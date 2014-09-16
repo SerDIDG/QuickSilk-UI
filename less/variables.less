@@ -6,54 +6,28 @@
 
 // /* ******* VARIABLES ******* */
 
-@Tpl-fontFamily: 'Merriweather', arial, helvetica, serif;
-@Tpl-fontFamily2: 'Open Sans Condensed', arial, helvetica, sans-serif;
-@Tpl-fontFamily3: 'Open Sans', arial, helvetica, sans-serif;
-
-@Tpl-color: #009bbf;
-@Tpl-colorFont: #2b292a;
-@Tpl-colorFont2: #999999;
-@Tpl-colorLightGray: #ebebeb;
+@Tpl-color: hsl(205, 98, 29%);
+@Tpl-colorFont: #666666;
+@Tpl-colorFontDark: #333333;
+@Tpl-colorLink: @Tpl-colorFont;
 
 @Tpl-lineHeight: 18px;
-@Tpl-fontSize: 12px;
-@Tpl-fontSize2: 14px;
-
-@Tpl-backgroundContent: #f7f7f7;
+@Tpl-fontFamily: 'Open Sans', sans-serif;
+@tpl-boldWeight: 600;
 
 // /* ******* COMMON ******* */
 
 /* *** COLORS *** */
 
-@cm-color: @Tpl-color;
-@cm-colorActive: lighten(desaturate(@cm-color, 20%), 50%);
 @cm-colorFont: @Tpl-colorFont;
-@cm-colorLink: #8f001a;
-@cm-colorLinkHover: @cm-color;
-
-@cm-colorBorder: #cccccc;
-
-@cm-background-themeLight: lighten(desaturate(@Tpl-color, 20%), 58%);
-@cm-background-light: @Tpl-colorLightGray;
-@cm-background-dark: @Tpl-color;
+@cm-colorLink: @Tpl-colorLink;
 
 /* *** FONTS *** */
 
 @cm-lineHeight: @Tpl-lineHeight;
 @cm-fontFamily: @Tpl-fontFamily;
-@cm-fontSize: @Tpl-fontSize;
-@cm-fontSizeUI: @Tpl-fontSize;
+@cm-boldWeight: @tpl-boldWeight;
 
-/* *** BORDER *** */
+/* *** FORMS *** */
 
-@cm-borderRadius: 0px;
-
-/* *** PARTS *** */
-
-@CmMenu-itemIndentY: 3px;
-
-/* ******* APPLICATION ******* */
-
-// /* *** COMPONENTS *** */
-
-@App-TopMenu-background: #2b292a;
+@CmForm-fieldHeight: 28px;

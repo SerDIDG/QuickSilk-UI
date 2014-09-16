@@ -1,71 +1,59 @@
-/* ************ TEMPLATE STYLES ************ */
-
-/* ******* FONTS ******* */
-
-@import url(http://fonts.googleapis.com/css?family=Merriweather:400,700,400italic,700italic);
-@import url(http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700);
+/* ************ TEMPLATE: STYLES ************ */
 
 /* ******* TAGS ******* */
 
+html {
+    background: url('@{TplPath-image}/bg-back.png') repeat;
+}
+
 body {
-    background-color: @Tpl-colorLightGray;
+    background: url('@{TplPath-image}/bg.png') 0 0 repeat-x;
 }
 
 /* *** FONT *** */
 
-h1, h2, h3, h4, h5 {
-    font-family: @Tpl-fontFamily3;
-    font-weight: normal;
+h1, h2, h3, h4, h5, h6 {
+    line-height: 18px;
+    font-weight: @tpl-boldWeight;
 }
 
-h1, h2, h3 {
-    font-weight: 400;
+h1, h2 {
+    line-height: 24px;
+    color: @Tpl-color;
 }
 
 h4, h5, h6 {
-    font-family: @Tpl-fontFamily;
+    color: @Tpl-colorFont;
 }
 
 h1 {
-    line-height: 32px;
-    font-size: 28px;
+    font-size: 24px;
 }
 
 h2 {
-    line-height: 24px;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 h3 {
-    line-height: 20px;
-    font-size: 16px;
-    text-transform: uppercase;
+    font-size: 15px;
+    color: @Tpl-colorFontDark;
 }
 
 h4 {
-    line-height: 20px;
-    font-size: 16px;
+    font-size: 13px;
 }
 
 h5 {
-    font-size: 14px;
+    font-size: 11px;
 }
 
 h6 {
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 9px;
 }
-
-
-/* *** FORM *** */
-
 
 /* ******* STATIC CLASSES ******* */
 
-.tpl-font2 {
-    font: 400 ~'@{Tpl-fontSize2}/@{Tpl-lineHeight}' @Tpl-fontFamily3;
-    color: @Tpl-colorFont2;
-}
+
 
 /* ******* ICONS ******* */
 
@@ -84,33 +72,7 @@ h6 {
 
 /* ******* COMMON STYLING ******* */
 
-/* *** TOGGLE BOX *** */
 
-.com-togglebox {
-    &.has-title-bg {
-        > dt {
-            * {
-                color: #ffffff;
-            }
-
-            .icon.default {
-                .icon.small.arrow-white-right;
-            }
-        }
-    }
-}
-
-/* *** FORUM *** */
-
-.com-forum-post {
-    > .inner {
-        > .l {
-            * {
-                color: #ffffff;
-            }
-        }
-    }
-}
 
 /* ******* APPLICATION STYLING ******* */
 
@@ -118,46 +80,87 @@ h6 {
 
 .app-module-menu {
     &.primary {
-        padding: 20px 0;
-
         > ul {
-
             > li {
-                margin: 0;
-                padding: 0 20px 0 0;
+                margin: 0 @cm-indentMedium 0 0;
 
                 &:last-child {
                     margin: 0;
-                    padding: 0;
                 }
 
                 > a {
-                    line-height: 40px;
-                    font-size: 20px;
-                    font-weight: bold;
-                    font-family: @Tpl-fontFamily2;
-                    text-transform: uppercase;
+                    height: 20px;
+                    padding: 0 0 8px 0;
+                    line-height: 20px;
+                    font-weight: @tpl-boldWeight;
                     text-decoration: none;
-                    color: @cm-colorFont;
+                    text-transform: uppercase;
 
                     &:hover {
-                        color: @cm-colorLinkHover;
+                        color: @Tpl-color;
+                        text-decoration: none;
+                    }
+                }
+
+                &.active {
+                    > a {
+                        color: @Tpl-colorFontDark;
                     }
                 }
             }
         }
 
         .menu-select {
-            height: 40px;
+            height: 20px;
 
             select {
-                height: 40px;
+                height: 20px;
             }
         }
 
         .menu-button {
-            width: 40px;
-            height: 40px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .cm-menu-dropdown {
+            &:before {
+                width: 15px;
+                height: 8px;
+                position: absolute;
+                left: @cm-indentMedium;
+                top: -8px;
+                display: block;
+                content: ' ';
+                background: url('@{TplPath-image}/dropdown-arrow.png');
+            }
+
+            li {
+                padding: 0 12px;
+
+                &:before {
+                    margin: 0;
+                }
+
+                a {
+                    padding: 5px 12px 5px 26px;
+                    background: url('@{TplPath-image}/arrow-r.png') 0 5px no-repeat;
+                    font-weight: @tpl-boldWeight;
+                    .cm-transition(all @cm-transitionDuration ease-in-out);
+
+                    &:hover {
+                        background-image: url('@{TplPath-image}/arrow-r-a.png');
+                        color: @Tpl-color;
+                        .cm-transition(all @cm-transitionDurationReverse ease-in-out);
+                    }
+                }
+
+                ul {
+                    &:before {
+                        display: none;
+                    }
+                }
+            }
         }
     }
 
@@ -165,10 +168,6 @@ h6 {
         > ul {
             > li {
                 margin: 0 0 0 @cm-indentMedium;
-
-                > a {
-                    font-size: @Tpl-fontSize2;
-                }
 
                 &:before {
                     width: 1px;
@@ -194,35 +193,11 @@ h6 {
 
     &.theme-footer {
         > ul {
-            padding: ((32px - @Tpl-lineHeight) / 2) 0;
-            text-align: center;
-
             > li {
-                margin: 0 0 0 @cm-indentXSmall;
+                margin: 0 @cm-indentXSmall 0 0;
 
-                > a {
-                    .cm-font-link;
-                    .tpl-font2;
-                }
-
-                &:before {
-                    @padding: (@Tpl-lineHeight - 10px) / 2;
-                    width: 1px;
-                    height: 10px;
-                    display: block;
-                    position: absolute;
-                    .cm-position(@padding, auto, @padding, -(@cm-indentXSmall / 2));
-                    background: @cm-colorBorder;
-                    content: '';
-                }
-
-                &:first-child {
+                &:last-child {
                     margin: 0;
-                    border-left: 0;
-
-                    &:before {
-                        display: none;
-                    }
                 }
             }
         }
@@ -239,140 +214,7 @@ h6 {
     }
 }
 
-/* *** MODULE INFO BLOCK *** */
-
-.app-module-infoblock {
-    > .inner {
-        padding: 0;
-        background: transparent;
-        border: none;
-        box-shadow: none;
-
-        > .title {
-            min-height: 40px;
-            border: none;
-
-            > .inner {
-                min-height: 20px;
-                padding: 10px 15px;
-            }
-        }
-
-        >.descr {
-            > .inner {
-                padding: 15px;
-            }
-        }
-    }
-
-    &.theme-first {
-        > .inner {
-            > .title {
-                > .inner {
-                    padding: 10px 0 8px;
-                    border-bottom: 2px solid @Tpl-colorLightGray;
-                }
-            }
-
-            >.descr {
-                > .inner {
-                    padding: 15px 0 0 0;
-                }
-            }
-        }
-    }
-
-    &.theme-second {
-        > .inner {
-            > .title {
-                background: @Tpl-color;
-
-                .cm-content-tags {
-                    color: #fff;
-                }
-            }
-
-            > .descr {
-                background: @Tpl-colorLightGray;
-            }
-        }
-    }
-}
-
-/* *** MODULE SEARCH *** */
-
-.app-module-search {
-    padding: 6px;
-    background-color: #999999;
-
-    .form-field {
-        padding: 0 0 0 32px;
-
-        input[type="text"] {
-            padding: 5px 6px;
-            border: none;
-            background-color: #ebebeb;
-        }
-
-        .icon {
-            .cm-position(0, auto, 0, 0);
-
-            &.default {
-                .tpl-icon.medium.search;
-
-                &:hover {
-                    background-color: transparent;
-                }
-
-                &:active {
-                    box-shadow: none;
-                }
-            }
-        }
-    }
-}
-
-/* *** MODULE LOGIN LINK *** */
-
-.app-module-loginlink {
-    padding: 6px;
-
-    > ul {
-        > li {
-            > a {
-                .cm-font-link;
-                line-height: 28px;
-                font-size: @Tpl-fontSize2;
-                color: @Tpl-colorFont2;
-            }
-
-            .icon.default {
-                width: 28px;
-                height: 28px;
-                margin: 0 4px 0 0;
-                display: inline-block;
-                vertical-align: top;
-                .tpl-icon.medium.login;
-                background-position: 50% 50%;
-                background-repeat: no-repeat;
-            }
-        }
-    }
-}
-
-.com-tooltip {
-    &.app-loginbox-tooltip {
-        > .inner {
-            margin-top: 5px;
-        }
-    }
-}
-
 /* ******* STRUCTURE ******* */
-
-.app-page-wrapper {
-    background-color: @Tpl-colorLightGray;
-}
 
 .header,
 .content,
@@ -385,7 +227,7 @@ h6 {
     .header > &,
     .content > &,
     .footer > & {
-        max-width: 1000px;
+        max-width: 1180px;
         margin: 0 auto;
         position: relative;
     }
@@ -395,10 +237,9 @@ h6 {
 
 .header {
 	z-index: 3;
-    background: #cccccc url('@{TplPath-image}/header-bg.png') 50% 0 repeat-x;
 
     > .inner:extend(.clear all) {
-        min-height: 210px;
+        min-height: 124px;
     }
 
     .app-widget-container {
@@ -417,25 +258,18 @@ h6 {
 }
 
 .header-logo {
-    width: 310px;
-    min-height: 166px;
+    width: 204px;
+    min-height: 56px;
     position: relative;
-    padding: 24px 0 0 0;
+    padding: 58px 0 0 0;
     float: left;
-    background: #2b292a;
-}
-
-.header-center:extend(.clear all) {
-    height: 90px;
-    position: absolute;
-    .cm-position(40px, 0, auto, 340px);
 }
 
 .header-bottom:extend(.clear all) {
-    min-height: 80px;
+    min-height: 28px;
     position: relative;
-    margin: 0 0 0 340px;
-    padding-top: 130px;
+    margin: 0 0 0 240px;
+    padding-top: 82px;
 }
 
 /* *** AREAS *** */
@@ -460,7 +294,7 @@ h6 {
     }
 
     &.logo {
-        min-height: 166px;
+        min-height: 56px;
         position: relative;
         .cm-position(auto, auto, auto, auto);
     }
@@ -472,7 +306,7 @@ h6 {
     }
 
     &.menu {
-        min-height: 80px;
+        min-height: 28px;
         position: relative;
         .cm-position(auto, auto, auto, auto);
     }
@@ -492,22 +326,12 @@ h6 {
 
 /* ******* CONTENT ******* */
 
-.content-wrapper {
-    background: @Tpl-backgroundContent;
-}
-
 .content {
     z-index: 1;
 
     > .inner {
-        padding-top: 40px;
+        padding-top: @cm-indentSmall;
         padding-bottom: 40px;
-    }
-
-    &.secondary {
-        background: #ffffff;
-        box-shadow: 0 -3px 6px rgba(0,0,0,0.1),
-                    0 3px 6px rgba(0,0,0,0.1);
     }
 }
 
@@ -519,25 +343,11 @@ h6 {
 
 .footer {
     z-index: 2;
-    background: @Tpl-colorLightGray url('@{TplPath-image}/footer-bg.png') 50% 0 repeat-x;
 
     > .inner {
         min-height: 32px;
         padding-top: 14px;
         padding-bottom: 14px;
-    }
-
-    .app-module-richeditor {
-        padding: ((32px - @Tpl-lineHeight) / 2) 0;
-    }
-
-    .cm-content-tags--base:extend(.tpl-font2 all) {
-
-    }
-
-    .cm-content-tags {
-        color: @Tpl-colorFont2;
-        margin: 0;
     }
 }
 
