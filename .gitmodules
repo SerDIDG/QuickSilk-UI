@@ -1,0 +1,6 @@
+[submodule "libs/common"]
+	path = libs/common
+	url = https://github.com/SerDIDG/FioraUI.git
+[submodule "libs/application"]
+	path = libs/application
+	url = https://SerDIDG@bitbucket.org/SerDIDG/qs-cms-v3.git

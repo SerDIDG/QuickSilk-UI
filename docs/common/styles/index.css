@@ -1,0 +1,13 @@
+html {
+    width: auto;
+    height: auto;
+    overflow: auto;
+}
+
+body {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 24px;
+    position: static;
+}
