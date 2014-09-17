@@ -28,6 +28,7 @@
     <script type="text/javascript" src="libs/application/js/components/TemplateEditor.js"></script>
     <script type="text/javascript" src="libs/application/js/components/LoginBox.js"></script>
     <script type="text/javascript" src="libs/application/js/components/ModuleMenu.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/SiteMap.js"></script>
 
     <script type="text/javascript" src="js/custom.js"></script>
 
@@ -125,6 +126,11 @@
                 })
                 .add('login-box', function(node){
                     new App.LoginBox({
+                        'node' : node
+                    });
+                })
+                .add('sitemap', function(node){
+                    new App.SiteMap({
                         'node' : node
                     });
                 })
@@ -530,10 +536,10 @@
     <!-- [* *** HEADER START *** *] -->
 
     <div class="header" data-node="Template.header">
-        <div class="inner">
+        <div class="header-inner">
 
             <div class="header-top">
-                <div class="app-header-area search" data-com-draganddrop="area">
+                <div class="app-header-area icons" data-com-draganddrop="area">
                     <div class="app-widget-container" data-com-draganddrop="draggable">
                         <div class="app-widget is-editable">
                             <div class="border"></div>
@@ -553,18 +559,26 @@
                                 </ul>
                             </div>
                             <div class="inner">
-                                <div class="app-module app-module-search">
-                                    <form class="form" action="">
-                                        <dl class="form-box">
-                                            <dt>Search</dt>
-                                            <dd>
-                                                <div class="form-field has-icon-right">
-                                                    <input type="text" name="search" placeholder="Search...">
-                                                    <input class="icon default linked" type="submit" value="">
-                                                </div>
-                                            </dd>
-                                        </dl>
-                                    </form>
+                                <div class="app-module app-module-default">
+                                    <div class="cm-line-share pull-left">
+                                        <ul>
+                                            <li>
+                                                <a title="Facebook" class="icon linked" target="_blank" href="http://www.facebook.com">
+                                                    <img src="img/icons/large/facebook.png" alt="">
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a title="Twitter" class="icon linked" target="_blank" href="http://www.twitter.com">
+                                                    <img src="img/icons/large/twitter.png">
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a title="LinkedIn" class="icon linked" target="_blank" href="http://www.linkedin.com">
+                                                    <img src="img/icons/large/linkedin.png">
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -687,6 +701,46 @@
                                             <img class="descr" src="img/logo.png" alt="Logo">
                                         </div>
                                     </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-center">
+                <div class="app-header-area search" data-com-draganddrop="area">
+                    <div class="app-widget-container" data-com-draganddrop="draggable">
+                        <div class="app-widget is-editable">
+                            <div class="border"></div>
+                            <div class="drag" data-com-draganddrop="drag">
+                                <div class="icon draggable"></div>
+                            </div>
+                            <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                <div class="icon draggable"></div>
+                            </div>
+                            <div class="cm-menu menu">
+                                <div class="icon small settings"></div>
+                                <ul class="cm-menu-dropdown">
+                                    <li><a>Edit</a></li>
+                                    <li><a>Remove</a></li>
+                                    <li><a>Clear</a></li>
+                                    <li><a>Good Button</a></li>
+                                </ul>
+                            </div>
+                            <div class="inner">
+                                <div class="app-module app-module-search">
+                                    <form class="form" action="">
+                                        <dl class="form-box">
+                                            <dt>Search</dt>
+                                            <dd>
+                                                <div class="form-field has-icon-right">
+                                                    <input type="text" name="search" placeholder="Search...">
+                                                    <input class="icon default linked" type="submit" value="">
+                                                </div>
+                                            </dd>
+                                        </dl>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -828,112 +882,117 @@
     <!-- [* *** CONTENT START *** *] -->
 
     <div class="content" data-node="Template.content">
-        <div class="inner">
+        <div class="content-inner">
             <div class="app-main-area" data-com-draganddrop="area">
                 <div class="app-widget-container" data-com-draganddrop="draggable">
                     <div class="app-widget is-editable">
-                    <div class="border"></div>
-                    <div class="drag" data-com-draganddrop="drag">
-                        <div class="icon draggable"></div>
-                    </div>
-                    <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                        <div class="icon draggable"></div>
-                    </div>
-                    <div class="cm-menu menu">
-                        <div class="icon small settings"></div>
-                        <ul class="cm-menu-dropdown">
-                            <li><a>Edit</a></li>
-                            <li><a>Remove</a></li>
-                            <li><a>Clear</a></li>
-                            <li><a>Good Button</a></li>
-                        </ul>
-                    </div>
-                    <div class="inner">
-                        <div class="app-module app-module-default">
-                            <div class="com-gallery-layout com-slider-layout is-bar-none" data-element="slider" data-config='{"hasBar" : false}' data-node="ComSlider:{}">
-                                <div class="inner" data-node="layout-inner">
-                                    <div class="com-gallery-preview">
-                                        <div class="inner">
-                                            <div class="com-slider" data-node="container">
-                                                <div class="inner">
-                                                    <div class="size cm-aspect-35x10"></div>
-                                                    <div class="slides" data-node="slides">
-                                                        <ul data-node="slidesInner">
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/1.jpg" alt="">
+                        <div class="border"></div>
+                        <div class="drag" data-com-draganddrop="drag">
+                            <div class="icon draggable"></div>
+                        </div>
+                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                            <div class="icon draggable"></div>
+                        </div>
+                        <div class="cm-menu menu">
+                            <div class="icon small settings"></div>
+                            <ul class="cm-menu-dropdown">
+                                <li><a>Edit</a></li>
+                                <li><a>Remove</a></li>
+                                <li><a>Clear</a></li>
+                                <li><a>Good Button</a></li>
+                            </ul>
+                        </div>
+                        <div class="inner">
+                            <div class="app-module app-module-slider">
+                                <div class="com-gallery-layout com-slider-layout is-bar-none" data-element="slider" data-config='{"hasBar" : false}' data-node="ComSlider:{}">
+                                    <div class="inner" data-node="layout-inner">
+                                        <div class="com-gallery-preview">
+                                            <div class="inner">
+                                                <div class="com-slider" data-node="container">
+                                                    <div class="inner">
+                                                        <div class="size cm-aspect-35x10"></div>
+                                                        <div class="slides" data-node="slides">
+                                                            <ul data-node="slidesInner">
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/1.jpg" alt="">
+                                                                            <div class="text">
+                                                                                <h1>Office of the PBO</h1>
+                                                                                <p>QuickSilk has recently developed a highly-commended integrated monitoring database that helps MPs, senators and citizens scrutinize the government’s financial performance.</p>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/2.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/2.jpg" alt="">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/3.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/3.jpg" alt="">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/4.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/4.jpg" alt="">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/5.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/5.jpg" alt="">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/6.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/6.jpg" alt="">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/7.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/7.jpg" alt="">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/8.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/8.jpg" alt="">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </li>
-                                                            <li data-node="items:[]:container">
-                                                                <div class="cm-imagebox is-flexible is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/slider/9.jpg" alt="">
+                                                                </li>
+                                                                <li data-node="items:[]:container">
+                                                                    <div class="cm-imagebox is-adaptive is-no-hover">
+                                                                        <div class="inner">
+                                                                            <img class="descr" src="img/slider/9.jpg" alt="">
+                                                                        </div>
                                                                     </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="com-gallery-controls is-small">
+                                                            <div class="inner">
+                                                                <div class="bar-arrow prev" data-node="prev">
+                                                                    <div class="icon default prev"></div>
                                                                 </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <div class="com-gallery-controls is-small">
-                                                        <div class="inner">
-                                                            <div class="bar-arrow prev" data-node="prev">
-                                                                <div class="icon default prev"></div>
-                                                            </div>
-                                                            <div class="bar-arrow next" data-node="next">
-                                                                <div class="icon default next"></div>
-                                                            </div>
-                                                            <div class="bar-buttons">
-                                                                <ul data-node="buttons"></ul>
+                                                                <div class="bar-arrow next" data-node="next">
+                                                                    <div class="icon default next"></div>
+                                                                </div>
+                                                                <div class="bar-buttons">
+                                                                    <ul data-node="buttons"></ul>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -966,10 +1025,10 @@
                             </ul>
                         </div>
                         <div class="inner">
-                            <div class="app-module app-module-columns com-columns indent-32px is-chassis-visible is-editable" data-element="columns">
+                            <div class="app-module app-module-columns com-columns indent-24px is-chassis-visible is-editable" data-element="columns">
                                 <div class="inner" data-com-columns="inner">
                                     <div class="container" data-com-columns="holder">
-                                        <div class="com-column" data-com-columns="column" style="width: 33.33%;">
+                                        <div class="com-column" data-com-columns="column" style="width: 21%;">
                                             <div class="inner" data-com-columns="column-inner" data-com-draganddrop="area">
                                                 <div class="app-widget-container" data-com-draganddrop="draggable">
                                                     <div class="app-widget is-editable">
@@ -991,134 +1050,9 @@
                                                         </div>
                                                         <div class="inner">
                                                             <div class="app-module app-module-image">
-                                                                <a class="cm-imagebox is-adaptive">
+                                                                <div class="cm-imagebox is-resizeble is-no-hover">
                                                                     <div class="inner">
-                                                                        <img class="descr" src="img/gnpbo.png" alt="">
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="cm-menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="cm-menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app-module app-module-infoblock theme-second">
-                                                                <div class="inner">
-                                                                    <div class="title">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <div class="app-module-richeditor">
-                                                                                <h3>Members</h3>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="descr">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <p>Description</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="com-column" data-com-columns="column" style="width: 33.33%;">
-                                            <div class="inner" data-com-columns="column-inner" data-com-draganddrop="area">
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="cm-menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="cm-menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app-module app-module-infoblock theme-first">
-                                                                <div class="inner">
-                                                                    <div class="title">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <div class="app-module-richeditor">
-                                                                                <h3>recent blogs</h3>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="descr">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <p>Description</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="com-column" data-com-columns="column" style="width: 33.33%;">
-                                            <div class="inner" data-com-columns="column-inner" data-com-draganddrop="area">
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="cm-menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="cm-menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app-module app-module-infoblock theme-second">
-                                                                <div class="inner">
-                                                                    <div class="title">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <div class="app-module-richeditor">
-                                                                                <h3>Discussion Forum</h3>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="descr">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <p>Description</p>
-                                                                        </div>
+                                                                        <img class="descr" src="img/content/image3.jpg" alt="">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1126,91 +1060,6 @@
                                                     </div>
                                                 </div>
 
-
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="cm-menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="cm-menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app-module app-module-infoblock theme-second">
-                                                                <div class="inner">
-                                                                    <div class="title">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <div class="app-module-richeditor">
-                                                                                <h3>JOB postings</h3>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="descr">
-                                                                        <div class="inner" data-com-draganddrop="area">
-                                                                            <p>Description</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        </div>
-    </div>
-
-    <!-- [* *** CONTENT END *** *] -->
-
-
-    <!-- [* *** FOOTER START *** *] -->
-
-    <div class="footer" data-node="Template.footer">
-        <div class="inner">
-            <div class="app-footer-area main" data-com-draganddrop="area">
-                <div class="app-widget-container" data-com-draganddrop="draggable">
-                    <div class="app-widget is-editable">
-                        <div class="border"></div>
-                        <div class="drag" data-com-draganddrop="drag">
-                            <div class="icon draggable"></div>
-                        </div>
-                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                            <div class="icon draggable"></div>
-                        </div>
-                        <div class="cm-menu menu">
-                            <div class="icon small settings"></div>
-                            <ul class="cm-menu-dropdown">
-                                <li><a>Edit</a></li>
-                                <li><a>Remove</a></li>
-                                <li><a>Clear</a></li>
-                                <li><a>Good Button</a></li>
-                            </ul>
-                        </div>
-                        <div class="inner">
-                            <div class="app-module com-columns app-module-columns indent-32px is-chassis-visible is-editable" data-element="columns">
-                                <div class="inner" data-com-columns="inner">
-                                    <div class="container" data-com-columns="holder">
-                                        <div class="com-column" data-com-columns="column" style="width: 28%;">
-                                            <div class="inner" data-com-columns="column-inner" data-com-draganddrop="area">
                                                 <div class="app-widget-container" data-com-draganddrop="draggable">
                                                     <div class="app-widget is-editable">
                                                         <div class="border"></div>
@@ -1231,7 +1080,9 @@
                                                         </div>
                                                         <div class="inner">
                                                             <div class="app-module app-module-richeditor">
-                                                                <p>© 2014 e-PBO, All Rights Reserved.</p>
+                                                                <h2>Solutions</h2>
+                                                                <p>Since 2001, QuickSilk has been developing web-based products, applications, components, modules and plug-ins that are in active use today by small and medium size businesses, government, non-profit organizations and NGO's throughout Canada, the United States of America and Europe.</p>
+                                                                <p style="text-align: right;"><b><a>Read more</a></b></p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1239,7 +1090,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="com-column" data-com-columns="column" style="width: 44%;">
+                                        <div class="com-column" data-com-columns="column" style="width: 21%;">
                                             <div class="inner" data-com-columns="column-inner" data-com-draganddrop="area">
                                                 <div class="app-widget-container" data-com-draganddrop="draggable">
                                                     <div class="app-widget is-editable">
@@ -1260,31 +1111,40 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-module-menu theme-footer" data-element="module-menu">
-                                                                <ul>
-                                                                    <li>
-                                                                        <a>Legal</a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a>Access to Information</a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a>Jobs</a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a>Site Map</a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a>Contact</a>
-                                                                    </li>
-                                                                </ul>
-                                                                <div class="menu-select">
-                                                                    <div class="menu-button"></div>
-                                                                    <select data-node="AppModuleMenu.select">
-                                                                        <option value="http://google.com">About</option>
-                                                                        <option>OUR PUBLICATIONS</option>
-                                                                    </select>
+                                                            <div class="app-module app-module-image">
+                                                                <div class="cm-imagebox is-resizeble is-no-hover">
+                                                                    <div class="inner">
+                                                                        <img class="descr" src="img/content/image2.jpg" alt="">
+                                                                    </div>
                                                                 </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="app-widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app-widget is-editable">
+                                                        <div class="border"></div>
+                                                        <div class="drag" data-com-draganddrop="drag">
+                                                            <div class="icon draggable"></div>
+                                                        </div>
+                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                                            <div class="icon draggable"></div>
+                                                        </div>
+                                                        <div class="cm-menu menu">
+                                                            <div class="icon small settings"></div>
+                                                            <ul class="cm-menu-dropdown">
+                                                                <li><a>Edit</a></li>
+                                                                <li><a>Remove</a></li>
+                                                                <li><a>Clear</a></li>
+                                                                <li><a>Good Button</a></li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="inner">
+                                                            <div class="app-module app-module-richeditor">
+                                                                <h2>Services</h2>
+                                                                <p>Whether you need to register or transfer a domain name, have a web or ecommerce site designed and developed, host your web site, or establish your own VPS or dedicated web server, QuickSilk is your one stop shop for quality web services.</p>
+                                                                <p style="text-align: right;"><b><a>Read more</a></b></p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1292,7 +1152,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="com-column" data-com-columns="column" style="width: 28%;">
+                                        <div class="com-column" data-com-columns="column" style="width: 21%;">
                                             <div class="inner" data-com-columns="column-inner" data-com-draganddrop="area">
                                                 <div class="app-widget-container" data-com-draganddrop="draggable">
                                                     <div class="app-widget is-editable">
@@ -1313,36 +1173,213 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-module-default">
-                                                                <div class="cm-line-share pull-right">
-                                                                    <ul>
-                                                                        <li>
-                                                                            <a class="icon linked">
-                                                                                <img src="img/icons/large/facebook.png">
-                                                                            </a>
-                                                                        </li>
-                                                                        <li>
-                                                                            <a class="icon linked">
-                                                                                <img src="img/icons/large/twitter.png">
-                                                                            </a>
-                                                                        </li>
-                                                                        <li>
-                                                                            <a class="icon linked">
-                                                                                <img src="img/icons/large/google.png">
-                                                                            </a>
-                                                                        </li>
-                                                                        <li>
-                                                                            <a class="icon linked">
-                                                                                <img src="img/icons/large/linkedin.png">
-                                                                            </a>
-                                                                        </li>
-                                                                    </ul>
+                                                            <div class="app-module app-module-image">
+                                                                <div class="cm-imagebox is-resizeble is-no-hover">
+                                                                    <div class="inner">
+                                                                        <img class="descr" src="img/content/image1.jpg" alt="">
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                <div class="app-widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app-widget is-editable">
+                                                        <div class="border"></div>
+                                                        <div class="drag" data-com-draganddrop="drag">
+                                                            <div class="icon draggable"></div>
+                                                        </div>
+                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                                            <div class="icon draggable"></div>
+                                                        </div>
+                                                        <div class="cm-menu menu">
+                                                            <div class="icon small settings"></div>
+                                                            <ul class="cm-menu-dropdown">
+                                                                <li><a>Edit</a></li>
+                                                                <li><a>Remove</a></li>
+                                                                <li><a>Clear</a></li>
+                                                                <li><a>Good Button</a></li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="inner">
+                                                            <div class="app-module app-module-richeditor">
+                                                                <h2>QuickSilk™ CMS</h2>
+                                                                <p>The QuickSilk™ Content Management System (CMS) is a flexible, easy to use, Rich Internet Application (RIA) framework that significantly improves your ability to effectively manage the collection and publication of your organization's website and digital assets, for targeted Internet, Intranet & Extranet audiences.</p>
+                                                                <p style="text-align: right;"><b><a>Read more</a></b></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        </div>
+
+                                        <div class="com-column" data-com-columns="column" style="width: 37%;">
+                                            <div class="inner" data-com-columns="column-inner" data-com-draganddrop="area"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [* *** CONTENT END *** *] -->
+
+
+    <!-- [* *** FOOTER START *** *] -->
+
+    <div class="footer" data-node="Template.footer" data-element="sitemap">
+        <div class="footer-top">
+            <div class="footer-inner">
+                <div class="r">
+                    <div class="app-footer-area copyright" data-com-draganddrop="area">
+                        <div class="app-widget-container" data-com-draganddrop="draggable">
+                            <div class="app-widget is-editable">
+                                <div class="border"></div>
+                                <div class="drag" data-com-draganddrop="drag">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="cm-menu menu">
+                                    <div class="icon small settings"></div>
+                                    <ul class="cm-menu-dropdown">
+                                        <li><a>Edit</a></li>
+                                        <li><a>Remove</a></li>
+                                        <li><a>Clear</a></li>
+                                        <li><a>Good Button</a></li>
+                                    </ul>
+                                </div>
+                                <div class="inner">
+                                    <div class="app-module app-module-richeditor">
+                                        <p>Copyright © 2014 QuickSilk, All Rights Reserved.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-footer-area links" data-com-draganddrop="area">
+                        <div class="app-widget-container" data-com-draganddrop="draggable">
+                            <div class="app-widget is-editable">
+                                <div class="border"></div>
+                                <div class="drag" data-com-draganddrop="drag">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="cm-menu menu">
+                                    <div class="icon small settings"></div>
+                                    <ul class="cm-menu-dropdown">
+                                        <li><a>Edit</a></li>
+                                        <li><a>Remove</a></li>
+                                        <li><a>Clear</a></li>
+                                        <li><a>Good Button</a></li>
+                                    </ul>
+                                </div>
+                                <div class="inner">
+                                    <div class="app-module app-module-menu theme-footer" data-element="module-menu">
+                                        <ul>
+                                            <li>
+                                                <a>Privacy Policy</a>
+                                            </li>
+                                            <li>
+                                                <a>Terms of Use</a>
+                                            </li>
+                                            <li>
+                                                <a>Legal</a>
+                                            </li>
+                                        </ul>
+                                        <div class="menu-select">
+                                            <div class="menu-button"></div>
+                                            <select data-node="AppModuleMenu.select">
+                                                <option value="http://google.com">Privacy Policy</option>
+                                                <option>Terms of Use</option>
+                                                <option>Legal</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="l">
+                    <div class="sitemap-button" data-node="AppSitemap.button">
+                        <span class="on-hide">Looking for our sitemap?</span>
+                        <span class="on-show">I get it, close me now</span>
+                        <span class="arrow"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-center" data-node="AppSitemap.target">
+            <div class="footer-borders">
+                <div class="footer-inner">
+                    <div class="app-footer-area sitemap" data-com-draganddrop="area">
+                        <div class="app-widget-container" data-com-draganddrop="draggable">
+                            <div class="app-widget is-editable">
+                                <div class="border"></div>
+                                <div class="drag" data-com-draganddrop="drag">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="cm-menu menu">
+                                    <div class="icon editable-icon"></div>
+                                    <ul class="cm-menu-dropdown">
+                                        <li><a>Edit</a></li>
+                                        <li><a>Remove</a></li>
+                                        <li><a>Clear</a></li>
+                                        <li><a>Good Button</a></li>
+                                    </ul>
+                                </div>
+                                <div class="inner">
+                                    <div class="app-module app-module-sitemap">
+                                        <div class="inner">
+                                            <dl>
+                                                <dt><a href="#">Home</a></dt>
+                                                <dd></dd>
+                                            </dl>
+                                            <dl>
+                                                <dt><a href="#">Web Solutions</a></dt>
+                                                <dd><a href="#">QuickSilk Licensed CMS</a></dd>
+                                                <dd><a href="#">QuickSilk Hosted CMSS</a></dd>
+                                            </dl>
+                                            <dl>
+                                                <dt><a href="#">Web Services</a></dt>
+                                                <dd><a href="#">Custom eCommerce &amp; Web Development</a></dd>
+                                                <dd><a href="#">Web Hosting</a></dd>
+                                            </dl>
+                                            <dl>
+                                                <dt><a href="#">Client Support</a></dt>
+                                                <dd></dd>
+                                            </dl>
+                                            <dl>
+                                                <dt><a href="#">Partners</a></dt>
+                                                <dd><a href="#">Outsourcing Program</a></dd>
+                                                <dd><a href="#">Reseller Program</a></dd>
+                                            </dl>
+                                            <dl>
+                                                <dt><a href="#">About</a></dt>
+                                                <dd><a href="#">Management &amp; Advisory Board</a></dd>
+                                                <dd><a href="#">Client Portfolio</a></dd>
+                                                <dd><a href="#">Community Initiative</a></dd>
+                                                <dd><a href="#">News &amp; Events</a></dd>
+                                            </dl>
+                                            <dl>
+                                                <dt><a href="#">Contact</a></dt>
+                                                <dd></dd>
+                                            </dl>
                                         </div>
                                     </div>
                                 </div>
