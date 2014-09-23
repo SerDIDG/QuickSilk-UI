@@ -128,22 +128,24 @@ h6 {
 /* *** COMPONENT: SLIDER *** */
 
 .com-slider {
-    > .inner {
-        background-color: @cm-background-gallery;
+    &.theme-template {
+        > .inner {
+            background-color: @cm-background-gallery;
 
-        > .com-gallery-controls {
-            opacity: 1;
-        }
+            > .com-gallery-controls {
+                opacity: 1;
+            }
 
-        &:after {
-            width: 110px;
-            height: 110px;
-            display: block;
-            z-index: 3;
-            position: absolute;
-            .cm-position(-1px, -1px, auto, auto);
-            content: '';
-            background: url("@{TplPath-image}/parts/slider/ribbon.png");
+            &:after {
+                width: 110px;
+                height: 110px;
+                display: block;
+                z-index: 3;
+                position: absolute;
+                .cm-position(-1px, -1px, auto, auto);
+                content: '';
+                background: url("@{TplPath-image}/parts/slider/ribbon.png");
+            }
         }
     }
 }
@@ -440,7 +442,6 @@ html {
     }
 }
 
-
 /* ******* CONTENT ******* */
 
 .content {
@@ -525,6 +526,7 @@ html {
 
 .app-footer-area {
     &.links {
+        min-width: 0;
         min-height: 37px;
         position: relative;
         .cm-position(auto, auto, auto, auto);
@@ -532,6 +534,7 @@ html {
     }
 
     &.copyright {
+        min-width: 0;
         min-height: 37px;
         position: relative;
         .cm-position(auto, auto, auto, auto);
@@ -541,6 +544,22 @@ html {
     &.sitemap {
         position: relative;
         .cm-position(auto, auto, auto, auto);
+    }
+}
+
+// Add sidebar states
+
+html {
+    &.is-app-sidebar--expanded {
+        .app-footer-area {
+            &.links {
+                min-width: @cm-XXLarge;
+            }
+
+            &.copyright {
+                min-width: @cm-XXLarge;
+            }
+        }
     }
 }
 
@@ -595,7 +614,7 @@ html {
                     transform: rotate(180deg);
 
             .ie9 &,
-            .ie8 {
+            .ie8 & {
                 background: url("@{TplPath-image}/parts/sitemap/arrow-down.png");
             }
         }
