@@ -254,7 +254,7 @@ form {
 .cm-image-resizable,
 .cm-imagebox > .inner > .descr,
 .com-slider > .inner > .size img,
-.lt__templates__item .image img,
+.app-lt__templates__item .image img,
 .mod__portfolio-widget__item > .inner .image img {
   width: 100%;
   height: auto;
@@ -302,7 +302,7 @@ form {
   text-align: right;
 }
 .cm-scroll-y,
-.lt__templates__scroll {
+.app-lt__templates__scroll {
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -3630,6 +3630,90 @@ button.has-icon-small .icon,
 .cm-list-counted.is-inline ul li .l {
   float: left;
 }
+/* ************ FIORA UI: LAYOUTS ************ */
+/* ******* LAYOUT: POST ******* */
+/* *** POST *** */
+.lt__post {
+  position: relative;
+}
+.lt__post .post-title {
+  margin: 0 0 4px;
+}
+.lt__post .post-info,
+.lt__post .post-tags {
+  font: normal 11px/18px 'Open Sans', sans-serif;
+  color: #666666;
+}
+.lt__post .post-info .cm-line-info,
+.lt__post .post-info .cm-listing .stuff {
+  margin: 0;
+}
+.lt__post .post-info .cm-line-info *,
+.lt__post .post-info .cm-listing .stuff * {
+  line-height: inherit;
+  font-size: inherit;
+}
+.lt__post .post-info.is-bottom {
+  margin: 12px 0 0 0;
+}
+.lt__post .post-share .cm-line-share {
+  margin: 24px 0 0 0;
+}
+.lt__post .post-share .cm-line-share:first-child {
+  margin: 0;
+}
+.lt__post .post-abstract .cm-content-tags,
+.lt__post .post-abstract h1,
+.lt__post .post-abstract h2,
+.lt__post .post-abstract h3,
+.lt__post .post-abstract h4,
+.lt__post .post-abstract h5,
+.lt__post .post-abstract h6,
+.lt__post .post-abstract p,
+.lt__post .post-abstract dl,
+.lt__post .post-abstract ul,
+.lt__post .post-abstract ol {
+  margin: 0;
+}
+.lt__post .cm-toolbar,
+.lt__post .post-abstract,
+.lt__post .post-entry,
+.lt__post .post-tags {
+  margin: 12px 0 0 0;
+}
+.lt__post.is-pending:before,
+.lt__post.is-featured:before {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  bottom: -8px;
+  left: -8px;
+  display: block;
+  z-index: -1;
+  content: '';
+  background-color: #fff9ef;
+  border-radius: 3px;
+}
+.lt__post.is-featured:before {
+  background-color: #f1f7fd;
+}
+.lt__post.is-pending:before {
+  background-color: #fff9ef;
+}
+.lt__post.is-entry .post-info.is-bottom,
+.lt__post.is-entry .cm-toolbar,
+.lt__post.is-entry .post-entry,
+.lt__post.is-entry .post-abstract,
+.lt__post.is-entry .post-tags {
+  margin: 24px 0 0 0;
+}
+/* *** POSTS *** */
+.lt__posts .lt__post {
+  margin: 32px 0 0;
+}
+.lt__posts .lt__post:first-child {
+  margin: 0;
+}
 /* ************ FIORA UI: COMPONENTS ************ */
 /* ******* COMPONENT: TOOLTIP ******* */
 .com-tooltip {
@@ -5865,76 +5949,6 @@ button.has-icon-small .icon,
 .com-tags.is-editable > .inner > .l {
   line-height: 28px;
 }
-/* ******* COMPONENT: BLOG ******* */
-/* *** POST *** */
-.com-blogpost {
-  position: relative;
-}
-.com-blogpost .post-title {
-  margin: 0 0 4px;
-}
-.com-blogpost .post-info,
-.com-blogpost .post-tags {
-  font: normal 11px/18px 'Open Sans', sans-serif;
-  color: #666666;
-}
-.com-blogpost .post-info .cm-line-info,
-.com-blogpost .post-info .cm-listing .stuff {
-  margin: 0;
-}
-.com-blogpost .post-info .cm-line-info *,
-.com-blogpost .post-info .cm-listing .stuff * {
-  line-height: inherit;
-  font-size: inherit;
-}
-.com-blogpost .post-info.is-bottom {
-  margin: 12px 0 0 0;
-}
-.com-blogpost .post-share .cm-line-share {
-  margin: 24px 0 0 0;
-}
-.com-blogpost .post-share .cm-line-share:first-child {
-  margin: 0;
-}
-.com-blogpost .cm-toolbar,
-.com-blogpost .post-abstract,
-.com-blogpost .post-entry,
-.com-blogpost .post-tags {
-  margin: 12px 0 0 0;
-}
-.com-blogpost.is-pending:before,
-.com-blogpost.is-featured:before {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  bottom: -8px;
-  left: -8px;
-  display: block;
-  z-index: -1;
-  content: '';
-  background-color: #fff9ef;
-  border-radius: 3px;
-}
-.com-blogpost.is-featured:before {
-  background-color: #f1f7fd;
-}
-.com-blogpost.is-pending:before {
-  background-color: #fff9ef;
-}
-.com-blogpost.is-entry .post-info.is-bottom,
-.com-blogpost.is-entry .cm-toolbar,
-.com-blogpost.is-entry .post-entry,
-.com-blogpost.is-entry .post-abstract,
-.com-blogpost.is-entry .post-tags {
-  margin: 24px 0 0 0;
-}
-/* *** POSTS *** */
-.com-blog-posts .com-blogpost {
-  margin: 32px 0 0;
-}
-.com-blog-posts .com-blogpost:first-child {
-  margin: 0;
-}
 /* ******* COMPONENT: FORUM ******* */
 /* *** MAIN *** */
 .com-forum-cell-icon {
@@ -7218,24 +7232,24 @@ html.is-immediately .app-template {
   }
 }
 /* ************ APPLICATION: LAYOUTS ************ */
-.lt__templates__scroll {
+.app-lt__templates__scroll {
   min-height: 200px;
   padding: 0 24px 0 0;
 }
-.lt__templates__item {
+.app-lt__templates__item {
   border: 2px solid #cbcbcb;
   cursor: pointer;
   -webkit-transition: border-color 0.3s ease-in-out;
   transition: border-color 0.3s ease-in-out;
 }
-.lt__templates__item > .inner {
+.app-lt__templates__item > .inner {
   position: relative;
 }
-.lt__templates__item .image {
+.app-lt__templates__item .image {
   position: relative;
   z-index: 1;
 }
-.lt__templates__item .info {
+.app-lt__templates__item .info {
   position: absolute;
   z-index: 2;
   opacity: 0;
@@ -7248,14 +7262,14 @@ html.is-immediately .app-template {
   background-image: -webkit-linear-gradient(to bottom, rgb(255,255,255) 0, rgba(255,255,255,0.5) 50%);
   background-image: linear-gradient(to bottom, rgb(255,255,255) 0, rgba(255,255,255,0.5) 50%);
 }
-.lt__templates__item .info > .inner {
+.app-lt__templates__item .info > .inner {
   position: absolute;
   top: 12px;
   right: 12px;
   bottom: 12px;
   left: 12px;
 }
-.lt__templates__item .info .btn-wrap {
+.app-lt__templates__item .info .btn-wrap {
   position: absolute;
   margin: 0;
   font-size: 0;
@@ -7264,19 +7278,20 @@ html.is-immediately .app-template {
   bottom: 0;
   left: 0;
 }
-.lt__templates__item:hover {
+.app-lt__templates__item:hover {
   border: 2px solid #dbebfb;
   -webkit-transition: border-color 0.1s ease-in-out;
   transition: border-color 0.1s ease-in-out;
 }
-.lt__templates__item:hover .info {
+.app-lt__templates__item:hover .info {
   opacity: 1;
   -webkit-transition: opacity 0.1s ease-in-out;
   transition: opacity 0.1s ease-in-out;
 }
-.lt__templates__item.active {
+.app-lt__templates__item.active {
   border: 2px solid #308ce8;
 }
+/* ******* LAYOUTS: EVENT ENTRY ******* */
 /* ************ APPLICATION: COMPONENTS ************ */
 /* ******* TOPMENU ******* */
 .app-topmenu {
@@ -8332,9 +8347,18 @@ h2 {
   font-weight: 700;
   color: #005694;
 }
+h1 a,
+h2 a {
+  color: #005694;
+}
 h4,
 h5,
 h6 {
+  color: #666666;
+}
+h4 a,
+h5 a,
+h6 a {
   color: #666666;
 }
 h1 {
