@@ -238,293 +238,411 @@
 
 <!-- [* ******* SIDEBAR START ******* *] -->
 
-<div class="app-sidebar" data-node=".AppSidebar:{}:container" data-element="app-sidebar" data-config='{"remember" : true, "name" : "app-sidebar"}'>
-    <div class="inner">
-        <div class="remove-zone" data-node="removeZone">
-            <div class="title">Drop here to remove</div>
+<div class="app-sidebar is-expanded" data-node=".AppSidebar:{}:container" data-element="app-sidebar" data-config='{"remember" : true, "name" : "app-sidebar"}'>
+<div class="inner">
+<div class="remove-zone" data-node="removeZone">
+    <div class="title">Drop here to remove</div>
+</div>
+
+<div class="title">
+    <span class="icon medium linked arrow-left" data-node="button"></span>Modules
+</div>
+
+<div class="descr" data-node="widgetsContainer">
+<dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-main"}'>
+    <dt data-node="ComToggleBox.button">
+        <span class="icon default"></span>
+        <span class="title">Main</span>
+    </dt>
+    <dd data-node="ComToggleBox.target">
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/site-logo.png" alt="">
+                    </div>
+                    <div class="caption">Site Logo</div>
+                </div>
+            </div>
         </div>
-        
-        <div class="title">
-            <span class="icon medium linked arrow-left" data-node="button"></span>Modules
+        <div class="app-widget-container" data-node="widgets:[]:container" data-config='{"type" : "content"}'>
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/rich-editor.png" alt="">
+                    </div>
+                    <div class="caption">Content</div>
+                </div>
+            </div>
         </div>
-        
-        <div class="descr" data-node="widgetsContainer">
-            <dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-main"}'>
-                <dt data-node="ComToggleBox.button">
-                    <span class="icon default"></span>
-                    <span class="title">Main</span>
-                </dt>
-                <dd data-node="ComToggleBox.target">
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/site-logo.png" alt="">
-                                </div>
-                                <div class="caption">Site Logo</div>
-                            </div>
-                        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/menu.png" alt="">
                     </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/block-title.png" alt="">
-                                </div>
-                                <div class="caption">Block Title</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/rich-editor.png" alt="">
-                                </div>
-                                <div class="caption">Rich Editor Block</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/infoblock.png" alt="">
-                                </div>
-                                <div class="caption">Infoblock</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/form.png" alt="">
-                                </div>
-                                <div class="caption">Form</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/map.png" alt="">
-                                </div>
-                                <div class="caption">Map</div>
-                            </div>
-                        </div>
-                    </div>
-                </dd>
-            </dl>
-            
-            <dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-blog"}'>
-                <dt data-node="ComToggleBox.button">
-                    <span class="icon default"></span>
-                    <span class="title">Blog</span>
-                </dt>
-                <dd data-node="ComToggleBox.target">
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/blog-roll.png" alt="">
-                                </div>
-                                <div class="caption">Blog roll</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/blog-categories.png" alt="">
-                                </div>
-                                <div class="caption">Blog categories</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/blog-specific.png" alt="">
-                                </div>
-                                <div class="caption">Blog specific category</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/blog-specific-infoblock.png" alt="">
-                                </div>
-                                <div class="caption">Blog specific category infoblock</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/calendar.png" alt="">
-                                </div>
-                                <div class="caption">Calendar</div>
-                            </div>
-                        </div>
-                    </div>
-                </dd>
-            </dl>
-            
-            <dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-layout"}'>
-                <dt data-node="ComToggleBox.button">
-                    <span class="icon default"></span>
-                    <span class="title">Layout</span>
-                </dt>
-                <dd data-node="ComToggleBox.target">
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/menu.png" alt="">
-                                </div>
-                                <div class="caption">Menu</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/columns.png" alt="">
-                                </div>
-                                <div class="caption">Columns</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/divider.png" alt="">
-                                </div>
-                                <div class="caption">Divider</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/search.png" alt="">
-                                </div>
-                                <div class="caption">Search</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/button.png" alt="">
-                                </div>
-                                <div class="caption">Button</div>
-                            </div>
-                        </div>
-                    </div>
-                </dd>
-            </dl>
-            
-            <dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-media"}'>
-                <dt data-node="ComToggleBox.button">
-                    <span class="icon default"></span>
-                    <span class="title">Media</span>
-                </dt>
-                <dd data-node="ComToggleBox.target">
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/image.png" alt="">
-                                </div>
-                                <div class="caption">Image</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/gallery.png" alt="">
-                                </div>
-                                <div class="caption">Gallery</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/slider.png" alt="">
-                                </div>
-                                <div class="caption">Slider</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/video.png" alt="">
-                                </div>
-                                <div class="caption">Video</div>
-                            </div>
-                        </div>
-                    </div>
-                </dd>
-            </dl>
-            
-            <dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-other"}'>
-                <dt data-node="ComToggleBox.button">
-                    <span class="icon default"></span>
-                    <span class="title">Other</span>
-                </dt>
-                <dd data-node="ComToggleBox.target">
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/login.png" alt="">
-                                </div>
-                                <div class="caption">Login / Registration</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/social.png" alt="">
-                                </div>
-                                <div class="caption">Social</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="app-widget-container" data-node="widgets:[]:container">
-                        <div class="app-widget-dummy" data-node="dummy">
-                            <div class="inner">
-                                <div class="icon">
-                                    <img src="libs/application/img/widgets/default.png" alt="">
-                                </div>
-                                <div class="caption">Default Widget</div>
-                            </div>
-                        </div>
-                    </div>
-                </dd>
-            </dl>
+                    <div class="caption">Menu</div>
+                </div>
+            </div>
         </div>
-    </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/infoblock.png" alt="">
+                    </div>
+                    <div class="caption">Infoblock</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/columns.png" alt="">
+                    </div>
+                    <div class="caption">Columns</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/divider.png" alt="">
+                    </div>
+                    <div class="caption">Divider</div>
+                </div>
+            </div>
+        </div>
+    </dd>
+</dl>
+
+<dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-service"}'>
+    <dt data-node="ComToggleBox.button">
+        <span class="icon default"></span>
+        <span class="title">Service</span>
+    </dt>
+    <dd data-node="ComToggleBox.target">
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/login.png" alt="">
+                    </div>
+                    <div class="caption">Login</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/login.png" alt="">
+                    </div>
+                    <div class="caption">Registration</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/search.png" alt="">
+                    </div>
+                    <div class="caption">Search</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/map.png" alt="">
+                    </div>
+                    <div class="caption">Google Map</div>
+                </div>
+            </div>
+        </div>
+    </dd>
+</dl>
+
+<dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-media"}'>
+    <dt data-node="ComToggleBox.button">
+        <span class="icon default"></span>
+        <span class="title">Media</span>
+    </dt>
+    <dd data-node="ComToggleBox.target">
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/image.png" alt="">
+                    </div>
+                    <div class="caption">Image</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/slider.png" alt="">
+                    </div>
+                    <div class="caption">Slider</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/gallery.png" alt="">
+                    </div>
+                    <div class="caption">Image Gallery</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/video.png" alt="">
+                    </div>
+                    <div class="caption">Video Gallery</div>
+                </div>
+            </div>
+        </div>
+    </dd>
+</dl>
+
+<dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-social"}'>
+    <dt data-node="ComToggleBox.button">
+        <span class="icon default"></span>
+        <span class="title">Social</span>
+    </dt>
+    <dd data-node="ComToggleBox.target">
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/social.png" alt="">
+                    </div>
+                    <div class="caption">Social Links</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/social.png" alt="">
+                    </div>
+                    <div class="caption">Social Share</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/social.png" alt="">
+                    </div>
+                    <div class="caption">Social Rating</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/comments.png" alt="">
+                    </div>
+                    <div class="caption">Comments</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/member.png" alt="">
+                    </div>
+                    <div class="caption">Member Directory</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/member-widget.png" alt="">
+                    </div>
+                    <div class="caption">Member Directory Widget</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/file.png" alt="">
+                    </div>
+                    <div class="caption">File Grid List</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/forum.png" alt="">
+                    </div>
+                    <div class="caption">Forum</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/forum-widget.png" alt="">
+                    </div>
+                    <div class="caption">Forum Widget</div>
+                </div>
+            </div>
+        </div>
+    </dd>
+</dl>
+
+<dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-blog"}'>
+    <dt data-node="ComToggleBox.button">
+        <span class="icon default"></span>
+        <span class="title">Blog</span>
+    </dt>
+    <dd data-node="ComToggleBox.target">
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/blog.png" alt="">
+                    </div>
+                    <div class="caption">Blog</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/blog-widget.png" alt="">
+                    </div>
+                    <div class="caption">Blog Widget</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/blog-categories.png" alt="">
+                    </div>
+                    <div class="caption">Blog Categories</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/blog-calendar.png" alt="">
+                    </div>
+                    <div class="caption">Blog Calendar</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/blog-archive.png" alt="">
+                    </div>
+                    <div class="caption">Blog Archive</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/blog-roll.png" alt="">
+                    </div>
+                    <div class="caption">Blog Roll</div>
+                </div>
+            </div>
+        </div>
+    </dd>
+</dl>
+
+<dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-events"}'>
+    <dt data-node="ComToggleBox.button">
+        <span class="icon default"></span>
+        <span class="title">Events</span>
+    </dt>
+    <dd data-node="ComToggleBox.target">
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/events.png" alt="">
+                    </div>
+                    <div class="caption">Events</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/events-widget.png" alt="">
+                    </div>
+                    <div class="caption">Events Widget</div>
+                </div>
+            </div>
+        </div>
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/events-calendar.png" alt="">
+                    </div>
+                    <div class="caption">Events Calendar</div>
+                </div>
+            </div>
+        </div>
+    </dd>
+</dl>
+
+<dl class="com-togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-sidebar-other"}'>
+    <dt data-node="ComToggleBox.button">
+        <span class="icon default"></span>
+        <span class="title">Other</span>
+    </dt>
+    <dd data-node="ComToggleBox.target">
+        <div class="app-widget-container" data-node="widgets:[]:container">
+            <div class="app-widget-dummy" data-node="dummy">
+                <div class="inner">
+                    <div class="icon">
+                        <img src="libs/application/img/widgets/default.png" alt="">
+                    </div>
+                    <div class="caption">Default Widget</div>
+                </div>
+            </div>
+        </div>
+    </dd>
+</dl>
+</div>
+</div>
 </div>
 
 <!-- [* ******* SIDEBAR END ******* *] -->
