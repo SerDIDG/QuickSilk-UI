@@ -88,13 +88,13 @@ h6 {
                 border: none;
                 border-radius: 0;
                 background: transparent url("@{TplPath-image}/parts/slider/button.png") 50% 50% no-repeat;
-                .cm-transition(background @cm-transitionDuration ease-in-out);
+                .cm-transition(background @CM-Transition-Duration ease-in-out);
 
                 &.active,
                 &:hover {
                     background-color: transparent;
                     background-image: url("@{TplPath-image}/parts/slider/button-a.png");
-                    .cm-transition(background @cm-transitionDurationReverse ease-in-out);
+                    .cm-transition(background @CM-Transition-DurationReverse ease-in-out);
                 }
             }
         }
@@ -128,7 +128,7 @@ h6 {
 
             &:hover {
                 .icon {
-                    opacity: @cm-opacityLinkHover;
+                    opacity: @CM-Opacity-Hover;
                 }
             }
         }
@@ -219,12 +219,12 @@ h6 {
                     padding: 5px 12px 5px 26px;
                     background: url('@{TplPath-image}/arrow-r.png') 0 5px no-repeat;
                     font-weight: @tpl-boldWeight;
-                    .cm-transition(all @cm-transitionDuration ease-in-out);
+                    .cm-transition(all @CM-Transition-Duration ease-in-out);
 
                     &:hover {
                         background-image: url('@{TplPath-image}/arrow-r-a.png');
                         color: @Tpl-color;
-                        .cm-transition(all @cm-transitionDurationReverse ease-in-out);
+                        .cm-transition(all @CM-Transition-DurationReverse ease-in-out);
                     }
                 }
 
@@ -576,7 +576,7 @@ html {
     font-size: 14px;
     font-weight: @tpl-boldWeight;
     cursor: pointer;
-    .cm-transition(box-shadow @cm-transitionDuration ease-in-out);
+    .cm-transition(box-shadow @CM-Transition-Duration ease-in-out);
 
     .arrow {
         width: 18px;
