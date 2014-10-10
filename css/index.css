@@ -578,7 +578,7 @@ textarea,
 select {
   width: 100%;
   height: 28px;
-  padding: 5px 6px;
+  padding: 4px 6px;
   margin: 0;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -3152,7 +3152,7 @@ button.has-icon-small .icon,
   border: 1px dashed #308ce8;
   border-radius: 3px;
 }
-.cm-editable.is-editable > .menu ul {
+.cm-editable.is-editable > .menu .cm-menu-dropdown {
   padding: 4px;
   background: #fff;
   border: 1px solid #cbcbcb;
@@ -3177,10 +3177,10 @@ button.has-icon-small .icon,
   bottom: auto;
   left: auto;
 }
-.cm-editable.is-editable > .menu ul li {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li {
   position: relative;
 }
-.cm-editable.is-editable > .menu ul li a {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li a {
   outline: none;
   text-decoration: underline;
   cursor: pointer;
@@ -3192,29 +3192,29 @@ button.has-icon-small .icon,
   text-decoration: none;
   white-space: nowrap;
 }
-.cm-editable.is-editable > .menu ul li a:hover {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li a:hover {
   text-decoration: none;
   color: #666666;
 }
-.cm-editable.is-editable > .menu ul li a:hover {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li a:hover {
   text-decoration: none;
 }
-.cm-editable.is-editable > .menu ul li a:hover {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li a:hover {
   color: #308ce8;
   text-decoration: none;
 }
-.cm-editable.is-editable > .menu ul li ul {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li ul {
   top: -5px;
   left: 100%;
 }
-.cm-editable.is-editable > .menu ul li.sep {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li.sep {
   display: none;
   height: 0;
   margin: 0 12px;
   overflow: hidden;
   border-top: 1px solid #cbcbcb;
 }
-.cm-editable.is-editable > .menu ul li:before {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li:before {
   display: block;
   height: 0;
   margin: 0 12px;
@@ -3222,10 +3222,10 @@ button.has-icon-small .icon,
   border-top: 1px solid #cbcbcb;
   content: '';
 }
-.cm-editable.is-editable > .menu ul li:first-child:before {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li:first-child:before {
   display: none;
 }
-.cm-editable.is-editable > .menu ul li:hover > ul {
+.cm-editable.is-editable > .menu .cm-menu-dropdown li:hover > ul {
   display: block;
 }
 .cm-editable.is-editable > .menu:hover {
@@ -3233,6 +3233,10 @@ button.has-icon-small .icon,
 }
 .cm-editable.is-editable > .menu:hover .icon {
   background-color: #fafafa;
+}
+.cm-editable.is-editable > .menu:hover .cm-menu-dropdown {
+  visibility: visible;
+  opacity: 1;
 }
 .cm-editable.is-active > .border,
 .cm-editable:hover > .border {
@@ -3270,12 +3274,6 @@ button.has-icon-small .icon,
 }
 .cm-editable.is-active > .drag {
   background-color: #dbebfb;
-}
-@media only screen and (max-width: 640px) {
-  .is-adaptive .cm-editable > .border,
-  .is-adaptive .cm-editable > .menu {
-    display: none;
-  }
 }
 /* ******* GRID ******* */
 .cm-grid {
@@ -3992,7 +3990,7 @@ button.has-icon-small .icon,
 .com-multiselect .inner {
   width: 100%;
   height: 28px;
-  padding: 5px 6px;
+  padding: 4px 6px;
   margin: 0;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -4025,13 +4023,13 @@ button.has-icon-small .icon,
 }
 /* ******* COMPONENTS: AUTOCOMPLETE ******* */
 /* *** TOOLTIP *** */
-.com-tooltip.com__autocomplete-tooltip {
+.com-tooltip.com__ac-tooltip {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
 }
-.com-tooltip.com__autocomplete-tooltip > .inner > .scroll {
-  max-height: 256px;
+.com-tooltip.com__ac-tooltip > .inner > .scroll {
+  max-height: 160px;
 }
 /* ******* GLOSSARY ******* */
 .com-glossary-word {
@@ -7141,7 +7139,7 @@ body {
   border: 1px dashed #308ce8;
   border-radius: 3px;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown {
   padding: 4px;
   background: #fff;
   border: 1px solid #cbcbcb;
@@ -7166,10 +7164,10 @@ body {
   bottom: auto;
   left: auto;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li {
   position: relative;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li a {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li a {
   outline: none;
   text-decoration: underline;
   cursor: pointer;
@@ -7181,29 +7179,29 @@ body {
   text-decoration: none;
   white-space: nowrap;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li a:hover {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li a:hover {
   text-decoration: none;
   color: #666666;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li a:hover {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li a:hover {
   text-decoration: none;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li a:hover {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li a:hover {
   color: #308ce8;
   text-decoration: none;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li ul {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li ul {
   top: -5px;
   left: 100%;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li.sep {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li.sep {
   display: none;
   height: 0;
   margin: 0 12px;
   overflow: hidden;
   border-top: 1px solid #cbcbcb;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li:before {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li:before {
   display: block;
   height: 0;
   margin: 0 12px;
@@ -7211,10 +7209,10 @@ body {
   border-top: 1px solid #cbcbcb;
   content: '';
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li:first-child:before {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li:first-child:before {
   display: none;
 }
-.app-widget-container > .app-widget.is-editable > .menu ul li:hover > ul {
+.app-widget-container > .app-widget.is-editable > .menu .cm-menu-dropdown li:hover > ul {
   display: block;
 }
 .app-widget-container > .app-widget.is-editable > .menu:hover {
@@ -7222,6 +7220,10 @@ body {
 }
 .app-widget-container > .app-widget.is-editable > .menu:hover .icon {
   background-color: #fafafa;
+}
+.app-widget-container > .app-widget.is-editable > .menu:hover .cm-menu-dropdown {
+  visibility: visible;
+  opacity: 1;
 }
 .app-widget-container > .app-widget.is-hide {
   overflow: hidden;
@@ -7727,8 +7729,8 @@ html.is-immediately .app-template {
   left: -50%;
 }
 .app-topmenu .menu-centered .menu li {
-  border-right: 1px solid rgba(255, 255, 255, 0.3);
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.4);
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
 }
 .app-topmenu .menu-centered .menu li a {
   padding: 0 12px;
@@ -7919,7 +7921,7 @@ html.is-immediately .app-template {
     padding: 0;
     position: relative;
     float: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
   }
   html.is-adaptive .app-topmenu .menu li {
     overflow: hidden;
@@ -7928,7 +7930,7 @@ html.is-immediately .app-template {
     display: block;
     margin: 0;
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
     line-height: 40px;
     -webkit-background-clip: padding-box;
     background-clip: padding-box;
@@ -7949,7 +7951,7 @@ html.is-immediately .app-template {
   }
   html.is-adaptive .app-topmenu .menu li.has-dropdown > a {
     background: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   }
   html.is-adaptive .app-topmenu .menu ul li a {
     background: rgba(255, 255, 255, 0.2);
@@ -8916,19 +8918,6 @@ h6 {
 }
 .com-slider.theme-template > .inner > .com-gallery-controls {
   opacity: 1;
-}
-.com-slider.theme-template > .inner:after {
-  width: 110px;
-  height: 110px;
-  display: block;
-  z-index: 3;
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  bottom: auto;
-  left: auto;
-  content: '';
-  background: url("../img/parts/slider/ribbon.png");
 }
 /* ******* APPLICATION STYLING ******* */
 /* *** MODULE: MENU *** */
