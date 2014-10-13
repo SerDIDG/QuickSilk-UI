@@ -4,7 +4,7 @@
 body {
   margin: 0;
   padding: 0;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   cursor: default;
   -webkit-text-size-adjust: 100%;
@@ -413,7 +413,7 @@ form {
 .cm-ul-inline > li,
 .com-timeselect > .inner > .sep,
 .com-slider > .inner > .slides.effect-push > ul > li {
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
 .cm-font-link {
@@ -432,12 +432,12 @@ form {
 .cm-font-ui,
 .cm-line-share .label,
 .cm-line-share .count {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
 .cm-font-ui-cursive,
 .com-togglebox-empty {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
   font-style: italic;
 }
@@ -450,13 +450,13 @@ form {
   color: #666666;
 }
 .cm-font-hint {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
 .cm-font-hint-cursive,
 .form .hint,
 .cm-itembox .hint {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
   font-style: italic;
   color: #999999;
@@ -474,9 +474,9 @@ p,
 dl,
 ul,
 ol {
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
-  margin: 0 0 18px;
+  margin: 0 0 20px;
   padding: 0;
 }
 h1 {
@@ -518,7 +518,7 @@ ol.style-none {
   list-style: none;
 }
 dl dd {
-  padding: 0 0 0 18px;
+  padding: 0 0 0 20px;
 }
 hr {
   height: 0;
@@ -531,8 +531,8 @@ hr {
   clear: both;
 }
 br {
-  height: 18px;
-  line-height: 18px;
+  height: 20px;
+  line-height: 20px;
 }
 iframe {
   width: 100%;
@@ -578,7 +578,7 @@ textarea,
 select {
   width: 100%;
   height: 28px;
-  padding: 4px 6px;
+  padding: 3px 6px;
   margin: 0;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -619,14 +619,14 @@ textarea {
 }
 .cm-select[multiple],
 select[multiple] {
-  height: 128px;
+  height: 142px;
   padding: 0;
 }
 input,
 select,
 textarea {
   margin: 0;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   outline: none;
 }
@@ -1129,7 +1129,7 @@ button,
   text-align: center;
   text-decoration: none;
   line-height: 28px;
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -1850,9 +1850,9 @@ button.has-icon-small .icon,
   width: 150px;
   display: block;
   margin: 0;
-  padding: 5px 0;
+  padding: 4px 0;
   float: left;
-  line-height: 18px;
+  line-height: 20px;
 }
 .form dd {
   display: block;
@@ -2004,10 +2004,10 @@ button.has-icon-small .icon,
   display: block;
 }
 .check-line label {
-  padding: 5px 20px 5px 8px;
+  padding: 4px 20px 4px 8px;
   cursor: pointer;
   vertical-align: baseline;
-  line-height: 18px;
+  line-height: 20px;
 }
 .check-line input[type="radio"],
 .check-line input[type="checkbox"] {
@@ -2431,7 +2431,7 @@ button.has-icon-small .icon,
   margin: 0;
 }
 .cm-form-icons-inside .text {
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   display: inline-block;
   vertical-align: middle;
@@ -2675,7 +2675,7 @@ button.has-icon-small .icon,
   outline: none;
   text-decoration: underline;
   cursor: pointer;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   display: block;
   padding: 2px 12px;
@@ -2776,7 +2776,7 @@ button.has-icon-small .icon,
 }
 /* ******* ITEMS LIST ******* */
 .cm-items-list ul {
-  max-height: 229px;
+  max-height: 249px;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -2792,7 +2792,7 @@ button.has-icon-small .icon,
 .cm-items-list ul li a {
   display: block;
   padding: 2px 4px;
-  line-height: 18px;
+  line-height: 20px;
   font-weight: normal;
   text-decoration: none;
   color: #666666;
@@ -2807,7 +2807,7 @@ button.has-icon-small .icon,
 }
 .cm-items-list ul li .title {
   padding: 2px 4px;
-  line-height: 18px;
+  line-height: 20px;
   font-weight: 600;
 }
 .cm-items-list ul li .cm-items-list {
@@ -2871,7 +2871,7 @@ button.has-icon-small .icon,
   vertical-align: top;
   margin: 0 4px 24px 0;
   line-height: 28px;
-  font-size: 13px;
+  font-size: 14px;
 }
 .cm-toolbar .group > li:last-child {
   margin-right: 0;
@@ -3184,7 +3184,7 @@ button.has-icon-small .icon,
   outline: none;
   text-decoration: underline;
   cursor: pointer;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   display: block;
   padding: 2px 12px;
@@ -3294,7 +3294,7 @@ button.has-icon-small .icon,
   display: inline-block;
   overflow: hidden;
   vertical-align: top;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -3520,7 +3520,7 @@ button.has-icon-small .icon,
   z-index: 3;
   top: auto;
   right: 0;
-  bottom: -26px;
+  bottom: -28px;
   left: 0;
   background: rgba(0, 0, 0, 0.7);
   opacity: 0;
@@ -3532,7 +3532,7 @@ button.has-icon-small .icon,
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   font-weight: 600;
   color: #fff;
@@ -3763,7 +3763,7 @@ button.has-icon-small .icon,
   margin: 0;
   padding: 0;
   list-style: none;
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
 /* *** DEFAULT *** */
@@ -3841,7 +3841,7 @@ button.has-icon-small .icon,
 }
 .lt__post .post-info,
 .lt__post .post-tags {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
 .lt__post .post-info .cm-line-info,
@@ -3979,7 +3979,7 @@ button.has-icon-small .icon,
   user-select: none;
 }
 .com-tooltip.com-select-tooltip > .inner > .scroll {
-  max-height: 160px;
+  max-height: 174px;
 }
 /* Select Multiple */
 .com-multiselect {
@@ -3990,7 +3990,7 @@ button.has-icon-small .icon,
 .com-multiselect .inner {
   width: 100%;
   height: 28px;
-  padding: 4px 6px;
+  padding: 3px 6px;
   margin: 0;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -4014,7 +4014,7 @@ button.has-icon-small .icon,
   border-color: #e6e6e6;
 }
 .com-multiselect .cm-items-list > ul {
-  max-height: 114px;
+  max-height: 124px;
 }
 .com-multiselect.disabled .inner {
   background-color: #fafafa;
@@ -4029,7 +4029,7 @@ button.has-icon-small .icon,
   user-select: none;
 }
 .com-tooltip.com__ac-tooltip > .inner > .scroll {
-  max-height: 160px;
+  max-height: 174px;
 }
 /* ******* GLOSSARY ******* */
 .com-glossary-word {
@@ -4122,7 +4122,7 @@ button.has-icon-small .icon,
   outline: none;
   text-decoration: underline;
   cursor: pointer;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   display: block;
   padding: 2px 12px;
@@ -4390,7 +4390,7 @@ button.has-icon-small .icon,
   max-width: 250px;
   display: inline-block;
   vertical-align: top;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   line-height: 28px;
   overflow: hidden;
@@ -4678,7 +4678,7 @@ button.has-icon-small .icon,
   margin-right: 4px;
   vertical-align: top;
   line-height: 28px;
-  font-size: 13px;
+  font-size: 14px;
 }
 .com-pagination ul li:first-child {
   margin-right: 0;
@@ -4701,7 +4701,7 @@ button.has-icon-small .icon,
   text-align: center;
   text-decoration: none;
   line-height: 28px;
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -4985,7 +4985,7 @@ button.has-icon-small .icon,
   height: 24px;
 }
 .com-togglebox.is-ui > dt {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
   font-weight: 600;
   line-height: 24px;
@@ -6132,7 +6132,7 @@ button.has-icon-small .icon,
   margin: 0;
 }
 .com-comment .comment-info {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
   line-height: 14px;
 }
@@ -6155,7 +6155,7 @@ button.has-icon-small .icon,
   margin: 0;
 }
 .com-comment .comment-actions {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
   line-height: 12px;
 }
@@ -6213,7 +6213,7 @@ button.has-icon-small .icon,
 .com-tags > .inner > .l {
   float: left;
   margin: 0 8px 0 0;
-  line-height: 18px;
+  line-height: 20px;
 }
 .com-tags > .inner > .l .icon {
   display: inline-block;
@@ -6356,7 +6356,7 @@ button.has-icon-small .icon,
 }
 .com-forum-post > .inner > .r .cm-title-editable,
 .com-forum-post > .inner > .r .date {
-  font: normal 11px/18px 'Open Sans', sans-serif;
+  font: normal 11px/20px 'Open Sans', sans-serif;
   color: #666666;
   color: #999999;
 }
@@ -6946,7 +6946,7 @@ body {
 /* ************ APPLICATION: PARTS ************ */
 /* ******* PARTS: FONT ******* */
 .app-font-topmenu {
-  font: 600 13px/40px 'Open Sans', sans-serif;
+  font: 600 14px/40px 'Open Sans', sans-serif;
   color: #d6d6d6;
 }
 /* ******* PART: ICONS ******* */
@@ -7171,7 +7171,7 @@ body {
   outline: none;
   text-decoration: underline;
   cursor: pointer;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   display: block;
   padding: 2px 12px;
@@ -7608,6 +7608,12 @@ html.is-immediately .app-template {
     margin-left: 0;
   }
 }
+/* *** PARTS: UI: PRINT *** */
+@media print {
+  .app-template {
+    margin: 0 !important;
+  }
+}
 /* ************ APPLICATION: LAYOUTS ************ */
 /* ******* LAYOUTS: TOP MENU ******* */
 .app-topmenu {
@@ -7684,14 +7690,14 @@ html.is-immediately .app-template {
   z-index: 2;
 }
 .app-topmenu .menu li {
-  font: 600 13px/40px 'Open Sans', sans-serif;
+  font: 600 14px/40px 'Open Sans', sans-serif;
   position: relative;
   line-height: 40px;
   color: #d6d6d6;
   white-space: nowrap;
 }
 .app-topmenu .menu li > a {
-  font: 600 13px/40px 'Open Sans', sans-serif;
+  font: 600 14px/40px 'Open Sans', sans-serif;
   color: #d6d6d6;
   display: block;
   text-decoration: none;
@@ -7806,7 +7812,7 @@ html.is-immediately .app-template {
     outline: none;
     text-decoration: underline;
     cursor: pointer;
-    font: normal 13px/18px 'Open Sans', sans-serif;
+    font: normal 14px/20px 'Open Sans', sans-serif;
     color: #666666;
     display: block;
     padding: 2px 12px;
@@ -7974,6 +7980,12 @@ html.is-immediately .app-template {
     transform: translateY(0);
   }
 }
+/* ***  LAYOUTS: TOP MENU: PRINT *** */
+@media print {
+  .app-topmenu {
+    display: none;
+  }
+}
 .app-lt__templates__scroll {
   min-height: 200px;
   padding: 0 24px 0 0;
@@ -8138,10 +8150,10 @@ html.is-immediately .app-template {
   visibility: hidden;
 }
 .app-sidebar .remove-zone .title {
-  padding: 6px 12px;
-  background-color: #e61919;
   font: 300 30px/38px 'Open Sans', 'Open Sans', sans-serif;
   color: #666666;
+  padding: 6px 12px;
+  background-color: #e61919;
   color: #fff;
 }
 .app-sidebar .remove-zone.cm-draganddrop-area.is-available {
@@ -8199,6 +8211,12 @@ html.is-immediately .app-template {
     display: none;
   }
 }
+/* *** COMPONENT: SIDEBAR: PRINT *** */
+@media print {
+  .app-sidebar {
+    display: none;
+  }
+}
 /* ******* COMPONENT: COLUMNS MODULE ******* */
 /* ******* COMPONENT: LOGIN BOX ******* */
 .app-loginbox .check-forgot > .l {
@@ -8208,7 +8226,7 @@ html.is-immediately .app-template {
   float: right;
 }
 .app-loginbox .links {
-  line-height: 18px;
+  line-height: 20px;
 }
 .app-loginbox .links ul {
   margin: 0;
@@ -8228,7 +8246,7 @@ html.is-immediately .app-template {
 .app-loginbox .links ul li a {
   display: block;
   line-height: 28px;
-  font-size: 13px;
+  font-size: 14px;
 }
 .app-loginbox .error {
   color: #e61919;
@@ -8248,10 +8266,10 @@ html.is-immediately .app-template {
   margin-left: 0;
 }
 .app-modular-sign .or {
-  margin: 15px 0;
+  margin: 14px 0;
   position: relative;
   text-align: center;
-  line-height: 18px;
+  line-height: 20px;
 }
 .app-modular-sign .or span {
   position: relative;
@@ -8424,7 +8442,7 @@ html.is-immediately .app-template {
   margin: 0 0 0 12px;
   display: inline-block;
   vertical-align: top;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
 .app-module-loginlink ul li:first-child {
@@ -8455,7 +8473,7 @@ html.is-immediately .app-template {
   position: relative;
   z-index: 1;
   vertical-align: top;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
 .app-module-menu > ul > li:first-child {
@@ -8492,7 +8510,7 @@ html.is-immediately .app-template {
   outline: none;
   text-decoration: underline;
   cursor: pointer;
-  font: normal 13px/18px 'Open Sans', sans-serif;
+  font: normal 14px/20px 'Open Sans', sans-serif;
   color: #666666;
   display: block;
   padding: 2px 12px;
@@ -8629,7 +8647,7 @@ html.is-immediately .app-template {
 /* ******* COMPONENT: MODULE ITEMS ******* */
 /* ******* COMPONENT: MODULE RICH EDITOR ******* */
 .app-module-richeditor {
-  min-height: 18px;
+  min-height: 20px;
 }
 /* *** CKE Editor *** */
 #moduleList h1 {
@@ -8810,7 +8828,7 @@ h3,
 h4,
 h5,
 h6 {
-  line-height: 18px;
+  line-height: 20px;
   font-weight: 600;
 }
 h1,
@@ -8838,15 +8856,15 @@ h1 {
 }
 h2 {
   line-height: 24px;
-  font-size: 16px;
+  font-size: 18px;
 }
 h3 {
   line-height: 24px;
-  font-size: 15px;
+  font-size: 16px;
   color: #333333;
 }
 h4 {
-  font-size: 13px;
+  font-size: 14px;
 }
 h5 {
   font-size: 11px;
@@ -8997,7 +9015,7 @@ h6 {
   display: none;
 }
 .app-module-menu.theme-footer {
-  padding: 9.5px 0;
+  padding: 8.5px 0;
 }
 .app-module-menu.theme-footer > ul > li {
   margin: 0 0 0 16px;
@@ -9007,7 +9025,7 @@ h6 {
   height: 10px;
   display: block;
   position: absolute;
-  top: 4px;
+  top: 5px;
   right: auto;
   bottom: 0;
   left: -8px;
@@ -9029,7 +9047,7 @@ h6 {
 }
 /* *** MODULE: LOGIN LINK *** */
 .app-module-loginlink {
-  padding: 7px 0;
+  padding: 6px 0;
 }
 /* ******* STRUCTURE ******* */
 .header,
@@ -9184,7 +9202,7 @@ html.is-app-sidebar--expanded .app-header-area.icons {
   position: relative;
 }
 .footer-top .footer-inner > .r .app-module-richeditor {
-  padding: 9.5px 0;
+  padding: 8.5px 0;
 }
 .footer-top .footer-inner > .r .app-module-richeditor .cm-content-tags--base,
 .footer-top .footer-inner > .r .app-module-richeditor p,
