@@ -981,6 +981,9 @@ input[type="checkbox"] {
 .icon.medium.settings-white {
   background-image: url("../libs/common/img/icons/medium/settings-white.png");
 }
+.icon.medium.plus-white {
+  background-image: url("../libs/common/img/icons/medium/plus-white.png");
+}
 .icon.large {
   width: 32px;
   height: 32px;
@@ -2679,7 +2682,6 @@ button.has-icon-small .icon,
   color: #666666;
   display: block;
   padding: 2px 12px;
-  line-height: 18px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -3188,7 +3190,6 @@ button.has-icon-small .icon,
   color: #666666;
   display: block;
   padding: 2px 12px;
-  line-height: 18px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -4126,7 +4127,6 @@ button.has-icon-small .icon,
   color: #666666;
   display: block;
   padding: 2px 12px;
-  line-height: 18px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -7175,7 +7175,6 @@ body {
   color: #666666;
   display: block;
   padding: 2px 12px;
-  line-height: 18px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -7720,26 +7719,7 @@ html.is-immediately .app-template {
 .app-topmenu .menu li.active > a {
   color: #fff;
 }
-.app-topmenu .menu-centered {
-  position: absolute;
-  z-index: 1;
-  margin: 0 50%;
-  top: 0;
-  right: auto;
-  bottom: 0;
-  left: auto;
-}
-.app-topmenu .menu-centered > .inner {
-  height: 100%;
-  position: relative;
-  left: -50%;
-}
-.app-topmenu .menu-centered .menu li {
-  border-right: 1px solid rgba(255, 255, 255, 0.4);
-  border-left: 1px solid rgba(255, 255, 255, 0.4);
-}
-.app-topmenu .menu-centered .menu li a {
-  padding: 0 12px;
+.app-topmenu .menu-centered .menu a {
   background: rgba(255, 255, 255, 0.2);
 }
 /* ******* LAYOUTS: TOP MENU: ADAPTIVE *** */
@@ -7816,7 +7796,6 @@ html.is-immediately .app-template {
     color: #666666;
     display: block;
     padding: 2px 12px;
-    line-height: 18px;
     text-decoration: none;
     white-space: nowrap;
   }
@@ -7863,17 +7842,23 @@ html.is-immediately .app-template {
     float: left;
     margin: 0 0 0 36px;
   }
-}
-@media only screen and (max-width: 1280px) and (min-width: 769px) {
   html.is-adaptive .app-topmenu .menu-centered {
-    position: relative;
+    float: right;
     margin: 0 0 0 12px;
-    float: left;
   }
-  html.is-adaptive .app-topmenu .menu-centered > .inner {
-    left: 0;
+  html.is-adaptive .app-topmenu .menu-centered .menu li {
+    margin: 0;
+    float: left;
+    border-left: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  html.is-adaptive .app-topmenu .menu-centered .menu li:last-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  html.is-adaptive .app-topmenu .menu-centered .menu li:before {
+    display: none;
   }
   html.is-adaptive .app-topmenu .menu-centered .menu a {
+    padding: 0 12px;
     font-size: 0;
   }
   html.is-adaptive .app-topmenu .menu-centered .menu a .icon.medium {
@@ -7915,7 +7900,7 @@ html.is-immediately .app-template {
     overflow-x: hidden;
     overflow-y: auto;
     position: absolute;
-    padding: 41px 0 0;
+    padding: 0;
     background-color: #000000;
     top: 40px;
     right: 0;
@@ -7962,17 +7947,6 @@ html.is-immediately .app-template {
   html.is-adaptive .app-topmenu .menu ul li a {
     background: rgba(255, 255, 255, 0.2);
     padding-left: 24px;
-  }
-  html.is-adaptive .app-topmenu .menu-centered {
-    height: 40px;
-    margin: 0;
-    top: 0;
-    right: 0;
-    bottom: auto;
-    left: 0;
-  }
-  html.is-adaptive .app-topmenu .menu-centered > .inner {
-    left: 0;
   }
   html.is-adaptive .app-topmenu.is-expanded .menu-holder {
     -webkit-transform: translateY(0);
@@ -8514,7 +8488,6 @@ html.is-immediately .app-template {
   color: #666666;
   display: block;
   padding: 2px 12px;
-  line-height: 18px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -8620,6 +8593,15 @@ html.is-immediately .app-template {
   display: inline-block;
   vertical-align: middle;
   color: #666666;
+}
+.app-module-menu.pull-left > ul {
+  text-align: left;
+}
+.app-module-menu.pull-center > ul {
+  text-align: center;
+}
+.app-module-menu.pull-right > ul {
+  text-align: right;
 }
 /* *** ADAPTIVE *** */
 @media only screen and (max-width: 768px) {
@@ -8977,8 +8959,8 @@ h6 {
   margin: 0;
 }
 .app-module-menu.primary .cm-menu-dropdown li a {
-  padding: 5px 12px 5px 26px;
-  background: url('../img/arrow-r.png') 0 5px no-repeat;
+  padding: 4px 12px 4px 26px;
+  background: url('../img/arrow-r.png') 0 center no-repeat;
   font-weight: 600;
   -webkit-transition: all 300ms ease-in-out;
   transition: all 300ms ease-in-out;
@@ -9015,7 +8997,7 @@ h6 {
   display: none;
 }
 .app-module-menu.theme-footer {
-  padding: 8.5px 0;
+  padding: -1px 0;
 }
 .app-module-menu.theme-footer > ul > li {
   margin: 0 0 0 16px;
@@ -9042,8 +9024,34 @@ h6 {
 .app-module-menu.theme-footer > ul > li:first-child:before {
   display: none;
 }
-.app-module-menu.vertical > ul > li > a {
-  text-transform: uppercase;
+.app-module-menu.vertical ul li {
+  border-top: 1px dotted #999999;
+  margin-top: 0;
+}
+.app-module-menu.vertical ul li:last-child {
+  border-bottom: 1px dotted #999999;
+}
+.app-module-menu.vertical ul li a {
+  padding: 4px 12px 4px 26px;
+  background: url('../img/arrow-r.png') 0 center no-repeat;
+  text-transform: none;
+  text-decoration: none;
+  font-weight: 600;
+  -webkit-transition: all 300ms ease-in-out;
+  transition: all 300ms ease-in-out;
+}
+.app-module-menu.vertical ul li.active a,
+.app-module-menu.vertical ul li a:hover {
+  background-image: url('../img/arrow-r-a.png');
+  color: #005694;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+.app-module-menu.vertical ul ul {
+  margin-top: 0;
+}
+.app-module-menu.vertical ul ul li:last-child {
+  border-bottom: none;
 }
 /* *** MODULE: LOGIN LINK *** */
 .app-module-loginlink {
@@ -9189,20 +9197,18 @@ html.is-app-sidebar--expanded .app-header-area.icons {
   margin: 0;
 }
 .footer-top {
-  height: 37px;
+  min-height: 37px;
   padding: 0 24px;
 }
 .footer-top .footer-inner {
-  height: 37px;
+  min-height: 37px;
   position: relative;
 }
 .footer-top .footer-inner > .r {
-  min-height: 37px;
+  min-height: 27px;
+  padding: 5px 0;
   margin: 0 0 0 260px;
   position: relative;
-}
-.footer-top .footer-inner > .r .app-module-richeditor {
-  padding: 8.5px 0;
 }
 .footer-top .footer-inner > .r .app-module-richeditor .cm-content-tags--base,
 .footer-top .footer-inner > .r .app-module-richeditor p,
@@ -9211,13 +9217,11 @@ html.is-app-sidebar--expanded .app-header-area.icons {
 .footer-top .footer-inner > .r .app-module-richeditor ol {
   margin: 0;
   font-size: 11px;
-}
-.footer-top .footer-inner > .r .app-footer-area {
-  margin-left: 24px;
+  line-height: 18px;
 }
 .footer-top .footer-inner > .l {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   text-align: center;
 }
@@ -9235,25 +9239,12 @@ html.is-app-sidebar--expanded .app-header-area.icons {
   border-bottom: 1px solid #b6bcc1;
 }
 /* *** AREAS *** */
-.app-footer-area.links {
-  min-width: 0;
-  min-height: 37px;
-  position: relative;
-  top: auto;
-  right: auto;
-  bottom: auto;
-  left: auto;
-  float: right;
-}
 .app-footer-area.copyright {
-  min-width: 0;
-  min-height: 37px;
   position: relative;
   top: auto;
   right: auto;
   bottom: auto;
   left: auto;
-  float: right;
 }
 .app-footer-area.sitemap {
   position: relative;
@@ -9261,12 +9252,6 @@ html.is-app-sidebar--expanded .app-header-area.icons {
   right: auto;
   bottom: auto;
   left: auto;
-}
-html.is-app-sidebar--expanded .app-footer-area.links {
-  min-width: 64px;
-}
-html.is-app-sidebar--expanded .app-footer-area.copyright {
-  min-width: 64px;
 }
 /* *** SITEMAP BUTTON *** */
 .sitemap-button {

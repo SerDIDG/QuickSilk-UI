@@ -205,8 +205,8 @@ h6 {
                 }
 
                 a {
-                    padding: 5px 12px 5px 26px;
-                    background: url('@{TplPath-image}/arrow-r.png') 0 5px no-repeat;
+                    padding: 4px 12px 4px 26px;
+                    background: url('@{TplPath-image}/arrow-r.png') 0 center no-repeat;
                     font-weight: @tpl-boldWeight;
                     .cm-transition(all @CM-Transition-Duration ease-in-out);
 
@@ -287,12 +287,41 @@ h6 {
     }
 
     &.vertical {
-        > ul {
-            > li {
-                > a {
-                    text-transform: uppercase;
-                }
-            }
+         ul {
+             li {
+                 border-top: 1px dotted #999999;
+                 margin-top: 0;
+
+                 &:last-child {
+                     border-bottom: 1px dotted #999999;
+                 }
+
+                 a {
+                     padding: 4px 12px 4px 26px;
+                     background: url('@{TplPath-image}/arrow-r.png') 0 center no-repeat;
+                     text-transform: none;
+                     text-decoration: none;
+                     font-weight: @tpl-boldWeight;
+                     .cm-transition(all @CM-Transition-Duration ease-in-out);
+                 }
+
+                 &.active a,
+                 a:hover {
+                     background-image: url('@{TplPath-image}/arrow-r-a.png');
+                     color: @Tpl-color;
+                     .cm-transition(all @CM-Transition-DurationReverse ease-in-out);
+                 }
+             }
+
+             ul {
+                 margin-top: 0;
+
+                 li {
+                     &:last-child {
+                         border-bottom: none;
+                     }
+                 }
+             }
         }
     }
 }
@@ -457,35 +486,31 @@ html {
 }
 
 .footer-top {
-    height: 37px;
+    min-height: 37px;
     padding: 0 @Tpl-indentOutside;
 
     .footer-inner {
-        height: 37px;
+        min-height: 37px;
         position: relative;
 
         > .r {
-            min-height: 37px;
+            min-height: 27px;
+            padding: 5px 0;
             margin: 0 0 0 260px;
             position: relative;
 
             .app-module-richeditor {
-                padding: ((@Tpl-lineHeightFooter - @Tpl-lineHeight) / 2) 0;
-
                 .cm-content-tags--base {
                     margin: 0;
                     font-size: @Tpl-fontSizeFooter;
+                    line-height: @Tpl-lineHeightFooter;
                 }
-            }
-
-            .app-footer-area {
-                margin-left: @cm-indentMedium;
             }
         }
 
         > .l {
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
             text-align: center;
         }
@@ -511,41 +536,14 @@ html {
 /* *** AREAS *** */
 
 .app-footer-area {
-    &.links {
-        min-width: 0;
-        min-height: 37px;
-        position: relative;
-        .cm-position(auto, auto, auto, auto);
-        float: right;
-    }
-
     &.copyright {
-        min-width: 0;
-        min-height: 37px;
         position: relative;
         .cm-position(auto, auto, auto, auto);
-        float: right;
     }
 
     &.sitemap {
         position: relative;
         .cm-position(auto, auto, auto, auto);
-    }
-}
-
-// Add sidebar states
-
-html {
-    &.is-app-sidebar--expanded {
-        .app-footer-area {
-            &.links {
-                min-width: @cm-XXLarge;
-            }
-
-            &.copyright {
-                min-width: @cm-XXLarge;
-            }
-        }
     }
 }
 
