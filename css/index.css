@@ -7937,13 +7937,8 @@ html.is-immediately .app-template {
     float: left;
     margin: 0 0 0 36px;
   }
-  html.is-adaptive .app-topmenu .menu-centered {
-    float: right;
-    margin: 0 0 0 12px;
-  }
   html.is-adaptive .app-topmenu .menu-centered .menu li {
     margin: 0;
-    float: left;
     border-left: 1px solid rgba(255, 255, 255, 0.4);
   }
   html.is-adaptive .app-topmenu .menu-centered .menu li:last-child {
@@ -7958,6 +7953,29 @@ html.is-immediately .app-template {
   }
   html.is-adaptive .app-topmenu .menu-centered .menu a .icon.medium {
     margin: 0;
+  }
+}
+@media only screen and (min-width: 1281px) {
+  html.is-adaptive .app-topmenu .menu-centered {
+    position: absolute;
+    margin: 0 50%;
+    top: 0;
+    right: auto;
+    bottom: 0;
+    left: auto;
+  }
+  html.is-adaptive .app-topmenu .menu-centered > .inner {
+    position: relative;
+    left: -50%;
+  }
+  html.is-adaptive .app-topmenu .menu-centered .menu {
+    white-space: nowrap;
+  }
+}
+@media only screen and (min-width: 769px) and (max-width: 1280px) {
+  html.is-adaptive .app-topmenu .menu-centered {
+    float: right;
+    margin: 0 0 0 12px;
   }
 }
 /* *** TABLET VIEW *** */
@@ -8049,10 +8067,10 @@ html.is-immediately .app-template {
     transform: translateY(0);
   }
 }
-/* ***  LAYOUTS: TOP MENU: PRINT *** */
+/* *******  LAYOUTS: TOP MENU: PRINT ******* */
 @media print {
   .app-topmenu {
-    display: none;
+    display: none !important;
   }
 }
 .app-lt__templates__scroll {
@@ -8529,7 +8547,7 @@ html.is-immediately .app-template {
 .app-module-logo a {
   display: block;
 }
-/* ******* MODULE MENU ******* */
+/* ******* MODULES: MENU ******* */
 .app-module-menu > ul {
   padding: 0;
   margin: 0;
@@ -8698,7 +8716,7 @@ html.is-immediately .app-template {
 .app-module-menu.pull-right > ul {
   text-align: right;
 }
-/* *** ADAPTIVE *** */
+/* ******* MODULES: MENU: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .app-module-menu:not(.vertical) > ul {
     display: none;
@@ -8707,12 +8725,24 @@ html.is-immediately .app-template {
     display: block;
   }
 }
-/* ******* COMPONENT: MODULE SEARCH ******* */
+/* *******  MODULES: MENU: PRINT ******* */
+@media print {
+  .app-module-menu {
+    display: none !important;
+  }
+}
+/* ******* MODULES: SEARCH ******* */
 .app-module-search dt {
   display: none;
 }
 .app-module-search .icon.default {
   background-image: url("../libs/common/img/icons/small/search.png");
+}
+/* *******  MODULES: SEARCH: PRINT ******* */
+@media print {
+  .app-module-search {
+    display: none !important;
+  }
 }
 /* ******* MODULE FORUM ******* */
 /* ******* COMPONENT: MODULE ITEMS ******* */
@@ -8897,6 +8927,13 @@ html.is-immediately .app-template {
   right: -1px;
   bottom: auto;
   left: auto;
+}
+/* ******* MODULES: SOCIAL MEDIA ******* */
+/* *******  MODULES: SOCIAL MEDIA: PRINT ******* */
+@media print {
+  .mod__social-media {
+    display: none !important;
+  }
 }
 /* *** COLORS *** */
 /* *** FONTS *** */
