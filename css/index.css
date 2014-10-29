@@ -8517,7 +8517,7 @@ html.is-immediately .app-template {
 .app-module-divider hr {
   margin: 0;
 }
-/* ******* COMPONENT: MODULE LOGIN LINK ******* */
+/* ******* MODULES: LOGIN LINK ******* */
 .app-module-loginlink ul {
   margin: 0;
   padding: 0;
@@ -8541,6 +8541,12 @@ html.is-immediately .app-template {
 .app-module-loginlink ul li .icon {
   display: none;
   vertical-align: middle;
+}
+/* ******* MODULES: LOGIN LINK: PRINT ******* */
+@media print {
+  .app-module-loginlink {
+    display: none !important;
+  }
 }
 /* ******* MODULE LISTING ******* */
 /* ******* COMPONENT: MODULE LOGO ******* */
@@ -8706,6 +8712,14 @@ html.is-immediately .app-template {
   display: inline-block;
   vertical-align: middle;
   color: #666666;
+}
+.app-module-menu.vertical.pull-right ul ul {
+  margin-left: 0;
+  margin-right: 24px;
+}
+.app-module-menu.vertical.pull-center ul ul {
+  margin-left: 0;
+  margin-right: 0;
 }
 .app-module-menu.pull-left > ul {
   text-align: left;
@@ -9183,7 +9197,7 @@ h6 {
   -webkit-transition: all 300ms ease-in-out;
   transition: all 300ms ease-in-out;
 }
-.app-module-menu.vertical ul li.active a,
+.app-module-menu.vertical ul li.active > a,
 .app-module-menu.vertical ul li a:hover {
   background-image: url('../img/arrow-r-a.png');
   color: #005694;
@@ -9195,6 +9209,10 @@ h6 {
 }
 .app-module-menu.vertical ul ul li:last-child {
   border-bottom: none;
+}
+.app-module-menu.vertical.pull-right ul li a {
+  padding: 4px 26px 4px 12px;
+  background: url('../img/arrow-r.png') 100% center no-repeat;
 }
 /* *** MODULE: LOGIN LINK *** */
 .app-module-loginlink {
@@ -9510,5 +9528,14 @@ html.is-app-sidebar--expanded .app-header-area.icons {
     right: auto;
     bottom: auto;
     left: auto;
+  }
+}
+/* *******  PRINT ******* */
+@media print {
+  .footer-top .footer-inner > .l {
+    display: none !important;
+  }
+  .footer-top .footer-inner > .r {
+    margin-right: 0;
   }
 }

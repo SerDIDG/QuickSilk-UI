@@ -305,7 +305,7 @@ h6 {
                      .cm-transition(all @CM-Transition-Duration ease-in-out);
                  }
 
-                 &.active a,
+                 &.active > a,
                  a:hover {
                      background-image: url('@{TplPath-image}/arrow-r-a.png');
                      color: @Tpl-color;
@@ -322,6 +322,17 @@ h6 {
                      }
                  }
              }
+        }
+
+        &.pull-right {
+            ul {
+                li {
+                    a {
+                        padding: 4px 26px 4px 12px;
+                        background: url('@{TplPath-image}/arrow-r.png') 100% center no-repeat;
+                    }
+                }
+            }
         }
     }
 }
@@ -695,6 +706,24 @@ html {
 @media only screen and (max-width : @cm-screenMobile) {
 
     html.is-adaptive {
+    }
+
+}
+
+/* *******  PRINT ******* */
+
+@media print {
+
+    .footer-top {
+        .footer-inner {
+            > .l {
+                display: none !important;
+            }
+
+            > .r {
+                margin-right: 0;
+            }
+        }
     }
 
 }
