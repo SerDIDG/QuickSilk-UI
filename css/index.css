@@ -1443,6 +1443,38 @@ button.transparent.active,
 .button.transparent.active {
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2) inset;
 }
+.cm-button.button-white,
+input[type="button"].button-white,
+input[type="submit"].button-white,
+input[type="reset"].button-white,
+button.button-white,
+.button.button-white {
+  background: #ffffff;
+  color: #308ce8;
+}
+.cm-button.button-white:hover,
+input[type="button"].button-white:hover,
+input[type="submit"].button-white:hover,
+input[type="reset"].button-white:hover,
+button.button-white:hover,
+.button.button-white:hover {
+  background-color: #1773cf;
+  color: #fff;
+}
+.cm-button.button-white:active,
+.cm-button.button-white.active,
+input[type="button"].button-white:active,
+input[type="button"].button-white.active,
+input[type="submit"].button-white:active,
+input[type="submit"].button-white.active,
+input[type="reset"].button-white:active,
+input[type="reset"].button-white.active,
+button.button-white:active,
+button.button-white.active,
+.button.button-white:active,
+.button.button-white.active {
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4) inset;
+}
 .cm-button.button-clear,
 input[type="button"].button-clear,
 input[type="submit"].button-clear,
@@ -1511,6 +1543,7 @@ button.has-icon-small .icon,
 .btn-wrap input[type="reset"],
 .btn-wrap button,
 .btn-wrap .button {
+  max-width: 100%;
   float: right;
   margin: 0 0 0 8px;
 }
@@ -1676,6 +1709,8 @@ button.has-icon-small .icon,
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .cm-box--clear {
   padding: 0;
@@ -1683,24 +1718,35 @@ button.has-icon-small .icon,
   border: none;
   border-radius: 0;
   box-shadow: none;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .cm-box-border {
   padding: 12px;
   border: 2px solid #cbcbcb;
   -webkit-transition: border-color 300ms ease-in-out;
   transition: border-color 300ms ease-in-out;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .cm-box-border.active {
   border: 2px solid #dbebfb;
 }
 .cm-box-flat {
+  margin: 0 0 24px;
   padding: 12px;
   background: #fafafa;
   border-radius: 3px;
-  margin: 0 0 24px;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: background 300ms ease-in-out;
+  transition: background 300ms ease-in-out;
 }
 .cm-box-flat:last-child {
   margin: 0;
+}
+.cm-box-flat.active {
+  background: #f1f7fd;
 }
 /* *** CONTENT *** */
 .cm-box-content {
@@ -2757,6 +2803,8 @@ button.has-icon-small .icon,
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   display: block;
   visibility: hidden;
   position: absolute;
@@ -2825,6 +2873,8 @@ button.has-icon-small .icon,
   border: none;
   border-radius: 0;
   box-shadow: none;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .cm-menu-dropdown--active {
   visibility: visible;
@@ -3268,6 +3318,8 @@ button.has-icon-small .icon,
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   display: block;
   visibility: hidden;
   position: absolute;
@@ -3450,6 +3502,9 @@ button.has-icon-small .icon,
   width: auto;
   overflow: visible;
 }
+.cm-grid.is-flexible {
+  overflow: visible;
+}
 .cm-grid.is-flexible > ul {
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -3457,10 +3512,41 @@ button.has-icon-small .icon,
   -ms-flex-pack: center;
 }
 .cm-grid.is-flexible > ul > li {
+  width: 100%;
   -webkit-flex: auto;
   -ms-flex: auto;
   flex: auto;
+}
+.cm-grid.is-flexible-in {
+  overflow: visible;
+}
+.cm-grid.is-flexible-in > ul {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
+}
+.cm-grid.is-flexible-in > ul > li {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex: 1 1;
+  -ms-flex: 1 1;
+  flex: 1 1;
+}
+.ie9 .cm-grid.is-flexible-in > ul,
+.ie8 .cm-grid.is-flexible-in > ul {
   width: 100%;
+  display: table;
+  table-layout: fixed;
+}
+.ie9 .cm-grid.is-flexible-in > ul > li,
+.ie8 .cm-grid.is-flexible-in > ul > li {
+  display: table-cell;
 }
 .cm-grid.col-1 > ul > li {
   width: 100%;
@@ -3589,8 +3675,13 @@ button.has-icon-small .icon,
   padding: 64px;
 }
 @media only screen and (max-width: 640px) {
+  html.is-adaptive .cm-grid:not(.is-not-adaptive) > ul {
+    width: auto;
+    display: block;
+  }
   html.is-adaptive .cm-grid:not(.is-not-adaptive) > ul > li {
     width: 100%;
+    display: block;
   }
 }
 /* ******* PARTS: GRID: BUNDLE ******* */
@@ -4113,6 +4204,8 @@ button.has-icon-small .icon,
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 /* ******* COMPONENT: TOOLTIP: INNER COMPONENTS ******* */
 /* *** ITEMS LIST *** */
@@ -4269,6 +4362,8 @@ button.has-icon-small .icon,
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   display: block;
   visibility: hidden;
   position: absolute;
@@ -5126,6 +5221,18 @@ html.ie9 .com__palette .b-stuff {
 .com-pagination ul li a.transparent.active {
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2) inset;
 }
+.com-pagination ul li a.button-white {
+  background: #ffffff;
+  color: #308ce8;
+}
+.com-pagination ul li a.button-white:hover {
+  background-color: #1773cf;
+  color: #fff;
+}
+.com-pagination ul li a.button-white:active,
+.com-pagination ul li a.button-white.active {
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4) inset;
+}
 .com-pagination ul li a.button-clear {
   background: none;
   box-shadow: none;
@@ -5621,6 +5728,8 @@ html.ie9 .com__palette .b-stuff {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   display: block;
   visibility: hidden;
   position: absolute;
@@ -7547,6 +7656,8 @@ body {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   display: block;
   visibility: hidden;
   position: absolute;
@@ -8173,6 +8284,8 @@ html.is-immediately .app-template {
     -webkit-background-clip: padding-box;
     -moz-background-clip: padding-box;
     background-clip: padding-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
     display: block;
     visibility: hidden;
     position: absolute;
@@ -8442,6 +8555,134 @@ html.is-immediately .app-template {
   border: 2px solid #308ce8;
 }
 /* ******* LAYOUTS: EVENT ENTRY ******* */
+/* ******* LAYOUTS: PLANS ******* */
+.app-lt__plans {
+  margin: 0 0 24px;
+}
+.app-lt__plans:last-child {
+  margin: 0;
+}
+.app-lt__plans__grid {
+  overflow: visible;
+}
+.app-lt__plans__grid > ul {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
+}
+.app-lt__plans__grid > ul > li {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex: 1 1;
+  -ms-flex: 1 1;
+  flex: 1 1;
+}
+.ie9 .app-lt__plans__grid > ul,
+.ie8 .app-lt__plans__grid > ul {
+  width: 100%;
+  display: table;
+  table-layout: fixed;
+}
+.ie9 .app-lt__plans__grid > ul > li,
+.ie8 .app-lt__plans__grid > ul > li {
+  display: table-cell;
+}
+.app-lt__plans__grid > ul {
+  margin: 24px -24px -24px;
+}
+.app-lt__plans__grid > ul:first-child {
+  margin: -24px;
+}
+.app-lt__plans__grid > ul > li {
+  padding: 24px;
+}
+.app-lt__plan {
+  margin: 0 0 24px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 3px;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: background 300ms ease-in-out;
+  transition: background 300ms ease-in-out;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  width: 100%;
+}
+.app-lt__plan:last-child {
+  margin: 0;
+}
+.app-lt__plan.active {
+  background: #f1f7fd;
+}
+.app-lt__plan > .inner {
+  width: 100%;
+  position: relative;
+  padding: 0 0 28px;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+.app-lt__plan .plan-title {
+  margin: 0 0 12px;
+  text-align: center;
+}
+.app-lt__plan .plan-price {
+  font: 300 30px/38px 'Open Sans', 'Open Sans', sans-serif;
+  color: #666666;
+  margin: 0 0 24px;
+  text-align: center;
+}
+.app-lt__plan .plan-abstract {
+  margin: 0 0 24px;
+}
+.app-lt__plan .plan-abstract ul {
+  margin: 0 0 24px;
+  list-style: disc;
+}
+.app-lt__plan .plan-abstract ul.bottom {
+  margin: 0;
+}
+.app-lt__plan .plan-abstract ul.has-indent ul,
+.app-lt__plan .plan-abstract ul.has-indent li {
+  margin: 8px 0 0 0;
+}
+.app-lt__plan .plan-abstract ul.has-indent ul:first-child,
+.app-lt__plan .plan-abstract ul.has-indent li:first-child {
+  margin: 0;
+}
+.app-lt__plan .plan-abstract ul ul {
+  list-style: circle;
+}
+.app-lt__plan .plan-abstract ul ul ul {
+  list-style: disc;
+}
+.app-lt__plan .plan-actions {
+  position: absolute;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app-lt__plan .plan-actions .btn-wrap {
+  margin: 0;
+}
+/* ******* LAYOUTS: PLANS: ADAPTIVE ******* */
+@media only screen and (max-width: 1024px) {
+  html.is-adaptive .app-lt__plans__grid > ul > li {
+    -webkit-flex: 1 1 50%;
+    -ms-flex: 1 1 50%;
+    flex: 1 1 50%;
+  }
+}
 /* ************ APPLICATION: COMPONENTS ************ */
 /* ******* COMPONENT: SIDEBAR ******* */
 .app-sidebar {
@@ -8750,6 +8991,8 @@ html.is-immediately .app-template {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .app-module-infoblock > .inner > .title {
   border-bottom: 1px solid #cbcbcb;
@@ -8904,6 +9147,8 @@ html.is-immediately .app-template {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   display: block;
   visibility: hidden;
   position: absolute;
