@@ -1,0 +1,9 @@
+Заменить:
+.cm-links --> .pt__links
+@CmPath-image --> @CmPath-Images
+@AppPath-image --> @AppPath-Images
+@TplPath-image --> @TplPath-Images
+
+Переделать:
+.com-gridlist-links в .pt__links
+.com-gridlist-link в .pt__links

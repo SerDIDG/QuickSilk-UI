@@ -3,11 +3,11 @@
 /* ******* TAGS ******* */
 
 html {
-    background: url('@{TplPath-image}/bg-back.png') repeat;
+    background: url('@{TplPath-Images}/bg-back.png') repeat;
 }
 
 body {
-    background: url('@{TplPath-image}/bg.png') 0 0 repeat-x;
+    background: url('@{TplPath-Images}/bg.png') 0 0 repeat-x;
 }
 
 /* *** FONT *** */
@@ -72,7 +72,7 @@ h6 {
             text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
 
             .cm-content-tags {
-                margin-bottom: @cm-indentXSmall;
+                margin-bottom: @Cm-indentXSmall;
             }
         }
     }
@@ -87,14 +87,14 @@ h6 {
                 margin: 0 0 0 5px;
                 border: none;
                 border-radius: 0;
-                background: transparent url("@{TplPath-image}/parts/slider/button.png") 50% 50% no-repeat;
-                .cm-transition(background @CM-Transition-Duration ease-in-out);
+                background: transparent url("@{TplPath-Images}/parts/slider/button.png") 50% 50% no-repeat;
+                .cm-transition(background @Cm-Transition-Duration ease-in-out);
 
                 &.active,
                 &:hover {
                     background-color: transparent;
-                    background-image: url("@{TplPath-image}/parts/slider/button-a.png");
-                    .cm-transition(background @CM-Transition-DurationReverse ease-in-out);
+                    background-image: url("@{TplPath-Images}/parts/slider/button-a.png");
+                    .cm-transition(background @Cm-Transition-DurationReverse ease-in-out);
                 }
             }
         }
@@ -102,7 +102,7 @@ h6 {
 
     &.is-small {
         height: 37px;
-        background: url("@{TplPath-image}/parts/slider/bar.png") 0 0 repeat-x;
+        background: url("@{TplPath-Images}/parts/slider/bar.png") 0 0 repeat-x;
 
         .bar-arrow {
             .icon {
@@ -116,19 +116,19 @@ h6 {
 
                     &.prev {
                         left: 0;
-                        background-image: url("@{TplPath-image}/parts/slider/prev.png");
+                        background-image: url("@{TplPath-Images}/parts/slider/prev.png");
                     }
 
                     &.next {
                         right: 0;
-                        background-image: url("@{TplPath-image}/parts/slider/next.png");
+                        background-image: url("@{TplPath-Images}/parts/slider/next.png");
                     }
                 }
             }
 
             &:hover {
                 .icon {
-                    opacity: @CM-Opacity-Hover;
+                    opacity: @Cm-Opacity-Hover;
                 }
             }
         }
@@ -140,7 +140,7 @@ h6 {
 .com-slider {
     &.theme-template {
         > .inner {
-            background-color: @cm-background-gallery;
+            background-color: @Cm-background-gallery;
 
             > .com-gallery-controls {
                 opacity: 1;
@@ -157,7 +157,7 @@ h6 {
     &.primary {
         > ul {
             > li {
-                margin: 0 @cm-indentMedium 0 0;
+                margin: 0 @Cm-indentMedium 0 0;
 
                 &:last-child {
                     margin: 0;
@@ -190,11 +190,11 @@ h6 {
                 width: 15px;
                 height: 8px;
                 position: absolute;
-                left: @cm-indentMedium;
+                left: @Cm-indentMedium;
                 top: -8px;
                 display: block;
                 content: ' ';
-                background: url('@{TplPath-image}/dropdown-arrow.png');
+                background: url('@{TplPath-Images}/dropdown-arrow.png');
             }
 
             li {
@@ -206,14 +206,14 @@ h6 {
 
                 a {
                     padding: 4px 12px 4px 26px;
-                    background: url('@{TplPath-image}/arrow-r.png') 0 center no-repeat;
+                    background: url('@{TplPath-Images}/arrow-r.png') 0 center no-repeat;
                     font-weight: @tpl-boldWeight;
-                    .cm-transition(all @CM-Transition-Duration ease-in-out);
+                    .cm-transition(all @Cm-Transition-Duration ease-in-out);
 
                     &:hover {
-                        background-image: url('@{TplPath-image}/arrow-r-a.png');
+                        background-image: url('@{TplPath-Images}/arrow-r-a.png');
                         color: @Tpl-color;
-                        .cm-transition(all @CM-Transition-DurationReverse ease-in-out);
+                        .cm-transition(all @Cm-Transition-DurationReverse ease-in-out);
                     }
                 }
 
@@ -229,15 +229,15 @@ h6 {
     &.secondary {
         > ul {
             > li {
-                margin: 0 0 0 @cm-indentMedium;
+                margin: 0 0 0 @Cm-indentMedium;
 
                 &:before {
                     width: 1px;
                     height: 100%;
                     display: block;
                     position: absolute;
-                    .cm-position(0, auto, 0, -(@cm-indentMedium / 2));
-                    background: @cm-colorBorder;
+                    .cm-position(0, auto, 0, -(@Cm-indentMedium / 2));
+                    background: @Cm-colorBorder;
                     content: '';
                 }
 
@@ -258,21 +258,21 @@ h6 {
 
         > ul {
             > li {
-                margin: 0 0 0 @cm-indentSmall;
+                margin: 0 0 0 @Cm-indentSmall;
 
                 &:before {
                     width: 1px;
                     height: 10px;
                     display: block;
                     position: absolute;
-                    .cm-position(((@Tpl-lineHeight - 10px) / 2), auto, 0, -(@cm-indentSmall / 2));
+                    .cm-position(((@Tpl-lineHeight - 10px) / 2), auto, 0, -(@Cm-indentSmall / 2));
                     background: @Tpl-colorFont;
                     content: '';
                 }
 
                 a {
                     font-size: @Tpl-fontSizeFooter;
-                    font-weight: @cm-boldWeight;
+                    font-weight: @Cm-boldWeight;
                 }
 
                 &:first-child {
@@ -298,18 +298,18 @@ h6 {
 
                  a {
                      padding: 4px 12px 4px 26px;
-                     background: url('@{TplPath-image}/arrow-r.png') 0 center no-repeat;
+                     background: url('@{TplPath-Images}/arrow-r.png') 0 center no-repeat;
                      text-transform: none;
                      text-decoration: none;
                      font-weight: @tpl-boldWeight;
-                     .cm-transition(all @CM-Transition-Duration ease-in-out);
+                     .cm-transition(all @Cm-Transition-Duration ease-in-out);
                  }
 
                  &.active > a,
                  a:hover {
-                     background-image: url('@{TplPath-image}/arrow-r-a.png');
+                     background-image: url('@{TplPath-Images}/arrow-r-a.png');
                      color: @Tpl-color;
-                     .cm-transition(all @CM-Transition-DurationReverse ease-in-out);
+                     .cm-transition(all @Cm-Transition-DurationReverse ease-in-out);
                  }
              }
 
@@ -329,7 +329,7 @@ h6 {
                 li {
                     a {
                         padding: 4px 26px 4px 12px;
-                        background: url('@{TplPath-image}/arrow-r.png') 100% center no-repeat;
+                        background: url('@{TplPath-Images}/arrow-r.png') 100% center no-repeat;
                     }
                 }
             }
@@ -380,7 +380,7 @@ h6 {
     .cm-position(16px, 0, auto, 240px);
 
     .app-header-area {
-        margin-left: @cm-indentMedium;
+        margin-left: @Cm-indentMedium;
     }
 }
 
@@ -458,11 +458,11 @@ html {
     &.is-app-sidebar--expanded {
         .app-header-area {
             &.links {
-                min-width: @cm-XXLarge;
+                min-width: @Cm-XXLarge;
             }
 
             &.icons {
-                min-width: @cm-XXLarge;
+                min-width: @Cm-XXLarge;
             }
         }
     }
@@ -475,8 +475,8 @@ html {
 }
 
 .content-inner {
-    padding-top: @cm-indentSmall;
-    padding-bottom: @cm-indentLarge;
+    padding-top: @Cm-indentSmall;
+    padding-bottom: @Cm-indentLarge;
 }
 
 .app-main-area {
@@ -533,13 +533,13 @@ html {
     overflow: hidden;
 
     .footer-inner {
-        padding: @cm-indentMedium 0;
+        padding: @Cm-indentMedium 0;
     }
 }
 
 .footer-borders {
     padding: 0 @Tpl-indentOutside;
-    background: #d3d3d3 url("@{TplPath-image}/parts/sitemap/bg.png") 0 0 repeat-x;
+    background: #d3d3d3 url("@{TplPath-Images}/parts/sitemap/bg.png") 0 0 repeat-x;
     border-top: 1px solid #b6bcc1;
     border-bottom: 1px solid #b6bcc1;
 }
@@ -566,7 +566,7 @@ html {
     display: inline-block;
     position: relative;
     padding: 0 0 0 16px;
-    background: url("@{TplPath-image}/parts/sitemap/button.png") 0 0 repeat-x;
+    background: url("@{TplPath-Images}/parts/sitemap/button.png") 0 0 repeat-x;
     border: 1px solid #b6bcc1;
     border-bottom: none;
     text-align: left;
@@ -574,7 +574,7 @@ html {
     font-size: 14px;
     font-weight: @tpl-boldWeight;
     cursor: pointer;
-    .cm-transition(box-shadow @CM-Transition-Duration ease-in-out);
+    .cm-transition(box-shadow @Cm-Transition-Duration ease-in-out);
 
     .arrow {
         width: 18px;
@@ -582,7 +582,7 @@ html {
         position: absolute;
         top: 9px;
         right: 9px;
-        background: url("@{TplPath-image}/parts/sitemap/arrow-up.png");
+        background: url("@{TplPath-Images}/parts/sitemap/arrow-up.png");
         .cm-transition(all 0.2s ease-in-out);
     }
 
@@ -610,7 +610,7 @@ html {
 
             .ie9 &,
             .ie8 & {
-                background: url("@{TplPath-image}/parts/sitemap/arrow-down.png");
+                background: url("@{TplPath-Images}/parts/sitemap/arrow-down.png");
             }
         }
 
@@ -632,14 +632,14 @@ html {
         .header-bottom {
             clear: both;
             margin: 0;
-            padding: @cm-indentMedium 0 0 0;
+            padding: @Cm-indentMedium 0 0 0;
         }
     }
 
 }
 
 
-@media only screen and (max-width : @cm-screenTabletPortrait) {
+@media only screen and (max-width : @CmScreen-TabletPortrait) {
 
     html.is-adaptive {
         .app-module-logo {
@@ -665,7 +665,7 @@ html {
             width: auto;
             position: relative;
             float: none;
-            padding: @cm-indentMedium 0 0 0;
+            padding: @Cm-indentMedium 0 0 0;
             .cm-position(auto, auto, auto, auto);
         }
 
@@ -684,7 +684,7 @@ html {
 
                     .app-footer-area {
                         float: none;
-                        margin: @cm-indentMedium 0 0 0;
+                        margin: @Cm-indentMedium 0 0 0;
 
                         &:first-child {
                             margin: 0;
@@ -693,7 +693,7 @@ html {
                 }
 
                 > .l {
-                    margin: @cm-indentMedium 0 0 0;
+                    margin: @Cm-indentMedium 0 0 0;
                     position: static;
                     .cm-position(auto, auto, auto, auto);
                 }
@@ -703,7 +703,7 @@ html {
 
 }
 
-@media only screen and (max-width : @cm-screenMobile) {
+@media only screen and (max-width : @CmScreen-Mobile) {
 
     html.is-adaptive {
     }
