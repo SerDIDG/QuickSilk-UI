@@ -1,5 +1,20 @@
 Заменить:
+.inner-link --> .link--inner
+.inherit-link --> .link--inherit
 .cm-links --> .pt__links
+.cm-page-title --> .pt__box-title
+.com-gridlist --> .pt__gridlist
+.cm-font-base --> .cm__font
+.cm-font-* --> .cm__font--*
+.cm-content-tags --> .cm__tags
+.cm-box --> .pt__box
+.cm-transition-none --> .cm__transition-none
+.com-gridlist-container --> .com__gridlist
+.pt__gridlist-container --> .com__gridlist
+.com-gridlist-counter --> pt__gridlist__counter
+.pt__gridlist-counter --> pt__gridlist__counter
+.com-gridlist-indent --> pt__gridlist__indent
+.pt__gridlist-indent --> pt__gridlist__indent
 @CmPath-image --> @CmPath-Images
 @AppPath-image --> @AppPath-Images
 @TplPath-image --> @TplPath-Images
@@ -7,3 +22,8 @@
 Переделать:
 .com-gridlist-links в .pt__links
 .com-gridlist-link в .pt__links
+
+Com.Overlay параметр 'node' --> 'container'.
+
+Удалить:
+.cm-block-padding
