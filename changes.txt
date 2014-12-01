@@ -4,10 +4,20 @@
 .cm-links --> .pt__links
 .cm-page-title --> .pt__box-title
 .com-gridlist --> .pt__gridlist
+.cm-progress-bar --> .pt__progress-bar
+
+.com-profile-members --> .lt__profile--members
+.com-profile --> .lt__profile
+
 .cm-font-base --> .cm__font
 .cm-font-* --> .cm__font--*
+
 .cm-content-tags --> .cm__tags
 .cm-box --> .pt__box
+.cm-loader-box -- > .pt__box-loader
+.cm-list --> .pt__list
+.cm-list-counted --> .pt__list-counted
+
 .cm-transition-none --> .cm__transition-none
 .com-gridlist-container --> .com__gridlist
 .pt__gridlist-container --> .com__gridlist
@@ -19,11 +29,15 @@
 @AppPath-image --> @AppPath-Images
 @TplPath-image --> @TplPath-Images
 
+//////////////////////////////////////////////////////////
+
 Переделать:
 .com-gridlist-links в .pt__links
 .com-gridlist-link в .pt__links
 
 Com.Overlay параметр 'node' --> 'container'.
+
+//////////////////////////////////////////////////////////
 
 Удалить:
 .cm-block-padding
