@@ -3,7 +3,6 @@
 .inherit-link --> .link--inherit
 .cm-links --> .pt__links
 .cm-page-title --> .pt__box-title
-.com-gridlist --> .pt__gridlist
 .cm-progress-bar --> .pt__progress-bar
 
 .com-profile-members --> .lt__profile--members
@@ -15,16 +14,17 @@
 .cm-content-tags --> .cm__tags
 .cm-box --> .pt__box
 .cm-loader-box -- > .pt__box-loader
-.cm-list --> .pt__list
-.cm-list-counted --> .pt__list-counted
+.cm-list-counted --> .pt__listing-counters
+.cm-ul --> .cm__list
+.cm-listing --> .pt__listing
+.cm-list --> .cm__list
 
 .cm-transition-none --> .cm__transition-none
-.com-gridlist-container --> .com__gridlist
-.pt__gridlist-container --> .com__gridlist
-.com-gridlist-counter --> pt__gridlist__counter
-.pt__gridlist-counter --> pt__gridlist__counter
 .com-gridlist-indent --> pt__gridlist__indent
-.pt__gridlist-indent --> pt__gridlist__indent
+.com-gridlist-container --> .com__gridlist
+.com-gridlist-counter --> pt__gridlist__counter
+.com-gridlist --> .pt__gridlist
+
 @CmPath-image --> @CmPath-Images
 @AppPath-image --> @AppPath-Images
 @TplPath-image --> @TplPath-Images

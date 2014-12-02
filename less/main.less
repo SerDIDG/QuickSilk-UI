@@ -88,13 +88,13 @@ h6 {
                 border: none;
                 border-radius: 0;
                 background: transparent url("@{TplPath-Images}/parts/slider/button.png") 50% 50% no-repeat;
-                .mx__transition(background @CmVar-Transition-Duration ease-in-out);
+                .mx__transition(background, @CmVar-Transition-Duration);
 
                 &.active,
                 &:hover {
                     background-color: transparent;
                     background-image: url("@{TplPath-Images}/parts/slider/button-a.png");
-                    .mx__transition(background @CmVar-Transition-DurationReverse ease-in-out);
+                    .mx__transition(background, @CmVar-Transition-DurationReverse);
                 }
             }
         }
@@ -208,12 +208,12 @@ h6 {
                     padding: 4px 12px 4px 26px;
                     background: url('@{TplPath-Images}/arrow-r.png') 0 center no-repeat;
                     font-weight: @tpl-boldWeight;
-                    .mx__transition(all @CmVar-Transition-Duration ease-in-out);
+                    .mx__transition(all, @CmVar-Transition-Duration);
 
                     &:hover {
                         background-image: url('@{TplPath-Images}/arrow-r-a.png');
                         color: @Tpl-color;
-                        .mx__transition(all @CmVar-Transition-DurationReverse ease-in-out);
+                        .mx__transition(all, @CmVar-Transition-DurationReverse);
                     }
                 }
 
@@ -302,14 +302,14 @@ h6 {
                      text-transform: none;
                      text-decoration: none;
                      font-weight: @tpl-boldWeight;
-                     .mx__transition(all @CmVar-Transition-Duration ease-in-out);
+                     .mx__transition(all, @CmVar-Transition-Duration);
                  }
 
                  &.active > a,
                  a:hover {
                      background-image: url('@{TplPath-Images}/arrow-r-a.png');
                      color: @Tpl-color;
-                     .mx__transition(all @CmVar-Transition-DurationReverse ease-in-out);
+                     .mx__transition(all, @CmVar-Transition-DurationReverse);
                  }
              }
 
@@ -574,7 +574,7 @@ html {
     font-size: 14px;
     font-weight: @tpl-boldWeight;
     cursor: pointer;
-    .mx__transition(box-shadow @CmVar-Transition-Duration ease-in-out);
+    .mx__transition(box-shadow, @CmVar-Transition-Duration);
 
     .arrow {
         width: 18px;
@@ -583,7 +583,7 @@ html {
         top: 9px;
         right: 9px;
         background: url("@{TplPath-Images}/parts/sitemap/arrow-up.png");
-        .mx__transition(all 0.2s ease-in-out);
+        .mx__transition(all, @CmVar-Transition-Duration);
     }
 
     .on-show {
