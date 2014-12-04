@@ -17,7 +17,23 @@
 .cm-list-counted --> .pt__listing-counters
 .cm-ul --> .cm__list
 .cm-listing --> .pt__listing
+.pt__listing-default --> .pt__listing-clear
 .cm-list --> .cm__list
+.cm-size- --> .cm__size__
+.cm-color- --> .cm__color__
+.cm-aspect- --> .cm__aspect__
+.cm-line- --> .pt__line__
+.cm-imagebox --> .pt__image
+.cm-editable --> .pt__editable
+.cm-title-editable --> .pt__box__editable
+
+.com-faq --> .lt__faq
+.com-forum --> .lt__forum
+.com-comment --> .lt__comment
+.lt__comment-editor --> .lt__comment__editor
+.com-filesgridlist --> .lt__filegridlist
+.lt__filegridlist- --> .lt__filegridlist__
+.com-collapsible-layout --> .lt__collapsible
 
 .cm-transition-none --> .cm__transition-none
 .com-gridlist-indent --> pt__gridlist__indent
