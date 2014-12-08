@@ -18,6 +18,7 @@
 .cm-ul --> .cm__list
 .cm-listing --> .pt__listing
 .pt__listing-default --> .pt__listing-clear
+.cm-items-list -- > .pt__listing-items
 .cm-list --> .cm__list
 .cm-size- --> .cm__size__
 .cm-color- --> .cm__color__
@@ -26,9 +27,12 @@
 .cm-imagebox --> .pt__image
 .cm-editable --> .pt__editable
 .cm-title-editable --> .pt__box__editable
+.cm-counter --> .cm__counter
+.cm-itembox --> .pt__itembox
 
 .com-faq --> .lt__faq
 .com-forum --> .lt__forum
+.lt__forum-cell --> .lt__forum__cell
 .com-comment --> .lt__comment
 .lt__comment-editor --> .lt__comment__editor
 .com-filesgridlist --> .lt__filegridlist
@@ -50,6 +54,7 @@
 Переделать:
 .com-gridlist-links в .pt__links
 .com-gridlist-link в .pt__links
+class="pt__listing-clear lt__faq__questions" в class ="lt__faq__questions"
 
 Com.Overlay параметр 'node' --> 'container'.
 
