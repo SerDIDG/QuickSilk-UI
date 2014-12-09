@@ -14,7 +14,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     line-height: @Tpl-lineHeight;
-    font-weight: @tpl-boldWeight;
+    font-weight: @Tpl-boldWeight;
 }
 
 h1, h2 {
@@ -167,7 +167,7 @@ h6 {
                     height: 20px;
                     padding: 0 0 8px 0;
                     line-height: 20px;
-                    font-weight: @tpl-boldWeight;
+                    font-weight: @Tpl-boldWeight;
                     text-decoration: none;
                     text-transform: uppercase;
 
@@ -207,7 +207,7 @@ h6 {
                 a {
                     padding: 4px 12px 4px 26px;
                     background: url('@{TplPath-Images}/arrow-r.png') 0 center no-repeat;
-                    font-weight: @tpl-boldWeight;
+                    font-weight: @Tpl-boldWeight;
                     .mx__transition(all, @CmUI-Transition-Duration);
 
                     &:hover {
@@ -236,9 +236,9 @@ h6 {
                     height: 100%;
                     display: block;
                     position: absolute;
-                    .mx__position(0, auto, 0, -(@CmIndent-Medium / 2));
-                    background: @Cm-colorBorder;
+                    background: @CmColor-Border;
                     content: '';
+                    .mx__position(0, auto, 0, -(@CmIndent-Medium / 2));
                 }
 
                 &:first-child {
@@ -265,9 +265,9 @@ h6 {
                     height: 10px;
                     display: block;
                     position: absolute;
-                    .mx__position(((@Tpl-lineHeight - 10px) / 2), auto, 0, -(@CmIndent-Small / 2));
                     background: @Tpl-colorFont;
                     content: '';
+                    .mx__position(((@Tpl-lineHeight - 10px) / 2), auto, 0, -(@CmIndent-Small / 2));
                 }
 
                 a {
@@ -301,7 +301,7 @@ h6 {
                      background: url('@{TplPath-Images}/arrow-r.png') 0 center no-repeat;
                      text-transform: none;
                      text-decoration: none;
-                     font-weight: @tpl-boldWeight;
+                     font-weight: @Tpl-boldWeight;
                      .mx__transition(all, @CmUI-Transition-Duration);
                  }
 
@@ -414,8 +414,8 @@ h6 {
         height: 32px;
         min-height: 32px;
         position: relative;
-        .mx__position(auto, auto, auto, auto);
         float: right;
+        .mx__position(auto, auto, auto, auto);
     }
 
     &.icons {
@@ -423,8 +423,8 @@ h6 {
         height: 32px;
         min-height: 32px;
         position: relative;
-        .mx__position(auto, auto, auto, auto);
         float: right;
+        .mx__position(auto, auto, auto, auto);
     }
 
     &.search {
@@ -488,8 +488,8 @@ html {
 .footer {
     z-index: 2;
     position: absolute;
-    .mx__position(auto, 0, 0, 0);
     padding: 0;
+    .mx__position(auto, 0, 0, 0);
 
     .app-widget-container {
         margin: 0;
@@ -572,7 +572,7 @@ html {
     text-align: left;
     line-height: 36px;
     font-size: 14px;
-    font-weight: @tpl-boldWeight;
+    font-weight: @Tpl-boldWeight;
     cursor: pointer;
     .mx__transition(box-shadow, @CmUI-Transition-Duration);
 

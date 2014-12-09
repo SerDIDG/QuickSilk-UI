@@ -1,6 +1,7 @@
 Заменить:
 .inner-link --> .link--inner
 .inherit-link --> .link--inherit
+.button-error --> .button-invalid
 .cm-links --> .pt__links
 .cm-page-title --> .pt__box-title
 .cm-progress-bar --> .pt__progress-bar
@@ -23,12 +24,17 @@
 .cm-size- --> .cm__size__
 .cm-color- --> .cm__color__
 .cm-aspect- --> .cm__aspect__
-.cm-line- --> .pt__line__
+.cm-line- --> .pt__line-
 .cm-imagebox --> .pt__image
 .cm-editable --> .pt__editable
 .cm-title-editable --> .pt__box__editable
 .cm-counter --> .cm__counter
 .cm-itembox --> .pt__itembox
+.cm-toolbar --> .pt__toolbar
+.cm-scroll --> .cm__scroll
+.cm__scroll-a-y --> .cm__scroll-y-a
+.cm-view-all --> .cm__view-all
+.cm-mark --> .cm__mark
 
 .com-faq --> .lt__faq
 .com-forum --> .lt__forum
