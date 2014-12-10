@@ -1,10 +1,15 @@
-Заменить:
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 .inner-link --> .link--inner
 .inherit-link --> .link--inherit
-.button-error --> .button-invalid
+.button-error --> .button-danger
 .cm-links --> .pt__links
 .cm-page-title --> .pt__box-title
 .cm-progress-bar --> .pt__progress-bar
+.cm-selectable --> .pt__selectable
+.cm-image-resizable --> .cm__image-resizable
+.cm-image-flexible --> .cm__image-flexible
+.cm-image-adaptive --> .cm__image-adaptive
+.cm-text-overflow --> .cm__text-overflow
 
 .com-profile-members --> .lt__profile--members
 .com-profile --> .lt__profile
@@ -57,14 +62,14 @@
 
 //////////////////////////////////////////////////////////
 
-Переделать:
-.com-gridlist-links в .pt__links
-.com-gridlist-link в .pt__links
-class="pt__listing-clear lt__faq__questions" в class ="lt__faq__questions"
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
+.com-gridlist-links пїЅ .pt__links
+.com-gridlist-link пїЅ .pt__links
+class="pt__listing-clear lt__faq__questions" пїЅ class ="lt__faq__questions"
 
-Com.Overlay параметр 'node' --> 'container'.
+Com.Overlay пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 'node' --> 'container'.
 
 //////////////////////////////////////////////////////////
 
-Удалить:
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 .cm-block-padding
