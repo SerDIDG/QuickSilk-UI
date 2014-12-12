@@ -28,13 +28,13 @@
 .cm-list --> .cm__list
 .cm-size- --> .cm__size__
 .cm-color- --> .cm__color__
-.cm-aspect- --> .cm__aspect__
+.cm-aspect- --> .cm__aspect-
 .cm-line- --> .pt__line-
 .cm-imagebox --> .pt__image
 .cm-editable --> .pt__editable
-.cm-title-editable --> .pt__box__editable
+.cm-title-editable --> .pt__box-editable
 .cm-counter --> .cm__counter
-.cm-itembox --> .pt__itembox
+.cm-itembox --> .pt__box-item
 .cm-toolbar --> .pt__toolbar
 .cm-scroll --> .cm__scroll
 .cm__scroll-a-y --> .cm__scroll-y-a
@@ -55,6 +55,15 @@
 .com-gridlist-container --> .com__gridlist
 .com-gridlist-counter --> pt__gridlist__counter
 .com-gridlist --> .pt__gridlist
+.com-calendar --> .com__calendar
+.com-tooltip --> .com__tooltip
+.com-datepicker --> .com__datepicker
+.com-timeselect --> .com__timeselect
+.com-dialog --> .com__dialog
+.com-tabset --> .com__tabset
+.com__tabset-head --> .com__tabset__head
+.com__tabset-content --> .com__tabset__content
+.com-gallery --> .com__gallery
 
 @CmPath-image --> @CmPath-Images
 @AppPath-image --> @AppPath-Images
