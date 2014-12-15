@@ -10,6 +10,7 @@
 .cm-image-flexible --> .cm__image-flexible
 .cm-image-adaptive --> .cm__image-adaptive
 .cm-text-overflow --> .cm__text-overflow
+.com-togglebox-empty --> .cm__empty
 
 .com-profile-members --> .lt__profile--members
 .com-profile --> .lt__profile
@@ -41,6 +42,7 @@
 .cm-view-all --> .cm__view-all
 .cm-mark --> .cm__mark
 .cm-draganddrop --> .pt__dnd
+.cm-menu --> .pt__menu
 
 .com-faq --> .lt__faq
 .com-forum --> .lt__forum
@@ -66,6 +68,8 @@
 .com__tabset-content --> .com__tabset__content
 .com-gallery --> .com__gallery
 .com-column --> .com__column
+.com__columns-chassis --> .com__columns__chassis
+.com-togglebox --> .com__togglebox
 
 @CmPath-image --> @CmPath-Images
 @AppPath-image --> @AppPath-Images
