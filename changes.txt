@@ -1,4 +1,4 @@
-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
+Заменить:
 .inner-link --> .link--inner
 .inherit-link --> .link--inherit
 .button-error --> .button-danger
@@ -28,7 +28,7 @@
 .cm-list --> .cm__list
 .cm-size- --> .cm__size__
 .cm-color- --> .cm__color__
-.cm-aspect- --> .cm__aspect-
+.cm-aspect --> .cm__aspect
 .cm-line- --> .pt__line-
 .cm-imagebox --> .pt__image
 .cm-editable --> .pt__editable
@@ -40,6 +40,7 @@
 .cm__scroll-a-y --> .cm__scroll-y-a
 .cm-view-all --> .cm__view-all
 .cm-mark --> .cm__mark
+.cm-draganddrop --> .pt__dnd
 
 .com-faq --> .lt__faq
 .com-forum --> .lt__forum
@@ -64,6 +65,7 @@
 .com__tabset-head --> .com__tabset__head
 .com__tabset-content --> .com__tabset__content
 .com-gallery --> .com__gallery
+.com-column --> .com__column
 
 @CmPath-image --> @CmPath-Images
 @AppPath-image --> @AppPath-Images
@@ -71,14 +73,14 @@
 
 //////////////////////////////////////////////////////////
 
-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
-.com-gridlist-links пїЅ .pt__links
-.com-gridlist-link пїЅ .pt__links
-class="pt__listing-clear lt__faq__questions" пїЅ class ="lt__faq__questions"
+Переделать:
+.com-gridlist-links в .pt__links
+.com-gridlist-link в .pt__links
+class="pt__listing-clear lt__faq__questions" в class ="lt__faq__questions"
 
-Com.Overlay пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 'node' --> 'container'.
+Com.Overlay параметр 'node' --> 'container'.
 
 //////////////////////////////////////////////////////////
 
-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
+Удалить:
 .cm-block-padding
