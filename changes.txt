@@ -43,6 +43,7 @@
 .cm-mark --> .cm__mark
 .cm-draganddrop --> .pt__dnd
 .cm-menu --> .pt__menu
+.com-breadcrumbs --> .pt__breadcrumbs
 
 .com-faq --> .lt__faq
 .com-forum --> .lt__forum
@@ -70,10 +71,16 @@
 .com-column --> .com__column
 .com__columns-chassis --> .com__columns__chassis
 .com-togglebox --> .com__togglebox
+.com-select --> .com__select
+.com-multiselect --> .com__select-multi
 
 @CmPath-image --> @CmPath-Images
 @AppPath-image --> @AppPath-Images
 @TplPath-image --> @TplPath-Images
+
+///////
+
+"app-module-webex-profile" --> "app-module mod__webex-profile"
 
 //////////////////////////////////////////////////////////
 
