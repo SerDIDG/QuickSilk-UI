@@ -1,4 +1,4 @@
-Заменить:
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 .inner-link --> .link--inner
 .inherit-link --> .link--inherit
 .button-error --> .button-danger
@@ -80,18 +80,32 @@
 
 ///////
 
-"app-module-webex-profile" --> "app-module mod__webex-profile"
+"app-module-webex-profile" --> "app-module app-mod__webex-profile"
+"app-module-aggregator" --> "app-module app-mod__aggregator"
+"app-module-columns" --> "app-module app-mod__columns"
+"app-module-divider" --> "app-module app-mod__divider"
+"app-module-forum" --> "app-module app-mod__forum"
+"app-module-image" --> "app-module app-mod__image"
+"app-module-infoblock" --> "app-module app-mod__infoblock"
+"app-module-items" --> "app-module app-mod__items"
+"app-module-knowledge-centre" --> "app-module app-mod__knowledge-centre"
+"mod__lang-switch" --> "app-module app-mod__lang-switch"
+"app-module-listing" --> "app-module app-mod__listing"
+"app-mod__loginlink" --> "app-module app-mod__loginlink"
+
+app-sidebar --> app-lt__sidebar
+app-topmenu --> app-lt__topmenu
 
 //////////////////////////////////////////////////////////
 
-Переделать:
-.com-gridlist-links в .pt__links
-.com-gridlist-link в .pt__links
-class="pt__listing-clear lt__faq__questions" в class ="lt__faq__questions"
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
+.com-gridlist-links пїЅ .pt__links
+.com-gridlist-link пїЅ .pt__links
+class="pt__listing-clear lt__faq__questions" пїЅ class ="lt__faq__questions"
 
-Com.Overlay параметр 'node' --> 'container'.
+Com.Overlay пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 'node' --> 'container'.
 
 //////////////////////////////////////////////////////////
 
-Удалить:
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 .cm-block-padding

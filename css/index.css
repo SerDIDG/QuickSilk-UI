@@ -208,8 +208,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.cm__scroll-y,
-.app-lt__templates__scroll {
+.cm__scroll-y {
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -8345,6 +8344,40 @@ body {
 .app-icon.small.plus {
   background-image: url("../libs/application/img/icons/small/plus.png");
 }
+/* ******* PART: ADMIN DESCRIPTION ******* */
+.app-admin-description {
+  margin: 0 0 24px;
+}
+.app-admin-description.bottom {
+  margin: 0;
+}
+.app-admin-description .app-module,
+.app-admin-description .app-module-default,
+.app-admin-description .app-page-default,
+.app-admin-description .app-module-sitemap,
+.app-admin-description .app-page-search,
+.app-admin-description .app-page-user-groups,
+.app-admin-description .app-page-memberprofile,
+.app-admin-description .app-page-groupprofile {
+  margin: 0;
+}
+.app-admin-description .pt__editable:last-child {
+  margin: 0;
+}
+.app-admin-description .pt__editable .cm__tags,
+.app-admin-description .pt__editable h1,
+.app-admin-description .pt__editable h2,
+.app-admin-description .pt__editable h3,
+.app-admin-description .pt__editable h4,
+.app-admin-description .pt__editable h5,
+.app-admin-description .pt__editable h6,
+.app-admin-description .pt__editable p,
+.app-admin-description .pt__editable dl,
+.app-admin-description .pt__editable ul,
+.app-admin-description .pt__editable ol,
+.app-admin-description .pt__editable hr {
+  margin: 0;
+}
 /* ******* WIDGETS ******* */
 /* Widget */
 .app-widget-container {
@@ -8561,11 +8594,6 @@ body {
 .app-widget-container .app-module,
 .app-widget-container .app-module-default,
 .app-widget-container .app-page-default,
-.app-widget-container .app-module-aggregator,
-.app-widget-container .app-module-knowledge-centre,
-.app-widget-container .app-module-divider,
-.app-widget-container .app-module-listing,
-.app-widget-container .app-module-forum,
 .app-widget-container .app-module-sitemap,
 .app-widget-container .app-page-search,
 .app-widget-container .app-page-user-groups,
@@ -8658,7 +8686,7 @@ body {
   left: auto;
 }
 .app-widget-container:hover > .app-widget-dummy .icon {
-  background: #e9f2fb;
+  background: #d8e8f8;
   -webkit-transition: background-color 100ms ease-in-out;
   transition: background-color 100ms ease-in-out;
 }
@@ -8727,56 +8755,12 @@ body {
 .app-widget-container.is-hide {
   overflow: hidden;
 }
-/* ******* PART: ADMIN DESCRIPTION ******* */
-.app-admin-description {
-  margin: 0 0 24px;
-}
-.app-admin-description.bottom {
-  margin: 0;
-}
-.app-admin-description .app-module,
-.app-admin-description .app-module-default,
-.app-admin-description .app-page-default,
-.app-admin-description .app-module-aggregator,
-.app-admin-description .app-module-knowledge-centre,
-.app-admin-description .app-module-divider,
-.app-admin-description .app-module-listing,
-.app-admin-description .app-module-forum,
-.app-admin-description .app-module-sitemap,
-.app-admin-description .app-page-search,
-.app-admin-description .app-page-user-groups,
-.app-admin-description .app-page-memberprofile,
-.app-admin-description .app-page-groupprofile {
-  margin: 0;
-}
-.app-admin-description .pt__editable:last-child {
-  margin: 0;
-}
-.app-admin-description .pt__editable .cm__tags,
-.app-admin-description .pt__editable h1,
-.app-admin-description .pt__editable h2,
-.app-admin-description .pt__editable h3,
-.app-admin-description .pt__editable h4,
-.app-admin-description .pt__editable h5,
-.app-admin-description .pt__editable h6,
-.app-admin-description .pt__editable p,
-.app-admin-description .pt__editable dl,
-.app-admin-description .pt__editable ul,
-.app-admin-description .pt__editable ol,
-.app-admin-description .pt__editable hr {
-  margin: 0;
-}
 /* ******* PART: UI ******* */
 /* *** MODULES / PAGES *** */
 .app-page,
 .app-module,
 .app-module-default,
 .app-page-default,
-.app-module-aggregator,
-.app-module-knowledge-centre,
-.app-module-divider,
-.app-module-listing,
-.app-module-forum,
 .app-module-sitemap,
 .app-page-search,
 .app-page-user-groups,
@@ -8788,11 +8772,6 @@ body {
 .app-module.bottom,
 .app-module-default.bottom,
 .app-page-default.bottom,
-.app-module-aggregator.bottom,
-.app-module-knowledge-centre.bottom,
-.app-module-divider.bottom,
-.app-module-listing.bottom,
-.app-module-forum.bottom,
 .app-module-sitemap.bottom,
 .app-page-search.bottom,
 .app-page-user-groups.bottom,
@@ -8830,16 +8809,6 @@ body {
 .app-header-area .app-module-default,
 .app-footer-area .app-page-default,
 .app-header-area .app-page-default,
-.app-footer-area .app-module-aggregator,
-.app-header-area .app-module-aggregator,
-.app-footer-area .app-module-knowledge-centre,
-.app-header-area .app-module-knowledge-centre,
-.app-footer-area .app-module-divider,
-.app-header-area .app-module-divider,
-.app-footer-area .app-module-listing,
-.app-header-area .app-module-listing,
-.app-footer-area .app-module-forum,
-.app-header-area .app-module-forum,
 .app-footer-area .app-module-sitemap,
 .app-header-area .app-module-sitemap,
 .app-footer-area .app-page-search,
@@ -8857,66 +8826,56 @@ body {
   min-height: 100%;
   position: relative;
 }
-html.is-app-topmenu .app-template {
+html.is-app-lt__topmenu .app-template {
   margin-top: 40px;
 }
-html.is-app-topmenu .app-sidebar {
+html.is-app-lt__topmenu .app-lt__sidebar {
   top: 40px;
 }
-html.is-app-topmenu.is-app-topmenu--expanded {
+html.is-app-lt__topmenu.is-app-lt__topmenu--expanded {
   overflow: hidden;
 }
-html.is-app-sidebar .app-template {
+html.is-app-lt__sidebar .app-template {
   margin-left: 319px;
   -webkit-transition: margin 500ms ease-in-out;
   transition: margin 500ms ease-in-out;
 }
-html.is-app-sidebar.is-app-sidebar--collapsed .app-template {
+html.is-app-lt__sidebar.is-app-lt__sidebar--collapsed .app-template {
   margin-left: 48px;
 }
-html.is-app-sidebar--collapsed .app-footer-area,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-footer-area,
-html.is-app-sidebar--collapsed .app-header-area,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-header-area,
-html.is-app-sidebar--collapsed .app-main-area,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-main-area {
+html.is-app-lt__sidebar--collapsed .app-footer-area,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-footer-area,
+html.is-app-lt__sidebar--collapsed .app-header-area,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-header-area,
+html.is-app-lt__sidebar--collapsed .app-main-area,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-main-area {
   min-height: 0;
 }
-html.is-app-sidebar--collapsed .app-module:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module:last-child,
-html.is-app-sidebar--collapsed .app-module-default:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module-default:last-child,
-html.is-app-sidebar--collapsed .app-page-default:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-page-default:last-child,
-html.is-app-sidebar--collapsed .app-module-aggregator:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module-aggregator:last-child,
-html.is-app-sidebar--collapsed .app-module-knowledge-centre:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module-knowledge-centre:last-child,
-html.is-app-sidebar--collapsed .app-module-divider:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module-divider:last-child,
-html.is-app-sidebar--collapsed .app-module-listing:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module-listing:last-child,
-html.is-app-sidebar--collapsed .app-module-forum:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module-forum:last-child,
-html.is-app-sidebar--collapsed .app-module-sitemap:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-module-sitemap:last-child,
-html.is-app-sidebar--collapsed .app-page-search:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-page-search:last-child,
-html.is-app-sidebar--collapsed .app-page-user-groups:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-page-user-groups:last-child,
-html.is-app-sidebar--collapsed .app-page-memberprofile:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-page-memberprofile:last-child,
-html.is-app-sidebar--collapsed .app-page-groupprofile:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-page-groupprofile:last-child {
+html.is-app-lt__sidebar--collapsed .app-module:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-module:last-child,
+html.is-app-lt__sidebar--collapsed .app-module-default:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-module-default:last-child,
+html.is-app-lt__sidebar--collapsed .app-page-default:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-page-default:last-child,
+html.is-app-lt__sidebar--collapsed .app-module-sitemap:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-module-sitemap:last-child,
+html.is-app-lt__sidebar--collapsed .app-page-search:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-page-search:last-child,
+html.is-app-lt__sidebar--collapsed .app-page-user-groups:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-page-user-groups:last-child,
+html.is-app-lt__sidebar--collapsed .app-page-memberprofile:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-page-memberprofile:last-child,
+html.is-app-lt__sidebar--collapsed .app-page-groupprofile:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-page-groupprofile:last-child {
   margin: 0;
 }
-html.is-app-sidebar--collapsed .pt__dnd-area,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .pt__dnd-area {
+html.is-app-lt__sidebar--collapsed .pt__dnd-area,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .pt__dnd-area {
   min-height: 0;
   padding: 0;
 }
-html.is-app-sidebar--collapsed .app-widget-container:last-child,
-html:not(.is-app-sidebar--expanded):not(.is-app-sidebar--collapsed) .app-widget-container:last-child {
+html.is-app-lt__sidebar--collapsed .app-widget-container:last-child,
+html:not(.is-app-lt__sidebar--expanded):not(.is-app-lt__sidebar--collapsed) .app-widget-container:last-child {
   margin: 0;
 }
 html.is-immediately .app-template {
@@ -8925,18 +8884,18 @@ html.is-immediately .app-template {
 }
 /* ******* PART: UI: ADAPTIVE ******* */
 @media only screen and (max-width: 1024px) {
-  html.is-adaptive.is-app-sidebar .app-template {
+  html.is-adaptive.is-app-lt__sidebar .app-template {
     margin-left: 208px;
   }
-  html.is-adaptive.is-app-sidebar.is-app-sidebar--collapsed .app-template {
+  html.is-adaptive.is-app-lt__sidebar.is-app-lt__sidebar--collapsed .app-template {
     margin-left: 48px;
   }
 }
 @media only screen and (max-width: 480px) {
-  html.is-adaptive.is-app-sidebar .app-template {
+  html.is-adaptive.is-app-lt__sidebar .app-template {
     margin-left: 0;
   }
-  html.is-adaptive.is-app-sidebar.is-app-sidebar--collapsed .app-template {
+  html.is-adaptive.is-app-lt__sidebar.is-app-lt__sidebar--collapsed .app-template {
     margin-left: 0;
   }
 }
@@ -8947,7 +8906,7 @@ html.is-immediately .app-template {
   }
 }
 /* ******* LAYOUTS: TOP MENU ******* */
-.app-topmenu {
+.app-lt__topmenu {
   height: 40px;
   position: fixed;
   z-index: 104;
@@ -8958,12 +8917,12 @@ html.is-immediately .app-template {
   bottom: auto;
   left: 0;
 }
-.app-topmenu > .inner {
+.app-lt__topmenu > .inner {
   height: 100%;
   margin: 0 auto;
   position: relative;
 }
-.app-topmenu .logo {
+.app-lt__topmenu .logo {
   width: 26px;
   height: 24px;
   position: relative;
@@ -8975,10 +8934,10 @@ html.is-immediately .app-template {
   -webkit-transition: opacity 300ms ease-in-out;
   transition: opacity 300ms ease-in-out;
 }
-.app-topmenu .logo:hover {
+.app-lt__topmenu .logo:hover {
   opacity: 0.7;
 }
-.app-topmenu .menu-button {
+.app-lt__topmenu .menu-button {
   background-image: url("../libs/common/img/icons/medium/menu-white.png");
   cursor: pointer;
   -webkit-transition: opacity 300ms ease-in-out;
@@ -8995,12 +8954,12 @@ html.is-immediately .app-template {
   bottom: 0;
   left: auto;
 }
-.app-topmenu .menu-button:hover {
+.app-lt__topmenu .menu-button:hover {
   opacity: 0.7;
   -webkit-transition: opacity 100ms ease-in-out;
   transition: opacity 100ms ease-in-out;
 }
-.app-topmenu .menu-holder {
+.app-lt__topmenu .menu-holder {
   position: absolute;
   z-index: 1;
   top: 0;
@@ -9008,7 +8967,7 @@ html.is-immediately .app-template {
   bottom: 0;
   left: 0;
 }
-.app-topmenu .menu-holder > .inner {
+.app-lt__topmenu .menu-holder > .inner {
   padding: 0 12px;
   position: absolute;
   top: 0;
@@ -9016,79 +8975,79 @@ html.is-immediately .app-template {
   bottom: 0;
   left: 0;
 }
-.app-topmenu .menu {
+.app-lt__topmenu .menu {
   margin: 0;
   padding: 0;
   list-style: none;
   position: relative;
   z-index: 2;
 }
-.app-topmenu .menu > li {
+.app-lt__topmenu .menu > li {
   margin: 0;
   padding: 0;
 }
-.app-topmenu .menu li {
+.app-lt__topmenu .menu li {
   font: 600 13px/40px 'Open Sans', arial, helvetica, sans-serif;
   position: relative;
   line-height: 40px;
   color: #d6d6d6;
   white-space: nowrap;
 }
-.app-topmenu .menu li > a {
+.app-lt__topmenu .menu li > a {
   font: 600 13px/40px 'Open Sans', arial, helvetica, sans-serif;
   color: #d6d6d6;
   display: block;
   text-decoration: none;
 }
-.app-topmenu .menu li > a .icon {
+.app-lt__topmenu .menu li > a .icon {
   margin: 0 8px 0 0;
 }
-.app-topmenu .menu li > a .icon.medium {
+.app-lt__topmenu .menu li > a .icon.medium {
   margin-top: -2px;
 }
-.app-topmenu .menu li > a:hover {
+.app-lt__topmenu .menu li > a:hover {
   text-decoration: underline;
 }
-.app-topmenu .menu li > a:hover .icon {
+.app-lt__topmenu .menu li > a:hover .icon {
   opacity: 0.7;
 }
-.app-topmenu .menu li.active {
+.app-lt__topmenu .menu li.active {
   color: #fff;
 }
-.app-topmenu .menu li.active > a {
+.app-lt__topmenu .menu li.active > a {
   color: #fff;
 }
-.app-topmenu .menu ul {
+.app-lt__topmenu .menu ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.app-topmenu .menu ul > li {
+.app-lt__topmenu .menu ul > li {
   margin: 0;
   padding: 0;
 }
-.app-topmenu .menu-centered .menu a {
+.app-lt__topmenu .menu-centered .menu a {
   background: rgba(255, 255, 255, 0.2);
 }
 /* ******* LAYOUTS: TOP MENU: ADAPTIVE *** */
 /* *** DESKTOP VIEW *** */
 @media only screen and (min-width: 769px) {
-  html.is-adaptive .app-topmenu .menu {
+  html.is-adaptive .app-lt__topmenu .menu {
     text-align: left;
     font-size: 0;
   }
-  html.is-adaptive .app-topmenu .menu > li {
+  html.is-adaptive .app-lt__topmenu .menu > li {
     display: inline-block;
     vertical-align: top;
   }
-  html.is-adaptive .app-topmenu .menu > li {
+  html.is-adaptive .app-lt__topmenu .menu > li {
     margin: 0 0 0 25px;
   }
-  html.is-adaptive .app-topmenu .menu > li.has-dropdown > a {
+  html.is-adaptive .app-lt__topmenu .menu > li.has-dropdown > a {
     padding-right: 20px;
     background: url("../libs/application/img/layouts/topmenu/arrow-down.png") 100% center no-repeat;
   }
-  html.is-adaptive .app-topmenu .menu > li:before {
+  html.is-adaptive .app-lt__topmenu .menu > li:before {
     width: 1px;
     height: 16px;
     display: block;
@@ -9100,19 +9059,19 @@ html.is-immediately .app-template {
     bottom: auto;
     left: -12px;
   }
-  html.is-adaptive .app-topmenu .menu > li:first-child {
+  html.is-adaptive .app-lt__topmenu .menu > li:first-child {
     margin: 0;
   }
-  html.is-adaptive .app-topmenu .menu > li:first-child:before {
+  html.is-adaptive .app-lt__topmenu .menu > li:first-child:before {
     display: none;
   }
-  html.is-adaptive .app-topmenu .menu > li:hover > ul {
+  html.is-adaptive .app-lt__topmenu .menu > li:hover > ul {
     visibility: visible;
     opacity: 1;
     -webkit-transition: all 100ms ease-in-out;
     transition: all 100ms ease-in-out;
   }
-  html.is-adaptive .app-topmenu .menu ul {
+  html.is-adaptive .app-lt__topmenu .menu ul {
     padding: 4px;
     background: #fff;
     border: 1px solid #cccccc;
@@ -9138,10 +9097,10 @@ html.is-immediately .app-template {
     border-top: none;
     border-radius: 0 0 3px 3px;
   }
-  html.is-adaptive .app-topmenu .menu ul li {
+  html.is-adaptive .app-lt__topmenu .menu ul li {
     position: relative;
   }
-  html.is-adaptive .app-topmenu .menu ul li a {
+  html.is-adaptive .app-lt__topmenu .menu ul li a {
     font: 400 13px/18px 'Open Sans', arial, helvetica, sans-serif;
     text-decoration: underline;
     outline: none;
@@ -9152,28 +9111,28 @@ html.is-immediately .app-template {
     white-space: nowrap;
     color: #666666;
   }
-  html.is-adaptive .app-topmenu .menu ul li a:hover {
+  html.is-adaptive .app-lt__topmenu .menu ul li a:hover {
     text-decoration: none;
     color: #1d73c9;
   }
-  html.is-adaptive .app-topmenu .menu ul li a:active {
+  html.is-adaptive .app-lt__topmenu .menu ul li a:active {
     color: #16599c;
   }
-  html.is-adaptive .app-topmenu .menu ul li a:hover {
+  html.is-adaptive .app-lt__topmenu .menu ul li a:hover {
     text-decoration: none;
   }
-  html.is-adaptive .app-topmenu .menu ul li ul {
+  html.is-adaptive .app-lt__topmenu .menu ul li ul {
     top: -5px;
     left: 100%;
   }
-  html.is-adaptive .app-topmenu .menu ul li.sep {
+  html.is-adaptive .app-lt__topmenu .menu ul li.sep {
     display: none;
     height: 0;
     margin: 0 12px;
     overflow: hidden;
     border-top: 1px solid #cccccc;
   }
-  html.is-adaptive .app-topmenu .menu ul li:before {
+  html.is-adaptive .app-lt__topmenu .menu ul li:before {
     display: block;
     height: 0;
     margin: 0 12px;
@@ -9181,39 +9140,39 @@ html.is-immediately .app-template {
     border-top: 1px solid #cccccc;
     content: '';
   }
-  html.is-adaptive .app-topmenu .menu ul li:first-child:before {
+  html.is-adaptive .app-lt__topmenu .menu ul li:first-child:before {
     display: none;
   }
-  html.is-adaptive .app-topmenu .menu ul li:hover > ul {
+  html.is-adaptive .app-lt__topmenu .menu ul li:hover > ul {
     display: block;
   }
-  html.is-adaptive .app-topmenu .menu.right {
+  html.is-adaptive .app-lt__topmenu .menu.right {
     float: right;
   }
-  html.is-adaptive .app-topmenu .menu.left {
+  html.is-adaptive .app-lt__topmenu .menu.left {
     float: left;
     margin: 0 0 0 36px;
   }
-  html.is-adaptive .app-topmenu .menu-centered .menu li {
+  html.is-adaptive .app-lt__topmenu .menu-centered .menu li {
     margin: 0;
     border-left: 1px solid rgba(255, 255, 255, 0.4);
   }
-  html.is-adaptive .app-topmenu .menu-centered .menu li:last-child {
+  html.is-adaptive .app-lt__topmenu .menu-centered .menu li:last-child {
     border-right: 1px solid rgba(255, 255, 255, 0.4);
   }
-  html.is-adaptive .app-topmenu .menu-centered .menu li:before {
+  html.is-adaptive .app-lt__topmenu .menu-centered .menu li:before {
     display: none;
   }
-  html.is-adaptive .app-topmenu .menu-centered .menu a {
+  html.is-adaptive .app-lt__topmenu .menu-centered .menu a {
     padding: 0 12px;
     font-size: 0;
   }
-  html.is-adaptive .app-topmenu .menu-centered .menu a .icon.medium {
+  html.is-adaptive .app-lt__topmenu .menu-centered .menu a .icon.medium {
     margin: 0;
   }
 }
 @media only screen and (min-width: 1281px) {
-  html.is-adaptive .app-topmenu .menu-centered {
+  html.is-adaptive .app-lt__topmenu .menu-centered {
     position: absolute;
     margin: 0 50%;
     top: 0;
@@ -9221,23 +9180,23 @@ html.is-immediately .app-template {
     bottom: 0;
     left: auto;
   }
-  html.is-adaptive .app-topmenu .menu-centered > .inner {
+  html.is-adaptive .app-lt__topmenu .menu-centered > .inner {
     position: relative;
     left: -50%;
   }
-  html.is-adaptive .app-topmenu .menu-centered .menu {
+  html.is-adaptive .app-lt__topmenu .menu-centered .menu {
     white-space: nowrap;
   }
 }
 @media only screen and (min-width: 769px) and (max-width: 1280px) {
-  html.is-adaptive .app-topmenu .menu-centered {
+  html.is-adaptive .app-lt__topmenu .menu-centered {
     float: right;
     margin: 0 0 0 12px;
   }
 }
 /* *** TABLET VIEW *** */
 @media only screen and (max-width: 768px) {
-  html.is-adaptive .app-topmenu > .inner:before {
+  html.is-adaptive .app-lt__topmenu > .inner:before {
     position: absolute;
     z-index: 2;
     display: block;
@@ -9248,10 +9207,10 @@ html.is-immediately .app-template {
     bottom: 0;
     left: 0;
   }
-  html.is-adaptive .app-topmenu .menu-button {
+  html.is-adaptive .app-lt__topmenu .menu-button {
     display: block;
   }
-  html.is-adaptive .app-topmenu .menu-holder {
+  html.is-adaptive .app-lt__topmenu .menu-holder {
     display: block;
     position: fixed;
     -webkit-transform: translateY(-100%);
@@ -9264,7 +9223,7 @@ html.is-immediately .app-template {
     bottom: 0;
     left: 0;
   }
-  html.is-adaptive .app-topmenu .menu-holder > .inner {
+  html.is-adaptive .app-lt__topmenu .menu-holder > .inner {
     -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     overflow-y: auto;
@@ -9276,14 +9235,14 @@ html.is-immediately .app-template {
     bottom: 0;
     left: 0;
   }
-  html.is-adaptive .app-topmenu .menu {
+  html.is-adaptive .app-lt__topmenu .menu {
     margin: 0;
     padding: 0;
     position: relative;
     float: none;
     border-top: 1px solid rgba(255, 255, 255, 0.4);
   }
-  html.is-adaptive .app-topmenu .menu li {
+  html.is-adaptive .app-lt__topmenu .menu li {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -9296,29 +9255,29 @@ html.is-immediately .app-template {
     -moz-background-clip: padding-box;
     background-clip: padding-box;
   }
-  html.is-adaptive .app-topmenu .menu li:first-child {
+  html.is-adaptive .app-lt__topmenu .menu li:first-child {
     margin: 0;
     border-top: none;
   }
-  html.is-adaptive .app-topmenu .menu li:before {
+  html.is-adaptive .app-lt__topmenu .menu li:before {
     display: none;
   }
-  html.is-adaptive .app-topmenu .menu li a {
+  html.is-adaptive .app-lt__topmenu .menu li a {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     padding: 0 12px;
     line-height: 40px;
   }
-  html.is-adaptive .app-topmenu .menu li.has-dropdown > a {
+  html.is-adaptive .app-lt__topmenu .menu li.has-dropdown > a {
     background: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   }
-  html.is-adaptive .app-topmenu .menu ul li a {
+  html.is-adaptive .app-lt__topmenu .menu ul li a {
     background: rgba(255, 255, 255, 0.2);
     padding-left: 24px;
   }
-  html.is-adaptive .app-topmenu.is-expanded .menu-holder {
+  html.is-adaptive .app-lt__topmenu.is-expanded .menu-holder {
     -webkit-transform: translateY(0);
     -ms-transform: translateY(0);
     transform: translateY(0);
@@ -9326,11 +9285,15 @@ html.is-immediately .app-template {
 }
 /* *******  LAYOUTS: TOP MENU: PRINT ******* */
 @media print {
-  .app-topmenu {
+  .app-lt__topmenu {
     display: none !important;
   }
 }
+/* ******* LAYOUTS: TEMPLATES ******* */
 .app-lt__templates__scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: scroll;
   min-height: 200px;
   padding: 0 24px 0 0;
 }
@@ -9521,9 +9484,8 @@ html.is-immediately .app-template {
     flex: 1 1 50%;
   }
 }
-/* ************ APPLICATION: COMPONENTS ************ */
-/* ******* COMPONENT: SIDEBAR ******* */
-.app-sidebar {
+/* ******* LAYOUTS: SIDEBAR ******* */
+.app-lt__sidebar {
   width: 319px;
   position: fixed;
   z-index: 102;
@@ -9537,14 +9499,14 @@ html.is-immediately .app-template {
   bottom: 0;
   left: 0;
 }
-.app-sidebar > .inner {
+.app-lt__sidebar > .inner {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
 }
-.app-sidebar > .inner > .title {
+.app-lt__sidebar > .inner > .title {
   font: 300 30px/38px 'Open Sans', arial, helvetica, sans-serif;
   color: #666666;
   padding: 6px 12px;
@@ -9559,7 +9521,7 @@ html.is-immediately .app-template {
   -moz-user-select: none;
   user-select: none;
 }
-.app-sidebar > .inner > .title .icon {
+.app-lt__sidebar > .inner > .title .icon {
   position: absolute;
   cursor: pointer;
   -webkit-transition: -webkit-transform 500ms ease-in-out, -ms-transform 500ms ease-in-out, transform 500ms ease-in-out;
@@ -9569,7 +9531,7 @@ html.is-immediately .app-template {
   bottom: auto;
   left: auto;
 }
-.app-sidebar > .inner > .descr {
+.app-lt__sidebar > .inner > .descr {
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -9583,33 +9545,33 @@ html.is-immediately .app-template {
   -webkit-transition: opacity 500ms ease-in-out;
   transition: opacity 500ms ease-in-out;
 }
-.app-sidebar.is-collapsed {
+.app-lt__sidebar.is-collapsed {
   -webkit-transform: translateX(-271px);
   -ms-transform: translateX(-271px);
   transform: translateX(-271px);
 }
-.app-sidebar.is-collapsed > .inner > .title .icon {
+.app-lt__sidebar.is-collapsed > .inner > .title .icon {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
   transform: rotate(180deg);
 }
-.app-sidebar.is-collapsed > .inner > .descr {
+.app-lt__sidebar.is-collapsed > .inner > .descr {
   opacity: 0;
   filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0);
 }
-.app-sidebar.is-immediately {
+.app-lt__sidebar.is-immediately {
   -webkit-transition: none;
   transition: none;
 }
-.app-sidebar.is-immediately > .inner > .title .icon {
+.app-lt__sidebar.is-immediately > .inner > .title .icon {
   -webkit-transition: none;
   transition: none;
 }
-.app-sidebar.is-immediately > .inner > .descr {
+.app-lt__sidebar.is-immediately > .inner > .descr {
   -webkit-transition: none;
   transition: none;
 }
-.app-sidebar .remove-zone {
+.app-lt__sidebar .remove-zone {
   position: absolute;
   padding: 0;
   z-index: 3;
@@ -9622,31 +9584,31 @@ html.is-immediately .app-template {
   bottom: 0;
   left: 0;
 }
-.app-sidebar .remove-zone .title {
+.app-lt__sidebar .remove-zone .title {
   font: 300 30px/38px 'Open Sans', arial, helvetica, sans-serif;
   color: #666666;
   padding: 6px 12px;
   background-color: #d43535;
   color: #fff;
 }
-.app-sidebar .remove-zone.pt__dnd-area.is-available {
+.app-lt__sidebar .remove-zone.pt__dnd-area.is-available {
   -webkit-transition: all 300ms ease-in-out;
   transition: all 300ms ease-in-out;
 }
-.app-sidebar .remove-zone.pt__dnd-area.is-available.is-highlight {
+.app-lt__sidebar .remove-zone.pt__dnd-area.is-available.is-highlight {
   visibility: visible;
   opacity: 1;
   background: rgba(212, 53, 53, 0.25);
 }
-.app-sidebar .remove-zone.pt__dnd-area.is-available.is-highlight:before {
+.app-lt__sidebar .remove-zone.pt__dnd-area.is-available.is-highlight:before {
   display: none;
 }
-.app-sidebar .remove-zone.pt__dnd-area.is-available.is-active {
+.app-lt__sidebar .remove-zone.pt__dnd-area.is-available.is-active {
   visibility: visible;
   opacity: 1;
   background: rgba(212, 53, 53, 0.5);
 }
-.app-sidebar .remove-zone.pt__dnd-area.is-available.is-active:before {
+.app-lt__sidebar .remove-zone.pt__dnd-area.is-available.is-active:before {
   display: none;
 }
 /* *** WIDGETS CATEGORY *** */
@@ -9670,27 +9632,26 @@ html.is-immediately .app-template {
 }
 /* ******* COMPONENT: SIDEBAR: ADAPTIVE ******* */
 @media only screen and (max-width: 1024px) {
-  html.is-adaptive .app-sidebar {
+  html.is-adaptive .app-lt__sidebar {
     width: 208px;
   }
-  html.is-adaptive .app-sidebar.is-collapsed {
+  html.is-adaptive .app-lt__sidebar.is-collapsed {
     -webkit-transform: translateX(-160px);
     -ms-transform: translateX(-160px);
     transform: translateX(-160px);
   }
 }
 @media only screen and (max-width: 480px) {
-  html.is-adaptive .app-sidebar {
+  html.is-adaptive .app-lt__sidebar {
     display: none;
   }
 }
 /* *** COMPONENT: SIDEBAR: PRINT *** */
 @media print {
-  .app-sidebar {
+  .app-lt__sidebar {
     display: none;
   }
 }
-/* ******* COMPONENT: COLUMNS MODULE ******* */
 /* ******* COMPONENT: LOGIN BOX ******* */
 .app-loginbox .check-forgot > .l {
   overflow: hidden;
@@ -9777,48 +9738,53 @@ html.is-immediately .app-template {
     width: auto;
   }
 }
-/* ******* COMPONENT: MODULE AGGREGATOR ******* */
-.app-module-aggregator > ul {
+/* ******* MODULES: COLUMNS ******* */
+/* ******* MODULES: AGGREGATOR ******* */
+.app-mod__aggregator > ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.app-module-aggregator > ul > li {
+.app-mod__aggregator > ul > li {
+  margin: 0;
+  padding: 0;
+}
+.app-mod__aggregator > ul > li {
   margin: 16px 0 0 0;
 }
-.app-module-aggregator > ul > li .service {
+.app-mod__aggregator > ul > li .service {
   padding: 0 8px;
   display: inline-block;
   vertical-align: top;
-  background: #308ce8;
+  background: #2985e0;
   font-size: 11px;
   color: #ffffff;
 }
-.app-module-aggregator > ul > li .service.facebook {
+.app-mod__aggregator > ul > li .service.facebook {
   background-color: #3B5998;
 }
-.app-module-aggregator > ul > li .service.twitter {
+.app-mod__aggregator > ul > li .service.twitter {
   background-color: #0084B4;
 }
-.app-module-aggregator > ul > li .date {
+.app-mod__aggregator > ul > li .date {
   display: inline-block;
   vertical-align: top;
   margin: 0 0 0 8px;
-  color: #666666;
-  font-size: 13px;
+  font-size: 11px;
+  color: #999999;
 }
-.app-module-aggregator > ul > li .text {
+.app-mod__aggregator > ul > li .text {
   margin: 4px 0 0 0;
 }
-.app-module-aggregator > ul > li:first-child {
+.app-mod__aggregator > ul > li:first-child {
   margin: 0;
 }
-/* ******* COMPONENT: MODULE IMAGE ******* */
-.app-module-image a {
+/* ******* MODULES: IMAGE ******* */
+.app-mod__image a {
   display: block;
 }
-/* ******* COMPONENT: MODULE INFO BLOCK ******* */
-.app-module-infoblock > .inner {
+/* ******* MODULES: INFO BLOCK ******* */
+.app-mod__infoblock > .inner {
   padding: 4px;
   background: #fff;
   border: 1px solid #cccccc;
@@ -9830,56 +9796,52 @@ html.is-immediately .app-template {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
 }
-.app-module-infoblock > .inner > .title {
+.app-mod__infoblock > .inner > .title {
   border-bottom: 1px solid #cccccc;
 }
-.app-module-infoblock > .inner > .title > .inner {
+.app-mod__infoblock > .inner > .title > .inner {
   padding: 12px;
 }
-.app-module-infoblock > .inner > .title .app-module-richeditor .cm__tags,
-.app-module-infoblock > .inner > .title .app-module-richeditor h1,
-.app-module-infoblock > .inner > .title .app-module-richeditor h2,
-.app-module-infoblock > .inner > .title .app-module-richeditor h3,
-.app-module-infoblock > .inner > .title .app-module-richeditor h4,
-.app-module-infoblock > .inner > .title .app-module-richeditor h5,
-.app-module-infoblock > .inner > .title .app-module-richeditor h6,
-.app-module-infoblock > .inner > .title .app-module-richeditor p,
-.app-module-infoblock > .inner > .title .app-module-richeditor dl,
-.app-module-infoblock > .inner > .title .app-module-richeditor ul,
-.app-module-infoblock > .inner > .title .app-module-richeditor ol,
-.app-module-infoblock > .inner > .title .app-module-richeditor hr {
+.app-mod__infoblock > .inner > .title .app-module-richeditor .cm__tags,
+.app-mod__infoblock > .inner > .title .app-module-richeditor h1,
+.app-mod__infoblock > .inner > .title .app-module-richeditor h2,
+.app-mod__infoblock > .inner > .title .app-module-richeditor h3,
+.app-mod__infoblock > .inner > .title .app-module-richeditor h4,
+.app-mod__infoblock > .inner > .title .app-module-richeditor h5,
+.app-mod__infoblock > .inner > .title .app-module-richeditor h6,
+.app-mod__infoblock > .inner > .title .app-module-richeditor p,
+.app-mod__infoblock > .inner > .title .app-module-richeditor dl,
+.app-mod__infoblock > .inner > .title .app-module-richeditor ul,
+.app-mod__infoblock > .inner > .title .app-module-richeditor ol,
+.app-mod__infoblock > .inner > .title .app-module-richeditor hr {
   margin: 0;
 }
-.app-module-infoblock > .inner > .title .app-module,
-.app-module-infoblock > .inner > .title .app-module-default,
-.app-module-infoblock > .inner > .title .app-page-default,
-.app-module-infoblock > .inner > .title .app-module-aggregator,
-.app-module-infoblock > .inner > .title .app-module-knowledge-centre,
-.app-module-infoblock > .inner > .title .app-module-divider,
-.app-module-infoblock > .inner > .title .app-module-listing,
-.app-module-infoblock > .inner > .title .app-module-forum,
-.app-module-infoblock > .inner > .title .app-module-sitemap,
-.app-module-infoblock > .inner > .title .app-page-search,
-.app-module-infoblock > .inner > .title .app-page-user-groups,
-.app-module-infoblock > .inner > .title .app-page-memberprofile,
-.app-module-infoblock > .inner > .title .app-page-groupprofile {
+.app-mod__infoblock > .inner > .title .app-module,
+.app-mod__infoblock > .inner > .title .app-module-default,
+.app-mod__infoblock > .inner > .title .app-page-default,
+.app-mod__infoblock > .inner > .title .app-module-sitemap,
+.app-mod__infoblock > .inner > .title .app-page-search,
+.app-mod__infoblock > .inner > .title .app-page-user-groups,
+.app-mod__infoblock > .inner > .title .app-page-memberprofile,
+.app-mod__infoblock > .inner > .title .app-page-groupprofile {
   margin: 0;
 }
-.app-module-infoblock > .inner > .descr > .inner {
+.app-mod__infoblock > .inner > .descr > .inner {
   padding: 12px;
 }
-.app-module-knowledge-centre > .inner {
+/* ******* MODULES: KNOWLEDGE CENTRE ******* */
+.app-mod__knowledge-centre > .inner {
   width: 100%;
   display: table;
   table-layout: fixed;
 }
-.app-module-knowledge-centre > .inner > .l {
+.app-mod__knowledge-centre > .inner > .l {
   width: 170px;
   display: table-cell;
   vertical-align: top;
   padding: 12px 16px 12px 0;
 }
-.app-module-knowledge-centre > .inner > .l .pt__listing-counters li:after {
+.app-mod__knowledge-centre > .inner > .l .pt__listing-counters li:after {
   width: 0;
   height: 0;
   display: block;
@@ -9895,10 +9857,10 @@ html.is-immediately .app-template {
   bottom: auto;
   left: auto;
 }
-.app-module-knowledge-centre > .inner > .l .pt__listing-counters li.active:after {
+.app-mod__knowledge-centre > .inner > .l .pt__listing-counters li.active:after {
   border-color: transparent #cccccc transparent transparent;
 }
-.app-module-knowledge-centre > .inner > .r {
+.app-mod__knowledge-centre > .inner > .r {
   padding: 4px;
   background: #fff;
   border: 1px solid #cccccc;
@@ -9913,51 +9875,58 @@ html.is-immediately .app-template {
   padding: 12px;
   vertical-align: top;
 }
-/* ******* MODULE DIVIDER ******* */
-.app-module-divider hr {
+/* ******* MODULES: DIVIDER ******* */
+.app-mod__divider hr {
   margin: 0;
 }
 /* ******* MODULES: LOGIN LINK ******* */
-.app-module-loginlink ul {
+.app-mod__loginlink ul {
   margin: 0;
   padding: 0;
   list-style: none;
-  white-space: nowrap;
+  text-align: left;
   font-size: 0;
+  white-space: nowrap;
 }
-.app-module-loginlink ul li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
-  color: #666666;
-  margin: 0 0 0 12px;
+.app-mod__loginlink ul > li {
+  margin: 0;
+  padding: 0;
+}
+.app-mod__loginlink ul > li {
   display: inline-block;
   vertical-align: top;
 }
-.app-module-loginlink ul li:first-child {
+.app-mod__loginlink ul li {
+  font: 400 14px/20px 'Open Sans', sans-serif;
+  color: #666666;
+  margin: 0 0 0 12px;
+}
+.app-mod__loginlink ul li:first-child {
   margin: 0;
 }
-.app-module-loginlink ul li a {
+.app-mod__loginlink ul li a {
   display: block;
 }
-.app-module-loginlink ul li .icon {
+.app-mod__loginlink ul li .icon {
   display: none;
   vertical-align: middle;
 }
-.app-module-loginlink.pull-left > ul {
+.app-mod__loginlink.pull-left > ul {
   text-align: left;
 }
-.app-module-loginlink.pull-center > ul {
+.app-mod__loginlink.pull-center > ul {
   text-align: center;
 }
-.app-module-loginlink.pull-right > ul {
+.app-mod__loginlink.pull-right > ul {
   text-align: right;
 }
 /* ******* MODULES: LOGIN LINK: PRINT ******* */
 @media print {
-  .app-module-loginlink {
+  .app-mod__loginlink {
     display: none !important;
   }
 }
-/* ******* MODULE LISTING ******* */
+/* ******* MODULES: LISTING ******* */
 /* ******* COMPONENT: MODULE LOGO ******* */
 .app-module-logo a {
   display: block;
@@ -10181,8 +10150,8 @@ html.is-immediately .app-template {
     display: none !important;
   }
 }
-/* ******* MODULE FORUM ******* */
-/* ******* COMPONENT: MODULE ITEMS ******* */
+/* ******* MODULES: FORUM ******* */
+/* ******* MODULES: ITEMS ******* */
 /* ******* COMPONENT: MODULE RICH EDITOR ******* */
 .app-module-richeditor {
   min-height: 20px;
@@ -10351,7 +10320,7 @@ html.is-immediately .app-template {
   }
 }
 /* ******* MODULES: LANG SWITCH ******* */
-.mod__lang-switch ul {
+.app-mod__lang-switch ul {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -10359,43 +10328,43 @@ html.is-immediately .app-template {
   font-size: 0;
   white-space: nowrap;
 }
-.mod__lang-switch ul > li {
+.app-mod__lang-switch ul > li {
   margin: 0;
   padding: 0;
 }
-.mod__lang-switch ul > li {
+.app-mod__lang-switch ul > li {
   display: inline-block;
   vertical-align: top;
 }
-.mod__lang-switch ul > li {
+.app-mod__lang-switch ul > li {
   font: 400 14px/20px 'Open Sans', sans-serif;
   color: #666666;
 }
-.mod__lang-switch ul li {
+.app-mod__lang-switch ul li {
   margin: 0 12px 0 0;
 }
-.mod__lang-switch ul li:last-child {
+.app-mod__lang-switch ul li:last-child {
   margin: 0;
 }
-.mod__lang-switch ul li a {
+.app-mod__lang-switch ul li a {
   display: block;
 }
-.mod__lang-switch ul li .icon {
+.app-mod__lang-switch ul li .icon {
   display: none;
   vertical-align: middle;
 }
-.mod__lang-switch.pull-left > ul {
+.app-mod__lang-switch.pull-left > ul {
   text-align: left;
 }
-.mod__lang-switch.pull-center > ul {
+.app-mod__lang-switch.pull-center > ul {
   text-align: center;
 }
-.mod__lang-switch.pull-right > ul {
+.app-mod__lang-switch.pull-right > ul {
   text-align: right;
 }
 /* ******* MODULES: LANG SWITCH: PRINT ******* */
 @media print {
-  .mod__lang-switch {
+  .app-mod__lang-switch {
     display: none !important;
   }
 }
@@ -10718,7 +10687,7 @@ h6 {
   background: url('../img/arrow-r.png') 100% center no-repeat;
 }
 /* *** MODULE: LOGIN LINK *** */
-.app-module-loginlink {
+.app-mod__loginlink {
   padding: 6px 0;
 }
 /* ******* STRUCTURE ******* */
@@ -10830,10 +10799,10 @@ h6 {
   bottom: auto;
   left: auto;
 }
-html.is-app-sidebar--expanded .app-header-area.links {
+html.is-app-lt__sidebar--expanded .app-header-area.links {
   min-width: 64px;
 }
-html.is-app-sidebar--expanded .app-header-area.icons {
+html.is-app-lt__sidebar--expanded .app-header-area.icons {
   min-width: 64px;
 }
 /* ******* CONTENT ******* */
