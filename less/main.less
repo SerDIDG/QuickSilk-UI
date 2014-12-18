@@ -64,7 +64,7 @@ h6 {
 
 /* ******* COMMON STYLING ******* */
 
-/* *** PART: IMAGE BOX *** */
+/* *** PARTS: IMAGE BOX *** */
 
 .pt__image {
     > .inner {
@@ -78,7 +78,7 @@ h6 {
     }
 }
 
-/* *** COMPONENT: GALLERY CONTROLS *** */
+/* *** COMPONENTS: GALLERY CONTROLS *** */
 
 .com__gallery-controls {
     .bar-buttons {
@@ -135,9 +135,9 @@ h6 {
     }
 }
 
-/* *** COMPONENT: SLIDER *** */
+/* *** COMPONENTS: SLIDER *** */
 
-.com-slider {
+.com__slider {
     &.theme-template {
         > .inner {
             background-color: @CmColor-Gallery;
@@ -151,9 +151,9 @@ h6 {
 
 /* ******* APPLICATION STYLING ******* */
 
-/* *** MODULE: MENU *** */
+/* *** MODULES: MENU *** */
 
-.app-module-menu {
+.app-mod__menu {
     &.primary {
         > ul {
             > li {
@@ -337,7 +337,7 @@ h6 {
     }
 }
 
-/* *** MODULE: LOGIN LINK *** */
+/* *** MODULES: LOGIN LINK *** */
 
 .app-mod__loginlink {
     padding: ((32px - @Tpl-lineHeight) / 2) 0;
@@ -370,11 +370,13 @@ h6 {
     }
 }
 
-.header-inner:extend(.clear all) {
+.header-inner {
+    .clearfix;
     min-height: 106px;
 }
 
-.header-top:extend(.clear all) {
+.header-top {
+    .clearfix;
     height: 40px;
     position: absolute;
     .mx__position(16px, 0, auto, 240px);
@@ -384,7 +386,8 @@ h6 {
     }
 }
 
-.header-center:extend(.clear all) {
+.header-center {
+    .clearfix;
     width: 250px;
     min-height: @CmForm-FieldHeight;
     padding: 64px 0 0 0;
@@ -399,7 +402,8 @@ h6 {
     float: left;
 }
 
-.header-bottom:extend(.clear all) {
+.header-bottom {
+    .clearfix;
     min-height: 34px;
     position: relative;
     margin: 0 274px 0 240px;
@@ -455,7 +459,7 @@ h6 {
 // Add sidebar states
 
 html {
-    &.is-app-lt__sidebar--expanded {
+    &.is-sidebar--expanded {
         .app-header-area {
             &.links {
                 min-width: @CmSize-XXLarge;
@@ -510,7 +514,7 @@ html {
             margin: 0 0 0 260px;
             position: relative;
 
-            .app-module-richeditor {
+            .app-mod__richeditor {
                 .cm__tags--base {
                     margin: 0;
                     font-size: @Tpl-fontSizeFooter;
@@ -642,19 +646,19 @@ html {
 @media only screen and (max-width : @CmScreen-TabletPortrait) {
 
     html.is-adaptive {
-        .app-module-logo {
+        .app-mod__logo {
             .pt__image > .inner > .descr {
                 margin: 0 auto;
             }
         }
 
-        .app-module-menu {
+        .app-mod__menu {
             &.theme-footer {
                 padding: 0;
             }
         }
 
-        .com-slider.theme-template > .inner:after {
+        .com__slider.theme-template > .inner:after {
             display: none;
         }
 
@@ -678,7 +682,7 @@ html {
                 > .r {
                     margin: 0;
 
-                    .app-module-richeditor {
+                    .app-mod__richeditor {
                         padding: 0;
                     }
 

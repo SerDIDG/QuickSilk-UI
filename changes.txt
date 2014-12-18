@@ -73,6 +73,7 @@
 .com-togglebox --> .com__togglebox
 .com-select --> .com__select
 .com-multiselect --> .com__select-multi
+.com-slider --> .com__slider
 
 @CmPath-image --> @CmPath-Images
 @AppPath-image --> @AppPath-Images
@@ -80,7 +81,7 @@
 
 ///////
 
-"app-module-webex-profile" --> "app-module app-mod__webex-profile"
+"app-module-webex" --> "app-module app-mod__webex"
 "app-module-aggregator" --> "app-module app-mod__aggregator"
 "app-module-columns" --> "app-module app-mod__columns"
 "app-module-divider" --> "app-module app-mod__divider"
@@ -92,6 +93,20 @@
 "mod__lang-switch" --> "app-module app-mod__lang-switch"
 "app-module-listing" --> "app-module app-mod__listing"
 "app-mod__loginlink" --> "app-module app-mod__loginlink"
+"app-module-logo" --> "app-module app-mod__logo"
+"app-module-menu" --> "app-module app-mod__menu"
+"mod__portfolio-widget" --> "app-module app-mod__portfolio-widget"
+"app-module-richeditor" --> "app-module app-mod__richeditor"
+"app-module-search" --> "app-module app-mod__search"
+"mod__sign-links" --> "app-module app-mod__sign-links"
+"app-module-sitemap" --> "app-module app-mod__sitemap"
+"mod__slider" --> "app-module app-mod__slider"
+"mod__social-media" --> "app-module app-mod__social-media"
+"app-mod__webex-cell-" --> "app-mod__webex__cell-"
+"mod__area" --> "app-module app-mod__area"
+"app-loginbox" --> "app__box-login"
+"app-modular-sign" --> "app__box-sign"
+is-app-lt__sidebar --> is-sidebar
 
 app-sidebar --> app-lt__sidebar
 app-topmenu --> app-lt__topmenu
