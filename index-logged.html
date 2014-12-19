@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html class="is-adaptive is-logged is-app-lt__topmenu is-sidebar">
+<html class="is-adaptive is-logged is-topmenu is-sidebar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -59,8 +59,8 @@
                 })
                 .add('template-editor', function(node){
                     var onRequest = function(TE, data){
-                        var content =   '<div class="app-widget-container" data-com-draganddrop="draggable">' +
-                                '<div class="app-widget is-editable">' +
+                        var content =   '<div class="app__widget-container" data-com-draganddrop="draggable">' +
+                                '<div class="app__widget is-editable">' +
                                 '<div class="border"></div>' +
                                 '<div class="drag" data-com-draganddrop="drag">' +
                                 '<div class="icon draggable"></div>' +
@@ -72,7 +72,7 @@
                                 '</ul>' +
                                 '</div>' +
                                 '<div class="inner">' +
-                                '<div class="app-module com__columns app-mod__columns is-chassis-visible is-editable" data-element="columns">' +
+                                '<div class="app__module com__columns app-mod__columns is-chassis-visible is-editable" data-element="columns">' +
                                 '<div class="inner" data-com__columns="inner">' +
                                 '<div class="container" data-com__columns="holder">' +
                                 '<div class="com__column" data-com__columns="column" style="width: 30%;">' +
@@ -257,14 +257,14 @@
 </div>
 
 <div class="descr" data-node="widgetsContainer">
-<dl class="com__togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-main"}'>
+<dl class="com__togglebox app__widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-main"}'>
     <dt data-node="ComToggleBox.button">
         <span class="icon default"></span>
         <span class="title">Main</span>
     </dt>
     <dd data-node="ComToggleBox.target">
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/site-logo.png" alt="">
@@ -273,8 +273,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container" data-config='{"type" : "content"}'>
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container" data-config='{"type" : "content"}'>
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/rich-editor.png" alt="">
@@ -283,8 +283,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/menu.png" alt="">
@@ -293,8 +293,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/infoblock.png" alt="">
@@ -303,8 +303,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/columns.png" alt="">
@@ -313,8 +313,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/divider.png" alt="">
@@ -326,14 +326,14 @@
     </dd>
 </dl>
 
-<dl class="com__togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-service"}'>
+<dl class="com__togglebox app__widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-service"}'>
     <dt data-node="ComToggleBox.button">
         <span class="icon default"></span>
         <span class="title">Service</span>
     </dt>
     <dd data-node="ComToggleBox.target">
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/login.png" alt="">
@@ -342,8 +342,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/login.png" alt="">
@@ -352,8 +352,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/search.png" alt="">
@@ -362,8 +362,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/map.png" alt="">
@@ -375,14 +375,14 @@
     </dd>
 </dl>
 
-<dl class="com__togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-media"}'>
+<dl class="com__togglebox app__widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-media"}'>
     <dt data-node="ComToggleBox.button">
         <span class="icon default"></span>
         <span class="title">Media</span>
     </dt>
     <dd data-node="ComToggleBox.target">
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/image.png" alt="">
@@ -391,8 +391,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/slider.png" alt="">
@@ -401,8 +401,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/gallery.png" alt="">
@@ -411,8 +411,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/video.png" alt="">
@@ -424,14 +424,14 @@
     </dd>
 </dl>
 
-<dl class="com__togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-social"}'>
+<dl class="com__togglebox app__widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-social"}'>
     <dt data-node="ComToggleBox.button">
         <span class="icon default"></span>
         <span class="title">Social</span>
     </dt>
     <dd data-node="ComToggleBox.target">
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/social.png" alt="">
@@ -440,8 +440,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/social.png" alt="">
@@ -450,8 +450,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/social.png" alt="">
@@ -460,8 +460,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/comments.png" alt="">
@@ -470,8 +470,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/member.png" alt="">
@@ -480,8 +480,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/member-widget.png" alt="">
@@ -490,8 +490,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/file.png" alt="">
@@ -500,8 +500,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/forum.png" alt="">
@@ -510,8 +510,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/forum-widget.png" alt="">
@@ -523,14 +523,14 @@
     </dd>
 </dl>
 
-<dl class="com__togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-blog"}'>
+<dl class="com__togglebox app__widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-blog"}'>
     <dt data-node="ComToggleBox.button">
         <span class="icon default"></span>
         <span class="title">Blog</span>
     </dt>
     <dd data-node="ComToggleBox.target">
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/blog.png" alt="">
@@ -539,8 +539,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/blog-widget.png" alt="">
@@ -549,8 +549,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/blog-categories.png" alt="">
@@ -559,8 +559,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/blog-calendar.png" alt="">
@@ -569,8 +569,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/blog-archive.png" alt="">
@@ -579,8 +579,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/blog-roll.png" alt="">
@@ -592,14 +592,14 @@
     </dd>
 </dl>
 
-<dl class="com__togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-events"}'>
+<dl class="com__togglebox app__widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-events"}'>
     <dt data-node="ComToggleBox.button">
         <span class="icon default"></span>
         <span class="title">Events</span>
     </dt>
     <dd data-node="ComToggleBox.target">
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/events.png" alt="">
@@ -608,8 +608,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/events-widget.png" alt="">
@@ -618,8 +618,8 @@
                 </div>
             </div>
         </div>
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/events-calendar.png" alt="">
@@ -631,14 +631,14 @@
     </dd>
 </dl>
 
-<dl class="com__togglebox app-widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-other"}'>
+<dl class="com__togglebox app__widgets-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app-lt__sidebar-other"}'>
     <dt data-node="ComToggleBox.button">
         <span class="icon default"></span>
         <span class="title">Other</span>
     </dt>
     <dd data-node="ComToggleBox.target">
-        <div class="app-widget-container" data-node="widgets:[]:container">
-            <div class="app-widget-dummy" data-node="dummy">
+        <div class="app__widget-container" data-node="widgets:[]:container">
+            <div class="app__widget-dummy" data-node="dummy">
                 <div class="inner">
                     <div class="icon">
                         <img src="libs/application/img/widgets/default.png" alt="">
@@ -657,7 +657,7 @@
 
 <!-- [* ******* TEMPLATE START ******* *] -->
 
-<div class="app-template" data-node="Template.container">
+<div class="app-lt__template" data-node="Template.container">
 
     <!-- [* *** HEADER START *** *] -->
 
@@ -665,9 +665,9 @@
         <div class="header-inner">
 
             <div class="header-top">
-                <div class="app-header-area icons" data-com-draganddrop="area">
-                    <div class="app-widget-container" data-com-draganddrop="draggable">
-                        <div class="app-widget is-editable">
+                <div class="app__area-header icons" data-com-draganddrop="area">
+                    <div class="app__widget-container" data-com-draganddrop="draggable">
+                        <div class="app__widget is-editable">
                             <div class="border"></div>
                             <div class="drag" data-com-draganddrop="drag">
                                 <div class="icon draggable"></div>
@@ -685,7 +685,7 @@
                                 </ul>
                             </div>
                             <div class="inner">
-                                <div class="app-module app-mod__social-media">
+                                <div class="app__module app-mod__social-media">
                                     <div class="pt__line-share pull-left">
                                         <ul>
                                             <li>
@@ -711,9 +711,9 @@
                     </div>
                 </div>
 
-                <div class="app-header-area links" data-com-draganddrop="area">
-                    <div class="app-widget-container" data-com-draganddrop="draggable">
-                        <div class="app-widget is-editable is-hidden">
+                <div class="app__area-header links" data-com-draganddrop="area">
+                    <div class="app__widget-container" data-com-draganddrop="draggable">
+                        <div class="app__widget is-editable is-hidden">
                             <div class="border"></div>
                             <div class="drag" data-com-draganddrop="drag">
                                 <div class="icon draggable"></div>
@@ -731,7 +731,7 @@
                                 </ul>
                             </div>
                             <div class="inner">
-                                <div class="app-module app-mod__loginlink " data-element="login-box">
+                                <div class="app__module app-mod__loginlink " data-element="login-box">
                                     <ul>
                                         <li>
                                             <a data-node="AppLoginBox.button">
@@ -801,9 +801,9 @@
             </div>
 
             <div class="header-logo">
-                <div class="app-header-area logo" data-com-draganddrop="area">
-                    <div class="app-widget-container" data-com-draganddrop="draggable">
-                        <div class="app-widget is-editable">
+                <div class="app__area-header logo" data-com-draganddrop="area">
+                    <div class="app__widget-container" data-com-draganddrop="draggable">
+                        <div class="app__widget is-editable">
                             <div class="border"></div>
                             <div class="drag" data-com-draganddrop="drag">
                                 <div class="icon draggable"></div>
@@ -821,7 +821,7 @@
                                 </ul>
                             </div>
                             <div class="inner">
-                                <div class="app-module app-mod__logo">
+                                <div class="app__module app-mod__logo">
                                     <a class="pt__image is-adaptive">
                                         <div class="inner">
                                             <img class="descr" src="img/logo.png" alt="Logo">
@@ -835,9 +835,9 @@
             </div>
 
             <div class="header-center">
-                <div class="app-header-area search" data-com-draganddrop="area">
-                    <div class="app-widget-container" data-com-draganddrop="draggable">
-                        <div class="app-widget is-editable">
+                <div class="app__area-header search" data-com-draganddrop="area">
+                    <div class="app__widget-container" data-com-draganddrop="draggable">
+                        <div class="app__widget is-editable">
                             <div class="border"></div>
                             <div class="drag" data-com-draganddrop="drag">
                                 <div class="icon draggable"></div>
@@ -855,7 +855,7 @@
                                 </ul>
                             </div>
                             <div class="inner">
-                                <div class="app-module app-mod__search">
+                                <div class="app__module app-mod__search">
                                     <form class="form" action="">
                                         <dl class="form-box">
                                             <dt>Search</dt>
@@ -875,9 +875,9 @@
             </div>
 
             <div class="header-bottom">
-                <div class="app-header-area menu" data-com-draganddrop="area">
-                    <div class="app-widget-container" data-com-draganddrop="draggable">
-                        <div class="app-widget is-editable">
+                <div class="app__area-header menu" data-com-draganddrop="area">
+                    <div class="app__widget-container" data-com-draganddrop="draggable">
+                        <div class="app__widget is-editable">
                             <div class="border"></div>
                             <div class="drag" data-com-draganddrop="drag">
                                 <div class="icon draggable"></div>
@@ -895,7 +895,7 @@
                                 </ul>
                             </div>
                             <div class="inner">
-                                <div class="app-module app-mod__menu primary" data-element="module-menu">
+                                <div class="app__module app-mod__menu primary" data-element="module-menu">
                                     <ul>
                                         <li class="active">
                                             <a>Home</a>
@@ -1009,9 +1009,9 @@
 
     <div class="content" data-node="Template.content">
         <div class="content-inner">
-            <div class="app-main-area" data-com-draganddrop="area">
-                <div class="app-widget-container" data-com-draganddrop="draggable">
-                    <div class="app-widget is-editable">
+            <div class="app__area-main" data-com-draganddrop="area">
+                <div class="app__widget-container" data-com-draganddrop="draggable">
+                    <div class="app__widget is-editable">
                         <div class="border"></div>
                         <div class="drag" data-com-draganddrop="drag">
                             <div class="icon draggable"></div>
@@ -1029,7 +1029,7 @@
                             </ul>
                         </div>
                         <div class="inner">
-                            <div class="app-module app-mod__slider">
+                            <div class="app__module app-mod__slider">
                                 <div class="com__gallery-layout com__slider-layout is-bar-none" data-element="slider" data-config='{"hasBar" : false}' data-node="ComSlider:{}">
                                     <div class="inner" data-node="layout-inner">
                                         <div class="com__gallery-preview">
@@ -1135,8 +1135,8 @@
                     </div>
                 </div>
 
-                <div class="app-widget-container" data-com-draganddrop="draggable">
-                    <div class="app-widget is-editable">
+                <div class="app__widget-container" data-com-draganddrop="draggable">
+                    <div class="app__widget is-editable">
                         <div class="border"></div>
                         <div class="drag" data-com-draganddrop="drag">
                             <div class="icon draggable"></div>
@@ -1154,13 +1154,13 @@
                             </ul>
                         </div>
                         <div class="inner">
-                            <div class="app-module app-mod__columns com__columns indent-24px is-chassis-visible is-editable" data-element="columns">
+                            <div class="app__module app-mod__columns com__columns indent-24px is-chassis-visible is-editable" data-element="columns">
                                 <div class="inner" data-com__columns="inner">
                                     <div class="container" data-com__columns="holder">
                                         <div class="com__column" data-com__columns="column" style="width: 21%;">
                                             <div class="inner" data-com__columns="column-inner" data-com-draganddrop="area">
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
+                                                <div class="app__widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app__widget is-editable">
                                                         <div class="border"></div>
                                                         <div class="drag" data-com-draganddrop="drag">
                                                             <div class="icon draggable"></div>
@@ -1178,7 +1178,7 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-mod__image">
+                                                            <div class="app__module app-mod__image">
                                                                 <div class="pt__image is-resizeble is-no-hover">
                                                                     <div class="inner">
                                                                         <img class="descr" src="img/content/image3.jpg" alt="">
@@ -1189,8 +1189,8 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
+                                                <div class="app__widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app__widget is-editable">
                                                         <div class="border"></div>
                                                         <div class="drag" data-com-draganddrop="drag">
                                                             <div class="icon draggable"></div>
@@ -1208,7 +1208,7 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-mod__richeditor">
+                                                            <div class="app__module app-mod__richeditor">
                                                                 <h2>Solutions</h2>
                                                                 <p>Since 2001, QuickSilk has been developing web-based products, applications, components, modules and plug-ins that are in active use today by small and medium size businesses, government, non-profit organizations and NGO's throughout Canada, the United States of America and Europe.</p>
                                                                 <p style="text-align: right;"><b><a>Read more</a></b></p>
@@ -1221,8 +1221,8 @@
 
                                         <div class="com__column" data-com__columns="column" style="width: 21%;">
                                             <div class="inner" data-com__columns="column-inner" data-com-draganddrop="area">
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
+                                                <div class="app__widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app__widget is-editable">
                                                         <div class="border"></div>
                                                         <div class="drag" data-com-draganddrop="drag">
                                                             <div class="icon draggable"></div>
@@ -1240,7 +1240,7 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-mod__image">
+                                                            <div class="app__module app-mod__image">
                                                                 <div class="pt__image is-resizeble is-no-hover">
                                                                     <div class="inner">
                                                                         <img class="descr" src="img/content/image2.jpg" alt="">
@@ -1251,8 +1251,8 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
+                                                <div class="app__widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app__widget is-editable">
                                                         <div class="border"></div>
                                                         <div class="drag" data-com-draganddrop="drag">
                                                             <div class="icon draggable"></div>
@@ -1270,7 +1270,7 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-mod__richeditor">
+                                                            <div class="app__module app-mod__richeditor">
                                                                 <h2>Services</h2>
                                                                 <p>Whether you need to register or transfer a domain name, have a web or ecommerce site designed and developed, host your web site, or establish your own VPS or dedicated web server, QuickSilk is your one stop shop for quality web services.</p>
                                                                 <p style="text-align: right;"><b><a>Read more</a></b></p>
@@ -1283,8 +1283,8 @@
 
                                         <div class="com__column" data-com__columns="column" style="width: 21%;">
                                             <div class="inner" data-com__columns="column-inner" data-com-draganddrop="area">
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
+                                                <div class="app__widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app__widget is-editable">
                                                         <div class="border"></div>
                                                         <div class="drag" data-com-draganddrop="drag">
                                                             <div class="icon draggable"></div>
@@ -1302,7 +1302,7 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-mod__image">
+                                                            <div class="app__module app-mod__image">
                                                                 <div class="pt__image is-resizeble is-no-hover">
                                                                     <div class="inner">
                                                                         <img class="descr" src="img/content/image1.jpg" alt="">
@@ -1313,8 +1313,8 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="app-widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-widget is-editable">
+                                                <div class="app__widget-container" data-com-draganddrop="draggable">
+                                                    <div class="app__widget is-editable">
                                                         <div class="border"></div>
                                                         <div class="drag" data-com-draganddrop="drag">
                                                             <div class="icon draggable"></div>
@@ -1332,7 +1332,7 @@
                                                             </ul>
                                                         </div>
                                                         <div class="inner">
-                                                            <div class="app-module app-mod__richeditor">
+                                                            <div class="app__module app-mod__richeditor">
                                                                 <h2>QuickSilk™ CMS</h2>
                                                                 <p>The QuickSilk™ Content Management System (CMS) is a flexible, easy to use, Rich Internet Application (RIA) framework that significantly improves your ability to effectively manage the collection and publication of your organization's website and digital assets, for targeted Internet, Intranet & Extranet audiences.</p>
                                                                 <p style="text-align: right;"><b><a>Read more</a></b></p>
@@ -1365,9 +1365,9 @@
         <div class="footer-top">
             <div class="footer-inner">
                 <div class="r">
-                    <div class="app-footer-area copyright" data-com-draganddrop="area">
-                        <div class="app-widget-container" data-com-draganddrop="draggable">
-                            <div class="app-widget is-editable">
+                    <div class="app__area-footer copyright" data-com-draganddrop="area">
+                        <div class="app__widget-container" data-com-draganddrop="draggable">
+                            <div class="app__widget is-editable">
                                 <div class="border"></div>
                                 <div class="drag" data-com-draganddrop="drag">
                                     <div class="icon draggable"></div>
@@ -1385,7 +1385,7 @@
                                     </ul>
                                 </div>
                                 <div class="inner">
-                                    <div class="app-module app-mod__menu theme-footer pull-right" data-element="module-menu">
+                                    <div class="app__module app-mod__menu theme-footer pull-right" data-element="module-menu">
                                         <ul>
                                             <li>
                                                 <a>Privacy Policy</a>
@@ -1410,8 +1410,8 @@
                             </div>
                         </div>
 
-                        <div class="app-widget-container" data-com-draganddrop="draggable">
-                            <div class="app-widget is-editable">
+                        <div class="app__widget-container" data-com-draganddrop="draggable">
+                            <div class="app__widget is-editable">
                                 <div class="border"></div>
                                 <div class="drag" data-com-draganddrop="drag">
                                     <div class="icon draggable"></div>
@@ -1429,7 +1429,7 @@
                                     </ul>
                                 </div>
                                 <div class="inner">
-                                    <div class="app-module app-mod__richeditor">
+                                    <div class="app__module app-mod__richeditor">
                                         <p style="text-align: right;">Copyright © 2014 QuickSilk, All Rights Reserved.</p>
                                         <p style="text-align: right;">Quicksilk™ and Spin The Web. Your Way™ are registered trademarks of QuickSilk Inc.</p>
                                     </div>
@@ -1452,9 +1452,9 @@
         <div class="footer-center" data-node="AppSitemap.target">
             <div class="footer-borders">
                 <div class="footer-inner">
-                    <div class="app-footer-area sitemap" data-com-draganddrop="area">
-                        <div class="app-widget-container" data-com-draganddrop="draggable">
-                            <div class="app-widget is-editable">
+                    <div class="app__area-footer sitemap" data-com-draganddrop="area">
+                        <div class="app__widget-container" data-com-draganddrop="draggable">
+                            <div class="app__widget is-editable">
                                 <div class="border"></div>
                                 <div class="drag" data-com-draganddrop="drag">
                                     <div class="icon draggable"></div>
@@ -1472,7 +1472,7 @@
                                     </ul>
                                 </div>
                                 <div class="inner">
-                                    <div class="app-module app-mod__sitemap">
+                                    <div class="app__module app-mod__sitemap">
                                         <div class="inner">
                                             <dl>
                                                 <dt><a href="#">Home</a></dt>

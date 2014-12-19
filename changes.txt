@@ -81,35 +81,57 @@
 
 ///////
 
-"app-module-webex" --> "app-module app-mod__webex"
-"app-module-aggregator" --> "app-module app-mod__aggregator"
-"app-module-columns" --> "app-module app-mod__columns"
-"app-module-divider" --> "app-module app-mod__divider"
-"app-module-forum" --> "app-module app-mod__forum"
-"app-module-image" --> "app-module app-mod__image"
-"app-module-infoblock" --> "app-module app-mod__infoblock"
-"app-module-items" --> "app-module app-mod__items"
-"app-module-knowledge-centre" --> "app-module app-mod__knowledge-centre"
-"mod__lang-switch" --> "app-module app-mod__lang-switch"
-"app-module-listing" --> "app-module app-mod__listing"
-"app-mod__loginlink" --> "app-module app-mod__loginlink"
-"app-module-logo" --> "app-module app-mod__logo"
-"app-module-menu" --> "app-module app-mod__menu"
-"mod__portfolio-widget" --> "app-module app-mod__portfolio-widget"
-"app-module-richeditor" --> "app-module app-mod__richeditor"
-"app-module-search" --> "app-module app-mod__search"
-"mod__sign-links" --> "app-module app-mod__sign-links"
-"app-module-sitemap" --> "app-module app-mod__sitemap"
-"mod__slider" --> "app-module app-mod__slider"
-"mod__social-media" --> "app-module app-mod__social-media"
+app-page-title --> app__box-title
+
+"app-module-webex" --> "app__module app-mod__webex"
+"app-module-aggregator" --> "app__module app-mod__aggregator"
+"app-module-columns" --> "app__module app-mod__columns"
+"app-module-divider" --> "app__module app-mod__divider"
+"app-module-forum" --> "app__module app-mod__forum"
+"app-module-image" --> "app__module app-mod__image"
+"app-module-infoblock" --> "app__module app-mod__infoblock"
+"app-module-items" --> "app__module app-mod__items"
+"app-module-knowledge-centre" --> "app__module app-mod__knowledge-centre"
+"mod__lang-switch" --> "app__module app-mod__lang-switch"
+"app-module-listing" --> "app__module app-mod__listing"
+"app-mod__loginlink" --> "app__module app-mod__loginlink"
+"app-module-logo" --> "app__module app-mod__logo"
+"app-module-menu" --> "app__module app-mod__menu"
+"mod__portfolio-widget" --> "app__module app-mod__portfolio-widget"
+"app-module-richeditor" --> "app__module app-mod__richeditor"
+"app-module-search" --> "app__module app-mod__search"
+"mod__sign-links" --> "app__module app-mod__sign-links"
+"app-module-sitemap" --> "app__module app-mod__sitemap"
+"mod__slider" --> "app__module app-mod__slider"
+"mod__social-media" --> "app__module app-mod__social-media"
 "app-mod__webex-cell-" --> "app-mod__webex__cell-"
-"mod__area" --> "app-module app-mod__area"
+"mod__area" --> "app__module app-mod__area"
+"app-module-default" --> "app-mod__default"
 "app-loginbox" --> "app__box-login"
 "app-modular-sign" --> "app__box-sign"
-is-app-lt__sidebar --> is-sidebar
+app-module --> app__module
+
+"app-page-groupprofile" --> "app__page app-page__groupprofile"
+"app-page-search" --> "app__page app-page__search"
+"app-page-default" --> "app__page app-page__default"
+"app-page-memberprofile" --> "app__page app-page__memberprofile"
+"app-page-login" --> "app__page app-page__login"
+"app-page-forgot" --> "app__page app-page__forgot"
+"app-page-user-groups" --> "app__page app-page__user-groups"
+app-page --> app__page
 
 app-sidebar --> app-lt__sidebar
 app-topmenu --> app-lt__topmenu
+app-template --> app-lt__template
+app-widget --> app__widget
+lt__post--event --> app-lt__post--event
+
+is-app-lt__sidebar --> is-sidebar
+is-app-lt__topmenu --> is-topmenu
+
+app-header-area --> app__area-header
+app-footer-area --> app__area-footer
+app-main-area --> app__area-main
 
 //////////////////////////////////////////////////////////
 

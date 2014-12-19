@@ -365,7 +365,7 @@ h6 {
 .header {
 	z-index: 3;
 
-    .app-widget-container {
+    .app__widget-container {
         margin: 0;
     }
 }
@@ -381,7 +381,7 @@ h6 {
     position: absolute;
     .mx__position(16px, 0, auto, 240px);
 
-    .app-header-area {
+    .app__area-header {
         margin-left: @CmIndent-Medium;
     }
 }
@@ -412,7 +412,7 @@ h6 {
 
 /* *** AREAS *** */
 
-.app-header-area {
+.app__area-header {
     &.links {
         min-width: 0;
         height: 32px;
@@ -460,7 +460,7 @@ h6 {
 
 html {
     &.is-sidebar--expanded {
-        .app-header-area {
+        .app__area-header {
             &.links {
                 min-width: @CmSize-XXLarge;
             }
@@ -483,7 +483,7 @@ html {
     padding-bottom: @CmIndent-Large;
 }
 
-.app-main-area {
+.app__area-main {
     min-height: 150px;
 }
 
@@ -495,7 +495,7 @@ html {
     padding: 0;
     .mx__position(auto, 0, 0, 0);
 
-    .app-widget-container {
+    .app__widget-container {
         margin: 0;
     }
 }
@@ -550,7 +550,7 @@ html {
 
 /* *** AREAS *** */
 
-.app-footer-area {
+.app__area-footer {
     &.copyright {
         position: relative;
         .mx__position(auto, auto, auto, auto);
@@ -686,7 +686,7 @@ html {
                         padding: 0;
                     }
 
-                    .app-footer-area {
+                    .app__area-footer {
                         float: none;
                         margin: @CmIndent-Medium 0 0 0;
 
