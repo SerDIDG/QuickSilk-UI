@@ -1,4 +1,4 @@
-��������:
+Заменить:
 .inner-link --> .link--inner
 .inherit-link --> .link--inherit
 .button-error --> .button-danger
@@ -81,7 +81,7 @@
 
 ///////
 
-app-page-title --> app__box-title
+app-page-title --> app-pt__box-title
 
 "app-module-webex" --> "app__module app-mod__webex"
 "app-module-aggregator" --> "app__module app-mod__aggregator"
@@ -107,8 +107,8 @@ app-page-title --> app__box-title
 "app-mod__webex-cell-" --> "app-mod__webex__cell-"
 "mod__area" --> "app__module app-mod__area"
 "app-module-default" --> "app-mod__default"
-"app-loginbox" --> "app__box-login"
-"app-modular-sign" --> "app__box-sign"
+"app-loginbox" --> "app-pt__box-login"
+"app-modular-sign" --> "app-pt__box-sign"
 app-module --> app__module
 
 "app-page-groupprofile" --> "app__page app-page__groupprofile"
@@ -135,14 +135,14 @@ app-main-area --> app__area-main
 
 //////////////////////////////////////////////////////////
 
-����������:
-.com-gridlist-links � .pt__links
-.com-gridlist-link � .pt__links
+Переделать:
+.com-gridlist-links в .pt__links
+.com-gridlist-link в .pt__links
 class="pt__listing-clear lt__faq__questions" � class ="lt__faq__questions"
 
-Com.Overlay �������� 'node' --> 'container'.
+Com.Overlay параметр 'node' --> 'container'.
 
 //////////////////////////////////////////////////////////
 
-�������:
+Удалить:
 .cm-block-padding
