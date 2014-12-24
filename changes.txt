@@ -125,6 +125,7 @@ app-topmenu --> app-lt__topmenu
 app-template --> app-lt__template
 app-widget --> app__widget
 lt__post--event --> app-lt__post--event
+app-advanced-editor --> app-lt__advanced-editor
 
 is-app-lt__sidebar --> is-sidebar
 is-app-lt__topmenu --> is-topmenu

@@ -4695,12 +4695,13 @@ button::-moz-focus-inner {
   }
 }
 /* ******* PARTS: SELECTABLE ******* */
-.pr__selectable {
+.pt__selectable {
   position: relative;
   border-radius: 3px;
   cursor: pointer;
+  z-index: 1;
 }
-.pr__selectable:before {
+.pt__selectable:before {
   display: block;
   position: absolute;
   z-index: -1;
@@ -4714,13 +4715,14 @@ button::-moz-focus-inner {
   -webkit-transition: border-color 300ms ease-in-out, background-color 300ms ease-in-out;
   transition: border-color 300ms ease-in-out, background-color 300ms ease-in-out;
 }
-.pr__selectable:hover:before {
+.pt__selectable:hover:before {
   background-color: #f2f2f2;
+  border-color: transparent;
   -webkit-transition: border-color 100ms ease-in-out, background-color 100ms ease-in-out;
   transition: border-color 100ms ease-in-out, background-color 100ms ease-in-out;
 }
-.pr__selectable.active:before {
-  background-color: #ffffff;
+.pt__selectable.active:before {
+  background-color: #f6fafd;
   border-color: #d8e8f8;
 }
 /* ******* PARTS: BREADCRUMBS ******* */
@@ -9713,6 +9715,44 @@ html.is-immediately .app-lt__template {
     flex: 1 1 50%;
   }
 }
+/* ******* COMPONENTS: STYLIZER ******* */
+/* *** LISTING *** */
+.app__stylizer-listing > ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.app__stylizer-listing > ul > li {
+  margin: 0;
+  padding: 0;
+}
+.app__stylizer-listing > ul > li {
+  margin: 22px 0 0 0;
+}
+.app__stylizer-listing > ul > li:first-child {
+  margin: 0;
+}
+.app__stylizer-listing > ul > li .cm__tags,
+.app__stylizer-listing > ul > li h1,
+.app__stylizer-listing > ul > li h2,
+.app__stylizer-listing > ul > li h3,
+.app__stylizer-listing > ul > li h4,
+.app__stylizer-listing > ul > li h5,
+.app__stylizer-listing > ul > li h6,
+.app__stylizer-listing > ul > li p,
+.app__stylizer-listing > ul > li dl,
+.app__stylizer-listing > ul > li ul,
+.app__stylizer-listing > ul > li ol,
+.app__stylizer-listing > ul > li hr {
+  margin: 0;
+}
+/* *** TOOLTIP *** */
+.com__tooltip.app__stylizer-tooltip > .inner > .scroll {
+  overflow: hidden;
+}
+.com__tooltip.app__stylizer-tooltip .pt__toolbar {
+  margin: 0;
+}
 /* ******* MODULES: COLUMNS ******* */
 /* ******* MODULES: AGGREGATOR ******* */
 .app-mod__aggregator > ul {
@@ -10396,7 +10436,6 @@ html.is-immediately .app-lt__template {
 /* ******* PAGES: GROUP PROFILE ******* */
 /* *** COLORS *** */
 /* *** FONTS *** */
-/* *** FORMS *** */
 /* ************ TEMPLATE: STYLES ************ */
 /* ******* TAGS ******* */
 html {

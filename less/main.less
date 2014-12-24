@@ -13,24 +13,24 @@ body {
 /* *** FONT *** */
 
 h1, h2, h3, h4, h5, h6 {
-    line-height: @Tpl-lineHeight;
-    font-weight: @Tpl-boldWeight;
+    line-height: @CmFont-Base-LineHeight;
+    font-weight: @CmFont-Base-BoldWeight;
 }
 
 h1, h2 {
     font-weight: 700;
-    color: @Tpl-color;
+    color: @Tpl-Color;
 
     a {
-        color: @Tpl-color;
+        color: @Tpl-Color;
     }
 }
 
 h4, h5, h6 {
-    color: @Tpl-colorFont;
+    color: @CmColor-Font;
 
     a {
-        color: @Tpl-colorFont;
+        color: @CmColor-Font;
     }
 }
 
@@ -47,7 +47,7 @@ h2 {
 h3 {
     line-height: 24px;
     font-size: 16px;
-    color: @Tpl-colorFontDark;
+    color: @Tpl-Color-FontDark;
 }
 
 h4 {
@@ -167,19 +167,19 @@ h6 {
                     height: 20px;
                     padding: 0 0 8px 0;
                     line-height: 20px;
-                    font-weight: @Tpl-boldWeight;
+                    font-weight: @CmFont-Base-BoldWeight;
                     text-decoration: none;
                     text-transform: uppercase;
 
                     &:hover {
-                        color: @Tpl-color;
+                        color: @Tpl-Color;
                         text-decoration: none;
                     }
                 }
 
                 &.active {
                     > a {
-                        color: @Tpl-colorFontDark;
+                        color: @Tpl-Color-FontDark;
                     }
                 }
             }
@@ -207,12 +207,12 @@ h6 {
                 a {
                     padding: 4px 12px 4px 26px;
                     background: url('@{TplPath-Images}/arrow-r.png') 0 center no-repeat;
-                    font-weight: @Tpl-boldWeight;
+                    font-weight: @CmFont-Base-BoldWeight;
                     .mx__transition(all, @CmUI-Transition-Duration);
 
                     &:hover {
                         background-image: url('@{TplPath-Images}/arrow-r-a.png');
-                        color: @Tpl-color;
+                        color: @Tpl-Color;
                         .mx__transition(all, @CmUI-Transition-DurationReverse);
                     }
                 }
@@ -254,7 +254,7 @@ h6 {
     }
 
     &.theme-footer {
-        padding: ((@Tpl-lineHeightFooter - @Tpl-lineHeight) / 2) 0;
+        padding: ((@Tpl-Footer-LineHeight - @CmFont-Base-LineHeight) / 2) 0;
 
         > ul {
             > li {
@@ -265,13 +265,13 @@ h6 {
                     height: 10px;
                     display: block;
                     position: absolute;
-                    background: @Tpl-colorFont;
+                    background: @CmColor-Font;
                     content: '';
-                    .mx__position(((@Tpl-lineHeight - 10px) / 2), auto, 0, -(@CmIndent-Small / 2));
+                    .mx__position(((@CmFont-Base-LineHeight - 10px) / 2), auto, 0, -(@CmIndent-Small / 2));
                 }
 
                 a {
-                    font-size: @Tpl-fontSizeFooter;
+                    font-size: @Tpl-Footer-FontSize;
                     font-weight: @CmFont-Base-BoldWeight;
                 }
 
@@ -301,14 +301,14 @@ h6 {
                      background: url('@{TplPath-Images}/arrow-r.png') 0 center no-repeat;
                      text-transform: none;
                      text-decoration: none;
-                     font-weight: @Tpl-boldWeight;
+                     font-weight: @CmFont-Base-BoldWeight;
                      .mx__transition(all, @CmUI-Transition-Duration);
                  }
 
                  &.active > a,
                  a:hover {
                      background-image: url('@{TplPath-Images}/arrow-r-a.png');
-                     color: @Tpl-color;
+                     color: @Tpl-Color;
                      .mx__transition(all, @CmUI-Transition-DurationReverse);
                  }
              }
@@ -340,7 +340,7 @@ h6 {
 /* *** MODULES: LOGIN LINK *** */
 
 .app-mod__loginlink {
-    padding: ((32px - @Tpl-lineHeight) / 2) 0;
+    padding: ((32px - @CmFont-Base-LineHeight) / 2) 0;
 }
 
 /* ******* STRUCTURE ******* */
@@ -349,7 +349,7 @@ h6 {
 .content,
 .footer {
     position: relative;
-    padding: 0 @Tpl-indentOutside;
+    padding: 0 @Tpl-IndentOutside;
 }
 
 .header-inner,
@@ -502,7 +502,7 @@ html {
 
 .footer-top {
     min-height: 37px;
-    padding: 0 @Tpl-indentOutside;
+    padding: 0 @Tpl-IndentOutside;
 
     .footer-inner {
         min-height: 37px;
@@ -517,8 +517,8 @@ html {
             .app-mod__richeditor {
                 .cm__tags--base {
                     margin: 0;
-                    font-size: @Tpl-fontSizeFooter;
-                    line-height: @Tpl-lineHeightFooter;
+                    font-size: @Tpl-Footer-FontSize;
+                    line-height: @Tpl-Footer-LineHeight;
                 }
             }
         }
@@ -542,7 +542,7 @@ html {
 }
 
 .footer-borders {
-    padding: 0 @Tpl-indentOutside;
+    padding: 0 @Tpl-IndentOutside;
     background: #d3d3d3 url("@{TplPath-Images}/parts/sitemap/bg.png") 0 0 repeat-x;
     border-top: 1px solid #b6bcc1;
     border-bottom: 1px solid #b6bcc1;
@@ -576,7 +576,7 @@ html {
     text-align: left;
     line-height: 36px;
     font-size: 14px;
-    font-weight: @Tpl-boldWeight;
+    font-weight: @CmFont-Base-BoldWeight;
     cursor: pointer;
     .mx__transition(box-shadow, @CmUI-Transition-Duration);
 
