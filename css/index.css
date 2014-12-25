@@ -8345,7 +8345,7 @@ body {
 }
 /* ******* WIDGETS ******* */
 /* Widget */
-.app__widget-container {
+.app-pt__widget-container {
   position: relative;
   margin: 0 0 24px;
   z-index: 1;
@@ -8353,7 +8353,7 @@ body {
   -webkit-transition: z-index 300ms ease-in-out;
   transition: z-index 300ms ease-in-out;
 }
-.app__widget-container > .app__widget {
+.app-pt__widget-container > .app-pt__widget {
   width: 100%;
   position: relative;
   z-index: 1;
@@ -8361,23 +8361,23 @@ body {
   -webkit-transition: opacity 300ms ease-in-out;
   transition: opacity 300ms ease-in-out;
 }
-.app__widget-container > .app__widget > .border,
-.app__widget-container > .app__widget > .drag,
-.app__widget-container > .app__widget > .menu {
+.app-pt__widget-container > .app-pt__widget > .border,
+.app-pt__widget-container > .app-pt__widget > .drag,
+.app-pt__widget-container > .app-pt__widget > .menu {
   display: none;
 }
-.app__widget-container > .app__widget.is-hidden {
+.app-pt__widget-container > .app-pt__widget.is-hidden {
   display: none;
 }
-.app__widget-container > .app__widget.is-visible {
+.app-pt__widget-container > .app-pt__widget.is-visible {
   display: block;
 }
-.app__widget-container > .app__widget.is-editable {
+.app-pt__widget-container > .app-pt__widget.is-editable {
   display: inline-block;
   cursor: text;
   vertical-align: top;
 }
-.app__widget-container > .app__widget.is-editable > .border {
+.app-pt__widget-container > .app-pt__widget.is-editable > .border {
   display: block;
   position: absolute;
   z-index: 1;
@@ -8391,17 +8391,17 @@ body {
   bottom: 0;
   left: 0;
 }
-.app__widget-container > .app__widget.is-editable > .inner {
+.app-pt__widget-container > .app-pt__widget.is-editable > .inner {
   width: 100%;
   display: inline-block;
   position: relative;
   z-index: 2;
   vertical-align: top;
 }
-.app__widget-container > .app__widget.is-editable > .inner:hover {
+.app-pt__widget-container > .app-pt__widget.is-editable > .inner:hover {
   z-index: 5;
 }
-.app__widget-container > .app__widget.is-editable > .drag {
+.app-pt__widget-container > .app-pt__widget.is-editable > .drag {
   width: 80px;
   height: 24px;
   margin: 0 0 0 -40px;
@@ -8421,24 +8421,24 @@ body {
   -webkit-transition: all 300ms ease-in-out;
   transition: all 300ms ease-in-out;
 }
-.app__widget-container > .app__widget.is-editable > .drag .icon {
+.app-pt__widget-container > .app-pt__widget.is-editable > .drag .icon {
   width: 34px;
   height: 6px;
   margin: 9px auto;
   display: block;
 }
-.app__widget-container > .app__widget.is-editable > .drag:hover {
+.app-pt__widget-container > .app-pt__widget.is-editable > .drag:hover {
   background: #f2f2f2;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.app__widget-container > .app__widget.is-editable > .drag:not(.is-bottom) {
+.app-pt__widget-container > .app-pt__widget.is-editable > .drag:not(.is-bottom) {
   top: -12px;
 }
-.app__widget-container > .app__widget.is-editable > .drag.is-bottom {
+.app-pt__widget-container > .app-pt__widget.is-editable > .drag.is-bottom {
   bottom: -12px;
 }
-.app__widget-container > .app__widget.is-editable > .menu {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu {
   display: block;
   position: absolute;
   z-index: 4;
@@ -8451,7 +8451,7 @@ body {
   bottom: auto;
   left: auto;
 }
-.app__widget-container > .app__widget.is-editable > .menu .icon {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .icon {
   width: 24px;
   height: 24px;
   display: block;
@@ -8461,7 +8461,7 @@ body {
   border: 1px dashed #2985e0;
   border-radius: 3px;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown {
   padding: 4px;
   background: #fff;
   border: 1px solid #cccccc;
@@ -8489,10 +8489,10 @@ body {
   bottom: auto;
   left: auto;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li {
   position: relative;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li a {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li a {
   font: 400 13px/18px 'Open Sans', arial, helvetica, sans-serif;
   text-decoration: underline;
   outline: none;
@@ -8503,28 +8503,28 @@ body {
   white-space: nowrap;
   color: #666666;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li a:hover {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
   color: #1d73c9;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li a:active {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li a:active {
   color: #16599c;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li a:hover {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li ul {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li ul {
   top: -5px;
   left: 100%;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li.sep {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li.sep {
   display: none;
   height: 0;
   margin: 0 12px;
   overflow: hidden;
   border-top: 1px solid #cccccc;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li:before {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li:before {
   display: block;
   height: 0;
   margin: 0 12px;
@@ -8532,45 +8532,45 @@ body {
   border-top: 1px solid #cccccc;
   content: '';
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li:first-child:before {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li:first-child:before {
   display: none;
 }
-.app__widget-container > .app__widget.is-editable > .menu .pt__menu-dropdown li:hover > ul {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu .pt__menu-dropdown li:hover > ul {
   display: block;
 }
-.app__widget-container > .app__widget.is-editable > .menu:hover {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu:hover {
   z-index: 14;
 }
-.app__widget-container > .app__widget.is-editable > .menu:hover .icon {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu:hover .icon {
   background-color: #f2f2f2;
 }
-.app__widget-container > .app__widget.is-editable > .menu:hover .pt__menu-dropdown {
+.app-pt__widget-container > .app-pt__widget.is-editable > .menu:hover .pt__menu-dropdown {
   visibility: visible;
   opacity: 1;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.app__widget-container > .app__widget.is-hide {
+.app-pt__widget-container > .app-pt__widget.is-hide {
   -webkit-transition: none;
   transition: none;
   overflow: hidden;
   opacity: 0;
 }
-.app__widget-container .app__module,
-.app__widget-container .app-mod__default {
+.app-pt__widget-container .app__module,
+.app-pt__widget-container .app-mod__default {
   margin: 0;
 }
-.app__widget-container > .app__widget-dummy {
+.app-pt__widget-container > .app-pt__widget-dummy {
   position: relative;
   border-radius: 3px;
   cursor: move;
   -webkit-transition: background-color 300ms ease-in-out, box-shadow 300ms ease-in-out;
   transition: background-color 300ms ease-in-out, box-shadow 300ms ease-in-out;
 }
-.app__widget-container > .app__widget-dummy > .inner {
+.app-pt__widget-container > .app-pt__widget-dummy > .inner {
   padding: 2px;
 }
-.app__widget-container > .app__widget-dummy .icon {
+.app-pt__widget-container > .app-pt__widget-dummy .icon {
   width: 90px;
   height: 90px;
   margin: 0 auto;
@@ -8579,7 +8579,7 @@ body {
   -webkit-transition: background-color 300ms ease-in-out;
   transition: background-color 300ms ease-in-out;
 }
-.app__widget-container > .app__widget-dummy .icon img {
+.app-pt__widget-container > .app-pt__widget-dummy .icon img {
   width: 100%;
   height: 100%;
   display: block;
@@ -8587,14 +8587,14 @@ body {
   -moz-user-select: none;
   user-select: none;
 }
-.app__widget-container > .app__widget-dummy .caption {
+.app-pt__widget-container > .app-pt__widget-dummy .caption {
   padding: 4px 0;
   overflow: hidden;
   text-align: center;
   line-height: 15px;
   font-size: 11px;
 }
-.app__widget-container > .app__widget-dummy .pt__box-loader {
+.app-pt__widget-container > .app-pt__widget-dummy .pt__box-loader {
   background: #f2f2f2;
   border: 1px solid #cccccc;
   border-radius: 3px;
@@ -8602,18 +8602,18 @@ body {
   -webkit-transition: opacity 300ms ease-in-out;
   transition: opacity 300ms ease-in-out;
 }
-.app__widget-container > .app__widget-dummy .pt__box-loader.fadein {
+.app-pt__widget-container > .app-pt__widget-dummy .pt__box-loader.fadein {
   opacity: 1;
 }
-.app__widget-container > .app__widget-dummy.is-hide {
+.app-pt__widget-container > .app-pt__widget-dummy.is-hide {
   overflow: hidden;
 }
-.app__widget-container:hover {
+.app-pt__widget-container:hover {
   z-index: 10;
   -webkit-transition: z-index 100ms ease-in-out;
   transition: z-index 100ms ease-in-out;
 }
-.app__widget-container:hover > .app__widget.is-editable > .border {
+.app-pt__widget-container:hover > .app-pt__widget.is-editable > .border {
   opacity: 1;
   background: #ffffff;
   -webkit-transition: all 100ms ease-in-out;
@@ -8623,19 +8623,19 @@ body {
   bottom: -16px;
   left: -16px;
 }
-.app__widget-container:hover > .app__widget.is-editable > .drag {
+.app-pt__widget-container:hover > .app-pt__widget.is-editable > .drag {
   opacity: 1;
   visibility: visible;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.app__widget-container:hover > .app__widget.is-editable > .drag:not(.is-bottom) {
+.app-pt__widget-container:hover > .app-pt__widget.is-editable > .drag:not(.is-bottom) {
   top: -28px;
 }
-.app__widget-container:hover > .app__widget.is-editable > .drag.is-bottom {
+.app-pt__widget-container:hover > .app-pt__widget.is-editable > .drag.is-bottom {
   bottom: -28px;
 }
-.app__widget-container:hover > .app__widget.is-editable > .menu {
+.app-pt__widget-container:hover > .app-pt__widget.is-editable > .menu {
   opacity: 1;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
@@ -8644,22 +8644,22 @@ body {
   bottom: auto;
   left: auto;
 }
-.app__widget-container:hover > .app__widget-dummy .icon {
+.app-pt__widget-container:hover > .app-pt__widget-dummy .icon {
   background: #d8e8f8;
   -webkit-transition: background-color 100ms ease-in-out;
   transition: background-color 100ms ease-in-out;
 }
-.app__widget-container.is-active {
+.app-pt__widget-container.is-active {
   z-index: 10;
   -webkit-transition: z-index 100ms ease-in-out;
   transition: z-index 100ms ease-in-out;
 }
-.app__widget-container.is-active > .app__widget.is-editable {
+.app-pt__widget-container.is-active > .app-pt__widget.is-editable {
   opacity: 0.7;
   -webkit-transition: opacity 100ms ease-in-out;
   transition: opacity 100ms ease-in-out;
 }
-.app__widget-container.is-active > .app__widget.is-editable > .border {
+.app-pt__widget-container.is-active > .app-pt__widget.is-editable > .border {
   opacity: 1;
   background: #ffffff;
   -webkit-transition: all 100ms ease-in-out;
@@ -8669,19 +8669,19 @@ body {
   bottom: -16px;
   left: -16px;
 }
-.app__widget-container.is-active > .app__widget.is-editable > .drag {
+.app-pt__widget-container.is-active > .app-pt__widget.is-editable > .drag {
   opacity: 1;
   visibility: visible;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.app__widget-container.is-active > .app__widget.is-editable > .drag:not(.is-bottom) {
+.app-pt__widget-container.is-active > .app-pt__widget.is-editable > .drag:not(.is-bottom) {
   top: -28px;
 }
-.app__widget-container.is-active > .app__widget.is-editable > .drag.is-bottom {
+.app-pt__widget-container.is-active > .app-pt__widget.is-editable > .drag.is-bottom {
   bottom: -28px;
 }
-.app__widget-container.is-active > .app__widget.is-editable > .menu {
+.app-pt__widget-container.is-active > .app-pt__widget.is-editable > .menu {
   opacity: 1;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
@@ -8690,28 +8690,28 @@ body {
   bottom: auto;
   left: auto;
 }
-.app__widget-container.is-active > .app__widget.is-editable > .drag {
+.app-pt__widget-container.is-active > .app-pt__widget.is-editable > .drag {
   background-color: #d8e8f8;
 }
-.app__widget-container.is-active > .app__widget-dummy {
+.app-pt__widget-container.is-active > .app-pt__widget-dummy {
   background: #ffffff;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   -webkit-transition: background-color 100ms ease-in-out, box-shadow 100ms ease-in-out;
   transition: background-color 100ms ease-in-out, box-shadow 100ms ease-in-out;
 }
-.app__widget-container.is-active > .app__widget-dummy .icon {
+.app-pt__widget-container.is-active > .app-pt__widget-dummy .icon {
   background: #d8e8f8;
   -webkit-transition: background-color 100ms ease-in-out;
   transition: background-color 100ms ease-in-out;
 }
-.app__widget-container.pt__dnd-helper {
+.app-pt__widget-container.pt__dnd-helper {
   position: fixed;
   z-index: 9000;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
 }
-.app__widget-container.is-hide {
+.app-pt__widget-container.is-hide {
   overflow: hidden;
 }
 /* ******* PART: UI ******* */
@@ -8805,8 +8805,8 @@ html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .pt__dnd-area {
   min-height: 0;
   padding: 0;
 }
-html.is-sidebar--collapsed .app__widget-container:last-child,
-html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .app__widget-container:last-child {
+html.is-sidebar--collapsed .app-pt__widget-container:last-child,
+html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .app-pt__widget-container:last-child {
   margin: 0;
 }
 html.is-immediately .app-lt__template {
@@ -9480,19 +9480,19 @@ html.is-immediately .app-lt__template {
   display: none;
 }
 /* *** WIDGETS CATEGORY *** */
-.app__widgets-category {
+.app-pt__widgets-category {
   margin: 10px 0 0 0;
 }
-.app__widgets-category:first-child {
+.app-pt__widgets-category:first-child {
   margin: 0;
 }
-.app__widgets-category > dd {
+.app-pt__widgets-category > dd {
   margin: 0 -2px;
   font-size: 0;
   background: #ffffff;
   /* Fix blinked blocks on collapse in Firefox. */
 }
-.app__widgets-category .app__widget-container {
+.app-pt__widgets-category .app-pt__widget-container {
   width: 94px;
   margin: 0;
   display: inline-block;
@@ -10721,7 +10721,7 @@ h6 {
 .header {
   z-index: 3;
 }
-.header .app__widget-container {
+.header .app-pt__widget-container {
   margin: 0;
 }
 .header-inner {
@@ -10875,7 +10875,7 @@ html.is-sidebar--expanded .app__area-header.icons {
   bottom: 0;
   left: 0;
 }
-.footer .app__widget-container {
+.footer .app-pt__widget-container {
   margin: 0;
 }
 .footer-top {

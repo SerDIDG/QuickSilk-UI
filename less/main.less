@@ -1,70 +1,11 @@
-/* ************ TEMPLATE: STYLES ************ */
 
-/* ******* TAGS ******* */
+// /* ************************************************ */
+// /* ******* COMMON ******* */
+// /* ************************************************ */
 
-html {
-    background: url('@{TplPath-Images}/bg-back.png') repeat;
-}
+/* ******* PARTS ******* */
 
-body {
-    background: url('@{TplPath-Images}/bg.png') 0 0 repeat-x;
-}
-
-/* *** FONT *** */
-
-h1, h2, h3, h4, h5, h6 {
-    line-height: @CmFont-Base-LineHeight;
-    font-weight: @CmFont-Base-BoldWeight;
-}
-
-h1, h2 {
-    font-weight: 700;
-    color: @Tpl-Color;
-
-    a {
-        color: @Tpl-Color;
-    }
-}
-
-h4, h5, h6 {
-    color: @CmColor-Font;
-
-    a {
-        color: @CmColor-Font;
-    }
-}
-
-h1 {
-    line-height: 34px;
-    font-size: 24px;
-}
-
-h2 {
-    line-height: 24px;
-    font-size: 18px;
-}
-
-h3 {
-    line-height: 24px;
-    font-size: 16px;
-    color: @Tpl-Color-FontDark;
-}
-
-h4 {
-    font-size: 14px;
-}
-
-h5 {
-    font-size: 11px;
-}
-
-h6 {
-    font-size: 9px;
-}
-
-/* ******* COMMON STYLING ******* */
-
-/* *** PARTS: IMAGE BOX *** */
+/* *** IMAGE BOX *** */
 
 .pt__image {
     > .inner {
@@ -78,7 +19,9 @@ h6 {
     }
 }
 
-/* *** COMPONENTS: GALLERY CONTROLS *** */
+/* ******* COMPONENTS ******* */
+
+/* *** GALLERY CONTROLS *** */
 
 .com__gallery-controls {
     .bar-buttons {
@@ -135,7 +78,7 @@ h6 {
     }
 }
 
-/* *** COMPONENTS: SLIDER *** */
+/* *** SLIDER *** */
 
 .com__slider {
     &.theme-template {
@@ -149,9 +92,13 @@ h6 {
     }
 }
 
-/* ******* APPLICATION STYLING ******* */
+// /* ************************************************ */
+// /* ******* APPLICATION ******* */
+// /* ************************************************ */
 
-/* *** MODULES: MENU *** */
+/* ******* MODUES ******* */
+
+/* *** MENU *** */
 
 .app-mod__menu {
     &.primary {
@@ -172,7 +119,7 @@ h6 {
                     text-transform: uppercase;
 
                     &:hover {
-                        color: @Tpl-Color;
+                        color: @CmColor-Primary-DarkDefault;
                         text-decoration: none;
                     }
                 }
@@ -212,7 +159,7 @@ h6 {
 
                     &:hover {
                         background-image: url('@{TplPath-Images}/arrow-r-a.png');
-                        color: @Tpl-Color;
+                        color: @CmColor-Primary-DarkDefault;
                         .mx__transition(all, @CmUI-Transition-DurationReverse);
                     }
                 }
@@ -308,7 +255,7 @@ h6 {
                  &.active > a,
                  a:hover {
                      background-image: url('@{TplPath-Images}/arrow-r-a.png');
-                     color: @Tpl-Color;
+                     color: @CmColor-Primary-DarkDefault;
                      .mx__transition(all, @CmUI-Transition-DurationReverse);
                  }
              }
@@ -337,10 +284,24 @@ h6 {
     }
 }
 
-/* *** MODULES: LOGIN LINK *** */
+/* *** LOGIN LINK *** */
 
 .app-mod__loginlink {
     padding: ((32px - @CmFont-Base-LineHeight) / 2) 0;
+}
+
+// /* ************************************************ */
+// /* ******* TEMPLATE ******* */
+// /* ************************************************ */
+
+/* ******* TAGS ******* */
+
+html {
+    background: url('@{TplPath-Images}/bg-back.png') repeat;
+}
+
+body {
+    background: url('@{TplPath-Images}/bg.png') 0 0 repeat-x;
 }
 
 /* ******* STRUCTURE ******* */
@@ -365,7 +326,7 @@ h6 {
 .header {
 	z-index: 3;
 
-    .app__widget-container {
+    .app-pt__widget-container {
         margin: 0;
     }
 }
@@ -495,7 +456,7 @@ html {
     padding: 0;
     .mx__position(auto, 0, 0, 0);
 
-    .app__widget-container {
+    .app-pt__widget-container {
         margin: 0;
     }
 }
@@ -525,9 +486,8 @@ html {
 
         > .l {
             position: absolute;
-            bottom: 0;
-            left: 0;
             text-align: center;
+            .mx__position(auto, auto, 0, 0);
         }
     }
 }
