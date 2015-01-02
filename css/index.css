@@ -349,10 +349,13 @@
 .cm__color__secondary {
   color: #858585;
 }
-.cm__color__valid {
+.cm__color__success {
   color: #25b125;
 }
-.cm__color__error {
+.cm__color__warning {
+  color: #e09d29;
+}
+.cm__color__danger {
   color: #d43535;
 }
 /* *** BACKGROUND COLORS *** */
@@ -362,10 +365,13 @@
 .cm__background__secondary {
   background: #858585;
 }
-.cm__background__valid {
+.cm__background__success {
   background: #25b125;
 }
-.cm__background__error {
+.cm__background__warning {
+  background: #e09d29;
+}
+.cm__background__danger {
   background: #d43535;
 }
 /* ******* COMMON: ASPECT RATIO ******* */
@@ -4492,23 +4498,33 @@ button::-moz-focus-inner {
 .pt__gridlist tr:hover td {
   background-color: #f2f2f2;
 }
+.pt__gridlist tr.success td,
+.pt__gridlist tr.valid td {
+  background-color: #daf6da;
+}
+.pt__gridlist tr.success:hover td,
+.pt__gridlist tr.valid:hover td {
+  background-color: #c6f1c6;
+}
+.pt__gridlist tr.danger td,
+.pt__gridlist tr.invalid td {
+  background-color: #f7d9d9;
+}
+.pt__gridlist tr.danger:hover td,
+.pt__gridlist tr.invalid:hover td {
+  background-color: #f3c4c4;
+}
+.pt__gridlist tr.warning td {
+  background-color: #f8ecd8;
+}
+.pt__gridlist tr.warning:hover td {
+  background-color: #f4e2c2;
+}
 .pt__gridlist tr.active td {
   background-color: #d8ebf8;
 }
 .pt__gridlist tr.active:hover td {
   background-color: #c2dff4;
-}
-.pt__gridlist tr.valid td {
-  background-color: #daf6da;
-}
-.pt__gridlist tr.valid:hover td {
-  background-color: #c6f1c6;
-}
-.pt__gridlist tr.invalid td {
-  background-color: #f7d9d9;
-}
-.pt__gridlist tr.invalid:hover td {
-  background-color: #f3c4c4;
 }
 .pt__gridlist.bottom {
   margin: 0;
@@ -4648,23 +4664,33 @@ button::-moz-focus-inner {
   html.is-adaptive .pt__gridlist tr:hover td {
     background-color: #f2f2f2;
   }
+  html.is-adaptive .pt__gridlist tr.success td,
+  html.is-adaptive .pt__gridlist tr.valid td {
+    background-color: #daf6da;
+  }
+  html.is-adaptive .pt__gridlist tr.success:hover td,
+  html.is-adaptive .pt__gridlist tr.valid:hover td {
+    background-color: #c6f1c6;
+  }
+  html.is-adaptive .pt__gridlist tr.danger td,
+  html.is-adaptive .pt__gridlist tr.invalid td {
+    background-color: #f7d9d9;
+  }
+  html.is-adaptive .pt__gridlist tr.danger:hover td,
+  html.is-adaptive .pt__gridlist tr.invalid:hover td {
+    background-color: #f3c4c4;
+  }
+  html.is-adaptive .pt__gridlist tr.warning td {
+    background-color: #f8ecd8;
+  }
+  html.is-adaptive .pt__gridlist tr.warning:hover td {
+    background-color: #f4e2c2;
+  }
   html.is-adaptive .pt__gridlist tr.active td {
     background-color: #d8ebf8;
   }
   html.is-adaptive .pt__gridlist tr.active:hover td {
     background-color: #c2dff4;
-  }
-  html.is-adaptive .pt__gridlist tr.valid td {
-    background-color: #daf6da;
-  }
-  html.is-adaptive .pt__gridlist tr.valid:hover td {
-    background-color: #c6f1c6;
-  }
-  html.is-adaptive .pt__gridlist tr.invalid td {
-    background-color: #f7d9d9;
-  }
-  html.is-adaptive .pt__gridlist tr.invalid:hover td {
-    background-color: #f3c4c4;
   }
   html.is-adaptive .pt__gridlist th {
     background-color: #fafafa;
@@ -6814,23 +6840,33 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.has-content-bg .pt__gridlist tr:hover td {
   background-color: #f2f2f2;
 }
+.com__togglebox.has-content-bg .pt__gridlist tr.success td,
+.com__togglebox.has-content-bg .pt__gridlist tr.valid td {
+  background-color: #daf6da;
+}
+.com__togglebox.has-content-bg .pt__gridlist tr.success:hover td,
+.com__togglebox.has-content-bg .pt__gridlist tr.valid:hover td {
+  background-color: #c6f1c6;
+}
+.com__togglebox.has-content-bg .pt__gridlist tr.danger td,
+.com__togglebox.has-content-bg .pt__gridlist tr.invalid td {
+  background-color: #f7d9d9;
+}
+.com__togglebox.has-content-bg .pt__gridlist tr.danger:hover td,
+.com__togglebox.has-content-bg .pt__gridlist tr.invalid:hover td {
+  background-color: #f3c4c4;
+}
+.com__togglebox.has-content-bg .pt__gridlist tr.warning td {
+  background-color: #f8ecd8;
+}
+.com__togglebox.has-content-bg .pt__gridlist tr.warning:hover td {
+  background-color: #f4e2c2;
+}
 .com__togglebox.has-content-bg .pt__gridlist tr.active td {
   background-color: #d8ebf8;
 }
 .com__togglebox.has-content-bg .pt__gridlist tr.active:hover td {
   background-color: #c2dff4;
-}
-.com__togglebox.has-content-bg .pt__gridlist tr.valid td {
-  background-color: #daf6da;
-}
-.com__togglebox.has-content-bg .pt__gridlist tr.valid:hover td {
-  background-color: #c6f1c6;
-}
-.com__togglebox.has-content-bg .pt__gridlist tr.invalid td {
-  background-color: #f7d9d9;
-}
-.com__togglebox.has-content-bg .pt__gridlist tr.invalid:hover td {
-  background-color: #f3c4c4;
 }
 .com__togglebox.has-content-bg .pt__gridlist th {
   background-color: #fafafa;

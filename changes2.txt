@@ -1,0 +1,4 @@
+cm__color__valid --> cm__color__success
+cm__color__error --> cm__color__danger
+cm__background__valid --> cm__background__success
+cm__background__error --> cm__background__danger
