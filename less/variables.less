@@ -14,11 +14,47 @@
 @Tpl-Color-FontDark: #333333;
 @Tpl-Footer-LineHeight: 18px;
 @Tpl-Footer-FontSize: 11px;
-@Tpl-IndentOutside: @CmIndent-Medium;
 
 // /* ************************************************ */
-// /* ******* FONT ******* */
+// /* ******* COMMON ******* */
 // /* ************************************************ */
+
+/* ******* COLORS ******* */
+
+@CmColor-Primary: 205;
+@CmColor-Primary-DarkSaturation: 98%;
+@CmColor-Primary-DarkDefault-Lightness: 29%;
+
+@CmColor-Font: #666666;
+@CmColor-Font-Link: @CmColor-Font;
+
+/* ******* FONTS ******* */
+
+@CmFont-Base-LineHeight: 20px;
+@CmFont-Base-Size: 14px;
+@CmFont-Base-Family: 'Open Sans', sans-serif;;
+@CmFont-Base-BoldWeight: 600;
+
+// /* ************************************************ */
+// /* ******* APPLICATION ******* */
+// /* ************************************************ */
+
+// /* ******* TEMPLATE ******* */
+
+@AppTpl-Container-Width: none;
+@AppTpl-Container-Align: center;
+@AppTpl-Container-BackgroundColor: transparent;
+@AppTpl-Container-BackgroundImage: url('@{TplPath-Images}/bg-back.png');
+@AppTpl-Container-BackgroundPosition: center center;
+@AppTpl-Container-BackgroundRepeat: repeat;
+
+@AppTpl-Header-Width: 1180px;
+@AppTpl-Header-Align: center;
+
+@AppTpl-Footer-Width: 1180px;
+@AppTpl-Footer-Align: center;
+
+// /* ******* FONT ******* */
 
 @AppFont-H1-Family: 'Open Sans', sans-serif;
 @AppFont-H1-LineHeight: 34px;
@@ -80,23 +116,3 @@
 @AppFont-A-Color: #666666;
 @AppFont-A-Decoration: none;
 @AppFont-A-Style: normal;
-
-// /* ************************************************ */
-// /* ******* COMMON ******* */
-// /* ************************************************ */
-
-/* ******* COLORS ******* */
-
-@CmColor-Primary: 205;
-@CmColor-Primary-DarkSaturation: 98%;
-@CmColor-Primary-DarkDefault-Lightness: 29%;
-
-@CmColor-Font: #666666;
-@CmColor-Font-Link: @CmColor-Font;
-
-/* ******* FONTS ******* */
-
-@CmFont-Base-LineHeight: 20px;
-@CmFont-Base-Size: 14px;
-@CmFont-Base-Family: 'Open Sans', sans-serif;;
-@CmFont-Base-BoldWeight: 600;

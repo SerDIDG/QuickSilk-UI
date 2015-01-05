@@ -666,12 +666,12 @@
 
 <!-- [* ******* TEMPLATE START ******* *] -->
 
-<div class="app-lt__template" data-node="Template.container">
+<div class="tpl__container" data-node="Template.container">
 
     <!-- [* *** HEADER START *** *] -->
 
-    <div class="header" data-node="Template.header">
-        <div class="header-inner">
+    <div class="tpl__header" data-node="Template.header">
+        <div class="tpl__header__inner">
 
             <div class="header-top">
                 <div class="app__area-header icons" data-com-draganddrop="area">
@@ -1016,8 +1016,8 @@
 
     <!-- [* *** CONTENT START *** *] -->
 
-    <div class="content" data-node="Template.content">
-        <div class="content-inner">
+    <div class="tpl__content" data-node="Template.content">
+        <div class="tpl__content__inner">
             <div class="app__area-main" data-com-draganddrop="area">
                 <div class="app-pt__widget-container" data-com-draganddrop="draggable">
                     <div class="app-pt__widget is-editable">
@@ -1370,153 +1370,155 @@
 
     <!-- [* *** FOOTER START *** *] -->
 
-    <div class="footer" data-node="Template.footer" data-element="sitemap">
-        <div class="footer-top">
-            <div class="footer-inner">
-                <div class="r">
-                    <div class="app__area-footer copyright" data-com-draganddrop="area">
-                        <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                            <div class="app-pt__widget is-editable">
-                                <div class="border"></div>
-                                <div class="drag" data-com-draganddrop="drag">
-                                    <div class="icon draggable"></div>
-                                </div>
-                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                    <div class="icon draggable"></div>
-                                </div>
-                                <div class="pt__menu menu">
-                                    <div class="icon small settings"></div>
-                                    <ul class="pt__menu-dropdown">
-                                        <li><a>Edit</a></li>
-                                        <li><a>Remove</a></li>
-                                        <li><a>Clear</a></li>
-                                        <li><a>Good Button</a></li>
-                                    </ul>
-                                </div>
-                                <div class="inner">
-                                    <div class="app__module app-mod__menu theme-footer pull-right" data-element="module-menu">
-                                        <ul>
-                                            <li>
-                                                <a>Privacy Policy</a>
-                                            </li>
-                                            <li>
-                                                <a>Terms of Use</a>
-                                            </li>
-                                            <li>
-                                                <a>Legal</a>
-                                            </li>
+    <div class="tpl__footer" data-node="Template.footer" data-element="sitemap">
+        <div class="tpl__footer__inner">
+            <div class="footer-top">
+                <div class="footer-inner">
+                    <div class="r">
+                        <div class="app__area-footer copyright" data-com-draganddrop="area">
+                            <div class="app-pt__widget-container" data-com-draganddrop="draggable">
+                                <div class="app-pt__widget is-editable">
+                                    <div class="border"></div>
+                                    <div class="drag" data-com-draganddrop="drag">
+                                        <div class="icon draggable"></div>
+                                    </div>
+                                    <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                        <div class="icon draggable"></div>
+                                    </div>
+                                    <div class="pt__menu menu">
+                                        <div class="icon small settings"></div>
+                                        <ul class="pt__menu-dropdown">
+                                            <li><a>Edit</a></li>
+                                            <li><a>Remove</a></li>
+                                            <li><a>Clear</a></li>
+                                            <li><a>Good Button</a></li>
                                         </ul>
-                                        <div class="menu-select">
-                                            <div class="menu-button"></div>
-                                            <select data-node="AppModuleMenu.select">
-                                                <option value="http://google.com">Privacy Policy</option>
-                                                <option>Terms of Use</option>
-                                                <option>Legal</option>
-                                            </select>
+                                    </div>
+                                    <div class="inner">
+                                        <div class="app__module app-mod__menu theme-footer pull-right" data-element="module-menu">
+                                            <ul>
+                                                <li>
+                                                    <a>Privacy Policy</a>
+                                                </li>
+                                                <li>
+                                                    <a>Terms of Use</a>
+                                                </li>
+                                                <li>
+                                                    <a>Legal</a>
+                                                </li>
+                                            </ul>
+                                            <div class="menu-select">
+                                                <div class="menu-button"></div>
+                                                <select data-node="AppModuleMenu.select">
+                                                    <option value="http://google.com">Privacy Policy</option>
+                                                    <option>Terms of Use</option>
+                                                    <option>Legal</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="app-pt__widget-container" data-com-draganddrop="draggable">
+                                <div class="app-pt__widget is-editable">
+                                    <div class="border"></div>
+                                    <div class="drag" data-com-draganddrop="drag">
+                                        <div class="icon draggable"></div>
+                                    </div>
+                                    <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                        <div class="icon draggable"></div>
+                                    </div>
+                                    <div class="pt__menu menu">
+                                        <div class="icon small settings"></div>
+                                        <ul class="pt__menu-dropdown">
+                                            <li><a>Edit</a></li>
+                                            <li><a>Remove</a></li>
+                                            <li><a>Clear</a></li>
+                                            <li><a>Good Button</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="inner">
+                                        <div class="app__module app-mod__richeditor">
+                                            <p style="text-align: right;">Copyright © 2014 QuickSilk, All Rights Reserved.</p>
+                                            <p style="text-align: right;">Quicksilk™ and Spin The Web. Your Way™ are registered trademarks of QuickSilk Inc.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                            <div class="app-pt__widget is-editable">
-                                <div class="border"></div>
-                                <div class="drag" data-com-draganddrop="drag">
-                                    <div class="icon draggable"></div>
-                                </div>
-                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                    <div class="icon draggable"></div>
-                                </div>
-                                <div class="pt__menu menu">
-                                    <div class="icon small settings"></div>
-                                    <ul class="pt__menu-dropdown">
-                                        <li><a>Edit</a></li>
-                                        <li><a>Remove</a></li>
-                                        <li><a>Clear</a></li>
-                                        <li><a>Good Button</a></li>
-                                    </ul>
-                                </div>
-                                <div class="inner">
-                                    <div class="app__module app-mod__richeditor">
-                                        <p style="text-align: right;">Copyright © 2014 QuickSilk, All Rights Reserved.</p>
-                                        <p style="text-align: right;">Quicksilk™ and Spin The Web. Your Way™ are registered trademarks of QuickSilk Inc.</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="l">
+                        <div class="sitemap-button" data-node="AppSitemap.button">
+                            <span class="on-hide">Looking for our sitemap?</span>
+                            <span class="on-show">I get it, close me now</span>
+                            <span class="arrow"></span>
                         </div>
                     </div>
                 </div>
-
-                <div class="l">
-                    <div class="sitemap-button" data-node="AppSitemap.button">
-                        <span class="on-hide">Looking for our sitemap?</span>
-                        <span class="on-show">I get it, close me now</span>
-                        <span class="arrow"></span>
-                    </div>
-                </div>
             </div>
-        </div>
 
-        <div class="footer-center" data-node="AppSitemap.target">
-            <div class="footer-borders">
-                <div class="footer-inner">
-                    <div class="app__area-footer sitemap" data-com-draganddrop="area">
-                        <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                            <div class="app-pt__widget is-editable">
-                                <div class="border"></div>
-                                <div class="drag" data-com-draganddrop="drag">
-                                    <div class="icon draggable"></div>
-                                </div>
-                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                    <div class="icon draggable"></div>
-                                </div>
-                                <div class="pt__menu menu">
-                                    <div class="icon editable-icon"></div>
-                                    <ul class="pt__menu-dropdown">
-                                        <li><a>Edit</a></li>
-                                        <li><a>Remove</a></li>
-                                        <li><a>Clear</a></li>
-                                        <li><a>Good Button</a></li>
-                                    </ul>
-                                </div>
-                                <div class="inner">
-                                    <div class="app__module app-mod__sitemap">
-                                        <div class="inner">
-                                            <dl>
-                                                <dt><a href="#">Home</a></dt>
-                                                <dd></dd>
-                                            </dl>
-                                            <dl>
-                                                <dt><a href="#">Web Solutions</a></dt>
-                                                <dd><a href="#">QuickSilk Licensed CMS</a></dd>
-                                                <dd><a href="#">QuickSilk Hosted CMSS</a></dd>
-                                            </dl>
-                                            <dl>
-                                                <dt><a href="#">Web Services</a></dt>
-                                                <dd><a href="#">Custom eCommerce &amp; Web Development</a></dd>
-                                                <dd><a href="#">Web Hosting</a></dd>
-                                            </dl>
-                                            <dl>
-                                                <dt><a href="#">Client Support</a></dt>
-                                                <dd></dd>
-                                            </dl>
-                                            <dl>
-                                                <dt><a href="#">Partners</a></dt>
-                                                <dd><a href="#">Outsourcing Program</a></dd>
-                                                <dd><a href="#">Reseller Program</a></dd>
-                                            </dl>
-                                            <dl>
-                                                <dt><a href="#">About</a></dt>
-                                                <dd><a href="#">Management &amp; Advisory Board</a></dd>
-                                                <dd><a href="#">Client Portfolio</a></dd>
-                                                <dd><a href="#">Community Initiative</a></dd>
-                                                <dd><a href="#">News &amp; Events</a></dd>
-                                            </dl>
-                                            <dl>
-                                                <dt><a href="#">Contact</a></dt>
-                                                <dd></dd>
-                                            </dl>
+            <div class="footer-center" data-node="AppSitemap.target">
+                <div class="footer-borders">
+                    <div class="footer-inner">
+                        <div class="app__area-footer sitemap" data-com-draganddrop="area">
+                            <div class="app-pt__widget-container" data-com-draganddrop="draggable">
+                                <div class="app-pt__widget is-editable">
+                                    <div class="border"></div>
+                                    <div class="drag" data-com-draganddrop="drag">
+                                        <div class="icon draggable"></div>
+                                    </div>
+                                    <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                        <div class="icon draggable"></div>
+                                    </div>
+                                    <div class="pt__menu menu">
+                                        <div class="icon editable-icon"></div>
+                                        <ul class="pt__menu-dropdown">
+                                            <li><a>Edit</a></li>
+                                            <li><a>Remove</a></li>
+                                            <li><a>Clear</a></li>
+                                            <li><a>Good Button</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="inner">
+                                        <div class="app__module app-mod__sitemap">
+                                            <div class="inner">
+                                                <dl>
+                                                    <dt><a href="#">Home</a></dt>
+                                                    <dd></dd>
+                                                </dl>
+                                                <dl>
+                                                    <dt><a href="#">Web Solutions</a></dt>
+                                                    <dd><a href="#">QuickSilk Licensed CMS</a></dd>
+                                                    <dd><a href="#">QuickSilk Hosted CMSS</a></dd>
+                                                </dl>
+                                                <dl>
+                                                    <dt><a href="#">Web Services</a></dt>
+                                                    <dd><a href="#">Custom eCommerce &amp; Web Development</a></dd>
+                                                    <dd><a href="#">Web Hosting</a></dd>
+                                                </dl>
+                                                <dl>
+                                                    <dt><a href="#">Client Support</a></dt>
+                                                    <dd></dd>
+                                                </dl>
+                                                <dl>
+                                                    <dt><a href="#">Partners</a></dt>
+                                                    <dd><a href="#">Outsourcing Program</a></dd>
+                                                    <dd><a href="#">Reseller Program</a></dd>
+                                                </dl>
+                                                <dl>
+                                                    <dt><a href="#">About</a></dt>
+                                                    <dd><a href="#">Management &amp; Advisory Board</a></dd>
+                                                    <dd><a href="#">Client Portfolio</a></dd>
+                                                    <dd><a href="#">Community Initiative</a></dd>
+                                                    <dd><a href="#">News &amp; Events</a></dd>
+                                                </dl>
+                                                <dl>
+                                                    <dt><a href="#">Contact</a></dt>
+                                                    <dd></dd>
+                                                </dl>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

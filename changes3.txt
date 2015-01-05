@@ -1,0 +1,2 @@
+app-lt__template --> tpl__container
+app__module-memberswidget --> app-mod__member-directory-widget

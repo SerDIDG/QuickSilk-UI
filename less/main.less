@@ -294,36 +294,9 @@
 // /* ******* TEMPLATE ******* */
 // /* ************************************************ */
 
-/* ******* TAGS ******* */
-
-html {
-    background: url('@{TplPath-Images}/bg-back.png') repeat;
-}
-
-body {
-    background: url('@{TplPath-Images}/bg.png') 0 0 repeat-x;
-}
-
-/* ******* STRUCTURE ******* */
-
-.header,
-.content,
-.footer {
-    position: relative;
-    padding: 0 @Tpl-IndentOutside;
-}
-
-.header-inner,
-.content-inner,
-.footer-inner {
-    max-width: 1180px;
-    margin: 0 auto;
-    position: relative;
-}
-
 /* ******* HEADER ******* */
 
-.header {
+.tpl__header {
 	z-index: 3;
 
     .app-pt__widget-container {
@@ -331,7 +304,7 @@ body {
     }
 }
 
-.header-inner {
+.tpl__header__inner {
     .clearfix;
     min-height: 106px;
 }
@@ -435,11 +408,11 @@ html {
 
 /* ******* CONTENT ******* */
 
-.content {
+.tpl__content {
     z-index: 1;
 }
 
-.content-inner {
+.tpl__content__inner {
     padding-top: @CmIndent-Small;
     padding-bottom: @CmIndent-Large;
 }
@@ -450,7 +423,7 @@ html {
 
 /* ******* FOOTER ******* */
 
-.footer {
+.tpl__footer {
     z-index: 2;
     position: absolute;
     padding: 0;
@@ -461,9 +434,19 @@ html {
     }
 }
 
+.tpl__footer__inner {
+    max-width: none;
+    margin: 0;
+}
+
+.footer-inner {
+    max-width: @AppTpl-Footer-Width;
+    .mx__align(@AppTpl-Footer-Align);
+}
+
 .footer-top {
     min-height: 37px;
-    padding: 0 @Tpl-IndentOutside;
+    padding: @AppTpl-Block-Padding;
 
     .footer-inner {
         min-height: 37px;
@@ -502,7 +485,7 @@ html {
 }
 
 .footer-borders {
-    padding: 0 @Tpl-IndentOutside;
+    padding: @AppTpl-Block-Padding;
     background: #d3d3d3 url("@{TplPath-Images}/parts/sitemap/bg.png") 0 0 repeat-x;
     border-top: 1px solid #b6bcc1;
     border-bottom: 1px solid #b6bcc1;

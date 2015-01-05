@@ -122,7 +122,7 @@ app-page --> app__page
 
 app-sidebar --> app-lt__sidebar
 app-topmenu --> app-lt__topmenu
-app-template --> app-lt__template
+app-template --> tpl__container
 app-widget --> app-pt__widget
 lt__post--event --> app-lt__post--event
 app-advanced-editor --> app-lt__advanced-editor

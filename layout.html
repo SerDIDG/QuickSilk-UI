@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Quicksilk</title>
+
+    <script type="text/javascript" src="libs/common/js/polyfill.js"></script>
+    <script type="text/javascript" src="libs/common/js/common.js"></script>
+    <script type="text/javascript" src="libs/common/js/parts.js"></script>
+    <script type="text/javascript" src="libs/common/js/modules.js"></script>
+    <script type="text/javascript" src="libs/common/js/init.js"></script>
+    <script type="text/javascript" src="libs/common/js/components/UA.js"></script>
+    <script type="text/javascript" src="libs/common/js/components/Collector.js"></script>
+
+    <script type="text/javascript" src="libs/application/js/Application.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/TopMenu.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/Sidebar.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/TemplateEditor.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/LoginBox.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/ModuleMenu.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/SiteMap.js"></script>
+
+    <script type="text/javascript" src="js/custom.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="css/index.css">
+
+    <script type="text/javascript">
+        cm.onReady(function(){
+            // Components
+            new Com.Collector()
+                .addEvent('onConstruct', function(){
+                    Part.Menu();
+                })
+                .add('sitemap', function(node){
+                    new App.SiteMap({
+                        'node' : node
+                    });
+                })
+                .construct();
+        });
+    </script>
+</head>
+
+<body>
+
+
+<!-- [* ******* TEMPLATE START ******* *] -->
+
+<div class="tpl__container" data-node="Template.container">
+
+    <!-- [* *** HEADER START *** *] -->
+
+    <div class="tpl__header" data-node="Template.header">
+        <div class="tpl__header__inner">
+
+            <div class="header-top">
+                <div class="app__area-header icons" data-com-draganddrop="area"></div>
+
+                <div class="app__area-header links" data-com-draganddrop="area"></div>
+            </div>
+
+            <div class="header-logo">
+                <div class="app__area-header logo" data-com-draganddrop="area"></div>
+            </div>
+
+            <div class="header-center">
+                <div class="app__area-header search" data-com-draganddrop="area"></div>
+            </div>
+
+            <div class="header-bottom">
+                <div class="app__area-header menu" data-com-draganddrop="area"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [* *** HEADER END *** *] -->
+
+    <!-- [* *** CONTENT START *** *] -->
+
+    <div class="tpl__content" data-node="Template.content">
+        <div class="tpl__content__inner">
+            <div class="app__area-main" data-com-draganddrop="area"></div>
+        </div>
+    </div>
+
+    <!-- [* *** CONTENT END *** *] -->
+
+
+    <!-- [* *** FOOTER START *** *] -->
+
+    <div class="tpl__footer" data-node="Template.footer" data-element="sitemap">
+        <div class="tpl__footer__inner">
+            <div class="footer-top">
+                <div class="footer-inner">
+                    <div class="r">
+                        <div class="app__area-footer copyright" data-com-draganddrop="area"></div>
+                    </div>
+
+                    <div class="l">
+                        <div class="sitemap-button" data-node="AppSitemap.button">
+                            <span class="on-hide">Looking for our sitemap?</span>
+                            <span class="on-show">I get it, close me now</span>
+                            <span class="arrow"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-center" data-node="AppSitemap.target">
+                <div class="footer-borders">
+                    <div class="footer-inner">
+                        <div class="app__area-footer sitemap" data-com-draganddrop="area"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [* *** FOOTER END *** *] -->
+
+</div>
+
+<!-- [* ******* TEMPLATE END ******* *] -->
+
+</body>
+</html>
