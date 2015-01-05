@@ -181,7 +181,7 @@
   resize: none;
 }
 .cm__image-resizable,
-.tpl__containers__item .image img {
+.app-lt__templates__item .image img {
   width: 100%;
   height: auto;
   display: block;
@@ -255,7 +255,7 @@
 /* ******* COMMON: FONT ******* */
 /* *** BASE *** */
 .cm__font {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
 }
 .cm__font--link {
@@ -272,12 +272,12 @@
   color: #0268b1;
 }
 .cm__font--hint {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
 }
 .cm__font--hint-cursive,
 .form .hint {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
   font-style: italic;
 }
@@ -792,7 +792,7 @@
 }
 /* ******* COMMON: TAGS ******* */
 body {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   margin: 0;
   padding: 0;
@@ -856,7 +856,7 @@ dl,
 ul,
 ol,
 hr {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   margin: 0 0 20px;
   padding: 0;
@@ -1060,7 +1060,7 @@ select[multiple] {
 input,
 select,
 textarea {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   margin: 0;
   outline: none;
@@ -1614,7 +1614,7 @@ button::-moz-focus-inner {
   vertical-align: top;
 }
 .cm__list-inline--base > li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
 }
 .cm__list-clear {
@@ -2421,7 +2421,7 @@ button::-moz-focus-inner {
   margin: 0;
 }
 .cm-form-icons-inside .text {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   display: inline-block;
   vertical-align: middle;
@@ -2891,7 +2891,7 @@ button::-moz-focus-inner {
   margin-bottom: 0;
 }
 .pt__box-item .hint {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
   font-style: italic;
 }
@@ -3286,7 +3286,7 @@ button::-moz-focus-inner {
   vertical-align: top;
 }
 .pt__toolbar .group > li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
 }
 .pt__toolbar .group:last-child {
@@ -3763,7 +3763,7 @@ button::-moz-focus-inner {
   vertical-align: top;
 }
 .pt__grid > ul > li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   width: 100%;
   overflow: hidden;
@@ -4079,7 +4079,7 @@ button::-moz-focus-inner {
   left: 0;
 }
 .pt__image > .inner > .title .inner {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -4268,7 +4268,7 @@ button::-moz-focus-inner {
   margin: 0;
 }
 .pt__listing .list-info {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
 }
 .pt__listing .list-title {
@@ -4972,7 +4972,7 @@ button::-moz-focus-inner {
   margin: 0;
 }
 .lt__comment .comment-info {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
   line-height: 14px;
 }
@@ -4997,7 +4997,7 @@ button::-moz-focus-inner {
   margin: 0;
 }
 .lt__comment .comment-actions {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
   line-height: 12px;
 }
@@ -5088,7 +5088,7 @@ button::-moz-focus-inner {
 }
 .lt__post .post-info,
 .lt__post .post-tags {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
 }
 .lt__post .post-info .pt__line-info {
@@ -5327,12 +5327,12 @@ button::-moz-focus-inner {
   vertical-align: top;
 }
 .lt__forum-post > .inner > .r .date {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
   color: #666666;
 }
 .lt__forum-post > .inner > .r .pt__box-editable {
-  font: 400 11px/20px 'Open Sans', sans-serif;
+  font: 400 11px/20px Open Sans, sans-serif;
   color: #999999;
   margin: 0;
   color: #666666;
@@ -5870,7 +5870,7 @@ button::-moz-focus-inner {
   flex: 1 1;
 }
 .com__timeselect > .inner > .sep {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   width: 24px;
   text-align: center;
@@ -5909,7 +5909,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   white-space: nowrap;
 }
 .com-tags-input > .inner .item .text {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -8309,43 +8309,43 @@ body {
 }
 /* ******* COMMON: FONT ******* */
 .app__font--h1 {
-  font: 700 24px/34px 'Open Sans', sans-serif;
+  font: 700 24px/34px Open Sans, sans-serif;
   color: #005694;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h2 {
-  font: 700 18px/24px 'Open Sans', sans-serif;
+  font: 700 18px/24px Open Sans, sans-serif;
   color: #005694;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h3 {
-  font: 600 16px/24px 'Open Sans', sans-serif;
+  font: 600 16px/24px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h4 {
-  font: 600 14px/20px 'Open Sans', sans-serif;
+  font: 600 14px/20px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h5 {
-  font: 600 11px/20px 'Open Sans', sans-serif;
+  font: 600 11px/20px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h6 {
-  font: 600 9px/20px 'Open Sans', sans-serif;
+  font: 600 9px/20px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--p {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -8438,43 +8438,43 @@ body {
 }
 /* ******* COMMON: TAGS ******* */
 h1 {
-  font: 700 24px/34px 'Open Sans', sans-serif;
+  font: 700 24px/34px Open Sans, sans-serif;
   color: #005694;
   font-style: normal;
   text-decoration: none;
 }
 h2 {
-  font: 700 18px/24px 'Open Sans', sans-serif;
+  font: 700 18px/24px Open Sans, sans-serif;
   color: #005694;
   font-style: normal;
   text-decoration: none;
 }
 h3 {
-  font: 600 16px/24px 'Open Sans', sans-serif;
+  font: 600 16px/24px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 h4 {
-  font: 600 14px/20px 'Open Sans', sans-serif;
+  font: 600 14px/20px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 h5 {
-  font: 600 11px/20px 'Open Sans', sans-serif;
+  font: 600 11px/20px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 h6 {
-  font: 600 9px/20px 'Open Sans', sans-serif;
+  font: 600 9px/20px Open Sans, sans-serif;
   color: #333333;
   font-style: normal;
   text-decoration: none;
 }
 p {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -8667,7 +8667,7 @@ html.is-immediately .tpl__container {
   vertical-align: top;
 }
 .app-pt__box-login .links ul > li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
 }
 .app-pt__box-login .links ul li {
@@ -9688,27 +9688,27 @@ html.is-immediately .tpl__container {
   }
 }
 /* ******* LAYOUTS: TEMPLATES ******* */
-.tpl__containers__scroll {
+.app-lt__templates__scroll {
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
   overflow-y: scroll;
   min-height: 200px;
   padding: 0 24px 0 0;
 }
-.tpl__containers__item {
+.app-lt__templates__item {
   border: 2px solid #cccccc;
   cursor: pointer;
   -webkit-transition: border-color 300ms ease-in-out;
   transition: border-color 300ms ease-in-out;
 }
-.tpl__containers__item > .inner {
+.app-lt__templates__item > .inner {
   position: relative;
 }
-.tpl__containers__item .image {
+.app-lt__templates__item .image {
   position: relative;
   z-index: 1;
 }
-.tpl__containers__item .info {
+.app-lt__templates__item .info {
   position: absolute;
   z-index: 2;
   opacity: 0;
@@ -9721,14 +9721,14 @@ html.is-immediately .tpl__container {
   background-image: -webkit-linear-gradient(to bottom, rgb(255,255,255) 0, rgba(255,255,255,0.5) 50%);
   background-image: linear-gradient(to bottom, rgb(255,255,255) 0, rgba(255,255,255,0.5) 50%);
 }
-.tpl__containers__item .info > .inner {
+.app-lt__templates__item .info > .inner {
   position: absolute;
   top: 12px;
   right: 12px;
   bottom: 12px;
   left: 12px;
 }
-.tpl__containers__item .info .btn-wrap {
+.app-lt__templates__item .info .btn-wrap {
   position: absolute;
   margin: 0;
   font-size: 0;
@@ -9737,17 +9737,17 @@ html.is-immediately .tpl__container {
   bottom: 0;
   left: 0;
 }
-.tpl__containers__item:hover {
+.app-lt__templates__item:hover {
   border: 2px solid #015692;
   -webkit-transition: border-color 100ms ease-in-out;
   transition: border-color 100ms ease-in-out;
 }
-.tpl__containers__item:hover .info {
+.app-lt__templates__item:hover .info {
   opacity: 1;
   -webkit-transition: opacity 100ms ease-in-out;
   transition: opacity 100ms ease-in-out;
 }
-.tpl__containers__item.active {
+.app-lt__templates__item.active {
   border: 2px solid #a6d2f2;
 }
 /* ******* LAYOUTS: EVENT ENTRY ******* */
@@ -10097,7 +10097,7 @@ html.is-immediately .tpl__container {
   vertical-align: top;
 }
 .app-mod__loginlink ul li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
   margin: 0 0 0 12px;
 }
@@ -10148,7 +10148,7 @@ html.is-immediately .tpl__container {
   vertical-align: top;
 }
 .app-mod__menu > ul > li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
 }
 .app-mod__menu > ul > li {
@@ -10542,7 +10542,7 @@ html.is-immediately .tpl__container {
   vertical-align: top;
 }
 .app-mod__lang-switch ul > li {
-  font: 400 14px/20px 'Open Sans', sans-serif;
+  font: 400 14px/20px Open Sans, sans-serif;
   color: #666666;
 }
 .app-mod__lang-switch ul li {
