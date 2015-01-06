@@ -9936,7 +9936,7 @@ html.is-immediately .tpl__container {
 }
 /* *** TOOLTIP *** */
 .com__tooltip.app__stylizer-tooltip > .inner > .scroll {
-  overflow: hidden;
+  overflow: visible;
 }
 .com__tooltip.app__stylizer-tooltip .pt__toolbar {
   margin: 0;
