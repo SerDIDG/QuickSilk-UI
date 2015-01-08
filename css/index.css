@@ -8490,7 +8490,7 @@ a {
 .tpl__container {
   min-height: 100%;
   position: relative;
-  background: transparent url('../img/bg-back.png') repeat center center;
+  background: transparent url('../img/bg-back.png') repeat center center scroll;
 }
 .tpl__header,
 .tpl__content,
