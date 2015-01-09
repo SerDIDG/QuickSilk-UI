@@ -3472,7 +3472,7 @@ button::-moz-focus-inner {
 }
 .pt__dnd-area {
   min-height: 24px;
-  padding: 12px;
+  padding: 16px;
   position: relative;
 }
 .pt__dnd-area.is-available {
@@ -8131,7 +8131,7 @@ html.ie9 .com__palette .b-range {
   display: block;
 }
 .com__columns.is-editable > .inner > .container > .com__column > .inner {
-  min-height: 88px;
+  min-height: 96px;
 }
 .com__columns.is-editable.is-active > .inner > .com__columns__chassis,
 .com__columns.is-editable:hover > .inner > .com__columns__chassis {
@@ -8514,17 +8514,15 @@ a {
   margin: 0 auto;
 }
 /* *** MODULES / PAGES *** */
-.app__page,
-.app__module,
-.app-mod__default,
-.app-page__default {
-  margin: 0 0 24px;
-}
-.app__page.bottom,
-.app__module.bottom,
-.app-mod__default.bottom,
-.app-page__default.bottom {
-  margin: 0;
+.app__page:after,
+.app__module:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  font-size: 0;
+  height: 0;
 }
 /* *** AREAS *** */
 .app__area-main {
@@ -8556,12 +8554,6 @@ a {
 .app__area-header:hover {
   z-index: 100 !important;
 }
-.app__area-footer .app__module,
-.app__area-header .app__module,
-.app__area-footer .app-mod__default,
-.app__area-header .app-mod__default {
-  margin: 0;
-}
 /* *** WRAPPERS *** */
 html.is-topmenu .tpl__container {
   margin-top: 40px;
@@ -8580,6 +8572,9 @@ html.is-sidebar .tpl__container {
 html.is-sidebar.is-sidebar--collapsed .tpl__container {
   margin-left: 48px;
 }
+html.is-sidebar--expanded .app-pt__widget-container {
+  margin: 0 0 24px !important;
+}
 html.is-sidebar--collapsed .app__area-footer,
 html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .app__area-footer,
 html.is-sidebar--collapsed .app__area-header,
@@ -8587,12 +8582,6 @@ html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .app__area-header,
 html.is-sidebar--collapsed .app__area-main,
 html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .app__area-main {
   min-height: 0;
-}
-html.is-sidebar--collapsed .app__module:last-child,
-html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .app__module:last-child,
-html.is-sidebar--collapsed .app-mod__default:last-child,
-html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .app-mod__default:last-child {
-  margin: 0;
 }
 html.is-sidebar--collapsed .pt__dnd-area,
 html:not(.is-sidebar--expanded):not(.is-sidebar--collapsed) .pt__dnd-area {
@@ -8741,8 +8730,7 @@ html.is-immediately .tpl__container {
 .app-pt__admin-description.bottom {
   margin: 0;
 }
-.app-pt__admin-description .app__module,
-.app-pt__admin-description .app-mod__default {
+.app-pt__admin-description .app__module {
   margin: 0;
 }
 .app-pt__admin-description .pt__editable:last-child {
@@ -8765,8 +8753,8 @@ html.is-immediately .tpl__container {
 /* ******* PARTS: WIDGET ******* */
 .app-pt__widget-container {
   position: relative;
-  margin: 0 0 24px;
   z-index: 1;
+  margin: 0 0 24px;
   -webkit-transform: translateZ(0);
   -webkit-transition: z-index 300ms ease-in-out;
   transition: z-index 300ms ease-in-out;
@@ -8974,8 +8962,7 @@ html.is-immediately .tpl__container {
   overflow: hidden;
   opacity: 0;
 }
-.app-pt__widget-container .app__module,
-.app-pt__widget-container .app-mod__default {
+.app-pt__widget-container .app__module {
   margin: 0;
 }
 .app-pt__widget-container > .app-pt__widget-dummy {
@@ -10019,8 +10006,7 @@ html.is-immediately .tpl__container {
 .app-mod__infoblock > .inner > .title .app-mod__richeditor hr {
   margin: 0;
 }
-.app-mod__infoblock > .inner > .title .app__module,
-.app-mod__infoblock > .inner > .title .app-mod__default {
+.app-mod__infoblock > .inner > .title .app__module {
   margin: 0;
 }
 .app-mod__infoblock > .inner > .descr > .inner {
@@ -10395,17 +10381,18 @@ html.is-immediately .tpl__container {
   margin: 0 2% 20px 0;
   vertical-align: top;
   font-size: 11px;
-  font-weight: 600;
   color: #666666;
 }
 .app-mod__sitemap > .inner dl:last-child {
   margin-right: 0;
 }
 .app-mod__sitemap > .inner dl dt {
+  font-weight: 600;
   color: #666666;
 }
 .app-mod__sitemap > .inner dl dt a {
-  color: #666666;
+  font-weight: inherit;
+  color: inherit;
 }
 .app-mod__sitemap > .inner dl dd {
   margin: 6px 0 0 0;
@@ -10623,6 +10610,9 @@ html.is-immediately .tpl__container {
 /* ******* PAGES: USER GROUPS ******* */
 /* ******* PAGES: MEMBER PROFILE ******* */
 /* ******* PAGES: GROUP PROFILE ******* */
+/* ************************************************ */
+/* ******* COMMON ******* */
+/* ************************************************ */
 /* ******* PARTS ******* */
 /* *** IMAGE BOX *** */
 .pt__image > .inner > .text {
@@ -10689,6 +10679,9 @@ html.is-immediately .tpl__container {
 .com__slider.theme-template > .inner > .com__gallery-controls.is-small .bar-arrow:hover .icon {
   opacity: 0.7;
 }
+/* ************************************************ */
+/* ******* APPLICATION ******* */
+/* ************************************************ */
 /* ******* MODUES ******* */
 /* *** MENU *** */
 .app-mod__menu.primary > ul > li {
@@ -10831,6 +10824,9 @@ html.is-immediately .tpl__container {
 .app-mod__loginlink {
   padding: 6px 0;
 }
+/* ************************************************ */
+/* ******* TEMPLATE ******* */
+/* ************************************************ */
 /* ******* HEADER ******* */
 .tpl__header {
   z-index: 3;
@@ -11185,7 +11181,3 @@ html.is-sidebar--expanded .app__area-header.icons {
     margin-right: 0;
   }
 }
-/* ******* PATH ******* */
-/* ******* TEMPLATE ******* */
-/* ******* COLORS ******* */
-/* ******* FONTS ******* */
