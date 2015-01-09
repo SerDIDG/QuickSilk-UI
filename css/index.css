@@ -8670,11 +8670,11 @@ html.is-immediately .tpl__container {
 .app-pt__box-login .error {
   color: #d43535;
 }
-.com__tooltip.app-pt__box-login-tooltip > .inner {
+.com__tooltip.app-pt__box-login__tooltip > .inner {
   margin: 8px 0 0 0;
   padding: 12px 24px 24px;
 }
-.com__tooltip.app-pt__box-login-tooltip .app-pt__box-sign {
+.com__tooltip.app-pt__box-login__tooltip .app-pt__box-sign {
   width: 350px;
 }
 /* *** SIGN *** */
@@ -8710,16 +8710,16 @@ html.is-immediately .tpl__container {
 }
 /* ******* PARTS: BOX: ADAPTIVE ******* */
 @media only screen and (max-width: 640px) {
-  html.is-adaptive .com__tooltip.app-pt__box-login-tooltip {
+  html.is-adaptive .com__tooltip.app-pt__box-login__tooltip {
     top: 46px !important;
     left: 0 !important;
     right: 0 !important;
     position: absolute;
   }
-  html.is-adaptive .com__tooltip.app-pt__box-login-tooltip > .inner {
+  html.is-adaptive .com__tooltip.app-pt__box-login__tooltip > .inner {
     margin: 0;
   }
-  html.is-adaptive .com__tooltip.app-pt__box-login-tooltip .app-pt__box-sign {
+  html.is-adaptive .com__tooltip.app-pt__box-login__tooltip .app-pt__box-sign {
     width: auto;
   }
 }
