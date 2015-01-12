@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Elements: File Gridlist</title>
+    <title>Layouts: File Gridlist</title>
 
     <link type="text/css" rel="stylesheet" href="../../../../css/index.css">
     <link type="text/css" rel="stylesheet" href="../../styles/index.css">
@@ -44,7 +44,7 @@
 
 <body>
 
-<h1 class="pt__box-title">Elements: File Gridlist</h1>
+<h1 class="pt__box-title">Layouts: File Gridlist</h1>
 
 <ul class="com__tabset__content-ul" data-element="tabset">
     <li data-node="tabs:[]:container" data-config='{"id" : "main", "title" : "Main"}'>
@@ -99,7 +99,7 @@
         <h1>Module title</h1>
 
         <div class="lt__filegridlist">
-            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-ui is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-1", "remember" : true}'>
+            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-base is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-1", "remember" : true}'>
                 <dt>
                     <span class="icon default linked" data-node="ComToggleBox.button"></span>
                     <div class="title">
@@ -111,7 +111,12 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th class="lt__filegridlist__cell-title">Filename</th>
+                                    <th class="sort lt__filegridlist__cell-title">
+                                        <div class="inner">
+                                            <span>Filename</span>
+                                            <div class="icon arrow desc"></div>
+                                        </div>
+                                    </th>
                                     <th class="lt__filegridlist__cell-size">Size</th>
                                     <th class="lt__filegridlist__cell-icon">Type</th>
                                     <th class="lt__filegridlist__cell-date">Date</th>
@@ -191,7 +196,7 @@
                 </dd>
             </dl>
 
-            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-ui is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-2", "remember" : true}'>
+            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-base is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-2", "remember" : true}'>
                 <dt>
                     <span class="icon default linked" data-node="ComToggleBox.button"></span>
                     <div class="title">
@@ -275,7 +280,7 @@
                 </dd>
             </dl>
 
-            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-ui is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-3", "remember" : true}'>
+            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-base is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-3", "remember" : true}'>
                 <dt>
                     <span class="icon default linked" data-node="ComToggleBox.button"></span>
                     <div class="title">
@@ -294,7 +299,7 @@
         <h1>Module title</h1>
 
         <div class="lt__filegridlist">
-            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-ui is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-1", "remember" : true}'>
+            <dl class="com__togglebox has-title-bg has-content-bg has-hover-icon is-base is-show" data-element="togglebox" data-config='{"name" : "com-filegridlist-1", "remember" : true}'>
                 <dt>
                     <span class="icon default linked" data-node="ComToggleBox.button"></span>
                     <div class="title">
@@ -335,10 +340,12 @@
                                     </td>
                                     <td class="lt__filegridlist__cell-date">July 8, 2014</td>
                                     <td class="lt__filegridlist__cell-links">
-                                        <ul class="pt__links">
-                                            <li><a>Edit</a></li>
-                                            <li><a>Delete</a></li>
-                                        </ul>
+                                        <div class="pt__links">
+                                            <ul>
+                                                <li><a>Edit</a></li>
+                                                <li><a>Delete</a></li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -355,10 +362,12 @@
                                     </td>
                                     <td class="lt__filegridlist__cell-date">July 2014</td>
                                     <td class="lt__filegridlist__cell-links">
-                                        <ul class="pt__links">
-                                            <li><a>Edit</a></li>
-                                            <li><a>Delete</a></li>
-                                        </ul>
+                                        <div class="pt__links">
+                                            <ul>
+                                                <li><a>Edit</a></li>
+                                                <li><a>Delete</a></li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

@@ -17,6 +17,8 @@
     <script type="text/javascript" src="../../../../libs/common/js/components/Collector.js"></script>
     <script type="text/javascript" src="../../../../libs/common/js/components/Tabset.js"></script>
     <script type="text/javascript" src="../../../../libs/common/js/components/TagsInput.js"></script>
+    <script type="text/javascript" src="../../../../libs/common/js/components/Tooltip.js"></script>
+    <script type="text/javascript" src="../../../../libs/common/js/components/Autocomplete.js"></script>
 
     <script type="text/javascript">
         cm.onReady(function(){
@@ -49,7 +51,7 @@
     <li data-node="tabs:[]:container" data-config='{"id" : "examples", "title" : "Examples"}'>
         <h2>Input:</h2>
 
-        <div class="com-tags is-editable">
+        <div class="com__tags is-editable">
             <div class="inner">
                 <div class="l">
                     <div class="icon small tags" title="Tags"></div>
@@ -62,8 +64,23 @@
 
         <hr>
 
+        <h2>Input with Autocomplete:</h2>
+
+        <div class="com__tags is-editable">
+            <div class="inner">
+                <div class="l">
+                    <div class="icon small tags" title="Tags"></div>
+                </div>
+                <div class="r">
+                    <input type="text" value="tag1, tag2" data-element="tags" data-config='{"autocomplete" : {"data" : ["Sponge Bob", "User Userberg", "User Userbergovich", "User Userbergini", "User Userbergovski", "User Userbergoff", "User Userberegovoy", "User Userbergosyan", "User Userbergovenko"]}}'>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
         <h2>Listing:</h2>
-        <div class="com-tags">
+        <div class="com__tags">
             <div class="inner">
                 <div class="l">
                     <div class="icon small tags" title="Tags"></div>

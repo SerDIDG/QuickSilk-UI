@@ -3,10 +3,12 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-	<title>Elements: Form</title>
+	<title>Common: Form</title>
 
     <link type="text/css" rel="stylesheet" href="../../../../css/index.css">
     <link type="text/css" rel="stylesheet" href="../../styles/index.css">
+
+    <script type="text/javascript" src="../../../../libs/common/vendors/bgrins/TinyColor/tinycolor.js"></script>
 
     <script type="text/javascript" src="../../../../libs/common/js/polyfill.js"></script>
     <script type="text/javascript" src="../../../../libs/common/js/common.js"></script>
@@ -29,6 +31,11 @@
     <script type="text/javascript" src="../../../../libs/common/js/components/ActionMenu.js"></script>
     <script type="text/javascript" src="../../../../libs/common/js/components/Draganddrop.js"></script>
     <script type="text/javascript" src="../../../../libs/common/js/components/Sortable.js"></script>
+    <script type="text/javascript" src="../../../../libs/common/js/components/Draggable.js"></script>
+    <script type="text/javascript" src="../../../../libs/common/js/components/Autocomplete.js"></script>
+    <script type="text/javascript" src="../../../../libs/common/js/components/Draggable.js"></script>
+    <script type="text/javascript" src="../../../../libs/common/js/components/Palette.js"></script>
+    <script type="text/javascript" src="../../../../libs/common/js/components/ColorPicker.js"></script>
 
 	<script type="text/javascript">
 		cm.onReady(function(){
@@ -56,6 +63,9 @@
                 .add('time-select', function(node){
                     new Com.TimeSelect({'input' : node});
                 })
+                .add('colorpicker', function(node){
+                    new Com.ColorPicker({'input' : node});
+                })
                 .add('action-menu', function(node){
                     new Com.ActionMenu({
                         'node' : node
@@ -73,7 +83,7 @@
 
 <body>
 
-<h1 class="pt__box-title">Elements: Form</h1>
+<h1 class="pt__box-title">Common: Form</h1>
 
 <ul class="com__tabset__content-ul" data-element="tabset">
     <li data-node="tabs:[]:container" data-config='{"id" : "inputs", "title" : "Inputs"}'>
@@ -128,19 +138,19 @@
             <hr>
 
             <dl>
-                <dt>Datepicker:</dt>
+                <dt>Date Picker:</dt>
                 <dd>
                     <input type="text" name="datepicker1" placeholder="Expires date" data-element="datepicker" readonly>
                 </dd>
             </dl>
             <dl>
-                <dt>Datepicker with clear button:</dt>
+                <dt>Date Picker with clear button:</dt>
                 <dd>
                     <input type="text" name="datepicker2" placeholder="Expires date" data-element="datepicker" data-config='{"showClearButton" : true}' readonly>
                 </dd>
             </dl>
             <dl>
-                <dt>Datepicker with time select:</dt>
+                <dt>Date Picker with time select:</dt>
                 <dd>
                     <input type="text" name="datepicker3" placeholder="Expires date" data-element="datepicker" data-config='{"showClearButton" : true, "isDateTime" : true}' readonly>
                 </dd>
@@ -155,6 +165,24 @@
                 <dt>Time Select:</dt>
                 <dd>
                     <input type="text" readonly data-element="time-select">
+                </dd>
+            </dl>
+            <dl>
+                <dt>Time Select with seconds:</dt>
+                <dd>
+                    <input type="text" readonly data-element="time-select" data-config='{"withSeconds" : true}'>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Color Picker:</dt>
+                <dd>
+                    <input type="text" readonly value="#ffffff" data-element="colorpicker">
+                </dd>
+            </dl>
+            <dl>
+                <dt>Color Picker with clear button:</dt>
+                <dd>
+                    <input type="text" readonly value="#ffffff" data-element="colorpicker" data-config='{"showClearButton" : true}'>
                 </dd>
             </dl>
 
@@ -429,17 +457,20 @@
                          </ul>
                      </div>
                  </div>
-                 <input type="submit" value="Primary">
-                 <input type="button" value="Error" class="error">
-                 <input type="button" value="Secondary" class="secondary">
-                 <input type="button" value="Transparent" class="transparent">
+                 <input type="submit" value="Primary" class="button-primary">
+                 <input type="button" value="Valid" class="button-success">
+                 <input type="button" value="Pending" class="button-warning">
+                 <input type="button" value="Invalid" class="button-danger">
+                 <input type="button" value="Secondary" class="button-secondary">
+                 <input type="button" value="White" class="button-white">
+                 <input type="button" value="Transparent" class="button-transparent">
              </div>
 
              <hr>
 
              <div class="btn-wrap">
                  <input type="submit" value="Submit">
-                 <input type="button" value="Cancel" class="transparent">
+                 <input type="button" value="Cancel" class="button-transparent">
              </div>
 
              <hr>
@@ -452,7 +483,7 @@
              <hr>
 
              <div class="btn-wrap centered">
-                 <input type="button" value="Cancel" class="secondary">
+                 <input type="button" value="Cancel" class="button-secondary">
                  <input type="submit" value="Submit">
              </div>
 
@@ -460,7 +491,7 @@
 
              <div class="btn-wrap">
                  <input type="submit" value="Submit">
-                 <input type="button" value="Cancel" class="secondary">
+                 <input type="button" value="Cancel" class="button-secondary">
                  <div class="hint">Hint message text</div>
              </div>
 
@@ -468,7 +499,7 @@
 
              <div class="btn-wrap error">
                  <input type="submit" value="Submit">
-                 <input type="button" value="Cancel" class="secondary">
+                 <input type="button" value="Cancel" class="button-secondary">
                  <div class="hint">Validation error message text</div>
              </div>
 
@@ -476,7 +507,7 @@
 
              <div class="btn-wrap ok">
                  <input type="submit" value="Submit">
-                 <input type="button" value="Cancel" class="secondary">
+                 <input type="button" value="Cancel" class="button-secondary">
                  <div class="hint">Validation success message text</div>
              </div>
          </div>
@@ -789,9 +820,9 @@
         <div class="pt__toolbar bottom">
             <div class="inner clear">
                 <ul class="group">
-                    <li class="button is-icon secondary"><span class="icon toolbar bold"></span></li>
-                    <li class="button is-icon secondary active"><span class="icon toolbar italic"></span></li>
-                    <li class="button is-icon secondary"><span class="icon toolbar underline"></span></li>
+                    <li class="button is-icon button-secondary"><span class="icon toolbar bold"></span></li>
+                    <li class="button is-icon button-secondary active"><span class="icon toolbar italic"></span></li>
+                    <li class="button is-icon button-secondary"><span class="icon toolbar underline"></span></li>
                 </ul>
                 <ul class="group">
                     <li class="is-field medium">
@@ -885,16 +916,16 @@
                     <div class="cm-multifield">
                         <ul>
                             <li>
-                                <div class="cm-form-icons small count-1">
+                                <div class="cm__form__icons small count-1">
                                     <input type="text">
-                                    <div class="cm-form-icons-outside">
+                                    <div class="cm__form__icons-outside">
                                         <div class="icon small remove linked"></div>
                                     </div>
                                 </div>
                             </li>
 
                             <li>
-                                <div class="cm-form-icons small count-1">
+                                <div class="cm__form__icons small count-1">
                                     <div class="cols three clear">
                                         <div class="col">
                                             <select data-element="select">
@@ -912,15 +943,15 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="cm-form-icons-outside">
+                                    <div class="cm__form__icons-outside">
                                         <div class="icon small remove linked"></div>
                                     </div>
                                 </div>
                             </li>
 
                             <li>
-                                <div class="cm-form-icons small count-1">
-                                    <div class="cm-form-icons-outside">
+                                <div class="cm__form__icons small count-1">
+                                    <div class="cm__form__icons-outside">
                                         <div class="icon small add linked"></div>
                                     </div>
                                 </div>
@@ -940,9 +971,9 @@
                             <li data-node="items:[]:container" class="is-sortable">
                                 <div class="icon default linked" data-node="drag"></div>
 
-                                <div class="cm-form-icons small count-1">
+                                <div class="cm__form__icons small count-1">
                                     <input type="text">
-                                    <div class="cm-form-icons-outside">
+                                    <div class="cm__form__icons-outside">
                                         <div class="icon small remove linked"></div>
                                     </div>
                                 </div>
@@ -951,9 +982,9 @@
                             <li data-node="items:[]:container" class="is-sortable">
                                 <div class="icon default linked" data-node="drag"></div>
 
-                                <div class="cm-form-icons small count-1">
+                                <div class="cm__form__icons small count-1">
                                     <input type="text">
-                                    <div class="cm-form-icons-outside">
+                                    <div class="cm__form__icons-outside">
                                         <div class="icon small remove linked"></div>
                                     </div>
                                 </div>
@@ -962,7 +993,7 @@
                             <li data-node="items:[]:container" class="is-sortable">
                                 <div class="icon default linked" data-node="drag"></div>
 
-                                <div class="cm-form-icons small count-1">
+                                <div class="cm__form__icons small count-1">
                                     <div class="cols three clear">
                                         <div class="col">
                                             <select data-element="select">
@@ -980,15 +1011,15 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="cm-form-icons-outside">
+                                    <div class="cm__form__icons-outside">
                                         <div class="icon small remove linked"></div>
                                     </div>
                                 </div>
                             </li>
 
                             <li>
-                                <div class="cm-form-icons small count-1">
-                                    <div class="cm-form-icons-outside">
+                                <div class="cm__form__icons small count-1">
+                                    <div class="cm__form__icons-outside">
                                         <div class="icon small add linked"></div>
                                     </div>
                                 </div>
@@ -1212,32 +1243,32 @@
 
             <hr>
 
-            <dl class="cm-form-icons small count-1">
+            <dl class="cm__form__icons small count-1">
                 <dt>Input with icon:</dt>
                 <dd>
                     <input type="text">
-                    <div class="cm-form-icons-outside">
+                    <div class="cm__form__icons-outside">
                         <div class="icon small add linked" title="Add"></div>
                     </div>
                 </dd>
             </dl>
 
-            <dl class="cm-form-icons small count-2">
+            <dl class="cm__form__icons small count-2">
                 <dt>Input with 2 icons:</dt>
                 <dd>
                     <input type="text">
-                    <div class="cm-form-icons-outside">
+                    <div class="cm__form__icons-outside">
                         <div class="icon small add linked" title="Add"></div>
                         <div class="icon small edit linked" title="Edit"></div>
                     </div>
                 </dd>
             </dl>
 
-            <dl class="cm-form-icons small count-3">
+            <dl class="cm__form__icons small count-3">
                 <dt>Input with 3 icons:</dt>
                 <dd>
                     <input type="text">
-                    <div class="cm-form-icons-outside">
+                    <div class="cm__form__icons-outside">
                         <div class="icon small add linked" title="Add"></div>
                         <div class="icon small edit linked" title="Edit"></div>
                         <div class="icon small remove linked" title="Remove"></div>
@@ -1245,11 +1276,11 @@
                 </dd>
             </dl>
 
-            <dl class="cm-form-icons small count-4">
+            <dl class="cm__form__icons small count-4">
                 <dt>Input with 4 icons:</dt>
                 <dd>
                     <input type="text">
-                    <div class="cm-form-icons-outside">
+                    <div class="cm__form__icons-outside">
                         <div class="icon small add linked" title="Add"></div>
                         <div class="icon small edit linked" title="Edit"></div>
                         <div class="icon small settings linked" title="Settings"></div>
