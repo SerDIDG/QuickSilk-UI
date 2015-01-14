@@ -8618,12 +8618,19 @@ a {
   text-decoration: none;
 }
 .cm__tags--title a,
+.cm__tags--title .link--inner,
 h1 a,
+h1 .link--inner,
 h2 a,
+h2 .link--inner,
 h3 a,
+h3 .link--inner,
 h4 a,
+h4 .link--inner,
 h5 a,
-h6 a {
+h5 .link--inner,
+h6 a,
+h6 .link--inner {
   font-weight: inherit;
   color: inherit;
 }
@@ -11411,3 +11418,13 @@ html.is-sidebar--expanded .app__area-header.icons {
     margin-right: 0;
   }
 }
+/*
+@CmColor-Font: #666666;
+@CmColor-Font-Link: @CmColor-Font;
+*/
+/*
+@CmFont-Base-LineHeight: 20px;
+@CmFont-Base-Size: 14px;
+@CmFont-Base-Family: Open Sans, sans-serif;
+@CmFont-Base-BoldWeight: 600;
+*/
