@@ -42,6 +42,36 @@
                 .addEvent('onConstruct', function(){
                     Part.Menu();
                 })
+                .add('columns', function(node){
+                    new Com.Columns({
+                        'columns' : node
+                    });
+                })
+                .add('togglebox', function(node){
+                    new Com.ToggleBox({
+                        'node' : node
+                    });
+                })
+                .add('module-menu', function(node){
+                    new App.ModuleMenu({
+                        'node' : node
+                    });
+                })
+                .add('slider', function(node){
+                    new Com.Slider({
+                        'node' : node
+                    });
+                })
+                .add('login-box', function(node){
+                    new App.LoginBox({
+                        'node' : node
+                    });
+                })
+                .add('sitemap', function(node){
+                    new App.SiteMap({
+                        'node' : node
+                    });
+                })
                 .add('app-topmenu', function(node){
                     new App.TopMenu({
                         'node' : node
@@ -50,11 +80,6 @@
                 .add('app-sidebar', function(node){
                     new App.Sidebar({
                         'node' : node
-                    });
-                })
-                .add('columns', function(node){
-                    new Com.Columns({
-                        'columns' : node
                     });
                 })
                 .add('template-editor', function(node){
@@ -116,31 +141,6 @@
                                 });
                             }
                         }
-                    });
-                })
-                .add('togglebox', function(node){
-                    new Com.ToggleBox({
-                        'node' : node
-                    });
-                })
-                .add('module-menu', function(node){
-                    new App.ModuleMenu({
-                        'node' : node
-                    });
-                })
-                .add('slider', function(node){
-                    new Com.Slider({
-                        'node' : node
-                    });
-                })
-                .add('login-box', function(node){
-                    new App.LoginBox({
-                        'node' : node
-                    });
-                })
-                .add('sitemap', function(node){
-                    new App.SiteMap({
-                        'node' : node
                     });
                 })
                 .construct();
@@ -674,51 +674,6 @@
         <div class="tpl__header__inner">
 
             <div class="header-top">
-                <div class="app__area-header icons" data-com-draganddrop="area">
-                    <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                        <div class="app-pt__widget is-editable">
-                            <div class="border"></div>
-                            <div class="drag" data-com-draganddrop="drag">
-                                <div class="icon draggable"></div>
-                            </div>
-                            <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                <div class="icon draggable"></div>
-                            </div>
-                            <div class="pt__menu menu">
-                                <div class="icon small settings"></div>
-                                <ul class="pt__menu-dropdown">
-                                    <li><a>Edit</a></li>
-                                    <li><a>Remove</a></li>
-                                    <li><a>Clear</a></li>
-                                    <li><a>Good Button</a></li>
-                                </ul>
-                            </div>
-                            <div class="inner">
-                                <div class="app__module app-mod__social-media">
-                                    <div class="pt__line-share pull-left">
-                                        <ul>
-                                            <li>
-                                                <a title="Facebook" class="icon linked" target="_blank" href="http://www.facebook.com">
-                                                    <img src="img/icons/large/facebook.png" alt="">
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a title="Twitter" class="icon linked" target="_blank" href="http://www.twitter.com">
-                                                    <img src="img/icons/large/twitter.png">
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a title="LinkedIn" class="icon linked" target="_blank" href="http://www.linkedin.com">
-                                                    <img src="img/icons/large/linkedin.png">
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="app__area-header links" data-com-draganddrop="area">
                     <div class="app-pt__widget-container" data-com-draganddrop="draggable">
@@ -844,43 +799,6 @@
             </div>
 
             <div class="header-center">
-                <div class="app__area-header search" data-com-draganddrop="area">
-                    <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                        <div class="app-pt__widget is-editable">
-                            <div class="border"></div>
-                            <div class="drag" data-com-draganddrop="drag">
-                                <div class="icon draggable"></div>
-                            </div>
-                            <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                <div class="icon draggable"></div>
-                            </div>
-                            <div class="pt__menu menu">
-                                <div class="icon small settings"></div>
-                                <ul class="pt__menu-dropdown">
-                                    <li><a>Edit</a></li>
-                                    <li><a>Remove</a></li>
-                                    <li><a>Clear</a></li>
-                                    <li><a>Good Button</a></li>
-                                </ul>
-                            </div>
-                            <div class="inner">
-                                <div class="app__module app-mod__search">
-                                    <form class="form" action="">
-                                        <dl class="form-box">
-                                            <dt>Search</dt>
-                                            <dd>
-                                                <div class="form-field has-icon-right">
-                                                    <input type="text" name="search" placeholder="Search...">
-                                                    <input class="icon default linked" type="submit" value="">
-                                                </div>
-                                            </dd>
-                                        </dl>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="header-bottom">
@@ -1019,348 +937,6 @@
     <div class="tpl__content" data-node="Template.content">
         <div class="tpl__content__inner">
             <div class="app__area-main" data-com-draganddrop="area">
-                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                    <div class="app-pt__widget is-editable">
-                        <div class="border"></div>
-                        <div class="drag" data-com-draganddrop="drag">
-                            <div class="icon draggable"></div>
-                        </div>
-                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                            <div class="icon draggable"></div>
-                        </div>
-                        <div class="pt__menu menu">
-                            <div class="icon small settings"></div>
-                            <ul class="pt__menu-dropdown">
-                                <li><a>Edit</a></li>
-                                <li><a>Remove</a></li>
-                                <li><a>Clear</a></li>
-                                <li><a>Good Button</a></li>
-                            </ul>
-                        </div>
-                        <div class="inner">
-                            <div class="app__module app-mod__slider">
-                                <div class="com__gallery-layout com__slider-layout is-bar-none" data-element="slider" data-config='{"hasBar" : false}' data-node="ComSlider:{}">
-                                    <div class="inner" data-node="layout-inner">
-                                        <div class="com__gallery-preview">
-                                            <div class="inner">
-                                                <div class="com__slider theme-template" data-node="container">
-                                                    <div class="inner" data-node="inner">
-                                                        <div class="size cm__aspect-35x10"></div>
-                                                        <div class="slides" data-node="slides">
-                                                            <ul data-node="slidesInner">
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/1.jpg" alt="">
-                                                                            <div class="app-mod__slider__featured"></div>
-                                                                            <div class="text">
-                                                                                <h1>Office of the PBO</h1>
-                                                                                <p>QuickSilk has recently developed a highly-commended integrated monitoring database that helps MPs, senators and citizens scrutinize the government’s financial performance.</p>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/2.jpg" alt="">
-                                                                            <div class="app-mod__slider__featured"></div>
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/3.jpg" alt="">
-                                                                            <div class="app-mod__slider__featured"></div>
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/4.jpg" alt="">
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/5.jpg" alt="">
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/6.jpg" alt="">
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/7.jpg" alt="">
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/8.jpg" alt="">
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                                <li data-node="items:[]:container">
-                                                                    <div class="pt__image is-adaptive is-no-hover">
-                                                                        <div class="inner">
-                                                                            <img class="descr" src="img/slider/9.jpg" alt="">
-                                                                        </div>
-                                                                    </div>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="com__gallery-controls is-small">
-                                                            <div class="inner">
-                                                                <div class="bar-arrow prev" data-node="prev">
-                                                                    <div class="icon default prev"></div>
-                                                                </div>
-                                                                <div class="bar-arrow next" data-node="next">
-                                                                    <div class="icon default next"></div>
-                                                                </div>
-                                                                <div class="bar-buttons">
-                                                                    <ul data-node="buttons"></ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                    <div class="app-pt__widget is-editable">
-                        <div class="border"></div>
-                        <div class="drag" data-com-draganddrop="drag">
-                            <div class="icon draggable"></div>
-                        </div>
-                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                            <div class="icon draggable"></div>
-                        </div>
-                        <div class="pt__menu menu">
-                            <div class="icon small settings"></div>
-                            <ul class="pt__menu-dropdown">
-                                <li><a>Edit</a></li>
-                                <li><a>Remove</a></li>
-                                <li><a>Clear</a></li>
-                                <li><a>Good Button</a></li>
-                            </ul>
-                        </div>
-                        <div class="inner">
-                            <div class="app__module app-mod__columns com__columns indent-24px is-chassis-visible is-editable" data-element="columns">
-                                <div class="inner" data-com__columns="inner">
-                                    <div class="container" data-com__columns="holder">
-                                        <div class="com__column" data-com__columns="column" style="width: 21%;">
-                                            <div class="inner" data-com__columns="column-inner" data-com-draganddrop="area">
-                                                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-pt__widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="pt__menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="pt__menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app__module app-mod__image">
-                                                                <div class="pt__image is-resizeble is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/content/image3.jpg" alt="">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-pt__widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="pt__menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="pt__menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app__module app-mod__richeditor">
-                                                                <h2>Solutions</h2>
-                                                                <p>Since 2001, QuickSilk has been developing web-based products, applications, components, modules and plug-ins that are in active use today by small and medium size businesses, government, non-profit organizations and NGO's throughout Canada, the United States of America and Europe.</p>
-                                                                <p style="text-align: right;"><b><a>Read more</a></b></p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="com__column" data-com__columns="column" style="width: 21%;">
-                                            <div class="inner" data-com__columns="column-inner" data-com-draganddrop="area" id="debug-area">
-                                                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-pt__widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="pt__menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="pt__menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app__module app-mod__image">
-                                                                <div class="pt__image is-resizeble is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/content/image2.jpg" alt="">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-pt__widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="pt__menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="pt__menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app__module app-mod__richeditor">
-                                                                <h2>Services</h2>
-                                                                <p>Whether you need to register or transfer a domain name, have a web or ecommerce site designed and developed, host your web site, or establish your own VPS or dedicated web server, QuickSilk is your one stop shop for quality web services.</p>
-                                                                <p style="text-align: right;"><b><a>Read more</a></b></p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="com__column" data-com__columns="column" style="width: 21%;">
-                                            <div class="inner" data-com__columns="column-inner" data-com-draganddrop="area">
-                                                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-pt__widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="pt__menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="pt__menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app__module app-mod__image">
-                                                                <div class="pt__image is-resizeble is-no-hover">
-                                                                    <div class="inner">
-                                                                        <img class="descr" src="img/content/image1.jpg" alt="">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                                    <div class="app-pt__widget is-editable">
-                                                        <div class="border"></div>
-                                                        <div class="drag" data-com-draganddrop="drag">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                                            <div class="icon draggable"></div>
-                                                        </div>
-                                                        <div class="pt__menu menu">
-                                                            <div class="icon small settings"></div>
-                                                            <ul class="pt__menu-dropdown">
-                                                                <li><a>Edit</a></li>
-                                                                <li><a>Remove</a></li>
-                                                                <li><a>Clear</a></li>
-                                                                <li><a>Good Button</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="inner">
-                                                            <div class="app__module app-mod__richeditor">
-                                                                <h2>QuickSilk™ CMS</h2>
-                                                                <p>The QuickSilk™ Content Management System (CMS) is a flexible, easy to use, Rich Internet Application (RIA) framework that significantly improves your ability to effectively manage the collection and publication of your organization's website and digital assets, for targeted Internet, Intranet & Extranet audiences.</p>
-                                                                <p style="text-align: right;"><b><a>Read more</a></b></p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="com__column" data-com__columns="column" style="width: 37%;">
-                                            <div class="inner" data-com__columns="column-inner" data-com-draganddrop="area"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1371,159 +947,143 @@
     <!-- [* *** FOOTER START *** *] -->
 
     <div class="tpl__footer" data-node="Template.footer" data-element="sitemap">
-        <div class="tpl__footer__inner">
-            <div class="footer-top">
-                <div class="footer-inner">
-                    <div class="r">
-                        <div class="app__area-footer copyright" data-com-draganddrop="area">
-                            <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                <div class="app-pt__widget is-editable">
-                                    <div class="border"></div>
-                                    <div class="drag" data-com-draganddrop="drag">
-                                        <div class="icon draggable"></div>
-                                    </div>
-                                    <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                        <div class="icon draggable"></div>
-                                    </div>
-                                    <div class="pt__menu menu">
-                                        <div class="icon small settings"></div>
-                                        <ul class="pt__menu-dropdown">
-                                            <li><a>Edit</a></li>
-                                            <li><a>Remove</a></li>
-                                            <li><a>Clear</a></li>
-                                            <li><a>Good Button</a></li>
-                                        </ul>
-                                    </div>
-                                    <div class="inner">
-                                        <div class="app__module app-mod__menu theme-footer pull-right" data-element="module-menu">
-                                            <ul>
-                                                <li>
-                                                    <a>Privacy Policy</a>
-                                                </li>
-                                                <li>
-                                                    <a>Terms of Use</a>
-                                                </li>
-                                                <li>
-                                                    <a>Legal</a>
-                                                </li>
-                                            </ul>
-                                            <div class="menu-select">
-                                                <div class="menu-button"></div>
-                                                <select data-node="AppModuleMenu.select">
-                                                    <option value="http://google.com">Privacy Policy</option>
-                                                    <option>Terms of Use</option>
-                                                    <option>Legal</option>
-                                                </select>
-                                            </div>
-                                        </div>
+        <div class="footer-top">
+            <div class="tpl__footer__inner">
+                <div class="footer-right">
+                    <div class="app__area-footer main" data-com-draganddrop="area">
+                        <div class="app-pt__widget-container" data-com-draganddrop="draggable">
+                            <div class="app-pt__widget is-editable">
+                                <div class="border"></div>
+                                <div class="drag" data-com-draganddrop="drag">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="pt__menu menu">
+                                    <div class="icon small settings"></div>
+                                    <ul class="pt__menu-dropdown">
+                                        <li><a>Edit</a></li>
+                                        <li><a>Remove</a></li>
+                                        <li><a>Clear</a></li>
+                                        <li><a>Good Button</a></li>
+                                    </ul>
+                                </div>
+                                <div class="inner">
+                                    <div class="app__module app-mod__search">
+                                        <form class="form" action="">
+                                            <dl class="form-box">
+                                                <dt>Search</dt>
+                                                <dd>
+                                                    <div class="form-field has-icon-right">
+                                                        <input type="text" name="search" placeholder="Search...">
+                                                        <input class="icon default linked" type="submit" value="">
+                                                    </div>
+                                                </dd>
+                                            </dl>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                <div class="app-pt__widget is-editable">
-                                    <div class="border"></div>
-                                    <div class="drag" data-com-draganddrop="drag">
-                                        <div class="icon draggable"></div>
-                                    </div>
-                                    <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                        <div class="icon draggable"></div>
-                                    </div>
-                                    <div class="pt__menu menu">
-                                        <div class="icon small settings"></div>
-                                        <ul class="pt__menu-dropdown">
-                                            <li><a>Edit</a></li>
-                                            <li><a>Remove</a></li>
-                                            <li><a>Clear</a></li>
-                                            <li><a>Good Button</a></li>
-                                        </ul>
-                                    </div>
-                                    <div class="inner">
-                                        <div class="app__module app-mod__richeditor">
-                                            <p style="text-align: right;">Copyright © 2014 QuickSilk, All Rights Reserved.</p>
-                                            <p style="text-align: right;">Quicksilk™ and Spin The Web. Your Way™ are registered trademarks of QuickSilk Inc.</p>
+                        <div class="app-pt__widget-container" data-com-draganddrop="draggable">
+                            <div class="app-pt__widget is-editable">
+                                <div class="border"></div>
+                                <div class="drag" data-com-draganddrop="drag">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="pt__menu menu">
+                                    <div class="icon small settings"></div>
+                                    <ul class="pt__menu-dropdown">
+                                        <li><a>Edit</a></li>
+                                        <li><a>Remove</a></li>
+                                        <li><a>Clear</a></li>
+                                        <li><a>Good Button</a></li>
+                                    </ul>
+                                </div>
+                                <div class="inner">
+                                    <div class="app__module app-mod__social-media">
+                                        <div class="pt__line-share pull-right">
+                                            <ul>
+                                                <li>
+                                                    <a title="Facebook" class="icon linked" target="_blank" href="http://www.facebook.com">
+                                                        <img src="img/content/social/facebook.png" alt="">
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a title="Twitter" class="icon linked" target="_blank" href="http://www.twitter.com">
+                                                        <img src="img/content/social/twitter.png">
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a title="LinkedIn" class="icon linked" target="_blank" href="http://www.linkedin.com">
+                                                        <img src="img/content/social/linkedin.png">
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="l">
-                        <div class="sitemap-button" data-node="AppSitemap.button">
-                            <span class="on-hide">Looking for our sitemap?</span>
-                            <span class="on-show">I get it, close me now</span>
-                            <span class="arrow"></span>
+                <div class="footer-left">
+                    <div class="app__area-footer sitemap" data-com-draganddrop="area">
+                        <div class="app-pt__widget-container" data-com-draganddrop="draggable">
+                            <div class="app-pt__widget is-editable">
+                                <div class="border"></div>
+                                <div class="drag" data-com-draganddrop="drag">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
+                                    <div class="icon draggable"></div>
+                                </div>
+                                <div class="pt__menu menu">
+                                    <div class="icon small settings"></div>
+                                    <ul class="pt__menu-dropdown">
+                                        <li><a>Edit</a></li>
+                                        <li><a>Remove</a></li>
+                                        <li><a>Clear</a></li>
+                                        <li><a>Good Button</a></li>
+                                    </ul>
+                                </div>
+                                <div class="inner">
+                                    <div class="app__module app-mod__sitemap">
+                                        <div class="inner">
+                                            <dl>
+                                                <dt><a href="#">Home</a></dt>
+                                                <dd></dd>
+                                            </dl>
+                                            <dl>
+                                                <dt><a href="#">Web Solutions</a></dt>
+                                                <dd><a href="#">QuickSilk Licensed CMS</a></dd>
+                                                <dd><a href="#">QuickSilk Hosted CMSS</a></dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="footer-center" data-node="AppSitemap.target">
-                <div class="footer-borders">
-                    <div class="footer-inner">
-                        <div class="app__area-footer sitemap" data-com-draganddrop="area">
-                            <div class="app-pt__widget-container" data-com-draganddrop="draggable">
-                                <div class="app-pt__widget is-editable">
-                                    <div class="border"></div>
-                                    <div class="drag" data-com-draganddrop="drag">
-                                        <div class="icon draggable"></div>
-                                    </div>
-                                    <div class="drag is-bottom" data-com-draganddrop="drag-bottom">
-                                        <div class="icon draggable"></div>
-                                    </div>
-                                    <div class="pt__menu menu">
-                                        <div class="icon editable-icon"></div>
-                                        <ul class="pt__menu-dropdown">
-                                            <li><a>Edit</a></li>
-                                            <li><a>Remove</a></li>
-                                            <li><a>Clear</a></li>
-                                            <li><a>Good Button</a></li>
-                                        </ul>
-                                    </div>
-                                    <div class="inner">
-                                        <div class="app__module app-mod__sitemap">
-                                            <div class="inner">
-                                                <dl>
-                                                    <dt><a href="#">Home</a></dt>
-                                                    <dd></dd>
-                                                </dl>
-                                                <dl>
-                                                    <dt><a href="#">Web Solutions</a></dt>
-                                                    <dd><a href="#">QuickSilk Licensed CMS</a></dd>
-                                                    <dd><a href="#">QuickSilk Hosted CMSS</a></dd>
-                                                </dl>
-                                                <dl>
-                                                    <dt><a href="#">Web Services</a></dt>
-                                                    <dd><a href="#">Custom eCommerce &amp; Web Development</a></dd>
-                                                    <dd><a href="#">Web Hosting</a></dd>
-                                                </dl>
-                                                <dl>
-                                                    <dt><a href="#">Client Support</a></dt>
-                                                    <dd></dd>
-                                                </dl>
-                                                <dl>
-                                                    <dt><a href="#">Partners</a></dt>
-                                                    <dd><a href="#">Outsourcing Program</a></dd>
-                                                    <dd><a href="#">Reseller Program</a></dd>
-                                                </dl>
-                                                <dl>
-                                                    <dt><a href="#">About</a></dt>
-                                                    <dd><a href="#">Management &amp; Advisory Board</a></dd>
-                                                    <dd><a href="#">Client Portfolio</a></dd>
-                                                    <dd><a href="#">Community Initiative</a></dd>
-                                                    <dd><a href="#">News &amp; Events</a></dd>
-                                                </dl>
-                                                <dl>
-                                                    <dt><a href="#">Contact</a></dt>
-                                                    <dd></dd>
-                                                </dl>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <div class="footer-bottom">
+            <div class="tpl__footer__inner">
+                <div class="footer-right">
+                    <div class="app__area-footer powered" data-com-draganddrop="area">
+                    </div>
+                </div>
+
+                <div class="footer-left">
+                    <div class="app__area-footer copyright" data-com-draganddrop="area">
                     </div>
                 </div>
             </div>

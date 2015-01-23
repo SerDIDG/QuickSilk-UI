@@ -11,9 +11,8 @@
 
 // /* ******* TEMPLATE ******* */
 
-@Tpl-Color-FontDark: #333333;
-@Tpl-Footer-LineHeight: 18px;
-@Tpl-Footer-FontSize: 11px;
+@TplColor-Separator: #ededed;
+@TplFooter-ColumnRight-Width: 370px;
 
 // /* ************************************************ */
 // /* ******* COMMON ******* */
@@ -21,104 +20,108 @@
 
 // /* ******* COLORS ******* */
 
-@CmColor-Primary: 205;
-@CmColor-Primary-DarkSaturation: 98%;
-@CmColor-Primary-DarkDefault-Lightness: 29%;
+@CmColor-Font-Link: #00adef;
+@CmColor-Font-LinkHover: #202020;
+@CmColor-Border: #d7d9da;
 
-/*
-@CmColor-Font: #666666;
-@CmColor-Font-Link: @CmColor-Font;
-*/
+@CmColor-Primary: 197;
 
-// /* ******* FONTS ******* */
+// /* ******* BORDER ******* */
 
-/*
-@CmFont-Base-LineHeight: 20px;
-@CmFont-Base-Size: 14px;
-@CmFont-Base-Family: Open Sans, sans-serif;
-@CmFont-Base-BoldWeight: 600;
-*/
+@CmBorder-Radius: 0px;
+
+// /* ******* COMMON ******* */
+
+// /* *** FORM *** */
+
+@CmForm-FieldHeight: 34px;
 
 // /* ************************************************ */
 // /* ******* APPLICATION ******* */
 // /* ************************************************ */
 
+// /* ******* LAYOUTS ******* */
+
+// /* *** TOP MENU *** */
+
+@AppLT-TopMenu-FontWeight: 300;
+
 // /* ******* TEMPLATE ******* */
 
-@AppTpl-Container-Size: box;
-@AppTpl-Container-Width: 1180px;
+@AppTpl-Container-Size: wide;
+@AppTpl-Container-Width: 1170px;
 @AppTpl-Container-Align: center;
-@AppTpl-Container-BackgroundColor: transparent;
-@AppTpl-Container-BackgroundImage: url('@{TplPath-Images}/bg-back.png');
+@AppTpl-Container-BackgroundColor: #ffffff;
+@AppTpl-Container-BackgroundImage: none;
 @AppTpl-Container-BackgroundPosition: center center;
 @AppTpl-Container-BackgroundRepeat: repeat;
 @AppTpl-Container-BackgroundParallax: scroll;
 
-@AppTpl-Header-Width: 1180px;
+@AppTpl-Header-Width: 1170px;
 @AppTpl-Header-Align: center;
 
-@AppTpl-Footer-Width: 1180px;
+@AppTpl-Footer-Width: 1170px;
 @AppTpl-Footer-Align: center;
 
 // /* ******* FONT ******* */
 
-@AppFont-H1-Family: Open Sans, sans-serif;
-@AppFont-H1-LineHeight: 34px;
-@AppFont-H1-Size: 24px;
-@AppFont-H1-Weight: 700;
-@AppFont-H1-Color: #005694;
+@AppFont-H1-Family: Roboto, sans-serif;
+@AppFont-H1-LineHeight: normal;
+@AppFont-H1-Size: 50px;
+@AppFont-H1-Weight: 300;
+@AppFont-H1-Color: #1f1f1f;
 @AppFont-H1-Decoration: none;
 @AppFont-H1-Style: normal;
 
-@AppFont-H2-Family: Open Sans, sans-serif;
-@AppFont-H2-LineHeight: 24px;
-@AppFont-H2-Size: 18px;
-@AppFont-H2-Weight: 700;
-@AppFont-H2-Color: #005694;
+@AppFont-H2-Family: Roboto, sans-serif;
+@AppFont-H2-LineHeight: normal;
+@AppFont-H2-Size: 30px;
+@AppFont-H2-Weight: 300;
+@AppFont-H2-Color: #1f1f1f;
 @AppFont-H2-Decoration: none;
 @AppFont-H2-Style: normal;
 
-@AppFont-H3-Family: Open Sans, sans-serif;
-@AppFont-H3-LineHeight: 24px;
-@AppFont-H3-Size: 16px;
-@AppFont-H3-Weight: 600;
-@AppFont-H3-Color: #333333;
+@AppFont-H3-Family: Roboto, sans-serif;
+@AppFont-H3-LineHeight: 30px;
+@AppFont-H3-Size: 20px;
+@AppFont-H3-Weight: 400;
+@AppFont-H3-Color: #000000;
 @AppFont-H3-Decoration: none;
 @AppFont-H3-Style: normal;
 
-@AppFont-H4-Family: Open Sans, sans-serif;
-@AppFont-H4-LineHeight: 20px;
-@AppFont-H4-Size: 14px;
-@AppFont-H4-Weight: 600;
-@AppFont-H4-Color: #333333;
+@AppFont-H4-Family: Roboto, sans-serif;
+@AppFont-H4-LineHeight: 30px;
+@AppFont-H4-Size: 18px;
+@AppFont-H4-Weight: 300;
+@AppFont-H4-Color: #000000;
 @AppFont-H4-Decoration: none;
 @AppFont-H4-Style: normal;
 
-@AppFont-H5-Family: Open Sans, sans-serif;
-@AppFont-H5-LineHeight: 20px;
-@AppFont-H5-Size: 11px;
-@AppFont-H5-Weight: 600;
-@AppFont-H5-Color: #333333;
+@AppFont-H5-Family: Roboto, sans-serif;
+@AppFont-H5-LineHeight: 24px;
+@AppFont-H5-Size: 16px;
+@AppFont-H5-Weight: 700;
+@AppFont-H5-Color: #000000;
 @AppFont-H5-Decoration: none;
 @AppFont-H5-Style: normal;
 
-@AppFont-H6-Family: Open Sans, sans-serif;
-@AppFont-H6-LineHeight: 20px;
-@AppFont-H6-Size: 9px;
-@AppFont-H6-Weight: 600;
-@AppFont-H6-Color: #333333;
+@AppFont-H6-Family: Roboto, sans-serif;
+@AppFont-H6-LineHeight: 18px;
+@AppFont-H6-Size: 15px;
+@AppFont-H6-Weight: 500;
+@AppFont-H6-Color: #000000;
 @AppFont-H6-Decoration: none;
 @AppFont-H6-Style: normal;
 
 @AppFont-P-Family: Open Sans, sans-serif;
-@AppFont-P-LineHeight: 20px;
+@AppFont-P-LineHeight: 24px;
 @AppFont-P-Size: 14px;
-@AppFont-P-Weight: 400;
-@AppFont-P-Color: #666666;
+@AppFont-P-Weight: 300;
+@AppFont-P-Color: #000000;
 @AppFont-P-Decoration: none;
 @AppFont-P-Style: normal;
 
-@AppFont-A-Weight: 400;
-@AppFont-A-Color: #666666;
-@AppFont-A-Decoration: none;
+@AppFont-A-Weight: 300;
+@AppFont-A-Color: #00adef;
+@AppFont-A-Decoration: underline;
 @AppFont-A-Style: normal;
