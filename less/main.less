@@ -127,7 +127,6 @@
             text-decoration: underline;
             .mx__transition(background color, @CmUI-Transition-Duration);
 
-
             &:hover {
                 background-color: #ffffff;
                 color: @CmColor-Font-LinkHover;
@@ -518,14 +517,28 @@ ul {
     list-style-image: url("@{TplPath-Images}/icons/small/ul-image.png");
 }
 
+/* ******* ICONS ****** */
+
+.tpl-icon {
+    &.link-arrow {
+        background-image: url("@{TplPath-Images}/icons/tpl/link-arrow.png");
+    }
+}
+
 /* ******* COMMON ******* */
 
 .tpl__arrow-right {
     &:before {
-        .fa-icon;
+        .icon.initial;
+        .tpl-icon.link-arrow;
+        width: 8px;
+        height: @CmFont-Base-LineHeight;
+        display: inline-block;
+        vertical-align: middle;
         margin-right: 8px;
-        content: @fa-var-angle-right;
         text-decoration: none;
+        line-height: inherit;
+        content: '';
     }
 }
 
