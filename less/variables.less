@@ -9,10 +9,20 @@
 @AppPath-Images: '../libs/application/img';
 @TplPath-Images: '../img';
 
+@fa-font-path: "../libs/common/vendors/FortAwesome/Font-Awesome/fonts";
+
 // /* ******* TEMPLATE ******* */
 
+@TplFont-Alt-Family: 'Alegreya Sans', sans-serif;
+
 @TplColor-Separator: #ededed;
-@TplFooter-ColumnRight-Width: 370px;
+@TplColor-Box: #f9f9f9;
+@TplColor-Font-Alt: #7a7b7c;
+
+@TplButton-Radius: 3px;
+@TplButton-Shadow: inset 0 -3px 0 0 rgba(0, 0, 0, 0.22);
+
+@TplIndent-Box: 40px;
 
 // /* ************************************************ */
 // /* ******* COMMON ******* */
@@ -20,21 +30,49 @@
 
 // /* ******* COLORS ******* */
 
-@CmColor-Font-Link: #00adef;
+@CmColor-Font-Link: #00609f;
 @CmColor-Font-LinkHover: #202020;
+@CmColor-Font-Hint: #9f9f9f;
 @CmColor-Border: #d7d9da;
 
 @CmColor-Primary: 197;
+@CmColor-Primary-DarkSaturation: 100;
+@CmColor-Primary-DarkDefault-Lightness: 47;
+@CmColor-Primary-DarkHover-Lightness: 50;
+@CmColor-Primary-LightHighlight-Lightness: 95%;
+@CmColor-Warning-LightHighlight-Lightness: 95%;
 
-// /* ******* BORDER ******* */
+// /* ******* FONT ******* */
 
-@CmBorder-Radius: 0px;
+@CmFont-Base-BoldWeight: 400;
+@CmFont-Base-SizeSmall: 12px;
+@CmFont-Base-Hint-Size: 12px;
 
 // /* ******* COMMON ******* */
 
 // /* *** FORM *** */
 
+@CmForm-FieldSmallWidth: 230px;
 @CmForm-FieldHeight: 34px;
+
+// /* *** BORDER *** */
+
+@CmBorder-Radius: 0px;
+
+// /* ******* PARTS ******* */
+
+// /* *** LISTING *** */
+
+@PtListingItems-PaddingY: 0px;
+
+// /* *** MENU *** */
+
+@PtMenu-Indent: 0px;
+
+// /* ******* COMPONENTS ******* */
+
+@ComToggleBox-Title-DefaultBackground: @CmColor-Primary-DarkDefault;
+@ComToggleBox-Title-HoverBackground: @CmColor-Primary-DarkHover;
 
 // /* ************************************************ */
 // /* ******* APPLICATION ******* */
@@ -45,6 +83,13 @@
 // /* *** TOP MENU *** */
 
 @AppLT-TopMenu-FontWeight: 300;
+
+// /* ******* MODULES ******* */
+
+// /* *** SITEMAP *** */
+
+@AppMod-Sitemap-FontSize: @AppFont-P-Size;
+@AppMod-Sitemap-IndentY: @CmIndent-Large;
 
 // /* ******* TEMPLATE ******* */
 
@@ -66,62 +111,62 @@
 // /* ******* FONT ******* */
 
 @AppFont-H1-Family: Roboto, sans-serif;
-@AppFont-H1-LineHeight: normal;
+@AppFont-H1-LineHeight: 60px;
 @AppFont-H1-Size: 50px;
 @AppFont-H1-Weight: 300;
-@AppFont-H1-Color: #1f1f1f;
+@AppFont-H1-Color: #0f2a4c;
 @AppFont-H1-Decoration: none;
 @AppFont-H1-Style: normal;
 
 @AppFont-H2-Family: Roboto, sans-serif;
-@AppFont-H2-LineHeight: normal;
+@AppFont-H2-LineHeight: 40px;
 @AppFont-H2-Size: 30px;
 @AppFont-H2-Weight: 300;
-@AppFont-H2-Color: #1f1f1f;
+@AppFont-H2-Color: #51585b;
 @AppFont-H2-Decoration: none;
 @AppFont-H2-Style: normal;
 
 @AppFont-H3-Family: Roboto, sans-serif;
-@AppFont-H3-LineHeight: 30px;
-@AppFont-H3-Size: 20px;
-@AppFont-H3-Weight: 400;
-@AppFont-H3-Color: #000000;
+@AppFont-H3-LineHeight: 32px;
+@AppFont-H3-Size: 26px;
+@AppFont-H3-Weight: 100;
+@AppFont-H3-Color: #0f2a4c;
 @AppFont-H3-Decoration: none;
 @AppFont-H3-Style: normal;
 
 @AppFont-H4-Family: Roboto, sans-serif;
-@AppFont-H4-LineHeight: 30px;
-@AppFont-H4-Size: 18px;
-@AppFont-H4-Weight: 300;
-@AppFont-H4-Color: #000000;
+@AppFont-H4-LineHeight: 28px;
+@AppFont-H4-Size: 22px;
+@AppFont-H4-Weight: 400;
+@AppFont-H4-Color: #0f2a4c;
 @AppFont-H4-Decoration: none;
 @AppFont-H4-Style: normal;
 
 @AppFont-H5-Family: Roboto, sans-serif;
 @AppFont-H5-LineHeight: 24px;
-@AppFont-H5-Size: 16px;
-@AppFont-H5-Weight: 700;
-@AppFont-H5-Color: #000000;
+@AppFont-H5-Size: 18px;
+@AppFont-H5-Weight: 300;
+@AppFont-H5-Color: #202020;
 @AppFont-H5-Decoration: none;
 @AppFont-H5-Style: normal;
 
 @AppFont-H6-Family: Roboto, sans-serif;
-@AppFont-H6-LineHeight: 18px;
-@AppFont-H6-Size: 15px;
-@AppFont-H6-Weight: 500;
-@AppFont-H6-Color: #000000;
+@AppFont-H6-LineHeight: 24px;
+@AppFont-H6-Size: 16px;
+@AppFont-H6-Weight: 300;
+@AppFont-H6-Color: #202020;
 @AppFont-H6-Decoration: none;
 @AppFont-H6-Style: normal;
 
 @AppFont-P-Family: Open Sans, sans-serif;
 @AppFont-P-LineHeight: 24px;
-@AppFont-P-Size: 14px;
+@AppFont-P-Size: 15px;
 @AppFont-P-Weight: 300;
-@AppFont-P-Color: #000000;
+@AppFont-P-Color: #3a3a3a;
 @AppFont-P-Decoration: none;
 @AppFont-P-Style: normal;
 
 @AppFont-A-Weight: 300;
-@AppFont-A-Color: #00adef;
+@AppFont-A-Color: #7a7b7c;
 @AppFont-A-Decoration: underline;
 @AppFont-A-Style: normal;

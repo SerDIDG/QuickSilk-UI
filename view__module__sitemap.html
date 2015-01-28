@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Quicksilk</title>
+    <title>Modules: Sitemap</title>
 
     <script type="text/javascript" src="libs/common/js/polyfill.js"></script>
     <script type="text/javascript" src="libs/common/js/common.js"></script>
@@ -32,70 +32,84 @@
                 .addEvent('onConstruct', function(){
                     Part.Menu();
                 })
-                .add('sitemap', function(node){
-                    new App.SiteMap({
-                        'node' : node
-                    });
-                })
                 .construct();
         });
     </script>
 </head>
+<body class="cm__indent__medium">
 
-<body>
-
-
-<!-- [* ******* TEMPLATE START ******* *] -->
-
-<div class="tpl__container" data-node="Template.container">
-
-    <!-- [* *** HEADER START *** *] -->
-
-    <div class="tpl__header" data-node="Template.header">
-        <div class="tpl__header__inner">
-
-            <div class="header-top">
-                <div class="app__area-header links" data-com-draganddrop="area"></div>
-            </div>
-
-            <div class="header-center">
-                <div class="header-logo">
-                    <div class="app__area-header logo" data-com-draganddrop="area"></div>
-                </div>
-
-                <div class="header-bottom">
-                    <div class="app__area-header menu" data-com-draganddrop="area"></div>
-                </div>
-            </div>
-        </div>
+<div class="app__module app-mod__sitemap theme-template">
+    <div class="inner">
+        <dl>
+            <dt>
+                <h4><a>Overview</a></h4>
+            </dt>
+            <dd>
+                <a>Features</a>
+            </dd>
+            <dd>
+                <a>Design</a>
+            </dd>
+            <dd>
+                <a>Store</a>
+            </dd>
+            <dd>
+                <a>Partners</a>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <h4><a>Resources</a></h4>
+            </dt>
+            <dd>
+                <a>Stories</a>
+            </dd>
+            <dd>
+                <a>Gallery</a>
+            </dd>
+            <dd>
+                <a>Professionals</a>
+            </dd>
+            <dd>
+                <a>Support</a>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <h4><a>Updates</a></h4>
+            </dt>
+            <dd>
+                <a>Blog</a>
+            </dd>
+            <dd>
+                <a>Status</a>
+            </dd>
+            <dd>
+                <a>Twitter</a>
+            </dd>
+            <dd>
+                <a>Facebook</a>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <h4><a>Company</a></h4>
+            </dt>
+            <dd>
+                <a>About</a>
+            </dd>
+            <dd>
+                <a>Press</a>
+            </dd>
+            <dd>
+                <a>Terms</a>
+            </dd>
+            <dd>
+                <a>Privacy</a>
+            </dd>
+        </dl>
     </div>
-
-    <!-- [* *** HEADER END *** *] -->
-
-    <!-- [* *** CONTENT START *** *] -->
-
-    <div class="tpl__content" data-node="Template.content">
-        <div class="tpl__content__inner">
-            <div class="app__area-main" data-com-draganddrop="area"></div>
-        </div>
-    </div>
-
-    <!-- [* *** CONTENT END *** *] -->
-
-
-    <!-- [* *** FOOTER START *** *] -->
-
-    <div class="tpl__footer" data-node="Template.footer" data-element="sitemap">
-        <div class="tpl__footer__inner">
-            <div class="app__area-footer main" data-com-draganddrop="area"></div>
-        </div>
-    </div>
-
-    <!-- [* *** FOOTER END *** *] -->
-
 </div>
-
-<!-- [* ******* TEMPLATE END ******* *] -->
 
 </body>
 </html>
