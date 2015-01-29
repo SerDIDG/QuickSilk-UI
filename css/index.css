@@ -2816,6 +2816,9 @@ button::-moz-focus-inner {
 .pt__box-flat:last-child {
   margin: 0;
 }
+.pt__box-flat > .inner > .title {
+  margin-bottom: 24px;
+}
 .pt__box-flat.active {
   background: #e9f6fb;
 }
@@ -10670,11 +10673,11 @@ html.is-immediately .tpl__container {
 .app-lt__plan:last-child {
   margin: 0;
 }
-.app-lt__plan.active {
-  background: #e9f6fb;
-}
 .app-lt__plan > .inner > .title {
   margin-bottom: 24px;
+}
+.app-lt__plan.active {
+  background: #e9f6fb;
 }
 .app-lt__plan > .inner {
   display: -webkit-flex;
@@ -11683,9 +11686,6 @@ button.button-transparent--hover {
 }
 /* ******* PARTS ******* */
 /* *** BOX *** */
-.pt__box-flat > .inner > .title {
-  margin-bottom: 24px;
-}
 .pt__box-item .title {
   font-weight: 300;
 }
