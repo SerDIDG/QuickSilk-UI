@@ -14,6 +14,7 @@
     <script type="text/javascript" src="libs/common/js/components/Collector.js"></script>
 
     <script type="text/javascript" src="libs/application/js/Application.js"></script>
+    <script type="text/javascript" src="libs/application/js/components/Template.js"></script>
     <script type="text/javascript" src="libs/application/js/components/TopMenu.js"></script>
     <script type="text/javascript" src="libs/application/js/components/Sidebar.js"></script>
     <script type="text/javascript" src="libs/application/js/components/TemplateEditor.js"></script>
@@ -32,8 +33,8 @@
                 .addEvent('onConstruct', function(){
                     Part.Menu();
                 })
-                .add('sitemap', function(node){
-                    new App.SiteMap({
+                .add('app-template', function(node){
+                    new App.Template({
                         'node' : node
                     });
                 })
@@ -47,11 +48,11 @@
 
 <!-- [* ******* TEMPLATE START ******* *] -->
 
-<div class="tpl__container" data-node="Template.container">
+<div class="tpl__container" data-node="AppTemplate.container" data-element="app-template">
 
     <!-- [* *** HEADER START *** *] -->
 
-    <div class="tpl__header" data-node="Template.header">
+    <div class="tpl__header" data-node="AppTemplate.header">
         <div class="tpl__header__inner">
 
             <div class="header-top">
@@ -74,7 +75,7 @@
 
     <!-- [* *** CONTENT START *** *] -->
 
-    <div class="tpl__content" data-node="Template.content">
+    <div class="tpl__content" data-node="AppTemplate.content">
         <div class="tpl__content__inner">
             <div class="app__area-main" data-com-draganddrop="area"></div>
         </div>
@@ -85,7 +86,7 @@
 
     <!-- [* *** FOOTER START *** *] -->
 
-    <div class="tpl__footer" data-node="Template.footer" data-element="sitemap">
+    <div class="tpl__footer" data-node="AppTemplate.footer">
         <div class="tpl__footer__inner">
             <div class="app__area-footer main" data-com-draganddrop="area"></div>
         </div>
