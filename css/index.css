@@ -9263,7 +9263,8 @@ h6 .link--inner {
 /* *** TEMPLATE *** */
 .tpl__container {
   position: relative;
-  background: #ffffff none repeat center center / auto scroll;
+  background: #ffffff none repeat center center scroll;
+  background-size: auto;
 }
 .tpl__header,
 .tpl__content,
@@ -11706,6 +11707,10 @@ html.is-immediately .tpl__container {
   }
 }
 /* ******* MODULES: WORKING AREA ******* */
+.app-mod__area {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
 .app-mod__area.pull-left > .inner {
   margin: 0;
 }
