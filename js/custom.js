@@ -1,7 +1,10 @@
 /* ******* APPLICATION ******* */
 
 App.LoginBox.prototype.setParams({
-    'adaptive' : true
+    'Com.Tooltip' : {
+        'adaptiveX' : true,
+        'adaptiveY' : false
+    }
 });
 
 App.Template.prototype.setParams({
