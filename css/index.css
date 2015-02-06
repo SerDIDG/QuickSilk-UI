@@ -271,12 +271,12 @@
   color: #0080b3;
 }
 .cm__font--hint {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
 }
 .cm__font--hint-cursive,
 .form .hint {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
   font-style: italic;
 }
@@ -3005,7 +3005,7 @@ button::-moz-focus-inner {
   margin-bottom: 0;
 }
 .pt__box-item .hint {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
   font-style: italic;
 }
@@ -3484,7 +3484,7 @@ button::-moz-focus-inner {
   visibility: hidden;
   position: absolute;
   margin: 0;
-  padding: 0px 0;
+  padding: 0px 0px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -3999,7 +3999,7 @@ button::-moz-focus-inner {
   visibility: hidden;
   position: absolute;
   margin: 0;
-  padding: 0px 0;
+  padding: 0px 0px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -4743,7 +4743,7 @@ button::-moz-focus-inner {
   margin: 0;
 }
 .pt__listing .list-info {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
 }
 .pt__listing .list-title {
@@ -5496,7 +5496,7 @@ button::-moz-focus-inner {
   margin: 0;
 }
 .lt__comment .comment-info {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
   line-height: 14px;
 }
@@ -5521,7 +5521,7 @@ button::-moz-focus-inner {
   margin: 0;
 }
 .lt__comment .comment-actions {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
   line-height: 12px;
 }
@@ -5608,7 +5608,7 @@ button::-moz-focus-inner {
 }
 .lt__post .post-info,
 .lt__post .post-tags {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
 }
 .lt__post .post-info .pt__line-info {
@@ -5870,12 +5870,12 @@ button::-moz-focus-inner {
   vertical-align: top;
 }
 .lt__forum-post > .inner > .r .date {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
   color: #3a3a3a;
 }
 .lt__forum-post > .inner > .r .pt__box-editable {
-  font: 300 12px/24px Open Sans, sans-serif;
+  font: 300 12px/18px Open Sans, sans-serif;
   color: #9f9f9f;
   margin: 0;
   color: #3a3a3a;
@@ -6143,7 +6143,7 @@ button::-moz-focus-inner {
   visibility: hidden;
   position: absolute;
   margin: 0;
-  padding: 0px 0;
+  padding: 0px 0px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -7715,7 +7715,7 @@ html.ie9 .com__palette .b-range {
   visibility: hidden;
   position: absolute;
   margin: 0;
-  padding: 0px 0;
+  padding: 0px 0px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -9766,7 +9766,7 @@ html.is-immediately .tpl__container {
   visibility: hidden;
   position: absolute;
   margin: 0;
-  padding: 0px 0;
+  padding: 0px 0px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -10278,7 +10278,7 @@ html.is-immediately .tpl__container {
     visibility: hidden;
     position: absolute;
     margin: 0;
-    padding: 0px 0;
+    padding: 0px 0px;
     list-style: none;
     opacity: 0;
     right: auto;
@@ -11407,7 +11407,7 @@ html.is-immediately .tpl__container {
   visibility: hidden;
   position: absolute;
   margin: 0;
-  padding: 0px 0;
+  padding: 0px 0px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -12629,10 +12629,28 @@ ul {
 }
 /* ******* CONTENT ******* */
 .tpl__content {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
   z-index: 1;
 }
-.app__area-main {
-  min-height: 150px;
+.tpl__content .tpl__content__inner {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+}
+.tpl__content .tpl__content__inner .app__area-main {
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
 }
 /* ******* FOOTER ******* */
 .tpl__footer {
