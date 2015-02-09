@@ -11306,7 +11306,7 @@ html.is-immediately .tpl__container {
 /* ******* MODULES: SPACER: ADAPTIVE ******* */
 @media only screen and (max-width: 640px) {
   html.is-adaptive .app-mod__spacer {
-    height: 24px;
+    height: 24px !important;
   }
 }
 /* ******* MODULES: LOGIN LINK ******* */
