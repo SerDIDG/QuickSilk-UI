@@ -9658,6 +9658,9 @@ html.is-immediately .tpl__container {
 .app-pt__widget-container > .app-pt__widget > .menu {
   display: none;
 }
+.app-pt__widget-container > .app-pt__widget .app-pt__widget__controls {
+  display: none;
+}
 .app-pt__widget-container > .app-pt__widget.is-hidden {
   display: none;
 }
@@ -9922,6 +9925,9 @@ html.is-immediately .tpl__container {
   opacity: 1;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
+}
+.app-pt__widget-container > .app-pt__widget.is-editable .app-pt__widget__controls {
+  display: block;
 }
 .app-pt__widget-container > .app-pt__widget.is-hide {
   -webkit-transition: none;
