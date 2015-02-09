@@ -11207,6 +11207,12 @@ html.is-immediately .tpl__container {
 .app-mod__image a {
   display: block;
 }
+/* ******* MODULES: IMAGE: ADAPTIVE ******* */
+@media only screen and (max-width: 640px) {
+  html.is-adaptive .app-mod__image .pt__image > .inner > .descr {
+    margin: 0 auto;
+  }
+}
 /* ******* MODULES: INFO BLOCK ******* */
 .app-mod__infoblock > .inner {
   padding: 4px;
@@ -11295,6 +11301,13 @@ html.is-immediately .tpl__container {
 /* ******* MODULES: DIVIDER ******* */
 .app-mod__divider hr {
   margin: 0;
+}
+/* ******* MODULES: SPACER ******* */
+/* ******* MODULES: SPACER: ADAPTIVE ******* */
+@media only screen and (max-width: 640px) {
+  html.is-adaptive .app-mod__spacer {
+    height: 24px;
+  }
 }
 /* ******* MODULES: LOGIN LINK ******* */
 .app-mod__loginlink ul {
@@ -11892,10 +11905,16 @@ html.is-immediately .tpl__container {
   left: auto;
 }
 /* ******* MODULES: SOCIAL MEDIA ******* */
-/* *******  MODULES: SOCIAL MEDIA: PRINT ******* */
+/* ******* MODULES: SOCIAL MEDIA: PRINT ******* */
 @media print {
   .app-mod__social-media {
     display: none !important;
+  }
+}
+/* ******* MODULES: SOCIAL MEDIA: ADAPTIVE ******* */
+@media only screen and (max-width: 640px) {
+  html.is-adaptive .app-mod__social-media .pt__line-share > ul {
+    text-align: center;
   }
 }
 /* ******* MODULES: LANG SWITCH ******* */
@@ -12686,9 +12705,6 @@ html.is-sidebar--expanded .app__area-footer {
 }
 /* ******* ADAPTIVE ******* */
 @media only screen and (max-width: 640px) {
-  html.is-adaptive .app-mod__logo .pt__image > .inner > .descr {
-    margin: 0 auto;
-  }
   html.is-adaptive .header-top,
   html.is-adaptive .header-logo,
   html.is-adaptive .header-center,
