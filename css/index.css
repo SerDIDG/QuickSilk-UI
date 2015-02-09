@@ -3673,7 +3673,7 @@ button::-moz-focus-inner {
   margin-right: 8px;
 }
 .pt__toolbar .group > li.is-icon {
-  width: 30px;
+  width: 34px;
   padding: 0;
 }
 .pt__toolbar .group > li.is-icon .icon {
@@ -9288,6 +9288,9 @@ body:before {
 .app-icon.small.plus {
   background-image: url("../libs/application/img/icons/small/plus.png");
 }
+.app-icon.x-small.arrow-white-down {
+  background-image: url("../libs/application/img/icons/x-small/arrow-white-down.png");
+}
 /* ******* COMMON: TAGS ******* */
 h1 {
   font: 300 50px/60px Roboto, sans-serif;
@@ -9637,7 +9640,6 @@ html.is-immediately .tpl__container {
   position: relative;
   z-index: 1;
   margin: 0 0 24px;
-  -webkit-transform: translateZ(0);
   -webkit-transition: z-index 300ms ease-in-out;
   transition: z-index 300ms ease-in-out;
 }
@@ -10236,8 +10238,10 @@ html.is-immediately .tpl__container {
     margin: 0 0 0 25px;
   }
   html.is-adaptive .app-lt__topmenu .menu > li.has-dropdown > a {
+    background-image: url("../libs/application/img/icons/x-small/arrow-white-down.png");
     padding-right: 20px;
-    background: url("../libs/application/img/layouts/topmenu/arrow-down.png") 100% center no-repeat;
+    background-position: 100% center;
+    background-repeat: no-repeat;
   }
   html.is-adaptive .app-lt__topmenu .menu > li:before {
     width: 1px;
