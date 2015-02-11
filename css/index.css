@@ -9368,6 +9368,20 @@ h6 .cm__link,
 .tpl__footer {
   position: relative;
 }
+.tpl__header:hover,
+.tpl__content:hover,
+.tpl__footer:hover {
+  z-index: 10;
+}
+.tpl__header {
+  z-index: 3;
+}
+.tpl__content {
+  z-index: 1;
+}
+.tpl__footer {
+  z-index: 2;
+}
 .tpl__header__inner,
 .tpl__content__inner,
 .tpl__footer__inner {
@@ -12696,6 +12710,11 @@ ul {
   flex-direction: row;
   z-index: 1;
 }
+.firefox .tpl__content {
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
 .tpl__content .tpl__content__inner {
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -12704,6 +12723,11 @@ ul {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
+}
+.firefox .tpl__content .tpl__content__inner {
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 .tpl__content .tpl__content__inner .app__area-main {
   -webkit-flex: 1 1 auto;
