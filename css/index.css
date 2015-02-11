@@ -10261,7 +10261,7 @@ html.is-immediately .tpl__container {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 128px;
+    max-width: 256px;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
   }
@@ -10514,7 +10514,13 @@ html.is-immediately .tpl__container {
     font-size: 12px;
   }
   html.is-adaptive .app-lt__topmenu .menu > li > a {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 128px;
     font-size: 12px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
   }
   html.is-adaptive .app-lt__topmenu .menu-centered {
     float: right;
