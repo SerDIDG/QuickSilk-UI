@@ -9695,17 +9695,21 @@ h6 .cm__link,
 .tpl__footer__inner {
   position: relative;
 }
-.tpl__header,
-.tpl__footer {
+.tpl__header {
   padding: 0 24px;
 }
 .tpl__header__inner {
   max-width: 1170px;
   margin: 0 auto;
 }
+.tpl__footer {
+  padding: 0 24px;
+}
+.tpl__footer {
+  padding: 0;
+}
 .tpl__footer__inner {
-  max-width: 1170px;
-  margin: 0 auto;
+  max-width: none;
 }
 /* *** TEMPLATE MIXINS *** */
 /* *** MODULES / PAGES *** */
@@ -13051,12 +13055,6 @@ ul {
 .tpl__footer {
   z-index: 2;
   border-top: 1px solid #ededed;
-}
-.tpl__footer {
-  padding: 0;
-}
-.tpl__footer__inner {
-  max-width: none;
 }
 /* *** AREAS *** */
 .app__area-footer.main {
