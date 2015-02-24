@@ -7377,7 +7377,6 @@ html.ie9 .com__palette .b-range {
   padding: 0 40px;
   line-height: 50px;
   font-size: 24px;
-  font-weight: 400;
   text-transform: none;
 }
 .com-pagination ul li a:active,
@@ -7992,6 +7991,15 @@ html.ie9 .com__palette .b-range {
   transition: opacity 300ms ease-in-out;
 }
 .com__tabset__content > ul > li:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  font-size: 0;
+  height: 0;
+}
+.com__tabset__content > ul > li:before {
   content: ".";
   display: block;
   clear: both;
@@ -12439,7 +12447,6 @@ button.button-big {
   padding: 0 40px;
   line-height: 50px;
   font-size: 24px;
-  font-weight: 400;
   text-transform: none;
 }
 /* *** FORM *** */
