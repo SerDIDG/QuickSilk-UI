@@ -9571,25 +9571,16 @@ h6 .com__glossary .com__glossary__title {
 .tpl__footer__inner {
   position: relative;
 }
-.tpl__header {
+.tpl__header,
+.tpl__footer,
+.tpl__content {
   padding: 0 24px;
 }
-.tpl__header__inner {
-  max-width: 1000px;
-  margin: 0 auto;
-}
-.tpl__footer {
-  padding: 0 24px;
-}
-.tpl__header {
-  padding: 0 24px;
-}
+.tpl__header__inner,
+.tpl__content__inner,
 .tpl__footer__inner {
   max-width: 1000px;
   margin: 0 auto;
-}
-.tpl__footer {
-  padding: 0 24px;
 }
 /* *** TEMPLATE MIXINS *** */
 /* *** MODULES / PAGES *** */
