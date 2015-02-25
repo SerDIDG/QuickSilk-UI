@@ -9320,13 +9320,13 @@ body:before {
 }
 /* ******* COMMON: FONT ******* */
 .app__font--h1 {
-  font: 100 48px/56px Open Sans, sans-serif;
+  font: 100 48px/64px Open Sans, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h2 {
-  font: 400 32px/40px Open Sans, sans-serif;
+  font: 400 32px/42px Open Sans, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -9458,13 +9458,13 @@ body:before {
 }
 /* ******* COMMON: TAGS ******* */
 h1 {
-  font: 100 48px/56px Open Sans, sans-serif;
+  font: 100 48px/64px Open Sans, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 h2 {
-  font: 400 32px/40px Open Sans, sans-serif;
+  font: 400 32px/42px Open Sans, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
