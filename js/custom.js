@@ -3,7 +3,7 @@
 App.LoginBox.prototype.setParams({
     'Com.Tooltip' : {
         'adaptiveX' : true,
-        'adaptiveY' : false
+        'adaptiveY' : true
     }
 });
 
