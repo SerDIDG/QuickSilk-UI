@@ -2848,6 +2848,7 @@ button::-moz-focus-inner {
   padding: 4px;
   background: #fff;
   border: 1px solid #cccccc;
+  border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -moz-box-sizing: border-box;
@@ -3631,6 +3632,7 @@ button::-moz-focus-inner {
   position: absolute;
   margin: 0;
   padding: 4px 0px;
+  border-width: 1px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -4156,6 +4158,7 @@ button::-moz-focus-inner {
   position: absolute;
   margin: 0;
   padding: 4px 0px;
+  border-width: 1px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -6134,6 +6137,7 @@ button::-moz-focus-inner {
   padding: 4px;
   background: #fff;
   border: 1px solid #cccccc;
+  border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -moz-box-sizing: border-box;
@@ -6299,6 +6303,7 @@ button::-moz-focus-inner {
   position: absolute;
   margin: 0;
   padding: 4px 0px;
+  border-width: 1px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -7575,6 +7580,9 @@ html.ie9 .com__palette .b-range {
 .com__togglebox > dt ol,
 .com__togglebox > dt hr,
 .com__togglebox > dt .form .hint,
+.com__togglebox > dt .pt__box-item .title,
+.com__togglebox > dt .pt__box-item .descr,
+.com__togglebox > dt .pt__box-item .author,
 .com__togglebox > dt .com__glossary .com__glossary__title,
 .com__togglebox > dt .com__glossary .com__glossary__title {
   color: inherit;
@@ -7911,6 +7919,7 @@ html.ie9 .com__palette .b-range {
   position: absolute;
   margin: 0;
   padding: 4px 0px;
+  border-width: 1px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -10281,6 +10290,7 @@ html.is-immediately .tpl__container {
   position: absolute;
   margin: 0;
   padding: 4px 0px;
+  border-width: 1px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -10905,6 +10915,7 @@ html.is-immediately .tpl__container {
     position: absolute;
     margin: 0;
     padding: 4px 0px;
+    border-width: 1px;
     list-style: none;
     opacity: 0;
     top: 100%;
@@ -11656,19 +11667,19 @@ html.is-immediately .tpl__container {
 .app-lt__plan .plan-abstract ul ul ul {
   list-style: disc;
 }
-.app-lt__plan .plan-abstract .cm__tags:last-child,
-.app-lt__plan .plan-abstract h1:last-child,
-.app-lt__plan .plan-abstract h2:last-child,
-.app-lt__plan .plan-abstract h3:last-child,
-.app-lt__plan .plan-abstract h4:last-child,
-.app-lt__plan .plan-abstract h5:last-child,
-.app-lt__plan .plan-abstract h6:last-child,
-.app-lt__plan .plan-abstract p:last-child,
-.app-lt__plan .plan-abstract dl:last-child,
-.app-lt__plan .plan-abstract ul:last-child,
-.app-lt__plan .plan-abstract ol:last-child,
-.app-lt__plan .plan-abstract hr:last-child {
-  margin: 0;
+.app-lt__plan .plan-abstract .cm__tags,
+.app-lt__plan .plan-abstract h1,
+.app-lt__plan .plan-abstract h2,
+.app-lt__plan .plan-abstract h3,
+.app-lt__plan .plan-abstract h4,
+.app-lt__plan .plan-abstract h5,
+.app-lt__plan .plan-abstract h6,
+.app-lt__plan .plan-abstract p,
+.app-lt__plan .plan-abstract dl,
+.app-lt__plan .plan-abstract ul,
+.app-lt__plan .plan-abstract ol,
+.app-lt__plan .plan-abstract hr {
+  text-align: center;
 }
 .app-lt__plan .plan-info ul {
   margin: 0;
@@ -11836,6 +11847,7 @@ html.is-immediately .tpl__container {
   padding: 4px;
   background: #fff;
   border: 1px solid #cccccc;
+  border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -moz-box-sizing: border-box;
@@ -11905,6 +11917,7 @@ html.is-immediately .tpl__container {
   padding: 4px;
   background: #fff;
   border: 1px solid #cccccc;
+  border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -moz-box-sizing: border-box;
@@ -12054,6 +12067,7 @@ html.is-immediately .tpl__container {
   position: absolute;
   margin: 0;
   padding: 4px 0px;
+  border-width: 1px;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -12220,10 +12234,10 @@ html.is-immediately .tpl__container {
   text-align: center;
 }
 .app-mod__menu.default.pull-center > ul > li {
-  margin-left: 12px;
+  margin-right: 12px;
 }
-.app-mod__menu.default.pull-center > ul > li:first-child {
-  margin-left: 0;
+.app-mod__menu.default.pull-center > ul > li:last-child {
+  margin-right: 0;
 }
 .app-mod__menu.default.pull-right > ul {
   text-align: right;
@@ -12235,13 +12249,61 @@ html.is-immediately .tpl__container {
   margin-left: 0;
 }
 .app-mod__menu.default.pull-justify > ul {
-  text-align: left;
+  text-align: center;
 }
 .app-mod__menu.default.pull-justify > ul > li {
-  margin-left: 12px;
+  margin-right: 12px;
 }
-.app-mod__menu.default.pull-justify > ul > li:first-child {
+.app-mod__menu.default.pull-justify > ul > li:last-child {
   margin-right: 0;
+}
+.app-mod__menu.default .menu-select .select,
+.app-mod__menu.default .menu-select select {
+  height: 28px;
+  padding-right: 28px;
+}
+.app-mod__menu.default .menu-button {
+  width: 28px;
+  height: 28px;
+}
+.app-mod__menu.default .menu-select .select,
+.app-mod__menu.default .menu-select select {
+  color: #666666;
+}
+.app-mod__menu.default .menu-select .select option,
+.app-mod__menu.default .menu-select .select optgroup,
+.app-mod__menu.default .menu-select select option,
+.app-mod__menu.default .menu-select select optgroup {
+  color: #666666;
+}
+.app-mod__menu.default.has-separator > ul > li:after {
+  width: 1px;
+  height: 12px;
+  margin: auto;
+  display: block;
+  position: absolute;
+  content: '';
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: auto;
+  background-color: #cccccc;
+}
+.app-mod__menu.default.has-separator.pull-left > ul > li:last-child:after,
+.app-mod__menu.default.has-separator.pull-center > ul > li:last-child:after,
+.app-mod__menu.default.has-separator.pull-justify > ul > li:last-child:after {
+  display: none;
+}
+.app-mod__menu.default.has-separator.pull-left > ul > li:after,
+.app-mod__menu.default.has-separator.pull-center > ul > li:after,
+.app-mod__menu.default.has-separator.pull-justify > ul > li:after {
+  right: -7px;
+}
+.app-mod__menu.default.has-separator.pull-right > ul > li:first-child:after {
+  display: none;
+}
+.app-mod__menu.default.has-separator.pull-right > ul > li:after {
+  left: -7px;
 }
 .app-mod__menu.primary.pull-left > ul {
   text-align: left;
@@ -12256,10 +12318,10 @@ html.is-immediately .tpl__container {
   text-align: center;
 }
 .app-mod__menu.primary.pull-center > ul > li {
-  margin-left: 12px;
+  margin-right: 12px;
 }
-.app-mod__menu.primary.pull-center > ul > li:first-child {
-  margin-left: 0;
+.app-mod__menu.primary.pull-center > ul > li:last-child {
+  margin-right: 0;
 }
 .app-mod__menu.primary.pull-right > ul {
   text-align: right;
@@ -12271,13 +12333,61 @@ html.is-immediately .tpl__container {
   margin-left: 0;
 }
 .app-mod__menu.primary.pull-justify > ul {
-  text-align: left;
+  text-align: center;
 }
 .app-mod__menu.primary.pull-justify > ul > li {
-  margin-left: 12px;
+  margin-right: 12px;
 }
-.app-mod__menu.primary.pull-justify > ul > li:first-child {
+.app-mod__menu.primary.pull-justify > ul > li:last-child {
   margin-right: 0;
+}
+.app-mod__menu.primary .menu-select .select,
+.app-mod__menu.primary .menu-select select {
+  height: 28px;
+  padding-right: 28px;
+}
+.app-mod__menu.primary .menu-button {
+  width: 28px;
+  height: 28px;
+}
+.app-mod__menu.primary .menu-select .select,
+.app-mod__menu.primary .menu-select select {
+  color: #666666;
+}
+.app-mod__menu.primary .menu-select .select option,
+.app-mod__menu.primary .menu-select .select optgroup,
+.app-mod__menu.primary .menu-select select option,
+.app-mod__menu.primary .menu-select select optgroup {
+  color: #666666;
+}
+.app-mod__menu.primary.has-separator > ul > li:after {
+  width: 1px;
+  height: 12px;
+  margin: auto;
+  display: block;
+  position: absolute;
+  content: '';
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: auto;
+  background-color: #cccccc;
+}
+.app-mod__menu.primary.has-separator.pull-left > ul > li:last-child:after,
+.app-mod__menu.primary.has-separator.pull-center > ul > li:last-child:after,
+.app-mod__menu.primary.has-separator.pull-justify > ul > li:last-child:after {
+  display: none;
+}
+.app-mod__menu.primary.has-separator.pull-left > ul > li:after,
+.app-mod__menu.primary.has-separator.pull-center > ul > li:after,
+.app-mod__menu.primary.has-separator.pull-justify > ul > li:after {
+  right: -7px;
+}
+.app-mod__menu.primary.has-separator.pull-right > ul > li:first-child:after {
+  display: none;
+}
+.app-mod__menu.primary.has-separator.pull-right > ul > li:after {
+  left: -7px;
 }
 .app-mod__menu.secondary.pull-left > ul {
   text-align: left;
@@ -12292,10 +12402,10 @@ html.is-immediately .tpl__container {
   text-align: center;
 }
 .app-mod__menu.secondary.pull-center > ul > li {
-  margin-left: 12px;
+  margin-right: 12px;
 }
-.app-mod__menu.secondary.pull-center > ul > li:first-child {
-  margin-left: 0;
+.app-mod__menu.secondary.pull-center > ul > li:last-child {
+  margin-right: 0;
 }
 .app-mod__menu.secondary.pull-right > ul {
   text-align: right;
@@ -12307,13 +12417,61 @@ html.is-immediately .tpl__container {
   margin-left: 0;
 }
 .app-mod__menu.secondary.pull-justify > ul {
-  text-align: left;
+  text-align: center;
 }
 .app-mod__menu.secondary.pull-justify > ul > li {
-  margin-left: 12px;
+  margin-right: 12px;
 }
-.app-mod__menu.secondary.pull-justify > ul > li:first-child {
+.app-mod__menu.secondary.pull-justify > ul > li:last-child {
   margin-right: 0;
+}
+.app-mod__menu.secondary .menu-select .select,
+.app-mod__menu.secondary .menu-select select {
+  height: 28px;
+  padding-right: 28px;
+}
+.app-mod__menu.secondary .menu-button {
+  width: 28px;
+  height: 28px;
+}
+.app-mod__menu.secondary .menu-select .select,
+.app-mod__menu.secondary .menu-select select {
+  color: #666666;
+}
+.app-mod__menu.secondary .menu-select .select option,
+.app-mod__menu.secondary .menu-select .select optgroup,
+.app-mod__menu.secondary .menu-select select option,
+.app-mod__menu.secondary .menu-select select optgroup {
+  color: #666666;
+}
+.app-mod__menu.secondary.has-separator > ul > li:after {
+  width: 1px;
+  height: 12px;
+  margin: auto;
+  display: block;
+  position: absolute;
+  content: '';
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: auto;
+  background-color: #cccccc;
+}
+.app-mod__menu.secondary.has-separator.pull-left > ul > li:last-child:after,
+.app-mod__menu.secondary.has-separator.pull-center > ul > li:last-child:after,
+.app-mod__menu.secondary.has-separator.pull-justify > ul > li:last-child:after {
+  display: none;
+}
+.app-mod__menu.secondary.has-separator.pull-left > ul > li:after,
+.app-mod__menu.secondary.has-separator.pull-center > ul > li:after,
+.app-mod__menu.secondary.has-separator.pull-justify > ul > li:after {
+  right: -7px;
+}
+.app-mod__menu.secondary.has-separator.pull-right > ul > li:first-child:after {
+  display: none;
+}
+.app-mod__menu.secondary.has-separator.pull-right > ul > li:after {
+  left: -7px;
 }
 .app-mod__menu.vertical ul {
   margin: 0;
@@ -12360,15 +12518,6 @@ html.is-immediately .tpl__container {
 }
 .app-mod__menu.vertical.pull-right ul ul {
   margin-right: 24px;
-}
-.app-mod__menu .menu-select .select,
-.app-mod__menu .menu-select select {
-  height: 28px;
-  padding-right: 28px;
-}
-.app-mod__menu .menu-button {
-  width: 28px;
-  height: 28px;
 }
 /* ******* MODULES: MENU: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
@@ -12647,6 +12796,12 @@ html.is-immediately .tpl__container {
 }
 .app-mod__lang-switch.pull-right > ul {
   text-align: right;
+}
+/* ******* MODULES: LANG SWITCH: ADAPTIVE ******* */
+@media only screen and (max-width: 640px) {
+  html.is-adaptive .app-mod__lang-switch > ul {
+    text-align: center;
+  }
 }
 /* ******* MODULES: LANG SWITCH: PRINT ******* */
 @media print {
