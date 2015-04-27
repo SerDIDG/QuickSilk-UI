@@ -2971,8 +2971,6 @@ button::-moz-focus-inner {
   border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -3748,8 +3746,6 @@ button::-moz-focus-inner {
   border: 1px solid #cccccc;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -4271,8 +4267,6 @@ button::-moz-focus-inner {
   border: 1px solid #cccccc;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -6317,8 +6311,6 @@ button::-moz-focus-inner {
   border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -6470,8 +6462,6 @@ button::-moz-focus-inner {
   border: 1px solid #cccccc;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -8056,8 +8046,6 @@ html.ie9 .com__palette .b-range {
   border: 1px solid #cccccc;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -10473,8 +10461,6 @@ html.is-immediately .tpl__container {
   border: 1px solid #cccccc;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -11117,8 +11103,6 @@ html.is-immediately .tpl__container {
     border: 1px solid #cccccc;
     border-radius: 3px;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
     -webkit-background-clip: padding-box;
     -moz-background-clip: padding-box;
     background-clip: padding-box;
@@ -12221,23 +12205,14 @@ html.is-immediately .tpl__container {
 }
 /* ******* COMPONENTS: HELP TOUR ******* */
 .app__helptour__popup {
-  padding: 4px;
-  background: #fff;
-  border: 1px solid #cccccc;
-  border-width: 1px;
-  border-radius: 3px;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  -webkit-background-clip: padding-box;
-  -moz-background-clip: padding-box;
-  background-clip: padding-box;
   width: 360px;
   padding: 24px;
   visibility: hidden;
   position: fixed;
   z-index: 9999;
   opacity: 0;
+  background: #ffffff;
+  border-radius: 3px;
   top: 0;
   right: auto;
   bottom: auto;
@@ -12317,8 +12292,6 @@ html.is-immediately .tpl__container {
   border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -12387,8 +12360,6 @@ html.is-immediately .tpl__container {
   border-width: 1px;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
@@ -12524,8 +12495,6 @@ html.is-immediately .tpl__container {
   border: 1px solid #cccccc;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
