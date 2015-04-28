@@ -2,8 +2,8 @@
 /* ************ FIORA UI: COMMON STYLES ************ */
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../libs/common/fonts/Magpie-UI-Glyphs.eot?6');
-  src: url('../libs/common/fonts/Magpie-UI-Glyphs.eot?#iefix6') format('embedded-opentype'), url('../libs/common/fonts/Magpie-UI-Glyphs.woff?6') format('woff'), url('../libs/common/fonts/Magpie-UI-Glyphs.ttf?6') format('truetype'), url('../libs/common/fonts/Magpie-UI-Glyphs.svg?6#Magpie-UI-Glyphs') format('svg');
+  src: url('../libs/common/fonts/Magpie-UI-Glyphs.eot?7');
+  src: url('../libs/common/fonts/Magpie-UI-Glyphs.eot?#iefix7') format('embedded-opentype'), url('../libs/common/fonts/Magpie-UI-Glyphs.woff?7') format('woff'), url('../libs/common/fonts/Magpie-UI-Glyphs.ttf?7') format('truetype'), url('../libs/common/fonts/Magpie-UI-Glyphs.svg?7#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -982,6 +982,9 @@
 }
 .cm-i__circle-arrow-right:before {
   content: '\e701';
+}
+.cm-i__circle-close:before {
+  content: '\e702';
 }
 /* ******* COMMON: TAGS ******* */
 *,
@@ -11047,6 +11050,7 @@ html.is-immediately .tpl__container {
 .app-lt__topmenu .menu li.has-icon > a {
   padding-left: 0;
 }
+/* *** HELPERS *** */
 .app-lt__topmenu-helper__height {
   height: 48px;
 }
@@ -11436,8 +11440,14 @@ html.is-immediately .tpl__container {
   -webkit-transition: background 300ms ease-in-out;
   transition: background 300ms ease-in-out;
 }
+.app-lt__sidebar .sidebar__menu > ul > li > a:hover {
+  -webkit-transition: background 100ms ease-in-out;
+  transition: background 100ms ease-in-out;
+}
 .app-lt__sidebar .sidebar__menu > ul > li > a:hover:after {
   background-color: #2985e0;
+  -webkit-transition: background 100ms ease-in-out;
+  transition: background 100ms ease-in-out;
 }
 .app-lt__sidebar .sidebar__menu > ul > li.active > a {
   background-color: #16599c;
@@ -12211,8 +12221,9 @@ html.is-immediately .tpl__container {
   position: fixed;
   z-index: 9999;
   opacity: 0;
-  background: #ffffff;
   border-radius: 3px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  background: #ffffff;
   top: 0;
   right: auto;
   bottom: auto;
@@ -12225,6 +12236,128 @@ html.is-immediately .tpl__container {
   transform-origin: 0 0;
   -webkit-transition: all 500ms ease-in-out;
   transition: all 500ms ease-in-out;
+}
+.app__helptour__popup .popup__close {
+  cursor: pointer;
+  -webkit-transition: opacity 300ms ease-in-out;
+  transition: opacity 300ms ease-in-out;
+  font-family: 'Magpie-UI-Glyphs';
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  text-decoration: none;
+  text-align: center;
+  color: #666666;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  right: 4px;
+  bottom: auto;
+  left: auto;
+  line-height: 24px;
+  font-size: 24px;
+}
+.app__helptour__popup .popup__close:hover {
+  opacity: 0.7;
+  -webkit-transition: opacity 100ms ease-in-out;
+  transition: opacity 100ms ease-in-out;
+}
+.app__helptour__popup .popup__close.xx-small {
+  line-height: 8px;
+  font-size: 8px;
+}
+.app__helptour__popup .popup__close.x-small {
+  line-height: 12px;
+  font-size: 12px;
+}
+.app__helptour__popup .popup__close.small {
+  line-height: 16px;
+  font-size: 16px;
+}
+.app__helptour__popup .popup__close.medium {
+  line-height: 24px;
+  font-size: 24px;
+}
+.app__helptour__popup .popup__close.large {
+  line-height: 32px;
+  font-size: 32px;
+}
+.app__helptour__popup .popup__close.x-large {
+  line-height: 48px;
+  font-size: 48px;
+}
+.app__helptour__popup .popup__close.xx-large {
+  line-height: 64px;
+  font-size: 64px;
+}
+.app__helptour__popup .popup__close.xxx-large {
+  line-height: 96px;
+  font-size: 96px;
+}
+.app__helptour__popup .popup__close:before {
+  speak: none;
+  display: block;
+}
+.app__helptour__popup .popup__close:before {
+  content: '\e702';
+}
+.app__helptour__popup .popup__content {
+  height: 0;
+  position: relative;
+  overflow: hidden;
+  -webkit-transition: all 500ms ease-in-out;
+  transition: all 500ms ease-in-out;
+}
+.app__helptour__popup .popup__content__item {
+  position: absolute;
+  opacity: 0;
+  background: #ffffff;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: opacity 500ms ease-in-out;
+  transition: opacity 500ms ease-in-out;
+}
+.app__helptour__popup .popup__content__item.is-show {
+  opacity: 1;
+}
+.app__helptour__popup .popup__content__item:last-child {
+  position: relative;
+}
+.app__helptour__popup .popup__arrow {
+  width: 0;
+  height: 0;
+  position: absolute;
+  opacity: 0;
+  border-style: solid;
+  border-color: transparent;
+  -webkit-transition: all 500ms ease-in-out;
+  transition: all 500ms ease-in-out;
+}
+.app__helptour__popup .popup__arrow.is-show {
+  opacity: 1;
+}
+.app__helptour__popup .popup__arrow--top {
+  top: -12px;
+  left: 24px;
+  border-width: 0 12px 12px 12px;
+  border-bottom-color: #ffffff;
+}
+.app__helptour__popup .popup__arrow--right {
+  top: 24px;
+  right: -12px;
+  border-width: 12px 0 12px 12px;
+  border-left-color: #ffffff;
+}
+.app__helptour__popup .popup__arrow--left {
+  top: 24px;
+  left: -12px;
+  border-width: 12px 12px 12px 0;
+  border-right-color: #ffffff;
 }
 .app__helptour__popup.is-show {
   visibility: visible;
