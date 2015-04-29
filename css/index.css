@@ -12339,6 +12339,19 @@ html.is-immediately .tpl__container {
 .app__helptour__popup .popup__content__item:last-child {
   position: relative;
 }
+.app__helptour__popup .popup__buttons {
+  margin: 24px 0 0 0;
+}
+.app__helptour__popup .popup__buttons .btn-wrap {
+  margin: 0;
+}
+.app__helptour__popup .popup__buttons .button,
+.app__helptour__popup .popup__buttons input[type="button"],
+.app__helptour__popup .popup__buttons input[type="submit"],
+.app__helptour__popup .popup__buttons input[type="reset"],
+.app__helptour__popup .popup__buttons button {
+  min-width: 100px;
+}
 .app__helptour__popup .popup__arrow {
   width: 0;
   height: 0;
