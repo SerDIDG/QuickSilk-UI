@@ -1962,6 +1962,9 @@ button::-moz-focus-inner {
 .form-box > dd:last-child {
   margin: 0;
 }
+.form-box.is-no-label > dt {
+  display: none;
+}
 /* *** FIELD WITH ICON *** */
 .form-field {
   position: relative;
@@ -12253,8 +12256,8 @@ html.is-immediately .tpl__container {
   -moz-osx-font-smoothing: grayscale;
   position: absolute;
   z-index: 2;
-  top: 4px;
-  right: 4px;
+  top: 12px;
+  right: 12px;
   bottom: auto;
   left: auto;
   line-height: 24px;
@@ -12352,6 +12355,12 @@ html.is-immediately .tpl__container {
   right: -12px;
   border-width: 12px 0 12px 12px;
   border-left-color: #ffffff;
+}
+.app__helptour__popup .popup__arrow--bottom {
+  bottom: -12px;
+  left: 24px;
+  border-width: 12px 12px 0 12px;
+  border-top-color: #ffffff;
 }
 .app__helptour__popup .popup__arrow--left {
   top: 24px;
