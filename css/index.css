@@ -4115,6 +4115,10 @@ button::-moz-focus-inner {
   -moz-user-select: none;
   user-select: none;
 }
+.pt__dnd-helper.is-drop {
+  -webkit-transition: all 400ms ease-in-out;
+  transition: all 400ms ease-in-out;
+}
 .pt__dnd-chassis {
   height: 0;
   -webkit-transition: height 0s linear;
@@ -4168,6 +4172,10 @@ button::-moz-focus-inner {
 }
 .pt__dnd-area.is-available.is-highlight.is-active .pt__dnd-area {
   background-color: rgba(255, 255, 255, 0.4);
+}
+/* *** HELPERS *** */
+.pt__dnd-helper__drop-duration {
+  transition-duration: 400ms;
 }
 /* ******* PARTS: EDITABLE ******* */
 .pt__editable {
@@ -5684,10 +5692,7 @@ button::-moz-focus-inner {
   top: 14px;
   cursor: pointer;
   -webkit-transition: -webkit-transform 500ms ease-in-out, opacity 500ms ease-in-out;
-  transition: -ms-transform 500ms ease-in-out, transform 500ms ease-in-out, opacity 500ms ease-in-out;
-}
-.safari .lt__collapsible > .sidebar > .inner > .title .icon {
-  transition: -webkit-transform 500ms ease-in-out;
+  transition: -webkit-transform 500ms ease-in-out, -ms-transform 500ms ease-in-out, transform 500ms ease-in-out, opacity 500ms ease-in-out;
 }
 .lt__collapsible > .sidebar > .inner > .title .icon.default {
   width: 24px;
@@ -6343,10 +6348,7 @@ button::-moz-focus-inner {
 .com__select .form-field .icon.default {
   background-image: url("../libs/common/img/icons/medium/select-arrow.png");
   -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
-}
-.safari .com__select .form-field .icon.default {
-  transition: -webkit-transform 300ms ease-in-out;
+  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
 }
 .com__select:focus .form-field .icon.default,
 .com__select.active .form-field .icon.default {
@@ -7053,10 +7055,7 @@ html.ie9 .com__palette .b-range {
 .com__colorpicker .form-field .icon.default {
   background-image: url("../libs/common/img/icons/medium/palette.png");
   -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
-}
-.safari .com__colorpicker .form-field .icon.default {
-  transition: -webkit-transform 300ms ease-in-out;
+  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
 }
 .com__colorpicker > .icon {
   width: 28px;
@@ -7684,10 +7683,7 @@ html.ie9 .com__palette .b-range {
 .com__togglebox > dt .icon.default {
   width: 16px;
   -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
-}
-.safari .com__togglebox > dt .icon.default {
-  transition: -webkit-transform 300ms ease-in-out;
+  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
 }
 .com__togglebox > dt .title {
   overflow: hidden;
@@ -10623,7 +10619,6 @@ html.is-immediately .tpl__container {
   padding: 2px;
 }
 .app-pt__widget-container > .app-pt__widget-dummy .icon {
-  width: 90px;
   height: 90px;
   margin: 0 auto;
   border-radius: 0px;
@@ -10761,6 +10756,10 @@ html.is-immediately .tpl__container {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+}
+.app-pt__widget-container.pt__dnd-helper.is-drop {
+  -webkit-transition: all 400ms ease-in-out;
+  transition: all 400ms ease-in-out;
 }
 .app-pt__widget-container.is-hidden {
   display: none;
@@ -11305,14 +11304,11 @@ html.is-immediately .tpl__container {
     -ms-transform: translateY(-100%);
     transform: translateY(-100%);
     -webkit-transition: -webkit-transform 300ms ease-in-out;
-    transition: -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
+    transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-  }
-  .safari html.is-adaptive .app-lt__topmenu .menu-holder {
-    transition: -webkit-transform 300ms ease-in-out;
   }
   html.is-adaptive .app-lt__topmenu .menu-holder > .inner {
     -webkit-overflow-scrolling: touch;
@@ -11487,10 +11483,7 @@ html.is-immediately .tpl__container {
   height: 48px;
   line-height: 48px;
   -webkit-transition: -webkit-transform 500ms ease-in-out, opacity 500ms ease-in-out;
-  transition: -ms-transform 500ms ease-in-out, transform 500ms ease-in-out, opacity 500ms ease-in-out;
-}
-.safari .app-lt__sidebar .sidebar__menu__button .icon {
-  transition: -webkit-transform 500ms ease-in-out;
+  transition: -webkit-transform 500ms ease-in-out, -ms-transform 500ms ease-in-out, transform 500ms ease-in-out, opacity 500ms ease-in-out;
 }
 .app-lt__sidebar .sidebar__menu__button .icon:hover {
   opacity: 0.7;
@@ -11892,10 +11885,7 @@ html.is-immediately .tpl__container {
   bottom: auto;
   left: 0;
   -webkit-transition: background 300ms ease-in-out, -webkit-transform 300ms ease-in-out;
-  transition: background 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
-}
-.safari .app-lt__templates__item .info .title {
-  transition: -webkit-transform 300ms ease-in-out;
+  transition: background 300ms ease-in-out, -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
 }
 .app-lt__templates__item .info .title .icon {
   opacity: 0;
@@ -11922,10 +11912,7 @@ html.is-immediately .tpl__container {
   bottom: 0;
   left: 0;
   -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
-}
-.safari .app-lt__templates__item .info .btn-wrap {
-  transition: -webkit-transform 300ms ease-in-out;
+  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
 }
 .app-lt__templates__item.active {
   border: 2px solid #25b125;
