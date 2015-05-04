@@ -10816,136 +10816,136 @@ html.is-immediately .tpl__container {
   background-color: #ffffff;
 }
 .app-pt__widget-container > .app-pt__widget-dummy .icon {
-  background-color: #f2f2f2;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 .app-pt__widget-container:hover > .app-pt__widget-dummy .icon {
-  background-color: #d8e8f8;
+  background-color: rgba(255, 255, 255, 0.5);
 }
 .app-pt__widget-container.is-active > .app-pt__widget-dummy .icon {
-  background-color: #d8e8f8;
+  background-color: #2985e0;
 }
 .app-pt__widget-dummy .icon {
-  background-image: url("../libs/application/img/parts/widget/Light/default.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/default.png");
 }
 .app-pt__widget-dummy .icon.module-blogcontent {
-  background-image: url("../libs/application/img/parts/widget/Light/blogcontent.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/blogcontent.png");
 }
 .app-pt__widget-dummy .icon.module-blogblock {
-  background-image: url("../libs/application/img/parts/widget/Light/blogblock.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/blogblock.png");
 }
 .app-pt__widget-dummy .icon.module-blogcalendar {
-  background-image: url("../libs/application/img/parts/widget/Light/blogcalendar.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/blogcalendar.png");
 }
 .app-pt__widget-dummy .icon.module-blogarchive {
-  background-image: url("../libs/application/img/parts/widget/Light/blogarchive.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/blogarchive.png");
 }
 .app-pt__widget-dummy .icon.module-blogcategories {
-  background-image: url("../libs/application/img/parts/widget/Light/blogcategories.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/blogcategories.png");
 }
 .app-pt__widget-dummy .icon.module-blogroll {
-  background-image: url("../libs/application/img/parts/widget/Light/blogroll.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/blogroll.png");
 }
 .app-pt__widget-dummy .icon.module-googlemap {
-  background-image: url("../libs/application/img/parts/widget/Light/googlemap.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/googlemap.png");
 }
 .app-pt__widget-dummy .icon.module-comment {
-  background-image: url("../libs/application/img/parts/widget/Light/comment.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/comment.png");
 }
 .app-pt__widget-dummy .icon.module-events {
-  background-image: url("../libs/application/img/parts/widget/Light/events.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/events.png");
 }
 .app-pt__widget-dummy .icon.module-latestevents {
-  background-image: url("../libs/application/img/parts/widget/Light/latestevents.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/latestevents.png");
 }
 .app-pt__widget-dummy .icon.module-eventscalendar {
-  background-image: url("../libs/application/img/parts/widget/Light/eventscalendar.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/eventscalendar.png");
 }
 .app-pt__widget-dummy .icon.module-filegridlist {
-  background-image: url("../libs/application/img/parts/widget/Light/filegridlist.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/filegridlist.png");
 }
 .app-pt__widget-dummy .icon.module-filegridlistwidget {
-  background-image: url("../libs/application/img/parts/widget/Light/filegridlistwidget.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/filegridlistwidget.png");
 }
 .app-pt__widget-dummy .icon.module-forum {
-  background-image: url("../libs/application/img/parts/widget/Light/forum.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/forum.png");
 }
 .app-pt__widget-dummy .icon.module-forum_build {
-  background-image: url("../libs/application/img/parts/widget/Light/forum_build.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/forum_build.png");
 }
 .app-pt__widget-dummy .icon.module-googlemapblock {
-  background-image: url("../libs/application/img/parts/widget/Light/googlemapblock.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/googlemapblock.png");
 }
 .app-pt__widget-dummy .icon.module-imagegallery {
-  background-image: url("../libs/application/img/parts/widget/Light/imagegallery.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/imagegallery.png");
 }
 .app-pt__widget-dummy .icon.module-memberdirectory {
-  background-image: url("../libs/application/img/parts/widget/Light/memberdirectory.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/memberdirectory.png");
 }
 .app-pt__widget-dummy .icon.module-memberwidget {
-  background-image: url("../libs/application/img/parts/widget/Light/memberwidget.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/memberwidget.png");
 }
 .app-pt__widget-dummy .icon.module-slider {
-  background-image: url("../libs/application/img/parts/widget/Light/slider.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/slider.png");
 }
 .app-pt__widget-dummy .icon.module-socialmedia {
-  background-image: url("../libs/application/img/parts/widget/Light/socialmedia.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/socialmedia.png");
 }
 .app-pt__widget-dummy .icon.module-socialmedia_share {
-  background-image: url("../libs/application/img/parts/widget/Light/socialmedia_share.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/socialmedia_share.png");
 }
 .app-pt__widget-dummy .icon.module-socialmedia_rating {
-  background-image: url("../libs/application/img/parts/widget/Light/socialmedia_rating.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/socialmedia_rating.png");
 }
 .app-pt__widget-dummy .icon.module-twitter {
-  background-image: url("../libs/application/img/parts/widget/Light/twitter.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/twitter.png");
 }
 .app-pt__widget-dummy .icon.module-videogallery {
-  background-image: url("../libs/application/img/parts/widget/Light/videogallery.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/videogallery.png");
 }
 .app-pt__widget-dummy .icon.module-content {
-  background-image: url("../libs/application/img/parts/widget/Light/content.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/content.png");
 }
 .app-pt__widget-dummy .icon.module-menu {
-  background-image: url("../libs/application/img/parts/widget/Light/menu.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/menu.png");
 }
 .app-pt__widget-dummy .icon.module-search {
-  background-image: url("../libs/application/img/parts/widget/Light/search.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/search.png");
 }
 .app-pt__widget-dummy .icon.module-logo {
-  background-image: url("../libs/application/img/parts/widget/Light/logo.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/logo.png");
 }
 .app-pt__widget-dummy .icon.module-zone {
-  background-image: url("../libs/application/img/parts/widget/Light/zone.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/zone.png");
 }
 .app-pt__widget-dummy .icon.module-workingarea {
-  background-image: url("../libs/application/img/parts/widget/Light/workingarea.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/workingarea.png");
 }
 .app-pt__widget-dummy .icon.module-column {
-  background-image: url("../libs/application/img/parts/widget/Light/column.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/column.png");
 }
 .app-pt__widget-dummy .icon.module-divider {
-  background-image: url("../libs/application/img/parts/widget/Light/divider.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/divider.png");
 }
 .app-pt__widget-dummy .icon.module-spacer {
-  background-image: url("../libs/application/img/parts/widget/Light/spacer.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/spacer.png");
 }
 .app-pt__widget-dummy .icon.module-image {
-  background-image: url("../libs/application/img/parts/widget/Light/image.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/image.png");
 }
 .app-pt__widget-dummy .icon.module-registration {
-  background-image: url("../libs/application/img/parts/widget/Light/registration.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/registration.png");
 }
 .app-pt__widget-dummy .icon.module-login {
-  background-image: url("../libs/application/img/parts/widget/Light/login.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/login.png");
 }
 .app-pt__widget-dummy .icon.module-tabs {
-  background-image: url("../libs/application/img/parts/widget/Light/tabs.png");
+  background-image: url("../libs/application/img/parts/widget/Dark/tabs.png");
 }
 .app-pt__widget-container > .app-pt__widget-dummy .caption {
-  color: #666666;
+  color: #ffffff;
 }
 .app-pt__widget-container:hover > .app-pt__widget-dummy .caption {
-  color: #666666;
+  color: #ffffff;
 }
 .app-pt__widget-container.is-active > .app-pt__widget-dummy .caption {
   color: #666666;
@@ -11411,7 +11411,7 @@ html.is-immediately .tpl__container {
   backface-visibility: hidden;
   -webkit-transition: width 500ms ease-in-out;
   transition: width 500ms ease-in-out;
-  background-color: #ffffff;
+  background-color: #2985e0;
 }
 .app-lt__sidebar > .inner {
   position: absolute;
@@ -11446,13 +11446,13 @@ html.is-immediately .tpl__container {
   margin: 4px 0 0 0;
 }
 .app-lt__sidebar .sidebar__menu > ul > li > a:hover:after {
-  background-color: #ffffff;
+  background-color: #2985e0;
 }
 .app-lt__sidebar .sidebar__menu > ul > li.active > a {
-  background-color: #ffffff;
+  background-color: #2985e0;
 }
 .app-lt__sidebar .sidebar__menu > ul > li.active > a {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .sidebar__menu > ul > li:first-child {
   margin: 0;
@@ -11680,26 +11680,65 @@ html.is-immediately .tpl__container {
   -webkit-transition: none !important;
   transition: none !important;
 }
-.app-lt__sidebar .app-lt__sidebar-tag__menu-item > a:hover:after {
+.app-lt__sidebar .pt__toolbar .button,
+.app-lt__sidebar .pt__toolbar input[type="button"],
+.app-lt__sidebar .pt__toolbar input[type="submit"],
+.app-lt__sidebar .pt__toolbar input[type="reset"],
+.app-lt__sidebar .pt__toolbar button {
   background-color: #ffffff;
+  color: #2985e0;
+}
+.app-lt__sidebar .pt__toolbar .button:active,
+.app-lt__sidebar .pt__toolbar .button.active,
+.app-lt__sidebar .pt__toolbar input[type="button"]:active,
+.app-lt__sidebar .pt__toolbar input[type="button"].active,
+.app-lt__sidebar .pt__toolbar input[type="submit"]:active,
+.app-lt__sidebar .pt__toolbar input[type="submit"].active,
+.app-lt__sidebar .pt__toolbar input[type="reset"]:active,
+.app-lt__sidebar .pt__toolbar input[type="reset"].active,
+.app-lt__sidebar .pt__toolbar button:active,
+.app-lt__sidebar .pt__toolbar button.active {
+  background-color: #d8e8f8;
+  color: #2985e0;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4) inset;
+}
+.app-lt__sidebar .pt__toolbar .button:hover,
+.app-lt__sidebar .pt__toolbar input[type="button"]:hover,
+.app-lt__sidebar .pt__toolbar input[type="submit"]:hover,
+.app-lt__sidebar .pt__toolbar input[type="reset"]:hover,
+.app-lt__sidebar .pt__toolbar button:hover {
+  background-color: #e9f2fb;
+  color: #2985e0;
+}
+.app-lt__sidebar .pt__listing-items > ul > li > a {
+  color: #ffffff;
+}
+.app-lt__sidebar .pt__listing-items > ul > li > a:hover {
+  color: #2985e0;
+}
+.app-lt__sidebar .pt__listing-items > ul > li.active > a {
+  color: #2985e0;
+}
+.app-lt__sidebar .app-lt__sidebar-tag__menu-item > a:hover:after {
+  background-color: #2985e0;
 }
 .app-lt__sidebar .app-lt__sidebar-tag__menu-item.active > a {
-  background-color: #ffffff;
+  background-color: #2985e0;
 }
 .app-lt__sidebar .app-pt__widgets-category > dd {
-  background-color: #ffffff;
+  background-color: #2985e0;
 }
 .app-lt__sidebar .app-lt__sidebar-tag__menu-item.active > a {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .sidebar__content__title {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .sidebar__content__title .icon {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .sidebar__content__text .cm__links {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .sidebar__content__text .cm__inherit,
 .app-lt__sidebar .sidebar__content__text .link,
@@ -11734,13 +11773,13 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .sidebar__content__text .pt__box-item .author,
 .app-lt__sidebar .sidebar__content__text .com__glossary .com__glossary__title,
 .app-lt__sidebar .sidebar__content__text .com__glossary .com__glossary__title {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .com__togglebox.is-hide > dt {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .com__togglebox.is-hide > dt:hover {
-  color: #1d73c9;
+  color: #c2dbf4;
 }
 .app-lt__sidebar .com__togglebox.is-hide > dt .cm__link,
 .app-lt__sidebar .com__togglebox.is-hide > dt .link,
@@ -11748,7 +11787,7 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-hide > dt a,
 .app-lt__sidebar .com__togglebox.is-hide > dt .pt__listing-items ul li a,
 .app-lt__sidebar .com__togglebox.is-hide > dt .com__glossary .com__glossary__title {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .com__togglebox.is-hide > dt .cm__link:hover,
 .app-lt__sidebar .com__togglebox.is-hide > dt .link:hover,
@@ -11756,13 +11795,13 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-hide > dt a:hover,
 .app-lt__sidebar .com__togglebox.is-hide > dt .pt__listing-items ul li a:hover,
 .app-lt__sidebar .com__togglebox.is-hide > dt .com__glossary .com__glossary__title:hover {
-  color: #1d73c9;
+  color: #c2dbf4;
 }
 .app-lt__sidebar .com__togglebox.is-show > dt {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .com__togglebox.is-show > dt:hover {
-  color: #1d73c9;
+  color: #c2dbf4;
 }
 .app-lt__sidebar .com__togglebox.is-show > dt .cm__link,
 .app-lt__sidebar .com__togglebox.is-show > dt .link,
@@ -11770,7 +11809,7 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-show > dt a,
 .app-lt__sidebar .com__togglebox.is-show > dt .pt__listing-items ul li a,
 .app-lt__sidebar .com__togglebox.is-show > dt .com__glossary .com__glossary__title {
-  color: #666666;
+  color: #ffffff;
 }
 .app-lt__sidebar .com__togglebox.is-show > dt .cm__link:hover,
 .app-lt__sidebar .com__togglebox.is-show > dt .link:hover,
@@ -11778,10 +11817,10 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-show > dt a:hover,
 .app-lt__sidebar .com__togglebox.is-show > dt .pt__listing-items ul li a:hover,
 .app-lt__sidebar .com__togglebox.is-show > dt .com__glossary .com__glossary__title:hover {
-  color: #1d73c9;
+  color: #c2dbf4;
 }
 .app-lt__sidebar .com__togglebox > dt .icon.default {
-  background-image: url("../libs/common/img/icons/small/arrow-right.png");
+  background-image: url("../libs/common/img/icons/small/arrow-white-right.png");
 }
 .app-lt__sidebar-helper__menu-width {
   width: 48px;
