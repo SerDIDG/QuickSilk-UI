@@ -3005,6 +3005,7 @@ button::-moz-focus-inner {
   border: 1px solid #cccccc;
   border-width: 1px;
   border-radius: 3px;
+  border-color: #cccccc;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
@@ -3807,6 +3808,7 @@ button::-moz-focus-inner {
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
+  border-color: #cccccc;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -3870,6 +3872,7 @@ button::-moz-focus-inner {
   overflow: hidden;
   border-top: 1px solid #cccccc;
   border-width: 1px;
+  border-color: #cccccc;
   content: '';
   top: -1px;
   right: 0;
@@ -4336,6 +4339,7 @@ button::-moz-focus-inner {
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
+  border-color: #cccccc;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -4403,6 +4407,7 @@ button::-moz-focus-inner {
   overflow: hidden;
   border-top: 1px solid #cccccc;
   border-width: 1px;
+  border-color: #cccccc;
   content: '';
   top: -1px;
   right: 0;
@@ -6367,6 +6372,7 @@ button::-moz-focus-inner {
   border: 1px solid #cccccc;
   border-width: 1px;
   border-radius: 3px;
+  border-color: #cccccc;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
@@ -6525,6 +6531,7 @@ button::-moz-focus-inner {
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
+  border-color: #cccccc;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -6591,6 +6598,7 @@ button::-moz-focus-inner {
   overflow: hidden;
   border-top: 1px solid #cccccc;
   border-width: 1px;
+  border-color: #cccccc;
   content: '';
   top: -1px;
   right: 0;
@@ -8103,6 +8111,7 @@ html.ie9 .com__palette .b-range {
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
+  border-color: #cccccc;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -8168,6 +8177,7 @@ html.ie9 .com__palette .b-range {
   overflow: hidden;
   border-top: 1px solid #cccccc;
   border-width: 1px;
+  border-color: #cccccc;
   content: '';
   top: -1px;
   right: 0;
@@ -10531,6 +10541,7 @@ html.is-immediately .tpl__container {
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
+  border-color: #cccccc;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -10598,6 +10609,7 @@ html.is-immediately .tpl__container {
   overflow: hidden;
   border-top: 1px solid #cccccc;
   border-width: 1px;
+  border-color: #cccccc;
   content: '';
   top: -1px;
   right: 0;
@@ -11097,6 +11109,12 @@ html.is-immediately .tpl__container {
   display: block;
   position: relative;
   text-decoration: none;
+  -webkit-transition: all 300ms ease-in-out;
+  transition: all 300ms ease-in-out;
+}
+.app-lt__topmenu .menu li a:hover {
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
 }
 .app-lt__topmenu .menu li .icon {
   display: inline-block;
@@ -11135,12 +11153,6 @@ html.is-immediately .tpl__container {
   html.is-adaptive .app-lt__topmenu .menu > li > a {
     max-width: 256px;
     z-index: 2;
-    -webkit-transition: all 300ms ease-in-out;
-    transition: all 300ms ease-in-out;
-  }
-  html.is-adaptive .app-lt__topmenu .menu > li > a:hover {
-    -webkit-transition: all 100ms ease-in-out;
-    transition: all 100ms ease-in-out;
   }
   html.is-adaptive .app-lt__topmenu .menu > li > .pt__menu-dropdown {
     border-top: none;
@@ -11181,6 +11193,7 @@ html.is-immediately .tpl__container {
     margin: 0;
     padding: 4px 0px;
     border-width: 1px;
+    border-color: #cccccc;
     list-style: none;
     opacity: 0;
     top: 100%;
@@ -11245,6 +11258,7 @@ html.is-immediately .tpl__container {
     overflow: hidden;
     border-top: 1px solid #cccccc;
     border-width: 1px;
+    border-color: #cccccc;
     content: '';
     top: -1px;
     right: 0;
@@ -11399,9 +11413,6 @@ html.is-immediately .tpl__container {
   html.is-adaptive .app-lt__topmenu .menu li:before {
     display: none;
   }
-  html.is-adaptive .app-lt__topmenu .menu li a:hover {
-    text-decoration: underline;
-  }
   html.is-adaptive .app-lt__topmenu .menu li.has-dropdown > a {
     border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   }
@@ -11411,6 +11422,10 @@ html.is-immediately .tpl__container {
   }
   html.is-adaptive .app-lt__topmenu .menu ul ul a {
     padding-left: 36px;
+  }
+  html.is-adaptive .app-lt__topmenu .menu li a:hover,
+  html.is-adaptive .app-lt__topmenu .menu ul a:hover {
+    background-color: #2985e0;
   }
   html.is-adaptive .app-lt__topmenu.is-expanded .menu-holder {
     -webkit-transform: translateY(0);
@@ -12541,6 +12556,7 @@ html.is-immediately .tpl__container {
   border: 1px solid #cccccc;
   border-width: 1px;
   border-radius: 3px;
+  border-color: #cccccc;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
@@ -12609,6 +12625,7 @@ html.is-immediately .tpl__container {
   border: 1px solid #cccccc;
   border-width: 1px;
   border-radius: 3px;
+  border-color: #cccccc;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
@@ -12754,6 +12771,7 @@ html.is-immediately .tpl__container {
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
+  border-color: #cccccc;
   list-style: none;
   opacity: 0;
   top: 100%;
@@ -12817,6 +12835,7 @@ html.is-immediately .tpl__container {
   overflow: hidden;
   border-top: 1px solid #cccccc;
   border-width: 1px;
+  border-color: #cccccc;
   content: '';
   top: -1px;
   right: 0;
