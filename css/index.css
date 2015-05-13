@@ -218,9 +218,23 @@
   transition: none !important;
 }
 .cm__transition-disable,
+.app-lt__sidebar .sidebar__menu > ul > li.is-immediately,
+.app-lt__sidebar .sidebar__content > ul > li.is-immediately {
+  -webkit-transition: none !important;
+  transition: none !important;
+}
 .cm__transition-disable *,
+.app-lt__sidebar .sidebar__menu > ul > li.is-immediately *,
+.app-lt__sidebar .sidebar__content > ul > li.is-immediately * {
+  -webkit-transition: none !important;
+  transition: none !important;
+}
+.cm__transition-disable *:before,
 .cm__transition-disable *:after,
-.cm__transition-disable *:before {
+.app-lt__sidebar .sidebar__menu > ul > li.is-immediately *:before,
+.app-lt__sidebar .sidebar__menu > ul > li.is-immediately *:after,
+.app-lt__sidebar .sidebar__content > ul > li.is-immediately *:before,
+.app-lt__sidebar .sidebar__content > ul > li.is-immediately *:after {
   -webkit-transition: none !important;
   transition: none !important;
 }
@@ -3372,7 +3386,7 @@ button::-moz-focus-inner {
   margin-bottom: 0;
 }
 /* ******* PART: BOX: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive {
     /* *** EDITABLE *** */
   }
@@ -4088,7 +4102,7 @@ button::-moz-focus-inner {
   justify-content: flex-start;
 }
 /* ******* PARTS: TOOLBAR: ADAPTIVE ********** */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .pt__toolbar > .inner > .left,
   html.is-adaptive .pt__toolbar > .inner > .right {
     width: 100%;
@@ -4164,6 +4178,10 @@ button::-moz-focus-inner {
   height: 0;
   -webkit-transition: height 0s linear;
   transition: height 0s linear;
+}
+.pt__dnd-chassis.is-immediately {
+  -webkit-transition: none !important;
+  transition: none !important;
 }
 .pt__dnd-removable {
   overflow: hidden;
@@ -4763,7 +4781,7 @@ button::-moz-focus-inner {
   padding: 48px;
 }
 /* ******* PARTS: GRID: MIXINS ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .pt__grid:not(.is-not-adaptive) > ul {
     width: auto;
     display: block;
@@ -5488,7 +5506,7 @@ button::-moz-focus-inner {
   font-size: 11px;
 }
 /* ******* PARTS: GRIDLIST: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .pt__gridlist th {
     background-color: transparent;
   }
@@ -6099,7 +6117,7 @@ button::-moz-focus-inner {
 .ie9 .lt__profile > .inner > .r {
   overflow: hidden;
 }
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   .lt__profile > .inner {
     display: block;
     margin: 0;
@@ -6287,7 +6305,7 @@ button::-moz-focus-inner {
   border-color: transparent #f6fafd transparent transparent;
 }
 /* ******* COMPONENT: FORUM: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .lt__forum-post > .inner {
     width: auto;
     display: block;
@@ -8522,7 +8540,7 @@ html.ie9 .com__palette .b-range {
   border-radius: 3px;
 }
 /* ******* COMPONENTS: TABSET: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .com__tabset {
     display: block !important;
   }
@@ -9222,9 +9240,11 @@ html.ie9 .com__palette .b-range {
 .com__slider > .inner > .slides > ul > li {
   width: 100%;
   height: 100%;
+  display: none;
   z-index: 1;
 }
 .com__slider > .inner > .slides > ul > li:first-child {
+  display: block;
   z-index: 2;
 }
 .com__slider > .inner > .slides > ul > li > .pt__image {
@@ -9391,7 +9411,7 @@ html.ie9 .com__palette .b-range {
   border: 2px solid #cccccc;
 }
 /* ******* ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .com__slider > .inner > .slides > ul > li {
     background-attachment: scroll !important;
   }
@@ -9697,7 +9717,7 @@ html.ie9 .com__palette .b-range {
   table-layout: fixed;
 }
 /* ******* COMPONENT: COLUMNS: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .com__column {
     width: auto !important;
     height: auto;
@@ -10136,6 +10156,7 @@ h6 .com__glossary .com__glossary__title {
 .tpl__header__inner,
 .tpl__content__inner,
 .tpl__footer__inner {
+  width: 100%;
   max-width: 100%;
   position: relative;
 }
@@ -12517,7 +12538,7 @@ html.is-immediately .tpl__container {
 }
 /* ******* MODULES: IMAGE ******* */
 /* ******* MODULES: IMAGE: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__image .pt__image > .inner > .descr {
     margin: 0 auto;
   }
@@ -12613,7 +12634,7 @@ html.is-immediately .tpl__container {
 }
 /* ******* MODULES: SPACER ******* */
 /* ******* MODULES: SPACER: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__spacer {
     height: 24px !important;
   }
@@ -12660,7 +12681,7 @@ html.is-immediately .tpl__container {
   text-align: right;
 }
 /* ******* MODULES: LOGIN LINK: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__loginlink > ul {
     text-align: center;
   }
@@ -12674,7 +12695,7 @@ html.is-immediately .tpl__container {
 /* ******* MODULES: LISTING ******* */
 /* ******* MODULES: LOGO ******* */
 /* ******* MODULES: LOGO: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__logo .pt__image > .inner > .descr {
     margin: 0 auto;
   }
@@ -13240,7 +13261,7 @@ html.is-immediately .tpl__container {
   padding: 8px;
 }
 /* *******  MODULES: SEARCH: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__search:after {
     content: ".";
     display: block;
@@ -13400,7 +13421,7 @@ html.is-immediately .tpl__container {
   margin: 0 auto 12px auto;
 }
 /* ******* MODULES: PORTFOLIO WIDGET: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__portfolio-widget__item > .inner .image {
     float: none;
     margin: 0 auto 12px auto;
@@ -13430,7 +13451,7 @@ html.is-immediately .tpl__container {
   }
 }
 /* ******* MODULES: SOCIAL MEDIA: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__social-media .pt__line-share > ul {
     text-align: center;
   }
@@ -13479,7 +13500,7 @@ html.is-immediately .tpl__container {
   text-align: right;
 }
 /* ******* MODULES: LANG SWITCH: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-mod__lang-switch > ul {
     text-align: center;
   }
@@ -13491,10 +13512,6 @@ html.is-immediately .tpl__container {
   }
 }
 /* ******* MODULES: WORKING AREA ******* */
-.app-mod__area {
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
 .app-mod__area.pull-left > .inner {
   margin: 0;
 }
@@ -13503,6 +13520,12 @@ html.is-immediately .tpl__container {
 }
 .app-mod__area.pull-right > .inner {
   margin: 0 0 0 auto;
+}
+/* ******* MODULES: WORKING AREA: ADAPTIVE ******* */
+@media only screen and (max-width: 768px) {
+  html.is-adaptive .app-mod__area > .inner {
+    margin: 0 auto;
+  }
 }
 /* ******* MODULES: WEBEX PROFILE ******* */
 /* ******* MODULES: MEMBER DIRECTORY WIDGET ******* */
@@ -13590,6 +13613,8 @@ html.is-immediately .tpl__container {
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  -webkit-justify-content: flex-start;
+  justify-content: flex-start;
 }
 .tpl__content .tpl__content__inner {
   display: -webkit-flex;
@@ -13599,8 +13624,14 @@ html.is-immediately .tpl__container {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-justify-content: flex-start;
+  justify-content: flex-start;
 }
 .tpl__content .tpl__content__inner .app__area-main {
+  width: 100%;
   max-width: 100%;
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
