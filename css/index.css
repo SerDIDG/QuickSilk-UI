@@ -6141,7 +6141,7 @@ button::-moz-focus-inner {
 .lt__profile > .inner > .l {
   width: 174px;
 }
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   .lt__profile > .inner > .l {
     width: auto;
   }
@@ -10379,7 +10379,7 @@ html.is-immediately .tpl__container {
   content: ' ';
 }
 /* ******* PARTS: BOX: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .com__tooltip.app-pt__box-login__tooltip {
     left: 0 !important;
     right: 0 !important;
