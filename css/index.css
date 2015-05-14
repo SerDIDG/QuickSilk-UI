@@ -10267,14 +10267,12 @@ html.is-immediately .tpl__container {
   transition: none !important;
 }
 /* ******* PART: UI: ADAPTIVE ******* */
-@media only screen and (max-width: 640px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .tpl__header__inner,
   html.is-adaptive .tpl__content__inner,
   html.is-adaptive .tpl__footer__inner {
     max-width: 100%;
   }
-}
-@media only screen and (max-width: 480px) {
   html.is-adaptive.is-sidebar .tpl__container {
     margin-left: 0;
   }
@@ -11379,11 +11377,12 @@ html.is-immediately .tpl__container {
   html.is-adaptive .app-lt__topmenu .menu-holder {
     display: block;
     position: fixed;
-    -webkit-transform: translateY(-100%);
-    -ms-transform: translateY(-100%);
-    transform: translateY(-100%);
-    -webkit-transition: -webkit-transform 300ms ease-in-out;
-    transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
+    visibility: hidden;
+    -webkit-transform: translate3d(0, -100%, 0);
+    -ms-transform: translate3d(0, -100%, 0);
+    transform: translate3d(0, -100%, 0);
+    -webkit-transition: -webkit-transform 300ms ease-in-out, visibility 300ms ease-in-out;
+    transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out, visibility 300ms ease-in-out;
     top: 0;
     right: 0;
     bottom: 0;
@@ -11439,10 +11438,17 @@ html.is-immediately .tpl__container {
   html.is-adaptive .app-lt__topmenu .menu ul a:hover {
     background-color: #2985e0;
   }
+  html.is-adaptive .app-lt__topmenu.is-collapsed .menu-holder {
+    visibility: hidden;
+    -webkit-transform: translate3d(0, -100%, 0);
+    -ms-transform: translate3d(0, -100%, 0);
+    transform: translate3d(0, -100%, 0);
+  }
   html.is-adaptive .app-lt__topmenu.is-expanded .menu-holder {
-    -webkit-transform: translateY(0);
-    -ms-transform: translateY(0);
-    transform: translateY(0);
+    visibility: visible;
+    -webkit-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 /* *******  LAYOUTS: TOP MENU: PRINT ******* */
@@ -11891,7 +11897,7 @@ html.is-immediately .tpl__container {
   width: 350px;
 }
 /* ******* COMPONENT: SIDEBAR: ADAPTIVE ******* */
-@media only screen and (max-width: 480px) {
+@media only screen and (max-width: 768px) {
   html.is-adaptive .app-lt__sidebar {
     display: none;
   }
