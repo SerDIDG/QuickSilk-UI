@@ -9240,8 +9240,12 @@ html.ie9 .com__palette .b-range {
 .com__slider > .inner > .slides > ul > li {
   width: 100%;
   height: 100%;
-  display: none;
+  position: absolute;
   z-index: 1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 .com__slider > .inner > .slides > ul > li:first-child {
   display: block;
@@ -9800,8 +9804,8 @@ html.ie9 .com__palette .b-range {
 /* ************ APPLICATION: STYLES ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?11');
-  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?#iefix11') format('embedded-opentype'), url('../libs/application/fonts/QuickSilk-Glyphs.woff?11') format('woff'), url('../libs/application/fonts/QuickSilk-Glyphs.ttf?11') format('truetype'), url('../libs/application/fonts/QuickSilk-Glyphs.svg?11#QuickSilk-Glyphs') format('svg');
+  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?17');
+  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?#iefix17') format('embedded-opentype'), url('../libs/application/fonts/QuickSilk-Glyphs.woff?17') format('woff'), url('../libs/application/fonts/QuickSilk-Glyphs.ttf?17') format('truetype'), url('../libs/application/fonts/QuickSilk-Glyphs.svg?17#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -10014,32 +10018,47 @@ body:before {
   font-family: 'QuickSilk-Glyphs';
 }
 .app-i__gear:before {
-  content: '\e600';
+  content: '\e602';
 }
 .app-i__gears:before {
-  content: '\e601';
+  content: '\e603';
 }
 .app-i__pages:before {
-  content: '\e602';
+  content: '\e604';
 }
 .app-i__palette:before {
-  content: '\e603';
+  content: '\e606';
 }
 .app-i__layouts:before {
-  content: '\e602';
+  content: '\e605';
 }
 .app-i__templates:before {
-  content: '\e603';
+  content: '\e606';
 }
 .app-i__plus:before {
-  content: '\e604';
+  content: '\e601';
 }
 /* Circle */
 .app-i__circle-help:before {
-  content: '\e700';
+  content: '\e701';
 }
 .app-i__circle-user:before {
-  content: '\e701';
+  content: '\e702';
+}
+.app-i__circle-plus:before {
+  content: '\e703';
+}
+.app-i__circle-gear:before {
+  content: '\e704';
+}
+.app-i__circle-star:before {
+  content: '\e705';
+}
+.app-i__circle-flash:before {
+  content: '\e706';
+}
+.app-i__circle-actions:before {
+  content: '\e706';
 }
 /* ******* COMMON: TAGS ******* */
 h1 {
@@ -10147,11 +10166,25 @@ h6 .com__glossary .com__glossary__title {
 .tpl__header {
   z-index: 3;
 }
+.tpl__header.is-fixed {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
 .tpl__content {
   z-index: 1;
 }
 .tpl__footer {
   z-index: 2;
+}
+.tpl__footer.is-fixed {
+  position: fixed;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 .tpl__header__inner,
 .tpl__content__inner,
@@ -10197,8 +10230,8 @@ h6 .com__glossary .com__glossary__title {
   font-size: 0;
   height: 0;
 }
-.app__area-footer:not(.main):not(.splash),
-.app__area-header:not(.main):not(.splash) {
+.app__area-footer:not(.main):not(.splash):not(.additional),
+.app__area-header:not(.main):not(.splash):not(.additional) {
   padding: 0;
 }
 .app__area-footer:hover,
@@ -10227,8 +10260,8 @@ html.is-sidebar--expanded .app__area-footer,
 html.is-sidebar--expanded .app__area-header {
   min-height: 48px;
 }
-html.is-sidebar--expanded .app__area-footer:not(.main),
-html.is-sidebar--expanded .app__area-header:not(.main) {
+html.is-sidebar--expanded .app__area-footer:not(.main):not(.splash):not(.additional),
+html.is-sidebar--expanded .app__area-header:not(.main):not(.splash):not(.additional) {
   min-width: 48px;
 }
 html.is-sidebar--expanded .pt__dnd-area.is-available .app-pt__widget-container {
@@ -11130,8 +11163,8 @@ html.is-immediately .tpl__container {
   display: inline-block;
   vertical-align: top;
   color: #ffffff;
-  line-height: 24px;
-  font-size: 24px;
+  line-height: 32px;
+  font-size: 32px;
   width: 48px;
   height: 48px;
   line-height: 48px;
@@ -11322,20 +11355,6 @@ html.is-immediately .tpl__container {
   }
   html.is-adaptive .app-lt__topmenu .menu-centered .menu {
     white-space: nowrap;
-  }
-  html.is-adaptive .app-lt__topmenu .menu-centered .menu li {
-    margin: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.4);
-  }
-  html.is-adaptive .app-lt__topmenu .menu-centered .menu li:last-child {
-    border-right: 1px solid rgba(255, 255, 255, 0.4);
-  }
-  html.is-adaptive .app-lt__topmenu .menu-centered .menu li:before {
-    display: none;
-  }
-  html.is-adaptive .app-lt__topmenu .menu-centered .menu li.has-icon > a {
-    padding: 0;
-    font-size: 0;
   }
 }
 @media only screen and (min-width: 769px) and (max-width: 1280px) {
