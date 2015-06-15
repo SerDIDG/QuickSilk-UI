@@ -3530,6 +3530,12 @@ button::-moz-focus-inner {
   background: #e8e8e8;
   border-radius: 3px 0 0 3px;
 }
+.pt__line-share .label:last-child {
+  border-radius: 0 3px 3px 0;
+}
+.pt__line-share .label:first-child:last-child {
+  border-radius: 3px;
+}
 .pt__line-share .count {
   background: #fafafa;
   border-radius: 0 3px 3px 0;
@@ -9545,6 +9551,9 @@ html.ie9 .com__palette .b-range {
   position: relative;
 }
 /* ******* COMPONENTS: TAGS ******* */
+.com__tags > .inner {
+  line-height: 18px;
+}
 .com__tags > .inner:after {
   content: ".";
   display: block;
@@ -9557,7 +9566,6 @@ html.ie9 .com__palette .b-range {
 .com__tags > .inner > .l {
   float: left;
   margin: 0 8px 0 0;
-  line-height: 18px;
 }
 .com__tags > .inner > .l .icon {
   display: inline-block;
@@ -10834,6 +10842,7 @@ html.is-immediately .tpl__container {
   height: 90px;
   margin: 0 auto;
   border-radius: 0px;
+  background-repeat: no-repeat;
   -webkit-transition: background-color 300ms ease-in-out;
   transition: background-color 300ms ease-in-out;
 }
@@ -11015,124 +11024,131 @@ html.is-immediately .tpl__container {
   background-color: #2985e0;
 }
 .app-pt__widget-dummy .icon {
-  background-image: url("../libs/application/img/parts/widget/Dark/default.png");
+  background-image: url("../libs/application/img/parts/widget/Dark.svg");
+  background-position: 50% 0;
 }
-.app-pt__widget-dummy .icon.module-blogcontent {
-  background-image: url("../libs/application/img/parts/widget/Dark/blogcontent.png");
+.app-pt__widget-dummy .icon.module-default {
+  background-position: 50% 0px;
 }
-.app-pt__widget-dummy .icon.module-blogblock {
-  background-image: url("../libs/application/img/parts/widget/Dark/blogblock.png");
-}
-.app-pt__widget-dummy .icon.module-blogcalendar {
-  background-image: url("../libs/application/img/parts/widget/Dark/blogcalendar.png");
-}
-.app-pt__widget-dummy .icon.module-blogarchive {
-  background-image: url("../libs/application/img/parts/widget/Dark/blogarchive.png");
-}
-.app-pt__widget-dummy .icon.module-blogcategories {
-  background-image: url("../libs/application/img/parts/widget/Dark/blogcategories.png");
-}
-.app-pt__widget-dummy .icon.module-blogroll {
-  background-image: url("../libs/application/img/parts/widget/Dark/blogroll.png");
-}
-.app-pt__widget-dummy .icon.module-googlemap {
-  background-image: url("../libs/application/img/parts/widget/Dark/googlemap.png");
-}
-.app-pt__widget-dummy .icon.module-comment {
-  background-image: url("../libs/application/img/parts/widget/Dark/comment.png");
-}
-.app-pt__widget-dummy .icon.module-events {
-  background-image: url("../libs/application/img/parts/widget/Dark/events.png");
-}
-.app-pt__widget-dummy .icon.module-latestevents {
-  background-image: url("../libs/application/img/parts/widget/Dark/latestevents.png");
-}
-.app-pt__widget-dummy .icon.module-eventscalendar {
-  background-image: url("../libs/application/img/parts/widget/Dark/eventscalendar.png");
-}
-.app-pt__widget-dummy .icon.module-filegridlist {
-  background-image: url("../libs/application/img/parts/widget/Dark/filegridlist.png");
-}
-.app-pt__widget-dummy .icon.module-filegridlistwidget {
-  background-image: url("../libs/application/img/parts/widget/Dark/filegridlistwidget.png");
-}
-.app-pt__widget-dummy .icon.module-forum {
-  background-image: url("../libs/application/img/parts/widget/Dark/forum.png");
-}
-.app-pt__widget-dummy .icon.module-forum_build {
-  background-image: url("../libs/application/img/parts/widget/Dark/forum_build.png");
-}
-.app-pt__widget-dummy .icon.module-googlemapblock {
-  background-image: url("../libs/application/img/parts/widget/Dark/googlemapblock.png");
-}
-.app-pt__widget-dummy .icon.module-imagegallery {
-  background-image: url("../libs/application/img/parts/widget/Dark/imagegallery.png");
-}
-.app-pt__widget-dummy .icon.module-memberdirectory {
-  background-image: url("../libs/application/img/parts/widget/Dark/memberdirectory.png");
-}
-.app-pt__widget-dummy .icon.module-memberwidget {
-  background-image: url("../libs/application/img/parts/widget/Dark/memberwidget.png");
-}
-.app-pt__widget-dummy .icon.module-slider {
-  background-image: url("../libs/application/img/parts/widget/Dark/slider.png");
-}
-.app-pt__widget-dummy .icon.module-socialmedia {
-  background-image: url("../libs/application/img/parts/widget/Dark/socialmedia.png");
-}
-.app-pt__widget-dummy .icon.module-socialmedia_share {
-  background-image: url("../libs/application/img/parts/widget/Dark/socialmedia_share.png");
-}
-.app-pt__widget-dummy .icon.module-socialmedia_rating {
-  background-image: url("../libs/application/img/parts/widget/Dark/socialmedia_rating.png");
-}
-.app-pt__widget-dummy .icon.module-twitter {
-  background-image: url("../libs/application/img/parts/widget/Dark/twitter.png");
-}
-.app-pt__widget-dummy .icon.module-videogallery {
-  background-image: url("../libs/application/img/parts/widget/Dark/videogallery.png");
-}
-.app-pt__widget-dummy .icon.module-content {
-  background-image: url("../libs/application/img/parts/widget/Dark/content.png");
-}
-.app-pt__widget-dummy .icon.module-menu {
-  background-image: url("../libs/application/img/parts/widget/Dark/menu.png");
-}
-.app-pt__widget-dummy .icon.module-search {
-  background-image: url("../libs/application/img/parts/widget/Dark/search.png");
-}
-.app-pt__widget-dummy .icon.module-logo {
-  background-image: url("../libs/application/img/parts/widget/Dark/logo.png");
-}
-.app-pt__widget-dummy .icon.module-zone {
-  background-image: url("../libs/application/img/parts/widget/Dark/zone.png");
-}
-.app-pt__widget-dummy .icon.module-workingarea {
-  background-image: url("../libs/application/img/parts/widget/Dark/workingarea.png");
+.app-pt__widget-dummy .icon.module-anchor {
+  background-position: 50% -90px;
 }
 .app-pt__widget-dummy .icon.module-column {
-  background-image: url("../libs/application/img/parts/widget/Dark/column.png");
+  background-position: 50% -180px;
+}
+.app-pt__widget-dummy .icon.module-menu {
+  background-position: 50% -270px;
 }
 .app-pt__widget-dummy .icon.module-divider {
-  background-image: url("../libs/application/img/parts/widget/Dark/divider.png");
+  background-position: 50% -360px;
 }
 .app-pt__widget-dummy .icon.module-spacer {
-  background-image: url("../libs/application/img/parts/widget/Dark/spacer.png");
+  background-position: 50% -450px;
 }
-.app-pt__widget-dummy .icon.module-image {
-  background-image: url("../libs/application/img/parts/widget/Dark/image.png");
+.app-pt__widget-dummy .icon.module-zone {
+  background-position: 50% -540px;
 }
-.app-pt__widget-dummy .icon.module-registration {
-  background-image: url("../libs/application/img/parts/widget/Dark/registration.png");
+.app-pt__widget-dummy .icon.module-workingarea {
+  background-position: 50% -540px;
 }
-.app-pt__widget-dummy .icon.module-login {
-  background-image: url("../libs/application/img/parts/widget/Dark/login.png");
+.app-pt__widget-dummy .icon.module-content {
+  background-position: 50% -630px;
+}
+.app-pt__widget-dummy .icon.module-logo {
+  background-position: 50% -720px;
+}
+.app-pt__widget-dummy .icon.module-googlemap {
+  background-position: 50% -810px;
 }
 .app-pt__widget-dummy .icon.module-tabs {
-  background-image: url("../libs/application/img/parts/widget/Dark/tabs.png");
+  background-position: 50% -900px;
+}
+.app-pt__widget-dummy .icon.module-search {
+  background-position: 50% -990px;
+}
+.app-pt__widget-dummy .icon.module-blogcontent {
+  background-position: 50% -1080px;
+}
+.app-pt__widget-dummy .icon.module-blogcategories {
+  background-position: 50% -1170px;
+}
+.app-pt__widget-dummy .icon.module-blogroll {
+  background-position: 50% -1260px;
+}
+.app-pt__widget-dummy .icon.module-blogblock {
+  background-position: 50% -1350px;
+}
+.app-pt__widget-dummy .icon.module-blogarchive {
+  background-position: 50% -1440px;
+}
+.app-pt__widget-dummy .icon.module-blogcalendar {
+  background-position: 50% -1530px;
+}
+.app-pt__widget-dummy .icon.module-image {
+  background-position: 50% -1620px;
+}
+.app-pt__widget-dummy .icon.module-imagegallery {
+  background-position: 50% -1710px;
+}
+.app-pt__widget-dummy .icon.module-slider {
+  background-position: 50% -1800px;
+}
+.app-pt__widget-dummy .icon.module-videogallery {
+  background-position: 50% -1890px;
+}
+.app-pt__widget-dummy .icon.module-forum {
+  background-position: 50% -1980px;
+}
+.app-pt__widget-dummy .icon.module-forum_build {
+  background-position: 50% -2070px;
+}
+.app-pt__widget-dummy .icon.module-comment {
+  background-position: 50% -2160px;
+}
+.app-pt__widget-dummy .icon.module-twitter {
+  background-position: 50% -2250px;
+}
+.app-pt__widget-dummy .icon.module-socialmedia {
+  background-position: 50% -2340px;
+}
+.app-pt__widget-dummy .icon.module-socialmedia_rating {
+  background-position: 50% -2340px;
+}
+.app-pt__widget-dummy .icon.module-socialmedia_share {
+  background-position: 50% -2340px;
+}
+.app-pt__widget-dummy .icon.module-login {
+  background-position: 50% -2430px;
+}
+.app-pt__widget-dummy .icon.module-registration {
+  background-position: 50% -2520px;
+}
+.app-pt__widget-dummy .icon.module-memberdirectory {
+  background-position: 50% -2610px;
+}
+.app-pt__widget-dummy .icon.module-memberwidget {
+  background-position: 50% -2700px;
+}
+.app-pt__widget-dummy .icon.module-filegridlist {
+  background-position: 50% -2790px;
+}
+.app-pt__widget-dummy .icon.module-filegridlistwidget {
+  background-position: 50% -2880px;
 }
 .app-pt__widget-dummy .icon.module-webexmeetings {
-  background-image: url("../libs/application/img/parts/widget/Dark/webexmeetings.png");
+  background-position: 50% -2970px;
+}
+.app-pt__widget-dummy .icon.module-events {
+  background-position: 50% -3060px;
+}
+.app-pt__widget-dummy .icon.module-eventscalendar {
+  background-position: 50% -3150px;
+}
+.app-pt__widget-dummy .icon.module-latestevents {
+  background-position: 50% -3240px;
+}
+.app-pt__widget-dummy .icon.module-flickr {
+  background-position: 50% -3330px;
 }
 .app-pt__widget-container > .app-pt__widget-dummy .caption {
   color: #ffffff;
@@ -13000,6 +13016,7 @@ html.is-immediately .tpl__container {
 .app-mod__menu .menu-select {
   display: none;
   background: #f2f2f2;
+  border-radius: 3px;
   position: relative;
 }
 .app-mod__menu .menu-select .select,
