@@ -1078,12 +1078,11 @@ section {
   display: block;
 }
 /* *** CONTENT TAGS *** */
-.cm__link,
-.link,
-.link--inner,
-a,
-.pt__listing-items ul li a,
-.com__glossary .com__glossary__title {
+.cm__link:not(.button),
+.link:not(.button),
+.link--inner:not(.button),
+a:not(.button),
+.com__glossary .com__glossary__title:not(.button) {
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -1091,21 +1090,19 @@ a,
   font-style: normal;
   text-decoration: underline;
 }
-.cm__link:hover,
-.link:hover,
-.link--inner:hover,
-a:hover,
-.pt__listing-items ul li a:hover,
-.com__glossary .com__glossary__title:hover {
+.cm__link:not(.button):hover,
+.link:not(.button):hover,
+.link--inner:not(.button):hover,
+a:not(.button):hover,
+.com__glossary .com__glossary__title:not(.button):hover {
   text-decoration: none;
   color: #1d73c9;
 }
-.cm__link:active,
-.link:active,
-.link--inner:active,
-a:active,
-.pt__listing-items ul li a:active,
-.com__glossary .com__glossary__title:active {
+.cm__link:not(.button):active,
+.link:not(.button):active,
+.link--inner:not(.button):active,
+a:not(.button):active,
+.com__glossary .com__glossary__title:not(.button):active {
   color: #16599c;
 }
 .cm__tags,
@@ -1925,6 +1922,26 @@ button::-moz-focus-inner {
 .cm__list-inline--base > li {
   font: 400 13px/18px Open Sans, sans-serif;
   color: #666666;
+}
+.cm__list-flex {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-align-items: flex-start;
+  align-items: flex-start;
+}
+.cm__list-flex.pull-left {
+  -webkit-align-items: flex-start;
+  align-items: flex-start;
+}
+.cm__list-flex.pull-center {
+  -webkit-align-items: center;
+  align-items: center;
+}
+.cm__list-flex.pull-right {
+  -webkit-align-items: flex-end;
+  align-items: flex-end;
 }
 .cm__list-clear {
   margin: 0;
@@ -5133,7 +5150,6 @@ button::-moz-focus-inner {
 .pt__listing .list-title .link,
 .pt__listing .list-title .link--inner,
 .pt__listing .list-title a,
-.pt__listing .list-title .pt__listing-items ul li a,
 .pt__listing .list-title .com__glossary .com__glossary__title {
   font-weight: 600;
 }
@@ -7189,6 +7205,10 @@ html.ie9 .com__palette .b-range {
 }
 /* ******* COMPONENTS: DIALOG ******* */
 .com__dialog {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
   width: 100%;
   height: 100%;
   display: none;
@@ -7198,6 +7218,41 @@ html.ie9 .com__palette .b-range {
   z-index: 1000;
   opacity: 0;
   text-align: center;
+}
+.com__dialog .cm__inherit,
+.com__dialog .link,
+.com__dialog .link--inner,
+.com__dialog .cm__empty,
+.com__dialog a,
+.com__dialog h1,
+.com__dialog h2,
+.com__dialog h3,
+.com__dialog h4,
+.com__dialog h5,
+.com__dialog h6,
+.com__dialog p,
+.com__dialog dl,
+.com__dialog ul,
+.com__dialog ol,
+.com__dialog hr,
+.com__dialog h1,
+.com__dialog h2,
+.com__dialog h3,
+.com__dialog h4,
+.com__dialog h5,
+.com__dialog h6,
+.com__dialog p,
+.com__dialog dl,
+.com__dialog ul,
+.com__dialog ol,
+.com__dialog hr,
+.com__dialog .form .hint,
+.com__dialog .pt__box-item .title,
+.com__dialog .pt__box-item .descr,
+.com__dialog .pt__box-item .author,
+.com__dialog .com__glossary .com__glossary__title,
+.com__dialog .com__glossary .com__glossary__title {
+  color: #666666;
 }
 .com__dialog:before {
   height: 100%;
@@ -7267,7 +7322,16 @@ html.ie9 .com__palette .b-range {
 .com__dialog__inner {
   overflow: hidden;
 }
-/* Confirmation Dialog. Deprecated. */
+/* *** FONT *** */
+/* ******* COMPONENT: DIALOG: STUFF ******* */
+/* *** EDITABLE AREA *** */
+.com__dialog .pt__editable:hover > .border {
+  top: -8px;
+  right: -8px;
+  bottom: -8px;
+  left: -8px;
+}
+/* *** DEPRECATED > CONFIRMATION DIALOG *** */
 .com__dialog-confirm {
   padding: 16px 0 0;
 }
@@ -7279,14 +7343,6 @@ html.ie9 .com__palette .b-range {
 }
 .com__dialog-confirm .button-box input {
   width: 70px;
-}
-/* ******* COMPONENT: DIALOG: STUFF ******* */
-/* *** EDITABLE AREA *** */
-.com__dialog .pt__editable:hover > .border {
-  top: -8px;
-  right: -8px;
-  bottom: -8px;
-  left: -8px;
 }
 /* ******* COMPONENT: DIALOG: THEMES ******* */
 .com__dialog.theme-default > .bg,
@@ -7364,6 +7420,44 @@ html.ie9 .com__palette .b-range {
 .com__dialog.theme-black.has-close-inside > .window > .inner > .title {
   padding-right: 72px;
 }
+.com__dialog.theme-black {
+  color: #ffffff;
+}
+.com__dialog.theme-black .cm__inherit,
+.com__dialog.theme-black .link,
+.com__dialog.theme-black .link--inner,
+.com__dialog.theme-black .cm__empty,
+.com__dialog.theme-black a,
+.com__dialog.theme-black h1,
+.com__dialog.theme-black h2,
+.com__dialog.theme-black h3,
+.com__dialog.theme-black h4,
+.com__dialog.theme-black h5,
+.com__dialog.theme-black h6,
+.com__dialog.theme-black p,
+.com__dialog.theme-black dl,
+.com__dialog.theme-black ul,
+.com__dialog.theme-black ol,
+.com__dialog.theme-black hr,
+.com__dialog.theme-black h1,
+.com__dialog.theme-black h2,
+.com__dialog.theme-black h3,
+.com__dialog.theme-black h4,
+.com__dialog.theme-black h5,
+.com__dialog.theme-black h6,
+.com__dialog.theme-black p,
+.com__dialog.theme-black dl,
+.com__dialog.theme-black ul,
+.com__dialog.theme-black ol,
+.com__dialog.theme-black hr,
+.com__dialog.theme-black .form .hint,
+.com__dialog.theme-black .pt__box-item .title,
+.com__dialog.theme-black .pt__box-item .descr,
+.com__dialog.theme-black .pt__box-item .author,
+.com__dialog.theme-black .com__glossary .com__glossary__title,
+.com__dialog.theme-black .com__glossary .com__glossary__title {
+  color: #ffffff;
+}
 .com__dialog.theme-black > .window > .icon.default {
   background-image: url("../libs/common/img/icons/medium/close-white.png");
 }
@@ -7371,6 +7465,45 @@ html.ie9 .com__palette .b-range {
   background-color: #111111;
 }
 .com__dialog.theme-black > .window > .inner > .title {
+  color: #ffffff;
+}
+/* *** FONT *** */
+.com__dialog-font--theme-black {
+  color: #ffffff;
+}
+.com__dialog-font--theme-black .cm__inherit,
+.com__dialog-font--theme-black .link,
+.com__dialog-font--theme-black .link--inner,
+.com__dialog-font--theme-black .cm__empty,
+.com__dialog-font--theme-black a,
+.com__dialog-font--theme-black h1,
+.com__dialog-font--theme-black h2,
+.com__dialog-font--theme-black h3,
+.com__dialog-font--theme-black h4,
+.com__dialog-font--theme-black h5,
+.com__dialog-font--theme-black h6,
+.com__dialog-font--theme-black p,
+.com__dialog-font--theme-black dl,
+.com__dialog-font--theme-black ul,
+.com__dialog-font--theme-black ol,
+.com__dialog-font--theme-black hr,
+.com__dialog-font--theme-black h1,
+.com__dialog-font--theme-black h2,
+.com__dialog-font--theme-black h3,
+.com__dialog-font--theme-black h4,
+.com__dialog-font--theme-black h5,
+.com__dialog-font--theme-black h6,
+.com__dialog-font--theme-black p,
+.com__dialog-font--theme-black dl,
+.com__dialog-font--theme-black ul,
+.com__dialog-font--theme-black ol,
+.com__dialog-font--theme-black hr,
+.com__dialog-font--theme-black .form .hint,
+.com__dialog-font--theme-black .pt__box-item .title,
+.com__dialog-font--theme-black .pt__box-item .descr,
+.com__dialog-font--theme-black .pt__box-item .author,
+.com__dialog-font--theme-black .com__glossary .com__glossary__title,
+.com__dialog-font--theme-black .com__glossary .com__glossary__title {
   color: #ffffff;
 }
 /* ******* COMPONENTS: PAGINATION ******* */
@@ -7991,7 +8124,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.is-hide > dt .link,
 .com__togglebox.is-hide > dt .link--inner,
 .com__togglebox.is-hide > dt a,
-.com__togglebox.is-hide > dt .pt__listing-items ul li a,
 .com__togglebox.is-hide > dt .com__glossary .com__glossary__title {
   color: #666666;
 }
@@ -7999,7 +8131,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.is-hide > dt .link:hover,
 .com__togglebox.is-hide > dt .link--inner:hover,
 .com__togglebox.is-hide > dt a:hover,
-.com__togglebox.is-hide > dt .pt__listing-items ul li a:hover,
 .com__togglebox.is-hide > dt .com__glossary .com__glossary__title:hover {
   color: #1d73c9;
 }
@@ -8013,7 +8144,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.is-show > dt .link,
 .com__togglebox.is-show > dt .link--inner,
 .com__togglebox.is-show > dt a,
-.com__togglebox.is-show > dt .pt__listing-items ul li a,
 .com__togglebox.is-show > dt .com__glossary .com__glossary__title {
   color: #666666;
 }
@@ -8021,7 +8151,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.is-show > dt .link:hover,
 .com__togglebox.is-show > dt .link--inner:hover,
 .com__togglebox.is-show > dt a:hover,
-.com__togglebox.is-show > dt .pt__listing-items ul li a:hover,
 .com__togglebox.is-show > dt .com__glossary .com__glossary__title:hover {
   color: #1d73c9;
 }
@@ -8050,7 +8179,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.has-title-bg.is-hide > dt .link,
 .com__togglebox.has-title-bg.is-hide > dt .link--inner,
 .com__togglebox.has-title-bg.is-hide > dt a,
-.com__togglebox.has-title-bg.is-hide > dt .pt__listing-items ul li a,
 .com__togglebox.has-title-bg.is-hide > dt .com__glossary .com__glossary__title {
   color: #666666;
 }
@@ -8058,7 +8186,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.has-title-bg.is-hide > dt .link:hover,
 .com__togglebox.has-title-bg.is-hide > dt .link--inner:hover,
 .com__togglebox.has-title-bg.is-hide > dt a:hover,
-.com__togglebox.has-title-bg.is-hide > dt .pt__listing-items ul li a:hover,
 .com__togglebox.has-title-bg.is-hide > dt .com__glossary .com__glossary__title:hover {
   color: #1d73c9;
 }
@@ -8072,7 +8199,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.has-title-bg.is-show > dt .link,
 .com__togglebox.has-title-bg.is-show > dt .link--inner,
 .com__togglebox.has-title-bg.is-show > dt a,
-.com__togglebox.has-title-bg.is-show > dt .pt__listing-items ul li a,
 .com__togglebox.has-title-bg.is-show > dt .com__glossary .com__glossary__title {
   color: #666666;
 }
@@ -8080,7 +8206,6 @@ html.ie9 .com__palette .b-range {
 .com__togglebox.has-title-bg.is-show > dt .link:hover,
 .com__togglebox.has-title-bg.is-show > dt .link--inner:hover,
 .com__togglebox.has-title-bg.is-show > dt a:hover,
-.com__togglebox.has-title-bg.is-show > dt .pt__listing-items ul li a:hover,
 .com__togglebox.has-title-bg.is-show > dt .com__glossary .com__glossary__title:hover {
   color: #1d73c9;
 }
@@ -9403,6 +9528,9 @@ html.ie9 .com__palette .b-range {
 .com__slider > .inner > .slides.effect-none > ul > li:first-child {
   display: block;
 }
+.com__slider > .inner > .slides.effect-none > ul > li > .slide-area {
+  position: relative;
+}
 .com__slider > .inner > .slides.effect-edit {
   position: relative;
 }
@@ -9415,6 +9543,9 @@ html.ie9 .com__palette .b-range {
 }
 .com__slider > .inner > .slides.effect-edit > ul > li:first-child {
   display: block;
+}
+.com__slider > .inner > .slides.effect-edit > ul > li > .slide-area {
+  position: relative;
 }
 .com__slider > .inner > .slides.effect-fade > ul > li {
   display: none;
@@ -9921,8 +10052,8 @@ html.ie9 .com__palette .b-range {
 /* ************ APPLICATION: STYLES ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?18');
-  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?#iefix18') format('embedded-opentype'), url('../libs/application/fonts/QuickSilk-Glyphs.woff?18') format('woff'), url('../libs/application/fonts/QuickSilk-Glyphs.ttf?18') format('truetype'), url('../libs/application/fonts/QuickSilk-Glyphs.svg?18#QuickSilk-Glyphs') format('svg');
+  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?19');
+  src: url('../libs/application/fonts/QuickSilk-Glyphs.eot?#iefix19') format('embedded-opentype'), url('../libs/application/fonts/QuickSilk-Glyphs.woff?19') format('woff'), url('../libs/application/fonts/QuickSilk-Glyphs.ttf?19') format('truetype'), url('../libs/application/fonts/QuickSilk-Glyphs.svg?19#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -10039,9 +10170,106 @@ body:before {
   font-style: normal;
   text-decoration: underline;
 }
-.app__font--topmenu {
-  font: 600 13px/48px Open Sans, sans-serif;
-  color: #ffffff;
+.app__font--default {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
+}
+/* *** COMPONENTS *** */
+.com__dialog-font {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
+}
+.com__dialog-font .cm__inherit,
+.com__dialog-font .link,
+.com__dialog-font .link--inner,
+.com__dialog-font .cm__empty,
+.com__dialog-font a,
+.com__dialog-font h1,
+.com__dialog-font h2,
+.com__dialog-font h3,
+.com__dialog-font h4,
+.com__dialog-font h5,
+.com__dialog-font h6,
+.com__dialog-font p,
+.com__dialog-font dl,
+.com__dialog-font ul,
+.com__dialog-font ol,
+.com__dialog-font hr,
+.com__dialog-font h1,
+.com__dialog-font h2,
+.com__dialog-font h3,
+.com__dialog-font h4,
+.com__dialog-font h5,
+.com__dialog-font h6,
+.com__dialog-font p,
+.com__dialog-font dl,
+.com__dialog-font ul,
+.com__dialog-font ol,
+.com__dialog-font hr,
+.com__dialog-font .form .hint,
+.com__dialog-font .pt__box-item .title,
+.com__dialog-font .pt__box-item .descr,
+.com__dialog-font .pt__box-item .author,
+.com__dialog-font .com__glossary .com__glossary__title,
+.com__dialog-font .com__glossary .com__glossary__title {
+  color: #666666;
+}
+.app-lt__topmenu-font {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
+}
+.app-lt__sidebar-font {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
+}
+.app__helptour-font {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
+}
+.app__helptour-font .cm__inherit,
+.app__helptour-font .link,
+.app__helptour-font .link--inner,
+.app__helptour-font .cm__empty,
+.app__helptour-font a,
+.app__helptour-font h1,
+.app__helptour-font h2,
+.app__helptour-font h3,
+.app__helptour-font h4,
+.app__helptour-font h5,
+.app__helptour-font h6,
+.app__helptour-font p,
+.app__helptour-font dl,
+.app__helptour-font ul,
+.app__helptour-font ol,
+.app__helptour-font hr,
+.app__helptour-font h1,
+.app__helptour-font h2,
+.app__helptour-font h3,
+.app__helptour-font h4,
+.app__helptour-font h5,
+.app__helptour-font h6,
+.app__helptour-font p,
+.app__helptour-font dl,
+.app__helptour-font ul,
+.app__helptour-font ol,
+.app__helptour-font hr,
+.app__helptour-font .form .hint,
+.app__helptour-font .pt__box-item .title,
+.app__helptour-font .pt__box-item .descr,
+.app__helptour-font .pt__box-item .author,
+.app__helptour-font .com__glossary .com__glossary__title,
+.app__helptour-font .com__glossary .com__glossary__title {
+  color: #666666;
 }
 /* ******* PART: ICONS ******* */
 .app-icon.large.facebook {
@@ -10134,6 +10362,9 @@ body:before {
 [class*=" app-i__"] {
   font-family: 'QuickSilk-Glyphs';
 }
+.app-i__quicksilk:before {
+  content: '\e600';
+}
 .app-i__gear:before {
   content: '\e602';
 }
@@ -10178,6 +10409,12 @@ body:before {
   content: '\e706';
 }
 /* ******* COMMON: TAGS ******* */
+body {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
+}
 h1 {
   font: 100 48px/64px Open Sans, sans-serif;
   color: #666666;
@@ -10214,18 +10451,6 @@ h6 {
   font-style: normal;
   text-decoration: none;
 }
-p {
-  font: 400 13px/18px Open Sans, sans-serif;
-  color: #666666;
-  font-style: normal;
-  text-decoration: none;
-}
-.cm__font--link {
-  font-weight: 400;
-  color: #1d73c9;
-  font-style: normal;
-  text-decoration: underline;
-}
 h1 .cm__link,
 h2 .cm__link,
 h3 .cm__link,
@@ -10250,12 +10475,6 @@ h3 a,
 h4 a,
 h5 a,
 h6 a,
-h1 .pt__listing-items ul li a,
-h2 .pt__listing-items ul li a,
-h3 .pt__listing-items ul li a,
-h4 .pt__listing-items ul li a,
-h5 .pt__listing-items ul li a,
-h6 .pt__listing-items ul li a,
 h1 .com__glossary .com__glossary__title,
 h2 .com__glossary .com__glossary__title,
 h3 .com__glossary .com__glossary__title,
@@ -10266,6 +10485,12 @@ h6 .com__glossary .com__glossary__title {
   font-weight: inherit;
   color: inherit;
   text-decoration: inherit;
+}
+.cm__font--link {
+  font-weight: 400;
+  color: #1d73c9;
+  font-style: normal;
+  text-decoration: underline;
 }
 /* ******* COMMON: UI ******* */
 /* *** TEMPLATE *** */
@@ -11185,20 +11410,23 @@ html.is-immediately .tpl__container {
   margin: 0 auto;
   position: relative;
 }
-.app-lt__topmenu .logo {
+.app-lt__topmenu .icon {
+  color: #ffffff;
+  line-height: 32px;
+  font-size: 32px;
   width: 48px;
   height: 48px;
+  line-height: 48px;
+}
+.app-lt__topmenu .menu-logo {
   position: relative;
   z-index: 3;
   display: block;
   float: left;
-  background-image: url("../libs/application/img/layouts/topmenu/logo.png");
-  background-position: 50% 50%;
-  background-repeat: no-repeat;
   -webkit-transition: opacity 300ms ease-in-out;
   transition: opacity 300ms ease-in-out;
 }
-.app-lt__topmenu .logo:hover {
+.app-lt__topmenu .menu-logo:hover {
   opacity: 0.7;
 }
 .app-lt__topmenu .menu-button {
@@ -11259,7 +11487,10 @@ html.is-immediately .tpl__container {
   padding: 0;
 }
 .app-lt__topmenu .menu li {
-  font: 600 13px/48px Open Sans, sans-serif;
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
   position: relative;
   line-height: 48px;
   color: #ffffff;
@@ -11284,23 +11515,11 @@ html.is-immediately .tpl__container {
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.app-lt__topmenu .menu li .icon {
-  display: inline-block;
-  vertical-align: top;
-  color: #ffffff;
-  line-height: 32px;
-  font-size: 32px;
-  width: 48px;
-  height: 48px;
-  line-height: 48px;
-}
-.app-lt__topmenu .menu li.has-icon > a {
-  padding-left: 0;
-}
 /* *** HELPERS *** */
 .app-lt__topmenu-helper__height {
   height: 48px;
 }
+/* *** FONT *** */
 /* ******* LAYOUTS: TOP MENU: ADAPTIVE *** */
 /* *** DESKTOP VIEW *** */
 @media only screen and (min-width: 769px) {
@@ -11325,6 +11544,13 @@ html.is-immediately .tpl__container {
   html.is-adaptive .app-lt__topmenu .menu > li > .pt__menu-dropdown {
     border-top: none;
     border-radius: 0 0 3px 3px;
+  }
+  html.is-adaptive .app-lt__topmenu .menu > li .icon {
+    display: inline-block;
+    vertical-align: top;
+  }
+  html.is-adaptive .app-lt__topmenu .menu > li.has-icon > a {
+    padding-left: 0;
   }
   html.is-adaptive .app-lt__topmenu .menu > li.has-dropdown > a {
     background-image: url("../libs/application/img/icons/x-small/arrow-white-down.png");
@@ -11571,6 +11797,9 @@ html.is-immediately .tpl__container {
   html.is-adaptive .app-lt__topmenu .menu li.has-dropdown > a {
     border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   }
+  html.is-adaptive .app-lt__topmenu .menu li .icon {
+    display: none;
+  }
   html.is-adaptive .app-lt__topmenu .menu ul a {
     background: rgba(255, 255, 255, 0.2);
     padding-left: 24px;
@@ -11603,6 +11832,10 @@ html.is-immediately .tpl__container {
 }
 /* ******* LAYOUTS: SIDEBAR ******* */
 .app-lt__sidebar {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
   width: 48px;
   position: fixed;
   z-index: 102;
@@ -11994,7 +12227,6 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-hide > dt .link,
 .app-lt__sidebar .com__togglebox.is-hide > dt .link--inner,
 .app-lt__sidebar .com__togglebox.is-hide > dt a,
-.app-lt__sidebar .com__togglebox.is-hide > dt .pt__listing-items ul li a,
 .app-lt__sidebar .com__togglebox.is-hide > dt .com__glossary .com__glossary__title {
   color: #ffffff;
 }
@@ -12002,7 +12234,6 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-hide > dt .link:hover,
 .app-lt__sidebar .com__togglebox.is-hide > dt .link--inner:hover,
 .app-lt__sidebar .com__togglebox.is-hide > dt a:hover,
-.app-lt__sidebar .com__togglebox.is-hide > dt .pt__listing-items ul li a:hover,
 .app-lt__sidebar .com__togglebox.is-hide > dt .com__glossary .com__glossary__title:hover {
   color: #c2dbf4;
 }
@@ -12016,7 +12247,6 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-show > dt .link,
 .app-lt__sidebar .com__togglebox.is-show > dt .link--inner,
 .app-lt__sidebar .com__togglebox.is-show > dt a,
-.app-lt__sidebar .com__togglebox.is-show > dt .pt__listing-items ul li a,
 .app-lt__sidebar .com__togglebox.is-show > dt .com__glossary .com__glossary__title {
   color: #ffffff;
 }
@@ -12024,13 +12254,13 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar .com__togglebox.is-show > dt .link:hover,
 .app-lt__sidebar .com__togglebox.is-show > dt .link--inner:hover,
 .app-lt__sidebar .com__togglebox.is-show > dt a:hover,
-.app-lt__sidebar .com__togglebox.is-show > dt .pt__listing-items ul li a:hover,
 .app-lt__sidebar .com__togglebox.is-show > dt .com__glossary .com__glossary__title:hover {
   color: #c2dbf4;
 }
 .app-lt__sidebar .com__togglebox > dt .icon.default {
   background-image: url("../libs/common/img/icons/small/arrow-white-right.png");
 }
+/* *** HELPERS *** */
 .app-lt__sidebar-helper__menu-width {
   width: 48px;
 }
@@ -12043,6 +12273,7 @@ html.is-immediately .tpl__container {
 .app-lt__sidebar-helper__width-expanded {
   width: 350px;
 }
+/* *** FONT *** */
 /* ******* COMPONENT: SIDEBAR: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .app-lt__sidebar {
@@ -12438,6 +12669,10 @@ html.is-immediately .tpl__container {
 }
 /* ******* COMPONENTS: HELP TOUR ******* */
 .app__helptour__popup {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
   width: 360px;
   padding: 24px;
   visibility: hidden;
@@ -12459,6 +12694,41 @@ html.is-immediately .tpl__container {
   transform-origin: 0 0;
   -webkit-transition: all 500ms ease-in-out;
   transition: all 500ms ease-in-out;
+}
+.app__helptour__popup .cm__inherit,
+.app__helptour__popup .link,
+.app__helptour__popup .link--inner,
+.app__helptour__popup .cm__empty,
+.app__helptour__popup a,
+.app__helptour__popup h1,
+.app__helptour__popup h2,
+.app__helptour__popup h3,
+.app__helptour__popup h4,
+.app__helptour__popup h5,
+.app__helptour__popup h6,
+.app__helptour__popup p,
+.app__helptour__popup dl,
+.app__helptour__popup ul,
+.app__helptour__popup ol,
+.app__helptour__popup hr,
+.app__helptour__popup h1,
+.app__helptour__popup h2,
+.app__helptour__popup h3,
+.app__helptour__popup h4,
+.app__helptour__popup h5,
+.app__helptour__popup h6,
+.app__helptour__popup p,
+.app__helptour__popup dl,
+.app__helptour__popup ul,
+.app__helptour__popup ol,
+.app__helptour__popup hr,
+.app__helptour__popup .form .hint,
+.app__helptour__popup .pt__box-item .title,
+.app__helptour__popup .pt__box-item .descr,
+.app__helptour__popup .pt__box-item .author,
+.app__helptour__popup .com__glossary .com__glossary__title,
+.app__helptour__popup .com__glossary .com__glossary__title {
+  color: #666666;
 }
 .app__helptour__popup .popup__close {
   cursor: pointer;
@@ -12618,6 +12888,7 @@ html.is-immediately .tpl__container {
 .app__helptour-helper__adaptive-from {
   width: 768px;
 }
+/* *** FONT *** */
 /* ******* COMPONENTS: HELP TOUR: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .app__helptour__popup {
