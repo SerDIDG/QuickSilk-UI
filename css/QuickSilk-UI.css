@@ -6729,21 +6729,21 @@ button::-moz-focus-inner {
   display: block;
 }
 .lt__filegridlist__cell-date {
-  width: 120px;
+  width: 140px;
 }
 .lt__filegridlist__cell-status {
   width: 100px;
 }
 .lt__filegridlist__cell-links {
-  width: 100px;
+  width: 140px;
 }
 .lt__filegridlist__cell-size {
-  width: 80px;
+  width: 100px;
 }
 /* ************ MAGPIE UI: COMPONENTS ************ */
 /* ******* COMPONENT: TOOLTIP ******* */
 .com__tooltip {
-  position: fixed;
+  position: absolute;
   display: none;
   left: 0;
   top: 0;
@@ -7365,6 +7365,9 @@ html.ie9 .com__timeselect > .inner > .sep {
   margin: 0;
 }
 /* ******* COMPONENTS: COLOR PALETTE ****** */
+.com__palette > .inner {
+  margin-top: -16px;
+}
 .com__palette > .inner:after {
   content: ".";
   display: block;
@@ -7375,8 +7378,13 @@ html.ie9 .com__timeselect > .inner > .sep {
   height: 0;
 }
 .com__palette .b-palette,
+.com__palette .b-range,
+.com__palette .b-stuff {
+  margin-top: 16px;
+}
+.com__palette .b-palette,
 .com__palette .b-range {
-  margin: 0 16px 0 0;
+  margin-right: 16px;
   float: left;
   border-radius: 3px;
 }
@@ -7522,7 +7530,13 @@ html.ie9 .com__palette .b-range {
   -moz-user-select: none;
   user-select: none;
 }
-/* ******* COMPONENTS: PALETTE: BUNDLE ******* */
+/* ******* COMPONENTS: PALETTE: ADAPTIVE ******* */
+@media only screen and (max-width: 480px) {
+  html.is-adaptive .com__palette .b-palette {
+    clear: both;
+    float: none;
+  }
+}
 /* ******* COMPONENTS: COLOR PICKER ******* */
 .com__colorpicker {
   width: 100%;
