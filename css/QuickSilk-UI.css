@@ -13237,6 +13237,12 @@ html.is-immediately .tpl__container {
 .app__block-dummy .icon.module-rss {
   background-position: 50% -3600px;
 }
+.app__block-dummy .icon.module-breadcrumb {
+  background-position: 50% -3690px;
+}
+.app__block-dummy .icon.module-breadcrumbs {
+  background-position: 50% -3690px;
+}
 .app__block-container > .app__block-dummy .caption {
   color: #ffffff;
 }
