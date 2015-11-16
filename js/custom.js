@@ -1,4 +1,4 @@
-/* ******* APPLICATION ******* */
+/* ************ QUICKSILK: TEMPLATE ************ */
 
 App.LoginBox.prototype.setParams({
     'Com.Tooltip' : {

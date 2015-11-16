@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-docs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Elements: Sign Up Popup</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body>
+
+<h1 class="app-pt__box-title">Elements: Sign Up Popup</h1>
+<hr>
+
+<div class="pt__toolbar">
+    <div class="inner clear">
+        <ul class="group">
+            <li>
+                <a class="button" data-element="login-popup">Open Login Popup</a>
+            </li>
+            <li>
+                <a class="button" data-element="forgot-popup">Open Forgot Popup</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<h2>Dialog Settings:</h2>
+
+<textarea class="pt__box-code cm-autoresize" readonly>
+<script type="text/javascript">
+    new Com.Dialog({
+        'autoOpen' : false,
+        'removeOnClose' : false,
+        'titleReserve' : false,
+        'width' : 400
+    });
+</script></textarea>
+
+<div class="display-none">
+    <div class="app-pt__box-sign" id="sample-loginPopup">
+        <div class="app-pt__box-login">
+            <form class="form">
+                <dl class="form-box">
+                    <dt>Email:</dt>
+                    <dd>
+                        <input type="email" name="email" tabindex="1">
+                    </dd>
+                </dl>
+                <dl class="form-box">
+                    <dt>Password:</dt>
+                    <dd>
+                        <input type="password" name="password" tabindex="2">
+                    </dd>
+                </dl>
+                <div class="btn-wrap">
+                    <input class="wide" type="submit" value="Login" tabindex="3">
+                </div>
+                <dl>
+                    <dd>
+                        <div class="check-forgot">
+                            <div class="l">
+                                <div class="check-line outside">
+                                    <input type="checkbox" id="remember" tabindex="4">
+                                    <label for="remember">Stay signed in</label>
+                                </div>
+                            </div>
+                            <div class="r">
+                                <div class="links">
+                                    <ul>
+                                        <li><a>Forgot your password?</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+            </form>
+        </div>
+
+        <div class="sign-separator">
+            <span>or</span>
+        </div>
+
+        <p>Login with your social network account:</p>
+        <div class="socials">
+            <div class="icon app-icon inline large linked facebook"></div>
+            <div class="icon app-icon inline large linked twitter"></div>
+            <div class="icon app-icon inline large linked linkedin"></div>
+            <div class="icon app-icon inline large linked google"></div>
+        </div>
+    </div>
+
+    <div class="app-pt__box-sign" id="sample-forgotPopup">
+        <div class="app-pt__box-login">
+            <form class="form">
+                <dl class="form-box">
+                    <dt>Email:</dt>
+                    <dd>
+                        <input type="email" name="email" tabindex="1">
+                    </dd>
+                </dl>
+                <dl class="form-box">
+                    <dt>Domain:</dt>
+                    <dd>
+                        <input type="text" name="password" tabindex="2">
+                    </dd>
+                </dl>
+                <div class="btn-wrap">
+                    <input class="wide" type="submit" value="Continue" tabindex="3">
+                </div>
+                <dl>
+                    <dd>
+                        <div class="check-forgot">
+                            <div class="r">
+                                <div class="links">
+                                    <ul>
+                                        <li><a>Return to Login</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>
