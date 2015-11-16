@@ -21484,7 +21484,7 @@ window.Collector = new Com.Collector()
             'events' : {
                 'onAppend' : onRequest,
                 'onReplace' : function(TE, data){
-                    components.construct(data['node']);
+                    window.Collector.construct(data['node']);
                     // Register areas
                     var areas = cm.getByAttr('data-com-draganddrop', 'area', data['node']);
                     cm.forEach(areas, function(area){
