@@ -66,8 +66,8 @@ window.Collector = new Com.Collector()
         });
     })
 
-    .add('action-menu', function(node){
-        new Com.ActionMenu({
+    .add('menu', function(node){
+        new Com.Menu({
             'node' : node
         });
     })

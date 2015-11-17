@@ -3278,7 +3278,7 @@ Copyright (c) 2015 Daniel Eden
 
 @CmIconVars-Family: 'Magpie-UI-Glyphs';
 @CmIconVars-Color: @CmColor-Icon;
-@CmIconVars-Version: 11;
+@CmIconVars-Version: 13;
 
 @CmIcon-Magnify: '\e600';
 
@@ -3290,6 +3290,12 @@ Copyright (c) 2015 Daniel Eden
 @CmIcon-CircleInstagram: '\e801';
 @CmIcon-CircleYoutube: '\e802';
 @CmIcon-CircleVK: '\e803';
+@CmIcon-CircleFacebook: '\e804';
+
+@CmIcon-ChevronDown: '\e900';
+@CmIcon-ChevronUp: '\e901';
+@CmIcon-ChevronLeft: '\e902';
+@CmIcon-ChevronRight: '\e903';
 // /* ************************************************ */
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
@@ -5128,6 +5134,14 @@ Copyright (c) 2015 Daniel Eden
         }
     }
 
+    &.large {
+        .for(archive default doc exe flash image movie music pdf pps ttf txt xls); .-each(@name) {
+            &.file-@{name} {
+                background-image: url("@{CmPath-Images}/icons/large/files/@{name}.png");
+            }
+        }
+    }
+
     // /* *** X-LARGE *** */
 
     &.x-large {
@@ -5315,6 +5329,38 @@ Copyright (c) 2015 Daniel Eden
 .cm-i__circle-vk {
     &:before {
         content: @CmIcon-CircleVK;
+    }
+}
+
+.cm-i__circle-facebook {
+    &:before {
+        content: @CmIcon-CircleFacebook;
+    }
+}
+
+/* *** SMALL *** */
+
+.cm-i__chevron-down {
+    &:before {
+        content: @CmIcon-ChevronDown;
+    }
+}
+
+.cm-i__chevron-up {
+    &:before {
+        content: @CmIcon-ChevronUp;
+    }
+}
+
+.cm-i__chevron-left {
+    &:before {
+        content: @CmIcon-ChevronLeft;
+    }
+}
+
+.cm-i__chevron-right {
+    &:before {
+        content: @CmIcon-ChevronRight;
     }
 }
 
@@ -5847,6 +5893,11 @@ select {
                 margin-right: 0;
             }
         }
+
+        .label {
+            display: inline-block;
+            vertical-align: top;
+        }
     }
 
     &.has-icon-medium {
@@ -6017,6 +6068,12 @@ button {
             margin: 0;
         }
     }
+
+    &.is-box {
+        dl {
+            .form-box;
+        }
+    }
 }
 
 .form--values {
@@ -6122,7 +6179,7 @@ button {
 
     .button,
     .browse-button,
-    .com-action-menu {
+    .com__menu {
         max-width: 100%;
         float: right;
         margin: 0 0 0 @CmForm-ButtonsIndent;
@@ -6155,7 +6212,7 @@ button {
     &.left {
         .button,
         .browse-button,
-        .com-action-menu {
+        .com__menu {
             float: left;
             margin: 0 @CmForm-ButtonsIndent 0 0;
         }
@@ -6167,7 +6224,7 @@ button {
 
         .button,
         .browse-button,
-        .com-action-menu {
+        .com__menu {
             float: none;
             display: inline-block;
             margin: 0 0 0 @CmForm-ButtonsIndent;
@@ -6184,7 +6241,7 @@ button {
 
         .button,
         .browse-button,
-        .com-action-menu {
+        .com__menu {
             width: 100%;
             display: block;
             margin: @CmForm-ButtonsIndent 0 0 0;
@@ -6203,7 +6260,7 @@ button {
 
         .button,
         .browse-button,
-        .com-action-menu {
+        .com__menu {
             float: none;
             .mx__flex(1);
 
@@ -7417,7 +7474,7 @@ button {
 
     .button,
     .browse-button,
-    .com-action-menu {
+    .com__menu {
         margin: 0 @buttonIndent;
     }
 
@@ -7435,7 +7492,7 @@ button {
 
         .button,
         .browse-button,
-        .com-action-menu {
+        .com__menu {
             .mx__flex(1);
         }
     }
@@ -7446,7 +7503,7 @@ button {
 
         .button,
         .browse-button,
-        .com-action-menu {
+        .com__menu {
             .cm__text-nowrap;
             width: 100%;
             display: block;
@@ -8201,6 +8258,10 @@ button {
                 }
             }
         }
+    }
+
+    &.has-background {
+        .pt__gridlist__has-background;
     }
 
     &.valign-middle {
@@ -10098,7 +10159,7 @@ button {
 }
 
 .lt__filegridlist__cell-icon {
-    width: 40px;
+    width: 48px;
 
     .icon {
         display: block;
@@ -10106,6 +10167,21 @@ button {
 }
 
 .lt__filegridlist__cell-title {
+    .cm__tags--base {
+        margin: 0;
+    }
+
+    .cm__tags--title {
+        margin: 0 0 @CmIndent-XXSmall;
+
+        &:last-child {
+            margin: 0;
+        }
+    }
+
+    .title {
+        font-weight: @CmFont-Base-BoldWeight;
+    }
 }
 
 .lt__filegridlist__cell-date {
@@ -10560,37 +10636,63 @@ button {
         }
     }
 }
-/* ******* COMPONENTS: ACTION MENU ******* */
-
-.com-action-menu {
-    .button {
-        margin: 0 !important;
-    }
-
-    .pt__menu {
-        display: none;
-    }
-}
-
-/* *** TOOLTIP *** */
+/* ******* COMPONENT: TOOLTIP ******* */
 
 .com__tooltip {
-    &.com-action-menu-tooltip {
-        > .inner {
-            > .scroll {
-                overflow: visible;
+    position: absolute;
+    display: none;
+    left: 0;
+    top: 0;
+    z-index: 1001;
+    opacity: 0;
+
+    > .inner {
+        > .title {
+            margin: 0 0 8px;
+
+            &:last-child {
+                margin: 0;
+            }
+
+            .cm__tags {
+                margin: 0;
             }
         }
 
-        .pt__menu {
-            .pt__menu-dropdown {
-                .pt__menu-dropdown--base;
-                .pt__menu-dropdown--active;
-                position: static;
-            }
+        > .scroll {
+            .cm__scroll-y-a;
         }
     }
 }
+
+/* ******* COMPONENT: TOOLTIP: THEMES ******* */
+
+.com__tooltip {
+    &.theme-default {
+        > .inner {
+            .pt__box;
+        }
+    }
+
+    &.theme-black{
+        > .inner {
+            .pt__box--black;
+        }
+    }
+}
+
+/* ******* COMPONENT: TOOLTIP: INNER COMPONENTS ******* */
+
+/* *** ITEMS LIST *** */
+
+.com__tooltip {
+    .pt__listing-items {
+        ul {
+            max-height: none;
+        }
+    }
+}
+
 /* ******* COMPONENTS: AUTOCOMPLETE ******* */
 
 /* *** TOOLTIP *** */
@@ -12064,6 +12166,37 @@ button {
 
         > .inner {
             padding: @CmIndent-XSmall;
+        }
+    }
+}
+/* ******* COMPONENTS: MENU ******* */
+
+.com__menu {
+    .button {
+        margin: 0 !important;
+    }
+
+    .pt__menu {
+        display: none;
+    }
+}
+
+/* *** TOOLTIP *** */
+
+.com__tooltip {
+    &.com__menu-tooltip {
+        > .inner {
+            > .scroll {
+                overflow: visible;
+            }
+        }
+
+        .pt__menu {
+            .pt__menu-dropdown {
+                .pt__menu-dropdown--base;
+                .pt__menu-dropdown--active;
+                position: static;
+            }
         }
     }
 }
@@ -14015,63 +14148,6 @@ button {
 
 
 }
-/* ******* COMPONENT: TOOLTIP ******* */
-
-.com__tooltip {
-    position: absolute;
-    display: none;
-    left: 0;
-    top: 0;
-    z-index: 1001;
-    opacity: 0;
-
-    > .inner {
-        > .title {
-            margin: 0 0 8px;
-
-            &:last-child {
-                margin: 0;
-            }
-
-            .cm__tags {
-                margin: 0;
-            }
-        }
-
-        > .scroll {
-            .cm__scroll-y-a;
-        }
-    }
-}
-
-/* ******* COMPONENT: TOOLTIP: THEMES ******* */
-
-.com__tooltip {
-    &.theme-default {
-        > .inner {
-            .pt__box;
-        }
-    }
-
-    &.theme-black{
-        > .inner {
-            .pt__box--black;
-        }
-    }
-}
-
-/* ******* COMPONENT: TOOLTIP: INNER COMPONENTS ******* */
-
-/* *** ITEMS LIST *** */
-
-.com__tooltip {
-    .pt__listing-items {
-        ul {
-            max-height: none;
-        }
-    }
-}
-
 /* ******* COMPONENTS: ZOOM ******* */
 
 .com__zoom {
@@ -18218,7 +18294,7 @@ html {
 
 // /* ******* SETTINGS ******* */
 
-@AppTpl-Container-Size: wide;
+@AppTpl-Container-Size: box;
 @AppTpl-Container-Width: 1000px;
 @AppTpl-Container-Align: center;
 @AppTpl-Container-Indent: 24px;

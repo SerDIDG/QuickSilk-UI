@@ -136,6 +136,21 @@ module.exports = function(grunt) {
                 options: {
                     spawn: false
                 }
+            },
+            docs: {
+                files: [
+                    'docs/src/content/**/*.*',
+                    'libs/common/src/less/**/*.less',
+                    'libs/application/src/less/**/*.less',
+                    'docs/src/less/**/*.less',
+                    'libs/common/src/js/**/*.js',
+                    'libs/application/src/js/**/*.js',
+                    'docs/src/js/**/*.js'
+                ],
+                tasks: ['docs'],
+                options: {
+                    spawn: false
+                }
             }
         }
     });
@@ -143,5 +158,5 @@ module.exports = function(grunt) {
     // Default task(s).
     grunt.registerTask('default', ['clean', 'grunt:common', 'grunt:application', 'concat', 'less', 'copy', 'clean:post']);
     grunt.registerTask('dev', ['grunt:common_dev', 'grunt:application_dev', 'concat:build', 'less:build', 'clean:post']);
-    grunt.registerTask('docs', ['grunt:common_dev', 'grunt:application_dev', 'concat:docs', 'less:docs', 'clean:post']);
+    grunt.registerTask('docs', ['grunt:common_dev', 'grunt:application_dev', 'concat:docs', 'less:docs', 'copy:docs', 'clean:post']);
 };
