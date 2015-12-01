@@ -1,4 +1,6 @@
-window.Collector = new Com.Collector()
+window.Collector = new Com.Collector({
+        'autoInit' : true
+    })
     .addEvent('onConstruct', function(collector, data){
         Part.Menu();
         Part.Autoresize(data['node']);
@@ -91,6 +93,25 @@ window.Collector = new Com.Collector()
             'node' : node
         });
     })
+
+    .add('app-zone', function(node){
+        new App.Zone({
+            'node' : node
+        });
+    })
+
+    .add('app-block', function(node){
+        new App.Block({
+            'node' : node
+        });
+    })
+
+    .add('app-dummy-block', function(node){
+        new App.DummyBlock({
+            'node' : node
+        });
+    })
+
     .add('app-helptour', function(node){
         new App.HelpTour({
             'node' : node
@@ -165,7 +186,7 @@ window.Collector = new Com.Collector()
 
     /* *** TEMPLATE EDITOR *** */
 
-    .add('template-editor', function(node){
+    .add('app-editor', function(node){
         var onRequest = function(TE, data){
             var config = cm.parseJSON(data['node'].getAttribute('data-config')) || {};
 
@@ -214,17 +235,12 @@ window.Collector = new Com.Collector()
             }, 500);
         };
 
-        new App.TemplateEditor({
+        new App.Editor({
             'node' : node,
             'events' : {
                 'onAppend' : onRequest,
                 'onReplace' : function(TE, data){
                     window.Collector.construct(data['node']);
-                    // Register areas
-                    var areas = cm.getByAttr('data-com-draganddrop', 'area', data['node']);
-                    cm.forEach(areas, function(area){
-                        TE.registerArea(area, {});
-                    });
                 }
             }
         });

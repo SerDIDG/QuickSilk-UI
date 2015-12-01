@@ -47,7 +47,8 @@ module.exports = function(grunt) {
             docs: {
                 files: [{
                     src: [
-                        'js/<%= pkg.name %>.js',
+                        'libs/common/build/js/MagpieUI.js',
+                        'libs/application/build/js/QuickSilk-Application.js',
                         'docs/src/js/**/*.js'
                     ],
                     dest: 'docs/build/js/<%= pkg.name %>.js'

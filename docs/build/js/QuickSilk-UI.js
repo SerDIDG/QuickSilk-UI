@@ -1,3 +1,1167 @@
+// TinyColor v1.2.1
+// https://github.com/bgrins/TinyColor
+// Brian Grinstead, MIT License
+
+(function() {
+
+var trimLeft = /^[\s,#]+/,
+    trimRight = /\s+$/,
+    tinyCounter = 0,
+    math = Math,
+    mathRound = math.round,
+    mathMin = math.min,
+    mathMax = math.max,
+    mathRandom = math.random;
+
+function tinycolor (color, opts) {
+
+    color = (color) ? color : '';
+    opts = opts || { };
+
+    // If input is already a tinycolor, return itself
+    if (color instanceof tinycolor) {
+       return color;
+    }
+    // If we are called as a function, call using new instead
+    if (!(this instanceof tinycolor)) {
+        return new tinycolor(color, opts);
+    }
+
+    var rgb = inputToRGB(color);
+    this._originalInput = color,
+    this._r = rgb.r,
+    this._g = rgb.g,
+    this._b = rgb.b,
+    this._a = rgb.a,
+    this._roundA = mathRound(100*this._a) / 100,
+    this._format = opts.format || rgb.format;
+    this._gradientType = opts.gradientType;
+
+    // Don't let the range of [0,255] come back in [0,1].
+    // Potentially lose a little bit of precision here, but will fix issues where
+    // .5 gets interpreted as half of the total, instead of half of 1
+    // If it was supposed to be 128, this was already taken care of by `inputToRgb`
+    if (this._r < 1) { this._r = mathRound(this._r); }
+    if (this._g < 1) { this._g = mathRound(this._g); }
+    if (this._b < 1) { this._b = mathRound(this._b); }
+
+    this._ok = rgb.ok;
+    this._tc_id = tinyCounter++;
+}
+
+tinycolor.prototype = {
+    isDark: function() {
+        return this.getBrightness() < 128;
+    },
+    isLight: function() {
+        return !this.isDark();
+    },
+    isValid: function() {
+        return this._ok;
+    },
+    getOriginalInput: function() {
+      return this._originalInput;
+    },
+    getFormat: function() {
+        return this._format;
+    },
+    getAlpha: function() {
+        return this._a;
+    },
+    getBrightness: function() {
+        //http://www.w3.org/TR/AERT#color-contrast
+        var rgb = this.toRgb();
+        return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+    },
+    getLuminance: function() {
+        //http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+        var rgb = this.toRgb();
+        var RsRGB, GsRGB, BsRGB, R, G, B;
+        RsRGB = rgb.r/255;
+        GsRGB = rgb.g/255;
+        BsRGB = rgb.b/255;
+
+        if (RsRGB <= 0.03928) {R = RsRGB / 12.92;} else {R = Math.pow(((RsRGB + 0.055) / 1.055), 2.4);}
+        if (GsRGB <= 0.03928) {G = GsRGB / 12.92;} else {G = Math.pow(((GsRGB + 0.055) / 1.055), 2.4);}
+        if (BsRGB <= 0.03928) {B = BsRGB / 12.92;} else {B = Math.pow(((BsRGB + 0.055) / 1.055), 2.4);}
+        return (0.2126 * R) + (0.7152 * G) + (0.0722 * B);
+    },
+    setAlpha: function(value) {
+        this._a = boundAlpha(value);
+        this._roundA = mathRound(100*this._a) / 100;
+        return this;
+    },
+    toHsv: function() {
+        var hsv = rgbToHsv(this._r, this._g, this._b);
+        return { h: hsv.h * 360, s: hsv.s, v: hsv.v, a: this._a };
+    },
+    toHsvString: function() {
+        var hsv = rgbToHsv(this._r, this._g, this._b);
+        var h = mathRound(hsv.h * 360), s = mathRound(hsv.s * 100), v = mathRound(hsv.v * 100);
+        return (this._a == 1) ?
+          "hsv("  + h + ", " + s + "%, " + v + "%)" :
+          "hsva(" + h + ", " + s + "%, " + v + "%, "+ this._roundA + ")";
+    },
+    toHsl: function() {
+        var hsl = rgbToHsl(this._r, this._g, this._b);
+        return { h: hsl.h * 360, s: hsl.s, l: hsl.l, a: this._a };
+    },
+    toHslString: function() {
+        var hsl = rgbToHsl(this._r, this._g, this._b);
+        var h = mathRound(hsl.h * 360), s = mathRound(hsl.s * 100), l = mathRound(hsl.l * 100);
+        return (this._a == 1) ?
+          "hsl("  + h + ", " + s + "%, " + l + "%)" :
+          "hsla(" + h + ", " + s + "%, " + l + "%, "+ this._roundA + ")";
+    },
+    toHex: function(allow3Char) {
+        return rgbToHex(this._r, this._g, this._b, allow3Char);
+    },
+    toHexString: function(allow3Char) {
+        return '#' + this.toHex(allow3Char);
+    },
+    toHex8: function() {
+        return rgbaToHex(this._r, this._g, this._b, this._a);
+    },
+    toHex8String: function() {
+        return '#' + this.toHex8();
+    },
+    toRgb: function() {
+        return { r: mathRound(this._r), g: mathRound(this._g), b: mathRound(this._b), a: this._a };
+    },
+    toRgbString: function() {
+        return (this._a == 1) ?
+          "rgb("  + mathRound(this._r) + ", " + mathRound(this._g) + ", " + mathRound(this._b) + ")" :
+          "rgba(" + mathRound(this._r) + ", " + mathRound(this._g) + ", " + mathRound(this._b) + ", " + this._roundA + ")";
+    },
+    toPercentageRgb: function() {
+        return { r: mathRound(bound01(this._r, 255) * 100) + "%", g: mathRound(bound01(this._g, 255) * 100) + "%", b: mathRound(bound01(this._b, 255) * 100) + "%", a: this._a };
+    },
+    toPercentageRgbString: function() {
+        return (this._a == 1) ?
+          "rgb("  + mathRound(bound01(this._r, 255) * 100) + "%, " + mathRound(bound01(this._g, 255) * 100) + "%, " + mathRound(bound01(this._b, 255) * 100) + "%)" :
+          "rgba(" + mathRound(bound01(this._r, 255) * 100) + "%, " + mathRound(bound01(this._g, 255) * 100) + "%, " + mathRound(bound01(this._b, 255) * 100) + "%, " + this._roundA + ")";
+    },
+    toName: function() {
+        if (this._a === 0) {
+            return "transparent";
+        }
+
+        if (this._a < 1) {
+            return false;
+        }
+
+        return hexNames[rgbToHex(this._r, this._g, this._b, true)] || false;
+    },
+    toFilter: function(secondColor) {
+        var hex8String = '#' + rgbaToHex(this._r, this._g, this._b, this._a);
+        var secondHex8String = hex8String;
+        var gradientType = this._gradientType ? "GradientType = 1, " : "";
+
+        if (secondColor) {
+            var s = tinycolor(secondColor);
+            secondHex8String = s.toHex8String();
+        }
+
+        return "progid:DXImageTransform.Microsoft.gradient("+gradientType+"startColorstr="+hex8String+",endColorstr="+secondHex8String+")";
+    },
+    toString: function(format) {
+        var formatSet = !!format;
+        format = format || this._format;
+
+        var formattedString = false;
+        var hasAlpha = this._a < 1 && this._a >= 0;
+        var needsAlphaFormat = !formatSet && hasAlpha && (format === "hex" || format === "hex6" || format === "hex3" || format === "name");
+
+        if (needsAlphaFormat) {
+            // Special case for "transparent", all other non-alpha formats
+            // will return rgba when there is transparency.
+            if (format === "name" && this._a === 0) {
+                return this.toName();
+            }
+            return this.toRgbString();
+        }
+        if (format === "rgb") {
+            formattedString = this.toRgbString();
+        }
+        if (format === "prgb") {
+            formattedString = this.toPercentageRgbString();
+        }
+        if (format === "hex" || format === "hex6") {
+            formattedString = this.toHexString();
+        }
+        if (format === "hex3") {
+            formattedString = this.toHexString(true);
+        }
+        if (format === "hex8") {
+            formattedString = this.toHex8String();
+        }
+        if (format === "name") {
+            formattedString = this.toName();
+        }
+        if (format === "hsl") {
+            formattedString = this.toHslString();
+        }
+        if (format === "hsv") {
+            formattedString = this.toHsvString();
+        }
+
+        return formattedString || this.toHexString();
+    },
+
+    _applyModification: function(fn, args) {
+        var color = fn.apply(null, [this].concat([].slice.call(args)));
+        this._r = color._r;
+        this._g = color._g;
+        this._b = color._b;
+        this.setAlpha(color._a);
+        return this;
+    },
+    lighten: function() {
+        return this._applyModification(lighten, arguments);
+    },
+    brighten: function() {
+        return this._applyModification(brighten, arguments);
+    },
+    darken: function() {
+        return this._applyModification(darken, arguments);
+    },
+    desaturate: function() {
+        return this._applyModification(desaturate, arguments);
+    },
+    saturate: function() {
+        return this._applyModification(saturate, arguments);
+    },
+    greyscale: function() {
+        return this._applyModification(greyscale, arguments);
+    },
+    spin: function() {
+        return this._applyModification(spin, arguments);
+    },
+
+    _applyCombination: function(fn, args) {
+        return fn.apply(null, [this].concat([].slice.call(args)));
+    },
+    analogous: function() {
+        return this._applyCombination(analogous, arguments);
+    },
+    complement: function() {
+        return this._applyCombination(complement, arguments);
+    },
+    monochromatic: function() {
+        return this._applyCombination(monochromatic, arguments);
+    },
+    splitcomplement: function() {
+        return this._applyCombination(splitcomplement, arguments);
+    },
+    triad: function() {
+        return this._applyCombination(triad, arguments);
+    },
+    tetrad: function() {
+        return this._applyCombination(tetrad, arguments);
+    }
+};
+
+// If input is an object, force 1 into "1.0" to handle ratios properly
+// String input requires "1.0" as input, so 1 will be treated as 1
+tinycolor.fromRatio = function(color, opts) {
+    if (typeof color == "object") {
+        var newColor = {};
+        for (var i in color) {
+            if (color.hasOwnProperty(i)) {
+                if (i === "a") {
+                    newColor[i] = color[i];
+                }
+                else {
+                    newColor[i] = convertToPercentage(color[i]);
+                }
+            }
+        }
+        color = newColor;
+    }
+
+    return tinycolor(color, opts);
+};
+
+// Given a string or object, convert that input to RGB
+// Possible string inputs:
+//
+//     "red"
+//     "#f00" or "f00"
+//     "#ff0000" or "ff0000"
+//     "#ff000000" or "ff000000"
+//     "rgb 255 0 0" or "rgb (255, 0, 0)"
+//     "rgb 1.0 0 0" or "rgb (1, 0, 0)"
+//     "rgba (255, 0, 0, 1)" or "rgba 255, 0, 0, 1"
+//     "rgba (1.0, 0, 0, 1)" or "rgba 1.0, 0, 0, 1"
+//     "hsl(0, 100%, 50%)" or "hsl 0 100% 50%"
+//     "hsla(0, 100%, 50%, 1)" or "hsla 0 100% 50%, 1"
+//     "hsv(0, 100%, 100%)" or "hsv 0 100% 100%"
+//
+function inputToRGB(color) {
+
+    var rgb = { r: 0, g: 0, b: 0 };
+    var a = 1;
+    var ok = false;
+    var format = false;
+
+    if (typeof color == "string") {
+        color = stringInputToObject(color);
+    }
+
+    if (typeof color == "object") {
+        if (color.hasOwnProperty("r") && color.hasOwnProperty("g") && color.hasOwnProperty("b")) {
+            rgb = rgbToRgb(color.r, color.g, color.b);
+            ok = true;
+            format = String(color.r).substr(-1) === "%" ? "prgb" : "rgb";
+        }
+        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
+            color.s = convertToPercentage(color.s);
+            color.v = convertToPercentage(color.v);
+            rgb = hsvToRgb(color.h, color.s, color.v);
+            ok = true;
+            format = "hsv";
+        }
+        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("l")) {
+            color.s = convertToPercentage(color.s);
+            color.l = convertToPercentage(color.l);
+            rgb = hslToRgb(color.h, color.s, color.l);
+            ok = true;
+            format = "hsl";
+        }
+
+        if (color.hasOwnProperty("a")) {
+            a = color.a;
+        }
+    }
+
+    a = boundAlpha(a);
+
+    return {
+        ok: ok,
+        format: color.format || format,
+        r: mathMin(255, mathMax(rgb.r, 0)),
+        g: mathMin(255, mathMax(rgb.g, 0)),
+        b: mathMin(255, mathMax(rgb.b, 0)),
+        a: a
+    };
+}
+
+
+// Conversion Functions
+// --------------------
+
+// `rgbToHsl`, `rgbToHsv`, `hslToRgb`, `hsvToRgb` modified from:
+// <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
+
+// `rgbToRgb`
+// Handle bounds / percentage checking to conform to CSS color spec
+// <http://www.w3.org/TR/css3-color/>
+// *Assumes:* r, g, b in [0, 255] or [0, 1]
+// *Returns:* { r, g, b } in [0, 255]
+function rgbToRgb(r, g, b){
+    return {
+        r: bound01(r, 255) * 255,
+        g: bound01(g, 255) * 255,
+        b: bound01(b, 255) * 255
+    };
+}
+
+// `rgbToHsl`
+// Converts an RGB color value to HSL.
+// *Assumes:* r, g, and b are contained in [0, 255] or [0, 1]
+// *Returns:* { h, s, l } in [0,1]
+function rgbToHsl(r, g, b) {
+
+    r = bound01(r, 255);
+    g = bound01(g, 255);
+    b = bound01(b, 255);
+
+    var max = mathMax(r, g, b), min = mathMin(r, g, b);
+    var h, s, l = (max + min) / 2;
+
+    if(max == min) {
+        h = s = 0; // achromatic
+    }
+    else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+
+        h /= 6;
+    }
+
+    return { h: h, s: s, l: l };
+}
+
+// `hslToRgb`
+// Converts an HSL color value to RGB.
+// *Assumes:* h is contained in [0, 1] or [0, 360] and s and l are contained [0, 1] or [0, 100]
+// *Returns:* { r, g, b } in the set [0, 255]
+function hslToRgb(h, s, l) {
+    var r, g, b;
+
+    h = bound01(h, 360);
+    s = bound01(s, 100);
+    l = bound01(l, 100);
+
+    function hue2rgb(p, q, t) {
+        if(t < 0) t += 1;
+        if(t > 1) t -= 1;
+        if(t < 1/6) return p + (q - p) * 6 * t;
+        if(t < 1/2) return q;
+        if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+    }
+
+    if(s === 0) {
+        r = g = b = l; // achromatic
+    }
+    else {
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return { r: r * 255, g: g * 255, b: b * 255 };
+}
+
+// `rgbToHsv`
+// Converts an RGB color value to HSV
+// *Assumes:* r, g, and b are contained in the set [0, 255] or [0, 1]
+// *Returns:* { h, s, v } in [0,1]
+function rgbToHsv(r, g, b) {
+
+    r = bound01(r, 255);
+    g = bound01(g, 255);
+    b = bound01(b, 255);
+
+    var max = mathMax(r, g, b), min = mathMin(r, g, b);
+    var h, s, v = max;
+
+    var d = max - min;
+    s = max === 0 ? 0 : d / max;
+
+    if(max == min) {
+        h = 0; // achromatic
+    }
+    else {
+        switch(max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return { h: h, s: s, v: v };
+}
+
+// `hsvToRgb`
+// Converts an HSV color value to RGB.
+// *Assumes:* h is contained in [0, 1] or [0, 360] and s and v are contained in [0, 1] or [0, 100]
+// *Returns:* { r, g, b } in the set [0, 255]
+ function hsvToRgb(h, s, v) {
+
+    h = bound01(h, 360) * 6;
+    s = bound01(s, 100);
+    v = bound01(v, 100);
+
+    var i = math.floor(h),
+        f = h - i,
+        p = v * (1 - s),
+        q = v * (1 - f * s),
+        t = v * (1 - (1 - f) * s),
+        mod = i % 6,
+        r = [v, q, p, p, t, v][mod],
+        g = [t, v, v, q, p, p][mod],
+        b = [p, p, t, v, v, q][mod];
+
+    return { r: r * 255, g: g * 255, b: b * 255 };
+}
+
+// `rgbToHex`
+// Converts an RGB color to hex
+// Assumes r, g, and b are contained in the set [0, 255]
+// Returns a 3 or 6 character hex
+function rgbToHex(r, g, b, allow3Char) {
+
+    var hex = [
+        pad2(mathRound(r).toString(16)),
+        pad2(mathRound(g).toString(16)),
+        pad2(mathRound(b).toString(16))
+    ];
+
+    // Return a 3 character hex if possible
+    if (allow3Char && hex[0].charAt(0) == hex[0].charAt(1) && hex[1].charAt(0) == hex[1].charAt(1) && hex[2].charAt(0) == hex[2].charAt(1)) {
+        return hex[0].charAt(0) + hex[1].charAt(0) + hex[2].charAt(0);
+    }
+
+    return hex.join("");
+}
+
+// `rgbaToHex`
+// Converts an RGBA color plus alpha transparency to hex
+// Assumes r, g, b and a are contained in the set [0, 255]
+// Returns an 8 character hex
+function rgbaToHex(r, g, b, a) {
+
+    var hex = [
+        pad2(convertDecimalToHex(a)),
+        pad2(mathRound(r).toString(16)),
+        pad2(mathRound(g).toString(16)),
+        pad2(mathRound(b).toString(16))
+    ];
+
+    return hex.join("");
+}
+
+// `equals`
+// Can be called with any tinycolor input
+tinycolor.equals = function (color1, color2) {
+    if (!color1 || !color2) { return false; }
+    return tinycolor(color1).toRgbString() == tinycolor(color2).toRgbString();
+};
+
+tinycolor.random = function() {
+    return tinycolor.fromRatio({
+        r: mathRandom(),
+        g: mathRandom(),
+        b: mathRandom()
+    });
+};
+
+
+// Modification Functions
+// ----------------------
+// Thanks to less.js for some of the basics here
+// <https://github.com/cloudhead/less.js/blob/master/lib/less/functions.js>
+
+function desaturate(color, amount) {
+    amount = (amount === 0) ? 0 : (amount || 10);
+    var hsl = tinycolor(color).toHsl();
+    hsl.s -= amount / 100;
+    hsl.s = clamp01(hsl.s);
+    return tinycolor(hsl);
+}
+
+function saturate(color, amount) {
+    amount = (amount === 0) ? 0 : (amount || 10);
+    var hsl = tinycolor(color).toHsl();
+    hsl.s += amount / 100;
+    hsl.s = clamp01(hsl.s);
+    return tinycolor(hsl);
+}
+
+function greyscale(color) {
+    return tinycolor(color).desaturate(100);
+}
+
+function lighten (color, amount) {
+    amount = (amount === 0) ? 0 : (amount || 10);
+    var hsl = tinycolor(color).toHsl();
+    hsl.l += amount / 100;
+    hsl.l = clamp01(hsl.l);
+    return tinycolor(hsl);
+}
+
+function brighten(color, amount) {
+    amount = (amount === 0) ? 0 : (amount || 10);
+    var rgb = tinycolor(color).toRgb();
+    rgb.r = mathMax(0, mathMin(255, rgb.r - mathRound(255 * - (amount / 100))));
+    rgb.g = mathMax(0, mathMin(255, rgb.g - mathRound(255 * - (amount / 100))));
+    rgb.b = mathMax(0, mathMin(255, rgb.b - mathRound(255 * - (amount / 100))));
+    return tinycolor(rgb);
+}
+
+function darken (color, amount) {
+    amount = (amount === 0) ? 0 : (amount || 10);
+    var hsl = tinycolor(color).toHsl();
+    hsl.l -= amount / 100;
+    hsl.l = clamp01(hsl.l);
+    return tinycolor(hsl);
+}
+
+// Spin takes a positive or negative amount within [-360, 360] indicating the change of hue.
+// Values outside of this range will be wrapped into this range.
+function spin(color, amount) {
+    var hsl = tinycolor(color).toHsl();
+    var hue = (mathRound(hsl.h) + amount) % 360;
+    hsl.h = hue < 0 ? 360 + hue : hue;
+    return tinycolor(hsl);
+}
+
+// Combination Functions
+// ---------------------
+// Thanks to jQuery xColor for some of the ideas behind these
+// <https://github.com/infusion/jQuery-xcolor/blob/master/jquery.xcolor.js>
+
+function complement(color) {
+    var hsl = tinycolor(color).toHsl();
+    hsl.h = (hsl.h + 180) % 360;
+    return tinycolor(hsl);
+}
+
+function triad(color) {
+    var hsl = tinycolor(color).toHsl();
+    var h = hsl.h;
+    return [
+        tinycolor(color),
+        tinycolor({ h: (h + 120) % 360, s: hsl.s, l: hsl.l }),
+        tinycolor({ h: (h + 240) % 360, s: hsl.s, l: hsl.l })
+    ];
+}
+
+function tetrad(color) {
+    var hsl = tinycolor(color).toHsl();
+    var h = hsl.h;
+    return [
+        tinycolor(color),
+        tinycolor({ h: (h + 90) % 360, s: hsl.s, l: hsl.l }),
+        tinycolor({ h: (h + 180) % 360, s: hsl.s, l: hsl.l }),
+        tinycolor({ h: (h + 270) % 360, s: hsl.s, l: hsl.l })
+    ];
+}
+
+function splitcomplement(color) {
+    var hsl = tinycolor(color).toHsl();
+    var h = hsl.h;
+    return [
+        tinycolor(color),
+        tinycolor({ h: (h + 72) % 360, s: hsl.s, l: hsl.l}),
+        tinycolor({ h: (h + 216) % 360, s: hsl.s, l: hsl.l})
+    ];
+}
+
+function analogous(color, results, slices) {
+    results = results || 6;
+    slices = slices || 30;
+
+    var hsl = tinycolor(color).toHsl();
+    var part = 360 / slices;
+    var ret = [tinycolor(color)];
+
+    for (hsl.h = ((hsl.h - (part * results >> 1)) + 720) % 360; --results; ) {
+        hsl.h = (hsl.h + part) % 360;
+        ret.push(tinycolor(hsl));
+    }
+    return ret;
+}
+
+function monochromatic(color, results) {
+    results = results || 6;
+    var hsv = tinycolor(color).toHsv();
+    var h = hsv.h, s = hsv.s, v = hsv.v;
+    var ret = [];
+    var modification = 1 / results;
+
+    while (results--) {
+        ret.push(tinycolor({ h: h, s: s, v: v}));
+        v = (v + modification) % 1;
+    }
+
+    return ret;
+}
+
+// Utility Functions
+// ---------------------
+
+tinycolor.mix = function(color1, color2, amount) {
+    amount = (amount === 0) ? 0 : (amount || 50);
+
+    var rgb1 = tinycolor(color1).toRgb();
+    var rgb2 = tinycolor(color2).toRgb();
+
+    var p = amount / 100;
+    var w = p * 2 - 1;
+    var a = rgb2.a - rgb1.a;
+
+    var w1;
+
+    if (w * a == -1) {
+        w1 = w;
+    } else {
+        w1 = (w + a) / (1 + w * a);
+    }
+
+    w1 = (w1 + 1) / 2;
+
+    var w2 = 1 - w1;
+
+    var rgba = {
+        r: rgb2.r * w1 + rgb1.r * w2,
+        g: rgb2.g * w1 + rgb1.g * w2,
+        b: rgb2.b * w1 + rgb1.b * w2,
+        a: rgb2.a * p  + rgb1.a * (1 - p)
+    };
+
+    return tinycolor(rgba);
+};
+
+
+// Readability Functions
+// ---------------------
+// <http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef (WCAG Version 2)
+
+// `contrast`
+// Analyze the 2 colors and returns the color contrast defined by (WCAG Version 2)
+tinycolor.readability = function(color1, color2) {
+    var c1 = tinycolor(color1);
+    var c2 = tinycolor(color2);
+    return (Math.max(c1.getLuminance(),c2.getLuminance())+0.05) / (Math.min(c1.getLuminance(),c2.getLuminance())+0.05);
+};
+
+// `isReadable`
+// Ensure that foreground and background color combinations meet WCAG2 guidelines.
+// The third argument is an optional Object.
+//      the 'level' property states 'AA' or 'AAA' - if missing or invalid, it defaults to 'AA';
+//      the 'size' property states 'large' or 'small' - if missing or invalid, it defaults to 'small'.
+// If the entire object is absent, isReadable defaults to {level:"AA",size:"small"}.
+
+// *Example*
+//    tinycolor.isReadable("#000", "#111") => false
+//    tinycolor.isReadable("#000", "#111",{level:"AA",size:"large"}) => false
+tinycolor.isReadable = function(color1, color2, wcag2) {
+    var readability = tinycolor.readability(color1, color2);
+    var wcag2Parms, out;
+
+    out = false;
+
+    wcag2Parms = validateWCAG2Parms(wcag2);
+    switch (wcag2Parms.level + wcag2Parms.size) {
+        case "AAsmall":
+        case "AAAlarge":
+            out = readability >= 4.5;
+            break;
+        case "AAlarge":
+            out = readability >= 3;
+            break;
+        case "AAAsmall":
+            out = readability >= 7;
+            break;
+    }
+    return out;
+
+};
+
+// `mostReadable`
+// Given a base color and a list of possible foreground or background
+// colors for that base, returns the most readable color.
+// Optionally returns Black or White if the most readable color is unreadable.
+// *Example*
+//    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:false}).toHexString(); // "#112255"
+//    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:true}).toHexString();  // "#ffffff"
+//    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"large"}).toHexString(); // "#faf3f3"
+//    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"small"}).toHexString(); // "#ffffff"
+tinycolor.mostReadable = function(baseColor, colorList, args) {
+    var bestColor = null;
+    var bestScore = 0;
+    var readability;
+    var includeFallbackColors, level, size ;
+    args = args || {};
+    includeFallbackColors = args.includeFallbackColors ;
+    level = args.level;
+    size = args.size;
+
+    for (var i= 0; i < colorList.length ; i++) {
+        readability = tinycolor.readability(baseColor, colorList[i]);
+        if (readability > bestScore) {
+            bestScore = readability;
+            bestColor = tinycolor(colorList[i]);
+        }
+    }
+
+    if (tinycolor.isReadable(baseColor, bestColor, {"level":level,"size":size}) || !includeFallbackColors) {
+        return bestColor;
+    }
+    else {
+        args.includeFallbackColors=false;
+        return tinycolor.mostReadable(baseColor,["#fff", "#000"],args);
+    }
+};
+
+
+// Big List of Colors
+// ------------------
+// <http://www.w3.org/TR/css3-color/#svg-color>
+var names = tinycolor.names = {
+    aliceblue: "f0f8ff",
+    antiquewhite: "faebd7",
+    aqua: "0ff",
+    aquamarine: "7fffd4",
+    azure: "f0ffff",
+    beige: "f5f5dc",
+    bisque: "ffe4c4",
+    black: "000",
+    blanchedalmond: "ffebcd",
+    blue: "00f",
+    blueviolet: "8a2be2",
+    brown: "a52a2a",
+    burlywood: "deb887",
+    burntsienna: "ea7e5d",
+    cadetblue: "5f9ea0",
+    chartreuse: "7fff00",
+    chocolate: "d2691e",
+    coral: "ff7f50",
+    cornflowerblue: "6495ed",
+    cornsilk: "fff8dc",
+    crimson: "dc143c",
+    cyan: "0ff",
+    darkblue: "00008b",
+    darkcyan: "008b8b",
+    darkgoldenrod: "b8860b",
+    darkgray: "a9a9a9",
+    darkgreen: "006400",
+    darkgrey: "a9a9a9",
+    darkkhaki: "bdb76b",
+    darkmagenta: "8b008b",
+    darkolivegreen: "556b2f",
+    darkorange: "ff8c00",
+    darkorchid: "9932cc",
+    darkred: "8b0000",
+    darksalmon: "e9967a",
+    darkseagreen: "8fbc8f",
+    darkslateblue: "483d8b",
+    darkslategray: "2f4f4f",
+    darkslategrey: "2f4f4f",
+    darkturquoise: "00ced1",
+    darkviolet: "9400d3",
+    deeppink: "ff1493",
+    deepskyblue: "00bfff",
+    dimgray: "696969",
+    dimgrey: "696969",
+    dodgerblue: "1e90ff",
+    firebrick: "b22222",
+    floralwhite: "fffaf0",
+    forestgreen: "228b22",
+    fuchsia: "f0f",
+    gainsboro: "dcdcdc",
+    ghostwhite: "f8f8ff",
+    gold: "ffd700",
+    goldenrod: "daa520",
+    gray: "808080",
+    green: "008000",
+    greenyellow: "adff2f",
+    grey: "808080",
+    honeydew: "f0fff0",
+    hotpink: "ff69b4",
+    indianred: "cd5c5c",
+    indigo: "4b0082",
+    ivory: "fffff0",
+    khaki: "f0e68c",
+    lavender: "e6e6fa",
+    lavenderblush: "fff0f5",
+    lawngreen: "7cfc00",
+    lemonchiffon: "fffacd",
+    lightblue: "add8e6",
+    lightcoral: "f08080",
+    lightcyan: "e0ffff",
+    lightgoldenrodyellow: "fafad2",
+    lightgray: "d3d3d3",
+    lightgreen: "90ee90",
+    lightgrey: "d3d3d3",
+    lightpink: "ffb6c1",
+    lightsalmon: "ffa07a",
+    lightseagreen: "20b2aa",
+    lightskyblue: "87cefa",
+    lightslategray: "789",
+    lightslategrey: "789",
+    lightsteelblue: "b0c4de",
+    lightyellow: "ffffe0",
+    lime: "0f0",
+    limegreen: "32cd32",
+    linen: "faf0e6",
+    magenta: "f0f",
+    maroon: "800000",
+    mediumaquamarine: "66cdaa",
+    mediumblue: "0000cd",
+    mediumorchid: "ba55d3",
+    mediumpurple: "9370db",
+    mediumseagreen: "3cb371",
+    mediumslateblue: "7b68ee",
+    mediumspringgreen: "00fa9a",
+    mediumturquoise: "48d1cc",
+    mediumvioletred: "c71585",
+    midnightblue: "191970",
+    mintcream: "f5fffa",
+    mistyrose: "ffe4e1",
+    moccasin: "ffe4b5",
+    navajowhite: "ffdead",
+    navy: "000080",
+    oldlace: "fdf5e6",
+    olive: "808000",
+    olivedrab: "6b8e23",
+    orange: "ffa500",
+    orangered: "ff4500",
+    orchid: "da70d6",
+    palegoldenrod: "eee8aa",
+    palegreen: "98fb98",
+    paleturquoise: "afeeee",
+    palevioletred: "db7093",
+    papayawhip: "ffefd5",
+    peachpuff: "ffdab9",
+    peru: "cd853f",
+    pink: "ffc0cb",
+    plum: "dda0dd",
+    powderblue: "b0e0e6",
+    purple: "800080",
+    rebeccapurple: "663399",
+    red: "f00",
+    rosybrown: "bc8f8f",
+    royalblue: "4169e1",
+    saddlebrown: "8b4513",
+    salmon: "fa8072",
+    sandybrown: "f4a460",
+    seagreen: "2e8b57",
+    seashell: "fff5ee",
+    sienna: "a0522d",
+    silver: "c0c0c0",
+    skyblue: "87ceeb",
+    slateblue: "6a5acd",
+    slategray: "708090",
+    slategrey: "708090",
+    snow: "fffafa",
+    springgreen: "00ff7f",
+    steelblue: "4682b4",
+    tan: "d2b48c",
+    teal: "008080",
+    thistle: "d8bfd8",
+    tomato: "ff6347",
+    turquoise: "40e0d0",
+    violet: "ee82ee",
+    wheat: "f5deb3",
+    white: "fff",
+    whitesmoke: "f5f5f5",
+    yellow: "ff0",
+    yellowgreen: "9acd32"
+};
+
+// Make it easy to access colors via `hexNames[hex]`
+var hexNames = tinycolor.hexNames = flip(names);
+
+
+// Utilities
+// ---------
+
+// `{ 'name1': 'val1' }` becomes `{ 'val1': 'name1' }`
+function flip(o) {
+    var flipped = { };
+    for (var i in o) {
+        if (o.hasOwnProperty(i)) {
+            flipped[o[i]] = i;
+        }
+    }
+    return flipped;
+}
+
+// Return a valid alpha value [0,1] with all invalid values being set to 1
+function boundAlpha(a) {
+    a = parseFloat(a);
+
+    if (isNaN(a) || a < 0 || a > 1) {
+        a = 1;
+    }
+
+    return a;
+}
+
+// Take input from [0, n] and return it as [0, 1]
+function bound01(n, max) {
+    if (isOnePointZero(n)) { n = "100%"; }
+
+    var processPercent = isPercentage(n);
+    n = mathMin(max, mathMax(0, parseFloat(n)));
+
+    // Automatically convert percentage into number
+    if (processPercent) {
+        n = parseInt(n * max, 10) / 100;
+    }
+
+    // Handle floating point rounding errors
+    if ((math.abs(n - max) < 0.000001)) {
+        return 1;
+    }
+
+    // Convert into [0, 1] range if it isn't already
+    return (n % max) / parseFloat(max);
+}
+
+// Force a number between 0 and 1
+function clamp01(val) {
+    return mathMin(1, mathMax(0, val));
+}
+
+// Parse a base-16 hex value into a base-10 integer
+function parseIntFromHex(val) {
+    return parseInt(val, 16);
+}
+
+// Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
+// <http://stackoverflow.com/questions/7422072/javascript-how-to-detect-number-as-a-decimal-including-1-0>
+function isOnePointZero(n) {
+    return typeof n == "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
+}
+
+// Check to see if string passed in is a percentage
+function isPercentage(n) {
+    return typeof n === "string" && n.indexOf('%') != -1;
+}
+
+// Force a hex value to have 2 characters
+function pad2(c) {
+    return c.length == 1 ? '0' + c : '' + c;
+}
+
+// Replace a decimal with it's percentage value
+function convertToPercentage(n) {
+    if (n <= 1) {
+        n = (n * 100) + "%";
+    }
+
+    return n;
+}
+
+// Converts a decimal to a hex value
+function convertDecimalToHex(d) {
+    return Math.round(parseFloat(d) * 255).toString(16);
+}
+// Converts a hex value to a decimal
+function convertHexToDecimal(h) {
+    return (parseIntFromHex(h) / 255);
+}
+
+var matchers = (function() {
+
+    // <http://www.w3.org/TR/css3-values/#integers>
+    var CSS_INTEGER = "[-\\+]?\\d+%?";
+
+    // <http://www.w3.org/TR/css3-values/#number-value>
+    var CSS_NUMBER = "[-\\+]?\\d*\\.\\d+%?";
+
+    // Allow positive/negative integer/number.  Don't capture the either/or, just the entire outcome.
+    var CSS_UNIT = "(?:" + CSS_NUMBER + ")|(?:" + CSS_INTEGER + ")";
+
+    // Actual matching.
+    // Parentheses and commas are optional, but not required.
+    // Whitespace can take the place of commas or opening paren
+    var PERMISSIVE_MATCH3 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
+    var PERMISSIVE_MATCH4 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
+
+    return {
+        rgb: new RegExp("rgb" + PERMISSIVE_MATCH3),
+        rgba: new RegExp("rgba" + PERMISSIVE_MATCH4),
+        hsl: new RegExp("hsl" + PERMISSIVE_MATCH3),
+        hsla: new RegExp("hsla" + PERMISSIVE_MATCH4),
+        hsv: new RegExp("hsv" + PERMISSIVE_MATCH3),
+        hsva: new RegExp("hsva" + PERMISSIVE_MATCH4),
+        hex3: /^([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,
+        hex6: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/,
+        hex8: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
+    };
+})();
+
+// `stringInputToObject`
+// Permissive string parsing.  Take in a number of formats, and output an object
+// based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
+function stringInputToObject(color) {
+
+    color = color.replace(trimLeft,'').replace(trimRight, '').toLowerCase();
+    var named = false;
+    if (names[color]) {
+        color = names[color];
+        named = true;
+    }
+    else if (color == 'transparent') {
+        return { r: 0, g: 0, b: 0, a: 0, format: "name" };
+    }
+
+    // Try to match string input using regular expressions.
+    // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
+    // Just return an object and let the conversion functions handle that.
+    // This way the result will be the same whether the tinycolor is initialized with string or object.
+    var match;
+    if ((match = matchers.rgb.exec(color))) {
+        return { r: match[1], g: match[2], b: match[3] };
+    }
+    if ((match = matchers.rgba.exec(color))) {
+        return { r: match[1], g: match[2], b: match[3], a: match[4] };
+    }
+    if ((match = matchers.hsl.exec(color))) {
+        return { h: match[1], s: match[2], l: match[3] };
+    }
+    if ((match = matchers.hsla.exec(color))) {
+        return { h: match[1], s: match[2], l: match[3], a: match[4] };
+    }
+    if ((match = matchers.hsv.exec(color))) {
+        return { h: match[1], s: match[2], v: match[3] };
+    }
+    if ((match = matchers.hsva.exec(color))) {
+        return { h: match[1], s: match[2], v: match[3], a: match[4] };
+    }
+    if ((match = matchers.hex8.exec(color))) {
+        return {
+            a: convertHexToDecimal(match[1]),
+            r: parseIntFromHex(match[2]),
+            g: parseIntFromHex(match[3]),
+            b: parseIntFromHex(match[4]),
+            format: named ? "name" : "hex8"
+        };
+    }
+    if ((match = matchers.hex6.exec(color))) {
+        return {
+            r: parseIntFromHex(match[1]),
+            g: parseIntFromHex(match[2]),
+            b: parseIntFromHex(match[3]),
+            format: named ? "name" : "hex"
+        };
+    }
+    if ((match = matchers.hex3.exec(color))) {
+        return {
+            r: parseIntFromHex(match[1] + '' + match[1]),
+            g: parseIntFromHex(match[2] + '' + match[2]),
+            b: parseIntFromHex(match[3] + '' + match[3]),
+            format: named ? "name" : "hex"
+        };
+    }
+
+    return false;
+}
+
+function validateWCAG2Parms(parms) {
+    // return valid WCAG2 parms for isReadable.
+    // If input parms are invalid, return {"level":"AA", "size":"small"}
+    var level, size;
+    parms = parms || {"level":"AA", "size":"small"};
+    level = (parms.level || "AA").toUpperCase();
+    size = (parms.size || "small").toLowerCase();
+    if (level !== "AA" && level !== "AAA") {
+        level = "AA";
+    }
+    if (size !== "small" && size !== "large") {
+        size = "small";
+    }
+    return {"level":level, "size":size};
+}
+
+// Node: Export function
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = tinycolor;
+}
+// AMD/requirejs: Define the module
+else if (typeof define === 'function' && define.amd) {
+    define(function () {return tinycolor;});
+}
+// Browser: Expose to window
+else {
+    window.tinycolor = tinycolor;
+}
+
+})();
+
 /*
 
  Running the following code before any other code will create if it's not natively available.
@@ -251,7 +1415,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.8.7',
+        '_version' : '3.9.1',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -291,11 +1455,20 @@ cm.isTouch = 'ontouchstart' in document.documentElement || !!window.navigator.ms
 
 /* ******* OBJECTS AND ARRAYS ******* */
 
-cm.isArray = Array.isArray || function(a){
-    return (a) ? a.constructor == Array : false;
+cm.top = function(name){
+    return window.top.cm[name];
 };
+
+cm.isArray = Array.isArray || function(a){
+    return a ? a.constructor == Array : false;
+};
+
 cm.isObject = function(o){
-    return (o) ? o.constructor == Object : false;
+    return o ? o.constructor == Object : false;
+};
+
+cm.isFunction = function(o){
+    return o ? typeof o == 'function' : false;
 };
 
 cm.forEach = function(o, callback){
@@ -364,7 +1537,9 @@ cm.merge = function(o1, o2){
     cm.forEach(o2, function(item, key){
         if(item != null){
             try{
-                if(Object.prototype.toString.call(item) == '[object Object]' && item.constructor != Object){
+                if(item._isComponent){
+                    o1[key] = item;
+                }else if(Object.prototype.toString.call(item) == '[object Object]' && item.constructor != Object){
                     o1[key] = item;
                 }else if(cm.isObject(item)){
                     o1[key] = cm.merge(o1[key], item);
@@ -416,6 +1591,7 @@ cm.clone = function(o, cloneNode){
         case RegExp:
         case Boolean:
         case XMLHttpRequest:
+        case File:
             newO = o;
             break;
         case Array:
@@ -425,10 +1601,14 @@ cm.clone = function(o, cloneNode){
             });
             break;
         case Object:
-            newO = {};
-            cm.forEach(o, function(item, key){
-                newO[key] = cm.clone(item, cloneNode);
-            });
+            if(o._isComponent){
+                newO = o;
+            }else{
+                newO = {};
+                cm.forEach(o, function(item, key){
+                    newO[key] = cm.clone(item, cloneNode);
+                });
+            }
             break;
         default:
             // Exceptions
@@ -640,12 +1820,14 @@ cm.getEventClientPosition = function(e){
         'y' : 0
     };
     if(e){
-        o['x'] = e.clientX;
-        o['y'] = e.clientY;
-        if(cm.isTouch && e.touches){
-            o['x'] = e.touches[0].clientX;
-            o['y'] = e.touches[0].clientY;
-        }
+        try{
+            o['x'] = e.clientX;
+            o['y'] = e.clientY;
+            if(cm.isTouch && e.touches){
+                o['x'] = e.touches[0].clientX;
+                o['y'] = e.touches[0].clientY;
+            }
+        }catch(e){}
     }
     return o;
 };
@@ -2136,6 +3318,55 @@ cm.getFullRect = function(node, styleObject){
     return dimensions;
 };
 
+cm.getNodeIndents = function(node, styleObject){
+    if(!node || !cm.isNode(node)){
+        return null;
+    }
+    styleObject = typeof styleObject == 'undefined' ? cm.getStyleObject(node) : styleObject;
+    // Get size and position
+    var o = {};
+    o['margin'] = {
+        'top' :     cm.getCSSStyle(styleObject, 'marginTop', true),
+        'right' :   cm.getCSSStyle(styleObject, 'marginRight', true),
+        'bottom' :  cm.getCSSStyle(styleObject, 'marginBottom', true),
+        'left' :    cm.getCSSStyle(styleObject, 'marginLeft', true)
+    };
+    o['padding'] = {
+        'top' :     cm.getCSSStyle(styleObject, 'marginTop', true),
+        'right' :   cm.getCSSStyle(styleObject, 'marginRight', true),
+        'bottom' :  cm.getCSSStyle(styleObject, 'marginBottom', true),
+        'left' :    cm.getCSSStyle(styleObject, 'marginLeft', true)
+    };
+    return o;
+};
+
+cm.getNodeOffset = function(node, styleObject, o){
+    if(!node || !cm.isNode(node)){
+        return null;
+    }
+    styleObject = typeof styleObject == 'undefined' ? cm.getStyleObject(node) : styleObject;
+    o = !o || typeof o == 'undefined' ? cm.getNodeIndents(node, styleObject) : o;
+    // Get size and position
+    o['offset'] = cm.getRect(node);
+    o['inner'] = {
+        'width' : o['offset']['width'] - o['padding']['left'] - o['padding']['right'],
+        'height' : o['offset']['height'] - o['padding']['top'] - o['padding']['bottom'],
+        'top' : o['offset']['top'] + o['padding']['top'],
+        'right' : o['offset']['right'] - o['padding']['right'],
+        'bottom' : o['offset']['bottom'] - o['padding']['bottom'],
+        'left': o['offset']['left'] + o['padding']['left']
+    };
+    o['outer'] = {
+        'width' : o['offset']['width'] + o['margin']['left'] + o['margin']['right'],
+        'height' : o['offset']['height'] + o['margin']['top'] + o['margin']['bottom'],
+        'top' : o['offset']['top'] - o['margin']['top'],
+        'right' : o['offset']['right'] + o['margin']['right'],
+        'bottom' : o['offset']['bottom'] + o['margin']['bottom'],
+        'left': o['offset']['left'] - o['margin']['left']
+    };
+    return o;
+};
+
 cm.getRealWidth = function(node, applyWidth){
     var nodeWidth = 0,
         width = 0;
@@ -2861,10 +4092,11 @@ cm.cookieDate = function(num){
 cm.ajax = function(o){
     var config = cm.merge({
             'debug' : true,
-            'type' : 'xml',                                         // text | xml | json | jsonp
-            'method' : 'post',                                      // post | get
+            'type' : 'json',                                         // text | xml | json | jsonp
+            'method' : 'post',                                       // post | get
             'params' : '',
             'url' : '',
+            'formData'  : false,
             'httpRequestObject' : cm.createXmlHttpRequestObject(),
             'headers' : {
                 'Content-Type' : 'application/x-www-form-urlencoded',
@@ -2904,7 +4136,9 @@ cm.ajax = function(o){
         responseType =  /text|json/.test(config['type']) ? 'responseText' : 'responseXML';
         config['method'] = config['method'].toLocaleLowerCase();
         // Convert params object to URI string
-        if(cm.isObject(config['params'])){
+        if(config['formData']){
+            config['params'] = cm.obj2FormData(config['params']);
+        }else if(cm.isObject(config['params'])){
             config['params'] = cm.obj2URI(config['params']);
         }
         // Build request link
@@ -3051,6 +4285,14 @@ cm.obj2URI = function(obj, prefix){
     return str.join("&");
 };
 
+cm.obj2FormData = function(o){
+    var fd = new FormData();
+    cm.forEach(o, function(value, key){
+        fd.append(key, value);
+    });
+    return fd;
+};
+
 cm.xml2arr = function(o){
     o = o.nodeType == 9 ? cm.firstEl(o) : o;
     if(o.nodeType == 3 || o.nodeType == 4){
@@ -3179,6 +4421,7 @@ cm.defineHelper = function(name, data, handler){
     }, data);
     // Create class extend object
     that.build = {
+        '_isComponent' : true,
         '_raw' : data,
         '_name' : {
             'full' : name,
@@ -3226,11 +4469,13 @@ cm.getConstructor = function(className, callback){
     }else{
         classConstructor = cm.defineStack[className];
         if(!classConstructor){
-            cm.errorLog({
-                'type' : 'error',
-                'name' : 'cm.getConstructor',
-                'message' : ['Class', cm.strWrap(className, '"'), 'does not exists or define.'].join(' ')
-            });
+            if(cm._debug){
+                cm.errorLog({
+                    'type' : 'attention',
+                    'name' : 'cm.getConstructor',
+                    'message' : ['Class', cm.strWrap(className, '"'), 'does not exists or define.'].join(' ')
+                });
+            }
             return false;
         }else{
             callback(classConstructor);
@@ -3296,23 +4541,20 @@ cm.Finder = function(className, name, parentNode, callback, params){
     var watcher = function(classObject){
         classObject.removeEvent(params['event'], watcher);
         var isSame = classObject.isAppropriateToStack(name, parentNode, callback);
-        if(isSame && !params['multiple']){
+        if(isSame && !params['multiple'] && isEventBind){
             that.remove();
         }
     };
 
     that.remove = function(){
-        if(isEventBind){
-            cm.getConstructor(className, function(classConstructor){
-                classConstructor.prototype.removeEvent(params['event'], watcher);
-            });
-        }
+        cm.getConstructor(className, function(classConstructor){
+            classConstructor.prototype.removeEvent(params['event'], watcher);
+        });
         return that;
     };
 
     init();
 };
-
 /* ******* PARAMS ******* */
 
 Mod['Params'] = {
@@ -3327,9 +4569,10 @@ Mod['Params'] = {
             that.build['params'] = {};
         }
     },
-    'setParams' : function(params){
+    'setParams' : function(params, replace){
         var that = this;
-        that.params = cm.merge(that.params, params);
+        replace = typeof replace == 'undefined'? false : replace;
+        that.params = cm.merge(replace ? that._raw.params : that.params, params);
         // Validate params
         cm.forEach(that.params, function(item, key){
             switch(item){
@@ -3343,6 +4586,10 @@ Mod['Params'] = {
 
                 case 'document.body':
                     that.params[key] = document.body;
+                    break;
+
+                case 'top.document.body':
+                    that.params[key] = window.top.document.body;
                     break;
 
                 case 'document.head':
@@ -4102,6 +5349,559 @@ cm.init = function(){
 };
 
 cm.onReady(cm.init, false);
+cm.define('Com.Form', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Storage',
+        'Callbacks',
+        'Stack',
+        'Structure'
+    ],
+    'events' : [
+        'onRender',
+        'onError',
+        'onAbort',
+        'onSuccess',
+        'onSendStart',
+        'onSendEnd'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'renderStructure' : true,
+        'ajax' : {
+            'type' : 'json',
+            'method' : 'post',
+            'formData' : true,
+            'url' : '',
+            'params' : ''
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.ajaxHandler = null;
+    that.fields = {};
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.callbacksProcess();
+        render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+    };
+
+    var render = function(){
+        if(that.params['renderStructure']){
+            that.nodes['container'] = cm.node('div', {'class' : 'com__form'},
+                that.nodes['form'] = cm.node('form', {'class' : 'form'})
+            );
+            that.appendStructure(that.nodes['container']);
+            cm.remove(that.params['node']);
+        }
+        // Events
+        cm.addEvent(that.nodes['form'], 'submit', function(e){
+            cm.preventDefault(e);
+            that.send();
+        });
+    };
+
+    var renderField = function(type, params){
+        var fieldParams, field;
+        // Merge params
+        params = cm.merge({
+            'name' : '',
+            'label' : '',
+            'options' : [],
+            'container' : that.nodes['form'],
+            'form' : that
+        }, params);
+        // Render
+        if(fieldParams = Com.FormFields.get(type)){
+            cm.getConstructor('Com.FormField', function(classConstructor){
+                params = cm.merge(fieldParams, params);
+                field = new classConstructor(params);
+                if(params['field']){
+                    that.fields[params['name']] = field;
+                }
+            });
+        }
+    };
+
+    /* ******* CALLBACKS ******* */
+
+    that.callbacks.prepare = function(that, config){
+        config['params'] = that.getAll();
+        return config;
+    };
+
+    that.callbacks.request = function(that, config){
+        config = that.callbacks.prepare(that, config);
+        // Return ajax handler (XMLHttpRequest) to providing abort method.
+        return cm.ajax(
+            cm.merge(config, {
+                'onStart' : function(){
+                    that.callbacks.start(that, config);
+                },
+                'onSuccess' : function(response){
+                    that.callbacks.response(that, config, response);
+                },
+                'onError' : function(){
+                    that.callbacks.error(that, config);
+                },
+                'onAbort' : function(){
+                    that.callbacks.abort(that, config);
+                },
+                'onEnd' : function(){
+                    that.callbacks.end(that, config);
+                }
+            })
+        );
+    };
+
+    that.callbacks.start = function(that, config){
+        that.triggerEvent('onSendStart');
+    };
+
+    that.callbacks.end = function(that, config){
+        that.triggerEvent('onSendEnd');
+    };
+
+    that.callbacks.response = function(that, config, response){
+        if(!cm.isEmpty(response)){
+            that.callbacks.success(that, response);
+        }else{
+            that.callbacks.error(that, config);
+        }
+    };
+
+    that.callbacks.error = function(that, config){
+        that.triggerEvent('onError');
+    };
+
+    that.callbacks.success = function(that, response){
+        that.triggerEvent('onSuccess', response);
+    };
+
+    that.callbacks.abort = function(that, config){
+        that.triggerEvent('onAbort');
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.add = function(type, params){
+        renderField(type, params);
+        return that;
+    };
+
+    that.getAll = function(){
+        var o = {};
+        cm.forEach(that.fields, function(field, name){
+            o[name] = field.get();
+        });
+        return o;
+    };
+
+    that.clear = function(){
+        cm.clearNode(that.nodes['form']);
+        return that;
+    };
+
+    that.reset = function(){
+        cm.forEach(that.fields, function(field){
+            field.reset();
+        });
+        return that;
+    };
+
+    that.send = function(){
+        that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params['ajax']));
+        return that;
+    };
+
+    that.abort = function(){
+        if(that.ajaxHandler && that.ajaxHandler.abort){
+            that.ajaxHandler.abort();
+        }
+        return that;
+    };
+
+    that.setAction = function(o){
+        o = cm.merge(that._raw.params['ajax'], o);
+        that.params['ajax'] = o;
+        return that;
+    };
+
+    init();
+});
+
+/* ******* COMPONENT: FORM FIELD ******* */
+
+Com.FormFields = (function(){
+    var stack = {};
+
+    return {
+        'add' : function(type, params){
+            stack[type] = cm.merge({
+                'node' : cm.node('div'),
+                'type' : type,
+                'field' : true
+            }, params);
+        },
+        'get' : function(type){
+            return stack[type]? cm.clone(stack[type], true) : null;
+        }
+    };
+})();
+
+cm.define('Com.FormField', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataConfig',
+        'Stack',
+        'Callbacks'
+    ],
+    'events' : [
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'container' : cm.node('div'),
+        'form' : false,
+        'name' : '',
+        'type' : false,
+        'label' : '',
+        'help' : null,
+        'placeholder' : '',
+        'options' : [],
+        'component' : false,
+        'componentParams' : {},
+        'Com.HelpBubble' : {
+            'renderStructure' : true
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {};
+    that.components = {};
+    that.form = null;
+    that.component = null;
+    that.value = null;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        that.callbacksProcess();
+        validateParams();
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        if(that.params['component']){
+            cm.getConstructor(that.params['component'], function(classConstructor){
+                that.params['constructor'] = classConstructor;
+            });
+        }
+        that.params['componentParams']['node'] = that.params['node'];
+        that.params['componentParams']['name'] = that.params['name'];
+        that.params['componentParams']['options'] = that.params['options'];
+        that.params['Com.HelpBubble']['content'] = that.params['help'];
+        that.params['Com.HelpBubble']['name'] = that.params['name'];
+        that.form = that.params['form'];
+    };
+
+    var render = function(){
+        // Render structure
+        that.nodes = that.callbacks.render(that) || {};
+        // Append
+        that.params['container'].appendChild(that.nodes['container']);
+        // Construct
+        that.callbacks.construct(that);
+    };
+
+    /* ******* CALLBACKS ******* */
+
+    that.callbacks.construct = function(that){
+        that.component = that.callbacks.component(that, that.params['componentParams']);
+    };
+
+    that.callbacks.component = function(that, params){
+        if(that.params['component']){
+            return new that.params['constructor'](params);
+        }
+    };
+
+    that.callbacks.render = function(that){
+        var nodes = {};
+        nodes['container'] = cm.node('dl',
+            nodes['label'] = cm.node('dt',
+                cm.node('label', that.params['label'])
+            ),
+            nodes['value'] = cm.node('dd', that.params['node'])
+        );
+        if(!cm.isEmpty(that.params['name'])){
+            that.params['node'].setAttribute('name', that.params['name']);
+        }
+        if(!cm.isEmpty(that.params['placeholder'])){
+            that.params['node'].setAttribute('placeholder', that.params['placeholder']);
+        }
+        if(!cm.isEmpty(that.params['help'])){
+            cm.getConstructor('Com.HelpBubble', function(classConstructor){
+                that.components['help'] = new classConstructor(
+                    cm.merge(that.params['Com.HelpBubble'], {
+                        'container' : nodes['label']
+                    })
+                );
+            });
+        }
+        return nodes;
+    };
+
+    that.callbacks.set = function(that, value){
+        cm.isFunction(that.component.set) && that.component.set(value);
+        return value;
+    };
+
+    that.callbacks.get = function(that){
+        return cm.isFunction(that.component.get) ? that.component.get() : null;
+    };
+
+    that.callbacks.reset = function(that){
+        cm.isFunction(that.component.reset) && that.component.reset();
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.set = function(value){
+        that.value = that.callbacks.set(that, value);
+        return that;
+    };
+
+    that.get = function(){
+        that.value = that.callbacks.get(that);
+        return that.value;
+    };
+
+    that.reset = function(){
+        that.callbacks.reset(that);
+        return that;
+    };
+
+    init();
+});
+
+/* ******* COMPONENT: FORM FIELD: DECORATORS ******* */
+
+Com.FormFields.add('input', {
+    'node' : cm.node('input', {'type' : 'text'}),
+    'callbacks' : {
+        'set' : function(that, value){
+            that.params['node'].value = value;
+            return value;
+        },
+        'get' : function(that){
+            return that.params['node'].value;
+        },
+        'reset' : function(that){
+            that.params['node'].value = '';
+        }
+    }
+});
+
+Com.FormFields.add('textarea', {
+    'node' : cm.node('textarea'),
+    'callbacks' : {
+        'set' : function(that, value){
+            that.params['node'].value = value;
+            return value;
+        },
+        'get' : function(that){
+            return that.params['node'].value;
+        },
+        'reset' : function(that){
+            that.params['node'].value = '';
+        }
+    }
+});
+
+Com.FormFields.add('select', {
+    'node' : cm.node('select'),
+    'callbacks' : {
+        'component' : function(that){
+            var nodes,
+                items = [];
+            cm.forEach(that.params['options'], function(item){
+                nodes = {};
+                nodes['container'] = cm.node('option', {'value' : item['value']}, item['text']);
+                that.params['node'].appendChild(nodes['container']);
+                items.push(nodes);
+            });
+            return items;
+        },
+        'set' : function(that, value){
+            that.params['node'].value = value;
+            return value;
+        },
+        'get' : function(that){
+            return that.params['node'].value;
+        },
+        'reset' : function(that){
+            that.params['node'].value = '';
+        }
+    }
+});
+
+Com.FormFields.add('radio', {
+    'node' : cm.node('div', {'class' : 'form__check-line'}),
+    'callbacks' : {
+        'component' : function(that){
+            var items = [],
+                item;
+            cm.forEach(that.params['options'], function(option){
+                item = {
+                    'config' : option,
+                    'nodes' : {}
+                };
+                item.nodes['container'] = cm.node('label',
+                    item.nodes['input'] = cm.node('input', {'type' : 'radio', 'name' : that.params['name'], 'value' : option['value']}),
+                    item.nodes['label'] = cm.node('span', {'class' : 'label'}, option['text'])
+                );
+                that.params['node'].appendChild(item.nodes['container']);
+                items.push(item);
+            });
+            return items;
+        },
+        'set' : function(that, value){
+            cm.forEach(that.component, function(item){
+                item.nodes['input'].checked = item.config['value'] == value;
+            });
+            return value;
+        },
+        'get' : function(that){
+            var value = null;
+            cm.forEach(that.component, function(item){
+                if(item.nodes['input'].checked){
+                    value = item.config['value'];
+                }
+            });
+            return value;
+        },
+        'reset' : function(that){
+            cm.forEach(that.component, function(item){
+                item.nodes['input'].checked = false;
+            });
+        }
+    }
+});
+
+Com.FormFields.add('check', {
+    'node' : cm.node('div', {'class' : 'form__check-line'}),
+    'callbacks' : {
+        'component' : function(that){
+            var items = [],
+                item;
+            cm.forEach(that.params['options'], function(option){
+                item = {
+                    'config' : option,
+                    'nodes' : {}
+                };
+                item.nodes['container'] = cm.node('label',
+                    item.nodes['input'] = cm.node('input', {'type' : 'checkbox', 'name' : that.params['name'], 'value' : option['value']}),
+                    item.nodes['label'] = cm.node('span', {'class' : 'label'}, option['text'])
+                );
+                that.params['node'].appendChild(item.nodes['container']);
+                items.push(item);
+            });
+            return items;
+        },
+        'set' : function(that, value){
+            cm.forEach(that.component, function(item){
+                item.nodes['input'].checked = cm.inArray(value, item.config['value']);
+            });
+            return value;
+        },
+        'get' : function(that){
+            var value = [];
+            cm.forEach(that.component, function(item){
+                if(item.nodes['input'].checked){
+                    value.push(item.config['value']);
+                }
+            });
+            return value;
+        },
+        'reset' : function(that){
+            cm.forEach(that.component, function(item){
+                item.nodes['input'].checked = false;
+            });
+        }
+    }
+});
+
+Com.FormFields.add('buttons', {
+    'node' : cm.node('div', {'class' : 'btn-wrap'}),
+    'field' : false,
+    'callbacks' : {
+        'render' : function(that){
+            var nodes = {};
+            nodes['container'] = that.params['node'];
+            return nodes;
+        },
+        'component' : function(that){
+            var buttons = {},
+                node;
+            cm.forEach(that.params['options'], function(item){
+                node = cm.node('button', item['text']);
+                switch(item['value']){
+                    case 'submit':
+                        node.type = 'submit';
+                        cm.addClass(node, 'button-primary');
+                        cm.addEvent(node, 'click', function(e){
+                            cm.preventDefault(e);
+                            that.form.send();
+                        });
+                        break;
+
+                    case 'reset':
+                        node.type = 'reset';
+                        cm.addClass(node, 'button-secondary');
+                        cm.addEvent(node, 'click', function(e){
+                            cm.preventDefault(e);
+                            that.form.reset();
+                        });
+                        break;
+
+                    case 'clear':
+                        cm.addClass(node, 'button-secondary');
+                        cm.addEvent(node, 'click', function(e){
+                            cm.preventDefault(e);
+                            that.form.clear();
+                        });
+                        break;
+
+                    default:
+                        break;
+                }
+                buttons[item['value']] = node;
+                that.params['node'].appendChild(node);
+            });
+            return buttons;
+        }
+    }
+});
 cm.define('Com.Autocomplete', {
     'modules' : [
         'Params',
@@ -4619,8 +6419,8 @@ cm.define('Com.Calendar', {
         'onMonthRender'
     ],
     'params' : {
+        'node' : cm.node('div'),
         'name' : '',
-        'container' : cm.Node('div'),
         'className' : '',
         'startYear' : 1950,                                                 // number | current
         'endYear' : 'current + 10',                                         // number | current
@@ -4651,7 +6451,7 @@ function(params){
     var init = function(){
         that.setParams(params);
         that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['container']);
+        that.getDataConfig(that.params['node']);
         validateParams();
         render();
         setMiscEvents();
@@ -4706,20 +6506,20 @@ function(params){
             );
         }
         // Insert into DOM
-        that.params['container'].appendChild(nodes['container']);
+        that.params['node'].appendChild(nodes['container']);
     };
 
     var setMiscEvents = function(){
         // Init custom selects
         selects['years'] = new Com.Select({
-                'select' : nodes['years'],
+                'node' : nodes['years'],
                 'renderInBody' : that.params['renderSelectsInBody']
             })
             .set(current['year'])
             .addEvent('onChange', renderView);
 
         selects['months'] = new Com.Select({
-                'select' : nodes['months'],
+                'node' : nodes['months'],
                 'renderInBody' : that.params['renderSelectsInBody']
             })
             .set(current['month'])
@@ -4951,7 +6751,7 @@ function(params){
         that.nodes['container'] = cm.Node('div', {'class' : 'com__calendar-events'});
         // Render calendar
         that.components['calendar'] = new Com.Calendar({
-            'container' : that.nodes['container'],
+            'node' : that.nodes['container'],
             'renderMonthOnInit' : false,
             'startYear' : that.params['startYear'],
             'endYear' : that.params['endYear'],
@@ -5022,6 +6822,57 @@ function(params){
         that.components['calendar'].renderMonth();
         return that;
     };
+
+    init();
+});
+cm.define('Com.CodeHighlight', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataConfig',
+        'Stack'
+    ],
+    'events' : [
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'language' : 'javascript',
+        'lineNumbers' : true
+    }
+},
+function(params){
+    var that = this;
+
+    that.components = {};
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var render = function(){
+        if(typeof CodeMirror != 'undefined'){
+            that.components['codemirror'] = CodeMirror.fromTextArea(that.params['node'], {
+                'lineNumbers': that.params['lineNumbers'],
+                'viewportMargin': Infinity,
+                'mode': that.params['language']
+            });
+            that.components['codemirror'].on('change', function(cm){
+                that.params['node'].value = cm.getValue();
+            });
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.components['codemirror'].refresh();
+            });
+        }
+    };
+
+    /* ******* PUBLIC ******* */
 
     init();
 });
@@ -5178,34 +7029,63 @@ function(params){
 
     init();
 });
-Com['Collector'] = function(o){
-    var that = this,
-        config = cm.merge({
-            'attribute' : 'data-element',
-            'events' : {}
-        }, o),
-        API = {
-            'onConstructStart' : [],
-            'onConstruct' : [],
-            'onDestructStart' : [],
-            'onDestruct' : []
-        },
-        stuck = {};
+cm.define('Com.Collector', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataConfig',
+        'Stack'
+    ],
+    'events' : [
+        'onRender',
+        'onConstructStart',
+        'onConstruct',
+        'onDestructStart',
+        'onDestruct'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'attribute' : 'data-element',
+        'autoInit' : false
+    }
+},
+function(params){
+    var that = this;
+
+    that.stack = {};
 
     var init = function(){
-        convertEvents(config['events']);
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var render = function(){
+        if(that.params['autoInit']){
+            cm.forEach(cm.defineStack, function(classConstructor){
+                that.add(classConstructor.prototype._name['full'], function(node){
+                    new classConstructor({
+                        'node' : node
+                    });
+                });
+            });
+        }
     };
 
     var constructItem = function(item, name, parentNode){
         var nodes = [];
         // Find element in specified node
-        if(parentNode.getAttribute(config['attribute']) == name){
+        if(parentNode.getAttribute(that.params['attribute']) == name){
             nodes.push(parentNode)
         }
         // Search for nodes in specified node
         nodes = nodes.concat(
             cm.clone(
-                cm.getByAttr(config['attribute'], name, parentNode)
+                cm.getByAttr(that.params['attribute'], name, parentNode)
             )
         );
         // Filter off existing nodes
@@ -5227,13 +7107,13 @@ Com['Collector'] = function(o){
             inArray;
         if(parentNode){
             // Find element in specified node
-            if(parentNode.getAttribute(config['attribute']) == name){
+            if(parentNode.getAttribute(that.params['attribute']) == name){
                 nodes.push(parentNode)
             }
             // Search for nodes in specified node
             nodes = nodes.concat(
                 cm.clone(
-                    cm.getByAttr(config['attribute'], name, parentNode)
+                    cm.getByAttr(that.params['attribute'], name, parentNode)
                 )
             );
             // Filter off not existing nodes and remove existing from global array
@@ -5255,64 +7135,48 @@ Com['Collector'] = function(o){
                     handler(node);
                 });
             });
-            delete stuck[name];
+            delete that.stack[name];
         }
     };
 
-    /* *** MISC FUNCTIONS *** */
-
-    var convertEvents = function(o){
-        cm.forEach(o, function(item, key){
-            if(API[key] && typeof item == 'function'){
-                API[key].push(item);
-            }
-        });
-    };
-
-    var executeEvent = function(event, params){
-        API[event].forEach(function(item){
-            item(that, params || {});
-        });
-    };
-
-    /* *** MAIN *** */
-
+    /* ******* PUBLIC ******* */
+    
     that.add = function(name, construct, destruct){
         if(name){
-            if(!stuck[name]){
-                stuck[name] = {
+            if(!that.stack[name]){
+                that.stack[name] = {
                     'construct' : [],
                     'destruct' : [],
                     'nodes' : []
                 };
             }
             if(typeof construct == 'function'){
-                stuck[name]['construct'].push(construct);
+                that.stack[name]['construct'].push(construct);
             }
             if(typeof destruct == 'function'){
-                stuck[name]['destruct'].push(destruct);
+                that.stack[name]['destruct'].push(destruct);
             }
         }
         return that;
     };
 
     that.remove = function(name, construct, destruct){
-        if(name && stuck[name]){
+        if(name && that.stack[name]){
             if(construct || destruct){
                 // Remove item's handlers
                 if(typeof construct == 'function'){
-                    stuck[name]['construct'] = stuck[name]['construct'].filter(function(handler){
+                    that.stack[name]['construct'] = that.stack[name]['construct'].filter(function(handler){
                         return handler != construct;
                     });
                 }
                 if(typeof destruct == 'function'){
-                    stuck[name]['destruct'] = stuck[name]['destruct'].filter(function(handler){
+                    that.stack[name]['destruct'] = that.stack[name]['destruct'].filter(function(handler){
                         return handler != destruct;
                     });
                 }
             }else{
                 // Remove item from global array
-                delete stuck[name];
+                delete that.stack[name];
             }
         }
         return that;
@@ -5320,18 +7184,18 @@ Com['Collector'] = function(o){
 
     that.construct = function(node, name){
         node = node || document.body;
-        executeEvent('onConstructStart', {
+        that.triggerEvent('onConstructStart', {
             'node' : node,
             'name' : name
         });
-        if(name && stuck[name]){
-            constructItem(stuck[name], name, node);
+        if(name && that.stack[name]){
+            constructItem(that.stack[name], name, node);
         }else{
-            cm.forEach(stuck, function(item, name){
+            cm.forEach(that.stack, function(item, name){
                 constructItem(item, name, node);
             });
         }
-        executeEvent('onConstruct', {
+        that.triggerEvent('onConstruct', {
             'node' : node,
             'name' : name
         });
@@ -5340,42 +7204,26 @@ Com['Collector'] = function(o){
 
     that.destruct = function(node, name){
         node = node || null;
-        executeEvent('onDestructStart', {
+        that.triggerEvent('onDestructStart', {
             'node' : node,
             'name' : name
         });
-        if(name && stuck[name]){
-            destructItem(stuck[name], name, node);
+        if(name && that.stack[name]){
+            destructItem(that.stack[name], name, node);
         }else{
-            cm.forEach(stuck, function(item, name){
+            cm.forEach(that.stack, function(item, name){
                 destructItem(item, name, node);
             });
         }
-        executeEvent('onDestruct', {
+        that.triggerEvent('onDestruct', {
             'node' : node,
             'name' : name
         });
         return that;
     };
-
-    that.addEvent = function(event, handler){
-        if(API[event] && typeof handler == 'function'){
-            API[event].push(handler);
-        }
-        return that;
-    };
-
-    that.removeEvent = function(event, handler){
-        if(API[event] && typeof handler == 'function'){
-            API[event] = API[event].filter(function(item){
-                return item != handler;
-            });
-        }
-        return that;
-    };
-
+    
     init();
-};
+});
 cm.define('Com.ColorPicker', {
     'modules' : [
         'Params',
@@ -5397,9 +7245,10 @@ cm.define('Com.ColorPicker', {
     ],
     'params' : {
         'container' : false,
-        'input' : cm.Node('div'),
+        'input' : null,                                     // Deprecated, use 'node' parameter instead.
+        'node' : cm.Node('input', {'type' : 'text'}),
         'name' : '',
-        'value' : null,                        // Color string: transparent | hex | rgba.
+        'value' : null,                                     // Color string: transparent | hex | rgba.
         'defaultValue' : 'transparent',
         'title' : '',
         'showInputValue' : true,
@@ -5437,8 +7286,9 @@ function(params){
 
     var init = function(){
         that.setParams(params);
+        preValidateParams();
         that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['input']);
+        that.getDataConfig(that.params['node']);
         validateParams();
         render();
         setLogic();
@@ -5450,12 +7300,18 @@ function(params){
         that.triggerEvent('onRender', that.value);
     };
 
-    var validateParams = function(){
+    var preValidateParams = function(){
         if(cm.isNode(that.params['input'])){
-            that.params['title'] = that.params['input'].getAttribute('title') || that.params['title'];
-            that.params['disabled'] = that.params['input'].disabled || that.params['disabled'];
-            that.value = that.params['input'].value;
-            that.params['name'] = that.params['input'].getAttribute('name') || that.params['name'];
+            that.params['node'] = that.params['input'];
+        }
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['disabled'] = that.params['node'].disabled || that.params['disabled'];
+            that.value = that.params['node'].value;
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
         }
         that.value = that.params['value'] || that.value || that.params['defaultValue'];
         that.disabled = that.params['disabled'];
@@ -5480,12 +7336,12 @@ function(params){
             that.nodes['container'].title = that.params['title'];
         }
         // ID
-        if(that.params['input'].id){
-            that.nodes['container'].id = that.params['input'].id;
+        if(that.params['node'].id){
+            that.nodes['container'].id = that.params['node'].id;
         }
         // Set hidden input attributes
-        if(that.params['input'].getAttribute('name')){
-            that.nodes['hidden'].setAttribute('name', that.params['input'].getAttribute('name'));
+        if(that.params['node'].getAttribute('name')){
+            that.nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
         }
         // Clear Button
         if(that.params['showClearButton']){
@@ -5497,10 +7353,10 @@ function(params){
         /* *** INSERT INTO DOM *** */
         if(that.params['container']){
             that.params['container'].appendChild(that.nodes['container']);
-        }else if(that.params['input'].parentNode){
-            cm.insertBefore(that.nodes['container'], that.params['input']);
+        }else if(that.params['node'].parentNode){
+            cm.insertBefore(that.nodes['container'], that.params['node']);
         }
-        cm.remove(that.params['input']);
+        cm.remove(that.params['node']);
     };
 
     var setLogic = function(){
@@ -5535,7 +7391,7 @@ function(params){
         // Render palette
         that.components['palette'] = new Com.Palette(
             cm.merge(that.params['Com.Palette'], {
-                'container' : that.nodes['menuContainer'],
+                'node' : that.nodes['menuContainer'],
                 'events' : {
                     'onChange' : function(my, value){
                         set(my.get('rgb'), true);
@@ -5665,10 +7521,11 @@ cm.define('Com.Columns', {
         'onResize'
     ],
     'params' : {
-        'container' : cm.Node('div'),
+        'columns' : false,                  // Deprecated, use 'node' parameter instead.
+        'node' : cm.node('div'),
+        'container' : false,
         'name' : '',
         'renderStructure' : false,
-        'columns' : false,
         'minColumnWidth' : 48,              // in px
         'data' : []
     }
@@ -5685,18 +7542,18 @@ function(params){
 
     var init = function(){
         that.setParams(params);
+        preValidateParams();
         that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['container']);
-        validateParams();
+        that.getDataConfig(that.params['node']);
         render();
         renderChassis();
         that.addToStack(nodes['container']);
         that.triggerEvent('onRender');
     };
 
-    var validateParams = function(){
-        if(cm.isNode(that.params['container'])){
-            that.params['name'] = that.params['container'].getAttribute('name') || that.params['name'];
+    var preValidateParams = function(){
+        if(cm.isNode(that.params['columns'])){
+            that.params['node'] = that.params['columns'];
         }
     };
 
@@ -5705,7 +7562,7 @@ function(params){
     var render = function(){
         if(that.params['renderStructure']){
             renderStructure();
-        }else if(that.params['columns']){
+        }else if(that.params['node']){
             collect();
         }
         // Add custom event
@@ -5717,7 +7574,7 @@ function(params){
     var collect = function(){
         var columns;
         // Collect nodes
-        nodes['container'] = that.params['columns'];
+        nodes['container'] = that.params['node'];
         nodes['inner'] = cm.getByAttr('data-com__columns', 'inner', nodes['container'])[0];
         nodes['holder'] = cm.getByAttr('data-com__columns', 'holder', nodes['container'])[0];
         // Set editable class
@@ -5746,7 +7603,9 @@ function(params){
         // Render Columns
         cm.forEach(that.params['data'], renderColumn);
         // Embed
-        that.params['container'].appendChild(nodes['container']);
+        if(that.params['container']){
+            that.params['container'].appendChild(nodes['container']);
+        }
     };
 
     /* *** COLUMNS *** */
@@ -7859,7 +9718,8 @@ cm.define('Com.DateSelect', {
     ],
     'params' : {
         'container' : false,
-        'input' : cm.Node('input', {'type' : 'text'}),
+        'input' : null,                                 // Deprecated, use 'node' parameter instead.
+        'node' : cm.Node('input', {'type' : 'text'}),
         'format' : 'cm._config.dateFormat',
         'startYear' : 1950,
         'endYear' : new Date().getFullYear() + 10,
@@ -7887,11 +9747,18 @@ function(params){
 
     var init = function(){
         that.setParams(params);
+        preValidateParams();
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
         render();
         // Set selected date
-        set(that.params['input'].value);
+        set(that.params['node'].value);
+    };
+
+    var preValidateParams = function(){
+        if(cm.isNode(that.params['input'])){
+            that.params['node'] = that.params['input'];
+        }
     };
 
     var render = function(){
@@ -7911,16 +9778,16 @@ function(params){
         renderSelects();
         /* *** ATTRIBUTES *** */
         // Set hidden input attributes
-        if(that.params['input'].getAttribute('name')){
-            nodes['hidden'].setAttribute('name', that.params['input'].getAttribute('name'));
+        if(that.params['node'].getAttribute('name')){
+            nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
         }
         /* *** INSERT INTO DOM *** */
         if(that.params['container']){
             that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['input'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['input']);
+        }else if(that.params['node'].parentNode){
+            cm.insertBefore(nodes['container'], that.params['node']);
         }
-        cm.remove(that.params['input']);
+        cm.remove(that.params['node']);
     };
 
     var renderSelects = function(){
@@ -8110,7 +9977,8 @@ cm.define('Com.Datepicker', {
     ],
     'params' : {
         'container' : false,
-        'input' : cm.Node('input', {'type' : 'text'}),
+        'input' : null,                      // Deprecated, use 'node' parameter instead.
+        'node' : cm.Node('input', {'type' : 'text'}),
         'name' : '',
         'renderInBody' : true,
         'format' : 'cm._config.dateFormat',
@@ -8166,8 +10034,9 @@ function(params){
 
     var init = function(){
         that.setParams(params);
+        preValidateParams();
         that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['input']);
+        that.getDataConfig(that.params['node']);
         validateParams();
         render();
         setLogic();
@@ -8177,18 +10046,24 @@ function(params){
         if(that.params['value']){
             that.set(that.params['value'], that.format, false);
         }else{
-            that.set(that.params['input'].value, that.format, false);
+            that.set(that.params['node'].value, that.format, false);
         }
         // Trigger events
         that.triggerEvent('onRender', that.value);
     };
 
-    var validateParams = function(){
+    var preValidateParams = function(){
         if(cm.isNode(that.params['input'])){
-            that.params['placeholder'] = that.params['input'].getAttribute('placeholder') || that.params['placeholder'];
-            that.params['title'] = that.params['input'].getAttribute('title') || that.params['title'];
-            that.params['disabled'] = that.params['input'].disabled || that.params['disabled'];
-            that.params['name'] = that.params['input'].getAttribute('name') || that.params['name'];
+            that.params['node'] = that.params['input'];
+        }
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['placeholder'] = that.params['node'].getAttribute('placeholder') || that.params['placeholder'];
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['disabled'] = that.params['node'].disabled || that.params['disabled'];
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
         }
         if(that.params['value'] == 'now'){
             that.params['value'] = new Date();
@@ -8222,8 +10097,8 @@ function(params){
             nodes['container'].title = that.params['title'];
         }
         // ID
-        if(that.params['input'].id){
-            nodes['container'].id = that.params['input'].id;
+        if(that.params['node'].id){
+            nodes['container'].id = that.params['node'].id;
         }
         // Set hidden input attributes
         if(that.params['name']){
@@ -8259,10 +10134,10 @@ function(params){
         /* *** INSERT INTO DOM *** */
         if(that.params['container']){
             that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['input'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['input']);
+        }else if(that.params['node'].parentNode){
+            cm.insertBefore(nodes['container'], that.params['node']);
         }
-        cm.remove(that.params['input']);
+        cm.remove(that.params['node']);
     };
 
     var setLogic = function(){
@@ -8303,7 +10178,7 @@ function(params){
         );
         // Render calendar
         components['calendar'] = new Com.Calendar({
-            'container' : nodes['calendarContainer'],
+            'node' : nodes['calendarContainer'],
             'renderSelectsInBody' : false,
             'className' : 'com__datepicker-calendar',
             'startYear' : that.params['startYear'],
@@ -10255,7 +12130,14 @@ function(params){
             'title' : ''
         }, item);
         // Check type
-        item['type'] = /(\.jpg|\.png|\.gif|\.jpeg|\.bmp|\.tga)$/gi.test(item['src']) ? 'image' : 'iframe';
+        if(
+            /(\.jpg|\.png|\.gif|\.jpeg|\.bmp|\.tga)$/gi.test(item['src']) ||
+            /^data:image/gi.test(item['src'])
+        ){
+            item['type'] = 'image';
+        }else{
+            item['type'] = 'iframe';
+        }
         // Structure
         if(!item['link']){
             item['link'] = cm.Node('a')
@@ -10435,6 +12317,26 @@ function(params){
         return that;
     };
 
+    that.clear = function(){
+        if(items[that.current]){
+            cm.remove(items[that.current]['nodes']['container']);
+            that.current = null;
+            that.previous = null;
+        }
+        items = [];
+        return that;
+    };
+
+    that.add = function(item){
+        item = cm.merge({
+            'link' : cm.node('a'),
+            'src' : '',
+            'title' : ''
+        }, item);
+        processItem(item);
+        return that;
+    };
+
     that.collect = function(node){
         var nodes;
         if(cm.isNode(node)){
@@ -10455,7 +12357,8 @@ cm.define('Com.GalleryLayout', {
         'Params',
         'Events',
         'DataConfig',
-        'DataNodes'
+        'DataNodes',
+        'Stack'
     ],
     'events' : [
         'onRender',
@@ -10493,6 +12396,8 @@ function(params){
         that.getDataConfig(that.params['node']);
         collectItems();
         render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
     };
 
     var render = function(){
@@ -10511,8 +12416,6 @@ function(params){
             )
             .addEvent('onChange', onChange)
             .set(0);
-        // API onRender event
-        that.triggerEvent('onRender');
     };
 
     var collectItems = function(){
@@ -10559,6 +12462,7 @@ cm.define('Com.GalleryPopup', {
         'Stack'
     ],
     'events' : [
+        'onRender',
         'onOpen',
         'onClose',
         'onChange'
@@ -10598,6 +12502,7 @@ function(params){
         validateParams();
         render();
         setLogic();
+        that.triggerEvent('onRender');
     };
 
     var validateParams = function(){
@@ -10715,8 +12620,18 @@ function(params){
         return that;
     };
 
+    that.add = function(item){
+        components['gallery'].add(item);
+        return that;
+    };
+
     that.collect = function(node){
         components['gallery'].collect(node);
+        return that;
+    };
+
+    that.clear = function(){
+        components['gallery'].clear();
         return that;
     };
 
@@ -11687,6 +13602,205 @@ function(params){
     };
 
     init();
+});
+cm.define('Com.ImageInput', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'Stack',
+        'Structure'
+    ],
+    'events' : [
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'title' : '',
+        'placeholder' : '',
+        'value' : null,
+        'disabled' : false,
+        'type' : 'file',              // base64 | file
+        'langs' : {
+            'no_image' : 'No Image',
+            'browse' : 'Browse',
+            'remove' : 'Remove'
+        },
+        'Com.GalleryPopup' : {}
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {};
+    that.components = {};
+    that.disabled = false;
+    that.value = null;
+    that.file = null;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        render();
+        // Set selected date
+        if(that.params['value']){
+            that.set(that.params['value'], false);
+        }else{
+            that.set(that.params['node'].value, false);
+        }
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['placeholder'] = that.params['node'].getAttribute('placeholder') || that.params['placeholder'];
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+        }
+        that.disabled = that.params['disabled'];
+    };
+
+    var render = function(){
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'com__image-input'},
+            that.nodes['hidden'] = cm.node('input', {'type' : 'hidden'}),
+            cm.node('div', {'class' : 'pt__box-item size-80'},
+                cm.node('div', {'class' : 'l'},
+                    that.nodes['imageContainer'] = cm.node('div', {'class' : 'pt__image has-border is-centered'},
+                        that.nodes['link'] = cm.node('a', {'class' : 'inner'},
+                            that.nodes['image'] = cm.node('img', {'class' : 'descr', 'alt' : ''})
+                        )
+                    )
+                ),
+                that.nodes['r'] = cm.node('div', {'class' : 'r'},
+                    that.nodes['buttons'] = cm.node('div', {'class' : 'btn-wrap pull-left'},
+                        cm.node('div', {'class' : 'browse-button'},
+                            cm.node('button', that.lang('browse')),
+                            cm.node('div', {'class' : 'inner'},
+                                that.nodes['input'] = cm.node('input', {'type' : 'file'})
+                            )
+                        ),
+                        that.nodes['remove'] = cm.node('button', that.lang('remove'))
+                    )
+                )
+            )
+        );
+        if(!cm.isEmpty(that.params['title'])){
+            that.nodes['imageContainer'].title = that.params['title'];
+        }
+        if(!cm.isEmpty(that.params['placeholder'])){
+            that.nodes['r'].appendChild(
+                cm.node('div', {'class' : 'hint'}, that.params['placeholder'])
+            );
+        }
+        if(!cm.isEmpty(that.params['name'])){
+            that.nodes['hidden'].setAttribute('name', that.params['name']);
+        }
+        // Append
+        that.appendStructure(that.nodes['container']);
+        cm.remove(that.params['node']);
+        // Events
+        cm.getConstructor('Com.GalleryPopup', function(classConstructor){
+            that.components['popup'] = new classConstructor(
+                cm.merge(that.params['Com.GalleryPopup'], {
+                    'node' : that.nodes['imageContainer']
+                })
+            );
+        });
+        that.components['fileReader'] = new FileReader();
+        cm.addEvent(that.components['fileReader'], 'load', fileReaderAction);
+        cm.addEvent(that.nodes['input'], 'change', changeAction);
+        cm.addEvent(that.nodes['remove'], 'click', removeAction);
+    };
+
+    var changeAction = function(){
+        var file = that.nodes['input'].files[0];
+        if(/^image\//.test(file.type)){
+            that.file = file;
+            that.components['fileReader'].readAsDataURL(that.file);
+        }
+    };
+
+    var removeAction = function(){
+        that.reset();
+    };
+
+    var fileReaderAction = function(e){
+        set(e.target.result);
+    };
+
+    var set = function(url){
+        that.value = url;
+        that.nodes['hidden'].value = url;
+        setImage(url);
+    };
+
+    var setImage = function(url){
+        that.nodes['image'].src = url;
+        cm.replaceClass(that.nodes['imageContainer'], 'is-no-hover is-no-image', 'is-zoom');
+        cm.appendChild(that.nodes['remove'], that.nodes['buttons']);
+        // Replace gallery item
+        if(that.components['popup']){
+            that.components['popup']
+                .clear()
+                .add({
+                    'link' : that.nodes['link'],
+                    'src' : url,
+                    'title' : ''
+                })
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.set = function(url, file){
+        if(cm.isEmpty(url)){
+            that.reset();
+        }else{
+            that.file = file;
+            set(url);
+        }
+        return that;
+    };
+
+    that.get = function(){
+        switch(that.params['type']){
+            case 'base64' :
+                return that.value;
+                break;
+            case 'file' :
+                return that.file;
+                break;
+        }
+    };
+
+    that.reset = function(){
+        that.file = null;
+        that.value = null;
+        that.nodes['hidden'].value = '';
+        cm.replaceClass(that.nodes['imageContainer'], 'is-zoom', 'is-no-hover is-no-image');
+        cm.remove(that.nodes['remove']);
+        // Clear gallery item
+        if(that.components['popup']){
+            that.components['popup']
+                .clear()
+        }
+        return that;
+    };
+
+    init();
+});
+
+/* ****** FORM FIELD COMPONENT ******* */
+
+Com.FormFields.add('image-input', {
+    'node' : cm.node('input'),
+    'component' : 'Com.ImageInput'
 });
 cm.define('Com.Menu', {
     'modules' : [
@@ -13036,8 +15150,8 @@ cm.define('Com.Palette', {
         'onChange'
     ],
     'params' : {
+        'node' : cm.node('div'),
         'name' : '',
-        'container' : cm.node('div'),
         'value' : 'transparent',
         'defaultValue' : 'rgb(255, 255, 255)',
         'setOnInit' : true,
@@ -13128,7 +15242,7 @@ function(params){
         cm.addEvent(that.nodes['inputHEX'], 'keypress', inputHEXKeypressHandler);
         cm.addEvent(that.nodes['buttonSelect'], 'click', buttonSelectHandler);
         // Embed
-        that.params['container'].appendChild(that.nodes['container']);
+        that.params['node'].appendChild(that.nodes['container']);
     };
 
     var initComponents = function(){
@@ -14116,12 +16230,14 @@ cm.define('Com.Select', {
         'onRender',
         'onSelect',
         'onChange',
+        'onReset',
         'onFocus',
         'onBlur'
     ],
     'params' : {
         'container' : false,                    // Component container that is required in case content is rendered without available select.
-        'select' : cm.Node('select'),           // Html select node to decorate.
+        'select' : null,                        // Deprecated, use 'node' parameter instead.
+        'node' : cm.Node('select'),             // Html select node to decorate.
         'name' : '',
         'renderInBody' : true,                  // Render dropdowns in document.body, else they will be rendrered in component container.
         'multiple' : false,                     // Render multiple select.
@@ -14163,8 +16279,9 @@ function(params){
 
     var init = function(){
         that.setParams(params);
+        preValidateParams();
         that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['select']);
+        that.getDataConfig(that.params['node']);
         validateParams();
         render();
         setMiscEvents();
@@ -14178,30 +16295,37 @@ function(params){
                     }
                 });
             }else{
-                cm.forEach(that.params['select'].options, function(item){
+                cm.forEach(that.params['node'].options, function(item){
                     item.selected && set(options[item.value]);
                 });
             }
         }else{
             if(that.params['selected'] && options[that.params['selected']]){
                 set(options[that.params['selected']]);
-            }else if(options[that.params['select'].value]){
-                set(options[that.params['select'].value]);
+            }else if(options[that.params['node'].value]){
+                set(options[that.params['node'].value]);
             }else if(optionsLength){
                 set(optionsList[0]);
             }
         }
-        // Trigger events
+        // Final events
+        that.addToStack(nodes['container']);
         that.triggerEvent('onRender', active);
     };
 
-    var validateParams = function(){
+    var preValidateParams = function(){
         if(cm.isNode(that.params['select'])){
-            that.params['placeholder'] = that.params['select'].getAttribute('placeholder') || that.params['placeholder'];
-            that.params['multiple'] = that.params['select'].multiple;
-            that.params['title'] = that.params['select'].getAttribute('title') || that.params['title'];
-            that.params['name'] = that.params['select'].getAttribute('name') || that.params['name'];
-            that.params['disabled'] = that.params['select'].disabled || that.params['disabled'];
+            that.params['node'] = that.params['select'];
+        }
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['placeholder'] = that.params['node'].getAttribute('placeholder') || that.params['placeholder'];
+            that.params['multiple'] = that.params['node'].multiple;
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+            that.params['disabled'] = that.params['node'].disabled || that.params['disabled'];
         }
         that.disabled = that.params['disabled'];
     };
@@ -14214,26 +16338,25 @@ function(params){
         }else{
             renderSingle();
         }
-        that.addToStack(nodes['container']);
         /* *** ATTRIBUTES *** */
         // Add class name
-        if(that.params['select'].className){
-            cm.addClass(nodes['container'], that.params['select'].className);
+        if(that.params['node'].className){
+            cm.addClass(nodes['container'], that.params['node'].className);
         }
         // Title
         if(that.params['showTitleTag'] && that.params['title']){
             nodes['container'].title = that.params['title'];
         }
         // Tabindex
-        if(tabindex = that.params['select'].getAttribute('tabindex')){
+        if(tabindex = that.params['node'].getAttribute('tabindex')){
             nodes['container'].setAttribute('tabindex', tabindex);
         }
         // ID
-        if(that.params['select'].id){
-            nodes['container'].id = that.params['select'].id;
+        if(that.params['node'].id){
+            nodes['container'].id = that.params['node'].id;
         }
         // Data
-        cm.forEach(that.params['select'].attributes, function(item){
+        cm.forEach(that.params['node'].attributes, function(item){
             if(/^data-/.test(item.name) && item.name != 'data-element'){
                 nodes['container'].setAttribute(item.name, item.value);
             }
@@ -14256,10 +16379,10 @@ function(params){
         /* *** INSERT INTO DOM *** */
         if(that.params['container']){
             that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['select'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['select']);
+        }else if(that.params['node'].parentNode){
+            cm.insertBefore(nodes['container'], that.params['node']);
         }
-        cm.remove(that.params['select']);
+        cm.remove(that.params['node']);
     };
 
     var renderSingle = function(){
@@ -14355,7 +16478,7 @@ function(params){
     /* *** COLLECTORS *** */
 
     var collectSelectOptions = function(){
-        var myChildes = that.params['select'].childNodes,
+        var myChildes = that.params['node'].childNodes,
             myOptionsNodes,
             myOptions;
         cm.forEach(myChildes, function(myChild){
@@ -14588,43 +16711,59 @@ function(params){
         return active;
     };
 
-    that.set = function(value, execute){
-        execute = typeof execute == 'undefined'? true : execute;
+    that.set = function(value, triggerEvents){
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
         // Select option and execute events
         if(typeof value != 'undefined'){
             if(cm.isArray(value)){
                 cm.forEach(value, function(item){
                     if(options[item]){
-                        set(options[item]);
+                        set(options[item], false);
                     }
                 });
-                /* *** EXECUTE API EVENTS *** */
-                if(execute){
+                if(triggerEvents){
                     that.triggerEvent('onSelect', active);
                     that.triggerEvent('onChange', active);
                 }
             }else if(options[value]){
-                set(options[value], execute);
+                set(options[value], triggerEvents);
             }
         }
         return that;
     };
 
-    that.selectAll = function(){
+    that.reset = function(triggerEvents){
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        if(that.params['multiple']){
+            that.deselectAll(triggerEvents);
+        }else{
+            if(optionsLength){
+                set(optionsList[0], triggerEvents);
+            }
+        }
+    };
+
+    that.selectAll = function(triggerEvents){
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
         if(that.params['multiple']){
             cm.forEach(options, deselectMultiple);
             cm.forEach(options, setMultiple);
-            that.triggerEvent('onSelect', active);
-            onChange();
+            if(triggerEvents){
+                that.triggerEvent('onSelect', active);
+                onChange();
+            }
         }
         return that;
     };
 
-    that.deselectAll = function(){
+    that.deselectAll = function(triggerEvents){
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
         if(that.params['multiple']){
             cm.forEach(options, deselectMultiple);
-            that.triggerEvent('onSelect', active);
-            onChange();
+            if(triggerEvents){
+                that.triggerEvent('onSelect', active);
+                onChange();
+            }
         }
         return that;
     };
@@ -14717,6 +16856,22 @@ function(params){
     };
 
     init();
+});
+
+/* ****** FORM FIELD COMPONENT ******* */
+
+Com.FormFields.add('select', {
+    'node' : cm.node('select'),
+    'component' : 'Com.Select',
+    'callbacks' : {
+        'component' : function(that, params){
+            return new that.params['constructor'](
+                cm.merge(params, {
+                    'select' : params['node']
+                })
+            );
+        }
+    }
 });
 cm.define('Com.Slider', {
     'modules' : [
@@ -16306,7 +18461,8 @@ cm.define('Com.TagsInput', {
     ],
     'params' : {
         'container' : false,
-        'input' : cm.Node('input', {'type' : 'text'}),
+        'input' : null,                                 // Deprecated, use 'node' parameter instead.
+        'node' : cm.Node('input', {'type' : 'text'}),
         'name' : '',
         'data' : [],
         'maxSingleTagLength': 255,
@@ -16340,7 +18496,7 @@ function(params){
         // Init modules
         that.setParams(params);
         that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['input']);
+        that.getDataConfig(that.params['node']);
         // Render
         render();
         setLogic();
@@ -16348,7 +18504,7 @@ function(params){
         that.triggerEvent('onRender');
         // Set tags
         sourceTags = that.params['data'].concat(
-            that.params['input'].value.split(',')
+            that.params['node'].value.split(',')
         );
         cm.forEach(sourceTags, function(tag){
             addTag(tag);
@@ -16356,8 +18512,11 @@ function(params){
     };
 
     var preValidateParams = function(){
+        if(cm.isNode(that.params['input'])){
+            that.params['node'] = that.params['input'];
+        }
         // Check for autocomplete
-        that.isAutocomplete = !(!cm.isEmpty(params['autocomplete']) && !that.getNodeDataConfig(that.params['input'])['autocomplete']);
+        that.isAutocomplete = !(!cm.isEmpty(params['autocomplete']) && !that.getNodeDataConfig(that.params['node'])['autocomplete']);
     };
 
     var render = function(){
@@ -16370,16 +18529,16 @@ function(params){
         renderAddButton();
         /* *** ATTRIBUTES *** */
         // Set hidden input attributes
-        if(that.params['input'].getAttribute('name')){
-            nodes['hidden'].setAttribute('name', that.params['input'].getAttribute('name'));
+        if(that.params['node'].getAttribute('name')){
+            nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
         }
         /* *** INSERT INTO DOM *** */
         if(that.params['container']){
             that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['input'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['input']);
+        }else if(that.params['node'].parentNode){
+            cm.insertBefore(nodes['container'], that.params['node']);
         }
-        cm.remove(that.params['input']);
+        cm.remove(that.params['node']);
 
     };
 
@@ -16613,7 +18772,8 @@ cm.define('Com.TimeSelect', {
     ],
     'params' : {
         'container' : false,
-        'input' : cm.Node('input', {'type' : 'text'}),
+        'input' : null,                                  // Deprecated, use 'node' parameter instead.
+        'node' : cm.Node('input', {'type' : 'text'}),
         'renderSelectsInBody' : true,
         'format' : 'cm._config.timeFormat',
         'showTitleTag' : true,
@@ -16647,8 +18807,9 @@ function(params){
 
     var init = function(){
         that.setParams(params);
+        preValidateParams();
         that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['input']);
+        that.getDataConfig(that.params['node']);
         validateParams();
         render();
         setMiscEvents();
@@ -16656,13 +18817,19 @@ function(params){
         if(that.params['selected']){
             that.set(that.params['selected'], that.params['format'], false);
         }else{
-            that.set(that.params['input'].value, that.params['format'], false);
+            that.set(that.params['node'].value, that.params['format'], false);
+        }
+    };
+
+    var preValidateParams = function(){
+        if(cm.isNode(that.params['input'])){
+            that.params['node'] = that.params['input'];
         }
     };
 
     var validateParams = function(){
-        if(cm.isNode(that.params['input'])){
-            that.params['title'] = that.params['input'].getAttribute('title') || that.params['title'];
+        if(cm.isNode(that.params['node'])){
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
         }
         if(cm.isEmpty(that.params['hoursInterval'])){
             that.params['hoursInterval'] = 1;
@@ -16736,16 +18903,16 @@ function(params){
             nodes['container'].title = that.params['title'];
         }
         // Set hidden input attributes
-        if(that.params['input'].getAttribute('name')){
-            nodes['hidden'].setAttribute('name', that.params['input'].getAttribute('name'));
+        if(that.params['node'].getAttribute('name')){
+            nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
         }
         /* *** INSERT INTO DOM *** */
         if(that.params['container']){
             that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['input'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['input']);
+        }else if(that.params['node'].parentNode){
+            cm.insertBefore(nodes['container'], that.params['node']);
         }
-        cm.remove(that.params['input']);
+        cm.remove(that.params['node']);
     };
 
     var setMiscEvents = function(){
@@ -17523,10 +19690,10 @@ function(params){
 });
 Com['UA'] = {
     'hash' : {'ie':'MSIE','opera':'Opera','ff':'Firefox','firefox':'Firefox','webkit':'AppleWebKit','safari':'Safari','chrome':'Chrome','steam':'Steam'},
-    'fullname' : {'MSIE':'Microsoft Internet Explorer','Firefox':'Mozilla Firefox','Chrome':'Google Chrome','Safari':'Apple Safari','Opera':'Opera','Opera Mini':'Opera Mini','Opera Mobile':'Opera Mobile','IE Mobile':'Internet Explorer Mobile','Steam':'Valve Steam GameOverlay'},
+    'fullname' : {'MSIE':'Microsoft Internet Explorer','Firefox':'Mozilla Firefox','Chrome':'Google Chrome','Safari':'Apple Safari','Opera':'Opera','Opera Mini':'Opera Mini','Opera Mobile':'Opera Mobile','IE Mobile':'Internet Explorer Mobile','Steam':'Valve Steam Game Overlay'},
     'os' : {
         'Windows':{'NT 5.0':'2000','NT 5.1':'XP','NT 5.2':'Server 2003','NT 6.0':'Vista','NT 6.1':'7','NT 6.2':'8','NT 6.3':'8.1','NT 10.0':'10'},
-        'Mac OS':{'X 10.0':'Cheetah','X 10.1':'Puma','X 10.2':'Jaguar','X 10.3':'Panther','X 10.4':'Tiger','X 10.5':'Leopard','X 10.6':'Snow Leopard','X 10.7':'Lion','X 10.8':'Mountain Lion','X 10.9':'Mavericks','X 10.10':'Yosemite'}
+        'Mac OSX':{'10.0':'Cheetah','10.1':'Puma','10.2':'Jaguar','10.3':'Panther','10.4':'Tiger','10.5':'Leopard','10.6':'Snow Leopard','10.7':'Lion','10.8':'Mountain Lion','10.9':'Mavericks','10.10':'Yosemite','10.11':'El Capitan'}
     },
     'str' : navigator.userAgent,
     'get' : function(str){
@@ -17672,13 +19839,11 @@ Com['UA'] = {
             arr['os_type'] = 'mobile';
             arr['os_version'] =  str.replace(/^(?:.+)(?:CPU[ iPhone]{0,} OS )([a-zA-Z0-9\._]{0,})(?:.+)$/, '$1').replace(/_/gi,'.');
         }else if(str.indexOf('Macintosh') > -1){
-            arr['os'] = 'Mac OS';
-            if((str.indexOf('Mac OS') > -1)){
-                arr['os_full_version'] =  str.replace(/^(?:.+)(?:Mac OS )([a-zA-Z0-9\.\s_]{0,})(?:.+)$/, '$1').replace(/_/gi,'.');
-                arr['os_version'] = arr['os_full_version'].slice(0, 6);
-                var os = that.os[arr['os']];
-                arr['os_name'] =  arr['os'] +' '+ arr['os_version'] + ((os && os[arr['os_version']])? ' '+os[arr['os_version']] : '');
+            if((str.indexOf('Mac OS X') > -1)){
+                arr['os'] = 'Mac OSX';
+                arr['os_version'] =  str.replace(/^(?:.+)(?:Mac OS X)(?:[\s]{0,1})([a-zA-Z0-9\.\s_]{0,})(?:.+)$/, '$1').replace(/_/gi,'.');
             }else{
+                arr['os'] = 'Mac OS';
                 arr['os_version'] = 'Classic';
             }
         }else if(str.indexOf('BlackBerry') > -1){
@@ -17931,1170 +20096,6 @@ function(params){
 
     init();
 });
-// TinyColor v1.2.1
-// https://github.com/bgrins/TinyColor
-// Brian Grinstead, MIT License
-
-(function() {
-
-var trimLeft = /^[\s,#]+/,
-    trimRight = /\s+$/,
-    tinyCounter = 0,
-    math = Math,
-    mathRound = math.round,
-    mathMin = math.min,
-    mathMax = math.max,
-    mathRandom = math.random;
-
-function tinycolor (color, opts) {
-
-    color = (color) ? color : '';
-    opts = opts || { };
-
-    // If input is already a tinycolor, return itself
-    if (color instanceof tinycolor) {
-       return color;
-    }
-    // If we are called as a function, call using new instead
-    if (!(this instanceof tinycolor)) {
-        return new tinycolor(color, opts);
-    }
-
-    var rgb = inputToRGB(color);
-    this._originalInput = color,
-    this._r = rgb.r,
-    this._g = rgb.g,
-    this._b = rgb.b,
-    this._a = rgb.a,
-    this._roundA = mathRound(100*this._a) / 100,
-    this._format = opts.format || rgb.format;
-    this._gradientType = opts.gradientType;
-
-    // Don't let the range of [0,255] come back in [0,1].
-    // Potentially lose a little bit of precision here, but will fix issues where
-    // .5 gets interpreted as half of the total, instead of half of 1
-    // If it was supposed to be 128, this was already taken care of by `inputToRgb`
-    if (this._r < 1) { this._r = mathRound(this._r); }
-    if (this._g < 1) { this._g = mathRound(this._g); }
-    if (this._b < 1) { this._b = mathRound(this._b); }
-
-    this._ok = rgb.ok;
-    this._tc_id = tinyCounter++;
-}
-
-tinycolor.prototype = {
-    isDark: function() {
-        return this.getBrightness() < 128;
-    },
-    isLight: function() {
-        return !this.isDark();
-    },
-    isValid: function() {
-        return this._ok;
-    },
-    getOriginalInput: function() {
-      return this._originalInput;
-    },
-    getFormat: function() {
-        return this._format;
-    },
-    getAlpha: function() {
-        return this._a;
-    },
-    getBrightness: function() {
-        //http://www.w3.org/TR/AERT#color-contrast
-        var rgb = this.toRgb();
-        return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
-    },
-    getLuminance: function() {
-        //http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-        var rgb = this.toRgb();
-        var RsRGB, GsRGB, BsRGB, R, G, B;
-        RsRGB = rgb.r/255;
-        GsRGB = rgb.g/255;
-        BsRGB = rgb.b/255;
-
-        if (RsRGB <= 0.03928) {R = RsRGB / 12.92;} else {R = Math.pow(((RsRGB + 0.055) / 1.055), 2.4);}
-        if (GsRGB <= 0.03928) {G = GsRGB / 12.92;} else {G = Math.pow(((GsRGB + 0.055) / 1.055), 2.4);}
-        if (BsRGB <= 0.03928) {B = BsRGB / 12.92;} else {B = Math.pow(((BsRGB + 0.055) / 1.055), 2.4);}
-        return (0.2126 * R) + (0.7152 * G) + (0.0722 * B);
-    },
-    setAlpha: function(value) {
-        this._a = boundAlpha(value);
-        this._roundA = mathRound(100*this._a) / 100;
-        return this;
-    },
-    toHsv: function() {
-        var hsv = rgbToHsv(this._r, this._g, this._b);
-        return { h: hsv.h * 360, s: hsv.s, v: hsv.v, a: this._a };
-    },
-    toHsvString: function() {
-        var hsv = rgbToHsv(this._r, this._g, this._b);
-        var h = mathRound(hsv.h * 360), s = mathRound(hsv.s * 100), v = mathRound(hsv.v * 100);
-        return (this._a == 1) ?
-          "hsv("  + h + ", " + s + "%, " + v + "%)" :
-          "hsva(" + h + ", " + s + "%, " + v + "%, "+ this._roundA + ")";
-    },
-    toHsl: function() {
-        var hsl = rgbToHsl(this._r, this._g, this._b);
-        return { h: hsl.h * 360, s: hsl.s, l: hsl.l, a: this._a };
-    },
-    toHslString: function() {
-        var hsl = rgbToHsl(this._r, this._g, this._b);
-        var h = mathRound(hsl.h * 360), s = mathRound(hsl.s * 100), l = mathRound(hsl.l * 100);
-        return (this._a == 1) ?
-          "hsl("  + h + ", " + s + "%, " + l + "%)" :
-          "hsla(" + h + ", " + s + "%, " + l + "%, "+ this._roundA + ")";
-    },
-    toHex: function(allow3Char) {
-        return rgbToHex(this._r, this._g, this._b, allow3Char);
-    },
-    toHexString: function(allow3Char) {
-        return '#' + this.toHex(allow3Char);
-    },
-    toHex8: function() {
-        return rgbaToHex(this._r, this._g, this._b, this._a);
-    },
-    toHex8String: function() {
-        return '#' + this.toHex8();
-    },
-    toRgb: function() {
-        return { r: mathRound(this._r), g: mathRound(this._g), b: mathRound(this._b), a: this._a };
-    },
-    toRgbString: function() {
-        return (this._a == 1) ?
-          "rgb("  + mathRound(this._r) + ", " + mathRound(this._g) + ", " + mathRound(this._b) + ")" :
-          "rgba(" + mathRound(this._r) + ", " + mathRound(this._g) + ", " + mathRound(this._b) + ", " + this._roundA + ")";
-    },
-    toPercentageRgb: function() {
-        return { r: mathRound(bound01(this._r, 255) * 100) + "%", g: mathRound(bound01(this._g, 255) * 100) + "%", b: mathRound(bound01(this._b, 255) * 100) + "%", a: this._a };
-    },
-    toPercentageRgbString: function() {
-        return (this._a == 1) ?
-          "rgb("  + mathRound(bound01(this._r, 255) * 100) + "%, " + mathRound(bound01(this._g, 255) * 100) + "%, " + mathRound(bound01(this._b, 255) * 100) + "%)" :
-          "rgba(" + mathRound(bound01(this._r, 255) * 100) + "%, " + mathRound(bound01(this._g, 255) * 100) + "%, " + mathRound(bound01(this._b, 255) * 100) + "%, " + this._roundA + ")";
-    },
-    toName: function() {
-        if (this._a === 0) {
-            return "transparent";
-        }
-
-        if (this._a < 1) {
-            return false;
-        }
-
-        return hexNames[rgbToHex(this._r, this._g, this._b, true)] || false;
-    },
-    toFilter: function(secondColor) {
-        var hex8String = '#' + rgbaToHex(this._r, this._g, this._b, this._a);
-        var secondHex8String = hex8String;
-        var gradientType = this._gradientType ? "GradientType = 1, " : "";
-
-        if (secondColor) {
-            var s = tinycolor(secondColor);
-            secondHex8String = s.toHex8String();
-        }
-
-        return "progid:DXImageTransform.Microsoft.gradient("+gradientType+"startColorstr="+hex8String+",endColorstr="+secondHex8String+")";
-    },
-    toString: function(format) {
-        var formatSet = !!format;
-        format = format || this._format;
-
-        var formattedString = false;
-        var hasAlpha = this._a < 1 && this._a >= 0;
-        var needsAlphaFormat = !formatSet && hasAlpha && (format === "hex" || format === "hex6" || format === "hex3" || format === "name");
-
-        if (needsAlphaFormat) {
-            // Special case for "transparent", all other non-alpha formats
-            // will return rgba when there is transparency.
-            if (format === "name" && this._a === 0) {
-                return this.toName();
-            }
-            return this.toRgbString();
-        }
-        if (format === "rgb") {
-            formattedString = this.toRgbString();
-        }
-        if (format === "prgb") {
-            formattedString = this.toPercentageRgbString();
-        }
-        if (format === "hex" || format === "hex6") {
-            formattedString = this.toHexString();
-        }
-        if (format === "hex3") {
-            formattedString = this.toHexString(true);
-        }
-        if (format === "hex8") {
-            formattedString = this.toHex8String();
-        }
-        if (format === "name") {
-            formattedString = this.toName();
-        }
-        if (format === "hsl") {
-            formattedString = this.toHslString();
-        }
-        if (format === "hsv") {
-            formattedString = this.toHsvString();
-        }
-
-        return formattedString || this.toHexString();
-    },
-
-    _applyModification: function(fn, args) {
-        var color = fn.apply(null, [this].concat([].slice.call(args)));
-        this._r = color._r;
-        this._g = color._g;
-        this._b = color._b;
-        this.setAlpha(color._a);
-        return this;
-    },
-    lighten: function() {
-        return this._applyModification(lighten, arguments);
-    },
-    brighten: function() {
-        return this._applyModification(brighten, arguments);
-    },
-    darken: function() {
-        return this._applyModification(darken, arguments);
-    },
-    desaturate: function() {
-        return this._applyModification(desaturate, arguments);
-    },
-    saturate: function() {
-        return this._applyModification(saturate, arguments);
-    },
-    greyscale: function() {
-        return this._applyModification(greyscale, arguments);
-    },
-    spin: function() {
-        return this._applyModification(spin, arguments);
-    },
-
-    _applyCombination: function(fn, args) {
-        return fn.apply(null, [this].concat([].slice.call(args)));
-    },
-    analogous: function() {
-        return this._applyCombination(analogous, arguments);
-    },
-    complement: function() {
-        return this._applyCombination(complement, arguments);
-    },
-    monochromatic: function() {
-        return this._applyCombination(monochromatic, arguments);
-    },
-    splitcomplement: function() {
-        return this._applyCombination(splitcomplement, arguments);
-    },
-    triad: function() {
-        return this._applyCombination(triad, arguments);
-    },
-    tetrad: function() {
-        return this._applyCombination(tetrad, arguments);
-    }
-};
-
-// If input is an object, force 1 into "1.0" to handle ratios properly
-// String input requires "1.0" as input, so 1 will be treated as 1
-tinycolor.fromRatio = function(color, opts) {
-    if (typeof color == "object") {
-        var newColor = {};
-        for (var i in color) {
-            if (color.hasOwnProperty(i)) {
-                if (i === "a") {
-                    newColor[i] = color[i];
-                }
-                else {
-                    newColor[i] = convertToPercentage(color[i]);
-                }
-            }
-        }
-        color = newColor;
-    }
-
-    return tinycolor(color, opts);
-};
-
-// Given a string or object, convert that input to RGB
-// Possible string inputs:
-//
-//     "red"
-//     "#f00" or "f00"
-//     "#ff0000" or "ff0000"
-//     "#ff000000" or "ff000000"
-//     "rgb 255 0 0" or "rgb (255, 0, 0)"
-//     "rgb 1.0 0 0" or "rgb (1, 0, 0)"
-//     "rgba (255, 0, 0, 1)" or "rgba 255, 0, 0, 1"
-//     "rgba (1.0, 0, 0, 1)" or "rgba 1.0, 0, 0, 1"
-//     "hsl(0, 100%, 50%)" or "hsl 0 100% 50%"
-//     "hsla(0, 100%, 50%, 1)" or "hsla 0 100% 50%, 1"
-//     "hsv(0, 100%, 100%)" or "hsv 0 100% 100%"
-//
-function inputToRGB(color) {
-
-    var rgb = { r: 0, g: 0, b: 0 };
-    var a = 1;
-    var ok = false;
-    var format = false;
-
-    if (typeof color == "string") {
-        color = stringInputToObject(color);
-    }
-
-    if (typeof color == "object") {
-        if (color.hasOwnProperty("r") && color.hasOwnProperty("g") && color.hasOwnProperty("b")) {
-            rgb = rgbToRgb(color.r, color.g, color.b);
-            ok = true;
-            format = String(color.r).substr(-1) === "%" ? "prgb" : "rgb";
-        }
-        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
-            color.s = convertToPercentage(color.s);
-            color.v = convertToPercentage(color.v);
-            rgb = hsvToRgb(color.h, color.s, color.v);
-            ok = true;
-            format = "hsv";
-        }
-        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("l")) {
-            color.s = convertToPercentage(color.s);
-            color.l = convertToPercentage(color.l);
-            rgb = hslToRgb(color.h, color.s, color.l);
-            ok = true;
-            format = "hsl";
-        }
-
-        if (color.hasOwnProperty("a")) {
-            a = color.a;
-        }
-    }
-
-    a = boundAlpha(a);
-
-    return {
-        ok: ok,
-        format: color.format || format,
-        r: mathMin(255, mathMax(rgb.r, 0)),
-        g: mathMin(255, mathMax(rgb.g, 0)),
-        b: mathMin(255, mathMax(rgb.b, 0)),
-        a: a
-    };
-}
-
-
-// Conversion Functions
-// --------------------
-
-// `rgbToHsl`, `rgbToHsv`, `hslToRgb`, `hsvToRgb` modified from:
-// <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
-
-// `rgbToRgb`
-// Handle bounds / percentage checking to conform to CSS color spec
-// <http://www.w3.org/TR/css3-color/>
-// *Assumes:* r, g, b in [0, 255] or [0, 1]
-// *Returns:* { r, g, b } in [0, 255]
-function rgbToRgb(r, g, b){
-    return {
-        r: bound01(r, 255) * 255,
-        g: bound01(g, 255) * 255,
-        b: bound01(b, 255) * 255
-    };
-}
-
-// `rgbToHsl`
-// Converts an RGB color value to HSL.
-// *Assumes:* r, g, and b are contained in [0, 255] or [0, 1]
-// *Returns:* { h, s, l } in [0,1]
-function rgbToHsl(r, g, b) {
-
-    r = bound01(r, 255);
-    g = bound01(g, 255);
-    b = bound01(b, 255);
-
-    var max = mathMax(r, g, b), min = mathMin(r, g, b);
-    var h, s, l = (max + min) / 2;
-
-    if(max == min) {
-        h = s = 0; // achromatic
-    }
-    else {
-        var d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-
-        h /= 6;
-    }
-
-    return { h: h, s: s, l: l };
-}
-
-// `hslToRgb`
-// Converts an HSL color value to RGB.
-// *Assumes:* h is contained in [0, 1] or [0, 360] and s and l are contained [0, 1] or [0, 100]
-// *Returns:* { r, g, b } in the set [0, 255]
-function hslToRgb(h, s, l) {
-    var r, g, b;
-
-    h = bound01(h, 360);
-    s = bound01(s, 100);
-    l = bound01(l, 100);
-
-    function hue2rgb(p, q, t) {
-        if(t < 0) t += 1;
-        if(t > 1) t -= 1;
-        if(t < 1/6) return p + (q - p) * 6 * t;
-        if(t < 1/2) return q;
-        if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-        return p;
-    }
-
-    if(s === 0) {
-        r = g = b = l; // achromatic
-    }
-    else {
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1/3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
-    }
-
-    return { r: r * 255, g: g * 255, b: b * 255 };
-}
-
-// `rgbToHsv`
-// Converts an RGB color value to HSV
-// *Assumes:* r, g, and b are contained in the set [0, 255] or [0, 1]
-// *Returns:* { h, s, v } in [0,1]
-function rgbToHsv(r, g, b) {
-
-    r = bound01(r, 255);
-    g = bound01(g, 255);
-    b = bound01(b, 255);
-
-    var max = mathMax(r, g, b), min = mathMin(r, g, b);
-    var h, s, v = max;
-
-    var d = max - min;
-    s = max === 0 ? 0 : d / max;
-
-    if(max == min) {
-        h = 0; // achromatic
-    }
-    else {
-        switch(max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-    return { h: h, s: s, v: v };
-}
-
-// `hsvToRgb`
-// Converts an HSV color value to RGB.
-// *Assumes:* h is contained in [0, 1] or [0, 360] and s and v are contained in [0, 1] or [0, 100]
-// *Returns:* { r, g, b } in the set [0, 255]
- function hsvToRgb(h, s, v) {
-
-    h = bound01(h, 360) * 6;
-    s = bound01(s, 100);
-    v = bound01(v, 100);
-
-    var i = math.floor(h),
-        f = h - i,
-        p = v * (1 - s),
-        q = v * (1 - f * s),
-        t = v * (1 - (1 - f) * s),
-        mod = i % 6,
-        r = [v, q, p, p, t, v][mod],
-        g = [t, v, v, q, p, p][mod],
-        b = [p, p, t, v, v, q][mod];
-
-    return { r: r * 255, g: g * 255, b: b * 255 };
-}
-
-// `rgbToHex`
-// Converts an RGB color to hex
-// Assumes r, g, and b are contained in the set [0, 255]
-// Returns a 3 or 6 character hex
-function rgbToHex(r, g, b, allow3Char) {
-
-    var hex = [
-        pad2(mathRound(r).toString(16)),
-        pad2(mathRound(g).toString(16)),
-        pad2(mathRound(b).toString(16))
-    ];
-
-    // Return a 3 character hex if possible
-    if (allow3Char && hex[0].charAt(0) == hex[0].charAt(1) && hex[1].charAt(0) == hex[1].charAt(1) && hex[2].charAt(0) == hex[2].charAt(1)) {
-        return hex[0].charAt(0) + hex[1].charAt(0) + hex[2].charAt(0);
-    }
-
-    return hex.join("");
-}
-
-// `rgbaToHex`
-// Converts an RGBA color plus alpha transparency to hex
-// Assumes r, g, b and a are contained in the set [0, 255]
-// Returns an 8 character hex
-function rgbaToHex(r, g, b, a) {
-
-    var hex = [
-        pad2(convertDecimalToHex(a)),
-        pad2(mathRound(r).toString(16)),
-        pad2(mathRound(g).toString(16)),
-        pad2(mathRound(b).toString(16))
-    ];
-
-    return hex.join("");
-}
-
-// `equals`
-// Can be called with any tinycolor input
-tinycolor.equals = function (color1, color2) {
-    if (!color1 || !color2) { return false; }
-    return tinycolor(color1).toRgbString() == tinycolor(color2).toRgbString();
-};
-
-tinycolor.random = function() {
-    return tinycolor.fromRatio({
-        r: mathRandom(),
-        g: mathRandom(),
-        b: mathRandom()
-    });
-};
-
-
-// Modification Functions
-// ----------------------
-// Thanks to less.js for some of the basics here
-// <https://github.com/cloudhead/less.js/blob/master/lib/less/functions.js>
-
-function desaturate(color, amount) {
-    amount = (amount === 0) ? 0 : (amount || 10);
-    var hsl = tinycolor(color).toHsl();
-    hsl.s -= amount / 100;
-    hsl.s = clamp01(hsl.s);
-    return tinycolor(hsl);
-}
-
-function saturate(color, amount) {
-    amount = (amount === 0) ? 0 : (amount || 10);
-    var hsl = tinycolor(color).toHsl();
-    hsl.s += amount / 100;
-    hsl.s = clamp01(hsl.s);
-    return tinycolor(hsl);
-}
-
-function greyscale(color) {
-    return tinycolor(color).desaturate(100);
-}
-
-function lighten (color, amount) {
-    amount = (amount === 0) ? 0 : (amount || 10);
-    var hsl = tinycolor(color).toHsl();
-    hsl.l += amount / 100;
-    hsl.l = clamp01(hsl.l);
-    return tinycolor(hsl);
-}
-
-function brighten(color, amount) {
-    amount = (amount === 0) ? 0 : (amount || 10);
-    var rgb = tinycolor(color).toRgb();
-    rgb.r = mathMax(0, mathMin(255, rgb.r - mathRound(255 * - (amount / 100))));
-    rgb.g = mathMax(0, mathMin(255, rgb.g - mathRound(255 * - (amount / 100))));
-    rgb.b = mathMax(0, mathMin(255, rgb.b - mathRound(255 * - (amount / 100))));
-    return tinycolor(rgb);
-}
-
-function darken (color, amount) {
-    amount = (amount === 0) ? 0 : (amount || 10);
-    var hsl = tinycolor(color).toHsl();
-    hsl.l -= amount / 100;
-    hsl.l = clamp01(hsl.l);
-    return tinycolor(hsl);
-}
-
-// Spin takes a positive or negative amount within [-360, 360] indicating the change of hue.
-// Values outside of this range will be wrapped into this range.
-function spin(color, amount) {
-    var hsl = tinycolor(color).toHsl();
-    var hue = (mathRound(hsl.h) + amount) % 360;
-    hsl.h = hue < 0 ? 360 + hue : hue;
-    return tinycolor(hsl);
-}
-
-// Combination Functions
-// ---------------------
-// Thanks to jQuery xColor for some of the ideas behind these
-// <https://github.com/infusion/jQuery-xcolor/blob/master/jquery.xcolor.js>
-
-function complement(color) {
-    var hsl = tinycolor(color).toHsl();
-    hsl.h = (hsl.h + 180) % 360;
-    return tinycolor(hsl);
-}
-
-function triad(color) {
-    var hsl = tinycolor(color).toHsl();
-    var h = hsl.h;
-    return [
-        tinycolor(color),
-        tinycolor({ h: (h + 120) % 360, s: hsl.s, l: hsl.l }),
-        tinycolor({ h: (h + 240) % 360, s: hsl.s, l: hsl.l })
-    ];
-}
-
-function tetrad(color) {
-    var hsl = tinycolor(color).toHsl();
-    var h = hsl.h;
-    return [
-        tinycolor(color),
-        tinycolor({ h: (h + 90) % 360, s: hsl.s, l: hsl.l }),
-        tinycolor({ h: (h + 180) % 360, s: hsl.s, l: hsl.l }),
-        tinycolor({ h: (h + 270) % 360, s: hsl.s, l: hsl.l })
-    ];
-}
-
-function splitcomplement(color) {
-    var hsl = tinycolor(color).toHsl();
-    var h = hsl.h;
-    return [
-        tinycolor(color),
-        tinycolor({ h: (h + 72) % 360, s: hsl.s, l: hsl.l}),
-        tinycolor({ h: (h + 216) % 360, s: hsl.s, l: hsl.l})
-    ];
-}
-
-function analogous(color, results, slices) {
-    results = results || 6;
-    slices = slices || 30;
-
-    var hsl = tinycolor(color).toHsl();
-    var part = 360 / slices;
-    var ret = [tinycolor(color)];
-
-    for (hsl.h = ((hsl.h - (part * results >> 1)) + 720) % 360; --results; ) {
-        hsl.h = (hsl.h + part) % 360;
-        ret.push(tinycolor(hsl));
-    }
-    return ret;
-}
-
-function monochromatic(color, results) {
-    results = results || 6;
-    var hsv = tinycolor(color).toHsv();
-    var h = hsv.h, s = hsv.s, v = hsv.v;
-    var ret = [];
-    var modification = 1 / results;
-
-    while (results--) {
-        ret.push(tinycolor({ h: h, s: s, v: v}));
-        v = (v + modification) % 1;
-    }
-
-    return ret;
-}
-
-// Utility Functions
-// ---------------------
-
-tinycolor.mix = function(color1, color2, amount) {
-    amount = (amount === 0) ? 0 : (amount || 50);
-
-    var rgb1 = tinycolor(color1).toRgb();
-    var rgb2 = tinycolor(color2).toRgb();
-
-    var p = amount / 100;
-    var w = p * 2 - 1;
-    var a = rgb2.a - rgb1.a;
-
-    var w1;
-
-    if (w * a == -1) {
-        w1 = w;
-    } else {
-        w1 = (w + a) / (1 + w * a);
-    }
-
-    w1 = (w1 + 1) / 2;
-
-    var w2 = 1 - w1;
-
-    var rgba = {
-        r: rgb2.r * w1 + rgb1.r * w2,
-        g: rgb2.g * w1 + rgb1.g * w2,
-        b: rgb2.b * w1 + rgb1.b * w2,
-        a: rgb2.a * p  + rgb1.a * (1 - p)
-    };
-
-    return tinycolor(rgba);
-};
-
-
-// Readability Functions
-// ---------------------
-// <http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef (WCAG Version 2)
-
-// `contrast`
-// Analyze the 2 colors and returns the color contrast defined by (WCAG Version 2)
-tinycolor.readability = function(color1, color2) {
-    var c1 = tinycolor(color1);
-    var c2 = tinycolor(color2);
-    return (Math.max(c1.getLuminance(),c2.getLuminance())+0.05) / (Math.min(c1.getLuminance(),c2.getLuminance())+0.05);
-};
-
-// `isReadable`
-// Ensure that foreground and background color combinations meet WCAG2 guidelines.
-// The third argument is an optional Object.
-//      the 'level' property states 'AA' or 'AAA' - if missing or invalid, it defaults to 'AA';
-//      the 'size' property states 'large' or 'small' - if missing or invalid, it defaults to 'small'.
-// If the entire object is absent, isReadable defaults to {level:"AA",size:"small"}.
-
-// *Example*
-//    tinycolor.isReadable("#000", "#111") => false
-//    tinycolor.isReadable("#000", "#111",{level:"AA",size:"large"}) => false
-tinycolor.isReadable = function(color1, color2, wcag2) {
-    var readability = tinycolor.readability(color1, color2);
-    var wcag2Parms, out;
-
-    out = false;
-
-    wcag2Parms = validateWCAG2Parms(wcag2);
-    switch (wcag2Parms.level + wcag2Parms.size) {
-        case "AAsmall":
-        case "AAAlarge":
-            out = readability >= 4.5;
-            break;
-        case "AAlarge":
-            out = readability >= 3;
-            break;
-        case "AAAsmall":
-            out = readability >= 7;
-            break;
-    }
-    return out;
-
-};
-
-// `mostReadable`
-// Given a base color and a list of possible foreground or background
-// colors for that base, returns the most readable color.
-// Optionally returns Black or White if the most readable color is unreadable.
-// *Example*
-//    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:false}).toHexString(); // "#112255"
-//    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:true}).toHexString();  // "#ffffff"
-//    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"large"}).toHexString(); // "#faf3f3"
-//    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"small"}).toHexString(); // "#ffffff"
-tinycolor.mostReadable = function(baseColor, colorList, args) {
-    var bestColor = null;
-    var bestScore = 0;
-    var readability;
-    var includeFallbackColors, level, size ;
-    args = args || {};
-    includeFallbackColors = args.includeFallbackColors ;
-    level = args.level;
-    size = args.size;
-
-    for (var i= 0; i < colorList.length ; i++) {
-        readability = tinycolor.readability(baseColor, colorList[i]);
-        if (readability > bestScore) {
-            bestScore = readability;
-            bestColor = tinycolor(colorList[i]);
-        }
-    }
-
-    if (tinycolor.isReadable(baseColor, bestColor, {"level":level,"size":size}) || !includeFallbackColors) {
-        return bestColor;
-    }
-    else {
-        args.includeFallbackColors=false;
-        return tinycolor.mostReadable(baseColor,["#fff", "#000"],args);
-    }
-};
-
-
-// Big List of Colors
-// ------------------
-// <http://www.w3.org/TR/css3-color/#svg-color>
-var names = tinycolor.names = {
-    aliceblue: "f0f8ff",
-    antiquewhite: "faebd7",
-    aqua: "0ff",
-    aquamarine: "7fffd4",
-    azure: "f0ffff",
-    beige: "f5f5dc",
-    bisque: "ffe4c4",
-    black: "000",
-    blanchedalmond: "ffebcd",
-    blue: "00f",
-    blueviolet: "8a2be2",
-    brown: "a52a2a",
-    burlywood: "deb887",
-    burntsienna: "ea7e5d",
-    cadetblue: "5f9ea0",
-    chartreuse: "7fff00",
-    chocolate: "d2691e",
-    coral: "ff7f50",
-    cornflowerblue: "6495ed",
-    cornsilk: "fff8dc",
-    crimson: "dc143c",
-    cyan: "0ff",
-    darkblue: "00008b",
-    darkcyan: "008b8b",
-    darkgoldenrod: "b8860b",
-    darkgray: "a9a9a9",
-    darkgreen: "006400",
-    darkgrey: "a9a9a9",
-    darkkhaki: "bdb76b",
-    darkmagenta: "8b008b",
-    darkolivegreen: "556b2f",
-    darkorange: "ff8c00",
-    darkorchid: "9932cc",
-    darkred: "8b0000",
-    darksalmon: "e9967a",
-    darkseagreen: "8fbc8f",
-    darkslateblue: "483d8b",
-    darkslategray: "2f4f4f",
-    darkslategrey: "2f4f4f",
-    darkturquoise: "00ced1",
-    darkviolet: "9400d3",
-    deeppink: "ff1493",
-    deepskyblue: "00bfff",
-    dimgray: "696969",
-    dimgrey: "696969",
-    dodgerblue: "1e90ff",
-    firebrick: "b22222",
-    floralwhite: "fffaf0",
-    forestgreen: "228b22",
-    fuchsia: "f0f",
-    gainsboro: "dcdcdc",
-    ghostwhite: "f8f8ff",
-    gold: "ffd700",
-    goldenrod: "daa520",
-    gray: "808080",
-    green: "008000",
-    greenyellow: "adff2f",
-    grey: "808080",
-    honeydew: "f0fff0",
-    hotpink: "ff69b4",
-    indianred: "cd5c5c",
-    indigo: "4b0082",
-    ivory: "fffff0",
-    khaki: "f0e68c",
-    lavender: "e6e6fa",
-    lavenderblush: "fff0f5",
-    lawngreen: "7cfc00",
-    lemonchiffon: "fffacd",
-    lightblue: "add8e6",
-    lightcoral: "f08080",
-    lightcyan: "e0ffff",
-    lightgoldenrodyellow: "fafad2",
-    lightgray: "d3d3d3",
-    lightgreen: "90ee90",
-    lightgrey: "d3d3d3",
-    lightpink: "ffb6c1",
-    lightsalmon: "ffa07a",
-    lightseagreen: "20b2aa",
-    lightskyblue: "87cefa",
-    lightslategray: "789",
-    lightslategrey: "789",
-    lightsteelblue: "b0c4de",
-    lightyellow: "ffffe0",
-    lime: "0f0",
-    limegreen: "32cd32",
-    linen: "faf0e6",
-    magenta: "f0f",
-    maroon: "800000",
-    mediumaquamarine: "66cdaa",
-    mediumblue: "0000cd",
-    mediumorchid: "ba55d3",
-    mediumpurple: "9370db",
-    mediumseagreen: "3cb371",
-    mediumslateblue: "7b68ee",
-    mediumspringgreen: "00fa9a",
-    mediumturquoise: "48d1cc",
-    mediumvioletred: "c71585",
-    midnightblue: "191970",
-    mintcream: "f5fffa",
-    mistyrose: "ffe4e1",
-    moccasin: "ffe4b5",
-    navajowhite: "ffdead",
-    navy: "000080",
-    oldlace: "fdf5e6",
-    olive: "808000",
-    olivedrab: "6b8e23",
-    orange: "ffa500",
-    orangered: "ff4500",
-    orchid: "da70d6",
-    palegoldenrod: "eee8aa",
-    palegreen: "98fb98",
-    paleturquoise: "afeeee",
-    palevioletred: "db7093",
-    papayawhip: "ffefd5",
-    peachpuff: "ffdab9",
-    peru: "cd853f",
-    pink: "ffc0cb",
-    plum: "dda0dd",
-    powderblue: "b0e0e6",
-    purple: "800080",
-    rebeccapurple: "663399",
-    red: "f00",
-    rosybrown: "bc8f8f",
-    royalblue: "4169e1",
-    saddlebrown: "8b4513",
-    salmon: "fa8072",
-    sandybrown: "f4a460",
-    seagreen: "2e8b57",
-    seashell: "fff5ee",
-    sienna: "a0522d",
-    silver: "c0c0c0",
-    skyblue: "87ceeb",
-    slateblue: "6a5acd",
-    slategray: "708090",
-    slategrey: "708090",
-    snow: "fffafa",
-    springgreen: "00ff7f",
-    steelblue: "4682b4",
-    tan: "d2b48c",
-    teal: "008080",
-    thistle: "d8bfd8",
-    tomato: "ff6347",
-    turquoise: "40e0d0",
-    violet: "ee82ee",
-    wheat: "f5deb3",
-    white: "fff",
-    whitesmoke: "f5f5f5",
-    yellow: "ff0",
-    yellowgreen: "9acd32"
-};
-
-// Make it easy to access colors via `hexNames[hex]`
-var hexNames = tinycolor.hexNames = flip(names);
-
-
-// Utilities
-// ---------
-
-// `{ 'name1': 'val1' }` becomes `{ 'val1': 'name1' }`
-function flip(o) {
-    var flipped = { };
-    for (var i in o) {
-        if (o.hasOwnProperty(i)) {
-            flipped[o[i]] = i;
-        }
-    }
-    return flipped;
-}
-
-// Return a valid alpha value [0,1] with all invalid values being set to 1
-function boundAlpha(a) {
-    a = parseFloat(a);
-
-    if (isNaN(a) || a < 0 || a > 1) {
-        a = 1;
-    }
-
-    return a;
-}
-
-// Take input from [0, n] and return it as [0, 1]
-function bound01(n, max) {
-    if (isOnePointZero(n)) { n = "100%"; }
-
-    var processPercent = isPercentage(n);
-    n = mathMin(max, mathMax(0, parseFloat(n)));
-
-    // Automatically convert percentage into number
-    if (processPercent) {
-        n = parseInt(n * max, 10) / 100;
-    }
-
-    // Handle floating point rounding errors
-    if ((math.abs(n - max) < 0.000001)) {
-        return 1;
-    }
-
-    // Convert into [0, 1] range if it isn't already
-    return (n % max) / parseFloat(max);
-}
-
-// Force a number between 0 and 1
-function clamp01(val) {
-    return mathMin(1, mathMax(0, val));
-}
-
-// Parse a base-16 hex value into a base-10 integer
-function parseIntFromHex(val) {
-    return parseInt(val, 16);
-}
-
-// Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
-// <http://stackoverflow.com/questions/7422072/javascript-how-to-detect-number-as-a-decimal-including-1-0>
-function isOnePointZero(n) {
-    return typeof n == "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
-}
-
-// Check to see if string passed in is a percentage
-function isPercentage(n) {
-    return typeof n === "string" && n.indexOf('%') != -1;
-}
-
-// Force a hex value to have 2 characters
-function pad2(c) {
-    return c.length == 1 ? '0' + c : '' + c;
-}
-
-// Replace a decimal with it's percentage value
-function convertToPercentage(n) {
-    if (n <= 1) {
-        n = (n * 100) + "%";
-    }
-
-    return n;
-}
-
-// Converts a decimal to a hex value
-function convertDecimalToHex(d) {
-    return Math.round(parseFloat(d) * 255).toString(16);
-}
-// Converts a hex value to a decimal
-function convertHexToDecimal(h) {
-    return (parseIntFromHex(h) / 255);
-}
-
-var matchers = (function() {
-
-    // <http://www.w3.org/TR/css3-values/#integers>
-    var CSS_INTEGER = "[-\\+]?\\d+%?";
-
-    // <http://www.w3.org/TR/css3-values/#number-value>
-    var CSS_NUMBER = "[-\\+]?\\d*\\.\\d+%?";
-
-    // Allow positive/negative integer/number.  Don't capture the either/or, just the entire outcome.
-    var CSS_UNIT = "(?:" + CSS_NUMBER + ")|(?:" + CSS_INTEGER + ")";
-
-    // Actual matching.
-    // Parentheses and commas are optional, but not required.
-    // Whitespace can take the place of commas or opening paren
-    var PERMISSIVE_MATCH3 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
-    var PERMISSIVE_MATCH4 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
-
-    return {
-        rgb: new RegExp("rgb" + PERMISSIVE_MATCH3),
-        rgba: new RegExp("rgba" + PERMISSIVE_MATCH4),
-        hsl: new RegExp("hsl" + PERMISSIVE_MATCH3),
-        hsla: new RegExp("hsla" + PERMISSIVE_MATCH4),
-        hsv: new RegExp("hsv" + PERMISSIVE_MATCH3),
-        hsva: new RegExp("hsva" + PERMISSIVE_MATCH4),
-        hex3: /^([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,
-        hex6: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/,
-        hex8: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
-    };
-})();
-
-// `stringInputToObject`
-// Permissive string parsing.  Take in a number of formats, and output an object
-// based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
-function stringInputToObject(color) {
-
-    color = color.replace(trimLeft,'').replace(trimRight, '').toLowerCase();
-    var named = false;
-    if (names[color]) {
-        color = names[color];
-        named = true;
-    }
-    else if (color == 'transparent') {
-        return { r: 0, g: 0, b: 0, a: 0, format: "name" };
-    }
-
-    // Try to match string input using regular expressions.
-    // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
-    // Just return an object and let the conversion functions handle that.
-    // This way the result will be the same whether the tinycolor is initialized with string or object.
-    var match;
-    if ((match = matchers.rgb.exec(color))) {
-        return { r: match[1], g: match[2], b: match[3] };
-    }
-    if ((match = matchers.rgba.exec(color))) {
-        return { r: match[1], g: match[2], b: match[3], a: match[4] };
-    }
-    if ((match = matchers.hsl.exec(color))) {
-        return { h: match[1], s: match[2], l: match[3] };
-    }
-    if ((match = matchers.hsla.exec(color))) {
-        return { h: match[1], s: match[2], l: match[3], a: match[4] };
-    }
-    if ((match = matchers.hsv.exec(color))) {
-        return { h: match[1], s: match[2], v: match[3] };
-    }
-    if ((match = matchers.hsva.exec(color))) {
-        return { h: match[1], s: match[2], v: match[3], a: match[4] };
-    }
-    if ((match = matchers.hex8.exec(color))) {
-        return {
-            a: convertHexToDecimal(match[1]),
-            r: parseIntFromHex(match[2]),
-            g: parseIntFromHex(match[3]),
-            b: parseIntFromHex(match[4]),
-            format: named ? "name" : "hex8"
-        };
-    }
-    if ((match = matchers.hex6.exec(color))) {
-        return {
-            r: parseIntFromHex(match[1]),
-            g: parseIntFromHex(match[2]),
-            b: parseIntFromHex(match[3]),
-            format: named ? "name" : "hex"
-        };
-    }
-    if ((match = matchers.hex3.exec(color))) {
-        return {
-            r: parseIntFromHex(match[1] + '' + match[1]),
-            g: parseIntFromHex(match[2] + '' + match[2]),
-            b: parseIntFromHex(match[3] + '' + match[3]),
-            format: named ? "name" : "hex"
-        };
-    }
-
-    return false;
-}
-
-function validateWCAG2Parms(parms) {
-    // return valid WCAG2 parms for isReadable.
-    // If input parms are invalid, return {"level":"AA", "size":"small"}
-    var level, size;
-    parms = parms || {"level":"AA", "size":"small"};
-    level = (parms.level || "AA").toUpperCase();
-    size = (parms.size || "small").toLowerCase();
-    if (level !== "AA" && level !== "AAA") {
-        level = "AA";
-    }
-    if (size !== "small" && size !== "large") {
-        size = "small";
-    }
-    return {"level":level, "size":size};
-}
-
-// Node: Export function
-if (typeof module !== "undefined" && module.exports) {
-    module.exports = tinycolor;
-}
-// AMD/requirejs: Define the module
-else if (typeof define === 'function' && define.amd) {
-    define(function () {return tinycolor;});
-}
-// Browser: Expose to window
-else {
-    window.tinycolor = tinycolor;
-}
-
-})();
-
 var App = {
     'Elements': {},
     'Nodes' : {}
@@ -19147,6 +20148,1619 @@ App['Anchor'] = function(o){
     init();
 
 };
+cm.define('App.Block', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataNodes',
+        'DataConfig',
+        'Stack'
+    ],
+    'events' : [
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'type' : 'content',                     // content | form | mail
+        'positionId' : 0,
+        'zone' : 0,
+        'parentId' : 0,
+        'locked' : false,
+        'visible' : true,
+        'editorName' : 'app-editor',
+        'thisContainer' : 'document.body',
+        'topContainer' : 'top.document.body'
+    }
+},
+function(params){
+    var that = this;
+
+    that.isDummy = false;
+    that.isEditing = false;
+    that.styleObject = null;
+    that.dimensions = null;
+
+    that.components = {};
+    that.nodes = {
+        'container' : cm.node('div'),
+        'content' : cm.node('div')
+    };
+    that.node = null;
+    that.zone = null;
+    that.zones = {};
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        that.params['name'] = that.params['positionId'];
+        that.params['zoneName'] = [that.params['parentId'], that.params['zone']].join('_');
+        that.node = that.params['node'];
+    };
+
+    var render = function(){
+        that.styleObject = cm.getStyleObject(that.params['node']);
+        that.dimensions = cm.getNodeOffset(that.params['node'], that.styleObject);
+        // Construct
+        new cm.top('Finder')('App.Zone', that.params['zoneName'], that.params['thisContainer'], constructZone);
+        new cm.top('Finder')('App.Editor', that.params['editorName'], that.params['topContainer'], constructEditor);
+    };
+
+    var constructZone = function(classObject){
+        if(classObject){
+            that.zone = classObject
+                .addBlock(that.params['name'], that);
+        }
+    };
+
+    var destructZone = function(classObject){
+        if(classObject){
+            that.zone = classObject
+                .removeBlock(that.params['name']);
+            that.zone = null;
+        }
+    };
+
+    var constructEditor = function(classObject){
+        if(classObject){
+            that.components['editor'] = classObject
+                .addBlock(that.params['name'], that);
+        }
+    };
+
+    var destructEditor = function(classObject){
+        if(classObject){
+            that.components['editor'] = classObject
+                .removeBlock(that.params['name']);
+        }
+    };
+
+    var renderControls = function(){
+
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.enableEditing = function(){
+        if(!that.isEditing){
+            that.isEditing = true;
+            if(!that.params['locked']){
+                cm.addClass(that.params['node'], 'is-editable');
+            }
+            if(!that.params['visible']){
+                cm.addClass(that.params['node'], 'is-visible');
+            }
+            cm.customEvent.trigger(that.params['node'], 'enableEditing', {
+                'type' : 'child',
+                'self' : false
+            });
+        }
+        return that;
+    };
+
+    that.disableEditing = function(){
+        if(that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(that.params['node'], 'is-editable is-visible');
+            cm.customEvent.trigger(that.params['node'], 'disableEditing', {
+                'type' : 'child',
+                'self' : false
+            });
+        }
+        return that;
+    };
+
+    that.addZone = function(name, item){
+        that.zones[name] = item;
+        return that;
+    };
+
+    that.removeZone = function(name){
+        delete that.zones[name];
+        return that;
+    };
+
+    that.setZone = function(zone){
+        destructZone(that.zone);
+        constructZone(zone);
+        return that;
+    };
+
+    that.unsetZone = function(){
+        destructZone(that.zone);
+        return that;
+    };
+
+    that.remove = function(){
+        destructEditor(that.components['editor']);
+        return that;
+    };
+
+    that.updateDimensions = function(){
+        that.dimensions = cm.getNodeOffset(that.params['node'], that.styleObject, that.dimensions);
+        return that.dimensions;
+    };
+
+    init();
+});
+cm.define('App.Dashboard', {
+    'modules' : [
+        'Params',
+        'Events'
+    ],
+    'events' : [
+        'onRender',
+        'onInit',
+        'onDragStart',
+        'onDrop',
+        'onRemove',
+        'onReplace'
+    ],
+    'params' : {
+        'draggableContainer' : 'document.body',
+        'scroll' : true,
+        'scrollNode' : window,
+        'scrollSpeed' : 1,                           // ms per 1px
+        'useGracefulDegradation' : true,
+        'dropDuration' : 400,
+        'moveDuration' : 200,
+        'highlightZones' : true,                     // highlight zones on drag start
+        'highlightPlaceholders' : true,
+        'animateRemove' : true,
+        'removeNode' : true
+    }
+},
+function(params){
+    var that = this,
+        anims = {},
+        zones = [],
+        zonesList = [],
+        blockList = [],
+        filteredAvailablezones = [],
+        checkInt,
+        placeholderInt,
+        pageSize,
+        isScrollProccess = false,
+
+        current,
+        currentAboveItem,
+        currentPosition,
+        currentZone,
+        currentPlaceholder,
+        previousZone;
+
+    that.isGracefulDegradation = false;
+    that.isZonesHighlight = false;
+    that.pageSize = {};
+
+    that.blocks = [];
+    that.dummyBlocks = [];
+    that.zones = [];
+
+    that.currentZones = [];
+    that.currentZone = null;
+    that.currentBlock = null;
+
+    /* *** INIT *** */
+
+    var init = function(){
+        getCSSHelpers();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        validateParams();
+        render();
+        that.triggerEvent('onRender');
+    };
+
+    var getCSSHelpers = function(){
+        that.params['dropDuration'] = cm.getTransitionDurationFromRule('.app__dashboard__drop-duration');
+        that.params['moveDuration'] = cm.getTransitionDurationFromRule('.app__dashboard__move-duration');
+    };
+
+    var validateParams = function(){
+        // Check Graceful Degradation, and turn it to mobile and old ie.
+        if(that.params['useGracefulDegradation'] && ((cm.is('IE') && cm.isVersion() < 9) || cm.isMobile())){
+            that.isGracefulDegradation = true;
+        }
+    };
+
+    var render = function(){
+        anims['scroll'] = new cm.Animation(that.params['scrollNode']);
+    };
+
+    /* *** DRAG AND DROP PROCESS ** */
+
+    var start = function(e, block){
+        cm.preventDefault(e);
+        // Prevent multiple drag event
+        if(that.currentBlock){
+            return;
+        }
+        // Prevent drag event not on LMB
+        if(!cm.isTouch && e.button){
+            return;
+        }
+        // Hide IFRAMES and EMBED tags
+        cm.hideSpecialTags();
+        cm.addClass(document.body, 'app__dashboard__body');
+        that.pageSize = cm.getPageSize();
+        // Get pointer position
+        var params = {
+            'left' : cm._clientPosition['x'],
+            'top' : cm._clientPosition['y']
+        };
+        // Check event type and get cursor / finger position
+        var tempCurrentAboveItem,
+            tempCurrentPosition;
+        // Filter zones
+        that.currentZones = getDroppableZones(block);
+        // API onDragStart Event
+        that.triggerEvent('onDragStart', {
+            'item' : block,
+            'node' : block.node,
+            'from' : block.zone
+        });
+        // Prepare widget, get offset, set start position, set widget as current
+        prepareBlock(block, params);
+        // Highlight zones
+        if(that.params['highlightZones']){
+            toggleZonesHighlight();
+        }
+        // Calculate elements position and dimension
+        getPositionsAll();
+        // Render Placeholder Blocks
+        renderPlaceholderBlocks();
+        // Find above block item
+        cm.forEach(that.currentBlock.zone.blocks, function(block){
+            if(x >= block['dimensions']['absoluteX1'] && x < block['dimensions']['absoluteX2'] && y >= block['dimensions']['absoluteY1'] && y <= block['dimensions']['absoluteY2']){
+                tempCurrentAboveItem = block;
+                // Check above block position
+                if((y - tempCurrentAboveItem['dimensions']['absoluteY1']) < (tempCurrentAboveItem['dimensions']['absoluteHeight'] / 2)){
+                    tempCurrentPosition = 'top';
+                }else{
+                    tempCurrentPosition = 'bottom';
+                }
+            }
+        });
+        // If current current block not above other block items
+        if(!tempCurrentAboveItem && current['zone']['items'].length){
+            if(y < current['zone']['dimensions']['y1']){
+                tempCurrentAboveItem = current['zone']['items'][0];
+                tempCurrentPosition = 'top';
+            }else{
+                tempCurrentAboveItem = current['zone']['items'][current['zone']['items'].length - 1];
+                tempCurrentPosition = 'bottom';
+            }
+        }
+        // Set placeholder
+        if(tempCurrentAboveItem){
+            currentPlaceholder = tempCurrentAboveItem['placeholder'][tempCurrentPosition];
+        }else{
+            currentPlaceholder = current['zone']['placeholder'][0];
+        }
+        if(currentPlaceholder){
+            cm.addClass(currentPlaceholder['node'], 'is-active');
+            if(that.params['highlightPlaceholders']){
+                cm.addClass(currentPlaceholder['node'], 'is-highlight');
+            }
+            currentPlaceholder['node'].style.height = [current['dimensions']['absoluteHeight'], 'px'].join('');
+        }
+        // Set current zone and above
+        that.currentZone = current['zone'];
+        currentAboveItem = tempCurrentAboveItem;
+        currentPosition = tempCurrentPosition;
+        that.currentZone.active();
+        // Add move event on document
+        cm.addEvent(window, 'mousemove', move);
+        cm.addEvent(window, 'mouseup', stop);
+    };
+
+    var move = function(e){
+        cm.preventDefault(e);
+        // Check event type and get cursor / finger position
+        var x = cm._clientPosition['x'],
+            y = cm._clientPosition['y'],
+            posY = y - current['dimensions']['offsetY'],
+            posX = x - current['dimensions']['offsetX'],
+            styleX,
+            styleY,
+            tempCurrentzone,
+            tempCurrentAboveItem,
+            tempCurrentPosition;
+        // Calculate drag direction and set new position
+        styleX = [posX, 'px'].join('');
+        styleY = [posY, 'px'].join('');
+        cm.setCSSTranslate(current['node'], styleX, styleY);
+        // Scroll node
+        if(that.params['scroll']){
+        //if(false){
+            if(y + 48 > pageSize['winHeight']){
+                toggleScroll(1);
+            }else if(y - 48 < 0){
+                toggleScroll(-1);
+            }else{
+                toggleScroll(0);
+            }
+        }
+        // Check and recalculate position
+        checkPosition();
+        // Find above zone
+        cm.forEach(filteredAvailablezones, function(zone){
+            if(x >= zone['dimensions']['x1'] && x < zone['dimensions']['x2'] && y >= zone['dimensions']['y1'] && y <= zone['dimensions']['y2']){
+                if(!tempCurrentzone){
+                    tempCurrentzone = zone;
+                }else if(zone['dimensions']['width'] < tempCurrentzone['dimensions']['width'] || zone['dimensions']['height'] < tempCurrentzone['dimensions']['height']){
+                    tempCurrentzone = zone;
+                }
+            }
+        });
+        // Find above block item
+        if(tempCurrentzone){
+            cm.forEach(tempCurrentzone['items'], function(block){
+                if(x >= block['dimensions']['absoluteX1'] && x < block['dimensions']['absoluteX2'] && y >= block['dimensions']['absoluteY1'] && y <= block['dimensions']['absoluteY2']){
+                    tempCurrentAboveItem = block;
+                    // Check above block position
+                    if((y - tempCurrentAboveItem['dimensions']['absoluteY1']) < (tempCurrentAboveItem['dimensions']['absoluteHeight'] / 2)){
+                        tempCurrentPosition = 'top';
+                    }else{
+                        tempCurrentPosition = 'bottom';
+                    }
+                }
+            });
+        }else{
+            tempCurrentzone = currentZone;
+        }
+        // If current current block not above other block items
+        if(!tempCurrentAboveItem && tempCurrentzone['items'].length){
+            if(y < tempCurrentzone['dimensions']['innerY1']){
+                tempCurrentAboveItem = tempCurrentzone['items'][0];
+                tempCurrentPosition = 'top';
+            }else{
+                tempCurrentAboveItem = tempCurrentzone['items'][tempCurrentzone['items'].length - 1];
+                tempCurrentPosition = 'bottom';
+            }
+        }
+        // Animate previous placeholder and get current
+        if(currentPlaceholder){
+            cm.removeClass(currentPlaceholder['node'], 'is-active is-highlight');
+        }
+        if(currentAboveItem && tempCurrentAboveItem && currentAboveItem['placeholder'][currentPosition] != tempCurrentAboveItem['placeholder'][tempCurrentPosition]){
+            animatePlaceholder(currentAboveItem['placeholder'][currentPosition], 0, that.params['moveDuration']);
+            currentPlaceholder = tempCurrentAboveItem['placeholder'][tempCurrentPosition];
+        }else if(!currentAboveItem && tempCurrentAboveItem){
+            animatePlaceholder(currentZone['placeholder'][0], 0, that.params['moveDuration']);
+            currentPlaceholder = tempCurrentAboveItem['placeholder'][tempCurrentPosition];
+        }else if(currentAboveItem && !tempCurrentAboveItem){
+            animatePlaceholder(currentAboveItem['placeholder'][currentPosition], 0, that.params['moveDuration']);
+            currentPlaceholder = tempCurrentzone['placeholder'][0];
+        }else if(!currentAboveItem && !tempCurrentAboveItem && currentZone != tempCurrentzone){
+            animatePlaceholder(currentZone['placeholder'][0], 0, that.params['moveDuration']);
+            currentPlaceholder = tempCurrentzone['placeholder'][0];
+        }
+        // Animate current placeholder
+        if(currentPlaceholder){
+            cm.addClass(currentPlaceholder['node'], 'is-active');
+            if(that.params['highlightPlaceholders']){
+                cm.addClass(currentPlaceholder['node'], 'is-highlight');
+            }
+            animatePlaceholder(currentPlaceholder, current['dimensions']['absoluteHeight'], that.params['moveDuration']);
+        }
+        // Unset classname from previous active zone
+        if(currentZone && currentZone != tempCurrentzone){
+            cm.removeClass(currentZone['node'], 'is-active');
+            previousZone = currentZone;
+        }
+        // Set current to global
+        currentZone = tempCurrentzone;
+        currentAboveItem = tempCurrentAboveItem;
+        currentPosition = tempCurrentPosition;
+        // Set active zone class name
+        if(!(previousZone && previousZone['isTemporary'] && currentZone['isRemoveZone'])){
+            cm.addClass(currentZone['node'], 'is-active');
+        }
+    };
+
+    var stop = function(e){
+        var currentHeight;
+        // Remove check position event
+        //checkInt && clearInterval(checkInt);
+        // Remove move events attached on document
+        cm.removeClass(document.body, 'pt__dnd-body');
+        cm.removeEvent(window, 'mousemove', move);
+        cm.removeEvent(window, 'mouseup', stop);
+        // Calculate height of block block, like he already dropped in zone, to animate height of fake empty space
+        getPosition(current);
+        current['node'].style.width = [(currentZone['dimensions']['innerWidth'] - current['dimensions']['margin']['left'] - current['dimensions']['margin']['right']), 'px'].join('');
+        currentHeight = current['node'].offsetHeight + current['dimensions']['margin']['top'] + current['dimensions']['margin']['bottom'];
+        current['node'].style.width = [current['dimensions']['width'], 'px'].join('');
+        // If current block located above another block item, drops after/before it, or drops in zone
+        if(currentAboveItem){
+            // Animate placeholder blocks
+            if(currentHeight != currentAboveItem['placeholder'][currentPosition]['node'].offsetHeight){
+                animatePlaceholder(currentAboveItem['placeholder'][currentPosition], currentHeight, that.params['dropDuration']);
+            }
+            // Drop Item to zone
+            dropBlockToZone(current, currentZone, {
+                'target' : currentAboveItem['node'],
+                'append' : currentPosition == 'top' ? 'before' : 'after',
+                'index' : currentZone['items'].indexOf(currentAboveItem) + (currentPosition == 'top' ? 0 : 1),
+                'top' : [currentPosition == 'top'? currentAboveItem['dimensions']['absoluteY1'] : currentAboveItem['dimensions']['absoluteY2'], 'px'].join(''),
+                'onStop' : unsetCurrentBlock
+            });
+        }else if(currentZone['isRemoveZone'] || currentZone['isTemporary']){
+            removeBlock(current, {
+                'onStop' : unsetCurrentBlock
+            });
+        }else{
+            // Animate placeholder blocks
+            animatePlaceholder(currentZone['placeholder'][0], currentHeight, that.params['dropDuration']);
+            // Drop Item to zone
+            dropBlockToZone(current, currentZone, {
+                'onStop' : unsetCurrentBlock
+            });
+        }
+        // Unset placeholder
+        if(currentPlaceholder){
+            cm.removeClass(currentPlaceholder['node'], 'is-active is-highlight');
+        }
+        // Unset active zone classname
+        if(currentZone){
+            cm.removeClass(currentZone['node'], 'is-active');
+        }
+        // Un Highlight zones
+        if(that.params['highlightZones']){
+            toggleZonesHighlight();
+        }
+        // Show IFRAMES and EMBED tags
+        cm.showSpecialTags();
+    };
+
+    /* *** BLOCK *** */
+
+    var initBlock = function(node, zone, params){
+        // Config
+        var block = cm.merge({
+            'node' : node,
+            'styleObject' : cm.getStyleObject(node),
+            'type' : 'item',
+            'placeholder' : {
+                'top' : null,
+                'bottom' : null
+            },
+            'dimensions' : {
+                'offsetX' : 0,
+                'offsetY' : 0
+            }
+        }, params);
+        block['zone'] = zone;
+        block['anim'] = new cm.Animation(block['node']);
+        // Set block event on element
+        initBlockDrag(block);
+        // Return item to push in zone array
+        blockList.push(block);
+        return block;
+    };
+
+    var prepareBlock = function(block, params){
+        block.updateDimensions();
+        // Get offset using pointer position (x and y)
+        block.dimensions['offsetLeft'] = block.dimensions['outer']['left'] - params['left'];
+        block.dimensions['offsetTop'] = block.dimensions['outer']['top'] - params['top'];
+        // Clone dummy block or unset area from block
+        if(block.isDummy){
+            that.currentBlock = block
+                .clone();
+        }else{
+            that.currentBlock = block
+                .unsetZone();
+        }
+        // Set widget start position
+        that.currentBlock['node'].style.top = 0;
+        that.currentBlock['node'].style.left = 0;
+        moveBlock(that.currentBlock, {
+            'left' : that.currentBlock.dimensions['outer']['left'],
+            'top' : that.currentBlock.dimensions['outer']['top'],
+            'width' : that.currentBlock.dimensions['offset']['width']
+        });
+        // Insert widget to body
+        that.params['draggableContainer'].appendChild(that.currentBlock['node']);
+        // Set helper classes
+        cm.addClass(that.currentBlock['node'], 'app__dashboard__helper');
+        cm.addClass(that.currentBlock['node'], 'is-active', true);
+    };
+
+    var moveBlock = function(block, params, offset){
+        // Calculate
+        var left = params['left'],
+            top = params['top'],
+            node = params['node'] || block['node'];
+        if(offset){
+            left += block.dimensions['offsetLeft'];
+            top += block.dimensions['offsetTop'];
+        }
+        if(typeof params['width'] != 'undefined'){
+            node.style.width = [params['width'], 'px'].join('');
+        }
+        if(typeof params['height'] != 'undefined'){
+            node.style.height = [params['height'], 'px'].join('');
+        }
+        if(typeof params['opacity'] != 'undefined'){
+            node.style.opacity = params['opacity'];
+        }
+        cm.setCSSTranslate(node, [left, 'px'].join(''), [top, 'px'].join(''));
+    };
+
+
+    var cloneBlock = function(block){
+        var clonedNode = block['node'].cloneNode(true),
+            zone = zones[0],
+            clonedBlock = initBlock(clonedNode, zone, {});
+
+        clonedBlock['dimensions'] = cm.clone(block['dimensions']);
+        zone['items'].push(clonedBlock);
+        return clonedBlock;
+    };
+
+    var dropBlockToZone = function(block, zone, params){
+        params = cm.merge({
+            'target' : zone['node'],
+            'append' : 'child',
+            'index' : 0,
+            'width' : [zone['dimensions']['innerWidth'], 'px'].join(''),
+            'top' : [zone['dimensions']['innerY1'] - block['dimensions']['margin']['top'], 'px'].join(''),
+            'left' : [zone['dimensions']['innerX1'] - block['dimensions']['margin']['left'], 'px'].join(''),
+            'onStart' : function(){},
+            'onStop' : function(){}
+        }, params);
+        // System onStart event
+        params['onStart']();
+        // Animate block item, like it drops in zone
+        cm.addClass(block['node'], 'is-drop', true);
+        block['node'].style.width = params['width'];
+        cm.setCSSTranslate(block['node'], params['left'], params['top']);
+        // On Dnimate Stop
+        setTimeout(function(){
+            // Append element in new position
+            switch(params['append']){
+                case 'child' :
+                    cm.appendChild(block['node'], params['target']);
+                    break;
+                case 'before' :
+                    cm.insertBefore(block['node'], params['target']);
+                    break;
+                case 'after' :
+                    cm.insertAfter(block['node'], params['target']);
+                    break;
+                case 'first' :
+                    cm.insertFirst(block['node'], params['target']);
+                    break;
+            }
+            // Remove block helper classname
+            cm.removeClass(block['node'], 'pt__dnd-helper is-drop is-active', true);
+            // Reset styles
+            block['node'].style.left = 'auto';
+            block['node'].style.top = 'auto';
+            block['node'].style.width = 'auto';
+            cm.setCSSTranslate(current['node'], 'auto', 'auto');
+            // Set index of block item in new zone
+            zone['items'].splice(params['index'], 0, block);
+            // API onDrop Event
+            that.triggerEvent('onDrop', {
+                'item' : block,
+                'node' : block['node'],
+                'to' : zone,
+                'from' : block['zone'],
+                'index' : params['index']
+            });
+            // Set block new zone
+            block['zone'] = zone;
+            // System onStop event
+            params['onStop']();
+        }, that.params['dropDuration']);
+    };
+
+    var removeBlock = function(block, params){
+        var style, anim, node;
+        // Remove handler
+        var handler = function(){
+            if(that.params['removeNode']){
+                cm.remove(node);
+            }
+            // Remove from block list
+            blockList = blockList.filter(function(item){
+                return item != block;
+            });
+            unsetBlockFromZone(block);
+            // API onRemove Event
+            if(!params['noEvent']){
+                that.triggerEvent('onRemove', {
+                    'item' : block,
+                    'node' : block['node'],
+                    'from' : block['zone']
+                });
+            }
+            // System onStop event
+            params['onStop']();
+        };
+        // Config
+        params = cm.merge({
+            'isCurrent' : block === current,
+            'isInDOM' : cm.inDOM(block['node']),
+            'onStart' : function(){},
+            'onStop' : function(){}
+        }, params);
+        // System onStart event
+        params['onStart']();
+        // If block not in DOM, we don't need to wrap and animate it
+        if(params['isInDOM'] && that.params['animateRemove']){
+            // If block is current - just animate pull out left, else - wrap to removable node
+            if(params['isCurrent']){
+                node = block['node'];
+                anim = block['anim'];
+                style = {
+                    'left' : [-(block['dimensions']['absoluteWidth'] + 50), 'px'].join(''),
+                    'opacity' : 0
+                }
+            }else{
+                node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable'}), block['node']);
+                anim = new cm.Animation(node);
+                style = {
+                    'height' : '0px',
+                    'opacity' : 0
+                }
+            }
+            // Animate block, like it disappear
+            anim.go({
+                'duration' : that.params['dropDuration'],
+                'anim' : 'smooth',
+                'style' : style,
+                'onStop' : handler
+            });
+        }else{
+            node = block['node'];
+            handler();
+        }
+    };
+
+    var unsetBlockFromZone = function(block){
+        block['zone']['items'] = block['zone']['items'].filter(function(item){
+            return item != block;
+        });
+    };
+
+    var unsetCurrentBlock = function(){
+        // Remove placeholder blocks
+        removePlaceholderBlocks();
+        // Reset other
+        current = false;
+        currentAboveItem = false;
+        currentZone = false;
+        previousZone = false;
+    };
+
+    /* *** PLACEHOLDER *** */
+
+    var renderPlaceholderBlocks = function(){
+        var placeholder;
+        cm.forEach(zones, function(zone){
+            if(zone['isLocked']){
+                return;
+            }
+
+            if(!zone['items'].length){
+                placeholder = renderPlaceholder();
+                cm.appendChild(placeholder['node'], zone['node']);
+                zone['placeholder'].push(placeholder);
+            }
+            cm.forEach(zone['items'], function(block, i){
+                if(i === 0){
+                    placeholder = renderPlaceholder();
+                    cm.insertBefore(placeholder['node'], block['node']);
+                    zone['placeholder'].push(placeholder);
+                }
+                placeholder = renderPlaceholder();
+                cm.insertAfter(placeholder['node'], block['node']);
+                zone['placeholder'].push(placeholder);
+                // Associate with block
+                block['placeholder']['top'] = zone['placeholder'][i];
+                block['placeholder']['bottom'] = zone['placeholder'][i + 1];
+            });
+        });
+    };
+
+    var renderPlaceholder = function(){
+        var node = cm.Node('div', {'class' : 'pt__dnd-placeholder'});
+        return {
+            'node' : node,
+            'anim' : new cm.Animation(node),
+            'isShow' : false
+        };
+    };
+
+    var removePlaceholderBlocks = function(){
+        cm.forEach(zones, function(zone){
+            cm.forEach(zone['placeholder'], function(placeholder){
+                cm.remove(placeholder['node']);
+            });
+            zone['placeholder'] = [];
+        });
+    };
+
+    var animatePlaceholder = function(placeholder, height, duration) {
+        var style;
+        height = [height, 'px'].join('');
+        if(!that.isGracefulDegradation && (style = cm.getSupportedStyle('transition-duration'))){
+            placeholder['node'].style[style] = [duration, 'ms'].join('');
+        }
+        placeholder['node'].style.height = height;
+    };
+
+    /* *** POSITION CALCULATION FUNCTIONS *** */
+
+    var getPosition = function(item){
+        item['dimensions'] = cm.extend(item['dimensions'], cm.getFullRect(item['node'], item['styleObject']));
+    };
+
+    var getPositions = function(arr){
+        cm.forEach(arr, getPosition);
+    };
+
+    var getPositionsAll = function(){
+        getPositions(zones);
+        cm.forEach(zones, function(zone){
+            getPositions(zone['items']);
+        });
+    };
+
+    var recalculatePosition = function(item){
+        //item['dimensions']['x1'] = cm.getRealX(item['node']);
+        item['dimensions']['y1'] = cm.getRealY(item['node']);
+        //item['dimensions']['x2'] = item['dimensions']['x1'] + item['dimensions']['width'];
+        item['dimensions']['y2'] = item['dimensions']['y1'] + item['dimensions']['height'];
+
+        //item['dimensions']['innerX1'] = item['dimensions']['x1'] + item['dimensions']['padding']['left'];
+        item['dimensions']['innerY1'] = item['dimensions']['y1'] + item['dimensions']['padding']['top'];
+        //item['dimensions']['innerX2'] = item['dimensions']['innerX1'] + item['dimensions']['innerWidth'];
+        item['dimensions']['innerY2'] = item['dimensions']['innerY1'] + item['dimensions']['innerHeight'];
+
+        //item['dimensions']['absoluteX1'] = item['dimensions']['x1'] - item['dimensions']['margin']['left'];
+        item['dimensions']['absoluteY1'] = item['dimensions']['y1'] - item['dimensions']['margin']['top'];
+        //item['dimensions']['absoluteX2'] = item['dimensions']['x2'] + item['dimensions']['margin']['right'];
+        item['dimensions']['absoluteY2'] = item['dimensions']['y2'] + item['dimensions']['margin']['bottom'];
+    };
+
+    var recalculatePositions = function(arr){
+        cm.forEach(arr, recalculatePosition);
+    };
+
+    var recalculatePositionsAll = function(){
+        var placeholderHeight = 0;
+        // Reset current active placeholder height, cause we need to calculate clear positions
+        if(currentPlaceholder){
+            cm.addClass(currentPlaceholder['node'], 'is-immediately');
+            placeholderHeight = currentPlaceholder['node'].offsetHeight;
+            currentPlaceholder['node'].style.height = 0;
+        }
+        recalculatePositions(zones);
+        cm.forEach(zones, function(zone){
+            recalculatePositions(zone['items']);
+        });
+        // Restoring placeholder height after calculation
+        if(currentPlaceholder && placeholderHeight){
+            currentPlaceholder['node'].style.height = [placeholderHeight, 'px'].join('');
+            (function(currentPlaceholder){
+                setTimeout(function(){
+                    cm.removeClass(currentPlaceholder['node'], 'is-immediately');
+                }, 5);
+            })(currentPlaceholder);
+        }
+    };
+
+    var checkPosition = function(){
+        var filteredZones = getFilteredZones();
+        if(filteredZones[0]['dimensions']['y1'] != cm.getRealY(filteredZones[0]['node'])){
+            recalculatePositionsAll();
+        }
+    };
+
+    /* *** ZONE *** */
+
+    var initZone = function(item){
+        that.zones.push(item);
+    };
+
+    var getFilteredZones = function(){
+        return zones.filter(function(zone){
+            // Filter out locked zones and inner zones
+            if(zone['isTemporary'] || zone['isSystem']){
+                return false;
+            }
+            // True - pass zone
+            return true;
+        });
+    };
+
+    var toggleZonesHighlight = function(){
+        if(that.currentZones){
+            if(that.isZonesHighlight){
+                that.isZonesHighlight = false;
+                cm.forEach(that.currentZones, function(zone){
+                    zone.unhighlight();
+                });
+            }else{
+                that.isZonesHighlight = true;
+                cm.forEach(that.currentZones, function(zone){
+                    zone.highlight();
+                });
+            }
+        }
+    };
+
+    var getDroppableZones = function(block){
+        return that.zones.filter(function(zone){
+            if(cm.isParent(block.params['node'], zone.params['node']) || zone.params['locked'] || block.params['type'] != zone.params['type']){
+                return false;
+            }
+            return true;
+        });
+    };
+
+    /* *** DUMMY *** */
+
+    var initDummyBlock = function(item){
+        cm.forEach(item.getDragNodes(), function(node){
+            cm.addEvent(node, 'mousedown', function(e){
+                start(e, item);
+            });
+        });
+        that.dummyBlocks.push(item);
+    };
+
+    /* *** HELPERS *** */
+
+    var toggleScroll = function(speed){
+        var scrollRemaining,
+            duration,
+            styles = {};
+
+        if(speed == 0){
+            isScrollProccess = false;
+            anims['scroll'].stop();
+        }else if(speed < 0 && !isScrollProccess){
+            isScrollProccess = true;
+            duration = cm.getScrollTop(that.params['scrollNode']) * that.params['scrollSpeed'];
+            if(cm.isWindow(that.params['scrollNode'])){
+                styles['docScrollTop'] = 0;
+            }else{
+                styles['scrollTop'] = 0;
+            }
+            anims['scroll'].go({'style' : styles, 'duration' : duration, 'onStop' : function(){
+                isScrollProccess = false;
+                //getPositionsAll();
+                //recalculatePositionsAll();
+            }});
+        }else if(speed > 0 && !isScrollProccess){
+            isScrollProccess = true;
+            scrollRemaining = cm.getScrollHeight(that.params['scrollNode']) - pageSize['winHeight'];
+            if(cm.isWindow(that.params['scrollNode'])){
+                styles['docScrollTop'] = scrollRemaining;
+            }else{
+                styles['scrollTop'] = scrollRemaining;
+            }
+            duration = scrollRemaining * that.params['scrollSpeed'];
+            anims['scroll'].go({'style' : styles, 'duration' : duration, 'onStop' : function(){
+                isScrollProccess = false;
+                //getPositionsAll();
+                //recalculatePositionsAll();
+            }});
+        }
+    };
+
+    /* ******* MAIN ******* */
+
+    that.addBlock = function(item){
+        initBlock(item);
+        return that;
+    };
+
+    that.addDummyBlock = function(item){
+        initDummyBlock(item);
+        return that;
+    };
+
+    that.addZone = function(item){
+        initZone(item);
+        return that;
+    };
+
+
+
+    that.getZone = function(node){
+        var zone;
+        cm.forEach(zones, function(item){
+            if(item['node'] === node){
+                zone = item;
+            }
+        });
+        return zone;
+    };
+
+    that.registerZone = function(node, params){
+        if(cm.isNode(node) && node.tagName){
+            initZone(node, params || {});
+        }
+        return that;
+    };
+
+    that.removeZone = function(node, params){
+        if(cm.isNode(node) && cm.inArray(zonesList, node)){
+            zonesList = zonesList.filter(function(zone){
+                return zone != node;
+            });
+            zones = zones.filter(function(zone){
+                return zone['node'] != node;
+            });
+        }
+        return that;
+    };
+
+    that.getBlock = function(node){
+        var block;
+        cm.forEach(blockList, function(item){
+            if(item['node'] === node){
+                block = item;
+            }
+        });
+        return block;
+    };
+
+    that.getBlockList = function(){
+        return blockList;
+    };
+
+    that.registerBlock = function(node, zoneNode, params){
+        var block, zone, newBlock, index, childNodes, blockNodes = [];
+        // Find block item by node
+        block = that.getBlock(node);
+        // If block already exists - reinit it, else - init like new block item
+        if(block){
+            initBlockDrag(block);
+        }else if(cm.inArray(zonesList, zoneNode)){
+            node.setAttribute('data-com-draganddrop', 'block');
+            // Fins zone item by node
+            zone = that.getzone(zoneNode);
+            // Find block index
+            if(zone['blockInChildNodes']){
+                childNodes = zone['node'].childNodes;
+                cm.forEach(childNodes, function(node){
+                    if(node.tagName && node.getAttribute('data-com-draganddrop') == 'block'){
+                        blockNodes.push(node);
+                    }
+                });
+            }else{
+                blockNodes = cm.getByAttr('data-com-draganddrop', 'block', zone['node']);
+            }
+            index = blockNodes.indexOf(node);
+            // Register block
+            newBlock = initBlock(node, zone, params || {});
+            zone['items'].splice(index, 0, newBlock);
+        }
+        return that;
+    };
+
+    that.replaceBlock = function(oldBlockNode, newBlockNode, params){
+        var oldBlock,
+            newBlock;
+        // Find block item
+        cm.forEach(blockList, function(item){
+            if(item['node'] === oldBlockNode){
+                oldBlock = item;
+            }
+        });
+        if(oldBlock){
+            // Find old block zone and index in zone
+            var zone = oldBlock['zone'],
+                index = zone['items'].indexOf(oldBlock),
+                node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable', 'style' : 'height: 0px;'}), newBlockNode),
+                anim = new cm.Animation(node);
+            // Append new block into DOM
+            cm.insertAfter(node, oldBlockNode);
+            // Remove old block
+            removeBlock(oldBlock, params);
+            // Animate new block
+            anim.go({'style' : {'height' : [cm.getRealHeight(node, 'offset', 0), 'px'].join(''), 'opacity' : 1}, 'duration' : 300, 'anim' : 'simple', 'onStop' : function(){
+                cm.insertAfter(newBlockNode, node);
+                cm.remove(node);
+                // Register new block
+                newBlock = initBlock(newBlockNode, zone);
+                zone['items'].splice(index, 0, newBlock);
+                // API onEmbed event
+                that.triggerEvent('onReplace', {
+                    'item' : newBlock,
+                    'node' : newBlock['node'],
+                    'to' : newBlock['to']
+                });
+            }});
+        }
+        return that;
+    };
+
+    that.removeBlock = function(node, params){
+        var block;
+        // Find block item
+        cm.forEach(blockList, function(item){
+            if(item['node'] === node){
+                block = item;
+            }
+        });
+        if(block){
+            // Remove
+            removeBlock(block, params || {});
+        }
+        return that;
+    };
+
+    that.getOrderingNodes = function(){
+        var results = [],
+            arr,
+            filteredZones = getFilteredZones();
+        // Build array
+        cm.forEach(filteredZones, function(zone){
+            arr = {
+                'zone' : zone['node'],
+                'items' : []
+            };
+            cm.forEach(zone['items'], function(item){
+                arr['items'].push(item['node']);
+            });
+            results.push(arr);
+        });
+        return filteredZones.length == 1 ? arr['items'] : results;
+    };
+
+    that.getOrderingIDs = function(){
+        var results = {},
+            arr,
+            filteredZones = getFilteredZones();
+        // Build array
+        cm.forEach(filteredZones, function(zone){
+            arr = {};
+            cm.forEach(zone['items'], function(item, i){
+                if(!item['id']){
+                    throw new Error('Attribute "data-id" not specified on item node.');
+                }
+                arr[item['id']] = i;
+            });
+            results[zone['id']] = arr;
+        });
+        return filteredZones.length == 1 ? arr : results;
+    };
+    
+    init();
+});
+cm.define('App.DummyBlock', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataNodes',
+        'DataConfig',
+        'Stack'
+    ],
+    'events' : [
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'type' : 'content',                     // content | form | mail
+        'sidebarName' : 'app-sidebar',
+        'editorName' : 'app-editor',
+        'thisContainer' : 'document.body',
+        'topContainer' : 'top.document.body'
+    }
+},
+function(params){
+    var that = this;
+
+    that.isDummy = true;
+    that.isEditing = false;
+    that.styleObject = null;
+    that.dimensions = null;
+
+    that.components = {};
+    that.nodes = {
+        'dummy' : cm.node('div')
+    };
+    that.node = null;
+    that.zone = null;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        that.params['name'] = [that.params['type'], that.params['keyword']].join('_');
+        that.node = that.params['node'];
+    };
+
+    var render = function(){
+        that.styleObject = cm.getStyleObject(that.node);
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject);
+        // Construct
+        new cm.top('Finder')('App.Editor', that.params['editorName'], that.params['topContainer'], constructEditor);
+    };
+
+    var constructEditor = function(classObject){
+        if(classObject){
+            that.components['editor'] = classObject
+                .addDummyBlock(that.params['name'], that);
+        }
+    };
+
+    var renderLoaderBox = function(){
+        var node;
+        node = cm.Node('div', {'class' : 'pt__box-loader position'},
+            cm.Node('div', {'class' : 'inner'})
+        );
+        return node;
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.enableEditing = function(){
+        that.isEditing = true;
+        return that;
+    };
+
+    that.disableEditing = function(){
+        that.isEditing = false;
+        return that;
+    };
+
+    that.getDragNodes = function(){
+        return [that.node];
+    };
+
+    that.updateDimensions = function(){
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, that.dimensions);
+        return that.dimensions;
+    };
+
+    that.clone = function(){
+        that.node = cm.clone(that.params['node'], true);
+        return that;
+    };
+
+    init();
+});
+cm.define('App.Editor', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataConfig',
+        'DataNodes',
+        'Stack',
+        'Storage'
+    ],
+    'events' : [
+        'onRender',
+        'onExpand',
+        'onCollapse',
+        'onDrop',
+        'onAppend',
+        'onRemove',
+        'onEmbed',
+        'onReplace',
+        'onUpdate',
+        'onForceRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : 'app-editor',
+        'sidebarName' : 'app-sidebar',
+        'App.Dashboard' : {}
+    }
+},
+function(params){
+    var that = this;
+    
+    that.components = {};
+    that.nodes = {};
+    that.states = {
+        'sidebarExpanded' : false
+    };
+
+    that.zones = {};
+    that.blocks = {};
+    that.dummyBlocks = {};
+    that.isProcessed = false;
+    that.isExpanded = false;
+
+    /* *** INIT *** */
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var render = function(){
+        initSidebar();
+        initDashboard();
+        windowResize();
+        cm.addEvent(window, 'resize', windowResize);
+    };
+
+    var initSidebar = function(){
+        new cm.Finder('App.Sidebar', that.params['sidebarName'], null, function(classObject){
+            that.components['sidebar'] = classObject
+                .addEvent('onExpand', sidebarExpandAction)
+                .addEvent('onCollapse', sidebarCollapseAction);
+
+            if(that.components['sidebar'].isExpanded){
+                sidebarExpandAction();
+            }else{
+                sidebarCollapseAction();
+            }
+        });
+    };
+
+    var initDashboard = function(){
+        cm.getConstructor('App.Dashboard', function(classConstructor){
+            that.components['dashboard'] = new classConstructor(that.params['App.Dashboard'])
+                .addEvent('onDrop', onDrop)
+                .addEvent('onReplace', onReplace)
+                .addEvent('onRemove', onRemove);
+            // Add Blocks
+            cm.forEach(that.dummyBlocks, function(item){
+                that.components['dashboard'].addDummyBlock(item);
+            });
+            cm.forEach(that.zones, function(item){
+                that.components['dashboard'].addZone(item);
+            });
+        });
+    };
+
+    var sidebarExpandAction = function(){
+        that.isExpanded = true;
+        cm.forEach(that.zones, function(item){
+            item.enableEditing();
+        });
+        cm.forEach(that.blocks, function(item){
+            item.enableEditing();
+        });
+        that.triggerEvent('onExpand');
+
+        return false;
+
+        var elements;
+        // Enable widgets editable
+        /*
+        elements = cm.getByClass('app__block');
+        cm.forEach(elements, function(widget){
+            if(!cm.isClass(widget, 'is-locked')){
+                cm.addClass(widget, 'is-editable');
+            }
+            if(cm.isClass(widget, 'is-hidden')){
+                cm.addClass(widget, 'is-visible');
+            }
+        });
+        */
+        // Enable columns editable
+        elements = cm.getByClass('app-mod__columns');
+        cm.forEach(elements, function(column){
+            if(!cm.isClass(column, 'is-locked')){
+                cm.addClass(column, 'is-editable');
+            }
+            if(cm.isClass(column, 'is-hidden')){
+                cm.addClass(column, 'is-visible');
+            }
+        });
+        // Enable spacers editable
+        elements = cm.getByClass('app-mod__spacer');
+        cm.forEach(elements, function(spacer){
+            if(!cm.isClass(spacer, 'is-locked')){
+                cm.addClass(spacer, 'is-editable');
+            }
+            if(cm.isClass(spacer, 'is-hidden')){
+                cm.addClass(spacer, 'is-visible');
+            }
+        });
+        // Enable slider editable
+        elements = cm.getByClass('app-mod__slider');
+        cm.forEach(elements, function(slider){
+            if(!cm.isClass(slider, 'is-locked')){
+                cm.addClass(slider, 'is-editable');
+            }
+            if(cm.isClass(slider, 'is-hidden')){
+                cm.addClass(slider, 'is-visible');
+            }
+        });
+        // Enable block editable
+        /*
+        cm.find('App.Block', null, that.nodes['AppTemplate']['container'], function(classObject){
+            classObject.enableEditMode();
+        });
+        */
+        // Enable gridlist editable
+        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
+            classObject.enableEditMode();
+        });
+        // Redraw template
+        cm.find('App.Template', null, that.nodes['AppTemplate']['container'], function(classObject){
+            classObject.redraw();
+        });
+    };
+
+    var sidebarCollapseAction = function(){
+        that.isExpanded = false;
+        cm.forEach(that.zones, function(item){
+            item.disableEditing();
+        });
+        cm.forEach(that.blocks, function(item){
+            item.disableEditing();
+        });
+        that.triggerEvent('onCollapse');
+
+        return false;
+
+        var elements;
+        // Disable widgets editable
+        /*
+        elements = cm.getByClass('app__block');
+        cm.forEach(elements, function(widget){
+            cm.removeClass(widget, 'is-editable is-visible');
+        });
+        */
+        // Disable columns editable
+        elements = cm.getByClass('app-mod__columns');
+        cm.forEach(elements, function(column){
+            cm.removeClass(column, 'is-editable is-visible');
+        });
+        // Disable spacers editable
+        elements = cm.getByClass('app-mod__spacer');
+        cm.forEach(elements, function(spacer){
+            cm.removeClass(spacer, 'is-editable is-visible');
+        });
+        // Disable slider editable
+        elements = cm.getByClass('app-mod__slider');
+        cm.forEach(elements, function(slider){
+            cm.removeClass(slider, 'is-editable is-visible');
+        });
+        // Disable block editable
+        /*
+        cm.find('App.Block', null, that.nodes['AppTemplate']['container'], function(classObject){
+            classObject.disableEditMode();
+        });
+        */
+        // Disable gridlist editable
+        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
+            classObject.disableEditMode();
+        });
+        // Redraw template
+        cm.find('App.Template', null, that.nodes['AppTemplate']['container'], function(classObject){
+            classObject.redraw();
+        });
+    };
+
+    var onAdminPage = function(){
+        // Enable gridlist editable
+        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
+            classObject.enableEditMode();
+        });
+    };
+
+    var windowResize = function(){
+        // This code must be placed in Sidebar component!!!
+        animFrame(function(){
+            var pageSize = cm.getPageSize();
+
+            if(that.components['sidebar']){
+                if(pageSize['winWidth'] <= cm._config['adaptiveFrom']){
+                    if(that.components['sidebar'].isExpanded && that.isExpanded){
+                        that.states['sidebarExpanded'] = true;
+                        that.components['sidebar'].collapse(true);
+                    }
+                }else{
+                    if(that.states['sidebarExpanded'] && !that.isExpanded){
+                        that.states['sidebarExpanded'] = false;
+                        that.components['sidebar'].expand(true);
+                    }
+                }
+            }
+        });
+    };
+
+    /* *** DROP EVENTS *** */
+
+    var onDrop = function(dd, widget){
+        if(widget['from']['isTemporary']){
+            widget['dummy'] = widget['item']['drag'];
+            // Embed loader box
+            widget['loaderBox'] = renderLoaderBox();
+            widget['dummy'].appendChild(widget['loaderBox']);
+            cm.addClass(widget['loaderBox'], 'fadein', true);
+            // API onAppend event
+            that.triggerEvent('onAppend', {
+                'item' : widget,
+                'node' : widget['node'],
+                'to' : widget['to'],
+                'index' : widget['index']
+            });
+        }else{
+            // API onDrop event
+            that.triggerEvent('onDrop', widget);
+        }
+    };
+
+    var onRemove = function(dd, widget){
+        // API onRemove event
+        that.triggerEvent('onRemove', widget);
+    };
+
+    var onReplace = function(dd, widget){
+        // API onRemove event
+        that.triggerEvent('onReplace', widget);
+    };
+
+    /* ******* MAIN ******* */
+
+    that.addZone = function(name, item){
+        that.zones[name] = item;
+        if(that.components['dashboard']){
+            that.components['dashboard'].addZone(item);
+        }
+        return that;
+    };
+
+    that.removeZone = function(name){
+        delete that.zones[name];
+        return that;
+    };
+
+    that.addBlock = function(name, item){
+        that.blocks[name] = item;
+        if(that.components['dashboard']){
+            that.components['dashboard'].addBlock(item);
+        }
+        return that;
+    };
+
+    that.removeBlock = function(name){
+        delete that.blocks[name];
+        return that;
+    };
+
+    that.addDummyBlock = function(name, item){
+        that.dummyBlocks[name] = item;
+        if(that.components['dashboard']){
+            that.components['dashboard'].addDummyBlock(item);
+        }
+        return that;
+    };
+
+
+
+
+
+    that.registerArea = function(area, params){
+        that.components['dd'].registerArea(area, params);
+        return that;
+    };
+
+    that.removeArea = function(area, params){
+        that.components['dd'].removeArea(area, params);
+        return that;
+    };
+
+    that.removeWidget = function(widget, params){
+        that.components['dd'].removeDraggable(widget, params);
+        return that;
+    };
+
+    that.replaceWidget = function(oldNode, newNode, params){
+        that.components['dd'].replaceDraggable(oldNode, newNode, params);
+        return that;
+    };
+
+    that.deleteAllTemporary = function() {
+        var dummy = cm.getByAttr('data-node', 'dummy', that.nodes['AppTemplate']['container']);
+        cm.forEach(dummy, function(node) {
+            that.removeWidget(node.parentNode);
+        });
+    };
+
+    that.updateTemporaryWidget = function(content) {
+        var dummy = cm.getByAttr('data-node', 'dummy', that.nodes['AppTemplate']['container']);
+        cm.forEach(dummy, function(node) {
+            var element = cm.strToHTML(content);
+            that.components['dd'].replaceDraggable(node.parentNode, element, {'noEvent': true, 'onStop': function() {
+                //register drop areas
+                var areas = cm.getByAttr('data-com-draganddrop', 'area', element);
+                cm.forEach(areas, function(area) {
+                    that.components['dd'].registerArea(area, {});
+                });
+                that.triggerEvent('onUpdate', {'node': element});
+            }});
+        });
+    };
+
+    that.getWidget = function(id) {
+        var draggableList = that.components['dd'].getDraggableList(),
+            widgets = [],
+            result = null;
+        cm.forEach(draggableList, function(item) {
+            widgets = cm.getByClass('app__block', item['node']);
+            if (widgets[0] && widgets[0].getAttribute('data-block-position-id') == id) {
+                result = item;
+            }
+        });
+        return result;
+    };
+
+    that.updateWidget = function(content, id) {
+        var item = that.getWidget(id);
+        if(item){
+            var element = cm.strToHTML(content);
+            that.components['dd'].replaceDraggable(item['node'], element, {'noEvent': true, 'onStop': function() {
+                //register drop areas
+                var areas = cm.getByAttr('data-com-draganddrop', 'area', element);
+                cm.forEach(areas, function(area) {
+                    that.components['dd'].registerArea(area, {});
+                });
+                that.triggerEvent('onUpdate', {'node': element});
+            }});
+        }
+    };
+
+    that.deleteWidget = function(id) {
+        var item = that.getWidget(id);
+        if(item){
+            that.components['dd'].removeDraggable(item['node'], {'noEvent': true});
+        }
+    };
+
+    init();
+});
 cm.define('App.HelpTour', {
     'modules' : [
         'Params',
@@ -19259,13 +21873,13 @@ function(params){
 
     var getDimensions = function(){
         var rule;
-        if(rule = cm.getCSSRule('.app-lt__sidebar-helper__width-collapsed')[0]){
+        if(rule = cm.getCSSRule('.app__sidebar-helper__width-collapsed')[0]){
             dimensions['sidebarCollapsed'] = cm.styleToNumber(rule.style.width);
         }
-        if(rule = cm.getCSSRule('.app-lt__sidebar-helper__width-expanded')[0]){
+        if(rule = cm.getCSSRule('.app__sidebar-helper__width-expanded')[0]){
             dimensions['sidebarExpanded'] = cm.styleToNumber(rule.style.width);
         }
-        if(rule = cm.getCSSRule('.app-lt__topmenu-helper__height')[0]){
+        if(rule = cm.getCSSRule('.app__topmenu-helper__height')[0]){
             dimensions['topMenu'] = cm.styleToNumber(rule.style.height);
         }
         if(!dimensions['popupSelfHeight']){
@@ -20024,9 +22638,7 @@ function(params){
         'inner' : cm.Node('div'),
         'collapseButtons' : [],
         'labels' : [],
-        'tabs' : [],
-        'areas' : [],
-        'widgets' : []
+        'tabs' : []
     };
     that.components = {};
     that.isExpanded = false;
@@ -20051,23 +22663,24 @@ function(params){
 
     var render = function(){
         var helperMenuRule, helperContentRule;
+        cm.log(that.nodes);
         // Init tabset
         cm.getConstructor('Com.TabsetHelper', function(classConstructor){
-            that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper']);
-            that.components['tabset'].addEvent('onLabelClick', function(tabset, data){
-                if(!that.isExpanded || tabset.get() == data['id']){
-                    that.toggle();
-                }
-            });
-            that.components['tabset'].addTabs(that.nodes['tabs'], that.nodes['labels']);
-            that.components['tabset'].set(that.params['active']);
+            that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper'])
+                .addEvent('onLabelClick', function(tabset, data){
+                    if(!that.isExpanded || tabset.get() == data['id']){
+                        that.toggle();
+                    }
+                })
+                .addTabs(that.nodes['tabs'], that.nodes['labels'])
+                .set(that.params['active']);
         });
         // Get sidebar dimensions from CSS
         scrollBarSize = cm._scrollSize;
-        if(helperMenuRule = cm.getCSSRule('.app-lt__sidebar-helper__menu-width')[0]){
+        if(helperMenuRule = cm.getCSSRule('.app__sidebar-helper__menu-width')[0]){
             menuWidth = cm.styleToNumber(helperMenuRule.style.width);
         }
-        if(helperContentRule = cm.getCSSRule('.app-lt__sidebar-helper__content-width')[0]){
+        if(helperContentRule = cm.getCSSRule('.app__sidebar-helper__content-width')[0]){
             contentWidth = cm.styleToNumber(helperContentRule.style.width);
         }
         // Add events on collapse buttons
@@ -20098,19 +22711,19 @@ function(params){
     var resize = function(){
         var rule;
         cm.addClass(that.nodes['container'], 'is-immediately');
-        if(rule = cm.getCSSRule('.app-lt__sidebar .sidebar__content')[0]){
+        if(rule = cm.getCSSRule('.app__sidebar .sidebar__content')[0]){
             rule.style.width = [contentWidth + scrollBarSize, 'px'].join('');
         }
-        if(rule = cm.getCSSRule('.app-lt__sidebar .sidebar__remove-zone')[0]){
+        if(rule = cm.getCSSRule('.app__sidebar .sidebar__remove-zone')[0]){
             rule.style.width = [contentWidth + scrollBarSize, 'px'].join('');
         }
-        if((rule = cm.getCSSRule('.app-lt__sidebar.is-expanded')[0]) || (rule = cm.getCSSRule('.is-expanded.app-lt__sidebar')[0])){
+        if((rule = cm.getCSSRule('.app__sidebar.is-expanded')[0]) || (rule = cm.getCSSRule('.is-expanded.app__sidebar')[0])){
             rule.style.width = [menuWidth + contentWidth + scrollBarSize, 'px'].join('');
         }
         if(rule = cm.getCSSRule('html.is-sidebar--expanded .tpl__container')[0]){
             rule.style.marginLeft = [menuWidth + contentWidth + scrollBarSize, 'px'].join('');
         }
-        if(rule = cm.getCSSRule('.app-lt__sidebar-helper__width-expanded')[0]){
+        if(rule = cm.getCSSRule('.app__sidebar-helper__width-expanded')[0]){
             rule.style.width = [menuWidth + contentWidth + scrollBarSize, 'px'].join('');
         }
         setTimeout(function(){
@@ -20780,362 +23393,6 @@ function(params){
 
     init();
 });
-cm.define('App.TemplateEditor', {
-    'modules' : [
-        'Params',
-        'Events',
-        'DataConfig',
-        'DataNodes',
-        'Stack',
-        'Storage'
-    ],
-    'events' : [
-        'onRender',
-        'onDrop',
-        'onAppend',
-        'onRemove',
-        'onEmbed',
-        'onReplace',
-        'onUpdate',
-        'onForceRender'
-    ],
-    'params' : {
-        'node' : cm.Node('div'),
-        'name' : 'app-template-editor',
-        'sidebarName' : 'app-sidebar',
-        'Com.Draganddrop' : {
-            'renderTemporaryAria' : true,
-            'highlightChassis' : true
-        }
-    }
-},
-function(params){
-    var that = this;
-    
-    that.components = {};
-    that.nodes = {
-        'AppTemplate' : {
-            'container' : cm.Node('div')
-        },
-        'AppSidebar' : {
-            'removeZone' : cm.Node('div'),
-            'areas' : [],
-            'widgets' : []
-        }
-    };
-    that.states = {
-        'sidebarExpanded' : false
-    };
-    that.isExpanded = false;
-
-    /* *** INIT *** */
-
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node'], that.params['nodesDataMarker'], null);
-        that.getDataConfig(that.params['node']);
-        render();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRender');
-    };
-
-    var render = function(){
-        processPanelWidgets();
-        initDragAndDrop();
-        initSidebar();
-        windowResize();
-        cm.addEvent(window, 'resize', windowResize);
-    };
-
-    var initSidebar = function(){
-        var finder = cm.find('App.Sidebar', that.params['sidebarName'], null, function(classObject){
-            that.components['sidebar'] = classObject;
-            that.components['sidebar']
-                .addEvent('onExpand', onSidebarExpand)
-                .addEvent('onCollapse', onSidebarCollapse);
-
-            if(that.components['sidebar'].isExpanded){
-                onSidebarExpand();
-            }else{
-                onSidebarCollapse();
-            }
-        });
-        if(!finder || finder.length == 0){
-            onSidebarCollapse();
-            onAdminPage();
-        }
-    };
-
-    var onSidebarExpand = function(){
-        var elements;
-        that.isExpanded = true;
-        // Enable widgets editable
-        elements = cm.getByClass('app__block');
-        cm.forEach(elements, function(widget){
-            if(!cm.isClass(widget, 'is-locked')){
-                cm.addClass(widget, 'is-editable');
-            }
-            if(cm.isClass(widget, 'is-hidden')){
-                cm.addClass(widget, 'is-visible');
-            }
-        });
-        // Enable columns editable
-        elements = cm.getByClass('app-mod__columns');
-        cm.forEach(elements, function(column){
-            if(!cm.isClass(column, 'is-locked')){
-                cm.addClass(column, 'is-editable');
-            }
-            if(cm.isClass(column, 'is-hidden')){
-                cm.addClass(column, 'is-visible');
-            }
-        });
-        // Enable spacers editable
-        elements = cm.getByClass('app-mod__spacer');
-        cm.forEach(elements, function(spacer){
-            if(!cm.isClass(spacer, 'is-locked')){
-                cm.addClass(spacer, 'is-editable');
-            }
-            if(cm.isClass(spacer, 'is-hidden')){
-                cm.addClass(spacer, 'is-visible');
-            }
-        });
-        // Enable slider editable
-        elements = cm.getByClass('app-mod__slider');
-        cm.forEach(elements, function(slider){
-            if(!cm.isClass(slider, 'is-locked')){
-                cm.addClass(slider, 'is-editable');
-            }
-            if(cm.isClass(slider, 'is-hidden')){
-                cm.addClass(slider, 'is-visible');
-            }
-        });
-        // Enable gridlist editable
-        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.enableEditMode();
-        });
-        // Redraw template
-        cm.find('App.Template', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.redraw();
-        });
-    };
-
-    var onSidebarCollapse = function(){
-        var elements;
-        that.isExpanded = false;
-        // Disable widgets editable
-        elements = cm.getByClass('app__block');
-        cm.forEach(elements, function(widget){
-            cm.removeClass(widget, 'is-editable is-visible');
-        });
-        // Disable columns editable
-        elements = cm.getByClass('app-mod__columns');
-        cm.forEach(elements, function(column){
-            cm.removeClass(column, 'is-editable is-visible');
-        });
-        // Disable spacers editable
-        elements = cm.getByClass('app-mod__spacer');
-        cm.forEach(elements, function(spacer){
-            cm.removeClass(spacer, 'is-editable is-visible');
-        });
-        // Disable slider editable
-        elements = cm.getByClass('app-mod__slider');
-        cm.forEach(elements, function(slider){
-            cm.removeClass(slider, 'is-editable is-visible');
-        });
-        // Disable gridlist editable
-        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.disableEditMode();
-        });
-        // Redraw template
-        cm.find('App.Template', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.redraw();
-        });
-    };
-
-    var onAdminPage = function(){
-        // Enable gridlist editable
-        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.enableEditMode();
-        });
-    };
-
-    var windowResize = function(){
-        var pageSize = cm.getPageSize();
-
-        if(that.components['sidebar']){
-            if(pageSize['winWidth'] <= cm._config['adaptiveFrom']){
-                if(that.components['sidebar'].isExpanded && that.isExpanded){
-                    that.states['sidebarExpanded'] = true;
-                    that.components['sidebar'].collapse(true);
-                }
-            }else{
-                if(that.states['sidebarExpanded'] && !that.isExpanded){
-                    that.states['sidebarExpanded'] = false;
-                    that.components['sidebar'].expand(true);
-                }
-            }
-        }
-    };
-
-    var renderLoaderBox = function(){
-        var node;
-        node = cm.Node('div', {'class' : 'pt__box-loader position'},
-            cm.Node('div', {'class' : 'inner'})
-        );
-        return node;
-    };
-
-    var processPanelWidgets = function(){
-        cm.forEach(that.nodes['AppSidebar']['widgets'], function(item){
-            item['container'].setAttribute('data-com-draganddrop', 'draggable');
-            item['dummy'].setAttribute('data-com-draganddrop', 'drag');
-        });
-    };
-
-    var initDragAndDrop = function(){
-        var classToUse = that.storageRead('dd')? that.storageRead('dd') : 'Com.Draganddrop';
-        cm.getConstructor(classToUse, function(classConstructor){
-            that.components['dd'] = new classConstructor(
-                cm.merge({
-                    'container' : that.nodes['AppTemplate']['container']
-                }, that.params['Com.Draganddrop'])
-            );
-            // Register widgets areas and events
-            cm.forEach(that.nodes['AppSidebar']['areas'], function(area){
-                that.components['dd'].registerArea(area['container'], {
-                    'isLocked' : true,
-                    'isSystem' : true,
-                    'hasPadding' : false,
-                    'draggableInChildNodes' : false,
-                    'cloneDraggable' : true
-                });
-            });
-            that.components['dd']
-                .registerArea(that.nodes['AppSidebar']['removeZone'], {
-                    'isSystem' : true,
-                    'isRemoveZone': true,
-                    'hasPadding' : false
-                })
-                .addEvent('onDrop', onDrop)
-                .addEvent('onReplace', onReplace)
-                .addEvent('onRemove', onRemove);
-        });
-    };
-
-    /* *** DROP EVENTS *** */
-
-    var onDrop = function(dd, widget){
-        if(widget['from']['isTemporary']){
-            widget['dummy'] = widget['item']['drag'];
-            // Embed loader box
-            widget['loaderBox'] = renderLoaderBox();
-            widget['dummy'].appendChild(widget['loaderBox']);
-            cm.addClass(widget['loaderBox'], 'fadein', true);
-            // API onAppend event
-            that.triggerEvent('onAppend', {
-                'item' : widget,
-                'node' : widget['node'],
-                'to' : widget['to'],
-                'index' : widget['index']
-            });
-        }else{
-            // API onDrop event
-            that.triggerEvent('onDrop', widget);
-        }
-    };
-
-    var onRemove = function(dd, widget){
-        // API onRemove event
-        that.triggerEvent('onRemove', widget);
-    };
-
-    var onReplace = function(dd, widget){
-        // API onRemove event
-        that.triggerEvent('onReplace', widget);
-    };
-
-    /* ******* MAIN ******* */
-
-    that.registerArea = function(area, params){
-        that.components['dd'].registerArea(area, params);
-        return that;
-    };
-
-    that.removeArea = function(area, params){
-        that.components['dd'].removeArea(area, params);
-        return that;
-    };
-
-    that.removeWidget = function(widget, params){
-        that.components['dd'].removeDraggable(widget, params);
-        return that;
-    };
-
-    that.replaceWidget = function(oldNode, newNode, params){
-        that.components['dd'].replaceDraggable(oldNode, newNode, params);
-        return that;
-    };
-
-    that.deleteAllTemporary = function() {
-        var dummy = cm.getByAttr('data-node', 'dummy', that.nodes['AppTemplate']['container']);
-        cm.forEach(dummy, function(node) {
-            that.removeWidget(node.parentNode);
-        });
-    };
-
-    that.updateTemporaryWidget = function(content) {
-        var dummy = cm.getByAttr('data-node', 'dummy', that.nodes['AppTemplate']['container']);
-        cm.forEach(dummy, function(node) {
-            var element = cm.strToHTML(content);
-            that.components['dd'].replaceDraggable(node.parentNode, element, {'noEvent': true, 'onStop': function() {
-                //register drop areas
-                var areas = cm.getByAttr('data-com-draganddrop', 'area', element);
-                cm.forEach(areas, function(area) {
-                    that.components['dd'].registerArea(area, {});
-                });
-                that.triggerEvent('onUpdate', {'node': element});
-            }});
-        });
-    };
-
-    that.getWidget = function(id) {
-        var draggableList = that.components['dd'].getDraggableList(),
-            widgets = [],
-            result = null;
-        cm.forEach(draggableList, function(item) {
-            widgets = cm.getByClass('app__block', item['node']);
-            if (widgets[0] && widgets[0].getAttribute('data-block-position-id') == id) {
-                result = item;
-            }
-        });
-        return result;
-    };
-
-    that.updateWidget = function(content, id) {
-        var item = that.getWidget(id);
-        if(item){
-            var element = cm.strToHTML(content);
-            that.components['dd'].replaceDraggable(item['node'], element, {'noEvent': true, 'onStop': function() {
-                //register drop areas
-                var areas = cm.getByAttr('data-com-draganddrop', 'area', element);
-                cm.forEach(areas, function(area) {
-                    that.components['dd'].registerArea(area, {});
-                });
-                that.triggerEvent('onUpdate', {'node': element});
-            }});
-        }
-    };
-
-    that.deleteWidget = function(id) {
-        var item = that.getWidget(id);
-        if(item){
-            that.components['dd'].removeDraggable(item['node'], {'noEvent': true});
-        }
-    };
-
-    init();
-});
 cm.define('App.TopMenu', {
     'modules' : [
         'Params',
@@ -21254,20 +23511,174 @@ function(params){
 
     init();
 });
-/* ************ QUICKSILK: TEMPLATE ************ */
-
-App.LoginBox.prototype.setParams({
-    'Com.Tooltip' : {
-        'adaptiveX' : true,
-        'adaptiveY' : true,
-        'top' : 'targetHeight + 12'
+cm.define('App.Zone', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataConfig',
+        'Stack'
+    ],
+    'events' : [
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'zone' : 0,
+        'parentId' : 0,
+        'type' : 'content',          // content | form | mail | remove
+        'locked' : false,
+        'editorName' : 'app-editor',
+        'thisContainer' : 'document.body',
+        'topContainer' : 'top.document.body'
     }
-});
+},
+function(params){
+    var that = this;
 
-App.Template.prototype.setParams({
-    'stickyFooter' : true
+    that.isEditing = false;
+    that.styleObject = null;
+    that.dimensions = null;
+
+    that.components = {};
+    that.node = null;
+    that.block = null;
+    that.blocks = {};
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        that.params['name'] = [that.params['parentId'], that.params['zone']].join('_');
+        that.params['blockName'] = that.params['parentId'];
+        that.node = that.params['node'];
+    };
+
+    var render = function(){
+        that.styleObject = cm.getStyleObject(that.node);
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject);
+        // Init zone
+        cm.addClass(that.node, 'app__zone');
+        cm.addClass(that.node, ['is', that.params['type']].join('-'));
+        if(that.params['locked']){
+            cm.addClass(that.node, 'is-locked');
+        }else{
+            cm.addClass(that.node, 'is-available');
+        }
+        // Construct
+        new cm.top('Finder')('App.Block', that.params['blockName'], that.params['thisContainer'], constructBlock);
+        new cm.top('Finder')('App.Editor', that.params['editorName'], that.params['topContainer'], constructEditor);
+    };
+
+    var constructBlock = function(classObject){
+        if(classObject){
+            that.block = classObject
+                .addZone(that.params['name'], that);
+        }
+    };
+
+    var destructBlock = function(classObject){
+        if(classObject){
+            that.block = classObject
+                .removeZone(that.params['name']);
+            that.block = null;
+        }
+    };
+
+    var constructEditor = function(classObject){
+        if(classObject){
+            that.components['editor'] = classObject
+                .addZone(that.params['name'], that);
+        }
+    };
+
+    var destructEditor = function(classObject){
+        if(classObject){
+            that.components['editor'] = classObject
+                .removeZone(that.params['name']);
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.enableEditing = function(){
+        if(!that.isEditing){
+            that.isEditing = true;
+            if(!that.params['locked']){
+                cm.addClass(that.node, 'is-editing');
+            }
+        }
+        return that;
+    };
+
+    that.disableEditing = function(){
+        if(that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(that.node, 'is-editing');
+        }
+        return that;
+    };
+
+    that.addBlock = function(name, item){
+        that.blocks[name] = item;
+        return that;
+    };
+
+    that.removeBlock = function(name){
+        delete that.blocks[name];
+        return that;
+    };
+
+    that.highlight = function(){
+        if(!that.params['locked']){
+            cm.addClass(that.node, 'is-highlight');
+        }
+        return that;
+    };
+
+    that.unhighlight = function(){
+        if(!that.params['locked']){
+            cm.removeClass(that.node, 'is-highlight');
+        }
+        return that;
+    };
+
+    that.active = function(){
+        if(!that.params['locked']){
+            cm.addClass(that.node, 'is-active');
+        }
+        return that;
+    };
+
+    that.unactive = function(){
+        if(!that.params['locked']){
+            cm.removeClass(that.node, 'is-active');
+        }
+        return that;
+    };
+
+    that.remove = function(){
+        destructBlock(that.block);
+        destructEditor(that.components['editor']);
+        return that;
+    };
+
+    that.updateDimensions = function(){
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, that.dimensions);
+        return that.dimensions;
+    };
+
+    init();
 });
-window.Collector = new Com.Collector()
+window.Collector = new Com.Collector({
+        'autoInit' : true
+    })
     .addEvent('onConstruct', function(collector, data){
         Part.Menu();
         Part.Autoresize(data['node']);
@@ -21360,6 +23771,25 @@ window.Collector = new Com.Collector()
             'node' : node
         });
     })
+
+    .add('app-zone', function(node){
+        new App.Zone({
+            'node' : node
+        });
+    })
+
+    .add('app-block', function(node){
+        new App.Block({
+            'node' : node
+        });
+    })
+
+    .add('app-dummy-block', function(node){
+        new App.DummyBlock({
+            'node' : node
+        });
+    })
+
     .add('app-helptour', function(node){
         new App.HelpTour({
             'node' : node
@@ -21434,7 +23864,7 @@ window.Collector = new Com.Collector()
 
     /* *** TEMPLATE EDITOR *** */
 
-    .add('template-editor', function(node){
+    .add('app-editor', function(node){
         var onRequest = function(TE, data){
             var config = cm.parseJSON(data['node'].getAttribute('data-config')) || {};
 
@@ -21483,17 +23913,12 @@ window.Collector = new Com.Collector()
             }, 500);
         };
 
-        new App.TemplateEditor({
+        new App.Editor({
             'node' : node,
             'events' : {
                 'onAppend' : onRequest,
                 'onReplace' : function(TE, data){
                     window.Collector.construct(data['node']);
-                    // Register areas
-                    var areas = cm.getByAttr('data-com-draganddrop', 'area', data['node']);
-                    cm.forEach(areas, function(area){
-                        TE.registerArea(area, {});
-                    });
                 }
             }
         });
@@ -21501,4 +23926,15 @@ window.Collector = new Com.Collector()
 
 cm.onReady(function(){
     window.Collector.construct();
+});
+App.LoginBox.prototype.setParams({
+    'Com.Tooltip' : {
+        'adaptiveX' : true,
+        'adaptiveY' : true,
+        'top' : 'targetHeight + 12'
+    }
+});
+
+App.Template.prototype.setParams({
+    'stickyFooter' : true
 });
