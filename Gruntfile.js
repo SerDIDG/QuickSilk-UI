@@ -91,6 +91,11 @@ module.exports = function(grunt) {
                     dest: 'docs/build/content/'
                 },{
                     expand: true,
+                    cwd: 'docs/src/stuff/',
+                    src: ['**/*.*'],
+                    dest: 'docs/build/stuff/'
+                },{
+                    expand: true,
                     cwd: 'docs/src/img/',
                     src: ['**/*.*'],
                     dest: 'docs/build/img/'
@@ -141,6 +146,7 @@ module.exports = function(grunt) {
             docs: {
                 files: [
                     'docs/src/content/**/*.*',
+                    'docs/src/stuff/**/*.*',
                     'libs/common/src/less/**/*.less',
                     'libs/application/src/less/**/*.less',
                     'docs/src/less/**/*.less',

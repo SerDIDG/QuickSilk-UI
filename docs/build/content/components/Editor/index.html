@@ -1,28 +1,12 @@
 <!DOCTYPE HTML>
-<html class="is-adaptive">
+<html class="is-adaptive is-logged">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>QuickSilk</title>
+    <title>Elements: Template Editor</title>
 
-    <link type="text/css" rel="stylesheet" href="css/QuickSilk-UI.css">
-    <script type="text/javascript" src="js/QuickSilk-UI.js"></script>
-
-    <script type="text/javascript">
-        cm.onReady(function(){
-            // Components
-            new Com.Collector()
-                .addEvent('onConstruct', function(){
-                    Part.Menu();
-                })
-                .add('app-template', function(node){
-                    new App.Template({
-                        'node' : node
-                    });
-                })
-                .construct();
-        });
-    </script>
+    <link type="text/css" rel="stylesheet" href="../../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../../js/QuickSilk-UI.js"></script>
 </head>
 
 <body>
@@ -30,13 +14,13 @@
 <!-- [* ******* TEMPLATE START ******* *] -->
 
 <div class="tpl__container" data-node="AppTemplate.container" data-element="app-template">
-    <div class="tpl__container__inner" data-node="AppTemplate.containerInner">
+    <div class="tpl__container__inner">
 
         <!-- [* *** HEADER START *** *] -->
 
         <div class="tpl__header" data-node="AppTemplate.header">
             <div class="tpl__header__inner">
-                <div class="app__zone-header main" data-com-draganddrop="area"></div>
+                <div class="app__zone-header main" data-element="app-zone" data-config='{"zone" : "header_main", "parentId" : "template"}'></div>
             </div>
         </div>
 
@@ -46,7 +30,7 @@
 
         <div class="tpl__content" data-node="AppTemplate.content">
             <div class="tpl__content__inner">
-                <div class="app__zone-main" data-com-draganddrop="area"></div>
+                <div class="app__zone-main" data-element="app-zone" data-config='{"zone" : "content", "parentId" : "template"}'></div>
             </div>
         </div>
 
@@ -57,7 +41,7 @@
 
         <div class="tpl__footer" data-node="AppTemplate.footer">
             <div class="tpl__footer__inner">
-                <div class="app__zone-footer main" data-com-draganddrop="area"></div>
+                <div class="app__zone-header main" data-element="app-zone" data-config='{"zone" : "footer_main", "parentId" : "template"}'></div>
             </div>
         </div>
 

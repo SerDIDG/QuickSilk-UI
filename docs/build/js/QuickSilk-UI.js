@@ -1415,14 +1415,16 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.9.1',
+        '_version' : '3.10.3',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
         '_deviceType' : 'desktop',
         '_deviceOrientation' : 'landscape',
+        '_baseUrl': [window.location.protocol, window.location.hostname].join('//'),
         '_scrollSize' : 0,
-        '_clientPosition' : {'x' : 0, 'y' : 0},
+        '_pageSize' : {},
+        '_clientPosition' : {'left' : 0, 'top' : 0},
         '_config' : {
             'animDuration' : 300,
             'animDurationQuick' : 150,
@@ -1437,7 +1439,8 @@ var cm = {
             'displayDateFormat' : '%F %j, %Y',
             'displayDateTimeFormat' : '%F %j, %Y, %H:%i',
             'tooltipTop' : 'targetHeight + 4'
-        }
+        },
+        'MAX_SAFE_INTEGER' : 9007199254740991
     },
     Mod = {},
     Part = {},
@@ -1451,61 +1454,143 @@ cm.isFileReader = (function(){return 'FileReader' in window;})();
 cm.isHistoryAPI = !!(window.history && history.pushState);
 cm.isLocalStorage = (function(){try{return 'localStorage' in window && window['localStorage'] !== null;}catch(e){return false;}})();
 cm.isCanvas = !!document.createElement("canvas").getContext;
-cm.isTouch = 'ontouchstart' in document.documentElement || !!window.navigator.msMaxTouchPoints;
+cm.isTouch = 'ontouchstart' in document.documentElement || !!window.maxTouchPoints || !!navigator.maxTouchPoints;
 
 /* ******* OBJECTS AND ARRAYS ******* */
 
-cm.top = function(name){
-    return window.top.cm[name];
+cm.top = window.top.cm || cm;
+
+cm.objToString = Object.prototype.toString;
+
+cm.property = function(key) {
+    return function(o) {
+        return o == null ? void 0 : o[key];
+    };
 };
 
-cm.isArray = Array.isArray || function(a){
-    return a ? a.constructor == Array : false;
+cm.length = cm.property('length');
+
+cm.isType = function(o, types){
+    if(cm.isString(types)){
+        return Object.prototype.toString.call(o) === '[object ' + types +']'
+    }
+    if(cm.isRegExp(types)){
+        return types.test(Object.prototype.toString.call(o));
+    }
+    if(cm.isObject(types)){
+        var match = false;
+        cm.forEach(types, function(type){
+            if(!match){
+                match = Object.prototype.toString.call(o) === '[object ' + type +']'
+            }
+        });
+        return match;
+    }
+    return false;
+};
+
+cm.isString = function(o){
+    return Object.prototype.toString.call(o) === '[object String]';
+};
+
+cm.isNumber = function(o){
+    return Object.prototype.toString.call(o) === '[object Number]';
+};
+
+cm.isArray = Array.isArray || function(o){
+    return Object.prototype.toString.call(o) === '[object Array]';
+};
+
+cm.isArrayLike = function(o) {
+    return o != null && cm.isLength(cm.length(o));
 };
 
 cm.isObject = function(o){
-    return o ? o.constructor == Object : false;
+    return Object.prototype.toString.call(o) === '[object Object]';
+};
+
+cm.isArguments = function(o){
+    return Object.prototype.toString.call(o) === '[object Arguments]';
 };
 
 cm.isFunction = function(o){
-    return o ? typeof o == 'function' : false;
+    return Object.prototype.toString.call(o) === '[object Function]';
+};
+
+cm.isRegExp = function(o){
+    return Object.prototype.toString.call(o) === '[object RegExp]';
+};
+
+cm.isDate = function(o){
+    return Object.prototype.toString.call(o) === '[object Date]';
+};
+
+cm.isWindow = function(o) {
+    return Object.prototype.toString.call(o) === '[object Window]' || Object.prototype.toString.call(o) === '[object global]';
+};
+
+cm.isLength = function(o) {
+    return typeof o == 'number' && o > -1 && o % 1 == 0 && o <= cm.MAX_SAFE_INTEGER;
+};
+
+cm.isNode = function(node){
+    return !!(node && node.nodeType);
+};
+
+cm.isTextNode = function(node){
+    return !!(node && node.nodeType && node.nodeType == 3);
+};
+
+cm.isElementNode = function(node){
+    return !!(node && node.nodeType && node.nodeType == 1);
+};
+
+cm.isPlainObject = function(obj) {
+    if (typeof obj == 'object' && obj !== null) {
+        if (typeof Object.getPrototypeOf == 'function') {
+            var proto = Object.getPrototypeOf(obj);
+            return proto === Object.prototype || proto === null;
+        }
+        return Object.prototype.toString.call(obj) == '[object Object]';
+    }
+    return false;
 };
 
 cm.forEach = function(o, callback){
-    if(!o){
-        return null;
-    }
-    if(!callback){
+    if(!o || !(callback && typeof callback == 'function')){
         return o;
     }
     var i, l;
-    switch(o.constructor){
-        case Object:
-            for(var key in o){
-                if(o.hasOwnProperty(key)){
-                    callback(o[key], key, o);
-                }
+    // Objects
+    if(cm.isObject(o)){
+        for(var key in o){
+            if(o.hasOwnProperty(key)){
+                callback(o[key], key, o);
             }
-            break;
-        case Array:
-            o.forEach(callback);
-            break;
-        case Number:
-            for(i = 0; i < o; i++){
-                callback(i);
+        }
+        return o;
+    }
+    // Arrays
+    if(cm.isArray(o)){
+        o.forEach(callback);
+        return o;
+    }
+    // Numbers
+    if(cm.isNumber(o)){
+        for(i = 0; i < o; i++){
+            callback(i);
+        }
+        return o;
+    }
+    // Default
+    try{
+        Array.prototype.forEach.call(o, callback);
+    }catch(e){
+        try{
+            for(i = 0, l = o.length; i < l; i++){
+                callback(o[i], i, o);
             }
-            break;
-        default:
-            try{
-                Array.prototype.forEach.call(o, callback);
-            }catch(e){
-                try{
-                    for(i = 0, l = o.length; i < l; i++){
-                        callback(o[i], i, o);
-                    }
-                }catch(e){}
-            }
-            break;
+        }catch(e){}
     }
     return o;
 };
@@ -1535,11 +1620,11 @@ cm.merge = function(o1, o2){
         return cm.clone(o2);
     }
     cm.forEach(o2, function(item, key){
-        if(item != null){
+        if(item !== null){
             try{
                 if(item._isComponent){
                     o1[key] = item;
-                }else if(Object.prototype.toString.call(item) == '[object Object]' && item.constructor != Object){
+                }else if(cm.isObject(item) && item.constructor != Object){
                     o1[key] = item;
                 }else if(cm.isObject(item)){
                     o1[key] = cm.merge(o1[key], item);
@@ -1562,21 +1647,21 @@ cm.extend = function(o1, o2){
         return o1;
     }
     var o;
-    switch(o1.constructor){
-        case Array:
-            o = o1.concat(o2);
-            break;
-        case Object:
-            o = {};
-            cm.forEach(o1, function(item, key){
-                o[key] = item;
-            });
-            cm.forEach(o2, function(item, key){
-                o[key] = item;
-            });
-            break;
+    if(cm.isArray(o1)){
+        o = o1.concat(o2);
+        return o;
     }
-    return o;
+    if(cm.isObject(o1)){
+        o = {};
+        cm.forEach(o1, function(item, key){
+            o[key] = item;
+        });
+        cm.forEach(o2, function(item, key){
+            o[key] = item;
+        });
+        return o;
+    }
+    return null;
 };
 
 cm.clone = function(o, cloneNode){
@@ -1584,57 +1669,39 @@ cm.clone = function(o, cloneNode){
     if(!o){
         return o;
     }
-    switch(o.constructor){
-        case Function:
-        case String:
-        case Number:
-        case RegExp:
-        case Boolean:
-        case XMLHttpRequest:
-        case File:
-            newO = o;
-            break;
-        case Array:
-            newO = [];
-            cm.forEach(o, function(item){
-                newO.push(cm.clone(item, cloneNode));
-            });
-            break;
-        case Object:
-            if(o._isComponent){
-                newO = o;
-            }else{
-                newO = {};
-                cm.forEach(o, function(item, key){
-                    newO[key] = cm.clone(item, cloneNode);
-                });
-            }
-            break;
-        default:
-            // Exceptions
-            if(cm.isNode(o)){
-                if(cloneNode){
-                    newO = o.cloneNode(true);
-                }else{
-                    newO = o;
-                }
-            }else if(XMLHttpRequest && o instanceof XMLHttpRequest){
-                newO = o;
-            }else if(Object.prototype.toString.call(o) == '[object Object]' && o.constructor != Object){
-                newO = o;
-            }else if(o == window){
-                newO = o;
-            }else if(o instanceof CSSStyleDeclaration){
-                newO = o;
-            }else{
-                newO = [];
-                cm.forEach(o, function(item){
-                    newO.push(cm.clone(item, cloneNode));
-                });
-            }
-            break;
+    // Arrays
+    if(cm.isType(o, /Array|Arguments|StyleSheetList|CSSRuleList|HTMLCollection|NodeList|DOMTokenList|FileList/)){
+        newO = [];
+        cm.forEach(o, function(item){
+            newO.push(cm.clone(item, cloneNode));
+        });
+        return newO;
     }
-    return newO;
+    // Objects
+    if(cm.isObject(o) && !o._isComponent){
+        newO = {};
+        cm.forEach(o, function(item, key){
+            newO[key] = cm.clone(item, cloneNode);
+        });
+        return newO;
+    }
+    // Dates
+    if(cm.isDate(o)){
+        newO = new Date();
+        newO.setTime(o.getTime());
+        return newO;
+    }
+    // Nodes
+    if(cm.isNode(o)){
+        if(cloneNode){
+            newO = o.cloneNode(true);
+        }else{
+            newO = o;
+        }
+        return newO;
+    }
+    // Other (make links)
+    return o;
 };
 
 cm.getLength = function(o){
@@ -1645,18 +1712,17 @@ cm.getLength = function(o){
     return i;
 };
 
-cm.inArray = function(a, str){
+cm.inArray = function(a, item){
     if(typeof a == 'string'){
-        return a === str;
+        return a === item;
     }else{
-        var inArray = false;
-        a.forEach(function(item){
-            if(item === str){
-                inArray = true;
-            }
-        });
-        return inArray;
+        return a.indexOf(item) > -1;
     }
+};
+
+cm.arrayRemove = function(a, item){
+    a.splice(a.indexOf(item), 1);
+    return a;
 };
 
 cm.objectToArray = function(o){
@@ -1697,9 +1763,9 @@ cm.objectReplace = function(o, vars){
 cm.isEmpty = function(el){
     if(!el){
         return true;
-    }else if(typeof el == 'string' || el.constructor == Array){
+    }else if(typeof el == 'string' || cm.isArray(el)){
         return el.length == 0;
-    }else if(el.constructor == Object){
+    }else if(cm.isObject(el)){
         return cm.getLength(el) === 0;
     }else if(typeof el == 'number'){
         return el == 0;
@@ -1816,16 +1882,16 @@ cm.getObjToEvent = cm.getRelatedTarget = function(e){
 
 cm.getEventClientPosition = function(e){
     var o = {
-        'x' : 0,
-        'y' : 0
+        'left' : 0,
+        'top' : 0
     };
     if(e){
         try{
-            o['x'] = e.clientX;
-            o['y'] = e.clientY;
-            if(cm.isTouch && e.touches){
-                o['x'] = e.touches[0].clientX;
-                o['y'] = e.touches[0].clientY;
+            o['left'] = e.clientX;
+            o['top'] = e.clientY;
+            if(e.touches){
+                o['left'] = e.touches[0].clientX;
+                o['top'] = e.touches[0].clientY;
             }
         }catch(e){}
     }
@@ -2035,7 +2101,7 @@ cm.customEvent = (function(){
                             break;
                         case 'all':
                         default:
-                            if(!params['self'] && node !== item['node']){
+                            if(node !== item['node']){
                                 item['handler'](params);
                             }
                             break;
@@ -2095,10 +2161,10 @@ cm.onReady = function(handler, isMessage){
 cm.addScrollEvent = function(node, callback, useCapture){
     useCapture = typeof useCapture == 'undefined' ? false : useCapture;
     if(cm.isWindow(node)){
-        cm.addEvent(window, 'scroll', callback, useCapture);
+        cm.addEvent(node, 'scroll', callback, useCapture);
     }else if(cm.isNode(node)){
         if(/body|html/gi.test(node.tagName)){
-            cm.addEvent(window, 'scroll', callback, useCapture);
+            cm.addEvent(cm.getOwnerWindow(node), 'scroll', callback, useCapture);
         }else{
             cm.addEvent(node, 'scroll', callback, useCapture);
         }
@@ -2109,10 +2175,10 @@ cm.addScrollEvent = function(node, callback, useCapture){
 cm.removeScrollEvent = function(node, callback, useCapture){
     useCapture = typeof useCapture == 'undefined' ? false : useCapture;
     if(cm.isWindow(node)){
-        cm.removeEvent(window, 'scroll', callback, useCapture);
+        cm.removeEvent(node, 'scroll', callback, useCapture);
     }if(cm.isNode(node)){
         if(/body|html/gi.test(node.tagName)){
-            cm.removeEvent(window, 'scroll', callback, useCapture);
+            cm.removeEvent(cm.getOwnerWindow(node), 'scroll', callback, useCapture);
         }else{
             cm.removeEvent(node, 'scroll', callback, useCapture);
         }
@@ -2208,24 +2274,8 @@ cm.onImageLoad = function(src, handler, delay){
 
 /* ******* NODES ******* */
 
-cm.isNode = function(node){
-    return !!(node && node.nodeType);
-};
-
-cm.isTextNode = function(node){
-    return !!(node && node.nodeType && node.nodeType == 3);
-};
-
-cm.isElementNode = function(node){
-    return !!(node && node.nodeType && node.nodeType == 1);
-};
-
-cm.isWindow = function(o) {
-    if(typeof(window.constructor) === 'undefined') {
-        return o instanceof window.constructor;
-    }else{
-        return window === o;
-    }
+cm.getOwnerWindow = function(node){
+    return node.ownerDocument.defaultView;
 };
 
 cm.getEl = function(str){
@@ -2355,6 +2405,13 @@ cm.inDOM = function(o){
             }
             el = el.parentNode
         }
+    }
+    return false;
+};
+
+cm.hasParentNode = function(o){
+    if(o){
+        return !!o.parentNode;
     }
     return false;
 };
@@ -2829,12 +2886,10 @@ cm.getValue = function(name, node){
 
 /* ******* STRINGS ******* */
 
-cm.isRegExp = function(obj){
-    return obj.constructor == RegExp;
-};
 cm.toFixed = function(n, x){
     return parseFloat(n).toFixed(x);
 };
+
 cm.toNumber = function(str){
     return parseInt(str.replace(/\s+/, ''));
 };
@@ -3073,7 +3128,7 @@ cm.parseDate = function(str, format){
 /* ******* STYLES ******* */
 
 cm.addClass = function(node, str, useHack){
-    if(!node || cm.isEmpty(str)){
+    if(!cm.isNode(node) || cm.isEmpty(str)){
         return null;
     }
     if(useHack){
@@ -3095,7 +3150,7 @@ cm.addClass = function(node, str, useHack){
 };
 
 cm.removeClass = function(node, str, useHack){
-    if(!node || cm.isEmpty(str)){
+    if(!cm.isNode(node) || cm.isEmpty(str)){
         return null;
     }
     if(useHack){
@@ -3122,7 +3177,7 @@ cm.removeClass = function(node, str, useHack){
 };
 
 cm.replaceClass = function(node, oldClass, newClass, useHack){
-    if(!node){
+    if(!cm.isNode(node)){
         return null;
     }
     return cm.addClass(cm.removeClass(node, oldClass, useHack), newClass, useHack);
@@ -3130,7 +3185,7 @@ cm.replaceClass = function(node, oldClass, newClass, useHack){
 
 cm.hasClass = cm.isClass = function(node, cssClass){
     var hasClass, classes;
-    if(!node){
+    if(!cm.isNode(node)){
         return false;
     }
     if(node.classList){
@@ -3150,16 +3205,17 @@ cm.hasClass = cm.isClass = function(node, cssClass){
 cm.getPageSize = function(key){
     var d = document,
         de = d.documentElement,
+        b = d.body,
         o = {
             'height' : Math.max(
-                Math.max(d.body.scrollHeight, de.scrollHeight),
-                Math.max(d.body.offsetHeight, de.offsetHeight),
-                Math.max(d.body.clientHeight, de.clientHeight)
+                Math.max(b.scrollHeight, de.scrollHeight),
+                Math.max(b.offsetHeight, de.offsetHeight),
+                Math.max(b.clientHeight, de.clientHeight)
             ),
             'width' : Math.max(
-                Math.max(d.body.scrollWidth, de.scrollWidth),
-                Math.max(d.body.offsetWidth, de.offsetWidth),
-                Math.max(d.body.clientWidth, de.clientWidth)
+                Math.max(b.scrollWidth, de.scrollWidth),
+                Math.max(b.offsetWidth, de.offsetWidth),
+                Math.max(b.clientWidth, de.clientWidth)
             ),
             'winHeight' : de.clientHeight,
             'winWidth' : de.clientWidth
@@ -3167,20 +3223,13 @@ cm.getPageSize = function(key){
     return o[key] || o;
 };
 
-cm.getScrollBarSize = function(){
-    var node = cm.Node('div'),
-        styles = node.style,
-        size = 0;
-    styles.width = '100px';
-    styles.height = '100px';
-    styles.overflow = 'scroll';
-    styles.position = 'position';
-    styles.top = '-9000px';
-    cm.insertFirst(node, document.body);
-    size = Math.max(node.offsetWidth - node.clientWidth, 0);
-    cm.remove(node);
-    return size;
-};
+cm.getScrollBarSize = (function(){
+    var node;
+    return function(){
+        !node && (node = cm.insertFirst(cm.Node('div', {'class' : 'cm__scroll-bar-size-checker'}), document.body));
+        return Math.max(node.offsetWidth - node.clientWidth, 0);
+    };
+})();
 
 cm.setOpacity = function(node, value){
     if(node){
@@ -3240,11 +3289,9 @@ cm.getRealY = function(node){
 };
 
 cm.getRect = function(node){
-    var docEl = document.documentElement,
-        o,
-        rect;
+    var docEl, o, rect;
     if(cm.isWindow(node)){
-        docEl = document.documentElement;
+        docEl = node.document.documentElement;
         return {
             'top' : 0,
             'right' : docEl.clientWidth,
@@ -3277,7 +3324,7 @@ cm.getRect = function(node){
 };
 
 cm.getFullRect = function(node, styleObject){
-    if(!node || !cm.isNode(node)){
+    if(!cm.isNode(node)){
         return null;
     }
     var dimensions = {};
@@ -3319,7 +3366,7 @@ cm.getFullRect = function(node, styleObject){
 };
 
 cm.getNodeIndents = function(node, styleObject){
-    if(!node || !cm.isNode(node)){
+    if(!cm.isNode(node)){
         return null;
     }
     styleObject = typeof styleObject == 'undefined' ? cm.getStyleObject(node) : styleObject;
@@ -3332,22 +3379,28 @@ cm.getNodeIndents = function(node, styleObject){
         'left' :    cm.getCSSStyle(styleObject, 'marginLeft', true)
     };
     o['padding'] = {
-        'top' :     cm.getCSSStyle(styleObject, 'marginTop', true),
-        'right' :   cm.getCSSStyle(styleObject, 'marginRight', true),
-        'bottom' :  cm.getCSSStyle(styleObject, 'marginBottom', true),
-        'left' :    cm.getCSSStyle(styleObject, 'marginLeft', true)
+        'top' :     cm.getCSSStyle(styleObject, 'paddingTop', true),
+        'right' :   cm.getCSSStyle(styleObject, 'paddingRight', true),
+        'bottom' :  cm.getCSSStyle(styleObject, 'paddingBottom', true),
+        'left' :    cm.getCSSStyle(styleObject, 'paddingLeft', true)
     };
     return o;
 };
 
-cm.getNodeOffset = function(node, styleObject, o){
-    if(!node || !cm.isNode(node)){
+cm.getNodeOffset = function(node, styleObject, o, offsets){
+    if(!cm.isNode(node)){
         return null;
     }
     styleObject = typeof styleObject == 'undefined' ? cm.getStyleObject(node) : styleObject;
     o = !o || typeof o == 'undefined' ? cm.getNodeIndents(node, styleObject) : o;
     // Get size and position
     o['offset'] = cm.getRect(node);
+    if(offsets){
+        o['offset']['top'] += offsets['top'];
+        o['offset']['right'] += offsets['left'];
+        o['offset']['bottom'] += offsets['top'];
+        o['offset']['left'] += offsets['left'];
+    }
     o['inner'] = {
         'width' : o['offset']['width'] - o['padding']['left'] - o['padding']['right'],
         'height' : o['offset']['height'] - o['padding']['top'] - o['padding']['bottom'],
@@ -3858,16 +3911,16 @@ cm.Animation = function(o){
     };
 
     that.go = function(){
-        var args = cm.merge({
+        var params = arguments[0],
+            args = cm.merge({
                 'style' : '',
                 'duration' : '',
                 'anim' : 'simple',
                 'onStop' : function(){}
-            }, arguments[0]),
+            }, params),
             pId = 'animation_process_' + Math.random(),
             delta = animationMethod[args.anim] || animationMethod['simple'],
             properties = [];
-
         for(var name in args.style){
             var value = args.style[name].toString();
             var dimension = cm.getStyleDimension(value);
@@ -3974,8 +4027,8 @@ cm.transition = function(node, params){
             'properties' : {},
             'duration' : 0,
             'easing' : 'ease-in-out',
-            'delayIn' : 30,
-            'delayOut' : 30,
+            'delayIn' : 0,
+            'delayOut' : 0,
             'clear' : false,
             'onStop' : function(){}
         }, params);
@@ -4097,7 +4150,6 @@ cm.ajax = function(o){
             'params' : '',
             'url' : '',
             'formData'  : false,
-            'httpRequestObject' : cm.createXmlHttpRequestObject(),
             'headers' : {
                 'Content-Type' : 'application/x-www-form-urlencoded',
                 'X-Requested-With' : 'XMLHttpRequest'
@@ -4132,12 +4184,16 @@ cm.ajax = function(o){
     };
 
     var validate = function(){
-        config['type'] = config['type'].toLocaleLowerCase();
+        config['httpRequestObject'] = cm.createXmlHttpRequestObject();
+        config['type'] = config['type'].toLowerCase();
         responseType =  /text|json/.test(config['type']) ? 'responseText' : 'responseXML';
-        config['method'] = config['method'].toLocaleLowerCase();
+        config['method'] = config['method'].toLowerCase();
         // Convert params object to URI string
-        if(config['formData']){
+        if(config['params'] instanceof FormData) {
+            delete config['headers']['Content-Type'];
+        }else if(config['formData']){
             config['params'] = cm.obj2FormData(config['params']);
+            delete config['headers']['Content-Type'];
         }else if(cm.isObject(config['params'])){
             config['params'] = cm.obj2URI(config['params']);
         }
@@ -4293,6 +4349,21 @@ cm.obj2FormData = function(o){
     return fd;
 };
 
+cm.formData2Obj = function(fd){
+    var o = {},
+        data;
+    if(fd.entries && (data = fd.entries())){
+        cm.forEach(data, function(item){
+            o[item[0]] = item[1];
+        });
+    }
+    return o;
+};
+
+cm.formData2URI = function(fd){
+    return cm.obj2URI(cm.formData2Obj(fd));
+};
+
 cm.xml2arr = function(o){
     o = o.nodeType == 9 ? cm.firstEl(o) : o;
     if(o.nodeType == 3 || o.nodeType == 4){
@@ -4421,7 +4492,6 @@ cm.defineHelper = function(name, data, handler){
     }, data);
     // Create class extend object
     that.build = {
-        '_isComponent' : true,
         '_raw' : data,
         '_name' : {
             'full' : name,
@@ -4463,7 +4533,7 @@ cm.getConstructor = function(className, callback){
     callback = typeof callback != 'undefined' ? callback : function(){}
     if(!className || className == '*'){
         cm.forEach(cm.defineStack, function(classConstructor){
-            callback(classConstructor);
+            callback(classConstructor, className);
         });
         return cm.defineStack;
     }else{
@@ -4478,7 +4548,7 @@ cm.getConstructor = function(className, callback){
             }
             return false;
         }else{
-            callback(classConstructor);
+            callback(classConstructor, className);
             return classConstructor;
         }
     }
@@ -4555,6 +4625,135 @@ cm.Finder = function(className, name, parentNode, callback, params){
 
     init();
 };
+/* ******* EXTEND ******* */
+
+Mod['Extend'] = {
+    '_config' : {
+        'extend' : true,
+        'predefine' : true
+    },
+    '_construct' : function(){
+        var that = this;
+    },
+    '_extend' : function(name, o){
+        var that = this;
+        if(!that.build._modules[name]){
+            // Merge Config
+            o._config = cm.merge({
+                'extend' : false,
+                'predefine' : false,
+                'require' : []
+            }, o._config);
+            // Check Requires
+            cm.forEach(o._config['require'], function(module){
+                if(Mod[module]){
+                    Mod['Extend']._extend.call(that, module, Mod[module]);
+                }
+            });
+            // Extend class by module's methods
+            if(o._config['extend']){
+                cm.forEach(o, function(item, key){
+                    if(!/^(_)/.test(key)){
+                        that.build[key] = item;
+                    }
+                });
+            }
+            // Construct module
+            if(typeof o._construct == 'function'){
+                // Construct
+                o._construct.call(that);
+            }else{
+                cm.errorLog({
+                    'type' : 'error',
+                    'name' : that.build._name['full'],
+                    'message' : ['Module', cm.strWrap(name, '"'), 'does not have "_construct" method.'].join(' ')
+                });
+            }
+            // Add into stack of class's modules
+            that.build._modules[name] = o;
+        }
+    },
+    'extend' : function(name, o){
+        var that = this;
+        if(!o){
+            cm.errorLog({
+                'type' : 'error',
+                'name' : that._name['full'],
+                'message' : 'Trying to extend the class by non-existing module.'
+            });
+        }else if(!name){
+            cm.errorLog({
+                'type' : 'error',
+                'name' : that._name['full'],
+                'message' : 'Module should have a name.'
+            });
+        }else if(that._modules[name]){
+            cm.errorLog({
+                'type' : 'error',
+                'name' : that._name['full'],
+                'message' : ['Module with name', cm.strWrap(name, '"'), 'already constructed.'].join(' ')
+            });
+        }else{
+            // Merge Config
+            o._config = cm.merge({
+                'extend' : false,
+                'predefine' : false,
+                'require' : []
+            }, o._config);
+            // Check Requires
+            cm.forEach(o._config['require'], function(module){
+                if(Mod[module]){
+                    Mod['Extend']._extend.call(that, module, Mod[module]);
+                }
+            });
+            // Extend class by module's methods
+            if(o._config['extend']){
+                cm.forEach(o, function(item, key){
+                    if(!/^(_)/.test(key)){
+                        cm.defineStack[that._name['full']].prototype[key] = item;
+                    }
+                });
+            }
+            // Construct module
+            if(typeof o._construct == 'function'){
+                // Construct
+                o._construct.call(that);
+            }else{
+                cm.errorLog({
+                    'type' : 'error',
+                    'name' : that._name['full'],
+                    'message' : ['Module', cm.strWrap(name, '"'), 'does not have "_construct" method.'].join(' ')
+                });
+            }
+            // Add into stack of class's modules
+            that._modules[name] = o;
+        }
+    }
+};
+
+/* ******* COMPONENTS ******* */
+
+Mod['Component'] = {
+    '_config' : {
+        'extend' : true,
+        'predefine' : true
+    },
+    '_construct' : function(){
+        var that = this;
+        that.build._isComponent = true;
+    },
+    'cloneComponent' : function(params){
+        var that = this,
+            component;
+        cm.getConstructor(that._name['full'], function(classConstructor){
+            component = new classConstructor(
+                cm.merge(that.params, params)
+            );
+        });
+        return component;
+    }
+};
+
 /* ******* PARAMS ******* */
 
 Mod['Params'] = {
@@ -4581,19 +4780,27 @@ Mod['Params'] = {
                     break;
 
                 case 'document.html':
-                    that.params[key] = cm.getDocumentHtml();
+                    if(cm.getDocumentHtml()){
+                        that.params[key] = cm.getDocumentHtml();
+                    }
                     break;
 
                 case 'document.body':
-                    that.params[key] = document.body;
+                    if(document.body){
+                        that.params[key] = document.body;
+                    }
                     break;
 
                 case 'top.document.body':
-                    that.params[key] = window.top.document.body;
+                    if(window.top.document.body){
+                        that.params[key] = window.top.document.body;
+                    }
                     break;
 
                 case 'document.head':
-                    that.params[key] = cm.getDocumentHead();
+                    if(cm.getDocumentHead()){
+                        that.params[key] = cm.getDocumentHead();
+                    }
                     break;
 
                 default:
@@ -4980,11 +5187,16 @@ Mod['Stack'] = {
         that._stack.push(that._stackItem);
         return that;
     },
+    'removeFromStack' : function(){
+        var that = this;
+        cm.arrayRemove(that._stack, that._stackItem);
+        return that;
+    },
     'isAppropriateToStack' : function(name, parent, callback){
         var that = this,
             item = that._stackItem;
         if((cm.isEmpty(name) || item['name'] == name) && cm.isParent(parent, item['node'], true)){
-            callback(item['class'], item);
+            callback(item['class'], item, name);
             return true;
         }
         return false;
@@ -4997,116 +5209,10 @@ Mod['Stack'] = {
         cm.forEach(that._stack, function(item){
             if((cm.isEmpty(name) || item['name'] == name) && cm.isParent(parent, item['node'], true)){
                 items.push(item);
-                callback(item['class'], item);
+                callback(item['class'], item, name);
             }
         });
         return items;
-    }
-};
-
-/* ******* EXTEND ******* */
-
-Mod['Extend'] = {
-    '_config' : {
-        'extend' : true,
-        'predefine' : true
-    },
-    '_construct' : function(){
-        var that = this;
-    },
-    '_extend' : function(name, o){
-        var that = this;
-        if(!that.build._modules[name]){
-            // Merge Config
-            o._config = cm.merge({
-                'extend' : false,
-                'predefine' : false,
-                'require' : []
-            }, o._config);
-            // Check Requires
-            cm.forEach(o._config['require'], function(module){
-                if(Mod[module]){
-                    Mod['Extend']._extend.call(that, module, Mod[module]);
-                }
-            });
-            // Extend class by module's methods
-            if(o._config['extend']){
-                cm.forEach(o, function(item, key){
-                    if(!/^(_)/.test(key)){
-                        that.build[key] = item;
-                    }
-                });
-            }
-            // Construct module
-            if(typeof o._construct == 'function'){
-                // Construct
-                o._construct.call(that);
-            }else{
-                cm.errorLog({
-                    'type' : 'error',
-                    'name' : that.build._name['full'],
-                    'message' : ['Module', cm.strWrap(name, '"'), 'does not have "_construct" method.'].join(' ')
-                });
-            }
-            // Add into stack of class's modules
-            that.build._modules[name] = o;
-        }
-    },
-    'extend' : function(name, o){
-        var that = this;
-        if(!o){
-            cm.errorLog({
-                'type' : 'error',
-                'name' : that._name['full'],
-                'message' : 'Trying to extend the class by non-existing module.'
-            });
-        }else if(!name){
-            cm.errorLog({
-                'type' : 'error',
-                'name' : that._name['full'],
-                'message' : 'Module should have a name.'
-            });
-        }else if(that._modules[name]){
-            cm.errorLog({
-                'type' : 'error',
-                'name' : that._name['full'],
-                'message' : ['Module with name', cm.strWrap(name, '"'), 'already constructed.'].join(' ')
-            });
-        }else{
-            // Merge Config
-            o._config = cm.merge({
-                'extend' : false,
-                'predefine' : false,
-                'require' : []
-            }, o._config);
-            // Check Requires
-            cm.forEach(o._config['require'], function(module){
-                if(Mod[module]){
-                    Mod['Extend']._extend.call(that, module, Mod[module]);
-                }
-            });
-            // Extend class by module's methods
-            if(o._config['extend']){
-                cm.forEach(o, function(item, key){
-                    if(!/^(_)/.test(key)){
-                        cm.defineStack[that._name['full']].prototype[key] = item;
-                    }
-                });
-            }
-            // Construct module
-            if(typeof o._construct == 'function'){
-                // Construct
-                o._construct.call(that);
-            }else{
-                cm.errorLog({
-                    'type' : 'error',
-                    'name' : that._name['full'],
-                    'message' : ['Module', cm.strWrap(name, '"'), 'does not have "_construct" method.'].join(' ')
-                });
-            }
-            // Add into stack of class's modules
-            that._modules[name] = o;
-        }
     }
 };
 
@@ -5259,10 +5365,26 @@ cm.init = function(){
         checkBrowser();
         checkType();
         checkScrollSize();
-        cm.addEvent(window, 'resize', checkType);
-        cm.addEvent(window, 'resize', checkScrollSize);
+        checkPageSize();
+        // Events
         cm.addEvent(window, 'mousemove', getClientPosition);
+        cm.addEvent(window, 'resize', resizeAction);
+        setInterval(checkAction, 500);
         //cm.addEvent(window, 'scroll', disableHover);
+    };
+
+    // Actions
+
+    var checkAction = function(){
+        checkScrollSize();
+    };
+
+    var resizeAction = function(){
+        animFrame(function(){
+            checkType();
+            checkScrollSize();
+            checkPageSize();
+        });
     };
 
     // Set browser class
@@ -5307,12 +5429,12 @@ cm.init = function(){
     // Get device scroll bar size
 
     var checkScrollSize = (function(){
-        var oldSize = 0;
+        var size = cm._scrollSize;
 
         return function(){
-            oldSize = cm._scrollSize;
             cm._scrollSize = cm.getScrollBarSize();
-            if(oldSize != cm._scrollSize){
+            if(size != cm._scrollSize){
+                size = cm._scrollSize;
                 cm.customEvent.trigger(window, 'scrollSizeChange', {
                     'type' : 'all',
                     'self' : true,
@@ -5321,6 +5443,10 @@ cm.init = function(){
             }
         };
     })();
+
+    var checkPageSize = function(){
+        cm._pageSize = cm.getPageSize();
+    };
 
     // Disable hover on scroll
 
@@ -5377,8 +5503,8 @@ cm.define('Com.Form', {
             'type' : 'json',
             'method' : 'post',
             'formData' : true,
-            'url' : '',
-            'params' : ''
+            'url' : '',                                             // Request URL. Variables: %baseurl%, %callback% for JSONP.
+            'params' : ''                                           // Params object. %baseurl%, %callback% for JSONP.
         }
     }
 },
@@ -5439,7 +5565,15 @@ function(params){
     /* ******* CALLBACKS ******* */
 
     that.callbacks.prepare = function(that, config){
-        config['params'] = that.getAll();
+        // Prepare
+        config['url'] = cm.strReplace(config['url'], {
+            '%baseurl%' : cm._baseUrl
+        });
+        config['params'] = cm.objectReplace(config['params'], {
+            '%baseurl%' : cm._baseUrl
+        });
+        // Get Params
+        config['params'] = cm.merge(config['params'], that.getAll());
         return config;
     };
 
@@ -5902,6 +6036,113 @@ Com.FormFields.add('buttons', {
         }
     }
 });
+cm.define('Com.Ajax', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Callbacks'
+    ],
+    'events' : [
+        'onRender'
+    ],
+    'params' : {
+        'url' : '',
+        'data' : {},
+        'form' : false,                                         // Provide form node to send it as iframe
+        'method' : 'post',                                      // delete | get | head | post | put
+        'requestType' : 'default',                              // default | form-data | jsonp | iframe
+        'responseType' : 'json',                                // text | xml | json
+        'send' : true,
+        'async' : true,
+        'withCredentials' : false,
+        'headers' : {
+            'Content-Type' : 'application/x-www-form-urlencoded',
+            'X-Requested-With' : 'XMLHttpRequest'
+        },
+        'xhr' : cm.createXmlHttpRequestObject()
+    }
+},
+function(params){
+    var that = this;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.callbacksProcess();
+        validateParams();
+        render();
+        that.triggerEvent('onRender');
+        that.params['send'] && that.send();
+    };
+
+    var validateParams = function(){
+        that.params['responseType'] = that.params['responseType'].toLowerCase();
+        that.params['requestType'] = that.params['requestType'].toLowerCase();
+        that.params['method'] = that.params['method'].toLowerCase();
+        // Convert data
+        if(/delete|get|head/.test(that.params['method'])){
+            that.params['data'] = convertData(that.params['data'], 'uri');
+        }else{
+            if(that.params['requestType'] == 'form-data'){
+                that.params['data'] = convertData(that.params['data'], 'form-data');
+            }else if(that.params['requestType'] == 'iframe'){
+                that.params['data'] = convertData(that.params['data'], 'obj');
+            }else{
+                that.params['data'] = convertData(that.params['data'], 'uri');
+            }
+        }
+        // Build request link
+        if(/delete|get|head/.test(that.params['method'])){
+            if(!cm.isEmpty(that.params['data'])){
+                that.params['url'] = [that.params['url'], that.params['data']].join('?');
+            }
+        }
+    };
+
+    var convertData = function(data, type){
+        switch(type){
+            case 'form-data':
+                if(data.constructor == FormData){
+                    return data
+                }else{
+                    return cm.obj2FormData(data);
+                }
+                break;
+            case 'uri':
+                if(data.constructor == FormData){
+                    return cm.formData2URI(data);
+                }else{
+                    return cm.obj2URI(data);
+                }
+                break;
+            case 'object':
+                if(data.constructor == FormData){
+                    return cm.formData2Obj(data);
+                }else{
+                    return data;
+                }
+                break;
+            default:
+                return data;
+                break;
+        }
+    };
+
+    var render = function(){
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.send = function(){
+        return that;
+    };
+
+    that.abort = function(){
+        return that;
+    };
+
+    init();
+});
 cm.define('Com.Autocomplete', {
     'modules' : [
         'Params',
@@ -5936,8 +6177,8 @@ cm.define('Com.Autocomplete', {
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
-            'url' : '',                                             // Request URL. Variables: %query%, %callback%.
-            'params' : ''                                           // Params object. Variables: %query%, %callback%.
+            'url' : '',                                             // Request URL. Variables: %baseurl%, %query%, %callback%.
+            'params' : ''                                           // Params object. Variables: %baseurl%, %query%, %callback%.
         },
         'langs' : {
             'loader' : 'Searching for: %query%.'                    // Variable: %query%.
@@ -6140,10 +6381,12 @@ function(params){
 
     that.callbacks.prepare = function(that, config, query){
         config['url'] = cm.strReplace(config['url'], {
-            '%query%' : query
+            '%query%' : query,
+            '%baseurl%' : cm._baseUrl
         });
         config['params'] = cm.strReplace(config['params'], {
-            '%query%' : query
+            '%query%' : query,
+            '%baseurl%' : cm._baseUrl
         });
         return config;
     };
@@ -7514,11 +7757,16 @@ cm.define('Com.Columns', {
         'Com.Draggable'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onAdd',
         'onRemove',
         'onChange',
-        'onResize'
+        'onResize',
+        'enableEditing',
+        'disableEditing',
+        'enableEditable',
+        'disableEditable'
     ],
     'params' : {
         'columns' : false,                  // Deprecated, use 'node' parameter instead.
@@ -7527,7 +7775,9 @@ cm.define('Com.Columns', {
         'name' : '',
         'renderStructure' : false,
         'minColumnWidth' : 48,              // in px
-        'data' : []
+        'data' : [],
+        'isEditing' : true,
+        'customEvents' : true
     }
 },
 function(params){
@@ -7535,6 +7785,7 @@ function(params){
         nodes = {},
         current;
 
+    that.isEditing = false;
     that.items = [];
     that.chassis = [];
 
@@ -7545,8 +7796,10 @@ function(params){
         preValidateParams();
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
+        that.triggerEvent('onRenderStart');
         render();
         renderChassis();
+        that.params['isEditing'] && that.enableEditing();
         that.addToStack(nodes['container']);
         that.triggerEvent('onRender');
     };
@@ -7566,9 +7819,17 @@ function(params){
             collect();
         }
         // Add custom event
-        cm.customEvent.add(nodes['container'], 'redraw', function(){
-            that.redraw();
-        });
+        if(that.params['customEvents']){
+            cm.customEvent.add(nodes['container'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(nodes['container'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(nodes['container'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
     };
 
     var collect = function(){
@@ -7804,10 +8065,10 @@ function(params){
     var move = function(e){
         cm.preventDefault(e);
         // Calculate sizes and positions
-        var x = cm._clientPosition['x'],
+        var position = cm.getEventClientPosition(e),
             toFixed = e.shiftKey ? 0 : 2,
-            leftWidth = x - current['left']['offset'],
-            rightWidth = current['right']['offset'] - x;
+            leftWidth = position['left'] - current['left']['offset'],
+            rightWidth = current['right']['offset'] - position['left'];
         // Apply sizes and positions
         if(leftWidth > that.params['minColumnWidth'] && rightWidth > that.params['minColumnWidth']){
             current['left']['column']['width'] = [(leftWidth / current['ratio']).toFixed(toFixed), '%'].join('');
@@ -7815,7 +8076,7 @@ function(params){
 
             current['left']['column']['container'].style.width = current['left']['column']['width'];
             current['right']['column']['container'].style.width = current['right']['column']['width'];
-            current['chassis']['container'].style.left = [((x - current['offset']) / current['ratio']).toFixed(toFixed), '%'].join('');
+            current['chassis']['container'].style.left = [((position['left'] - current['offset']) / current['ratio']).toFixed(toFixed), '%'].join('');
 
             current['left']['column']['rulerCounter'].innerHTML = current['left']['column']['width'];
             current['right']['column']['rulerCounter'].innerHTML = current['right']['column']['width'];
@@ -7857,6 +8118,26 @@ function(params){
     };
 
     /* ******* PUBLIC ******* */
+
+    that.enableEditing = function(){
+        if(!that.isEditing){
+            that.isEditing = true;
+            cm.addClass(nodes['container'], 'is-editing is-editable');
+            that.triggerEvent('enableEditing');
+            that.triggerEvent('enableEditable');
+        }
+        return that;
+    };
+
+    that.disableEditing = function(){
+        if(that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(nodes['container'], 'is-editing is-editable');
+            that.triggerEvent('disableEditing');
+            that.triggerEvent('disableEditable');
+        }
+        return that;
+    };
 
     that.redraw = function(){
         redrawChassis();
@@ -7906,15 +8187,20 @@ cm.define('Com.ColumnsHelper', {
         'onResize',
         'onDragStart',
         'onDragMove',
-        'onDragStop'
+        'onDragStop',
+        'enableEditing',
+        'disableEditing',
+        'enableEditable',
+        'disableEditable'
     ],
     'params' : {
         'node' : cm.node('div'),
         'name' : '',
-        'isEditMode' : true,
+        'isEditing' : true,
         'items' : [],
         'showDrag' : true,
         'minColumnWidth' : 48,              // in px
+        'customEvents' : true,
         'ajax' : {
             'type' : 'json',
             'method' : 'post',
@@ -7929,7 +8215,7 @@ function(params){
     that.items = [];
     that.chassis = [];
     that.current = null;
-    that.isEditMode = false;
+    that.isEditing = false;
     that.isRendered = false;
     that.isAjax = false;
     that.isProcess = false;
@@ -7951,7 +8237,6 @@ function(params){
         if(!cm.isEmpty(that.params['ajax']['url'])){
             that.isAjax = true;
         }
-        that.isEditMode = that.params['isEditMode'];
     };
 
     var render = function(){
@@ -7961,13 +8246,23 @@ function(params){
             that.redraw();
         });
         // Add custom event
-        cm.customEvent.add(that.params['node'], 'redraw', function(){
-            that.redraw();
-        });
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
+        // Editing
+        that.params['isEditing'] && that.enableEditing();
     };
 
     var renderChassis = function(){
-        if(that.isEditMode && !that.isRendered){
+        if(that.isEditing && !that.isRendered){
             that.items = [];
             that.chassis = [];
             cm.forEach(that.params['items'], function(item, i){
@@ -8086,17 +8381,11 @@ function(params){
     };
 
     var move = function(e){
-        var leftWidth,
-            rightWidth;
-        e = cm.getEvent(e);
         cm.preventDefault(e);
-        var x = e.clientX;
-        if(cm.isTouch && e.touches){
-            x = e.touches[0].clientX;
-        }
         // Calculate sizes and positions
-        leftWidth = x - that.current['left']['offset'];
-        rightWidth = that.current['right']['offset'] - x;
+        var position = cm.getEventClientPosition(e),
+            leftWidth = position['left'] - that.current['left']['offset'],
+            rightWidth = that.current['right']['offset'] - position['left'];
         // Apply sizes and positions
         if(leftWidth > that.params['minColumnWidth'] && rightWidth > that.params['minColumnWidth']){
             that.current['left']['column']['width'] = [(leftWidth / that.current['ratio']).toFixed(2), '%'].join('');
@@ -8174,15 +8463,23 @@ function(params){
 
     /* ******* PUBLIC ******* */
 
-    that.enableEditMode = function(){
-        that.isEditMode = true;
-        renderChassis();
+    that.enableEditing = function(){
+        if(!that.isEditing){
+            that.isEditing = true;
+            renderChassis();
+            that.triggerEvent('enableEditing');
+            that.triggerEvent('enableEditable');
+        }
         return that;
     };
 
-    that.disableEditMode = function(){
-        that.isEditMode = false;
-        removeChassis();
+    that.disableEditing = function(){
+        if(that.isEditing){
+            that.isEditing = false;
+            removeChassis();
+            that.triggerEvent('disableEditing');
+            that.triggerEvent('disableEditable');
+        }
         return that;
     };
 
@@ -8194,7 +8491,7 @@ function(params){
     };
 
     that.redraw = function(){
-        if(that.isEditMode){
+        if(that.isEditing){
             redrawChassis();
         }
         return that;
@@ -8414,10 +8711,7 @@ function(params){
         cm.hideSpecialTags();
         cm.addClass(document.body, 'com__dashboard__body');
         // Get pointer position
-        var params = {
-            'left' : cm._clientPosition['x'],
-            'top' : cm._clientPosition['y']
-        };
+        var params = cm.getEventClientPosition(e);
         // Filter areas
         that.currentAreas = getDroppableAreas(widget);
         // Drag start event
@@ -8442,10 +8736,7 @@ function(params){
     var move  = function(e){
         cm.preventDefault(e);
         // Get pointer position
-        var params = {
-            'left' : cm._clientPosition['x'],
-            'top' : cm._clientPosition['y']
-        };
+        var params = cm.getEventClientPosition(e);
         // Move widget
         moveWidget(that.currentWidget, params, true);
         // Find placeholder above widget
@@ -8478,7 +8769,7 @@ function(params){
         cm.removeScrollEvent(window, scroll);
     };
 
-    var scroll = function(){
+    var scroll = function(e){
         // Get pointer position
         var params = {
             'left' : cm._clientPosition['x'],
@@ -10385,6 +10676,7 @@ cm.define('Com.Dialog', {
         'Stack'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onOpenStart',
         'onOpen',
@@ -10443,6 +10735,7 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['content']);
         validateParams();
+        that.triggerEvent('onRenderStart');
         render();
         that.addToStack(nodes['container']);
         // Trigger onRender event
@@ -10903,20 +11196,21 @@ function(params){
         }
         // Config
         var area = cm.merge({
-                'node' : node,
-                'styleObject' : cm.getStyleObject(node),
-                'type' : 'area',
-                'isLocked' : false,
-                'isTemporary' : false,
-                'isSystem' : false,
-                'isRemoveZone' : false,
-                'draggableInChildNodes' : true,
-                'cloneDraggable' : false,
-                'items' : [],
-                'chassis' : [],
-                'dimensions' : {}
-            }, params),
-            childNodes;
+            'node' : node,
+            'styleObject' : cm.getStyleObject(node),
+            'type' : false,                             // content, form
+            'isLocked' : false,
+            'isTemporary' : false,
+            'isSystem' : false,
+            'isRemoveZone' : false,
+            'draggableInChildNodes' : true,
+            'cloneDraggable' : false,
+            'items' : [],
+            'chassis' : [],
+            'dimensions' : {}
+        }, params);
+        // Get type
+        area['type'] = area['node'].getAttribute('data-block-type');
         // Add mark classes
         cm.addClass(area['node'], 'pt__dnd-area');
         cm.addClass(area['node'], that.params['classes']['area']);
@@ -10925,6 +11219,16 @@ function(params){
         }else{
             cm.addClass(area['node'], 'is-available');
         }
+        // Find draggable elements
+        initAreaWidgets(area);
+        // Push to areas array
+        areasList.push(area['node']);
+        areas.push(area);
+    };
+
+    var initAreaWidgets = function(area){
+        var childNodes;
+        area['items'] = [];
         // Find draggable elements
         if(area['draggableInChildNodes']){
             childNodes = area['node'].childNodes;
@@ -10943,9 +11247,6 @@ function(params){
                 );
             });
         }
-        // Push to areas array
-        areasList.push(area['node']);
-        areas.push(area);
     };
 
     var initDraggable = function(node, area, params){
@@ -10953,7 +11254,7 @@ function(params){
         var draggable = cm.merge({
             'node' : node,
             'styleObject' : cm.getStyleObject(node),
-            'type' : 'item',
+            'type' : false,                             // content, form
             'chassis' : {
                 'top' : null,
                 'bottom' : null
@@ -10965,6 +11266,8 @@ function(params){
         }, params);
         draggable['area'] = area;
         draggable['anim'] = new cm.Animation(draggable['node']);
+        // Get type
+        draggable['type'] = draggable['node'].getAttribute('data-block-type');
         // Set draggable event on element
         initDraggableDrag(draggable);
         // Return item to push in area array
@@ -10999,8 +11302,9 @@ function(params){
         // Hide IFRAMES and EMBED tags
         cm.hideSpecialTags();
         // Check event type and get cursor / finger position
-        var x = cm._clientPosition['x'],
-            y = cm._clientPosition['y'],
+        var position = cm.getEventClientPosition(e),
+            x = position['left'],
+            y = position['top'],
             tempCurrentAboveItem,
             tempCurrentPosition;
         if(!cm.isTouch){
@@ -11019,7 +11323,11 @@ function(params){
         // Filter areas
         filteredAvailableAreas = areas.filter(function(area){
             // Filter out locked areas and inner areas
-            if(cm.isParent(draggable['node'], area['node']) || area['isLocked']){
+            if(
+                (draggable['type'] != area['type'] && !area['isRemoveZone'])
+                || cm.isParent(draggable['node'], area['node'])
+                || area['isLocked']
+            ){
                 return false;
             }
             // True - pass area
@@ -11108,8 +11416,9 @@ function(params){
     var move = function(e){
         cm.preventDefault(e);
         // Check event type and get cursor / finger position
-        var x = cm._clientPosition['x'],
-            y = cm._clientPosition['y'],
+        var position = cm.getEventClientPosition(e),
+            x = position['left'],
+            y = position['top'],
             posY = y - current['dimensions']['offsetY'],
             posX = x - current['dimensions']['offsetX'],
             styleX,
@@ -11659,6 +11968,14 @@ function(params){
         return that;
     };
 
+    that.updateArea = function(node){
+        var area = that.getArea(node);
+        if(area){
+            initAreaWidgets(area);
+        }
+        return that;
+    };
+
     that.removeArea = function(node, params){
         if(cm.isNode(node) && cm.inArray(areasList, node)){
             areasList = areasList.filter(function(area){
@@ -11863,22 +12180,20 @@ function(params){
     };
 
     var start = function(e){
+        cm.preventDefault(e);
+        if(!cm.isTouch && e.button){
+            return;
+        }
         if(that.isDrag){
             return;
         }
         that.isDrag = true;
-        cm.preventDefault(e);
         // Hide IFRAMES and EMBED tags
         cm.hideSpecialTags();
         // Check event type and get cursor / finger position
-        that.startX = cm._clientPosition['x'];
-        that.startY = cm._clientPosition['y'];
-        if(!cm.isTouch){
-            // If not left mouse button, don't duplicate drag event
-            if((cm.is('IE') && cm.isVersion() < 9 && e.button != 1) || (!cm.is('IE') && e.button)){
-                return;
-            }
-        }
+        var position = cm.getEventClientPosition(e);
+        that.startX = position['left'];
+        that.startY = position['top'];
         // Calculate dimensions and position
         that.getDimensions();
         that.nodeStartX = cm.getStyle(that.params['node'], 'left', true);
@@ -11893,8 +12208,9 @@ function(params){
 
     var move = function(e){
         cm.preventDefault(e);
+        var position = cm.getEventClientPosition(e);
         // Calculate dimensions and position
-        setPosition(cm._clientPosition['x'], cm._clientPosition['y']);
+        setPosition(position['left'], position['top']);
         // Trigger Event
         that.triggerEvent('onMove');
     };
@@ -11998,6 +12314,7 @@ cm.define('Com.Gallery', {
         'DataNodes'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onSet',
         'onChange',
@@ -12045,6 +12362,7 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node'], that.params['nodesDataMarker'], false);
         that.getDataConfig(that.params['node']);
+        that.triggerEvent('onRenderStart');
         render();
         // Collect items
         cm.forEach(that.nodes['items'], collectItem);
@@ -12361,6 +12679,7 @@ cm.define('Com.GalleryLayout', {
         'Stack'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onChange'
     ],
@@ -12394,6 +12713,7 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node'], that.params['nodesDataMarker'], false);
         that.getDataConfig(that.params['node']);
+        that.triggerEvent('onRenderStart');
         collectItems();
         render();
         that.addToStack(that.params['node']);
@@ -12462,6 +12782,7 @@ cm.define('Com.GalleryPopup', {
         'Stack'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onOpen',
         'onClose',
@@ -12500,6 +12821,7 @@ function(params){
         that.getDataConfig(that.params['node']);
         that.addToStack(that.params['node']);
         validateParams();
+        that.triggerEvent('onRenderStart');
         render();
         setLogic();
         that.triggerEvent('onRender');
@@ -13304,13 +13626,20 @@ cm.define('Com.GridlistHelper', {
     'events' : [
         'onRender',
         'onColumnsChange',
-        'onColumnsResize'
+        'onColumnsResize',
+        'enableEditing',
+        'disableEditing',
+        'enableEditable',
+        'disableEditable'
     ],
     'params' : {
         'node' : cm.Node('div'),
         'name' : '',
-        'isEditMode' : true,
+        'isEditing' : true,
+        'customEvents' : true,
         'columns' : {
+            'isEditing' : false,
+            'customEvents' : false,
             'showDrag' : false,
             'ajax' : {
                 'type' : 'json',
@@ -13330,7 +13659,7 @@ function(params){
         'items' : []
     };
     that.components = {};
-    that.isEditMode = false;
+    that.isEditing = false;
 
     var init = function(){
         that.setParams(params);
@@ -13345,7 +13674,6 @@ function(params){
 
     var validateParams = function(){
         that.nodes['container'] = that.params['node'];
-        that.isEditMode = that.params['isEditMode'];
     };
 
     var render = function(){
@@ -13356,7 +13684,6 @@ function(params){
         cm.getConstructor('Com.ColumnsHelper', function(classConstructor){
             that.components['columns'] = new classConstructor(
                 cm.merge(that.params['columns'], {
-                    'isEditMode' : false,
                     'node' : that.nodes['container'],
                     'items' : that.nodes['items'],
                     'events' : {
@@ -13376,29 +13703,48 @@ function(params){
                 })
             );
         });
-        // Edit mode
-        if(that.isEditMode){
-            that.enableEditMode();
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
         }
+        // Editing
+        that.params['isEditing'] && that.enableEditing();
     };
 
     /* ******* PUBLIC ******* */
 
-    that.enableEditMode = function(){
-        that.isEditMode = true;
-        cm.addClass(that.nodes['container'], 'is-editable');
-        if(that.components['columns']){
-            that.components['columns'].enableEditMode();
+    that.enableEditing = function(){
+        if(!that.isEditing){
+            that.isEditing = true;
+            cm.addClass(that.params['node'], 'is-editing is-editable');
+            that.components['columns'] && that.components['columns'].enableEditing();
+            that.triggerEvent('enableEditing');
+            that.triggerEvent('enableEditable');
         }
         return that;
     };
 
-    that.disableEditMode = function(){
-        that.isEditMode = false;
-        cm.removeClass(that.nodes['container'], 'is-editable');
-        if(that.components['columns']){
-            that.components['columns'].disableEditMode();
+    that.disableEditing = function(){
+        if(that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(that.params['node'], 'is-editing is-editable');
+            that.components['columns'] && that.components['columns'].disableEditing();
+            that.triggerEvent('disableEditing');
+            that.triggerEvent('disableEditable');
         }
+        return that;
+    };
+
+    that.redraw = function(){
+        that.components['columns'] && that.components['columns'].redraw();
         return that;
     };
 
@@ -14306,8 +14652,10 @@ cm.define('Com.Overlay', {
         'onRender',
         'onOpenStart',
         'onOpen',
+        'onOpenEnd',
         'onCloseStart',
-        'onClose'
+        'onClose',
+        'onCloseEnd'
     ],
     'params' : {
         'name' : '',
@@ -14329,6 +14677,7 @@ function(params){
     that.isOpen = false;
     that.isShowSpinner = false;
     that.isShowContent = false;
+    that.openInterval = null;
 
     var init = function(){
         getCSSHelpers();
@@ -14365,34 +14714,70 @@ function(params){
         that.setTheme(that.params['theme']);
     };
 
+    var openHelper = function(){
+        that.triggerEvent('onOpen')
+            .triggerEvent('onOpenEnd');
+    };
+
+    var closeHelper = function(){
+        that.triggerEvent('onClose')
+            .triggerEvent('onCloseEnd');
+        if(that.params['removeOnClose']){
+            cm.remove(that.nodes['container']);
+        }
+    };
+
     /* ******* MAIN ******* */
 
-    that.open = function(){
+    that.open = function(isImmediately){
         if(!that.isOpen){
             that.isOpen = true;
+            // Set immediately animation hack
+            if(isImmediately){
+                cm.addClass(that.nodes['container'], 'is-immediately');
+            }
             if(!cm.inDOM(that.nodes['container'])){
                 that.params['container'].appendChild(that.nodes['container']);
             }
             that.triggerEvent('onOpenStart');
             cm.addClass(that.nodes['container'], 'is-open', true);
-            setTimeout(function(){
-                that.triggerEvent('onOpen');
-            }, that.params['duration']);
+            // Remove immediately animation hack
+            that.openInterval && clearTimeout(that.openInterval);
+            if(isImmediately){
+                that.openInterval = setTimeout(function(){
+                    cm.removeClass(that.nodes['container'], 'is-immediately');
+                    openHelper();
+                }, 5);
+            }else{
+                that.openInterval = setTimeout(function(){
+                    openHelper();
+                }, that.params['duration'] + 5);
+            }
         }
         return that;
     };
 
-    that.close = function(){
+    that.close = function(isImmediately){
         if(that.isOpen){
             that.isOpen = false;
+            // Set immediately animation hack
+            if(isImmediately){
+                cm.addClass(that.nodes['container'], 'is-immediately');
+            }
             that.triggerEvent('onCloseStart');
             cm.removeClass(that.nodes['container'], 'is-open');
-            setTimeout(function(){
-                if(that.params['removeOnClose']){
-                    cm.remove(that.nodes['container']);
-                }
-                that.triggerEvent('onClose');
-            }, that.params['duration']);
+            // Remove immediately animation hack
+            that.openInterval && clearTimeout(that.openInterval);
+            if(isImmediately){
+                that.openInterval = setTimeout(function(){
+                    cm.removeClass(that.nodes['container'], 'is-immediately');
+                    closeHelper();
+                }, 5);
+            }else{
+                that.openInterval = setTimeout(function(){
+                    closeHelper();
+                }, that.params['duration'] + 5);
+            }
         }
         // Close Event
         return that;
@@ -14412,7 +14797,7 @@ function(params){
             if(!that.params['removeOnClose']){
                 setTimeout(function(){
                     cm.remove(that.nodes['container']);
-                }, that.params['duration']);
+                }, that.params['duration'] + 5);
             }
         }else{
             cm.remove(that.nodes['container']);
@@ -14529,8 +14914,8 @@ cm.define('Com.Pagination', {
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
-            'url' : '',                                             // Request URL. Variables: %page%, %token%, %perPage%, %callback% for JSONP.
-            'params' : ''                                           // Params object. %page%, %token%, %perPage%, %callback% for JSONP.
+            'url' : '',                                             // Request URL. Variables: %page%, %offset%, %token%, %perPage%, %limit%, %callback% for JSONP.
+            'params' : ''                                           // Params object. %page%, %offset%, %token%, %perPage%, %limit%, %callback% for JSONP.
         },
         'Com.Overlay' : {
             'position' : 'absolute',
@@ -14669,7 +15054,6 @@ function(params){
             // Render bars
             that.callbacks.rebuildBars(that);
             // Request
-
             if(!that.currentPage || page != that.currentPage){
                 if(that.pages[that.page] && that.pages[that.page]['isRendered']){
                     that.callbacks.cached(that, that.pages[that.page]['data']);
@@ -14691,20 +15075,25 @@ function(params){
         // Prepare
         config['url'] = cm.strReplace(config['url'], {
             '%perPage%' : that.params['perPage'],
+            '%limit%' : that.params['perPage'],
             '%page%' : that.page,
-            '%token%' : that.pageToken
+            '%offset%' : (that.page - 1) * that.params['perPage'],
+            '%token%' : that.pageToken,
+            '%baseurl%' : cm._baseUrl
         });
         config['params'] = cm.objectReplace(config['params'], {
             '%perPage%' : that.params['perPage'],
+            '%limit%' : that.params['perPage'],
             '%page%' : that.page,
-            '%token%' : that.pageToken
+            '%offset%' : (that.page - 1) * that.params['perPage'],
+            '%token%' : that.pageToken,
+            '%baseurl%' : cm._baseUrl
         });
         return config;
     };
 
     that.callbacks.request = function(that, config){
         config = that.callbacks.prepare(that, config);
-
         // Return ajax handler (XMLHttpRequest) to providing abort method.
         return cm.ajax(
             cm.merge(config, {
@@ -15759,8 +16148,8 @@ cm.define('Com.ScrollPagination', {
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
-            'url' : '',                                             // Request URL. Variables: %page%, %token%, %perPage%, %callback% for JSONP.
-            'params' : ''                                           // Params object. %page%, %token%, %perPage%, %callback% for JSONP.
+            'url' : '',                                             // Request URL. Variables: %baseurl%, %page%, %offset%, %token%, %limit%, %perPage%, %callback% for JSONP.
+            'params' : ''                                           // Params object. %baseurl%, %page%, %offset%, %token%, %limit%, %perPage%, %callback% for JSONP.
         },
         'langs' : {
             'load_more' : 'Load More'
@@ -15931,13 +16320,19 @@ function(params){
         // Prepare
         config['url'] = cm.strReplace(config['url'], {
             '%perPage%' : that.params['perPage'],
+            '%limit%' : that.params['perPage'],
             '%page%' : that.page,
-            '%token%' : that.pageToken
+            '%offset%' : (that.page - 1) * that.params['perPage'],
+            '%token%' : that.pageToken,
+            '%baseurl%' : cm._baseUrl
         });
         config['params'] = cm.objectReplace(config['params'], {
             '%perPage%' : that.params['perPage'],
+            '%limit%' : that.params['perPage'],
             '%page%' : that.page,
-            '%token%' : that.pageToken
+            '%offset%' : (that.page - 1) * that.params['perPage'],
+            '%token%' : that.pageToken,
+            '%baseurl%' : cm._baseUrl
         });
         return config;
     };
@@ -16374,7 +16769,7 @@ function(params){
         /* *** RENDER OPTIONS *** */
         collectSelectOptions();
         cm.forEach(that.params['options'], function(item){
-            renderOption(item.value, item.text);
+            renderOption(item);
         });
         /* *** INSERT INTO DOM *** */
         if(that.params['container']){
@@ -16489,12 +16884,17 @@ function(params){
                     cm.forEach(myOptionsNodes, function(optionNode){
                         myOptions.push({
                             'value' : optionNode.value,
-                            'text' : optionNode.innerHTML
+                            'text' : optionNode.innerHTML,
+                            'className' : optionNode.className
                         });
                     });
                     renderGroup(myChild.getAttribute('label'), myOptions);
                 }else if(myChild.tagName.toLowerCase() == 'option'){
-                    renderOption(myChild.value, myChild.innerHTML);
+                    renderOption({
+                        'value' : myChild.value,
+                        'text' : myChild.innerHTML,
+                        'className' : myChild.className
+                    });
                 }
             }
         });
@@ -16521,7 +16921,7 @@ function(params){
         }
         // Render options
         cm.forEach(myOptions, function(myOption){
-            renderOption(myOption.value, myOption.text, item);
+            renderOption(myOption, item);
         });
         // Append
         nodes['items'].appendChild(item['container']);
@@ -16532,23 +16932,24 @@ function(params){
 
     /* *** OPTIONS *** */
 
-    var renderOption = function(value, text, group){
+    var renderOption = function(item, group){
         // Check for exists
-        if(options[value]){
-            removeOption(options[value]);
+        if(options[item['value']]){
+            removeOption(options[item['value']]);
         }
         // Config
-        var item = {
+        item = cm.merge({
             'selected' : false,
-            'value' : value,
-            'text' : text,
+            'value' : '',
+            'text' : '',
+            'className' : '',
             'group': group
-        };
+        }, item);
         // Structure
-        item['node'] = cm.Node('li',
-            cm.Node('a', {'innerHTML' : text})
+        item['node'] = cm.Node('li', {'class' : item['className']},
+            cm.Node('a', {'innerHTML' : item['text']})
         );
-        item['option'] = cm.Node('option', {'value' : value, 'innerHTML' : text});
+        item['option'] = cm.Node('option', {'value' : item['value'], 'innerHTML' : item['text']});
         // Label onlick event
         cm.addEvent(item['node'], 'click', function(){
             if(!that.disabled){
@@ -16565,7 +16966,7 @@ function(params){
             nodes['hidden'].appendChild(item['option']);
         }
         // Push
-        optionsList.push(options[value] = item);
+        optionsList.push(options[item['value']] = item);
         optionsLength = optionsList.length;
     };
 
@@ -16769,13 +17170,20 @@ function(params){
     };
 
     that.addOption = function(value, text){
-        renderOption(value, text);
+        if(cm.isArray(arguments[0])){
+            renderOption(arguments[0]);
+        }else{
+            renderOption({
+                'value' : value,
+                'text' : text
+            });
+        }
         return that;
     };
 
     that.addOptions = function(arr){
         cm.forEach(arr, function(item){
-            renderOption(item['value'], item['text']);
+            renderOption(item);
         });
         return that;
     };
@@ -16906,7 +17314,8 @@ cm.define('Com.Slider', {
         'minHeight' : 48,               // Set min-height of slider, work with calculateMaxHeight parameter
         'hasBar' : false,
         'barDirection' : 'horizontal',  // horizontal | vertical
-        'editMode' : false,
+        'isEditing' : false,
+        'customEvents' : true,
         'Com.Scroll' : {
             'step' : 25,
             'time' : 25
@@ -16944,6 +17353,7 @@ function(params){
     that.paused = false;
     that.pausedOutside = false;
     that.isProcess = false;
+    that.isEditing = false;
 
     var init = function(){
         getCSSHelpers();
@@ -16956,7 +17366,7 @@ function(params){
         renderSlider();
         renderLayout();
         that.setEffect(that.params['effect']);
-        that.params['editMode'] && that.enableEditMode();
+        that.params['isEditing'] && that.enableEditing();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
     };
@@ -16969,6 +17379,7 @@ function(params){
         if(cm.isNode(that.params['node'])){
             that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
         }
+        that.isEditing = cm.hasClass(that.params['node'], 'is-editing');
         that.params['direction'] = {'forward' : 1, 'backward' : 1, 'random' : 1}[that.params['direction']] ? that.params['direction'] : 'forward';
         that.params['effect'] = Com.SliderEffects[that.params['effect']] ? that.params['effect'] : 'fade';
         that.params['transition'] = {'smooth' : 1, 'simple' : 1, 'acceleration' : 1, 'inhibition' : 1}[that.params['transition']] ? that.params['transition'] : 'smooth';
@@ -17029,9 +17440,17 @@ function(params){
             that.redraw();
         });
         // Add custom event
-        cm.customEvent.add(that.params['node'], 'redraw', function(){
-            that.redraw();
-        });
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
     };
 
     var renderLayout = function(){
@@ -17280,6 +17699,28 @@ function(params){
 
     /* ******* MAIN ******* */
 
+    that.enableEditing = function(){
+        if(!that.isEditing){
+            that.isEditing = true;
+            cm.addClass(that.params['node'], 'is-editing');
+            that.enableEditMode();
+            that.triggerEvent('enableEditing');
+            that.triggerEvent('enableEditable');
+        }
+        return that;
+    };
+
+    that.disableEditing = function(){
+        if(that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(that.params['node'], 'is-editing');
+            that.disableEditMode();
+            that.triggerEvent('disableEditing');
+            that.triggerEvent('disableEditable');
+        }
+        return that;
+    };
+
     that.redraw = function(){
         resizeHandler();
         return that;
@@ -17324,13 +17765,13 @@ function(params){
 
     that.enableEditMode = function(){
         that.pause();
-        cm.addClass(that.nodes['container'], 'is-edit-mode');
+        cm.addClass(that.nodes['container'], 'is-editable');
         that.setEffect('edit');
     };
 
     that.disableEditMode = function(){
         that.start();
-        cm.removeClass(that.nodes['container'], 'is-edit-mode');
+        cm.removeClass(that.nodes['container'], 'is-editable');
         that.restoreEffect();
     };
 
@@ -17563,13 +18004,7 @@ function(params){
 
     var render = function(){
         // Init drag'n'drop class
-        that.components['dd'] = new Com.Draganddrop(
-                cm.merge(that.params['Com.Draganddrop'], {
-                    'draggableContainer' : that.params['draggableContainer'],
-                    'direction' : that.params['direction'],
-                    'limit' : that.params['limit']
-                })
-            )
+        that.components['dd'] = new Com.Draganddrop(that.params['Com.Draganddrop'])
             .addEvent('onRemove', onRemove)
             .addEvent('onDrop', onSort);
         // Process items
@@ -17651,20 +18086,27 @@ cm.define('Com.Spacer', {
     'events' : [
         'onRender',
         'onChange',
-        'onResize'
+        'onResize',
+        'enableEditing',
+        'disableEditing',
+        'enableEditable',
+        'disableEditable'
     ],
     'params' : {
         'node' : cm.Node('div'),
         'name' : '',
+        'minHeight' : 24,
+        'isEditing' : true,
+        'customEvents' : true,
         'Com.Draggable' : {
-            'direction' : 'vertical',
-            'minY' : 24
+            'direction' : 'vertical'
         }
     }
 },
 function(params){
     var that = this;
 
+    that.isEditing = false;
     that.components = {};
     that.nodes = {};
     that.value = 0;
@@ -17676,7 +18118,7 @@ function(params){
         validateParams();
         render();
         setLogic();
-        set(that.params['node'].style.height, false);
+        set(parseFloat(that.params['node'].style.height), false);
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
     };
@@ -17685,6 +18127,7 @@ function(params){
         if(cm.isNode(that.params['node'])){
             that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
         }
+        that.params['Com.Draggable']['minY'] = that.params['minHeight'];
     };
 
     var render = function(){
@@ -17713,9 +18156,19 @@ function(params){
             that.redraw();
         });
         // Add custom event
-        cm.customEvent.add(that.params['node'], 'redraw', function(){
-            that.redraw();
-        });
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
+        // Editing
+        that.params['isEditing'] && that.enableEditing();
     };
 
     var setLogic = function(){
@@ -17760,7 +18213,7 @@ function(params){
     };
 
     var set = function(height, triggerEvents){
-        that.value = height;
+        that.value = Math.min(height, that.params['minHeight']);
         setHeight(height);
         setRulerCounter();
         if(triggerEvents){
@@ -17783,6 +18236,26 @@ function(params){
     };
 
     /* ******* MAIN ******* */
+
+    that.enableEditing = function(){
+        if(!that.isEditing){
+            that.isEditing = true;
+            cm.addClass(that.params['node'], 'is-editing is-editable');
+            that.triggerEvent('enableEditing');
+            that.triggerEvent('enableEditable');
+        }
+        return that;
+    };
+
+    that.disableEditing = function(){
+        if(that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(that.params['node'], 'is-editing is-editable');
+            that.triggerEvent('disableEditing');
+            that.triggerEvent('disableEditable');
+        }
+        return that;
+    };
 
     that.redraw = function(){
         setHeight(that.value);
@@ -18247,8 +18720,9 @@ cm.define('Com.TabsetHelper', {
     'modules' : [
         'Params',
         'Events',
-        'DataConfig',
+        'Callbacks',
         'DataNodes',
+        'DataConfig',
         'Stack'
     ],
     'events' : [
@@ -18257,154 +18731,346 @@ cm.define('Com.TabsetHelper', {
         'onTabShow',
         'onTabHideStart',
         'onTabHide',
-        'onLabelClick'
+        'onLabelClick',
+        'onRequestStart',
+        'onRequestEnd',
+        'onRequestError',
+        'onRequestSuccess',
+        'onRequestAbort',
+        'onContentRenderStart',
+        'onContentRender'
     ],
     'params' : {
         'node' : cm.Node('div'),
         'name' : '',
         'active' : null,
-        'setFirstTabImmediately' : true
+        'items' : [],
+        'setFirstTabImmediately' : true,
+        'showLoader' : true,
+        'loaderDelay' : 300,                                        // in ms
+        'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
+        'responseHTML' : false,                                     // If true, html will append automatically
+        'cache' : false,
+        'ajax' : {
+            'type' : 'json',
+            'method' : 'get',
+            'url' : '',                                             // Request URL. Variables: %baseurl%, %tab%, %callback% for JSONP.
+            'params' : ''                                           // Params object. %tab%, %baseurl%, %callback% for JSONP.
+        },
+        'Com.Overlay' : {
+            'position' : 'absolute',
+            'autoOpen' : false,
+            'removeOnClose' : true
+        }
     }
 },
 function(params){
     var that = this;
 
+    that.components = {};
     that.nodes = {
         'container': cm.Node('div'),
         'labels' : [],
         'tabs' : []
     };
 
+    that.ajaxHandler = null;
+    that.isAjax = false;
+    that.isProcess = false;
+    that.loaderDelay = null;
+
     that.current = false;
     that.previous = false;
-    that.tabs = {};
+    that.items = {};
 
     var init = function(){
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
+        that.callbacksProcess();
+        validateParams();
         render();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
         // Set active tab
-        if(that.params['active'] && that.tabs[that.params['active']]){
-            set(that.params['active'], true);
+        if(that.params['active'] && that.items[that.params['active']]){
+            set(that.params['active']);
+        }
+    };
+
+    var validateParams = function(){
+        if(!cm.isEmpty(that.params['ajax']['url'])){
+            that.isAjax = true;
         }
     };
 
     var render = function(){
         // Process tabs
-        cm.forEach(that.nodes['tabs'], function(item){
-            processTab(item);
+        that.processTabs(that.nodes['tabs'], that.nodes['labels']);
+        // Process tabs in parameters
+        cm.forEach(that.params['items'], function(item){
+            renderTab(item);
         });
-        cm.forEach(that.nodes['labels'], function(item){
-            processLabel(item);
+        // Overlay
+        cm.getConstructor('Com.Overlay', function(classConstructor){
+            that.components['loader'] = new classConstructor(that.params['Com.Overlay']);
         });
-    };
-
-    var processTab = function(item, config){
-        config = cm.merge(
-            cm.merge({
-                    'id' : ''
-                }, that.getNodeDataConfig(item['container'])
-            ),
-            config
-        );
-        config['container'] = item['container'];
-        renderTab(config);
-    };
-
-    var processLabel = function(item, config){
-        config = cm.merge(
-            cm.merge({
-                    'id' : ''
-                }, that.getNodeDataConfig(item['container'])
-            ),
-            config
-        );
-        config['container'] = item['container'];
-        renderLabel(config);
     };
 
     var renderTab = function(item){
-        var tab;
         item = cm.merge({
             'id' : '',
-            'container' : cm.Node('li')
+            'tab' : {
+                'container' : cm.node('li'),
+                'inner' : cm.node('div')
+            },
+            'label' : {
+                'container' : cm.node('li'),
+                'inner' : cm.node('div')
+            },
+            'isHidden' : false,
+            'isAjax' : false,
+            'isCached' : false,
+            'ajax' : {}
         }, item);
-
-        if(!cm.isEmpty(item['id']) && !(tab = that.tabs[item['id']])){
-            that.tabs[item['id']] = {
-                'id' : item['id'],
-                'tab' : item['container'],
-                'config' : item
-            };
+        if(!cm.isEmpty(item['ajax']['url'])){
+            item.isAjax = true;
         }
-    };
-
-    var renderLabel = function(item){
-        var tab;
-        item = cm.merge({
-            'id' : '',
-            'container' : cm.Node('li')
-        }, item);
-
-        if(!cm.isEmpty(item['id']) && (tab = that.tabs[item['id']])){
-            tab['label'] = item['container'];
-            tab['config'] = cm.merge(tab['config'], item);
-            cm.addEvent(tab['label'], 'click', function(){
-                that.triggerEvent('onLabelClick', tab);
-                set(tab['id']);
+        if(!cm.isEmpty(item['id']) && !that.items[item['id']]){
+            that.items[item['id']] = item;
+            if(item.isHidden){
+                cm.addClass(item['label']['container'], 'hidden');
+                cm.addClass(item['tab']['container'], 'hidden');
+            }
+            cm.addEvent(item['label']['container'], 'click', function(){
+                that.triggerEvent('onLabelClick', {
+                    'item' : item
+                });
+                set(item['id']);
             });
         }
     };
 
-    var set = function(id, triggerEvents){
+    var set = function(id){
+        var item;
         if(that.current != id){
             // Hide previous tab
-            unset(triggerEvents);
+            unset();
             // Show new tab
             that.current = id;
-            triggerEvents && that.triggerEvent('onTabShowStart', that.tabs[that.current]);
+            item = that.items[that.current];
+            that.triggerEvent('onTabShowStart', {
+                'item' : item
+            });
             if(!that.previous && that.params['setFirstTabImmediately']){
-                cm.addClass(that.tabs[that.current]['tab'], 'is-immediately');
-                cm.addClass(that.tabs[that.current]['label'], 'is-immediately');
+                cm.addClass(item['tab']['container'], 'is-immediately');
+                cm.addClass(item['label']['container'], 'is-immediately');
                 setTimeout(function(){
-                    cm.removeClass(that.tabs[that.current]['tab'], 'is-immediately');
-                    cm.removeClass(that.tabs[that.current]['label'], 'is-immediately');
+                    cm.removeClass(item['tab']['container'], 'is-immediately');
+                    cm.removeClass(item['label']['container'], 'is-immediately');
                 }, 5);
             }
-            cm.addClass(that.tabs[that.current]['tab'], 'active');
-            cm.addClass(that.tabs[that.current]['label'], 'active');
-            triggerEvents && that.triggerEvent('onTabShow', that.tabs[that.current]);
+            cm.addClass(item['tab']['container'], 'active');
+            cm.addClass(item['label']['container'], 'active');
+            if(item.isAjax && (!that.params['cache'] || (that.params['cache'] && !item.isCached))){
+                that.ajaxHandler = that.callbacks.request(that, item, cm.merge(that.params['ajax'], item['ajax']));
+            }else{
+                that.triggerEvent('onTabShow', {
+                    'item' : item
+                });
+            }
         }
     };
 
-    var unset = function(triggerEvents){
-        if(that.current && that.tabs[that.current]){
+    var unset = function(){
+        var item;
+        if(that.current && that.items[that.current]){
+            item = that.items[that.current];
+            if(that.isProcess){
+                that.abort();
+            }
             that.previous = that.current;
-            triggerEvents && that.triggerEvent('onTabHideStart', that.tabs[that.current]);
-            cm.removeClass(that.tabs[that.current]['tab'], 'active');
-            cm.removeClass(that.tabs[that.current]['label'], 'active');
-            triggerEvents && that.triggerEvent('onTabHide', that.tabs[that.current]);
+            that.triggerEvent('onTabHideStart', {
+                'item' : item
+            });
+            cm.removeClass(item['tab']['container'], 'active');
+            cm.removeClass(item['label']['container'], 'active');
+            that.triggerEvent('onTabHide', {
+                'item' : item
+            });
             that.current = null;
         }
     };
 
-    /* ******* MAIN ******* */
+    /* ******* CALLBACKS ******* */
 
-    that.set = function(id, triggerEvents){
-        triggerEvents = typeof triggerEvents != 'undefined'? triggerEvents : true;
-        if(id && that.tabs[id]){
-            set(id, triggerEvents);
+    /* *** AJAX *** */
+
+    that.callbacks.prepare = function(that, item, config){
+        // Prepare
+        config['url'] = cm.strReplace(config['url'], {
+            '%tab%' : item['id'],
+            '%baseurl%' : cm._baseUrl
+        });
+        config['params'] = cm.objectReplace(config['params'], {
+            '%tab%' : item['id'],
+            '%baseurl%' : cm._baseUrl
+        });
+        return config;
+    };
+
+    that.callbacks.request = function(that, item, config){
+        config = that.callbacks.prepare(that, item, config);
+        // Return ajax handler (XMLHttpRequest) to providing abort method.
+        return cm.ajax(
+            cm.merge(config, {
+                'onStart' : function(){
+                    that.callbacks.start(that, item, config);
+                },
+                'onSuccess' : function(response){
+                    that.callbacks.response(that, item, config, response);
+                },
+                'onError' : function(){
+                    that.callbacks.error(that, item, config);
+                },
+                'onAbort' : function(){
+                    that.callbacks.abort(that, item, config);
+                },
+                'onEnd' : function(){
+                    that.callbacks.end(that, item,  config);
+                }
+            })
+        );
+    };
+
+    that.callbacks.start = function(that, item, config){
+        that.isProcess = true;
+        // Show Loader
+        if(that.params['showLoader']){
+            that.loaderDelay = setTimeout(function(){
+                if(that.components['loader'] && !that.components['loader'].isOpen){
+                    that.components['loader']
+                        .embed(item['tab']['container'])
+                        .open();
+                }
+            }, that.params['loaderDelay']);
+        }
+        that.triggerEvent('onRequestStart', {
+            'item' : item
+        });
+    };
+
+    that.callbacks.end = function(that, item, config){
+        that.isProcess = false;
+        // Hide Loader
+        if(that.params['showLoader']){
+            that.loaderDelay && clearTimeout(that.loaderDelay);
+            if(that.components['loader'] && that.components['loader'].isOpen){
+                that.components['loader'].close();
+            }
+        }
+        that.triggerEvent('onRequestEnd', {
+            'item' : item
+        });
+    };
+
+    that.callbacks.filter = function(that, item, config, response){
+        var data = [],
+            dataItem = cm.objectSelector(that.params['responseKey'], response);
+        if(dataItem && !cm.isEmpty(dataItem)){
+            data = dataItem;
+        }
+        return data;
+    };
+
+    that.callbacks.response = function(that, item, config, response){
+        // Response
+        if(!cm.isEmpty(response)){
+            that.callbacks.success(that, {
+                'item' : item,
+                'response' : response
+            });
+            response = that.callbacks.filter(that, item, config, response);
+            that.callbacks.render(that, item, response);
+        }else{
+            that.callbacks.error(that, item, config);
+        }
+    };
+
+    that.callbacks.error = function(that, item, config){
+        that.triggerEvent('onRequestError', {
+            'item' : item
+        });
+    };
+
+    that.callbacks.success = function(that, tab, response){
+        that.triggerEvent('onRequestSuccess', {
+            'tab' : tab,
+            'response' : response
+        });
+    };
+
+    that.callbacks.abort = function(that, item, config){
+        that.triggerEvent('onRequestAbort', {
+            'item' : item
+        });
+    };
+
+    /* *** RENDER *** */
+
+    that.callbacks.render = function(that, item, data){
+        that.isRendering = true;
+        item['data'] = data;
+        item.isCached = true;
+        // Render
+        that.triggerEvent('onContentRenderStart', {
+            'item' : item,
+            'data' : data
+        });
+        that.callbacks.renderContent(that, item, data);
+        that.triggerEvent('onContentRender', {
+            'item' : item,
+            'data' : data
+        });
+        that.triggerEvent('onTabShow', {
+            'item' : item,
+            'data' : data
+        });
+    };
+
+    that.callbacks.renderContent = function(that, item, data){
+        var nodes;
+        if(that.params['responseHTML']){
+            cm.clearNode(item['tab']['inner']);
+            nodes = cm.strToHTML(data);
+            if(!cm.isEmpty(nodes)){
+                if(cm.isNode(nodes)){
+                    item['tab']['inner'].appendChild(nodes);
+                }else{
+                    while(nodes.length){
+                        if(cm.isNode(nodes[0])){
+                            item['tab']['inner'].appendChild(nodes[0]);
+                        }else{
+                            cm.remove(nodes[0]);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.set = function(id){
+        if(id && that.items[id]){
+            set(id);
         }
         return that;
     };
 
-    that.unset = function(triggerEvents){
-        triggerEvents = typeof triggerEvents != 'undefined'? triggerEvents : true;
-        unset(triggerEvents);
+    that.unset = function(){
+        unset();
         that.previous = null;
         return that;
     };
@@ -18413,29 +19079,48 @@ function(params){
         return that.current;
     };
 
-    that.addTab = function(tab, label, config){
-        cm.isNode(tab) && processTab(tab, config);
-        cm.isNode(label) && processLabel(label, config);
+    that.addTab = function(item){
+        renderTab(item);
         return that;
     };
 
-    that.addTabs = function(tabs, lables){
-        tabs = cm.isArray(tabs) ? tabs : [];
-        lables = cm.isArray(lables) ? lables : [];
-        cm.forEach(tabs, function(item){
-            processTab(item);
+    that.addTabs = function(items){
+        cm.forEach(items, function(item){
+            renderTab(item);
         });
-        cm.forEach(lables, function(item){
-            processLabel(item);
+        return that;
+    };
+
+    that.processTabs = function(tabs, labels){
+        var items = [],
+            label,
+            config,
+            item;
+        cm.forEach(tabs, function(tab, key){
+            label = labels[key];
+            config = cm.merge(that.getNodeDataConfig(tab['container']), that.getNodeDataConfig(label['container']));
+            item = cm.merge(config, {
+                'tab' : tab,
+                'label' : label
+            });
+            items.push(item);
         });
+        that.addTabs(items);
         return that;
     };
 
     that.getTab = function(id){
-        if(id && that.tabs[id]){
-            return that.tabs[id];
+        if(id && that.items[id]){
+            return that.items[id];
         }
         return null;
+    };
+
+    that.abort = function(){
+        if(that.ajaxHandler && that.ajaxHandler.abort){
+            that.ajaxHandler.abort();
+        }
+        return that;
     };
 
     init();
@@ -19993,8 +20678,8 @@ function(params){
 
     var calculateAction = function(){
         if(that.isLoad){
-            var setX = -cm._clientPosition['x'] * widthRatio,
-                setY = -cm._clientPosition['y'] * heightRatio;
+            var setX = -cm._clientPosition['left'] * widthRatio,
+                setY = -cm._clientPosition['top'] * heightRatio;
             cm.setCSSTranslate(that.nodes['image'], [setX, 'px'].join(''), [setY, 'px'].join(''));
         }
     };
@@ -20098,55 +20783,8 @@ function(params){
 });
 var App = {
     'Elements': {},
-    'Nodes' : {}
-};
-App['Anchor'] = function(o){
-    var that = this,
-        config = cm.merge({
-            'link' : cm.Node('a'),
-            'href' : null,
-            'target' : cm.Node('div'),
-            'scroll' : document.body,
-            'indentY' : 0,
-            'duration' : 800,
-            'setURL' : true
-        }, o),
-        anims = {};
-
-    var init = function(){
-        var y, styles;
-        // Init scroll animation
-        anims['scroll'] = new cm.Animation(config['scroll']);
-        // Add click event
-        cm.addEvent(config['link'], 'click', function(e){
-            e = cm.getEvent(e);
-            cm.preventDefault(e);
-            // Set url
-            if(config['setURL'] && cm.isHistoryAPI && config['href']){
-                window.history.pushState(false, false, config['href']);
-            }
-            // Get target position and animate to it
-            y = config['target'].offsetTop + config['indent'];
-            if(config['scroll'] == document.body){
-                styles = {'docScrollTop' : y};
-            }else{
-                styles = {'scrollTop' : y};
-            }
-            anims['scroll'].go({'style' : styles, 'anim' : 'smooth', 'duration' : config['duration']});
-        }, true, true);
-    };
-
-    /* ******* MAIN ******* */
-
-    that.setIndent = function(indent){
-        if(!isNaN(indent)){
-            config['indent'] = indent
-        }
-        return that;
-    };
-
-    init();
-
+    'Nodes' : {},
+    'Test' : []
 };
 cm.define('App.Block', {
     'modules' : [
@@ -20157,7 +20795,11 @@ cm.define('App.Block', {
         'Stack'
     ],
     'events' : [
-        'onRender'
+        'onRenderStart',
+        'onRender',
+        'onRemove',
+        'enableEditing',
+        'disableEditing'
     ],
     'params' : {
         'node' : cm.Node('div'),
@@ -20165,17 +20807,17 @@ cm.define('App.Block', {
         'positionId' : 0,
         'zone' : 0,
         'parentId' : 0,
+        'index' : false,
         'locked' : false,
         'visible' : true,
-        'editorName' : 'app-editor',
-        'thisContainer' : 'document.body',
-        'topContainer' : 'top.document.body'
+        'editorName' : 'app-editor'
     }
 },
 function(params){
     var that = this;
 
     that.isDummy = false;
+    that.isRemoved = false;
     that.isEditing = false;
     that.styleObject = null;
     that.dimensions = null;
@@ -20183,11 +20825,20 @@ function(params){
     that.components = {};
     that.nodes = {
         'container' : cm.node('div'),
-        'content' : cm.node('div')
+        'block' : {
+            'container' : cm.node('div'),
+            'inner' : cm.node('div'),
+            'drag' : [],
+            'menu' : {
+                'edit' : cm.node('div'),
+                'duplicate' : cm.node('div'),
+                'delete' : cm.node('div')
+            }
+        }
     };
     that.node = null;
     that.zone = null;
-    that.zones = {};
+    that.zones = [];
 
     var init = function(){
         that.setParams(params);
@@ -20195,6 +20846,7 @@ function(params){
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
         validateParams();
+        that.triggerEvent('onRenderStart');
         render();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
@@ -20203,28 +20855,33 @@ function(params){
     var validateParams = function(){
         that.params['name'] = that.params['positionId'];
         that.params['zoneName'] = [that.params['parentId'], that.params['zone']].join('_');
-        that.node = that.params['node'];
+        that.params['index'] = cm.isString(that.params['index']) ? parseInt(that.params['index']) : that.params['index'];
     };
 
     var render = function(){
-        that.styleObject = cm.getStyleObject(that.params['node']);
-        that.dimensions = cm.getNodeOffset(that.params['node'], that.styleObject);
+        that.node = that.params['node'];
+        // Calculate dimensions
+        that.getDimensions();
         // Construct
-        new cm.top('Finder')('App.Zone', that.params['zoneName'], that.params['thisContainer'], constructZone);
-        new cm.top('Finder')('App.Editor', that.params['editorName'], that.params['topContainer'], constructEditor);
+        new cm.Finder('App.Zone', that.params['zoneName'], null, function(classObject){
+            constructZone(classObject, that.params['index']);
+        });
+        new cm.Finder('App.Editor', that.params['editorName'], null, function(classObject){
+            constructEditor(classObject);
+        });
     };
 
-    var constructZone = function(classObject){
+    var constructZone = function(classObject, index){
         if(classObject){
             that.zone = classObject
-                .addBlock(that.params['name'], that);
+                .addBlock(that, index);
         }
     };
 
     var destructZone = function(classObject){
         if(classObject){
             that.zone = classObject
-                .removeBlock(that.params['name']);
+                .removeBlock(that);
             that.zone = null;
         }
     };
@@ -20232,19 +20889,15 @@ function(params){
     var constructEditor = function(classObject){
         if(classObject){
             that.components['editor'] = classObject
-                .addBlock(that.params['name'], that);
+                .addBlock(that);
         }
     };
 
     var destructEditor = function(classObject){
         if(classObject){
             that.components['editor'] = classObject
-                .removeBlock(that.params['name']);
+                .removeBlock(that);
         }
-    };
-
-    var renderControls = function(){
-
     };
 
     /* ******* PUBLIC ******* */
@@ -20252,16 +20905,22 @@ function(params){
     that.enableEditing = function(){
         if(!that.isEditing){
             that.isEditing = true;
-            if(!that.params['locked']){
-                cm.addClass(that.params['node'], 'is-editable');
-            }
+            cm.addClass(that.params['node'], 'is-editing');
             if(!that.params['visible']){
                 cm.addClass(that.params['node'], 'is-visible');
+            }
+            if(!that.params['locked']){
+                cm.addClass(that.params['node'], 'is-editable');
+                cm.customEvent.trigger(that.params['node'], 'enableEditable', {
+                    'type' : 'child',
+                    'self' : false
+                });
             }
             cm.customEvent.trigger(that.params['node'], 'enableEditing', {
                 'type' : 'child',
                 'self' : false
             });
+            that.triggerEvent('enableEditing');
         }
         return that;
     };
@@ -20269,28 +20928,39 @@ function(params){
     that.disableEditing = function(){
         if(that.isEditing){
             that.isEditing = false;
-            cm.removeClass(that.params['node'], 'is-editable is-visible');
+            cm.removeClass(that.params['node'], 'is-editing');
+            if(!that.params['visible']){
+                cm.removeClass(that.params['node'], 'is-visible');
+            }
+            if(!that.params['locked']){
+                cm.removeClass(that.params['node'], 'is-editable');
+                cm.customEvent.trigger(that.params['node'], 'disableEditable', {
+                    'type' : 'child',
+                    'self' : false
+                });
+            }
             cm.customEvent.trigger(that.params['node'], 'disableEditing', {
                 'type' : 'child',
                 'self' : false
             });
+            that.triggerEvent('disableEditing');
         }
         return that;
     };
 
-    that.addZone = function(name, item){
-        that.zones[name] = item;
+    that.addZone = function(item){
+        that.zones.push(item);
         return that;
     };
 
-    that.removeZone = function(name){
-        delete that.zones[name];
+    that.removeZone = function(zone){
+        cm.arrayRemove(that.zones, zone);
         return that;
     };
 
-    that.setZone = function(zone){
+    that.setZone = function(zone, index){
         destructZone(that.zone);
-        constructZone(zone);
+        constructZone(zone, index);
         return that;
     };
 
@@ -20299,13 +20969,64 @@ function(params){
         return that;
     };
 
+    that.getIndex = function(){
+        if(that.zone){
+            return that.zone.getBlockIndex(that);
+        }
+        return null;
+    };
+
+    that.getLower = function(){
+        var index = that.getIndex();
+        return that.zone.getBlock(index - 1) || null;
+    };
+
+    that.getUpper = function(){
+        var index = that.getIndex();
+        return that.zone.getBlock(index + 1) || null;
+    };
+
+    that.getDragNodes = function(){
+        var nodes = [];
+        cm.forEach(that.nodes['block']['drag'], function(item){
+            nodes.push(item['container']);
+        });
+        return nodes;
+    };
+
+    that.getMenuNodes = function(){
+        return that.nodes['block']['menu'];
+    };
+
+    that.getInnerNode = function(){
+        return that.nodes['block']['inner'];
+    };
+
     that.remove = function(){
-        destructEditor(that.components['editor']);
+        if(!that.isRemoved){
+            that.isRemoved = true;
+            destructZone(that.zone);
+            destructEditor(that.components['editor']);
+            while(that.zones.length){
+                that.zones[0].remove();
+            }
+            that.removeFromStack();
+            cm.remove(that.node);
+            that.triggerEvent('onRemove');
+        }
         return that;
     };
 
+    that.getDimensions = function(){
+        if(!that.styleObject){
+            that.styleObject = cm.getStyleObject(that.node);
+        }
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, null);
+        return that.dimensions;
+    };
+
     that.updateDimensions = function(){
-        that.dimensions = cm.getNodeOffset(that.params['node'], that.styleObject, that.dimensions);
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, that.dimensions);
         return that.dimensions;
     };
 
@@ -20317,57 +21038,62 @@ cm.define('App.Dashboard', {
         'Events'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
-        'onInit',
         'onDragStart',
+        'onMove',
         'onDrop',
+        'onRemoveStart',
         'onRemove',
-        'onReplace'
+        'onRemoveEnd',
+        'onReplaceStart',
+        'onReplace',
+        'onReplaceEnd',
+        'onAppendStart',
+        'onAppend',
+        'onAppendEnd'
     ],
     'params' : {
         'draggableContainer' : 'document.body',
-        'scroll' : true,
-        'scrollNode' : window,
+        'scrollNode' : 'document.body',
         'scrollSpeed' : 1,                           // ms per 1px
+        'scrollStep' : 48,
         'useGracefulDegradation' : true,
         'dropDuration' : 400,
         'moveDuration' : 200,
         'highlightZones' : true,                     // highlight zones on drag start
         'highlightPlaceholders' : true,
-        'animateRemove' : true,
-        'removeNode' : true
+        'placeholderHeight' : 64,
+        'Com.Overlay' : {
+            'container' : 'document.body',
+            'duration' : 0,
+            'autoOpen' : false,
+            'removeOnClose' : true,
+            'showSpinner' : false,
+            'showContent' : false,
+            'position' : 'fixed',
+            'theme' : 'transparent'
+        }
     }
 },
 function(params){
-    var that = this,
-        anims = {},
-        zones = [],
-        zonesList = [],
-        blockList = [],
-        filteredAvailablezones = [],
-        checkInt,
-        placeholderInt,
-        pageSize,
-        isScrollProccess = false,
-
-        current,
-        currentAboveItem,
-        currentPosition,
-        currentZone,
-        currentPlaceholder,
-        previousZone;
+    var that = this;
 
     that.isGracefulDegradation = false;
-    that.isZonesHighlight = false;
-    that.pageSize = {};
+    that.isScrollProccess = false;
+    that.isProccess = false;
+    that.components = {};
+    that.anim = {};
 
+    that.zones = [];
     that.blocks = [];
     that.dummyBlocks = [];
-    that.zones = [];
 
-    that.currentZones = [];
-    that.currentZone = null;
+    that.currentZones = null;
+    that.currentBlocks = null;
     that.currentBlock = null;
+    that.currentBlockOffset = null;
+    that.currentBellow = null;
 
     /* *** INIT *** */
 
@@ -20376,6 +21102,7 @@ function(params){
         that.setParams(params);
         that.convertEvents(that.params['events']);
         validateParams();
+        that.triggerEvent('onRenderStart');
         render();
         that.triggerEvent('onRender');
     };
@@ -20386,294 +21113,179 @@ function(params){
     };
 
     var validateParams = function(){
+        that.params['Com.Overlay']['container'] = that.params['draggableContainer'];
         // Check Graceful Degradation, and turn it to mobile and old ie.
-        if(that.params['useGracefulDegradation'] && ((cm.is('IE') && cm.isVersion() < 9) || cm.isMobile())){
+        if(
+            that.params['useGracefulDegradation']
+            && ((cm.is('IE') && cm.isVersion() < 9)
+            || cm.isMobile())
+        ){
             that.isGracefulDegradation = true;
         }
+        // Permanent disable animation
+        that.isGracefulDegradation = true;
     };
 
     var render = function(){
-        anims['scroll'] = new cm.Animation(that.params['scrollNode']);
+        reset();
+        // Overlay, for protect content while dragging
+        cm.getConstructor('Com.Overlay', function(classConstructor){
+            that.components['overlays'] = new classConstructor(that.params['Com.Overlay']);
+        });
+        // Init scroll
+        that.anim['scroll'] = new cm.Animation(that.params['scrollNode']);
     };
 
-    /* *** DRAG AND DROP PROCESS ** */
+    /* *** DRAG AND DROP ** */
+
+    var reset = function(){
+        // Unset zone, blocks and placeholder bellow current graggable block
+        if(that.currentBellow){
+            unsetCurrentBelow();
+        }
+        // Remove placeholders
+        removePlaceholders();
+        // Reset variables
+        that.currentZones = [];
+        that.currentBlocks = [];
+        that.currentBlock = null;
+        that.currentBlockOffset = {
+            'left' : 0,
+            'top' : 0
+        };
+        that.currentBellow = {
+            'zone' : null,
+            'block' : null,
+            'position' : null,
+            'placeholder' : null
+        };
+        that.isProccess = false;
+    };
 
     var start = function(e, block){
         cm.preventDefault(e);
         // Prevent multiple drag event
-        if(that.currentBlock){
+        if(that.isProccess || that.currentBlock){
             return;
         }
         // Prevent drag event not on LMB
         if(!cm.isTouch && e.button){
             return;
         }
-        // Hide IFRAMES and EMBED tags
-        cm.hideSpecialTags();
+        that.isProccess = true;
+        // Variables
+        var params = getPosition(e);
         cm.addClass(document.body, 'app__dashboard__body');
-        that.pageSize = cm.getPageSize();
-        // Get pointer position
-        var params = {
-            'left' : cm._clientPosition['x'],
-            'top' : cm._clientPosition['y']
-        };
-        // Check event type and get cursor / finger position
-        var tempCurrentAboveItem,
-            tempCurrentPosition;
-        // Filter zones
-        that.currentZones = getDroppableZones(block);
+        // Open overlay to prevent lose focus on child iframe
+        that.components['overlays'].open();
+        // Filter zones and blocks to work with it
+        that.currentZones = getCurrentZones(block);
+        that.currentBlocks = getCurrentBlocks(block);
         // API onDragStart Event
         that.triggerEvent('onDragStart', {
             'item' : block,
             'node' : block.node,
-            'from' : block.zone
+            'zone' : block.zone
         });
         // Prepare widget, get offset, set start position, set widget as current
         prepareBlock(block, params);
         // Highlight zones
         if(that.params['highlightZones']){
-            toggleZonesHighlight();
+            highlightCurrentZones();
         }
-        // Calculate elements position and dimension
-        getPositionsAll();
-        // Render Placeholder Blocks
-        renderPlaceholderBlocks();
-        // Find above block item
-        cm.forEach(that.currentBlock.zone.blocks, function(block){
-            if(x >= block['dimensions']['absoluteX1'] && x < block['dimensions']['absoluteX2'] && y >= block['dimensions']['absoluteY1'] && y <= block['dimensions']['absoluteY2']){
-                tempCurrentAboveItem = block;
-                // Check above block position
-                if((y - tempCurrentAboveItem['dimensions']['absoluteY1']) < (tempCurrentAboveItem['dimensions']['absoluteHeight'] / 2)){
-                    tempCurrentPosition = 'top';
-                }else{
-                    tempCurrentPosition = 'bottom';
-                }
-            }
-        });
-        // If current current block not above other block items
-        if(!tempCurrentAboveItem && current['zone']['items'].length){
-            if(y < current['zone']['dimensions']['y1']){
-                tempCurrentAboveItem = current['zone']['items'][0];
-                tempCurrentPosition = 'top';
-            }else{
-                tempCurrentAboveItem = current['zone']['items'][current['zone']['items'].length - 1];
-                tempCurrentPosition = 'bottom';
-            }
-        }
-        // Set placeholder
-        if(tempCurrentAboveItem){
-            currentPlaceholder = tempCurrentAboveItem['placeholder'][tempCurrentPosition];
-        }else{
-            currentPlaceholder = current['zone']['placeholder'][0];
-        }
-        if(currentPlaceholder){
-            cm.addClass(currentPlaceholder['node'], 'is-active');
-            if(that.params['highlightPlaceholders']){
-                cm.addClass(currentPlaceholder['node'], 'is-highlight');
-            }
-            currentPlaceholder['node'].style.height = [current['dimensions']['absoluteHeight'], 'px'].join('');
-        }
-        // Set current zone and above
-        that.currentZone = current['zone'];
-        currentAboveItem = tempCurrentAboveItem;
-        currentPosition = tempCurrentPosition;
-        that.currentZone.active();
-        // Add move event on document
+        // Update positions of blocks and zones
+        getCurrentDimensions();
+        // Render placeholders
+        renderPlaceholders();
+        // Find zone, block and placeholder under current graggable block
+        setCurrentBelow(
+            getCurrentBelow(params)
+        );
+        // Add events
         cm.addEvent(window, 'mousemove', move);
         cm.addEvent(window, 'mouseup', stop);
+        cm.addEvent(window, 'scroll', scroll);
     };
 
     var move = function(e){
         cm.preventDefault(e);
-        // Check event type and get cursor / finger position
-        var x = cm._clientPosition['x'],
-            y = cm._clientPosition['y'],
-            posY = y - current['dimensions']['offsetY'],
-            posX = x - current['dimensions']['offsetX'],
-            styleX,
-            styleY,
-            tempCurrentzone,
-            tempCurrentAboveItem,
-            tempCurrentPosition;
-        // Calculate drag direction and set new position
-        styleX = [posX, 'px'].join('');
-        styleY = [posY, 'px'].join('');
-        cm.setCSSTranslate(current['node'], styleX, styleY);
+        // Variables
+        var params = getPosition(e);
         // Scroll node
-        if(that.params['scroll']){
-        //if(false){
-            if(y + 48 > pageSize['winHeight']){
-                toggleScroll(1);
-            }else if(y - 48 < 0){
-                toggleScroll(-1);
-            }else{
-                toggleScroll(0);
-            }
-        }
-        // Check and recalculate position
-        checkPosition();
-        // Find above zone
-        cm.forEach(filteredAvailablezones, function(zone){
-            if(x >= zone['dimensions']['x1'] && x < zone['dimensions']['x2'] && y >= zone['dimensions']['y1'] && y <= zone['dimensions']['y2']){
-                if(!tempCurrentzone){
-                    tempCurrentzone = zone;
-                }else if(zone['dimensions']['width'] < tempCurrentzone['dimensions']['width'] || zone['dimensions']['height'] < tempCurrentzone['dimensions']['height']){
-                    tempCurrentzone = zone;
-                }
-            }
-        });
-        // Find above block item
-        if(tempCurrentzone){
-            cm.forEach(tempCurrentzone['items'], function(block){
-                if(x >= block['dimensions']['absoluteX1'] && x < block['dimensions']['absoluteX2'] && y >= block['dimensions']['absoluteY1'] && y <= block['dimensions']['absoluteY2']){
-                    tempCurrentAboveItem = block;
-                    // Check above block position
-                    if((y - tempCurrentAboveItem['dimensions']['absoluteY1']) < (tempCurrentAboveItem['dimensions']['absoluteHeight'] / 2)){
-                        tempCurrentPosition = 'top';
-                    }else{
-                        tempCurrentPosition = 'bottom';
-                    }
-                }
-            });
+        if(params['top'] + that.params['scrollStep'] > cm._pageSize['winHeight']){
+            moveScroll(1);
+        }else if(params['top'] - that.params['scrollStep'] < 0){
+            moveScroll(-1);
         }else{
-            tempCurrentzone = currentZone;
+            moveScroll(0);
         }
-        // If current current block not above other block items
-        if(!tempCurrentAboveItem && tempCurrentzone['items'].length){
-            if(y < tempCurrentzone['dimensions']['innerY1']){
-                tempCurrentAboveItem = tempCurrentzone['items'][0];
-                tempCurrentPosition = 'top';
-            }else{
-                tempCurrentAboveItem = tempCurrentzone['items'][tempCurrentzone['items'].length - 1];
-                tempCurrentPosition = 'bottom';
-            }
-        }
-        // Animate previous placeholder and get current
-        if(currentPlaceholder){
-            cm.removeClass(currentPlaceholder['node'], 'is-active is-highlight');
-        }
-        if(currentAboveItem && tempCurrentAboveItem && currentAboveItem['placeholder'][currentPosition] != tempCurrentAboveItem['placeholder'][tempCurrentPosition]){
-            animatePlaceholder(currentAboveItem['placeholder'][currentPosition], 0, that.params['moveDuration']);
-            currentPlaceholder = tempCurrentAboveItem['placeholder'][tempCurrentPosition];
-        }else if(!currentAboveItem && tempCurrentAboveItem){
-            animatePlaceholder(currentZone['placeholder'][0], 0, that.params['moveDuration']);
-            currentPlaceholder = tempCurrentAboveItem['placeholder'][tempCurrentPosition];
-        }else if(currentAboveItem && !tempCurrentAboveItem){
-            animatePlaceholder(currentAboveItem['placeholder'][currentPosition], 0, that.params['moveDuration']);
-            currentPlaceholder = tempCurrentzone['placeholder'][0];
-        }else if(!currentAboveItem && !tempCurrentAboveItem && currentZone != tempCurrentzone){
-            animatePlaceholder(currentZone['placeholder'][0], 0, that.params['moveDuration']);
-            currentPlaceholder = tempCurrentzone['placeholder'][0];
-        }
-        // Animate current placeholder
-        if(currentPlaceholder){
-            cm.addClass(currentPlaceholder['node'], 'is-active');
-            if(that.params['highlightPlaceholders']){
-                cm.addClass(currentPlaceholder['node'], 'is-highlight');
-            }
-            animatePlaceholder(currentPlaceholder, current['dimensions']['absoluteHeight'], that.params['moveDuration']);
-        }
-        // Unset classname from previous active zone
-        if(currentZone && currentZone != tempCurrentzone){
-            cm.removeClass(currentZone['node'], 'is-active');
-            previousZone = currentZone;
-        }
-        // Set current to global
-        currentZone = tempCurrentzone;
-        currentAboveItem = tempCurrentAboveItem;
-        currentPosition = tempCurrentPosition;
-        // Set active zone class name
-        if(!(previousZone && previousZone['isTemporary'] && currentZone['isRemoveZone'])){
-            cm.addClass(currentZone['node'], 'is-active');
-        }
+        // Move block
+        moveBlock(that.currentBlock, params, true);
+        // Find zone, block and placeholder under current graggable block
+        setCurrentBelow(
+            getCurrentBelow(params)
+        );
     };
 
-    var stop = function(e){
-        var currentHeight;
-        // Remove check position event
-        //checkInt && clearInterval(checkInt);
-        // Remove move events attached on document
-        cm.removeClass(document.body, 'pt__dnd-body');
-        cm.removeEvent(window, 'mousemove', move);
-        cm.removeEvent(window, 'mouseup', stop);
-        // Calculate height of block block, like he already dropped in zone, to animate height of fake empty space
-        getPosition(current);
-        current['node'].style.width = [(currentZone['dimensions']['innerWidth'] - current['dimensions']['margin']['left'] - current['dimensions']['margin']['right']), 'px'].join('');
-        currentHeight = current['node'].offsetHeight + current['dimensions']['margin']['top'] + current['dimensions']['margin']['bottom'];
-        current['node'].style.width = [current['dimensions']['width'], 'px'].join('');
-        // If current block located above another block item, drops after/before it, or drops in zone
-        if(currentAboveItem){
-            // Animate placeholder blocks
-            if(currentHeight != currentAboveItem['placeholder'][currentPosition]['node'].offsetHeight){
-                animatePlaceholder(currentAboveItem['placeholder'][currentPosition], currentHeight, that.params['dropDuration']);
-            }
-            // Drop Item to zone
-            dropBlockToZone(current, currentZone, {
-                'target' : currentAboveItem['node'],
-                'append' : currentPosition == 'top' ? 'before' : 'after',
-                'index' : currentZone['items'].indexOf(currentAboveItem) + (currentPosition == 'top' ? 0 : 1),
-                'top' : [currentPosition == 'top'? currentAboveItem['dimensions']['absoluteY1'] : currentAboveItem['dimensions']['absoluteY2'], 'px'].join(''),
-                'onStop' : unsetCurrentBlock
-            });
-        }else if(currentZone['isRemoveZone'] || currentZone['isTemporary']){
-            removeBlock(current, {
-                'onStop' : unsetCurrentBlock
+    var stop = function(){
+        // Drop block
+        if(!that.currentBellow.zone || that.currentBellow.zone.params['type'] == 'remove'){
+            removeBlock(that.currentBlock, {
+                'onEnd' : reset
             });
         }else{
-            // Animate placeholder blocks
-            animatePlaceholder(currentZone['placeholder'][0], currentHeight, that.params['dropDuration']);
-            // Drop Item to zone
-            dropBlockToZone(current, currentZone, {
-                'onStop' : unsetCurrentBlock
+            dropBlock(that.currentBlock, {
+                'index' : that.currentBellow.placeholder.params['index'],
+                'zone' : that.currentBellow.zone,
+                'placeholder' : that.currentBellow.placeholder,
+                'onEnd' : reset
             });
         }
-        // Unset placeholder
-        if(currentPlaceholder){
-            cm.removeClass(currentPlaceholder['node'], 'is-active is-highlight');
-        }
-        // Unset active zone classname
-        if(currentZone){
-            cm.removeClass(currentZone['node'], 'is-active');
-        }
-        // Un Highlight zones
+        // Unhighlight zones
         if(that.params['highlightZones']){
-            toggleZonesHighlight();
+            unhighlightCurrentZones();
         }
-        // Show IFRAMES and EMBED tags
-        cm.showSpecialTags();
+        // Hide content blocker
+        that.components['overlays'].close();
+        cm.removeClass(document.body, 'app__dashboard__body');
+        // Remove events attached on document and template
+        cm.removeEvent(window, 'mousemove', move);
+        cm.removeEvent(window, 'mouseup', stop);
+        cm.removeEvent(window, 'scroll', scroll);
+    };
+
+    var scroll = function(e){
+        // Variables
+        var params = getPosition(e);
+        // Update positions of blocks and zones
+        updateCurrentDimensions();
+        // Find zone, block and placeholder under current graggable block
+        setCurrentBelow(
+            getCurrentBelow(params)
+        );
     };
 
     /* *** BLOCK *** */
 
-    var initBlock = function(node, zone, params){
-        // Config
-        var block = cm.merge({
-            'node' : node,
-            'styleObject' : cm.getStyleObject(node),
-            'type' : 'item',
-            'placeholder' : {
-                'top' : null,
-                'bottom' : null
-            },
-            'dimensions' : {
-                'offsetX' : 0,
-                'offsetY' : 0
-            }
-        }, params);
-        block['zone'] = zone;
-        block['anim'] = new cm.Animation(block['node']);
-        // Set block event on element
-        initBlockDrag(block);
-        // Return item to push in zone array
-        blockList.push(block);
-        return block;
+    var initBlock = function(item){
+        item.placeholders = {
+            'top' : null,
+            'bottom' : null
+        };
+        cm.forEach(item.getDragNodes(), function(node){
+            cm.addEvent(node, 'mousedown', function(e){
+                start(e, item);
+            });
+        });
+        resetBlock(item);
+        that.blocks.push(item);
     };
 
     var prepareBlock = function(block, params){
-        block.updateDimensions();
-        // Get offset using pointer position (x and y)
-        block.dimensions['offsetLeft'] = block.dimensions['outer']['left'] - params['left'];
-        block.dimensions['offsetTop'] = block.dimensions['outer']['top'] - params['top'];
+        var dimensions = block.getDimensions();
+        // Get offset using pointer position
+        that.currentBlockOffset['top'] = params['top'] - dimensions['outer']['top'];
+        that.currentBlockOffset['left'] = params['left'] - dimensions['outer']['left'];
         // Clone dummy block or unset area from block
         if(block.isDummy){
             that.currentBlock = block
@@ -20682,29 +21294,32 @@ function(params){
             that.currentBlock = block
                 .unsetZone();
         }
-        // Set widget start position
-        that.currentBlock['node'].style.top = 0;
-        that.currentBlock['node'].style.left = 0;
-        moveBlock(that.currentBlock, {
-            'left' : that.currentBlock.dimensions['outer']['left'],
-            'top' : that.currentBlock.dimensions['outer']['top'],
-            'width' : that.currentBlock.dimensions['offset']['width']
-        });
         // Insert widget to body
-        that.params['draggableContainer'].appendChild(that.currentBlock['node']);
+        cm.appendChild(that.currentBlock.node, that.params['draggableContainer']);
         // Set helper classes
-        cm.addClass(that.currentBlock['node'], 'app__dashboard__helper');
+        cm.addClass(that.currentBlock['node'], 'is-immediately');
+        cm.addClass(that.currentBlock['node'], 'is-dragging');
         cm.addClass(that.currentBlock['node'], 'is-active', true);
+        // Set widget start position
+        moveBlock(that.currentBlock, {
+            'top' : dimensions['outer']['top'],
+            'left' : dimensions['outer']['left'],
+            'width' : dimensions['offset']['width']
+        });
+        that.currentBlock.updateDimensions();
+        setTimeout(function(){
+            cm.removeClass(that.currentBlock['node'], 'is-immediately');
+        }, 5);
     };
 
     var moveBlock = function(block, params, offset){
         // Calculate
-        var left = params['left'],
-            top = params['top'],
+        var top = params['top'],
+            left = params['left'],
             node = params['node'] || block['node'];
         if(offset){
-            left += block.dimensions['offsetLeft'];
-            top += block.dimensions['offsetTop'];
+            top -= that.currentBlockOffset['top'];
+            left -= that.currentBlockOffset['left'];
         }
         if(typeof params['width'] != 'undefined'){
             node.style.width = [params['width'], 'px'].join('');
@@ -20718,318 +21333,518 @@ function(params){
         cm.setCSSTranslate(node, [left, 'px'].join(''), [top, 'px'].join(''));
     };
 
-
-    var cloneBlock = function(block){
-        var clonedNode = block['node'].cloneNode(true),
-            zone = zones[0],
-            clonedBlock = initBlock(clonedNode, zone, {});
-
-        clonedBlock['dimensions'] = cm.clone(block['dimensions']);
-        zone['items'].push(clonedBlock);
-        return clonedBlock;
-    };
-
-    var dropBlockToZone = function(block, zone, params){
+    var removeBlock = function(block, params){
+        var node;
+        that.isProccess = true;
+        // Merge params
         params = cm.merge({
-            'target' : zone['node'],
-            'append' : 'child',
-            'index' : 0,
-            'width' : [zone['dimensions']['innerWidth'], 'px'].join(''),
-            'top' : [zone['dimensions']['innerY1'] - block['dimensions']['margin']['top'], 'px'].join(''),
-            'left' : [zone['dimensions']['innerX1'] - block['dimensions']['margin']['left'], 'px'].join(''),
             'onStart' : function(){},
-            'onStop' : function(){}
+            'onEnd' : function(){},
+            'triggerEvent' : true
         }, params);
         // System onStart event
         params['onStart']();
-        // Animate block item, like it drops in zone
-        cm.addClass(block['node'], 'is-drop', true);
-        block['node'].style.width = params['width'];
-        cm.setCSSTranslate(block['node'], params['left'], params['top']);
-        // On Dnimate Stop
-        setTimeout(function(){
-            // Append element in new position
-            switch(params['append']){
-                case 'child' :
-                    cm.appendChild(block['node'], params['target']);
-                    break;
-                case 'before' :
-                    cm.insertBefore(block['node'], params['target']);
-                    break;
-                case 'after' :
-                    cm.insertAfter(block['node'], params['target']);
-                    break;
-                case 'first' :
-                    cm.insertFirst(block['node'], params['target']);
-                    break;
+        // Global event
+        if(params['triggerEvent']){
+            that.triggerEvent('onRemoveStart', block);
+        }
+        // Check if widget exists and placed in DOM
+        if(cm.hasParentNode(block.node)){
+            // Update block dimensions
+            block.updateDimensions();
+            // Init drop state
+            cm.addClass(block.node, 'is-dropping', true);
+            // Move widget
+            if(block === that.currentBlock){
+                node = block.node;
+                moveBlock(block, {
+                    'left' : -block.dimensions['outer']['width'],
+                    'top' : block.dimensions['outer']['top'],
+                    'opacity' : 0
+                });
+            }else{
+                node = cm.Node('div', {'class' : 'app__dashboard__helper'});
+                cm.insertAfter(node, block.node);
+                cm.appendChild(block.node, node);
+                cm.transition(node, {
+                    'properties' : {
+                        'height' : '0px',
+                        'opacity' : 0
+                    },
+                    'duration' : that.params['dropDuration']
+                });
             }
-            // Remove block helper classname
-            cm.removeClass(block['node'], 'pt__dnd-helper is-drop is-active', true);
-            // Reset styles
-            block['node'].style.left = 'auto';
-            block['node'].style.top = 'auto';
-            block['node'].style.width = 'auto';
-            cm.setCSSTranslate(current['node'], 'auto', 'auto');
-            // Set index of block item in new zone
-            zone['items'].splice(params['index'], 0, block);
-            // API onDrop Event
-            that.triggerEvent('onDrop', {
-                'item' : block,
-                'node' : block['node'],
-                'to' : zone,
-                'from' : block['zone'],
-                'index' : params['index']
-            });
-            // Set block new zone
-            block['zone'] = zone;
-            // System onStop event
-            params['onStop']();
+        }else{
+            node = block.node;
+        }
+        // After animation event
+        setTimeout(function(){
+            // Remove temporary node
+            cm.remove(node);
+            // Remove block
+            block.unsetZone()
+                 .remove();
+            if(params['triggerEvent']){
+                that.triggerEvent('onRemove', block);
+                that.triggerEvent('onRemoveEnd', block);
+            }
+            that.isProccess = false;
+            // System onEnd event
+            params['onEnd']();
         }, that.params['dropDuration']);
     };
 
-    var removeBlock = function(block, params){
-        var style, anim, node;
-        // Remove handler
-        var handler = function(){
-            if(that.params['removeNode']){
-                cm.remove(node);
-            }
-            // Remove from block list
-            blockList = blockList.filter(function(item){
-                return item != block;
-            });
-            unsetBlockFromZone(block);
-            // API onRemove Event
-            if(!params['noEvent']){
-                that.triggerEvent('onRemove', {
-                    'item' : block,
-                    'node' : block['node'],
-                    'from' : block['zone']
-                });
-            }
-            // System onStop event
-            params['onStop']();
-        };
-        // Config
+    var dropBlock = function(block, params){
+        var width, height;
+        // Merge params
         params = cm.merge({
-            'isCurrent' : block === current,
-            'isInDOM' : cm.inDOM(block['node']),
+            'index' : 0,
+            'zone' : null,
+            'placeholder' : null,
             'onStart' : function(){},
-            'onStop' : function(){}
+            'onEnd' : function(){}
         }, params);
         // System onStart event
         params['onStart']();
-        // If block not in DOM, we don't need to wrap and animate it
-        if(params['isInDOM'] && that.params['animateRemove']){
-            // If block is current - just animate pull out left, else - wrap to removable node
-            if(params['isCurrent']){
-                node = block['node'];
-                anim = block['anim'];
-                style = {
-                    'left' : [-(block['dimensions']['absoluteWidth'] + 50), 'px'].join(''),
-                    'opacity' : 0
-                }
-            }else{
-                node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable'}), block['node']);
-                anim = new cm.Animation(node);
-                style = {
-                    'height' : '0px',
-                    'opacity' : 0
-                }
-            }
-            // Animate block, like it disappear
-            anim.go({
-                'duration' : that.params['dropDuration'],
-                'anim' : 'smooth',
-                'style' : style,
-                'onStop' : handler
-            });
-        }else{
-            node = block['node'];
-            handler();
+        // Get dimensions
+        params.zone.getDimensions();
+        // Init drop state
+        if(block.isDummy){
+            block.showSpinner();
         }
+        // Get block height
+        width = params.zone.dimensions['inner']['width'] - block.dimensions['margin']['left'] - block.dimensions['margin']['right'];
+        block.node.style.width = [width, 'px'].join('');
+        height = block.node.offsetHeight + block.dimensions['margin']['top'] + block.dimensions['margin']['bottom'];
+        block.node.style.width = [block.dimensions['offset']['width'], 'px'].join('');
+        // Move block
+        cm.addClass(block.node, 'is-dropping', true);
+        if(params.placeholder){
+            params.placeholder.getDimensions();
+            moveBlock(block, {
+                'left' : params.placeholder.dimensions['outer']['left'] - block.dimensions['margin']['left'],
+                'top' : params.placeholder.dimensions['outer']['top'] - block.dimensions['margin']['top'],
+                'width' : width
+            });
+            // Animate placeholder
+            params.placeholder.show(height, that.params['dropDuration'], true);
+        }else{
+            moveBlock(block, {
+                'left' : params.zone.dimensions['inner']['left'] - block.dimensions['margin']['left'],
+                'top' : params.zone.dimensions['inner']['top'] - block.dimensions['margin']['top'],
+                'width' : width
+            });
+        }
+        // Animation end event
+        setTimeout(function(){
+            // Reset styles
+            resetBlock(block);
+            // Append
+            if(params.placeholder){
+                cm.insertAfter(block.node, params.placeholder.node);
+            }else{
+                cm.appendChild(block.node, params.zone.node);
+            }
+            block.setZone(params.zone, params['index']);
+            that.triggerEvent('onDrop', block);
+            // System onEnd event
+            params['onEnd']();
+        }, that.params['dropDuration']);
     };
 
-    var unsetBlockFromZone = function(block){
-        block['zone']['items'] = block['zone']['items'].filter(function(item){
-            return item != block;
+    var appendBlock = function(node, params){
+        var dimensions, temporaryNode;
+        that.isProccess = true;
+        // Merge params
+        params = cm.merge({
+            'block' : null,
+            'zone' : null,
+            'triggerEvent' : true,
+            'onStart' : function(){},
+            'onEnd' : function(){}
+        }, params);
+        // System onStart event
+        params['onStart']();
+        // Global event
+        if(params['triggerEvent']){
+            that.triggerEvent('onAppendStart', {
+                'node' : node
+            });
+        }
+        // Render temporary node
+        temporaryNode = cm.node('div');
+        temporaryNode.style.height = 0;
+        if(params.block){
+            cm.insertAfter(temporaryNode, params.block.node);
+        }else{
+            cm.appendChild(temporaryNode, params.zone.node);
+        }
+        cm.appendChild(node, temporaryNode);
+        cm.addClass(node, 'is-replacing', true);
+        cm.addClass(temporaryNode, 'app__dashboard__helper', true);
+        // Get new block dimensions
+        dimensions = cm.getNodeOffset(node);
+        // Animate
+        cm.transition(temporaryNode, {
+            'properties' : {
+                'height' : [dimensions['outer']['height'], 'px'].join('')
+            },
+            'duration' : that.params['dropDuration']
         });
+        cm.transition(node, {'properties' : {'opacity' : 1}, 'duration' : that.params['dropDuration']});
+        // After animation event
+        setTimeout(function(){
+            cm.removeClass(node, 'is-replacing');
+            cm.insertAfter(node, temporaryNode);
+            cm.remove(temporaryNode);
+            // Global event
+            if(params['triggerEvent']){
+                that.triggerEvent('onAppend', {
+                    'node' : node
+                });
+                that.triggerEvent('onAppendEnd', {
+                    'node' : node
+                });
+            }
+            that.isProccess = false;
+            // System onEnd event
+            params['onEnd']();
+        }, that.params['dropDuration']);
     };
 
-    var unsetCurrentBlock = function(){
-        // Remove placeholder blocks
-        removePlaceholderBlocks();
-        // Reset other
-        current = false;
-        currentAboveItem = false;
-        currentZone = false;
-        previousZone = false;
+    var replaceBlock = function(node, params){
+        var halfTime = that.params['dropDuration'] / 2,
+            dimensions,
+            temporaryNode;
+        that.isProccess = true;
+        // Merge params
+        params = cm.merge({
+            'block' : null,
+            'zone' : null,
+            'triggerEvent' : true,
+            'onStart' : function(){},
+            'onEnd' : function(){}
+        }, params);
+        // System onStart event
+        params['onStart']();
+        // Global event
+        if(params['triggerEvent']){
+            that.triggerEvent('onReplaceStart', {
+                'node' : node
+            });
+        }
+        temporaryNode = cm.node('div');
+        if(params.block){
+            cm.insertAfter(temporaryNode, params.block.node);
+            cm.appendChild(params.block.node, temporaryNode);
+            cm.appendChild(node, temporaryNode);
+            // Animate fade previous block
+            cm.transition(params.block.node, {'properties' : {'opacity' : 0}, 'duration' : halfTime});
+        }else{
+            cm.appendChild(temporaryNode, params.zone.node);
+            cm.appendChild(node, temporaryNode);
+            // Set initial styles
+            temporaryNode.style.height = 0;
+        }
+        cm.addClass(node, 'is-replacing', true);
+        cm.addClass(temporaryNode, 'app__dashboard__helper', true);
+        // Get new block dimensions
+        dimensions = cm.getNodeOffset(node);
+        // Animate
+        cm.transition(temporaryNode, {
+            'properties' : {
+                'height' : [dimensions['outer']['height'], 'px'].join('')
+            },
+            'duration' : that.params['dropDuration']
+        });
+        cm.transition(node, {'properties' : {'opacity' : 1}, 'duration' : halfTime, 'delayIn' : halfTime});
+        // After animation event
+        setTimeout(function(){
+            if(params.block){
+                params.block
+                    .unsetZone()
+                    .remove();
+            }
+            cm.removeClass(node, 'is-replacing');
+            cm.insertAfter(node, temporaryNode);
+            cm.remove(temporaryNode);
+            // Global event
+            if(params['triggerEvent']){
+                that.triggerEvent('onReplace', {
+                    'node' : node
+                });
+                that.triggerEvent('onReplaceEnd', {
+                    'node' : node
+                });
+            }
+            that.isProccess = false;
+            // System onEnd event
+            params['onEnd']();
+        }, that.params['dropDuration']);
+    };
+
+    var resetBlock = function(block){
+        // Remove helper classes
+        cm.removeClass(block.node, 'is-immediately is-dragging is-dropping is-active', true);
+        // Reset styles
+        block.node.style.left = '';
+        block.node.style.top = '';
+        block.node.style.width = '';
+        block.node.style.opacity = '';
+        cm.setCSSTranslate(block.node, 'auto', 'auto');
     };
 
     /* *** PLACEHOLDER *** */
 
-    var renderPlaceholderBlocks = function(){
+    var renderPlaceholders = function(){
         var placeholder;
-        cm.forEach(zones, function(zone){
-            if(zone['isLocked']){
-                return;
+        cm.forEach(that.currentZones, function(zone){
+            zone.placeholders = [];
+            if(!zone['blocks'].length){
+                placeholder = new App.DashboardPlaceholder({
+                    'highlight' : that.params['highlightPlaceholders'],
+                    'animate' : !that.isGracefulDegradation,
+                    'index' : 0,
+                    'container' : zone.node,
+                    'insert' : 'appendChild'
+                });
+                zone.placeholders.push(placeholder);
+            }else{
+                cm.forEach(zone['blocks'], function(block, i){
+                    block.placeholders = {};
+                    if(!i){
+                        placeholder = new App.DashboardPlaceholder({
+                            'highlight' : that.params['highlightPlaceholders'],
+                            'animate' : !that.isGracefulDegradation,
+                            'index' : i,
+                            'container' : block.node,
+                            'insert' : 'insertBefore'
+                        });
+                        zone.placeholders.push(placeholder);
+                    }
+                    placeholder = new App.DashboardPlaceholder({
+                        'highlight' : that.params['highlightPlaceholders'],
+                        'animate' : !that.isGracefulDegradation,
+                        'index' : i + 1,
+                        'container' : block.node,
+                        'insert' : 'insertAfter'
+                    });
+                    zone.placeholders.push(placeholder);
+                    // Associate with block
+                    block.placeholders['top'] = zone.placeholders[i];
+                    block.placeholders['bottom'] = zone.placeholders[i + 1];
+                });
             }
-
-            if(!zone['items'].length){
-                placeholder = renderPlaceholder();
-                cm.appendChild(placeholder['node'], zone['node']);
-                zone['placeholder'].push(placeholder);
-            }
-            cm.forEach(zone['items'], function(block, i){
-                if(i === 0){
-                    placeholder = renderPlaceholder();
-                    cm.insertBefore(placeholder['node'], block['node']);
-                    zone['placeholder'].push(placeholder);
-                }
-                placeholder = renderPlaceholder();
-                cm.insertAfter(placeholder['node'], block['node']);
-                zone['placeholder'].push(placeholder);
-                // Associate with block
-                block['placeholder']['top'] = zone['placeholder'][i];
-                block['placeholder']['bottom'] = zone['placeholder'][i + 1];
-            });
         });
     };
 
-    var renderPlaceholder = function(){
-        var node = cm.Node('div', {'class' : 'pt__dnd-placeholder'});
-        return {
-            'node' : node,
-            'anim' : new cm.Animation(node),
-            'isShow' : false
+    var removePlaceholders = function(){
+        cm.forEach(that.currentZones, function(zone){
+            cm.forEach(zone.placeholders, function(placeholder){
+                placeholder.remove();
+            });
+            zone.placeholders = [];
+        });
+    };
+
+    /* *** CURRENT *** */
+
+    var getCurrentDimensions = function(){
+        var isPlaceholderShow;
+        if(that.currentBellow.placeholder && (isPlaceholderShow = that.currentBellow.placeholder.isShow)){
+            that.currentBellow.placeholder.hide(0);
+        }
+        cm.forEach(that.currentZones, function(item){
+            item.getDimensions();
+        });
+        cm.forEach(that.currentBlocks, function(item){
+            item.getDimensions();
+        });
+        if(that.currentBellow.placeholder && isPlaceholderShow){
+           that.currentBellow.placeholder.restore(0);
+        }
+    };
+
+    var updateCurrentDimensions = function(){
+        var isPlaceholderShow;
+        if(that.currentBellow.placeholder && (isPlaceholderShow = that.currentBellow.placeholder.isShow)){
+            that.currentBellow.placeholder.hide(0);
+        }
+        cm.forEach(that.currentZones, function(item){
+            item.updateDimensions();
+        });
+        cm.forEach(that.currentBlocks, function(item){
+            item.updateDimensions();
+        });
+        if(that.currentBellow.placeholder && isPlaceholderShow){
+            that.currentBellow.placeholder.restore(0);
+        }
+    };
+
+    var getCurrentZones = function(block){
+        return that.zones.filter(function(zone){
+            if(
+                cm.isParent(block.params['node'], zone.params['node'])
+                || zone.params['locked']
+                || zone.params['type'] != 'remove' && block.params['type'] != zone.params['type']
+            ){
+                return false;
+            }
+            return true;
+        });
+    };
+
+    var getCurrentBlocks = function(block){
+        return that.blocks.filter(function(item){
+            if(
+                cm.isParent(block.params['node'], item.params['node'])
+                || block.params['type'] != item.params['type']
+            ){
+                return false;
+            }
+            return true;
+        });
+    };
+
+    var getCurrentBelow = function(params){
+        var temp = {
+            'zone' : null,
+            'block' : null,
+            'position' : null,
+            'placeholder' : null
         };
-    };
-
-    var removePlaceholderBlocks = function(){
-        cm.forEach(zones, function(zone){
-            cm.forEach(zone['placeholder'], function(placeholder){
-                cm.remove(placeholder['node']);
+        // Find zone below current graggable block
+        cm.forEach(that.currentZones, function(zone){
+            if(
+                params['left'] >= zone.dimensions['offset']['left']
+                && params['left'] < zone.dimensions['offset']['right']
+                && params['top'] >= zone.dimensions['offset']['top']
+                && params['top'] <= zone.dimensions['offset']['bottom']
+            ){
+                if(!temp.zone){
+                    temp.zone = zone;
+                }else if(
+                    zone.dimensions['offset']['width'] < temp.zone.dimensions['offset']['width']
+                    || zone.dimensions['offset']['height'] < temp.zone.dimensions['offset']['height']
+                ){
+                    temp.zone = zone;
+                }
+            }
+        });
+        if(!temp.zone){
+            temp.zone = that.currentBellow.zone;
+        }
+        // Find block below current graggable block
+        if(temp.zone){
+            cm.forEach(temp.zone['blocks'], function(block){
+                if(
+                    params['left'] >= block.dimensions['outer']['left']
+                    && params['left'] < block.dimensions['outer']['right']
+                    && params['top'] >= block.dimensions['outer']['top']
+                    && params['top'] <= block.dimensions['outer']['bottom']
+                ){
+                    temp.block = block;
+                    // Find position
+                    if((params['top'] - block.dimensions['outer']['top']) < (block.dimensions['outer']['height'] / 2)){
+                        temp.position = 'top';
+                    }else{
+                        temp.position = 'bottom';
+                    }
+                }
             });
-            zone['placeholder'] = [];
-        });
-    };
-
-    var animatePlaceholder = function(placeholder, height, duration) {
-        var style;
-        height = [height, 'px'].join('');
-        if(!that.isGracefulDegradation && (style = cm.getSupportedStyle('transition-duration'))){
-            placeholder['node'].style[style] = [duration, 'ms'].join('');
+            if(!temp.block && temp.zone['blocks'].length){
+                if(params['top'] < temp.zone.dimensions['inner']['top']){
+                    temp.block = temp.zone['blocks'][0];
+                    temp.position = 'top';
+                }else{
+                    temp.block = temp.zone['blocks'][temp.zone['blocks'].length - 1];
+                    temp.position = 'bottom';
+                }
+            }
         }
-        placeholder['node'].style.height = height;
-    };
-
-    /* *** POSITION CALCULATION FUNCTIONS *** */
-
-    var getPosition = function(item){
-        item['dimensions'] = cm.extend(item['dimensions'], cm.getFullRect(item['node'], item['styleObject']));
-    };
-
-    var getPositions = function(arr){
-        cm.forEach(arr, getPosition);
-    };
-
-    var getPositionsAll = function(){
-        getPositions(zones);
-        cm.forEach(zones, function(zone){
-            getPositions(zone['items']);
-        });
-    };
-
-    var recalculatePosition = function(item){
-        //item['dimensions']['x1'] = cm.getRealX(item['node']);
-        item['dimensions']['y1'] = cm.getRealY(item['node']);
-        //item['dimensions']['x2'] = item['dimensions']['x1'] + item['dimensions']['width'];
-        item['dimensions']['y2'] = item['dimensions']['y1'] + item['dimensions']['height'];
-
-        //item['dimensions']['innerX1'] = item['dimensions']['x1'] + item['dimensions']['padding']['left'];
-        item['dimensions']['innerY1'] = item['dimensions']['y1'] + item['dimensions']['padding']['top'];
-        //item['dimensions']['innerX2'] = item['dimensions']['innerX1'] + item['dimensions']['innerWidth'];
-        item['dimensions']['innerY2'] = item['dimensions']['innerY1'] + item['dimensions']['innerHeight'];
-
-        //item['dimensions']['absoluteX1'] = item['dimensions']['x1'] - item['dimensions']['margin']['left'];
-        item['dimensions']['absoluteY1'] = item['dimensions']['y1'] - item['dimensions']['margin']['top'];
-        //item['dimensions']['absoluteX2'] = item['dimensions']['x2'] + item['dimensions']['margin']['right'];
-        item['dimensions']['absoluteY2'] = item['dimensions']['y2'] + item['dimensions']['margin']['bottom'];
-    };
-
-    var recalculatePositions = function(arr){
-        cm.forEach(arr, recalculatePosition);
-    };
-
-    var recalculatePositionsAll = function(){
-        var placeholderHeight = 0;
-        // Reset current active placeholder height, cause we need to calculate clear positions
-        if(currentPlaceholder){
-            cm.addClass(currentPlaceholder['node'], 'is-immediately');
-            placeholderHeight = currentPlaceholder['node'].offsetHeight;
-            currentPlaceholder['node'].style.height = 0;
+        // Find placeholder
+        if(temp.block){
+            temp.placeholder = temp.block.placeholders[temp.position];
+        }else if(temp.zone){
+            temp.placeholder = temp.zone.placeholders[0];
         }
-        recalculatePositions(zones);
-        cm.forEach(zones, function(zone){
-            recalculatePositions(zone['items']);
-        });
-        // Restoring placeholder height after calculation
-        if(currentPlaceholder && placeholderHeight){
-            currentPlaceholder['node'].style.height = [placeholderHeight, 'px'].join('');
-            (function(currentPlaceholder){
-                setTimeout(function(){
-                    cm.removeClass(currentPlaceholder['node'], 'is-immediately');
-                }, 5);
-            })(currentPlaceholder);
-        }
+        return temp;
     };
 
-    var checkPosition = function(){
-        var filteredZones = getFilteredZones();
-        if(filteredZones[0]['dimensions']['y1'] != cm.getRealY(filteredZones[0]['node'])){
-            recalculatePositionsAll();
+    var setCurrentBelow = function(temp){
+        // Unset old zone and set new one
+        if(
+            that.currentBellow.zone
+            && that.currentBellow.zone.isActive
+            && that.currentBellow.zone != temp.zone
+        ){
+            that.currentBellow.zone.unactive();
+        }
+        if(
+            temp.zone
+            && !temp.zone.isActive
+            && temp.zone != that.currentBellow.placeholder
+        ){
+            temp.zone.active();
+        }
+        // Unset old placeholder and new new one
+        if(
+            that.currentBellow.placeholder
+            && that.currentBellow.placeholder.isActive
+            && that.currentBellow.placeholder != temp.placeholder
+        ){
+            that.currentBellow.placeholder.unactive();
+            that.currentBellow.placeholder.hide(that.params['moveDuration']);
+        }
+        if(
+            temp.placeholder
+            && !temp.placeholder.isActive
+            && temp.placeholder != that.currentBellow.placeholder
+        ){
+            temp.placeholder.active();
+            //temp.placeholder.show(that.currentBlock.dimensions['outer']['height'], that.params['moveDuration']);
+            temp.placeholder.show(that.params['placeholderHeight'], that.params['moveDuration']);
+        }
+        // Update positions of blocks and zones
+        if(
+            that.currentBellow.zone != temp.zone
+            || that.currentBellow.placeholder != temp.placeholder
+        ){
+            //updateCurrentDimensions();
+        }
+        // Set global variables
+        that.currentBellow = temp;
+    };
+
+    var unsetCurrentBelow = function(){
+        if(that.currentBellow.zone){
+            that.currentBellow.zone
+                .unactive();
+        }
+        if(that.currentBellow.placeholder){
+            that.currentBellow.placeholder
+                .unactive()
+                .hide()
+                .remove();
         }
     };
 
     /* *** ZONE *** */
 
     var initZone = function(item){
+        item.placeholders = [];
         that.zones.push(item);
     };
 
-    var getFilteredZones = function(){
-        return zones.filter(function(zone){
-            // Filter out locked zones and inner zones
-            if(zone['isTemporary'] || zone['isSystem']){
-                return false;
-            }
-            // True - pass zone
-            return true;
+    var highlightCurrentZones = function(){
+        cm.forEach(that.currentZones, function(zone){
+            zone.highlight();
         });
     };
 
-    var toggleZonesHighlight = function(){
-        if(that.currentZones){
-            if(that.isZonesHighlight){
-                that.isZonesHighlight = false;
-                cm.forEach(that.currentZones, function(zone){
-                    zone.unhighlight();
-                });
-            }else{
-                that.isZonesHighlight = true;
-                cm.forEach(that.currentZones, function(zone){
-                    zone.highlight();
-                });
-            }
-        }
-    };
-
-    var getDroppableZones = function(block){
-        return that.zones.filter(function(zone){
-            if(cm.isParent(block.params['node'], zone.params['node']) || zone.params['locked'] || block.params['type'] != zone.params['type']){
-                return false;
-            }
-            return true;
+    var unhighlightCurrentZones = function(){
+        cm.forEach(that.currentZones, function(zone){
+            zone.unhighlight();
         });
     };
 
@@ -21046,53 +21861,58 @@ function(params){
 
     /* *** HELPERS *** */
 
-    var toggleScroll = function(speed){
-        var scrollRemaining,
-            duration,
-            styles = {};
-
-        if(speed == 0){
-            isScrollProccess = false;
-            anims['scroll'].stop();
-        }else if(speed < 0 && !isScrollProccess){
-            isScrollProccess = true;
-            duration = cm.getScrollTop(that.params['scrollNode']) * that.params['scrollSpeed'];
-            if(cm.isWindow(that.params['scrollNode'])){
-                styles['docScrollTop'] = 0;
-            }else{
-                styles['scrollTop'] = 0;
-            }
-            anims['scroll'].go({'style' : styles, 'duration' : duration, 'onStop' : function(){
-                isScrollProccess = false;
-                //getPositionsAll();
-                //recalculatePositionsAll();
-            }});
-        }else if(speed > 0 && !isScrollProccess){
-            isScrollProccess = true;
-            scrollRemaining = cm.getScrollHeight(that.params['scrollNode']) - pageSize['winHeight'];
-            if(cm.isWindow(that.params['scrollNode'])){
-                styles['docScrollTop'] = scrollRemaining;
-            }else{
-                styles['scrollTop'] = scrollRemaining;
-            }
-            duration = scrollRemaining * that.params['scrollSpeed'];
-            anims['scroll'].go({'style' : styles, 'duration' : duration, 'onStop' : function(){
-                isScrollProccess = false;
-                //getPositionsAll();
-                //recalculatePositionsAll();
-            }});
+    var getPosition = function(e){
+        if(e.type == 'scroll'){
+            return cm._clientPosition;
         }
+        return cm.getEventClientPosition(e);
+    };
+
+    var moveScroll = function(speed){
+        var duration = 0,
+            move = 0;
+        if(speed == 0){
+            that.isScrollProccess = false;
+            that.anim['scroll'].stop();
+            return true;
+        }
+        if(that.isScrollProccess){
+           return true;
+        }
+        that.isScrollProccess = true;
+        if(speed < 0){
+            move = 0;
+            duration = cm.getBodyScrollTop() * that.params['scrollSpeed'];
+        }else{
+            move = Math.max(cm.getBodyScrollHeight() - cm._pageSize['winHeight'], 0);
+            duration = move * that.params['scrollSpeed'];
+        }
+        that.anim['scroll'].go({'style' : {'docScrollTop' : move}, 'duration' : duration, 'anim' : 'smooth'});
     };
 
     /* ******* MAIN ******* */
 
-    that.addBlock = function(item){
-        initBlock(item);
+    that.addBlock = function(block){
+        if(block.isDummy){
+            initDummyBlock(block);
+        }else{
+            initBlock(block);
+        }
         return that;
     };
 
-    that.addDummyBlock = function(item){
-        initDummyBlock(item);
+    that.removeBlock = function(block, params){
+        removeBlock(block, params);
+        return that;
+    };
+
+    that.replaceBlock = function(node, params){
+        replaceBlock(node, params);
+        return that;
+    };
+
+    that.appendBlock = function(node, params){
+        appendBlock(node, params);
         return that;
     };
 
@@ -21100,170 +21920,126 @@ function(params){
         initZone(item);
         return that;
     };
-
-
-
-    that.getZone = function(node){
-        var zone;
-        cm.forEach(zones, function(item){
-            if(item['node'] === node){
-                zone = item;
-            }
-        });
-        return zone;
-    };
-
-    that.registerZone = function(node, params){
-        if(cm.isNode(node) && node.tagName){
-            initZone(node, params || {});
-        }
-        return that;
-    };
-
-    that.removeZone = function(node, params){
-        if(cm.isNode(node) && cm.inArray(zonesList, node)){
-            zonesList = zonesList.filter(function(zone){
-                return zone != node;
-            });
-            zones = zones.filter(function(zone){
-                return zone['node'] != node;
-            });
-        }
-        return that;
-    };
-
-    that.getBlock = function(node){
-        var block;
-        cm.forEach(blockList, function(item){
-            if(item['node'] === node){
-                block = item;
-            }
-        });
-        return block;
-    };
-
-    that.getBlockList = function(){
-        return blockList;
-    };
-
-    that.registerBlock = function(node, zoneNode, params){
-        var block, zone, newBlock, index, childNodes, blockNodes = [];
-        // Find block item by node
-        block = that.getBlock(node);
-        // If block already exists - reinit it, else - init like new block item
-        if(block){
-            initBlockDrag(block);
-        }else if(cm.inArray(zonesList, zoneNode)){
-            node.setAttribute('data-com-draganddrop', 'block');
-            // Fins zone item by node
-            zone = that.getzone(zoneNode);
-            // Find block index
-            if(zone['blockInChildNodes']){
-                childNodes = zone['node'].childNodes;
-                cm.forEach(childNodes, function(node){
-                    if(node.tagName && node.getAttribute('data-com-draganddrop') == 'block'){
-                        blockNodes.push(node);
-                    }
-                });
-            }else{
-                blockNodes = cm.getByAttr('data-com-draganddrop', 'block', zone['node']);
-            }
-            index = blockNodes.indexOf(node);
-            // Register block
-            newBlock = initBlock(node, zone, params || {});
-            zone['items'].splice(index, 0, newBlock);
-        }
-        return that;
-    };
-
-    that.replaceBlock = function(oldBlockNode, newBlockNode, params){
-        var oldBlock,
-            newBlock;
-        // Find block item
-        cm.forEach(blockList, function(item){
-            if(item['node'] === oldBlockNode){
-                oldBlock = item;
-            }
-        });
-        if(oldBlock){
-            // Find old block zone and index in zone
-            var zone = oldBlock['zone'],
-                index = zone['items'].indexOf(oldBlock),
-                node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable', 'style' : 'height: 0px;'}), newBlockNode),
-                anim = new cm.Animation(node);
-            // Append new block into DOM
-            cm.insertAfter(node, oldBlockNode);
-            // Remove old block
-            removeBlock(oldBlock, params);
-            // Animate new block
-            anim.go({'style' : {'height' : [cm.getRealHeight(node, 'offset', 0), 'px'].join(''), 'opacity' : 1}, 'duration' : 300, 'anim' : 'simple', 'onStop' : function(){
-                cm.insertAfter(newBlockNode, node);
-                cm.remove(node);
-                // Register new block
-                newBlock = initBlock(newBlockNode, zone);
-                zone['items'].splice(index, 0, newBlock);
-                // API onEmbed event
-                that.triggerEvent('onReplace', {
-                    'item' : newBlock,
-                    'node' : newBlock['node'],
-                    'to' : newBlock['to']
-                });
-            }});
-        }
-        return that;
-    };
-
-    that.removeBlock = function(node, params){
-        var block;
-        // Find block item
-        cm.forEach(blockList, function(item){
-            if(item['node'] === node){
-                block = item;
-            }
-        });
-        if(block){
-            // Remove
-            removeBlock(block, params || {});
-        }
-        return that;
-    };
-
-    that.getOrderingNodes = function(){
-        var results = [],
-            arr,
-            filteredZones = getFilteredZones();
-        // Build array
-        cm.forEach(filteredZones, function(zone){
-            arr = {
-                'zone' : zone['node'],
-                'items' : []
-            };
-            cm.forEach(zone['items'], function(item){
-                arr['items'].push(item['node']);
-            });
-            results.push(arr);
-        });
-        return filteredZones.length == 1 ? arr['items'] : results;
-    };
-
-    that.getOrderingIDs = function(){
-        var results = {},
-            arr,
-            filteredZones = getFilteredZones();
-        // Build array
-        cm.forEach(filteredZones, function(zone){
-            arr = {};
-            cm.forEach(zone['items'], function(item, i){
-                if(!item['id']){
-                    throw new Error('Attribute "data-id" not specified on item node.');
-                }
-                arr[item['id']] = i;
-            });
-            results[zone['id']] = arr;
-        });
-        return filteredZones.length == 1 ? arr : results;
-    };
     
+    init();
+});
+cm.define('App.DashboardPlaceholder', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'highlight' : true,
+        'animate' : true,
+        'index' : 0,
+        'container' : cm.node('div'),
+        'insert' : 'appendChild'        // appendChild, insertBefore, insertAfter
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {};
+    that.node = null;
+    that.styleObject = null;
+    that.offsets = null;
+    that.dimensions = null;
+
+    that.isAnimate = false;
+    that.isActive = false;
+    that.isShow = false;
+    that.transitionDurationProperty = null;
+    that.height = 0;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        validateParams();
+        that.triggerEvent('onRenderStart');
+        render();
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        that.transitionDurationProperty = cm.getSupportedStyle('transition-duration');
+        that.isAnimate = that.params['animate'] && that.transitionDurationProperty;
+    };
+
+    var render = function(){
+        // Render structure
+        that.nodes['container'] = cm.node('div', {'class' : 'app__dashboard__placeholder'});
+        cm[that.params['insert']](that.nodes['container'], that.params['container']);
+        that.node = that.nodes['container'];
+        // Calculate dimensions
+        that.getDimensions();
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.active = function(){
+        that.isActive = true;
+        cm.addClass(that.nodes['container'], 'is-active');
+        if(that.params['highlight']){
+            cm.addClass(that.nodes['container'], 'is-highlight');
+        }
+        return that;
+    };
+
+    that.unactive = function(){
+        that.isActive = false;
+        cm.removeClass(that.nodes['container'], 'is-active is-highlight');
+        return that;
+    };
+
+    that.show = function(height, duration, animate){
+        animate = typeof animate == 'undefined' ? that.isAnimate : animate;
+        that.isShow = true;
+        if(animate){
+            that.nodes['container'].style[that.transitionDurationProperty] = [duration, 'ms'].join('');
+        }
+        that.height = height;
+        that.nodes['container'].style.height = [height, 'px'].join('');
+        return that;
+    };
+
+    that.hide = function(duration, animate){
+        animate = typeof animate == 'undefined' ? that.isAnimate : animate;
+        that.isShow = false;
+        if(animate){
+            that.nodes['container'].style[that.transitionDurationProperty] = [duration, 'ms'].join('');
+        }
+        that.nodes['container'].style.height = '0px';
+        return that;
+    };
+
+    that.restore = function(duration){
+        that.show(that.height, duration);
+        return that;
+    };
+
+    that.remove = function(){
+        cm.remove(that.node);
+        return that;
+    };
+
+    that.getDimensions = function(){
+        if(!that.styleObject){
+            that.styleObject = cm.getStyleObject(that.node);
+        }
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, null);
+        return that.dimensions;
+    };
+
+    that.updateDimensions = function(){
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, that.dimensions);
+        return that.dimensions;
+    };
+
     init();
 });
 cm.define('App.DummyBlock', {
@@ -21275,16 +22051,16 @@ cm.define('App.DummyBlock', {
         'Stack'
     ],
     'events' : [
-        'onRender'
+        'onRenderStart',
+        'onRender',
+        'onRemove'
     ],
     'params' : {
         'node' : cm.Node('div'),
         'name' : '',
+        'keyword' : '',
         'type' : 'content',                     // content | form | mail
-        'sidebarName' : 'app-sidebar',
-        'editorName' : 'app-editor',
-        'thisContainer' : 'document.body',
-        'topContainer' : 'top.document.body'
+        'editorName' : 'app-editor'
     }
 },
 function(params){
@@ -21292,11 +22068,13 @@ function(params){
 
     that.isDummy = true;
     that.isEditing = false;
+    that.isRemoved = false;
     that.styleObject = null;
     that.dimensions = null;
 
     that.components = {};
     that.nodes = {
+        'container' : cm.node('div'),
         'dummy' : cm.node('div')
     };
     that.node = null;
@@ -21308,6 +22086,7 @@ function(params){
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
         validateParams();
+        that.triggerEvent('onRenderStart');
         render();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
@@ -21315,55 +22094,133 @@ function(params){
 
     var validateParams = function(){
         that.params['name'] = [that.params['type'], that.params['keyword']].join('_');
-        that.node = that.params['node'];
     };
 
     var render = function(){
-        that.styleObject = cm.getStyleObject(that.node);
-        that.dimensions = cm.getNodeOffset(that.node, that.styleObject);
+        that.node = that.params['node'];
+        // Render spinner
+        renderSpinner();
+        // Calculate dimensions
+        that.getDimensions();
         // Construct
-        new cm.top('Finder')('App.Editor', that.params['editorName'], that.params['topContainer'], constructEditor);
+        new cm.Finder('App.Editor', that.params['editorName'], null, constructEditor);
+    };
+
+    var constructZone = function(classObject, index){
+        if(classObject){
+            that.zone = classObject
+                .addBlock(that, index);
+        }
+    };
+
+    var destructZone = function(classObject){
+        if(classObject){
+            that.zone = classObject
+                .removeBlock(that);
+            that.zone = null;
+        }
     };
 
     var constructEditor = function(classObject){
         if(classObject){
             that.components['editor'] = classObject
-                .addDummyBlock(that.params['name'], that);
+                .addBlock(that);
         }
     };
 
-    var renderLoaderBox = function(){
-        var node;
-        node = cm.Node('div', {'class' : 'pt__box-loader position'},
-            cm.Node('div', {'class' : 'inner'})
+    var renderSpinner = function(){
+        that.nodes['spinner'] = cm.node('div', {'class' : 'app__block-spinner'},
+            cm.node('div', {'class' : 'pt__box-loader is-absolute'},
+                cm.node('div', {'class' : 'inner'})
+            )
         );
-        return node;
+        that.nodes['container'].appendChild(that.nodes['spinner']);
     };
 
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
         that.isEditing = true;
+        cm.addClass(that.params['node'], 'is-editing is-editable is-visible');
         return that;
     };
 
     that.disableEditing = function(){
         that.isEditing = false;
+        cm.removeClass(that.params['node'], 'is-editing is-editable is-visible');
         return that;
+    };
+
+    that.setZone = function(zone, index){
+        destructZone(that.zone);
+        constructZone(zone, index);
+        return that;
+    };
+
+    that.unsetZone = function(){
+        destructZone(that.zone);
+        return that;
+    };
+
+    that.getIndex = function(){
+        if(that.zone){
+            return that.zone.getBlockIndex(that);
+        }
+        return null;
+    };
+
+    that.getLower = function(){
+        var index = that.getIndex();
+        return that.zone.getBlock(index - 1) || null;
+    };
+
+    that.getUpper = function(){
+        var index = that.getIndex();
+        return that.zone.getBlock(index + 1) || null;
     };
 
     that.getDragNodes = function(){
         return [that.node];
     };
 
-    that.updateDimensions = function(){
-        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, that.dimensions);
-        return that.dimensions;
+    that.showSpinner = function(){
+        cm.addClass(that.nodes['spinner'], 'is-visible', true);
+        return that;
+    };
+
+    that.hideSpinner = function(){
+        cm.removeClass(that.nodes['spinner'], 'is-visible');
+        return that;
     };
 
     that.clone = function(){
-        that.node = cm.clone(that.params['node'], true);
+        var params = {
+            'node' : cm.clone(that.node, true)
+        };
+        return that.cloneComponent(params);
+    };
+
+    that.remove = function(){
+        if(!that.isRemoved){
+            that.isRemoved = true;
+            that.removeFromStack();
+            cm.remove(that.node);
+            that.triggerEvent('onRemove');
+        }
         return that;
+    };
+
+    that.getDimensions = function(){
+        if(!that.styleObject){
+            that.styleObject = cm.getStyleObject(that.node);
+        }
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, null);
+        return that.dimensions;
+    };
+
+    that.updateDimensions = function(){
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, that.dimensions);
+        return that.dimensions;
     };
 
     init();
@@ -21378,36 +22235,54 @@ cm.define('App.Editor', {
         'Storage'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onExpand',
         'onCollapse',
-        'onDrop',
-        'onAppend',
-        'onRemove',
-        'onEmbed',
-        'onReplace',
-        'onUpdate',
-        'onForceRender'
+
+        'create',
+        'replace',
+        'move',
+        'delete',
+        'update',
+        'duplicate',
+
+        'createRequest',
+        'replaceRequest',
+        'moveRequest',
+        'deleteRequest',
+        'updateRequest',
+        'duplicateRequest',
+
+        'onProcessEnd'
     ],
     'params' : {
         'node' : cm.Node('div'),
         'name' : 'app-editor',
+        'topMenuName' : 'app-topmenu',
         'sidebarName' : 'app-sidebar',
-        'App.Dashboard' : {}
+        'templateName' : 'app-template',
+        'App.Dashboard' : {},
+        'Com.Overlay' : {
+            'container' : 'document.body',
+            'autoOpen' : false,
+            'removeOnClose' : true,
+            'showSpinner' : true,
+            'showContent' : false,
+            'position' : 'fixed',
+            'theme' : 'light'
+        }
     }
 },
 function(params){
     var that = this;
-    
+
     that.components = {};
     that.nodes = {};
-    that.states = {
-        'sidebarExpanded' : false
-    };
 
-    that.zones = {};
-    that.blocks = {};
-    that.dummyBlocks = {};
+    that.zones = [];
+    that.blocks = [];
+    that.dummyBlocks = [];
     that.isProcessed = false;
     that.isExpanded = false;
 
@@ -21418,117 +22293,71 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
+        that.triggerEvent('onRenderStart');
         render();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
     };
 
     var render = function(){
-        initSidebar();
-        initDashboard();
-        windowResize();
-        cm.addEvent(window, 'resize', windowResize);
-    };
-
-    var initSidebar = function(){
-        new cm.Finder('App.Sidebar', that.params['sidebarName'], null, function(classObject){
+        cm.getConstructor('App.Dashboard', function(classConstructor, className){
+            that.components['dashboard'] = new classConstructor(that.params[className])
+                .addEvent('onDrop', dropRequest)
+                .addEvent('onRemove', removeRequest);
+        });
+        cm.find('App.TopMenu', that.params['topMenuName'], null, function(classObject){
+            that.components['topmenu'] = classObject;
+        });
+        cm.find('App.Sidebar', that.params['sidebarName'], null, function(classObject){
             that.components['sidebar'] = classObject
-                .addEvent('onExpand', sidebarExpandAction)
-                .addEvent('onCollapse', sidebarCollapseAction);
-
-            if(that.components['sidebar'].isExpanded){
-                sidebarExpandAction();
-            }else{
-                sidebarCollapseAction();
-            }
+                .addEvent('onResize', sidebarResizeAction)
+                .addEvent('onExpandEnd', sidebarExpandAction)
+                .addEvent('onCollapseEnd', sidebarCollapseAction);
         });
+        cm.find('App.Template', that.params['templateName'], null, function(classObject){
+            that.components['template'] = classObject;
+        });
+        process();
     };
 
-    var initDashboard = function(){
-        cm.getConstructor('App.Dashboard', function(classConstructor){
-            that.components['dashboard'] = new classConstructor(that.params['App.Dashboard'])
-                .addEvent('onDrop', onDrop)
-                .addEvent('onReplace', onReplace)
-                .addEvent('onRemove', onRemove);
-            // Add Blocks
-            cm.forEach(that.dummyBlocks, function(item){
-                that.components['dashboard'].addDummyBlock(item);
-            });
-            cm.forEach(that.zones, function(item){
-                that.components['dashboard'].addZone(item);
-            });
-        });
+    var process = function(){
+        cm.addClass(cm.getDocumentHtml(), 'is-editor');
+        if(that.components['sidebar'] && that.components['sidebar'].isExpanded){
+            that.components['sidebar'].resize();
+            sidebarExpandAction();
+        }else{
+            sidebarCollapseAction();
+        }
+        if(!that.components['sidebar'] && that.components['topmenu']){
+            adminPageAction();
+        }
+    };
+
+    var sidebarResizeAction = function(sidebar, params){
+        var rule;
+        cm.addClass(cm.getDocumentHtml(), 'is-immediately');
+        if(rule = cm.getCSSRule('html.is-sidebar--expanded .tpl__container')[0]){
+            rule.style.marginLeft = [params['width'], 'px'].join('');
+        }
+        setTimeout(function(){
+            cm.removeClass(cm.getDocumentHtml(), 'is-immediately');
+        }, 5);
     };
 
     var sidebarExpandAction = function(){
         that.isExpanded = true;
+        cm.addClass(cm.getDocumentHtml(), 'is-editing');
         cm.forEach(that.zones, function(item){
             item.enableEditing();
         });
         cm.forEach(that.blocks, function(item){
             item.enableEditing();
         });
+        cm.forEach(that.dummyBlocks, function(item){
+            item.enableEditing();
+        });
+        that.components['template'].redraw();
         that.triggerEvent('onExpand');
-
-        return false;
-
-        var elements;
-        // Enable widgets editable
-        /*
-        elements = cm.getByClass('app__block');
-        cm.forEach(elements, function(widget){
-            if(!cm.isClass(widget, 'is-locked')){
-                cm.addClass(widget, 'is-editable');
-            }
-            if(cm.isClass(widget, 'is-hidden')){
-                cm.addClass(widget, 'is-visible');
-            }
-        });
-        */
-        // Enable columns editable
-        elements = cm.getByClass('app-mod__columns');
-        cm.forEach(elements, function(column){
-            if(!cm.isClass(column, 'is-locked')){
-                cm.addClass(column, 'is-editable');
-            }
-            if(cm.isClass(column, 'is-hidden')){
-                cm.addClass(column, 'is-visible');
-            }
-        });
-        // Enable spacers editable
-        elements = cm.getByClass('app-mod__spacer');
-        cm.forEach(elements, function(spacer){
-            if(!cm.isClass(spacer, 'is-locked')){
-                cm.addClass(spacer, 'is-editable');
-            }
-            if(cm.isClass(spacer, 'is-hidden')){
-                cm.addClass(spacer, 'is-visible');
-            }
-        });
-        // Enable slider editable
-        elements = cm.getByClass('app-mod__slider');
-        cm.forEach(elements, function(slider){
-            if(!cm.isClass(slider, 'is-locked')){
-                cm.addClass(slider, 'is-editable');
-            }
-            if(cm.isClass(slider, 'is-hidden')){
-                cm.addClass(slider, 'is-visible');
-            }
-        });
-        // Enable block editable
-        /*
-        cm.find('App.Block', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.enableEditMode();
-        });
-        */
-        // Enable gridlist editable
-        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.enableEditMode();
-        });
-        // Redraw template
-        cm.find('App.Template', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.redraw();
-        });
     };
 
     var sidebarCollapseAction = function(){
@@ -21539,224 +22368,192 @@ function(params){
         cm.forEach(that.blocks, function(item){
             item.disableEditing();
         });
+        cm.forEach(that.dummyBlocks, function(item){
+            item.disableEditing();
+        });
+        cm.removeClass(cm.getDocumentHtml(), 'is-editing');
+        that.components['template'].redraw();
         that.triggerEvent('onCollapse');
-
-        return false;
-
-        var elements;
-        // Disable widgets editable
-        /*
-        elements = cm.getByClass('app__block');
-        cm.forEach(elements, function(widget){
-            cm.removeClass(widget, 'is-editable is-visible');
-        });
-        */
-        // Disable columns editable
-        elements = cm.getByClass('app-mod__columns');
-        cm.forEach(elements, function(column){
-            cm.removeClass(column, 'is-editable is-visible');
-        });
-        // Disable spacers editable
-        elements = cm.getByClass('app-mod__spacer');
-        cm.forEach(elements, function(spacer){
-            cm.removeClass(spacer, 'is-editable is-visible');
-        });
-        // Disable slider editable
-        elements = cm.getByClass('app-mod__slider');
-        cm.forEach(elements, function(slider){
-            cm.removeClass(slider, 'is-editable is-visible');
-        });
-        // Disable block editable
-        /*
-        cm.find('App.Block', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.disableEditMode();
-        });
-        */
-        // Disable gridlist editable
-        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.disableEditMode();
-        });
-        // Redraw template
-        cm.find('App.Template', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.redraw();
-        });
     };
 
-    var onAdminPage = function(){
+    var adminPageAction = function(){
         // Enable gridlist editable
-        cm.find('Com.GridlistHelper', null, that.nodes['AppTemplate']['container'], function(classObject){
-            classObject.enableEditMode();
+        cm.find('Com.GridlistHelper', null, null, function(classObject){
+            classObject.enableEditing();
         });
     };
 
-    var windowResize = function(){
-        // This code must be placed in Sidebar component!!!
-        animFrame(function(){
-            var pageSize = cm.getPageSize();
+    /* *** DASHBOARD REQUEST EVENTS *** */
 
-            if(that.components['sidebar']){
-                if(pageSize['winWidth'] <= cm._config['adaptiveFrom']){
-                    if(that.components['sidebar'].isExpanded && that.isExpanded){
-                        that.states['sidebarExpanded'] = true;
-                        that.components['sidebar'].collapse(true);
-                    }
-                }else{
-                    if(that.states['sidebarExpanded'] && !that.isExpanded){
-                        that.states['sidebarExpanded'] = false;
-                        that.components['sidebar'].expand(true);
-                    }
-                }
-            }
-        });
-    };
-
-    /* *** DROP EVENTS *** */
-
-    var onDrop = function(dd, widget){
-        if(widget['from']['isTemporary']){
-            widget['dummy'] = widget['item']['drag'];
-            // Embed loader box
-            widget['loaderBox'] = renderLoaderBox();
-            widget['dummy'].appendChild(widget['loaderBox']);
-            cm.addClass(widget['loaderBox'], 'fadein', true);
-            // API onAppend event
-            that.triggerEvent('onAppend', {
-                'item' : widget,
-                'node' : widget['node'],
-                'to' : widget['to'],
-                'index' : widget['index']
-            });
+    var dropRequest = function(dashboard, block){
+        if(block.isDummy){
+            that.createRequest(block);
         }else{
-            // API onDrop event
-            that.triggerEvent('onDrop', widget);
+            that.moveRequest(block);
         }
     };
 
-    var onRemove = function(dd, widget){
-        // API onRemove event
-        that.triggerEvent('onRemove', widget);
-    };
-
-    var onReplace = function(dd, widget){
-        // API onRemove event
-        that.triggerEvent('onReplace', widget);
+    var removeRequest = function(dashboard, block){
+        if(!block.isDummy){
+            that.deleteRequest(block);
+        }
     };
 
     /* ******* MAIN ******* */
 
-    that.addZone = function(name, item){
-        that.zones[name] = item;
-        if(that.components['dashboard']){
-            that.components['dashboard'].addZone(item);
+    /* *** REQUESTS *** */
+
+    that.createRequest = function(block){
+        that.triggerEvent('createRequest', block);
+        return that;
+    };
+
+    that.deleteRequest = function(block){
+        that.triggerEvent('deleteRequest', block);
+        return that;
+    };
+
+    that.moveRequest = function(block){
+        that.triggerEvent('moveRequest', block);
+        return that;
+    };
+
+    that.replaceRequest = function(block){
+        that.triggerEvent('replaceRequest', block);
+        return that;
+    };
+
+    that.updateRequest = function(block){
+        that.triggerEvent('updateRequest', block);
+        return that;
+    };
+
+    that.duplicateRequest = function(block){
+        that.triggerEvent('duplicateRequest', block);
+        return that;
+    };
+
+    /* *** ACTIONS *** */
+
+    that.create = function(node, block){
+        if(node && block){
+            node = !cm.isNode(node) ? cm.strToHTML(node) : node;
+            that.components['dashboard'].replaceBlock(node, {
+                'block' : block,
+                'zone' : block.zone,
+                'onEnd' : function(){
+                    that.triggerEvent('create', node);
+                    that.triggerEvent('onProcessEnd', node);
+                }
+            });
         }
         return that;
     };
 
-    that.removeZone = function(name){
-        delete that.zones[name];
-        return that;
-    };
-
-    that.addBlock = function(name, item){
-        that.blocks[name] = item;
-        if(that.components['dashboard']){
-            that.components['dashboard'].addBlock(item);
+    that.replace = function(node, block){
+        if(node && block){
+            node = !cm.isNode(node) ? cm.strToHTML(node) : node;
+            that.components['dashboard'].replaceBlock(node, {
+                'block' : block,
+                'zone' : block.zone,
+                'onEnd' : function(){
+                    that.triggerEvent('replace', node);
+                    that.triggerEvent('onProcessEnd', node);
+                }
+            });
         }
         return that;
     };
 
-    that.removeBlock = function(name){
-        delete that.blocks[name];
-        return that;
-    };
-
-    that.addDummyBlock = function(name, item){
-        that.dummyBlocks[name] = item;
-        if(that.components['dashboard']){
-            that.components['dashboard'].addDummyBlock(item);
+    that.delete = function(block){
+        if(block){
+            that.components['dashboard'].removeBlock(block, {
+                'triggerEvent' : false,
+                'onEnd' : function(){
+                    that.triggerEvent('delete', block.node);
+                    that.triggerEvent('onProcessEnd', block.node);
+                }
+            });
         }
         return that;
     };
 
-
-
-
-
-    that.registerArea = function(area, params){
-        that.components['dd'].registerArea(area, params);
-        return that;
-    };
-
-    that.removeArea = function(area, params){
-        that.components['dd'].removeArea(area, params);
-        return that;
-    };
-
-    that.removeWidget = function(widget, params){
-        that.components['dd'].removeDraggable(widget, params);
-        return that;
-    };
-
-    that.replaceWidget = function(oldNode, newNode, params){
-        that.components['dd'].replaceDraggable(oldNode, newNode, params);
-        return that;
-    };
-
-    that.deleteAllTemporary = function() {
-        var dummy = cm.getByAttr('data-node', 'dummy', that.nodes['AppTemplate']['container']);
-        cm.forEach(dummy, function(node) {
-            that.removeWidget(node.parentNode);
-        });
-    };
-
-    that.updateTemporaryWidget = function(content) {
-        var dummy = cm.getByAttr('data-node', 'dummy', that.nodes['AppTemplate']['container']);
-        cm.forEach(dummy, function(node) {
-            var element = cm.strToHTML(content);
-            that.components['dd'].replaceDraggable(node.parentNode, element, {'noEvent': true, 'onStop': function() {
-                //register drop areas
-                var areas = cm.getByAttr('data-com-draganddrop', 'area', element);
-                cm.forEach(areas, function(area) {
-                    that.components['dd'].registerArea(area, {});
-                });
-                that.triggerEvent('onUpdate', {'node': element});
-            }});
-        });
-    };
-
-    that.getWidget = function(id) {
-        var draggableList = that.components['dd'].getDraggableList(),
-            widgets = [],
-            result = null;
-        cm.forEach(draggableList, function(item) {
-            widgets = cm.getByClass('app__block', item['node']);
-            if (widgets[0] && widgets[0].getAttribute('data-block-position-id') == id) {
-                result = item;
-            }
-        });
-        return result;
-    };
-
-    that.updateWidget = function(content, id) {
-        var item = that.getWidget(id);
-        if(item){
-            var element = cm.strToHTML(content);
-            that.components['dd'].replaceDraggable(item['node'], element, {'noEvent': true, 'onStop': function() {
-                //register drop areas
-                var areas = cm.getByAttr('data-com-draganddrop', 'area', element);
-                cm.forEach(areas, function(area) {
-                    that.components['dd'].registerArea(area, {});
-                });
-                that.triggerEvent('onUpdate', {'node': element});
-            }});
+    that.duplicate = function(node, block){
+        if(node && block){
+            node = !cm.isNode(node) ? cm.strToHTML(node) : node;
+            that.components['dashboard'].appendBlock(node, {
+                'block' : block,
+                'zone' : block.zone,
+                'onEnd' : function(){
+                    that.triggerEvent('duplicate', node);
+                    that.triggerEvent('onProcessEnd', node);
+                }
+            });
         }
+        return that;
     };
 
-    that.deleteWidget = function(id) {
-        var item = that.getWidget(id);
-        if(item){
-            that.components['dd'].removeDraggable(item['node'], {'noEvent': true});
+    that.update = function(node, block){
+        if(node && block){
+            node = !cm.isNode(node) ? cm.strToHTML(node) : node;
+            cm.remove(block.getInnerNode());
+            cm.appendChild(node, block.getInnerNode());
+            that.triggerEvent('update', node);
+            that.triggerEvent('onProcessEnd', node);
         }
+        return that;
+    };
+
+    /* *** SYSTEM *** */
+
+    that.addZone = function(zone){
+        that.zones.push(zone);
+        that.components['dashboard'].addZone(zone);
+        if(that.components['sidebar'] && that.components['sidebar'].isExpanded){
+            zone.enableEditing();
+        }else{
+            zone.disableEditing();
+        }
+        return that;
+    };
+
+    that.removeZone = function(zone){
+        cm.arrayRemove(that.zones, zone);
+        return that;
+    };
+
+    that.addBlock = function(block){
+        if(block.isDummy){
+            that.dummyBlocks.push(block);
+        }else{
+            var menu = block.getMenuNodes();
+            cm.addEvent(menu['edit'], 'click', function(){
+                that.replaceRequest(block);
+            });
+            cm.addEvent(menu['duplicate'], 'click', function(){
+                that.duplicateRequest(block);
+            });
+            cm.addEvent(menu['delete'], 'click', function(){
+                that.deleteRequest(block);
+            });
+            that.blocks.push(block);
+        }
+        that.components['dashboard'].addBlock(block);
+        if(that.components['sidebar'] && that.components['sidebar'].isExpanded){
+            block.enableEditing();
+        }else{
+            block.disableEditing();
+        }
+        return that;
+    };
+
+    that.removeBlock = function(block){
+        if(block.isDummy){
+            cm.arrayRemove(that.dummyBlocks, block);
+        }else{
+            cm.arrayRemove(that.blocks, block);
+        }
+        return that;
     };
 
     init();
@@ -21902,7 +22699,7 @@ function(params){
             that.components['topMenu'] = classObject;
             that.components['overlays']['topMenu'].embed(that.components['topMenu'].getNodes('inner'));
         });
-        // Get TopMenu
+        // Get Template
         cm.find('App.Template', that.params['templateName'], null, function(classObject){
             that.components['template'] = classObject;
             that.components['overlays']['template'].embed(that.components['template'].getNodes('container'));
@@ -22462,83 +23259,6 @@ function(params){
 
     init();
 });
-App['Rollover'] = function(o){
-    var that = this,
-        config = cm.merge({
-            'node' : cm.Node('div'),
-            'height' : 400,
-            'duration' : 500,
-            'nodes' : {
-                'app-rollover' : {}
-            }
-        }, o),
-        privateConfgig = {
-            'nodes' : {
-                'app-rollover' : ['button', 'container']
-            }
-        },
-        nodes = {},
-        anims = {},
-        startHeight = 0,
-        isOpen;
-
-    var init = function(){
-        var container;
-        // Collect nodes
-        getNodes();
-        // Check height of container and status
-        container = nodes['app-rollover']['container'];
-        if(container.offsetHeight === container.scrollHeight){
-            startHeight = config['height'];
-            isOpen = true;
-            cm.replaceClass(config['node'], 'is-close', 'is-open');
-        }else{
-            startHeight = container.offsetHeight;
-            isOpen = false;
-            cm.replaceClass(config['node'], 'is-open', 'is-close');
-        }
-        // Render
-        render();
-    };
-
-    var getNodes = function(){
-        // Get nodes
-        cm.forEach(privateConfgig['nodes'], function(item, key){
-            nodes[key] = {};
-            cm.forEach(item, function(value){
-                nodes[key][value] = cm.getByAttr(['data', key].join('-'), value, config['node'])[0] || cm.Node('div')
-            });
-        });
-        // Merge collected nodes with each defined in config
-        nodes = cm.merge(nodes, config['nodes']);
-    };
-
-    var render = function(){
-        anims['container'] = new cm.Animation(nodes['app-rollover']['container']);
-        // Add click event on button, that collapse / expand container block
-        cm.addEvent(nodes['app-rollover']['button'], 'click', clickEvent);
-    };
-
-    var clickEvent = function(){
-        console.log(1);
-        if(isOpen){
-            cm.replaceClass(config['node'], 'is-open', 'is-close');
-            anims['container'].go({'style' : {'height' : [startHeight, 'px'].join('')}, 'duration' : config['duration'], 'anim' : 'smooth'});
-        }else{
-            cm.replaceClass(config['node'], 'is-close', 'is-open');
-            anims['container'].go({
-                'style' : {'height' : [(nodes['app-rollover']['container'].scrollHeight + nodes['app-rollover']['button'].scrollHeight), 'px'].join('')},
-                'duration' : config['duration'],
-                'anim' : 'smooth'
-            });
-        }
-        isOpen = !isOpen;
-    };
-
-    /* ******* MAIN ******* */
-
-    init();
-};
 cm.define('App.SearchBox', {
     'modules' : [
         'Params',
@@ -22611,19 +23331,35 @@ cm.define('App.Sidebar', {
         'Stack'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
+        'onCollapseStart',
         'onCollapse',
-        'onExpand'
+        'onCollapseEnd',
+        'onExpandStart',
+        'onExpand',
+        'onExpandEnd',
+        'onTabShow',
+        'onTabHide',
+        'onResize'
     ],
     'params' : {
         'node' : cm.Node('div'),
         'name' : 'app-sidebar',
+        'duration' : 300,
         'active' : 'modules',
         'target' : 'document.html',
         'remember' : true,
+        'ajax' : {
+            'type' : 'json',
+            'method' : 'get',
+            'url' : '',                                             // Request URL. Variables: %tab%, %callback% for JSONP.
+            'params' : ''                                           // Params object. %tab%, %callback% for JSONP.
+        },
         'Com.TabsetHelper' : {
             'node' : cm.Node('div'),
-            'name' : ''
+            'name' : '',
+            'responseHTML' : true
         }
     }
 },
@@ -22642,39 +23378,37 @@ function(params){
     };
     that.components = {};
     that.isExpanded = false;
+    that.openInterval = null;
 
     /* *** CLASS FUNCTIONS *** */
 
     var init = function(){
+        getCSSHelpers();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
-        that.addToStack(that.params['node']);
         validateParams();
+        that.triggerEvent('onRenderStart');
         render();
+        that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
+    };
+
+    var getCSSHelpers = function(){
+        that.params['duration'] = cm.getTransitionDurationFromRule('.app__sidebar__duration');
     };
 
     var validateParams = function(){
         that.params['Com.TabsetHelper']['node'] = that.nodes['inner'];
         that.params['Com.TabsetHelper']['name'] = [that.params['name'], 'tabset'].join('-');
+        that.params['Com.TabsetHelper']['ajax'] = that.params['ajax'];
     };
 
     var render = function(){
         var helperMenuRule, helperContentRule;
-        cm.log(that.nodes);
         // Init tabset
-        cm.getConstructor('Com.TabsetHelper', function(classConstructor){
-            that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper'])
-                .addEvent('onLabelClick', function(tabset, data){
-                    if(!that.isExpanded || tabset.get() == data['id']){
-                        that.toggle();
-                    }
-                })
-                .addTabs(that.nodes['tabs'], that.nodes['labels'])
-                .set(that.params['active']);
-        });
+        processTabset();
         // Get sidebar dimensions from CSS
         scrollBarSize = cm._scrollSize;
         if(helperMenuRule = cm.getCSSRule('.app__sidebar-helper__menu-width')[0]){
@@ -22705,44 +23439,80 @@ function(params){
         }else{
             that.collapse(true);
         }
-        cm.addEvent(window, 'resize', onResize);
+        cm.addEvent(window, 'resize', resizeAction);
+        cm.customEvent.add(that.nodes['container'], 'scrollSizeChange', resizeAction);
+    };
+
+    var processTabset = function(){
+        cm.getConstructor('Com.TabsetHelper', function(classConstructor){
+            that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper'])
+                .addEvent('onLabelClick', function(tabset, data){
+                    if(!that.isExpanded || tabset.get() == data['item']['id']){
+                        that.toggle();
+                    }
+                })
+                .addEvent('onTabHide', function(tabset, data){
+                    that.triggerEvent('onTabHide', data);
+                })
+                .addEvent('onTabShow', function(tabset, data){
+                    that.triggerEvent('onTabShow', data);
+                })
+                .processTabs(that.nodes['tabs'], that.nodes['labels'])
+                .set(that.params['active']);
+        });
     };
 
     var resize = function(){
-        var rule;
+        var rule,
+            params = {
+                'innerWidth' : contentWidth + scrollBarSize,
+                'width' : menuWidth + contentWidth + scrollBarSize,
+                'contentWidth' : contentWidth,
+                'menuWidth' : menuWidth,
+                'scrollBarSize' : scrollBarSize
+            };
         cm.addClass(that.nodes['container'], 'is-immediately');
         if(rule = cm.getCSSRule('.app__sidebar .sidebar__content')[0]){
-            rule.style.width = [contentWidth + scrollBarSize, 'px'].join('');
+            rule.style.width = [params['innerWidth'], 'px'].join('');
         }
         if(rule = cm.getCSSRule('.app__sidebar .sidebar__remove-zone')[0]){
-            rule.style.width = [contentWidth + scrollBarSize, 'px'].join('');
+            rule.style.width = [params['innerWidth'], 'px'].join('');
         }
         if((rule = cm.getCSSRule('.app__sidebar.is-expanded')[0]) || (rule = cm.getCSSRule('.is-expanded.app__sidebar')[0])){
-            rule.style.width = [menuWidth + contentWidth + scrollBarSize, 'px'].join('');
-        }
-        if(rule = cm.getCSSRule('html.is-sidebar--expanded .tpl__container')[0]){
-            rule.style.marginLeft = [menuWidth + contentWidth + scrollBarSize, 'px'].join('');
+            rule.style.width = [params['width'], 'px'].join('');
         }
         if(rule = cm.getCSSRule('.app__sidebar-helper__width-expanded')[0]){
-            rule.style.width = [menuWidth + contentWidth + scrollBarSize, 'px'].join('');
+            rule.style.width = [params['width'], 'px'].join('');
         }
+        that.triggerEvent('onResize', params);
         setTimeout(function(){
             cm.removeClass(that.nodes['container'], 'is-immediately');
         }, 5);
     };
 
-    var onResize = function(){
-        if(cm._scrollSize != scrollBarSize){
-            scrollBarSize = cm._scrollSize;
-            resize();
-        }
+    var resizeAction = function(){
+        animFrame(function(){
+            if(cm._scrollSize != scrollBarSize){
+                scrollBarSize = cm._scrollSize;
+                resize();
+            }
+            if(cm._pageSize['winWidth'] <= cm._config['adaptiveFrom']){
+                if(that.isExpanded){
+                    that.collapse(true);
+                }
+            }
+        });
     };
 
     /* ******* MAIN ******* */
 
     that.collapse = function(isImmediately){
-        var tab;
         that.isExpanded = false;
+        // Write storage
+        if(that.params['remember']){
+            that.storageWrite('isExpanded', false);
+        }
+        that.triggerEvent('onCollapseStart');
         // Set immediately animation hack
         if(isImmediately){
             cm.addClass(that.nodes['container'], 'is-immediately');
@@ -22755,22 +23525,30 @@ function(params){
             cm.removeClass(item['container'], 'active');
         });
         // Remove immediately animation hack
+        that.openInterval && clearTimeout(that.openInterval);
         if(isImmediately){
-            setTimeout(function(){
+            that.openInterval = setTimeout(function(){
                 cm.removeClass(that.nodes['container'], 'is-immediately');
                 cm.removeClass(that.params['target'], 'is-immediately');
+                that.triggerEvent('onCollapse');
+                that.triggerEvent('onCollapseEnd');
             }, 5);
+        }else{
+            that.openInterval = setTimeout(function(){
+                that.triggerEvent('onCollapse');
+                that.triggerEvent('onCollapseEnd');
+            }, that.params['duration'] + 5);
         }
-        // Write storage
-        if(that.params['remember']){
-            that.storageWrite('isExpanded', false);
-        }
-        that.triggerEvent('onCollapse');
         return that;
     };
 
     that.expand = function(isImmediately){
         that.isExpanded = true;
+        // Write storage
+        if(that.params['remember']){
+            that.storageWrite('isExpanded', true);
+        }
+        that.triggerEvent('onExpandStart');
         // Set immediately animation hack
         if(isImmediately){
             cm.addClass(that.nodes['container'], 'is-immediately');
@@ -22783,17 +23561,20 @@ function(params){
             cm.addClass(item['container'], 'active');
         });
         // Remove immediately animation hack
+        that.openInterval && clearTimeout(that.openInterval);
         if(isImmediately){
-            setTimeout(function(){
+            that.openInterval = setTimeout(function(){
                 cm.removeClass(that.nodes['container'], 'is-immediately');
                 cm.removeClass(that.params['target'], 'is-immediately');
+                that.triggerEvent('onExpand');
+                that.triggerEvent('onExpandEnd');
             }, 5);
+        }else{
+            that.openInterval = setTimeout(function(){
+                that.triggerEvent('onExpand');
+                that.triggerEvent('onExpandEnd');
+            }, that.params['duration'] + 5);
         }
-        // Write storage
-        if(that.params['remember']){
-            that.storageWrite('isExpanded', true);
-        }
-        that.triggerEvent('onExpand');
         return that;
     };
 
@@ -22825,6 +23606,11 @@ function(params){
             return that.components['tabset'].get();
         }
         return null;
+    };
+
+    that.resize = function(){
+        resize();
+        return that;
     };
 
     that.getNodes = function(key){
@@ -23301,16 +24087,19 @@ cm.define('App.Template', {
         'Stack'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
-        'onRedraw'
+        'onRedraw',
+        'onResize'
     ],
     'params' : {
         'node' : cm.Node('div'),
         'name' : 'app-template',
         'fixedHeader' : false,
         'stickyFooter' : false,
-        'scroll' : 'document.body',
-        'scrollDuration' : 1000
+        'scrollNode' : 'document.body',
+        'scrollDuration' : 1000,
+        'topMenuName' : 'app-topmenu'
     }
 },
 function(params){
@@ -23324,6 +24113,7 @@ function(params){
         'buttonUp' : cm.Node('div')
     };
 
+    that.compoennts = {};
     that.anim = {};
 
     var init = function(){
@@ -23331,19 +24121,26 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
-        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
         render();
+        that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
         redraw(true);
     };
 
     var render = function(){
+        new cm.Finder('App.TopMenu', that.params['topMenuName'], null, function(classObject){
+            that.compoennts['topMenu'] = classObject;
+        });
         // Scroll Controllers
-        that.anim['scroll'] = new cm.Animation(that.params['scroll']);
+        that.anim['scroll'] = new cm.Animation(that.params['scrollNode']);
         cm.addEvent(that.nodes['buttonUp'], 'click', that.scrollToTop);
-        // Resize events
+        // Events
         cm.addEvent(window, 'resize', function(){
-            redraw(true);
+            animFrame(function(){
+                that.triggerEvent('onResize');
+                redraw(true);
+            });
         });
     };
 
@@ -23369,9 +24166,10 @@ function(params){
 
     var stickyFooter = function(){
         var windowHeight = cm.getPageSize('winHeight'),
-            contentTop = cm.getY(that.nodes['content']),
-            footerHeight = that.nodes['footer'].offsetHeight;
-        that.nodes['content'].style.minHeight = Math.max((windowHeight - contentTop - footerHeight), 0) + 'px';
+            headerHeight = that.nodes['header'].offsetHeight,
+            footerHeight = that.nodes['footer'].offsetHeight,
+            topMenu = that.compoennts['topMenu']? that.compoennts['topMenu'].getDimensions('height') : 0;
+        that.nodes['content'].style.minHeight = Math.max((windowHeight - topMenu - headerHeight - footerHeight), 0) + 'px';
     };
 
     /* ******* MAIN ******* */
@@ -23382,8 +24180,18 @@ function(params){
         return that;
     };
 
+    that.scrollTo = function(num, duration){
+        that.anim['scroll'].go({'style' : {'docScrollTop' : num}, 'duration' : duration, 'anim' : 'smooth'});
+        return that;
+    };
+
     that.scrollToTop = function(){
-        that.anim['scroll'].go({'style' : {'docScrollTop' : '0'}, 'duration' : that.params['scrollDuration'], 'anim' : 'smooth'});
+        that.scrollTo(0, that.params['scrollDuration']);
+        return that;
+    };
+
+    that.scrollStop = function(){
+        that.anim['scroll'].stop();
         return that;
     };
 
@@ -23505,6 +24313,11 @@ function(params){
         return null;
     };
 
+    that.getDimensions = function(key){
+        var rect = cm.getRect(that.nodes['container']);
+        return rect[key] || rect;
+    };
+
     that.getNodes = function(key){
         return that.nodes[key] || that.nodes;
     };
@@ -23519,7 +24332,9 @@ cm.define('App.Zone', {
         'Stack'
     ],
     'events' : [
-        'onRender'
+        'onRenderStart',
+        'onRender',
+        'onRemove'
     ],
     'params' : {
         'node' : cm.Node('div'),
@@ -23527,28 +24342,31 @@ cm.define('App.Zone', {
         'parentId' : 0,
         'type' : 'content',          // content | form | mail | remove
         'locked' : false,
-        'editorName' : 'app-editor',
-        'thisContainer' : 'document.body',
-        'topContainer' : 'top.document.body'
+        'editorName' : 'app-editor'
     }
 },
 function(params){
     var that = this;
 
     that.isEditing = false;
+    that.isRemoved = false;
+    that.isActive = false;
     that.styleObject = null;
+    that.offsets = null;
     that.dimensions = null;
 
     that.components = {};
     that.node = null;
     that.block = null;
-    that.blocks = {};
+    that.dummyBlocks = [];
+    that.blocks = [];
 
     var init = function(){
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
         validateParams();
+        that.triggerEvent('onRenderStart');
         render();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
@@ -23557,12 +24375,12 @@ function(params){
     var validateParams = function(){
         that.params['name'] = [that.params['parentId'], that.params['zone']].join('_');
         that.params['blockName'] = that.params['parentId'];
-        that.node = that.params['node'];
     };
 
     var render = function(){
-        that.styleObject = cm.getStyleObject(that.node);
-        that.dimensions = cm.getNodeOffset(that.node, that.styleObject);
+        that.node = that.params['node'];
+        // Calculate dimensions
+        that.getDimensions();
         // Init zone
         cm.addClass(that.node, 'app__zone');
         cm.addClass(that.node, ['is', that.params['type']].join('-'));
@@ -23572,21 +24390,21 @@ function(params){
             cm.addClass(that.node, 'is-available');
         }
         // Construct
-        new cm.top('Finder')('App.Block', that.params['blockName'], that.params['thisContainer'], constructBlock);
-        new cm.top('Finder')('App.Editor', that.params['editorName'], that.params['topContainer'], constructEditor);
+        new cm.Finder('App.Block', that.params['blockName'], null, constructBlock);
+        new cm.Finder('App.Editor', that.params['editorName'], null, constructEditor);
     };
 
     var constructBlock = function(classObject){
         if(classObject){
             that.block = classObject
-                .addZone(that.params['name'], that);
+                .addZone(that);
         }
     };
 
     var destructBlock = function(classObject){
         if(classObject){
             that.block = classObject
-                .removeZone(that.params['name']);
+                .removeZone(that);
             that.block = null;
         }
     };
@@ -23594,14 +24412,14 @@ function(params){
     var constructEditor = function(classObject){
         if(classObject){
             that.components['editor'] = classObject
-                .addZone(that.params['name'], that);
+                .addZone(that);
         }
     };
 
     var destructEditor = function(classObject){
         if(classObject){
             that.components['editor'] = classObject
-                .removeZone(that.params['name']);
+                .removeZone(that);
         }
     };
 
@@ -23610,8 +24428,9 @@ function(params){
     that.enableEditing = function(){
         if(!that.isEditing){
             that.isEditing = true;
+            cm.addClass(that.node, 'is-editing');
             if(!that.params['locked']){
-                cm.addClass(that.node, 'is-editing');
+                cm.addClass(that.node, 'is-editable');
             }
         }
         return that;
@@ -23621,18 +24440,49 @@ function(params){
         if(that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.node, 'is-editing');
+            if(!that.params['locked']){
+                cm.removeClass(that.node, 'is-editable');
+            }
         }
         return that;
     };
 
-    that.addBlock = function(name, item){
-        that.blocks[name] = item;
+    that.addBlock = function(block, index){
+        if(block.isDummy){
+            if(typeof index != 'undefined' && cm.isNumber(index)){
+                that.dummyBlocks[index] = block;
+            }else{
+                that.dummyBlocks.push(block);
+            }
+        }else{
+            if(typeof index != 'undefined' && cm.isNumber(index)){
+                that.blocks.splice(index, 0, block);
+            }else{
+                that.blocks.push(block);
+            }
+        }
         return that;
     };
 
-    that.removeBlock = function(name){
-        delete that.blocks[name];
+    that.removeBlock = function(block){
+        if(block.isDummy){
+            cm.arrayRemove(that.dummyBlocks, block);
+        }else{
+            cm.arrayRemove(that.blocks, block);
+        }
         return that;
+    };
+
+    that.getBlockIndex = function(block){
+        if(block.isDummy){
+            return that.dummyBlocks.indexOf(block);
+        }else{
+            return that.blocks.indexOf(block);
+        }
+    };
+
+    that.getBlock = function(index){
+        return that.blocks[index];
     };
 
     that.highlight = function(){
@@ -23651,6 +24501,7 @@ function(params){
 
     that.active = function(){
         if(!that.params['locked']){
+            that.isActive = true;
             cm.addClass(that.node, 'is-active');
         }
         return that;
@@ -23658,15 +24509,33 @@ function(params){
 
     that.unactive = function(){
         if(!that.params['locked']){
+            that.isActive = false;
             cm.removeClass(that.node, 'is-active');
         }
         return that;
     };
 
     that.remove = function(){
-        destructBlock(that.block);
-        destructEditor(that.components['editor']);
+        if(!that.isRemoved){
+            that.isRemoved = true;
+            destructBlock(that.block);
+            destructEditor(that.components['editor']);
+            while(that.blocks.length){
+                that.blocks[0].remove();
+            }
+            that.removeFromStack();
+            cm.remove(that.params['node']);
+            that.triggerEvent('onRemove');
+        }
         return that;
+    };
+
+    that.getDimensions = function(){
+        if(!that.styleObject){
+            that.styleObject = cm.getStyleObject(that.node);
+        }
+        that.dimensions = cm.getNodeOffset(that.node, that.styleObject, null);
+        return that.dimensions;
     };
 
     that.updateDimensions = function(){
@@ -23676,6 +24545,7 @@ function(params){
 
     init();
 });
+
 window.Collector = new Com.Collector({
         'autoInit' : true
     })
@@ -23768,7 +24638,12 @@ window.Collector = new Com.Collector({
 
     .add('app-sidebar', function(node){
         new App.Sidebar({
-            'node' : node
+            'node' : node,
+            'events' : {
+                'onTabShow' : function(that, data){
+                    window.Collector.construct(data['item']['tab']['container']);
+                }
+            }
         });
     })
 
@@ -23865,68 +24740,85 @@ window.Collector = new Com.Collector({
     /* *** TEMPLATE EDITOR *** */
 
     .add('app-editor', function(node){
-        var onRequest = function(TE, data){
-            var config = cm.parseJSON(data['node'].getAttribute('data-config')) || {};
-
-            var widget = '<div class="app__block-container" data-com-draganddrop="draggable">' +
-                '<div class="app__block is-editable">' +
-                '<div class="border"></div>' +
-                '<div class="drag" data-com-draganddrop="drag">' +
-                '<div class="icon draggable"></div>' +
-                '</div>' +
-                '<div class="drag is-bottom" data-com-draganddrop="drag-bottom">' +
-                '<div class="icon draggable"></div>' +
-                '</div>' +
-                '<div class="pt__menu menu">' +
-                '<div class="icon small settings"></div>' +
-                '<ul class="pt__menu-dropdown">' +
-                '<li><a>Remove</a></li>' +
-                '</ul>' +
-                '</div>' +
-                '<div class="inner">$content$</div>' +
-                '</div>';
-
-            var types = {
-                'columns' : '<div class="app__module com__columns app-mod__columns is-chassis-visible is-editable" data-element="columns">' +
-                '<div class="inner" data-com__columns="inner">' +
-                '<div class="container" data-com__columns="holder">' +
-                '<div class="com__column" data-com__columns="column" style="width: 33%;">' +
-                '<div class="inner" data-com__columns="column-inner" data-com-draganddrop="area"></div>' +
-                '</div>' +
-                '<div class="com__column" data-com__columns="column" style="width: 34%;">' +
-                '<div class="inner" data-com__columns="column-inner" data-com-draganddrop="area"></div>' +
-                '</div>' +
-                '<div class="com__column" data-com__columns="column" style="width: 33%;">' +
-                '<div class="inner" data-com__columns="column-inner" data-com-draganddrop="area"></div>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>',
-                'content' : '<div class="app__module com__columns app-mod__columns is-chassis-visible is-editable" contenteditable="true">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ipsum est, consectetur nec viverra nec, vestibulum id tellus. Cras neque risus, gravida ornare blandit ut, porttitor placerat leo. Maecenas sodales turpis lacus, ac ultricies odio finibus nec. Nulla et efficitur diam, et lobortis ex. Maecenas dapibus feugiat ligula, vitae dignissim est malesuada sed. Maecenas dictum erat nisl. In non neque lacus. Ut vitae massa purus. Etiam facilisis rhoncus eros quis fermentum. Proin sed libero vel mauris feugiat volutpat sed non ligula. Fusce ultricies in mi a lacinia. Donec faucibus arcu nibh, a pellentesque orci venenatis id. Mauris fringilla eleifend nibh eget finibus.</div>'
-            };
-
-            var content = widget.replace('$content$', types[config['type'] || 'columns']);
-
-            setTimeout(function(){
-                TE.replaceWidget(data['node'], cm.strToHTML(content), {'noEvent' : true});
-            }, 500);
-        };
-
         new App.Editor({
             'node' : node,
             'events' : {
-                'onAppend' : onRequest,
-                'onReplace' : function(TE, data){
-                    window.Collector.construct(data['node']);
+                'createRequest' : function(editor, block){
+                    cm.ajax({
+                        'method' : 'POST',
+                        'url' : cm._baseUrl + '/stuff/ajax.editor.create.php',
+                        'params' : {
+                            'keyword' : block.params['keyword'],
+                            'parentId' : block.zone.params['parentId'],
+                            'type' : block.params['type'],
+                            'zone' : block.zone.params['zone'],
+                            'index' : block.getIndex()
+                        },
+                        'onSuccess' : function(response){
+                            editor.create(response['data'], block);
+                        }
+                    });
+                },
+                'duplicateRequest' : function(editor, block){
+                    cm.ajax({
+                        'method' : 'POST',
+                        'url' : cm._baseUrl + '/stuff/ajax.editor.duplicate.php',
+                        'params' : {
+                            'parentId' : block.zone.params['parentId'],
+                            'type' : block.params['type'],
+                            'zone' : block.zone.params['zone'],
+                            'index' : block.getIndex() + 1
+                        },
+                        'onSuccess' : function(response){
+                            editor.duplicate(response['data'], block);
+                        }
+                    });
+                },
+                'replaceRequest' : function(editor, block){
+                    cm.ajax({
+                        'method' : 'POST',
+                        'url' : cm._baseUrl + '/stuff/ajax.editor.replace.php',
+                        'params' : {
+                            'positionId' : block.params['positionId'],
+                            'parentId' : block.zone.params['parentId'],
+                            'type' : block.params['type'],
+                            'zone' : block.zone.params['zone'],
+                            'index' : block.getIndex()
+                        },
+                        'onSuccess' : function(response){
+                            editor.replace(response['data'], block);
+                        }
+                    });
+                },
+                'deleteRequest' : function(editor, block){
+                    editor.delete(block);
+                },
+                'moveRequest' : function(editor, block){
+                    var upper, upperId, lower, lowerId;
+                    if(upper = block.getUpper()){
+                        upperId = upper.params['positionId'];
+                    }
+                    if(lower = block.getLower()){
+                        lowerId = lower.params['positionId'];
+                    }
+                },
+                'onProcessEnd' : function(editor, node){
+                    window.Collector.construct(node);
                 }
             }
         });
     });
 
 cm.onReady(function(){
-    window.Collector.construct();
+    window.Collector.construct(document.body);
 });
+
+cm._baseUrl = [cm._baseUrl, 'docs/build'].join('/');
+
+Com.Dialog.prototype.setParams({
+    'container' : 'top.document.body'
+});
+
 App.LoginBox.prototype.setParams({
     'Com.Tooltip' : {
         'adaptiveX' : true,

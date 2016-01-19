@@ -5,125 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Elements: Template Editor</title>
 
-    <link type="text/css" rel="stylesheet" href="../../../../../css/QuickSilk-UI.css">
-
-    <script type="text/javascript" src="../../../../common/build/js/MagpieUI.js"></script>
-    <script type="text/javascript" src="../../../js/build/QuickSilk-Application.js"></script>
-    <script type="text/javascript" src="../../../../../js/custom.js"></script>
-
-    <script type="text/javascript">
-        cm.onReady(function(){
-            var components;
-            // Components
-            components = new Com.Collector()
-                .addEvent('onConstruct', function(){
-                    Part.Menu();
-                })
-                .add('columns', function(node){
-                    new Com.Columns({
-                        'columns' : node
-                    });
-                })
-                .add('tabset-helper', function(node){
-                    new Com.TabsetHelper({
-                        'node' : node
-                    });
-                })
-                .add('togglebox', function(node){
-                    new Com.ToggleBox({
-                        'node' : node
-                    });
-                })
-                .add('app-template', function(node){
-                    new App.Template({
-                        'node' : node
-                    });
-                })
-                .add('app-topmenu', function(node){
-                    new App.TopMenu({
-                        'node' : node
-                    });
-                })
-                .add('app-sidebar', function(node){
-                    new App.Sidebar({
-                        'node' : node
-                    });
-                })
-                .add('app-helptour', function(node){
-                    new App.HelpTour({
-                        'node' : node
-                    });
-                })
-                .add('template-editor', function(node){
-                    var onRequest = function(TE, data){
-                        var config = cm.parseJSON(data['node'].getAttribute('data-config')) || {};
-
-                        var widget = '<div class="app__block-container" data-com-draganddrop="draggable">' +
-                                '<div class="app__block is-editable">' +
-                                '<div class="border"></div>' +
-                                '<div class="drag" data-com-draganddrop="drag">' +
-                                '<div class="icon draggable"></div>' +
-                                '</div>' +
-                                '<div class="drag is-bottom" data-com-draganddrop="drag-bottom">' +
-                                '<div class="icon draggable"></div>' +
-                                '</div>' +
-                                '<div class="pt__menu menu">' +
-                                '<div class="icon small settings"></div>' +
-                                '<ul class="pt__menu-dropdown">' +
-                                '<li><a>Remove</a></li>' +
-                                '</ul>' +
-                                '</div>' +
-                                '<div class="inner">$content$</div>' +
-                                '</div>';
-
-                        var types = {
-                            'columns' : '<div class="app__module com__columns app-mod__columns is-chassis-visible is-editable" data-element="columns">' +
-                                        '<div class="inner" data-com__columns="inner">' +
-                                        '<div class="container" data-com__columns="holder">' +
-                                        '<div class="com__column" data-com__columns="column" style="width: 33%;">' +
-                                        '<div class="inner" data-com__columns="column-inner" data-com-draganddrop="area"></div>' +
-                                        '</div>' +
-                                        '<div class="com__column" data-com__columns="column" style="width: 34%;">' +
-                                        '<div class="inner" data-com__columns="column-inner" data-com-draganddrop="area"></div>' +
-                                        '</div>' +
-                                        '<div class="com__column" data-com__columns="column" style="width: 33%;">' +
-                                        '<div class="inner" data-com__columns="column-inner" data-com-draganddrop="area"></div>' +
-                                        '</div>' +
-                                        '</div>' +
-                                        '</div>' +
-                                        '</div>' +
-                                        '</div>',
-                            'content' : '<div class="app__module com__columns app-mod__columns is-chassis-visible is-editable" contenteditable="true">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ipsum est, consectetur nec viverra nec, vestibulum id tellus. Cras neque risus, gravida ornare blandit ut, porttitor placerat leo. Maecenas sodales turpis lacus, ac ultricies odio finibus nec. Nulla et efficitur diam, et lobortis ex. Maecenas dapibus feugiat ligula, vitae dignissim est malesuada sed. Maecenas dictum erat nisl. In non neque lacus. Ut vitae massa purus. Etiam facilisis rhoncus eros quis fermentum. Proin sed libero vel mauris feugiat volutpat sed non ligula. Fusce ultricies in mi a lacinia. Donec faucibus arcu nibh, a pellentesque orci venenatis id. Mauris fringilla eleifend nibh eget finibus.</div>'
-                        };
-
-                        var content = widget.replace('$content$', types[config['type'] || 'columns']);
-
-                        setTimeout(function(){
-                            TE.replaceWidget(data['node'], cm.strToHTML(content), {'noEvent' : true});
-                        }, 500);
-                    };
-
-                    new App.Editor({
-                        'node' : node,
-                        'events' : {
-                            'onAppend' : onRequest,
-                            'onReplace' : function(TE, data){
-                                components.construct(data['node']);
-                                // Register areas
-                                var areas = cm.getByAttr('data-com-draganddrop', 'area', data['node']);
-                                cm.forEach(areas, function(area){
-                                    TE.registerArea(area, {});
-                                });
-                            }
-                        }
-                    });
-                })
-                .construct();
-        });
-    </script>
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
 </head>
 
-<body data-element="template-editor">
+<body data-element="app-editor">
 
 <!-- [* ******* TOPMENU START ******* *] -->
 
@@ -348,7 +234,7 @@
 
 <!-- [* ******* SIDEBAR START ******* *] -->
 
-<div class="app__sidebar is-expanded" data-node="AppSidebar:{}:container" data-element="app-sidebar">
+<div class="app__sidebar" data-node="AppSidebar:{}:container" data-element="app-sidebar">
     <div class="inner" data-node="inner">
         <div class="sidebar__menu">
             <ul>
@@ -364,6 +250,9 @@
                 <li data-node="labels:[]:container" data-config='{"id" : "templates"}'>
                     <a class="icon app-i app-i__templates" title="Templates"></a>
                 </li>
+                <li class="hidden" data-node="labels:[]:container" data-config='{"id" : "form-modules", "isHidden" : true, "ajax" : {"url" : "%baseurl%/stuff/ajax.sidebar.php?tab=%tab%"}}'>
+                    <a class="icon app-i app-i__form" title="Form Modules"></a>
+                </li>
             </ul>
             <div class="sidebar__menu__button" data-node="AppSidebar.collapseButtons:[]:container">
                 <div class="icon cm-i cm-i__circle-arrow-right"></div>
@@ -377,7 +266,7 @@
                         <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Modules
                     </div>
 
-                    <div class="sidebar__content__descr" data-node="AppSidebar.areas:[]:container">
+                    <div class="sidebar__content__descr">
                         <div class="inner">
                             <dl class="com__togglebox app__blocks-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app__sidebar-main"}' data-node="ComToggleBox.container">
                                 <dt data-node="ComToggleBox.button">
@@ -385,7 +274,7 @@
                                     <span class="title">Main</span>
                                 </dt>
                                 <dd data-node="ComToggleBox.target">
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "logo"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-logo"></div>
@@ -393,7 +282,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container" data-config='{"type" : "content"}'>
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "content"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-content"></div>
@@ -401,7 +290,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "menu"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-menu"></div>
@@ -409,7 +298,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "column"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-column"></div>
@@ -417,7 +306,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "zone"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-zone"></div>
@@ -425,15 +314,15 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "workingarea"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
-                                                <div class="icon module-zone"></div>
+                                                <div class="icon module-workingarea"></div>
                                                 <div class="caption">Working Area</div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "divider"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-divider"></div>
@@ -441,7 +330,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "spacer"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-spacer"></div>
@@ -449,7 +338,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "tabs"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-tabs"></div>
@@ -457,7 +346,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "flickr"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-flickr"></div>
@@ -465,7 +354,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "languageswitcher"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-languageswitcher"></div>
@@ -473,7 +362,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "d3"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-d3"></div>
@@ -481,11 +370,19 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "rss"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-rss"></div>
                                                 <div class="caption">RSS</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "rss"}'>
+                                        <div class="app__block-dummy" data-node="dummy">
+                                            <div class="inner">
+                                                <div class="icon module-form_builder"></div>
+                                                <div class="caption">Forms</div>
                                             </div>
                                         </div>
                                     </div>
@@ -498,7 +395,7 @@
                                     <span class="title">Service</span>
                                 </dt>
                                 <dd data-node="ComToggleBox.target">
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "login"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-login"></div>
@@ -506,7 +403,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "registration"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-registration"></div>
@@ -514,7 +411,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "search"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-search"></div>
@@ -522,7 +419,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "googlemap"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-googlemap"></div>
@@ -530,7 +427,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "breadcrumbs"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-breadcrumb"></div>
@@ -547,7 +444,7 @@
                                     <span class="title">Media</span>
                                 </dt>
                                 <dd data-node="ComToggleBox.target">
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "image"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-image"></div>
@@ -555,7 +452,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "slider"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-slider"></div>
@@ -563,7 +460,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "imagegallery"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-imagegallery"></div>
@@ -571,7 +468,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "videogallery"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-videogallery"></div>
@@ -588,7 +485,7 @@
                                     <span class="title">Social</span>
                                 </dt>
                                 <dd data-node="ComToggleBox.target">
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "socialmedia"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-socialmedia"></div>
@@ -596,7 +493,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "socialmedia_share"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-socialmedia_share"></div>
@@ -604,7 +501,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "socialmedia_rating"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-socialmedia_rating"></div>
@@ -612,7 +509,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "comment"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-comment"></div>
@@ -620,7 +517,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "memberdirectory"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-memberdirectory"></div>
@@ -628,7 +525,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "memberwidget"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-memberwidget"></div>
@@ -636,7 +533,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "filegridlist"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-filegridlist"></div>
@@ -644,7 +541,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "forum"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-forum"></div>
@@ -652,7 +549,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "forum_build"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-forum_build"></div>
@@ -669,7 +566,7 @@
                                     <span class="title">Blog</span>
                                 </dt>
                                 <dd data-node="ComToggleBox.target">
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "blogcontent"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-blogcontent"></div>
@@ -677,7 +574,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "blogblock"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-blogblock"></div>
@@ -685,7 +582,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "blogcategories"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-blogcategories"></div>
@@ -693,7 +590,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "blogcalendar"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-blogcalendar"></div>
@@ -701,7 +598,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "blogarchive"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-blogarchive"></div>
@@ -709,7 +606,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "blogroll"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-blogroll"></div>
@@ -726,7 +623,7 @@
                                     <span class="title">Events</span>
                                 </dt>
                                 <dd data-node="ComToggleBox.target">
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "events"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-events"></div>
@@ -734,7 +631,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "latestevents"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-latestevents"></div>
@@ -742,7 +639,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "eventscalendar"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-eventscalendar"></div>
@@ -759,7 +656,7 @@
                                     <span class="title">Other</span>
                                 </dt>
                                 <dd data-node="ComToggleBox.target">
-                                    <div class="app__block-container" data-node="AppSidebar.widgets:[]:container">
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "default"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon"></div>
@@ -951,10 +848,20 @@
                         </div>
                     </div>
                 </li>
+                <li class="sidebar__content__modules" data-node="tabs:[]:container" data-config='{"id" : "form-modules"}'>
+                    <div class="sidebar__content__title">
+                        <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Form Modules
+                    </div>
+
+                    <div class="sidebar__content__descr">
+                        <div class="inner" data-node="inner">
+                        </div>
+                    </div>
+                </li>
             </ul>
         </div>
 
-        <div class="sidebar__remove-zone" data-node="AppSidebar.removeZone">
+        <div class="sidebar__remove-zone" data-element="app-zone" data-config='{"type" : "remove", "zone" : "remove", "parentId" : "sidebar"}'>
             <div class="sidebar__content__title">Drop here to remove</div>
         </div>
     </div>
@@ -971,7 +878,7 @@
 
         <div class="tpl__header" data-node="AppTemplate.header">
             <div class="tpl__header__inner">
-                <div class="app__area-header main" data-com-draganddrop="area"></div>
+                <div class="app__zone-header main" data-element="app-zone" data-config='{"zone" : "header_main", "parentId" : "template"}'></div>
             </div>
         </div>
 
@@ -981,7 +888,7 @@
 
         <div class="tpl__content" data-node="AppTemplate.content">
             <div class="tpl__content__inner">
-                <div class="app__area-main" data-com-draganddrop="area"></div>
+                <div class="app__zone-main" data-element="app-zone" data-config='{"zone" : "content", "parentId" : "template"}'></div>
             </div>
         </div>
 
@@ -992,7 +899,7 @@
 
         <div class="tpl__footer" data-node="AppTemplate.footer">
             <div class="tpl__footer__inner">
-                <div class="app__area-footer main" data-com-draganddrop="area"></div>
+                <div class="app__zone-header main" data-element="app-zone" data-config='{"zone" : "footer_main", "parentId" : "template"}'></div>
             </div>
         </div>
 

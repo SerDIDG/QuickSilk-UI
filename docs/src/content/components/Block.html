@@ -1,0 +1,51 @@
+<div class="app__block-container app__block--123">
+    <div class="app__block"></div>
+    <style type="text/css" class="app__block__styles">
+        /* CSS goes here */
+    </style>
+</div>
+
+
+<!-- Если будешь использовать less компилятор -->
+
+.app__block--123 {
+    // Block indent goes here
+    // margin: 0 0 24px; - for example
+
+    > .app__block {
+        // Block styles goes here (background, min-height, padding, etc)
+    }
+
+    // Mobile
+    @media only screen and (max-width : 768px) {
+        display: block / none;
+    }
+
+    // Print
+    @media print {
+        display: block / none;
+    }
+}
+
+<!-- Если будешь использовать обычный CSS -->
+
+.app__block--123 {
+    // Block indent goes here
+    // margin: 0 0 24px; - for example
+}
+
+.app__block--123 > .app__block {
+    // Block styles goes here (background, min-height, padding, etc)
+}
+
+@media only screen and (max-width : 768px) {
+    .app__block--123 {
+        display: block / none;
+    }
+}
+
+@media print {
+    .app__block--123 {
+        display: block / none;
+    }
+}
