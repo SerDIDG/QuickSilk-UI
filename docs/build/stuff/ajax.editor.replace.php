@@ -10,8 +10,7 @@ $config = array(
 	'positionId' => $_POST['positionId'],
 	'zone' => $_POST['zone'],
 	'parentId' => $_POST['parentId'],
-	'type' => $_POST['type'],
-	'index' => $_POST['index']
+	'type' => $_POST['type']
 );
 
 $response = json_encode(array(

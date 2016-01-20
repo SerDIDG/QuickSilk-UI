@@ -14434,28 +14434,26 @@ h6 .com__glossary .com__glossary__title {
 .tpl__footer {
   position: relative;
 }
-.tpl__header {
+.tpl__header__container {
   z-index: 3;
 }
-.tpl__header.is-fixed {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: auto;
+.tpl__header__container.is-fixed,
+.tpl__header__container.is-overlapping {
+  position: absolute;
   left: 0;
+  right: 0;
+}
+.tpl__header__container.is-fixed {
+  position: fixed;
+}
+.tpl__header {
+  z-index: 3;
 }
 .tpl__content {
   z-index: 1;
 }
 .tpl__footer {
   z-index: 2;
-}
-.tpl__footer.is-fixed {
-  position: fixed;
-  top: auto;
-  right: 0;
-  bottom: 0;
-  left: 0;
 }
 .tpl__container__inner,
 .tpl__header__inner,
@@ -14469,6 +14467,14 @@ h6 .com__glossary .com__glossary__title {
   padding: 0 24px;
 }
 .tpl__container__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.tpl__header__container.is-fixed {
+  padding: 0 24px;
+}
+.tpl__header__container.is-fixed .tpl__header {
+  width: 100%;
   max-width: 1000px;
   margin: 0 auto;
 }
@@ -14488,9 +14494,18 @@ html.is-sidebar .tpl__container {
   -webkit-transition: margin 500ms ease-in-out;
   transition: margin 500ms ease-in-out;
 }
+html.is-sidebar .tpl__header__container.is-fixed {
+  left: 48px;
+  -webkit-transition: left 500ms ease-in-out;
+  transition: left 500ms ease-in-out;
+}
 html.is-sidebar--expanded .tpl__container {
   margin-left: 350px;
 }
+html.is-sidebar--expanded .tpl__header__container.is-fixed {
+  left: 350px;
+}
+html.is-sidebar--expanded .tpl__header__container:hover,
 html.is-sidebar--expanded .tpl__header:hover,
 html.is-sidebar--expanded .tpl__content:hover,
 html.is-sidebar--expanded .tpl__footer:hover {
@@ -14502,7 +14517,8 @@ html:not(.is-editing) .app__module__controls--edit {
 html:not(.is-editing).is-editor .app__module__controls {
   display: none;
 }
-html.is-immediately .tpl__container {
+html.is-immediately .tpl__container,
+html.is-immediately .tpl__header__container {
   -webkit-transition: none !important;
   transition: none !important;
 }
@@ -14517,11 +14533,19 @@ html.is-immediately .tpl__container {
   html.is-adaptive.is-sidebar--collapsed .tpl__container {
     margin-left: 0;
   }
+  html.is-adaptive.is-sidebar .tpl__header__container.is-fixed,
+  html.is-adaptive.is-sidebar--collapsed .tpl__header__container.is-fixed {
+    left: 0;
+  }
 }
 /* *** PARTS: UI: PRINT *** */
 @media print {
   .tpl__container {
     margin: 0 !important;
+  }
+  .tpl__header__container.is-fixed,
+  .tpl__header__container.is-overlapping {
+    left: 0 !important;
   }
   .app__module__controls--edit,
   .app__module__controls {

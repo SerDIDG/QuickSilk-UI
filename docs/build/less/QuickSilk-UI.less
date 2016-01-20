@@ -15197,13 +15197,23 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
-.tpl__header {
+.tpl__header__container {
     z-index: 3;
+
+    &.is-fixed,
+    &.is-overlapping {
+        position: absolute;
+        left: 0;
+        right: 0;
+    }
 
     &.is-fixed {
         position: fixed;
-        .mx__position(0, 0, auto, 0);
     }
+}
+
+.tpl__header {
+    z-index: 3;
 }
 
 .tpl__content {
@@ -15212,11 +15222,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .tpl__footer {
     z-index: 2;
-
-    &.is-fixed {
-        position: fixed;
-        .mx__position(auto, 0, 0, 0);
-    }
 }
 
 .tpl__container__inner,
@@ -15267,6 +15272,18 @@ h1, h2, h3, h4, h5, h6 {
     .tpl__container__inner {
         max-width: @AppTpl-Container-Width;
         .mx__align(@AppTpl-Container-Align);
+    }
+
+    .tpl__header__container {
+        &.is-fixed {
+            padding: 0 @AppTpl-Container-Indent;
+
+            .tpl__header {
+                width: 100%;
+                max-width: @AppTpl-Container-Width;
+                .mx__align(@AppTpl-Container-Align);
+            }
+        }
     }
 
     .tpl__header__size(content);
@@ -15369,6 +15386,13 @@ html {
             margin-left: @AppSidebar-WidthCollapsed;
             .mx__transition(margin, @AppSidebar-Duration);
         }
+
+        .tpl__header__container {
+            &.is-fixed {
+                left: @AppSidebar-WidthCollapsed;
+                .mx__transition(left, @AppSidebar-Duration);
+            }
+        }
     }
 
     &.is-sidebar--expanded {
@@ -15376,6 +15400,13 @@ html {
             margin-left: @AppSidebar-WidthExpanded;
         }
 
+        .tpl__header__container {
+            &.is-fixed {
+                left: @AppSidebar-WidthExpanded;
+            }
+        }
+
+        .tpl__header__container,
         .tpl__header,
         .tpl__content,
         .tpl__footer {
@@ -15398,7 +15429,8 @@ html {
     }
 
     &.is-immediately {
-        .tpl__container {
+        .tpl__container,
+        .tpl__header__container {
             .cm__transition-none;
         }
     }
@@ -15421,6 +15453,12 @@ html {
             .tpl__container {
                 margin-left: 0;
             }
+
+            .tpl__header__container {
+                &.is-fixed {
+                    left: 0;
+                }
+            }
         }
     }
 }
@@ -15431,6 +15469,13 @@ html {
 
     .tpl__container {
         margin: 0 !important;
+    }
+
+    .tpl__header__container {
+        &.is-fixed,
+        &.is-overlapping {
+            left: 0 !important;
+        }
     }
 
     .app__module__controls--edit,

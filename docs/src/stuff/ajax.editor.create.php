@@ -5,8 +5,7 @@ $config = array(
 	'positionId' => $date->getTimestamp(),
 	'zone' => $_POST['zone'],
 	'parentId' => $_POST['parentId'],
-	'type' => $_POST['type'],
-	'index' => $_POST['index']
+	'type' => $_POST['type']
 );
 
 $module = '';

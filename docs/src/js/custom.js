@@ -1,10 +1,6 @@
 
 cm._baseUrl = [cm._baseUrl, 'docs/build'].join('/');
 
-Com.Dialog.prototype.setParams({
-    'container' : 'top.document.body'
-});
-
 App.LoginBox.prototype.setParams({
     'Com.Tooltip' : {
         'adaptiveX' : true,
@@ -14,5 +10,23 @@ App.LoginBox.prototype.setParams({
 });
 
 App.Template.prototype.setParams({
-    'stickyFooter' : true
+    'stickyFooter' : true,
+    'template' : {
+        'type' : 'box',
+        'width' : 1000,
+        'align' : 'center',
+        'indent' : 24
+    },
+    'header' : {
+        'type' : 'box',
+        'width' : 1000,
+        'align' : 'center',
+        'fixed' : false,
+        'overlapping' : false
+    },
+    'footer' : {
+        'type' : 'box',
+        'width' : 1000,
+        'align' : 'center'
+    }
 });

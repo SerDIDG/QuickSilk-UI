@@ -204,8 +204,7 @@ window.Collector = new Com.Collector({
                             'keyword' : block.params['keyword'],
                             'parentId' : block.zone.params['parentId'],
                             'type' : block.params['type'],
-                            'zone' : block.zone.params['zone'],
-                            'index' : block.getIndex()
+                            'zone' : block.zone.params['zone']
                         },
                         'onSuccess' : function(response){
                             editor.create(response['data'], block);
@@ -219,8 +218,7 @@ window.Collector = new Com.Collector({
                         'params' : {
                             'parentId' : block.zone.params['parentId'],
                             'type' : block.params['type'],
-                            'zone' : block.zone.params['zone'],
-                            'index' : block.getIndex() + 1
+                            'zone' : block.zone.params['zone']
                         },
                         'onSuccess' : function(response){
                             editor.duplicate(response['data'], block);
@@ -235,8 +233,7 @@ window.Collector = new Com.Collector({
                             'positionId' : block.params['positionId'],
                             'parentId' : block.zone.params['parentId'],
                             'type' : block.params['type'],
-                            'zone' : block.zone.params['zone'],
-                            'index' : block.getIndex()
+                            'zone' : block.zone.params['zone']
                         },
                         'onSuccess' : function(response){
                             editor.replace(response['data'], block);
