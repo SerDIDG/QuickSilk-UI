@@ -6074,9 +6074,6 @@ button::-moz-focus-inner {
   }
 }
 /* ******* PART: ANIMATE ******* */
-/**
-* Require: modules/Animate.css
-*/
 .cm-animate {
   visibility: hidden;
 }
@@ -6086,6 +6083,17 @@ button::-moz-focus-inner {
 }
 .cm-animate.animated {
   visibility: visible;
+}
+/* *** ANIMATION ON HOVER *** */
+.cm__animate.hover--fadeIn {
+  opacity: 0;
+  -webkit-transition: opacity 300ms ease-in-out;
+  transition: opacity 300ms ease-in-out;
+}
+.cm__animate.hover--fadeIn:hover {
+  opacity: 1;
+  -webkit-transition: opacity 100ms ease-in-out;
+  transition: opacity 100ms ease-in-out;
 }
 /* ******* PART: BOX ******* */
 .pt__box {
@@ -15588,8 +15596,6 @@ html.is-immediately .tpl__header__container {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
 }
 .app__block-container > .app__block > .border,
 .app__block-container > .app__block > .drag,
@@ -15616,6 +15622,8 @@ html.is-immediately .tpl__header__container {
   display: inline-block;
   cursor: text;
   vertical-align: top;
+  -webkit-transition: opacity 300ms ease-in-out;
+  transition: opacity 300ms ease-in-out;
 }
 .app__block-container.is-editable > .app__block > .border {
   display: block;
