@@ -1415,7 +1415,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.10.4',
+        '_version' : '3.10.6',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -1428,6 +1428,7 @@ var cm = {
         '_config' : {
             'animDuration' : 300,
             'animDurationQuick' : 150,
+            'hideDelay' : 300,
             'adaptiveFrom' : 768,
             'screenTablet' : 1024,
             'screenTabletPortrait' : 768,
@@ -1460,16 +1461,6 @@ cm.isTouch = 'ontouchstart' in document.documentElement || !!window.maxTouchPoin
 
 cm.top = window.top.cm || cm;
 
-cm.objToString = Object.prototype.toString;
-
-cm.property = function(key) {
-    return function(o) {
-        return o == null ? void 0 : o[key];
-    };
-};
-
-cm.length = cm.property('length');
-
 cm.isType = function(o, types){
     if(cm.isString(types)){
         return Object.prototype.toString.call(o) === '[object ' + types +']'
@@ -1501,10 +1492,6 @@ cm.isArray = Array.isArray || function(o){
     return Object.prototype.toString.call(o) === '[object Array]';
 };
 
-cm.isArrayLike = function(o) {
-    return o != null && cm.isLength(cm.length(o));
-};
-
 cm.isObject = function(o){
     return Object.prototype.toString.call(o) === '[object Object]';
 };
@@ -1527,10 +1514,6 @@ cm.isDate = function(o){
 
 cm.isWindow = function(o) {
     return Object.prototype.toString.call(o) === '[object Window]' || Object.prototype.toString.call(o) === '[object global]';
-};
-
-cm.isLength = function(o) {
-    return typeof o == 'number' && o > -1 && o % 1 == 0 && o <= cm.MAX_SAFE_INTEGER;
 };
 
 cm.isNode = function(node){
@@ -1723,6 +1706,10 @@ cm.inArray = function(a, item){
 cm.arrayRemove = function(a, item){
     a.splice(a.indexOf(item), 1);
     return a;
+};
+
+cm.arrayIndex = function(a, item){
+    return Array.prototype.indexOf.call(a, item)
 };
 
 cm.objectToArray = function(o){
@@ -2069,45 +2056,45 @@ cm.customEvent = (function(){
             var stopPropagation = false;
             params = cm.merge({
                 'target' : node,
-                'type' : 'both',            // child | parent | both | all
+                'type' : 'all',            // child | parent | all
                 'self' : true,
                 'stopPropagation' : function(){
                     stopPropagation = true;
                 }
             }, params);
-            cm.forEach(_stack[type], function(item){
-                if(!stopPropagation){
-                    if(params['self'] && node === item['node']){
-                        item['handler'](params);
+            if(_stack[type]){
+                _stack[type].sort(function(a, b){
+                    if(params['type'] == 'parent'){
+                        return cm.getNodeOffsetIndex(a['node']) > cm.getNodeOffsetIndex(b['node']) ? -1 : 1;
                     }
-                    switch(params['type']){
-                        case 'child':
-                            if(cm.isParent(node, item['node'], false)){
-                                item['handler'](params);
-                            }
-                            break;
-                        case 'parent':
-                            if(cm.isParent(item['node'], node, false)){
-                                item['handler'](params);
-                            }
-                            break;
-                        case 'both':
-                            if(cm.isParent(node, item['node'], false)){
-                                item['handler'](params);
-                            }
-                            if(cm.isParent(item['node'], node, false)){
-                                item['handler'](params);
-                            }
-                            break;
-                        case 'all':
-                        default:
-                            if(node !== item['node']){
-                                item['handler'](params);
-                            }
-                            break;
+                    return cm.getNodeOffsetIndex(a['node']) > cm.getNodeOffsetIndex(b['node']) ? 1 : -1;
+                });
+                cm.forEach(_stack[type], function(item){
+                    if(!stopPropagation){
+                        if(params['self'] && node === item['node']){
+                            item['handler'](params);
+                        }
+                        switch(params['type']){
+                            case 'child':
+                                if(cm.isParent(node, item['node'], false)){
+                                    item['handler'](params);
+                                }
+                                break;
+                            case 'parent':
+                                if(cm.isParent(item['node'], node, false)){
+                                    item['handler'](params);
+                                }
+                                break;
+                            case 'all':
+                            default:
+                                if(node !== item['node']){
+                                    item['handler'](params);
+                                }
+                                break;
+                        }
                     }
-                }
-            });
+                });
+            }
             return node;
         }
     };
@@ -2347,6 +2334,16 @@ cm.getDocumentHead = function(){
 
 cm.getDocumentHtml = function(){
     return document.documentElement;
+};
+
+cm.getNodeOffsetIndex = function(node){
+    var o = node,
+        i = 0;
+    while(o.parentNode){
+        o = o.parentNode;
+        i++;
+    }
+    return i;
 };
 
 cm.node = cm.Node = function(){
@@ -6036,113 +6033,6 @@ Com.FormFields.add('buttons', {
         }
     }
 });
-cm.define('Com.Ajax', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Callbacks'
-    ],
-    'events' : [
-        'onRender'
-    ],
-    'params' : {
-        'url' : '',
-        'data' : {},
-        'form' : false,                                         // Provide form node to send it as iframe
-        'method' : 'post',                                      // delete | get | head | post | put
-        'requestType' : 'default',                              // default | form-data | jsonp | iframe
-        'responseType' : 'json',                                // text | xml | json
-        'send' : true,
-        'async' : true,
-        'withCredentials' : false,
-        'headers' : {
-            'Content-Type' : 'application/x-www-form-urlencoded',
-            'X-Requested-With' : 'XMLHttpRequest'
-        },
-        'xhr' : cm.createXmlHttpRequestObject()
-    }
-},
-function(params){
-    var that = this;
-
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.callbacksProcess();
-        validateParams();
-        render();
-        that.triggerEvent('onRender');
-        that.params['send'] && that.send();
-    };
-
-    var validateParams = function(){
-        that.params['responseType'] = that.params['responseType'].toLowerCase();
-        that.params['requestType'] = that.params['requestType'].toLowerCase();
-        that.params['method'] = that.params['method'].toLowerCase();
-        // Convert data
-        if(/delete|get|head/.test(that.params['method'])){
-            that.params['data'] = convertData(that.params['data'], 'uri');
-        }else{
-            if(that.params['requestType'] == 'form-data'){
-                that.params['data'] = convertData(that.params['data'], 'form-data');
-            }else if(that.params['requestType'] == 'iframe'){
-                that.params['data'] = convertData(that.params['data'], 'obj');
-            }else{
-                that.params['data'] = convertData(that.params['data'], 'uri');
-            }
-        }
-        // Build request link
-        if(/delete|get|head/.test(that.params['method'])){
-            if(!cm.isEmpty(that.params['data'])){
-                that.params['url'] = [that.params['url'], that.params['data']].join('?');
-            }
-        }
-    };
-
-    var convertData = function(data, type){
-        switch(type){
-            case 'form-data':
-                if(data.constructor == FormData){
-                    return data
-                }else{
-                    return cm.obj2FormData(data);
-                }
-                break;
-            case 'uri':
-                if(data.constructor == FormData){
-                    return cm.formData2URI(data);
-                }else{
-                    return cm.obj2URI(data);
-                }
-                break;
-            case 'object':
-                if(data.constructor == FormData){
-                    return cm.formData2Obj(data);
-                }else{
-                    return data;
-                }
-                break;
-            default:
-                return data;
-                break;
-        }
-    };
-
-    var render = function(){
-    };
-
-    /* ******* PUBLIC ******* */
-
-    that.send = function(){
-        return that;
-    };
-
-    that.abort = function(){
-        return that;
-    };
-
-    init();
-});
 cm.define('Com.Autocomplete', {
     'modules' : [
         'Params',
@@ -7785,7 +7675,7 @@ function(params){
         nodes = {},
         current;
 
-    that.isEditing = false;
+    that.isEditing = null;
     that.items = [];
     that.chassis = [];
 
@@ -8120,7 +8010,7 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             cm.addClass(nodes['container'], 'is-editing is-editable');
             that.triggerEvent('enableEditing');
@@ -8130,7 +8020,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
             cm.removeClass(nodes['container'], 'is-editing is-editable');
             that.triggerEvent('disableEditing');
@@ -8497,1503 +8387,6 @@ function(params){
         return that;
     };
 
-    init();
-});
-cm.define('Com.Dashboard', {
-    'modules' : [
-        'Params',
-        'Events'
-    ],
-    'events' : [
-        'onRender',
-        'onInit',
-        'onDragStart',
-        'onDrop',
-        'onRemove',
-        'onReplace'
-    ],
-    'params' : {
-        'container' : cm.Node('div'),
-        'chassisTag' : 'div',
-        'draggableContainer' : 'document.body',      // HTML node | selfParent
-        'scroll' : true,
-        'scrollNode' : window,
-        'scrollSpeed' : 1,                           // ms per 1px
-        'renderTemporaryAria' : false,
-        'useCSSAnimation' : true,
-        'useGracefulDegradation' : true,
-        'dropDuration' : 400,
-        'moveDuration' : 200,
-        'highlightAreas' : true,                     // highlight areas on drag start
-        'highlightChassis' : false,
-        'animateRemove' : true,
-        'removeNode' : true,
-        'classes' : {
-            'area' : null
-        }
-    }
-},
-function(params){
-    var that = this,
-        nodes = {},
-        anims = {},
-        areas = [],
-        areasList = [],
-        draggableList = [],
-        filteredAvailableAreas = [],
-
-
-        checkInt,
-        chassisInt,
-        pageSize,
-        isScrollProccess = false,
-        isGracefulDegradation = false,
-        isHighlightedAreas = false,
-
-        current,
-        currentAboveItem,
-        currentPosition,
-        currentArea,
-        currentChassis,
-        previousArea;
-
-    that.currentAreas = [];
-    that.currentPlaceholder = null;
-    that.currentArea = null;
-    that.currentWidget = null;
-
-    /* *** INIT *** */
-
-    var init = function(){
-        var areasNodes;
-
-        getCSSHelpers();
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-
-        if(that.params['container']){
-            // Check Graceful Degradation, and turn it to mobile and old ie.
-            if(that.params['useGracefulDegradation'] && ((cm.is('IE') && cm.isVersion() < 9) || cm.isMobile())){
-                isGracefulDegradation = true;
-            }
-            // Init misc
-            anims['scroll'] = new cm.Animation(that.params['scrollNode']);
-            // Render temporary area
-            if(that.params['renderTemporaryAria']){
-                nodes['temporaryArea'] = cm.Node('div');
-                initArea(nodes['temporaryArea'], {
-                    'isTemporary' : true
-                });
-            }
-            // Find drop areas
-            areasNodes = cm.getByAttr('data-com-draganddrop', 'area', that.params['container']);
-            // Init areas
-            cm.forEach(areasNodes, function(area){
-                initArea(area, {});
-            });
-            /* *** EXECUTE API EVENTS *** */
-            that.triggerEvent('onInit');
-            that.triggerEvent('onRender');
-        }
-    };
-
-    var getCSSHelpers = function(){
-        that.params['dropDuration'] = cm.getTransitionDurationFromRule('.pt__dnd-helper__drop-duration');
-        that.params['moveDuration'] = cm.getTransitionDurationFromRule('.pt__dnd-helper__move-duration');
-    };
-
-    var initArea = function(node, params){
-        // Check, if area already exists
-        if(cm.inArray(areasList, node)){
-            return;
-        }
-        // Config
-        var area = cm.merge({
-                'node' : node,
-                'styleObject' : cm.getStyleObject(node),
-                'type' : 'area',
-                'isLocked' : false,
-                'isTemporary' : false,
-                'isSystem' : false,
-                'isRemoveZone' : false,
-                'draggableInChildNodes' : true,
-                'cloneDraggable' : false,
-                'items' : [],
-                'chassis' : [],
-                'placeholders' : [],
-                'dimensions' : {}
-            }, params),
-            childNodes;
-        // Add mark classes
-        cm.addClass(area['node'], 'com__dashboard__area');
-        cm.addClass(area['node'], that.params['classes']['area']);
-        if(area['isLocked']){
-            cm.addClass(area['node'], 'is-locked');
-        }else{
-            cm.addClass(area['node'], 'is-available');
-        }
-        // Find draggable elements
-        if(area['draggableInChildNodes']){
-            childNodes = area['node'].childNodes;
-            cm.forEach(childNodes, function(node){
-                if(node.tagName && node.getAttribute('data-com-draganddrop') == 'draggable'){
-                    area['items'].push(
-                        initDraggable(node, area, {})
-                    );
-                }
-            });
-        }else{
-            childNodes = cm.getByAttr('data-com-draganddrop', 'draggable', area['node']);
-            cm.forEach(childNodes, function(node){
-                area['items'].push(
-                    initDraggable(node, area, {})
-                );
-            });
-        }
-        // Push to areas array
-        areasList.push(area['node']);
-        areas.push(area);
-    };
-
-    var initDraggable = function(node, area, params){
-        // Config
-        var draggable = cm.merge({
-            'node' : node,
-            'styleObject' : cm.getStyleObject(node),
-            'type' : 'item',
-            'chassis' : {
-                'top' : null,
-                'bottom' : null
-            },
-            'dimensions' : {
-                'offsetX' : 0,
-                'offsetY' : 0
-            }
-        }, params);
-        draggable['area'] = area;
-        draggable['anim'] = new cm.Animation(draggable['node']);
-        // Set draggable event on element
-        initDraggableDrag(draggable);
-        // Return item to push in area array
-        draggableList.push(draggable);
-        return draggable;
-    };
-
-    var initDraggableDrag = function(draggable){
-        var dragNode;
-        draggable['drag'] = cm.getByAttr('data-com-draganddrop', 'drag', draggable['node'])[0];
-        draggable['drag-bottom'] = cm.getByAttr('data-com-draganddrop', 'drag-bottom', draggable['node'])[0];
-        // Set draggable event on element
-        dragNode = draggable['drag'] || draggable['node'];
-        cm.addEvent(dragNode, 'mousedown', function(e){
-            start(e, draggable);
-        });
-        if(draggable['drag-bottom']){
-            cm.addEvent(draggable['drag-bottom'], 'mousedown', function(e){
-                start(e, draggable);
-            });
-        }
-    };
-
-    /* *** DRAG AND DROP PROCESS ** */
-
-    var start = function(e, widget){
-        cm.preventDefault(e);
-        // Prevent multiple drag event
-        if(that.currentWidget){
-            return;
-        }
-        // Prevent drag event not on LMB
-        if(!cm.isTouch && e.button){
-            return;
-        }
-        // Hide IFRAMES and EMBED tags
-        cm.hideSpecialTags();
-        cm.addClass(document.body, 'com__dashboard__body');
-        // Get pointer position
-        var params = cm.getEventClientPosition(e);
-        // Filter areas
-        that.currentAreas = getDroppableAreas(widget);
-        // Drag start event
-        that.triggerEvent('onDragStart', {
-            'item' : widget,
-            'node' : widget['node'],
-            'from' : widget['area']
-        });
-        // Prepare widget, get offset, set start position, set widget as current
-        prepareWidget(widget, params);
-        // Render placeholders in filtered areas
-        renderPlaceholders(that.currentAreas);
-        // Find placeholder above widget
-        checkPlaceholders(that.currentAreas, params);
-        getCurrentPlaceholder(that.currentAreas, params);
-        // Add events
-        cm.addEvent(window, 'mousemove', move);
-        cm.addEvent(window, 'mouseup', stop);
-        cm.addScrollEvent(window, scroll);
-    };
-
-    var move  = function(e){
-        cm.preventDefault(e);
-        // Get pointer position
-        var params = cm.getEventClientPosition(e);
-        // Move widget
-        moveWidget(that.currentWidget, params, true);
-        // Find placeholder above widget
-        checkPlaceholders(that.currentAreas, params);
-        getCurrentPlaceholder(that.currentAreas, params);
-    };
-
-    var stop = function(){
-        // Unhighlight Placeholder
-        unhighlightPlaceholder(that.currentPlaceholder);
-        // Drop widget
-        if(!that.currentArea || that.currentArea['isRemoveZone'] || that.currentArea['isTemporary']){
-            cm.log(1);
-            removeWidget(that.currentWidget, {
-                'onStop' : clear
-            });
-        }else{
-            dropWidget(that.currentWidget, that.currentArea, {
-                'index' : that.currentPlaceholder['index'],
-                'placeholder' : that.currentPlaceholder,
-                'onStop' : clear
-            });
-        }
-        // Show IFRAMES and EMBED tags
-        cm.showSpecialTags();
-        cm.removeClass(document.body, 'com__dashboard__body');
-        // Remove move events attached on document
-        cm.removeEvent(window, 'mousemove', move);
-        cm.removeEvent(window, 'mouseup', stop);
-        cm.removeScrollEvent(window, scroll);
-    };
-
-    var scroll = function(e){
-        // Get pointer position
-        var params = {
-            'left' : cm._clientPosition['x'],
-            'top' : cm._clientPosition['y']
-        };
-        // Update placeholders position
-        updatePlaceholdersDimensions(that.currentAreas, params);
-        // Find placeholder above widget
-        getCurrentPlaceholder(that.currentAreas, params);
-    };
-
-    var clear = function(){
-        removePlaceholders(that.currentAreas);
-        // Clear variables
-        that.currentAreas = [];
-        that.currentPlaceholder = null;
-        that.currentArea = null;
-        that.currentWidget = null;
-    };
-
-    var startold = function(e, draggable){
-        // If current exists, we don't need to start another drag event until previous will not stop
-        if(current){
-            return;
-        }
-        cm.preventDefault(e);
-        // Hide IFRAMES and EMBED tags
-        cm.hideSpecialTags();
-        // Check event type and get cursor / finger position
-        var x = cm._clientPosition['x'],
-            y = cm._clientPosition['y'],
-            tempCurrentAboveItem,
-            tempCurrentPosition;
-        if(!cm.isTouch){
-            // If not left mouse button, don't duplicate drag event
-            if((cm.is('IE') && cm.isVersion() < 9 && e.button != 1) || (!cm.is('IE') && e.button)){
-                return;
-            }
-        }
-        pageSize = cm.getPageSize();
-        // API onDragStart Event
-        that.triggerEvent('onDragStart', {
-            'item' : draggable,
-            'node' : draggable['node'],
-            'from' : draggable['area']
-        });
-        // Filter areas
-        filteredAvailableAreas = areas.filter(function(area){
-            // Filter out locked areas and inner areas
-            if(cm.isParent(draggable['node'], area['node']) || area['isLocked']){
-                return false;
-            }
-            // True - pass area
-            return true;
-        });
-        // Highlight Areas
-        if(that.params['highlightAreas']){
-            toggleHighlightAreas();
-        }
-        // Get position and dimension of current draggable item
-        getPosition(draggable);
-        // Get offset position relative to touch point (cursor or finger position)
-        draggable['dimensions']['offsetX'] = x - draggable['dimensions']['absoluteX1'];
-        draggable['dimensions']['offsetY'] = y - draggable['dimensions']['absoluteY1'];
-        // Set draggable item to current
-        if(draggable['area']['cloneDraggable']){
-            current = cloneDraggable(draggable);
-        }else{
-            current = draggable;
-        }
-        // Set position and dimension to current draggable node, before we insert it to draggableContainer
-        current['node'].style.top = 0;
-        current['node'].style.left = 0;
-        current['node'].style.width = [current['dimensions']['width'], 'px'].join('');
-        cm.setCSSTranslate(current['node'], [current['dimensions']['absoluteX1'], 'px'].join(''), [current['dimensions']['absoluteY1'], 'px'].join(''));
-        // Unset area from draggable item
-        unsetDraggableFromArea(current);
-        // Insert draggable element to body
-        if(that.params['draggableContainer'] && that.params['draggableContainer'] != 'selfParent'){
-            that.params['draggableContainer'].appendChild(current['node']);
-        }
-        cm.addClass(current['node'], 'pt__dnd-helper');
-        cm.addClass(current['node'], 'is-active', true);
-        // Calculate elements position and dimension
-        getPositionsAll();
-        // Render Chassis Blocks
-        renderChassisBlocks();
-        // Find above draggable item
-        cm.forEach(current['area']['items'], function(draggable){
-            if(x >= draggable['dimensions']['absoluteX1'] && x < draggable['dimensions']['absoluteX2'] && y >= draggable['dimensions']['absoluteY1'] && y <= draggable['dimensions']['absoluteY2']){
-                tempCurrentAboveItem = draggable;
-                // Check above block position
-                if((y - tempCurrentAboveItem['dimensions']['absoluteY1']) < (tempCurrentAboveItem['dimensions']['absoluteHeight'] / 2)){
-                    tempCurrentPosition = 'top';
-                }else{
-                    tempCurrentPosition = 'bottom';
-                }
-            }
-        });
-        // If current current draggable not above other draggable items
-        if(!tempCurrentAboveItem && current['area']['items'].length){
-            if(y < current['area']['dimensions']['y1']){
-                tempCurrentAboveItem = current['area']['items'][0];
-                tempCurrentPosition = 'top';
-            }else{
-                tempCurrentAboveItem = current['area']['items'][current['area']['items'].length - 1];
-                tempCurrentPosition = 'bottom';
-            }
-        }
-        // Set chassis
-        if(tempCurrentAboveItem){
-            currentChassis = tempCurrentAboveItem['chassis'][tempCurrentPosition];
-        }else{
-            currentChassis = current['area']['chassis'][0];
-        }
-        if(currentChassis){
-            cm.addClass(currentChassis['node'], 'is-active');
-            if(that.params['highlightChassis']){
-                cm.addClass(currentChassis['node'], 'is-highlight');
-            }
-            currentChassis['node'].style.height = [current['dimensions']['absoluteHeight'], 'px'].join('');
-        }
-        // Set current area and above
-        currentArea = current['area'];
-        currentAboveItem = tempCurrentAboveItem;
-        currentPosition = tempCurrentPosition;
-        cm.addClass(currentArea['node'], 'is-active');
-        // Set check position event
-        //checkInt = setInterval(checkPosition, 5);
-        // Add move event on document
-        cm.addClass(document.body, 'pt__dnd-body');
-        cm.addEvent(window, 'mousemove', move);
-        cm.addEvent(window, 'mouseup', stop);
-    };
-
-    var moveold = function(e){
-        cm.preventDefault(e);
-        // Check event type and get cursor / finger position
-        var x = cm._clientPosition['x'],
-            y = cm._clientPosition['y'],
-            posY = y - current['dimensions']['offsetY'],
-            posX = x - current['dimensions']['offsetX'],
-            styleX,
-            styleY,
-            tempCurrentArea,
-            tempCurrentAboveItem,
-            tempCurrentPosition;
-        // Calculate drag direction and set new position
-        switch(that.params['direction']){
-            case 'both':
-                styleX = [posX, 'px'].join('');
-                styleY = [posY, 'px'].join('');
-                break;
-            case 'vertical':
-                styleX = [current['dimensions']['absoluteX1'], 'px'].join('');
-                if(that.params['limit']){
-                    if(posY < current['area']['dimensions']['y1']){
-                        styleY = [current['area']['dimensions']['y1'], 'px'].join('');
-                    }else if(posY > current['area']['dimensions']['y2']){
-                        styleY = [current['area']['dimensions']['y2'], 'px'].join('');
-                    }else{
-                        styleY = [posY, 'px'].join('');
-                    }
-                }else{
-                    styleY = [posY, 'px'].join('');
-                }
-                break;
-            case 'horizontal':
-                styleX = [posX, 'px'].join('');
-                styleY = [current['dimensions']['absoluteY1'], 'px'].join('');
-                break;
-        }
-        cm.setCSSTranslate(current['node'], styleX, styleY);
-        // Scroll node
-        if(that.params['scroll']){
-        //if(false){
-            if(y + 48 > pageSize['winHeight']){
-                toggleScroll(1);
-            }else if(y - 48 < 0){
-                toggleScroll(-1);
-            }else{
-                toggleScroll(0);
-            }
-        }
-        // Check and recalculate position
-        checkPosition();
-        // Find above area
-        cm.forEach(filteredAvailableAreas, function(area){
-            if(x >= area['dimensions']['x1'] && x < area['dimensions']['x2'] && y >= area['dimensions']['y1'] && y <= area['dimensions']['y2']){
-                if(!tempCurrentArea){
-                    tempCurrentArea = area;
-                }else if(area['dimensions']['width'] < tempCurrentArea['dimensions']['width'] || area['dimensions']['height'] < tempCurrentArea['dimensions']['height']){
-                    tempCurrentArea = area;
-                }
-            }
-        });
-        // Find above draggable item
-        if(tempCurrentArea){
-            cm.forEach(tempCurrentArea['items'], function(draggable){
-                if(x >= draggable['dimensions']['absoluteX1'] && x < draggable['dimensions']['absoluteX2'] && y >= draggable['dimensions']['absoluteY1'] && y <= draggable['dimensions']['absoluteY2']){
-                    tempCurrentAboveItem = draggable;
-                    // Check above block position
-                    if((y - tempCurrentAboveItem['dimensions']['absoluteY1']) < (tempCurrentAboveItem['dimensions']['absoluteHeight'] / 2)){
-                        tempCurrentPosition = 'top';
-                    }else{
-                        tempCurrentPosition = 'bottom';
-                    }
-                }
-            });
-        }else{
-            tempCurrentArea = currentArea;
-        }
-        // If current current draggable not above other draggable items
-        if(!tempCurrentAboveItem && tempCurrentArea['items'].length){
-            if(y < tempCurrentArea['dimensions']['innerY1']){
-                tempCurrentAboveItem = tempCurrentArea['items'][0];
-                tempCurrentPosition = 'top';
-            }else{
-                tempCurrentAboveItem = tempCurrentArea['items'][tempCurrentArea['items'].length - 1];
-                tempCurrentPosition = 'bottom';
-            }
-        }
-        // Animate previous chassis and get current
-        if(currentChassis){
-            cm.removeClass(currentChassis['node'], 'is-active is-highlight');
-        }
-        if(currentAboveItem && tempCurrentAboveItem && currentAboveItem['chassis'][currentPosition] != tempCurrentAboveItem['chassis'][tempCurrentPosition]){
-            animateChassis(currentAboveItem['chassis'][currentPosition], 0, that.params['moveDuration']);
-            currentChassis = tempCurrentAboveItem['chassis'][tempCurrentPosition];
-        }else if(!currentAboveItem && tempCurrentAboveItem){
-            animateChassis(currentArea['chassis'][0], 0, that.params['moveDuration']);
-            currentChassis = tempCurrentAboveItem['chassis'][tempCurrentPosition];
-        }else if(currentAboveItem && !tempCurrentAboveItem){
-            animateChassis(currentAboveItem['chassis'][currentPosition], 0, that.params['moveDuration']);
-            currentChassis = tempCurrentArea['chassis'][0];
-        }else if(!currentAboveItem && !tempCurrentAboveItem && currentArea != tempCurrentArea){
-            animateChassis(currentArea['chassis'][0], 0, that.params['moveDuration']);
-            currentChassis = tempCurrentArea['chassis'][0];
-        }
-        // Animate current chassis
-        if(currentChassis){
-            cm.addClass(currentChassis['node'], 'is-active');
-            if(that.params['highlightChassis']){
-                cm.addClass(currentChassis['node'], 'is-highlight');
-            }
-            animateChassis(currentChassis, current['dimensions']['absoluteHeight'], that.params['moveDuration']);
-        }
-        // Unset classname from previous active area
-        if(currentArea && currentArea != tempCurrentArea){
-            cm.removeClass(currentArea['node'], 'is-active');
-            previousArea = currentArea;
-        }
-        // Set current to global
-        currentArea = tempCurrentArea;
-        currentAboveItem = tempCurrentAboveItem;
-        currentPosition = tempCurrentPosition;
-        // Set active area class name
-        if(!(previousArea && previousArea['isTemporary'] && currentArea['isRemoveZone'])){
-            cm.addClass(currentArea['node'], 'is-active');
-        }
-    };
-
-    var stopold = function(e){
-        var currentHeight;
-        // Remove check position event
-        //checkInt && clearInterval(checkInt);
-        // Remove move events attached on document
-        cm.removeClass(document.body, 'pt__dnd-body');
-        cm.removeEvent(window, 'mousemove', move);
-        cm.removeEvent(window, 'mouseup', stop);
-        // Calculate height of draggable block, like he already dropped in area, to animate height of fake empty space
-        getPosition(current);
-        current['node'].style.width = [(currentArea['dimensions']['innerWidth'] - current['dimensions']['margin']['left'] - current['dimensions']['margin']['right']), 'px'].join('');
-        currentHeight = current['node'].offsetHeight + current['dimensions']['margin']['top'] + current['dimensions']['margin']['bottom'];
-        current['node'].style.width = [current['dimensions']['width'], 'px'].join('');
-        // If current draggable located above another draggable item, drops after/before it, or drops in area
-        if(currentAboveItem){
-            // Animate chassis blocks
-            if(currentHeight != currentAboveItem['chassis'][currentPosition]['node'].offsetHeight){
-                animateChassis(currentAboveItem['chassis'][currentPosition], currentHeight, that.params['dropDuration']);
-            }
-            // Drop Item to Area
-            dropDraggableToArea(current, currentArea, {
-                'target' : currentAboveItem['node'],
-                'append' : currentPosition == 'top' ? 'before' : 'after',
-                'index' : currentArea['items'].indexOf(currentAboveItem) + (currentPosition == 'top' ? 0 : 1),
-                'top' : [currentPosition == 'top'? currentAboveItem['dimensions']['absoluteY1'] : currentAboveItem['dimensions']['absoluteY2'], 'px'].join(''),
-                'onStop' : unsetCurrentDraggable
-            });
-        }else if(currentArea['isRemoveZone'] || currentArea['isTemporary']){
-            removeDraggable(current, {
-                'onStop' : unsetCurrentDraggable
-            });
-        }else{
-            // Animate chassis blocks
-            animateChassis(currentArea['chassis'][0], currentHeight, that.params['dropDuration']);
-            // Drop Item to Area
-            dropDraggableToArea(current, currentArea, {
-                'onStop' : unsetCurrentDraggable
-            });
-        }
-        // Unset chassis
-        if(currentChassis){
-            cm.removeClass(currentChassis['node'], 'is-active is-highlight');
-        }
-        // Unset active area classname
-        if(currentArea){
-            cm.removeClass(currentArea['node'], 'is-active');
-        }
-        // Un Highlight Areas
-        if(that.params['highlightAreas']){
-            toggleHighlightAreas();
-        }
-        // Show IFRAMES and EMBED tags
-        cm.showSpecialTags();
-    };
-
-    /* *** DRAGGABLE MANIPULATION FUNCTIONS *** */
-
-    var cloneDraggable = function(draggable){
-        var clonedNode = draggable['node'].cloneNode(true),
-            area = that.params['renderTemporaryAria']? areas[0] : draggable['area'],
-            clonedDraggable = initDraggable(clonedNode, area, {});
-
-        clonedDraggable['dimensions'] = cm.clone(draggable['dimensions']);
-        area['items'].push(clonedDraggable);
-        return clonedDraggable;
-    };
-
-    var dropDraggableToArea = function(draggable, area, params){
-        params = cm.merge({
-            'target' : area['node'],
-            'append' : 'child',
-            'index' : 0,
-            'width' : [area['dimensions']['innerWidth'], 'px'].join(''),
-            'top' : [area['dimensions']['innerY1'] - draggable['dimensions']['margin']['top'], 'px'].join(''),
-            'left' : [area['dimensions']['innerX1'] - draggable['dimensions']['margin']['left'], 'px'].join(''),
-            'onStart' : function(){},
-            'onStop' : function(){}
-        }, params);
-        // System onStart event
-        params['onStart']();
-        // Animate draggable item, like it drops in area
-        cm.addClass(draggable['node'], 'is-drop', true);
-        draggable['node'].style.width = params['width'];
-        cm.setCSSTranslate(draggable['node'], params['left'], params['top']);
-        // On Dnimate Stop
-        setTimeout(function(){
-            // Append element in new position
-            switch(params['append']){
-                case 'child' :
-                    cm.appendChild(draggable['node'], params['target']);
-                    break;
-                case 'before' :
-                    cm.insertBefore(draggable['node'], params['target']);
-                    break;
-                case 'after' :
-                    cm.insertAfter(draggable['node'], params['target']);
-                    break;
-                case 'first' :
-                    cm.insertFirst(draggable['node'], params['target']);
-                    break;
-            }
-            // Remove draggable helper classname
-            cm.removeClass(draggable['node'], 'pt__dnd-helper is-drop is-active', true);
-            // Reset styles
-            draggable['node'].style.left = 'auto';
-            draggable['node'].style.top = 'auto';
-            draggable['node'].style.width = 'auto';
-            cm.setCSSTranslate(current['node'], 'auto', 'auto');
-            // Set index of draggable item in new area
-            area['items'].splice(params['index'], 0, draggable);
-            // API onDrop Event
-            that.triggerEvent('onDrop', {
-                'item' : draggable,
-                'node' : draggable['node'],
-                'to' : area,
-                'from' : draggable['area'],
-                'index' : params['index']
-            });
-            // Set draggable new area
-            draggable['area'] = area;
-            // System onStop event
-            params['onStop']();
-        }, that.params['dropDuration']);
-    };
-
-    var removeDraggable = function(draggable, params){
-        var style, anim, node;
-        // Remove handler
-        var handler = function(){
-            if(that.params['removeNode']){
-                cm.remove(node);
-            }
-            // Remove from draggable list
-            draggableList = draggableList.filter(function(item){
-                return item != draggable;
-            });
-            unsetDraggableFromArea(draggable);
-            // API onRemove Event
-            if(!params['noEvent']){
-                that.triggerEvent('onRemove', {
-                    'item' : draggable,
-                    'node' : draggable['node'],
-                    'from' : draggable['area']
-                });
-            }
-            // System onStop event
-            params['onStop']();
-        };
-        // Config
-        params = cm.merge({
-            'isCurrent' : draggable === current,
-            'isInDOM' : cm.inDOM(draggable['node']),
-            'onStart' : function(){},
-            'onStop' : function(){}
-        }, params);
-        // System onStart event
-        params['onStart']();
-        // If draggable not in DOM, we don't need to wrap and animate it
-        if(params['isInDOM'] && that.params['animateRemove']){
-            // If draggable is current - just animate pull out left, else - wrap to removable node
-            if(params['isCurrent']){
-                node = draggable['node'];
-                anim = draggable['anim'];
-                style = {
-                    'left' : [-(draggable['dimensions']['absoluteWidth'] + 50), 'px'].join(''),
-                    'opacity' : 0
-                }
-            }else{
-                node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable'}), draggable['node']);
-                anim = new cm.Animation(node);
-                style = {
-                    'height' : '0px',
-                    'opacity' : 0
-                }
-            }
-            // Animate draggable, like it disappear
-            anim.go({
-                'duration' : that.params['dropDuration'],
-                'anim' : 'smooth',
-                'style' : style,
-                'onStop' : handler
-            });
-        }else{
-            node = draggable['node'];
-            handler();
-        }
-    };
-
-    var unsetDraggableFromArea = function(draggable){
-        draggable['area']['items'] = draggable['area']['items'].filter(function(item){
-            return item != draggable;
-        });
-    };
-
-    var unsetCurrentDraggable = function(){
-        // Remove chassis blocks
-        removeChassisBlocks();
-        // Reset other
-        current = false;
-        currentAboveItem = false;
-        currentArea = false;
-        previousArea = false;
-    };
-
-    /* *** WIDGET *** */
-
-    var prepareWidget = function(widget, params){
-        updateDimensions(widget);
-        // Get offset using pointer position (x and y)
-        widget['dimensions']['offsetX'] = widget['dimensions']['absoluteX1'] - params['left'];
-        widget['dimensions']['offsetY'] = widget['dimensions']['absoluteY1'] - params['top'];
-        // Check clone statement and set widget as current
-        if(widget['area']['cloneDraggable']){
-            that.currentWidget = cloneDraggable(widget);
-        }else{
-            that.currentWidget = widget;
-        }
-        // Unset widget from his area
-        unsetDraggableFromArea(that.currentWidget);
-        // Set widget start position
-        that.currentWidget['node'].style.top = 0;
-        that.currentWidget['node'].style.left = 0;
-        moveWidget(that.currentWidget, {
-            'left' : that.currentWidget['dimensions']['absoluteX1'],
-            'top' : that.currentWidget['dimensions']['absoluteY1'],
-            'width' : that.currentWidget['dimensions']['width']
-        });
-        // Insert widget to body
-        if(that.params['draggableContainer']){
-            that.params['draggableContainer'].appendChild(that.currentWidget['node']);
-        }
-        // Set helper classes
-        cm.addClass(that.currentWidget['node'], 'com__dashboard__helper');
-        cm.addClass(that.currentWidget['node'], 'is-active', true);
-    };
-
-    var moveWidget = function(widget, params, offset){
-        // Calculate
-        var left = params['left'],
-            top = params['top'],
-            node = params['node'] || widget['node'];
-        if(offset){
-            left += widget['dimensions']['offsetX'];
-            top += widget['dimensions']['offsetY'];
-        }
-        if(typeof params['width'] != 'undefined'){
-            node.style.width = [params['width'], 'px'].join('');
-        }
-        if(typeof params['height'] != 'undefined'){
-            node.style.height = [params['height'], 'px'].join('');
-        }
-        if(typeof params['opacity'] != 'undefined'){
-            node.style.opacity = params['opacity'];
-        }
-        cm.setCSSTranslate(node, [left, 'px'].join(''), [top, 'px'].join(''));
-    };
-
-    var resetWidget = function(widget){
-        // Remove helper classes
-        cm.removeClass(widget['node'], 'com__dashboard__helper is-drop is-active', true);
-        // Reset styles
-        widget['node'].style.left = 'auto';
-        widget['node'].style.top = 'auto';
-        widget['node'].style.width = 'auto';
-        cm.setCSSTranslate(widget['node'], 'auto', 'auto');
-    };
-
-    var dropWidget = function(widget, area, params){
-        // Update area dimensions
-        updateDimensions(area);
-        // Merge params
-        params = cm.merge({
-            'index' : 0,
-            'placeholder' : null,
-            'onStart' : function(){},
-            'onStop' : function(){}
-        }, params);
-        // System onStart event
-        params['onStart']();
-        // Init drop state
-        cm.addClass(widget['node'], 'is-drop', true);
-        // Update widget dimensions
-        updateDimensions(widget);
-        // Move widget
-        if(params['placeholder']){
-            moveWidget(widget, {
-                'left' : params['placeholder']['dimensions']['left'] - widget['dimensions']['margin']['left'],
-                'top' : params['placeholder']['dimensions']['top'] - widget['dimensions']['margin']['top'],
-                'width' : area['dimensions']['innerWidth']
-            });
-            // Animate placeholder
-            cm.transition(params['placeholder']['node'], {
-                'properties' : {
-                    'height' : [widget['dimensions']['absoluteHeight'], 'px'].join('')
-                },
-                'duration' : that.params['dropDuration']
-
-            });
-        }else{
-            moveWidget(widget, {
-                'left' : area['dimensions']['innerX1'] - widget['dimensions']['margin']['left'],
-                'top' : area['dimensions']['innerY1'] - widget['dimensions']['margin']['top'],
-                'width' : area['dimensions']['innerWidth']
-            });
-        }
-        // Animation end event
-        setTimeout(function(){
-            // Append
-            if(params['placeholder']){
-                cm.insertBefore(widget['node'], params['placeholder']['node']);
-            }else{
-                cm.appendChild(widget['node'], area['node']);
-            }
-            // Reset styles
-            resetWidget(widget);
-            // Set index of draggable item in new area
-            area['items'].splice(params['index'], 0, widget);
-            // Drop event
-            that.triggerEvent('onDrop', {
-                'item' : widget,
-                'node' : widget['node'],
-                'from' : widget['area'],
-                'to' : area,
-                'index' : params['index']
-            });
-            // Set draggable new area
-            widget['area'] = area;
-            // System onStop event
-            params['onStop']();
-        }, that.params['dropDuration']);
-    };
-
-    var removeWidget = function(widget, params){
-        var node;
-        // Merge params
-        params = cm.merge({
-            'onStart' : function(){},
-            'onStop' : function(){}
-        }, params);
-        // System onStart event
-        params['onStart']();
-        // Check if widget exists and placed in DOM
-        if(cm.inDOM(widget['node'])){
-            // Update widget dimensions
-            updateDimensions(widget);
-            // Init drop state
-            cm.addClass(widget['node'], 'is-drop', true);
-            // Move widget
-            if(widget === that.currentWidget){
-                node = widget['node'];
-                moveWidget(widget, {
-                    'left' : -widget['dimensions']['absoluteWidth'],
-                    'top' : widget['dimensions']['absoluteY1'],
-                    'opacity' : 0
-                });
-            }else{
-                node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable'}), widget['node']);
-                cm.transition(node, {
-                    'properties' : {
-                        'height' : '0px',
-                        'opacity' : 0
-                    },
-                    'duration' : that.params['dropDuration'],
-                    'easing' : 'linear'
-                });
-            }
-        }else{
-            node = widget['node'];
-        }
-        // Animation end event
-        setTimeout(function(){
-            if(that.params['removeNode']){
-                cm.remove(node);
-            }
-            // Remove from draggable list
-            draggableList = draggableList.filter(function(item){
-                return item != widget;
-            });
-            unsetDraggableFromArea(widget);
-            // API onRemove Event
-            if(!params['noEvent']){
-                that.triggerEvent('onRemove', {
-                    'item' : widget,
-                    'node' : widget['node'],
-                    'from' : widget['area']
-                });
-            }
-            // System onStop event
-            params['onStop']();
-        }, that.params['dropDuration']);
-    };
-
-    /* *** PLACEHOLDER *** */
-
-    var renderPlaceholders = function(areas){
-        var placeholder;
-        cm.forEach(areas, function(area){
-            if(area['isLocked']){
-                return;
-            }
-            if(!area['items'].length){
-                placeholder = renderPlaceholder(area['node'], {
-                    'append' : 'appendChild',
-                    'isArea' : true
-                });
-                placeholder['area'] = area;
-                placeholder['index'] = 0;
-                area['placeholders'].push(placeholder);
-            }
-            cm.log('start');
-            cm.forEach(area['items'], function(widget, i){;
-                cm.log(widget);
-                if(i === 0){
-                    placeholder = renderPlaceholder(widget['node'], {
-                        'append' : 'insertBefore'
-                    });
-                    placeholder['area'] = area;
-                    placeholder['index'] = i;
-                    area['placeholders'].push(placeholder);
-                }
-                placeholder = renderPlaceholder(widget['node'], {
-                    'append' : 'insertAfter'
-                });
-                placeholder['area'] = area;
-                placeholder['index'] = i + 1;
-                area['placeholders'].push(placeholder);
-            });
-        });
-    };
-
-    var renderPlaceholder = function(targetNode, params){
-        params = cm.merge({
-            'append' : 'appendChild',
-            'isArea' : false
-        }, params);
-        // Placeholder object
-        var placeholder = {
-            'node' : cm.node(that.params['chassisTag'], {'class' : 'com__dashboard__placeholder'}),
-            'isActive' : false,
-            'isExpand' : false,
-            'index' : 0,
-            'area' : null
-        };
-
-        params['isArea'] && cm.addClass(placeholder['node'], 'is-area');
-        cm[params['append']](placeholder['node'], targetNode);
-        placeholder['dimensions'] = cm.getRect(placeholder['node']);
-        cm.addClass(placeholder['node'], 'is-show', true);
-        return placeholder;
-    };
-
-    var removePlaceholders = function(areas){
-        cm.forEach(areas, function(area){
-            cm.forEach(area['placeholders'], function(placeholder){
-                cm.remove(placeholder['node']);
-            });
-            area['placeholders'] = [];
-        });
-    };
-
-    var updatePlaceholdersDimensions = function(areas, params){
-        cm.forEach(areas, function(area){
-            cm.forEach(area['placeholders'], function(placeholder){
-                placeholder['dimensions'] = cm.getRect(placeholder['node']);
-            });
-        });
-    };
-
-    var checkPlaceholders = function(areas, params){
-        var additional = 96,
-            top = params['top'] - additional,
-            bottom = params['top'] + additional;
-        cm.forEach(areas, function(area){
-            cm.forEach(area['placeholders'], function(item){
-                if(!cm.inRange(item['dimensions']['top'], item['dimensions']['bottom'], top, bottom)){
-                    if(item['isExpand']){
-                        collapsePlaceholder(item);
-                        updatePlaceholdersDimensions(areas, params);
-                        checkPlaceholders(areas, params);
-                    }
-                }else{
-                    if(!item['isExpand']){
-                        expandPlaceholder(item);
-                        updatePlaceholdersDimensions(areas, params);
-                        checkPlaceholders(areas, params);
-                    }
-                }
-            });
-        });
-    };
-
-    var getPlaceholder = function(areas, params){
-        var placeholder;
-        cm.forEach(areas, function(area){
-            cm.forEach(area['placeholders'], function(item){
-                if(
-                    item['dimensions']['left'] <= params['left'] &&
-                    item['dimensions']['right'] >= params['left'] &&
-                    item['dimensions']['top']  <= params['top'] &&
-                    item['dimensions']['bottom'] >= params['top']
-                ){
-                    placeholder = item;
-                }
-            });
-        });
-        return placeholder;
-    };
-
-    var getCurrentPlaceholder = function(areas, params){
-        var placeholder = getPlaceholder(areas, params);
-        if(!placeholder){
-            placeholder = that.currentPlaceholder;
-        }
-        if(that.currentPlaceholder && placeholder != that.currentPlaceholder){
-            unhighlightPlaceholder(that.currentPlaceholder);
-        }
-        if(placeholder && placeholder != that.currentPlaceholder){
-            highlightPlaceholder(placeholder);
-        }
-        that.currentPlaceholder = placeholder;
-        // Get current area
-        if(that.currentPlaceholder){
-            that.currentArea = that.currentPlaceholder['area'];
-        }
-        // Update placeholders position
-        updatePlaceholdersDimensions(areas, params);
-    };
-
-    var expandPlaceholder = function(placeholder){
-        if(placeholder && !placeholder['isExpand']){
-            placeholder['isExpand'] = true;
-            cm.addClass(placeholder['node'], 'is-expand', true);
-        }
-    };
-
-    var collapsePlaceholder = function(placeholder){
-        if(placeholder && placeholder['isExpand']){
-            placeholder['isExpand'] = false;
-            cm.removeClass(placeholder['node'], 'is-expand', true);
-        }
-    };
-
-    var highlightPlaceholder = function(placeholder){
-        if(placeholder && !placeholder['isActive']){
-            highlightArea(placeholder['area']);
-            placeholder['isActive'] = true;
-            cm.addClass(placeholder['node'], 'is-active');
-        }
-    };
-
-    var unhighlightPlaceholder = function(placeholder){
-        if(placeholder && placeholder['isActive']){
-            unhighlightArea(placeholder['area']);
-            placeholder['isActive'] = false;
-            cm.removeClass(placeholder['node'], 'is-active');
-        }
-    };
-
-    /* *** CHASSIS FUNCTIONS *** */
-
-    var renderChassisBlocks = function(){
-        var chassis;
-        cm.forEach(areas, function(area){
-            if(area['isLocked']){
-                return;
-            }
-
-            if(!area['items'].length){
-                chassis = renderChassis();
-                cm.appendChild(chassis['node'], area['node']);
-                area['chassis'].push(chassis);
-            }
-            cm.forEach(area['items'], function(draggable, i){
-                if(i === 0){
-                    chassis = renderChassis();
-                    cm.insertBefore(chassis['node'], draggable['node']);
-                    area['chassis'].push(chassis);
-                }
-                chassis = renderChassis();
-                cm.insertAfter(chassis['node'], draggable['node']);
-                area['chassis'].push(chassis);
-                // Associate with draggable
-                draggable['chassis']['top'] = area['chassis'][i];
-                draggable['chassis']['bottom'] = area['chassis'][i + 1];
-            });
-        });
-    };
-
-    var renderChassis = function(){
-        var node = cm.Node(that.params['chassisTag'], {'class' : 'pt__dnd-chassis'});
-        return {
-            'node' : node,
-            'anim' : new cm.Animation(node),
-            'isShow' : false
-        };
-    };
-
-    var removeChassisBlocks = function(){
-        cm.forEach(areas, function(area){
-            cm.forEach(area['chassis'], function(chassis){
-                cm.remove(chassis['node']);
-            });
-            area['chassis'] = [];
-        });
-    };
-
-    var animateChassis = function(chassis, height, duration) {
-        var style;
-        height = [height, 'px'].join('');
-        if(that.params['useCSSAnimation'] || isGracefulDegradation){
-            if(!isGracefulDegradation && (style = cm.getSupportedStyle('transition-duration'))){
-                chassis['node'].style[style] = [duration, 'ms'].join('');
-            }
-            chassis['node'].style.height = height;
-        }else{
-            chassis['anim'].go({'style' : {'height' : height}, 'anim' : 'smooth', 'duration' : duration});
-        }
-    };
-
-    /* *** POSITION CALCULATION FUNCTIONS *** */
-
-    var updateDimensions = function(item){
-        item['dimensions'] = cm.extend(item['dimensions'], cm.getFullRect(item['node'], item['styleObject']));
-    };
-
-    var getPosition = function(item){
-        item['dimensions'] = cm.extend(item['dimensions'], cm.getFullRect(item['node'], item['styleObject']));
-    };
-
-    var getPositions = function(arr){
-        cm.forEach(arr, getPosition);
-    };
-
-    var getPositionsAll = function(){
-        getPositions(areas);
-        cm.forEach(areas, function(area){
-            getPositions(area['items']);
-        });
-    };
-
-    var recalculatePosition = function(item){
-        //item['dimensions']['x1'] = cm.getRealX(item['node']);
-        item['dimensions']['y1'] = cm.getRealY(item['node']);
-        //item['dimensions']['x2'] = item['dimensions']['x1'] + item['dimensions']['width'];
-        item['dimensions']['y2'] = item['dimensions']['y1'] + item['dimensions']['height'];
-
-        //item['dimensions']['innerX1'] = item['dimensions']['x1'] + item['dimensions']['padding']['left'];
-        item['dimensions']['innerY1'] = item['dimensions']['y1'] + item['dimensions']['padding']['top'];
-        //item['dimensions']['innerX2'] = item['dimensions']['innerX1'] + item['dimensions']['innerWidth'];
-        item['dimensions']['innerY2'] = item['dimensions']['innerY1'] + item['dimensions']['innerHeight'];
-
-        //item['dimensions']['absoluteX1'] = item['dimensions']['x1'] - item['dimensions']['margin']['left'];
-        item['dimensions']['absoluteY1'] = item['dimensions']['y1'] - item['dimensions']['margin']['top'];
-        //item['dimensions']['absoluteX2'] = item['dimensions']['x2'] + item['dimensions']['margin']['right'];
-        item['dimensions']['absoluteY2'] = item['dimensions']['y2'] + item['dimensions']['margin']['bottom'];
-    };
-
-    var recalculatePositions = function(arr){
-        cm.forEach(arr, recalculatePosition);
-    };
-
-    var recalculatePositionsAll = function(){
-        var chassisHeight = 0;
-        // Reset current active chassis height, cause we need to calculate clear positions
-        if(currentChassis){
-            cm.addClass(currentChassis['node'], 'is-immediately');
-            chassisHeight = currentChassis['node'].offsetHeight;
-            currentChassis['node'].style.height = 0;
-        }
-        recalculatePositions(areas);
-        cm.forEach(areas, function(area){
-            recalculatePositions(area['items']);
-        });
-        // Restoring chassis height after calculation
-        if(currentChassis && chassisHeight){
-            currentChassis['node'].style.height = [chassisHeight, 'px'].join('');
-            (function(currentChassis){
-                setTimeout(function(){
-                    cm.removeClass(currentChassis['node'], 'is-immediately');
-                }, 5);
-            })(currentChassis);
-        }
-    };
-
-    var checkPosition = function(){
-        var filteredAreas = getFilteredAreas();
-        if(filteredAreas[0]['dimensions']['y1'] != cm.getRealY(filteredAreas[0]['node'])){
-            recalculatePositionsAll();
-        }
-    };
-
-    /* *** AREA FUNCTIONS *** */
-
-    var getFilteredAreas = function(){
-        return areas.filter(function(area){
-            // Filter out temporary and system areas
-            if(area['isTemporary'] || area['isSystem']){
-                return false;
-            }
-            // True - pass area
-            return true;
-        });
-    };
-
-    var getDroppableAreas = function(widget){
-        return areas.filter(function(area){
-            // Filter out locked areas and inner areas
-            if(cm.isParent(widget['node'], area['node']) || area['isLocked']){
-                return false;
-            }
-            // True - pass area
-            return true;
-        });
-    };
-
-    var getRemoveZones = function(){
-        return areas.filter(function(area){
-            return area['isRemoveZone'];
-        });
-    };
-
-    var toggleHighlightAreas = function(){
-        if(filteredAvailableAreas){
-            if(isHighlightedAreas){
-                isHighlightedAreas = false;
-                cm.forEach(filteredAvailableAreas, function(area){
-                    cm.removeClass(area['node'], 'is-highlight');
-                });
-            }else{
-                isHighlightedAreas = true;
-                cm.forEach(filteredAvailableAreas, function(area){
-                    cm.addClass(area['node'], 'is-highlight');
-                });
-            }
-        }
-    };
-
-    var highlightArea = function(area){
-        if(area && !area['isActive']){
-            area['isActive'] = true;
-            cm.addClass(area['node'], 'is-active');
-        }
-    };
-
-    var unhighlightArea = function(area){
-        if(area && area['isActive']){
-            area['isActive'] = false;
-            cm.removeClass(area['node'], 'is-active');
-        }
-    };
-
-    /* *** HELPERS *** */
-
-    var toggleScroll = function(speed){
-        var scrollRemaining,
-            duration,
-            styles = {};
-
-        if(speed == 0){
-            isScrollProccess = false;
-            anims['scroll'].stop();
-        }else if(speed < 0 && !isScrollProccess){
-            isScrollProccess = true;
-            duration = cm.getScrollTop(that.params['scrollNode']) * that.params['scrollSpeed'];
-            if(cm.isWindow(that.params['scrollNode'])){
-                styles['docScrollTop'] = 0;
-            }else{
-                styles['scrollTop'] = 0;
-            }
-            anims['scroll'].go({'style' : styles, 'duration' : duration, 'onStop' : function(){
-                isScrollProccess = false;
-                //getPositionsAll();
-                //recalculatePositionsAll();
-            }});
-        }else if(speed > 0 && !isScrollProccess){
-            isScrollProccess = true;
-            scrollRemaining = cm.getScrollHeight(that.params['scrollNode']) - pageSize['winHeight'];
-            if(cm.isWindow(that.params['scrollNode'])){
-                styles['docScrollTop'] = scrollRemaining;
-            }else{
-                styles['scrollTop'] = scrollRemaining;
-            }
-            duration = scrollRemaining * that.params['scrollSpeed'];
-            anims['scroll'].go({'style' : styles, 'duration' : duration, 'onStop' : function(){
-                isScrollProccess = false;
-                //getPositionsAll();
-                //recalculatePositionsAll();
-            }});
-        }
-    };
-
-    /* ******* MAIN ******* */
-
-    that.getArea = function(node){
-        var area;
-        cm.forEach(areas, function(item){
-            if(item['node'] === node){
-                area = item;
-            }
-        });
-        return area;
-    };
-
-    that.registerArea = function(node, params){
-        if(cm.isNode(node) && node.tagName){
-            initArea(node, params || {});
-        }
-        return that;
-    };
-
-    that.removeArea = function(node, params){
-        if(cm.isNode(node) && cm.inArray(areasList, node)){
-            areasList = areasList.filter(function(area){
-                return area != node;
-            });
-            areas = areas.filter(function(area){
-                return area['node'] != node;
-            });
-        }
-        return that;
-    };
-
-    that.getDraggable = function(node){
-        var draggable;
-        cm.forEach(draggableList, function(item){
-            if(item['node'] === node){
-                draggable = item;
-            }
-        });
-        return draggable;
-    };
-
-    that.getDraggableList = function(){
-        return draggableList;
-    };
-
-    that.registerDraggable = function(node, areaNode, params){
-        var draggable, area, newDraggable, index, childNodes, draggableNodes = [];
-        // Find draggable item by node
-        draggable = that.getDraggable(node);
-        // If draggable already exists - reinit it, else - init like new draggable item
-        if(draggable){
-            initDraggableDrag(draggable);
-        }else if(cm.inArray(areasList, areaNode)){
-            node.setAttribute('data-com-draganddrop', 'draggable');
-            // Fins area item by node
-            area = that.getArea(areaNode);
-            // Find draggable index
-            if(area['draggableInChildNodes']){
-                childNodes = area['node'].childNodes;
-                cm.forEach(childNodes, function(node){
-                    if(node.tagName && node.getAttribute('data-com-draganddrop') == 'draggable'){
-                        draggableNodes.push(node);
-                    }
-                });
-            }else{
-                draggableNodes = cm.getByAttr('data-com-draganddrop', 'draggable', area['node']);
-            }
-            index = draggableNodes.indexOf(node);
-            // Register draggable
-            newDraggable = initDraggable(node, area, params || {});
-            area['items'].splice(index, 0, newDraggable);
-        }
-        return that;
-    };
-
-    that.replaceDraggable = function(oldDraggableNode, newDraggableNode, params){
-        var oldDraggable,
-            newDraggable;
-        // Find draggable item
-        cm.forEach(draggableList, function(item){
-            if(item['node'] === oldDraggableNode){
-                oldDraggable = item;
-            }
-        });
-        if(oldDraggable){
-            // Find old draggable area and index in area
-            var area = oldDraggable['area'],
-                index = area['items'].indexOf(oldDraggable),
-                node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable', 'style' : 'height: 0px;'}), newDraggableNode);
-            // Append new draggable into DOM
-            cm.insertAfter(node, oldDraggableNode);
-            // Remove old draggable
-            removeDraggable(oldDraggable, params);
-            // Animate new draggable
-            cm.transition(node, {
-                'properties' : {
-                    'height' : [cm.getRealHeight(node, 'offset', 0), 'px'].join(''),
-                    'opacity' : 1
-                },
-                'duration' : that.params['dropDuration'],
-                'easing' : 'linear',
-                'onStop' : function(){
-                    cm.insertAfter(newDraggableNode, node);
-                    cm.remove(node);
-                    // Register new draggable
-                    newDraggable = initDraggable(newDraggableNode, area);
-                    area['items'].splice(index, 0, newDraggable);
-                    // API onEmbed event
-                    that.triggerEvent('onReplace', {
-                        'item' : newDraggable,
-                        'node' : newDraggable['node'],
-                        'to' : newDraggable['to']
-                    });
-                }
-            });
-
-        }
-        return that;
-    };
-
-    that.removeDraggable = function(node, params){
-        var draggable;
-        // Find draggable item
-        cm.forEach(draggableList, function(item){
-            if(item['node'] === node){
-                draggable = item;
-            }
-        });
-        if(draggable){
-            // Remove
-            removeDraggable(draggable, params || {});
-        }
-        return that;
-    };
-
-    that.getOrderingNodes = function(){
-        var results = [],
-            arr,
-            filteredAreas = getFilteredAreas();
-        // Build array
-        cm.forEach(filteredAreas, function(area){
-            arr = {
-                'area' : area['node'],
-                'items' : []
-            };
-            cm.forEach(area['items'], function(item){
-                arr['items'].push(item['node']);
-            });
-            results.push(arr);
-        });
-        return filteredAreas.length == 1 ? arr['items'] : results;
-    };
-
-    that.getOrderingIDs = function(){
-        var results = {},
-            arr,
-            filteredAreas = getFilteredAreas();
-        // Build array
-        cm.forEach(filteredAreas, function(area){
-            arr = {};
-            cm.forEach(area['items'], function(item, i){
-                if(!item['id']){
-                    throw new Error('Attribute "data-id" not specified on item node.');
-                }
-                arr[item['id']] = i;
-            });
-            results[area['id']] = arr;
-        });
-        return filteredAreas.length == 1 ? arr : results;
-    };
-    
     init();
 });
 cm.define('Com.DateSelect', {
@@ -10694,7 +9087,7 @@ cm.define('Com.Dialog', {
         'position' : 'fixed',
         'indentY' : 24,
         'indentX' : 24,
-        'theme' : 'theme-default',      // theme css class name, default: theme-default
+        'theme' : 'theme-default',      // theme css class name, default: theme-default | theme-black
         'className' : '',               // custom css class name
         'content' : cm.Node('div'),
         'title' : '',
@@ -17294,7 +15687,11 @@ cm.define('Com.Slider', {
         'onChangeStart',
         'onChange',
         'onPause',
-        'onStart'
+        'onStart',
+        'enableEditing',
+        'disableEditing',
+        'enableEditable',
+        'disableEditable'
     ],
     'params' : {
         'node' : cm.Node('div'),
@@ -17353,7 +15750,7 @@ function(params){
     that.paused = false;
     that.pausedOutside = false;
     that.isProcess = false;
-    that.isEditing = false;
+    that.isEditing = null;
 
     var init = function(){
         getCSSHelpers();
@@ -17700,7 +16097,7 @@ function(params){
     /* ******* MAIN ******* */
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.params['node'], 'is-editing');
             that.enableEditMode();
@@ -17711,7 +16108,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.params['node'], 'is-editing');
             that.disableEditMode();
@@ -18106,7 +16503,7 @@ cm.define('Com.Spacer', {
 function(params){
     var that = this;
 
-    that.isEditing = false;
+    that.isEditing = null;
     that.components = {};
     that.nodes = {};
     that.value = 0;
@@ -18235,10 +16632,10 @@ function(params){
         that.nodes['dragContainer'].style.top = [that.params['node'].offsetHeight, 'px'].join('');
     };
 
-    /* ******* MAIN ******* */
+    /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.params['node'], 'is-editing is-editable');
             that.triggerEvent('enableEditing');
@@ -18248,7 +16645,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.params['node'], 'is-editing is-editable');
             that.triggerEvent('disableEditing');
@@ -18731,7 +17128,7 @@ cm.define('Com.TabsetHelper', {
         'onTabShow',
         'onTabHideStart',
         'onTabHide',
-        'onLabelClick',
+        'onLabelTarget',
         'onRequestStart',
         'onRequestEnd',
         'onRequestError',
@@ -18745,6 +17142,7 @@ cm.define('Com.TabsetHelper', {
         'name' : '',
         'active' : null,
         'items' : [],
+        'targetEvent' : 'click',                                    // click | hover
         'setFirstTabImmediately' : true,
         'showLoader' : true,
         'loaderDelay' : 300,                                        // in ms
@@ -18778,10 +17176,12 @@ function(params){
     that.isAjax = false;
     that.isProcess = false;
     that.loaderDelay = null;
+    that.targetEvent = null;
 
     that.current = false;
     that.previous = false;
     that.items = {};
+    that.itemsList = [];
 
     var init = function(){
         that.setParams(params);
@@ -18800,8 +17200,19 @@ function(params){
     };
 
     var validateParams = function(){
+        // Ajax
         if(!cm.isEmpty(that.params['ajax']['url'])){
             that.isAjax = true;
+        }
+        // Target Event
+        switch(that.params['targetEvent']){
+            case 'hover':
+                that.targetEvent = 'mouseover';
+                break;
+            case 'click':
+            default:
+                that.targetEvent = 'click';
+                break;
         }
     };
 
@@ -18821,6 +17232,7 @@ function(params){
     var renderTab = function(item){
         item = cm.merge({
             'id' : '',
+            'title' : '',
             'tab' : {
                 'container' : cm.node('li'),
                 'inner' : cm.node('div')
@@ -18830,6 +17242,7 @@ function(params){
                 'inner' : cm.node('div')
             },
             'isHidden' : false,
+            'isShow' : false,
             'isAjax' : false,
             'isCached' : false,
             'ajax' : {}
@@ -18838,13 +17251,14 @@ function(params){
             item.isAjax = true;
         }
         if(!cm.isEmpty(item['id']) && !that.items[item['id']]){
+            that.itemsList.push(item);
             that.items[item['id']] = item;
             if(item.isHidden){
                 cm.addClass(item['label']['container'], 'hidden');
                 cm.addClass(item['tab']['container'], 'hidden');
             }
-            cm.addEvent(item['label']['container'], 'click', function(){
-                that.triggerEvent('onLabelClick', {
+            cm.addEvent(item['label']['container'], that.targetEvent, function(){
+                that.triggerEvent('onLabelTarget', {
                     'item' : item
                 });
                 set(item['id']);
@@ -18855,14 +17269,15 @@ function(params){
     var set = function(id){
         var item;
         if(that.current != id){
+            that.triggerEvent('onTabShowStart', {
+                'item' : that.items[id]
+            });
             // Hide previous tab
             unset();
             // Show new tab
             that.current = id;
             item = that.items[that.current];
-            that.triggerEvent('onTabShowStart', {
-                'item' : item
-            });
+            item.isShow = true;
             if(!that.previous && that.params['setFirstTabImmediately']){
                 cm.addClass(item['tab']['container'], 'is-immediately');
                 cm.addClass(item['label']['container'], 'is-immediately');
@@ -18891,6 +17306,7 @@ function(params){
                 that.abort();
             }
             that.previous = that.current;
+            item.isShow = false;
             that.triggerEvent('onTabHideStart', {
                 'item' : item
             });
@@ -19069,6 +17485,14 @@ function(params){
         return that;
     };
 
+    that.setByIndex = function(index){
+        var item;
+        if(item = that.itemsList[index]){
+            set(item['id']);
+        }
+        return that;
+    };
+
     that.unset = function(){
         unset();
         that.previous = null;
@@ -19114,6 +17538,10 @@ function(params){
             return that.items[id];
         }
         return null;
+    };
+
+    that.getTabs = function(){
+        return that.items;
     };
 
     that.abort = function(){
@@ -20818,7 +19246,7 @@ function(params){
 
     that.isDummy = false;
     that.isRemoved = false;
-    that.isEditing = false;
+    that.isEditing = null;
     that.styleObject = null;
     that.dimensions = null;
 
@@ -20872,7 +19300,7 @@ function(params){
         });
         new cm.Finder('App.Editor', that.params['editorName'], null, function(classObject){
             constructEditor(classObject);
-        });
+        }, {'event' : 'onProcessStart'});
     };
 
     var constructZone = function(classObject, index){
@@ -20907,7 +19335,7 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.node, 'is-editing');
             if(!that.params['visible']){
@@ -20931,7 +19359,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.node, 'is-editing');
             if(!that.params['visible']){
@@ -21466,7 +19894,7 @@ function(params){
             'block' : null,
             'zone' : null,
             'triggerEvent' : true,
-            'index' : 0,
+            'index' : false,
             'onStart' : function(){},
             'onEnd' : function(){}
         }, params);
@@ -21478,11 +19906,13 @@ function(params){
                 'node' : node
             });
         }
+        if(cm.isNumber(params.index)){
+            node.setAttribute('data-index', params.index.toString());
+        }
         // Render temporary node
         temporaryNode = cm.node('div');
         temporaryNode.style.height = 0;
         if(params.block){
-            node.setAttribute('data-index', params.index.toString());
             cm.insertAfter(temporaryNode, params.block.node);
         }else{
             cm.appendChild(temporaryNode, params.zone.node);
@@ -21530,7 +19960,7 @@ function(params){
             'block' : null,
             'zone' : null,
             'triggerEvent' : true,
-            'index' : 0,
+            'index' : false,
             'onStart' : function(){},
             'onEnd' : function(){}
         }, params);
@@ -21542,10 +19972,12 @@ function(params){
                 'node' : node
             });
         }
+        if(cm.isNumber(params.index)){
+            node.setAttribute('data-index', params.index.toString());
+        }
         // Temporary node
         temporaryNode = cm.node('div');
         if(params.block){
-            node.setAttribute('data-index', params.index.toString());
             cm.insertAfter(temporaryNode, params.block.node);
             cm.appendChild(params.block.node, temporaryNode);
             cm.appendChild(node, temporaryNode);
@@ -21749,9 +20181,7 @@ function(params){
         if(temp.zone){
             cm.forEach(temp.zone['blocks'], function(block){
                 if(
-                    params['left'] >= block.dimensions['outer']['left']
-                    && params['left'] < block.dimensions['outer']['right']
-                    && params['top'] >= block.dimensions['outer']['top']
+                    params['top'] >= block.dimensions['outer']['top']
                     && params['top'] <= block.dimensions['outer']['bottom']
                 ){
                     temp.block = block;
@@ -22114,7 +20544,7 @@ function(params){
         // Calculate dimensions
         that.getDimensions();
         // Construct
-        new cm.Finder('App.Editor', that.params['editorName'], null, constructEditor);
+        new cm.Finder('App.Editor', that.params['editorName'], null, constructEditor, {'event' : 'onProcessStart'});
     };
 
     var constructZone = function(classObject, index){
@@ -22151,14 +20581,18 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        that.isEditing = true;
-        cm.addClass(that.params['node'], 'is-editing is-editable is-visible');
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
+            that.isEditing = true;
+            cm.addClass(that.params['node'], 'is-editing is-editable is-visible');
+        }
         return that;
     };
 
     that.disableEditing = function(){
-        that.isEditing = false;
-        cm.removeClass(that.params['node'], 'is-editing is-editable is-visible');
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(that.params['node'], 'is-editing is-editable is-visible');
+        }
         return that;
     };
 
@@ -22248,6 +20682,7 @@ cm.define('App.Editor', {
     'events' : [
         'onRenderStart',
         'onRender',
+        'onProcessStart',
         'onExpand',
         'onCollapse',
         'onResize',
@@ -22295,8 +20730,9 @@ function(params){
     that.zones = [];
     that.blocks = [];
     that.dummyBlocks = [];
+    that.isRendered = false;
     that.isProcessed = false;
-    that.isExpanded = false;
+    that.isExpanded = null;
 
     /* *** INIT *** */
 
@@ -22305,9 +20741,9 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
         that.triggerEvent('onRenderStart');
         render();
-        that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
     };
 
@@ -22333,6 +20769,7 @@ function(params){
     };
 
     var process = function(){
+        that.triggerEvent('onProcessStart');
         cm.addClass(cm.getDocumentHtml(), 'is-editor');
         if(that.components['sidebar']){
             that.components['sidebar'].resize();
@@ -22341,10 +20778,13 @@ function(params){
             }else{
                 sidebarCollapseAction();
             }
+        }else{
+            sidebarCollapseAction();
         }
         if(!that.components['sidebar'] && that.components['topmenu']){
             adminPageAction();
         }
+        that.isRendered = true;
     };
 
     var sidebarResizeAction = function(sidebar, params){
@@ -22358,35 +20798,39 @@ function(params){
     };
 
     var sidebarExpandAction = function(){
-        that.isExpanded = true;
-        cm.addClass(cm.getDocumentHtml(), 'is-editing');
-        cm.forEach(that.zones, function(item){
-            item.enableEditing();
-        });
-        cm.forEach(that.blocks, function(item){
-            item.enableEditing();
-        });
-        cm.forEach(that.dummyBlocks, function(item){
-            item.enableEditing();
-        });
-        that.components['template'].enableEditing();
-        that.triggerEvent('onExpand');
+        if(typeof that.isExpanded !== 'boolean' || !that.isExpanded){
+            that.isExpanded = true;
+            cm.addClass(cm.getDocumentHtml(), 'is-editing');
+            cm.forEach(that.zones, function(item){
+                item.enableEditing();
+            });
+            cm.forEach(that.blocks, function(item){
+                item.enableEditing();
+            });
+            cm.forEach(that.dummyBlocks, function(item){
+                item.enableEditing();
+            });
+            that.components['template'].enableEditing();
+            that.triggerEvent('onExpand');
+        }
     };
 
     var sidebarCollapseAction = function(){
-        that.isExpanded = false;
-        cm.removeClass(cm.getDocumentHtml(), 'is-editing');
-        cm.forEach(that.zones, function(item){
-            item.disableEditing();
-        });
-        cm.forEach(that.blocks, function(item){
-            item.disableEditing();
-        });
-        cm.forEach(that.dummyBlocks, function(item){
-            item.disableEditing();
-        });
-        that.components['template'].disableEditing();
-        that.triggerEvent('onCollapse');
+        if(typeof that.isExpanded !== 'boolean' || that.isExpanded){
+            that.isExpanded = false;
+            cm.removeClass(cm.getDocumentHtml(), 'is-editing');
+            cm.forEach(that.zones, function(item){
+                item.disableEditing();
+            });
+            cm.forEach(that.blocks, function(item){
+                item.disableEditing();
+            });
+            cm.forEach(that.dummyBlocks, function(item){
+                item.disableEditing();
+            });
+            that.components['template'].disableEditing();
+            that.triggerEvent('onCollapse');
+        }
     };
 
     var adminPageAction = function(){
@@ -22454,6 +20898,7 @@ function(params){
             that.components['dashboard'].replaceBlock(node, {
                 'block' : block,
                 'zone' : block.zone,
+                'index' : block.getIndex(),
                 'onEnd' : function(){
                     that.triggerEvent('create', node);
                     that.triggerEvent('onProcessEnd', node);
@@ -22511,7 +20956,7 @@ function(params){
     that.update = function(node, block){
         if(node && block){
             node = !cm.isNode(node) ? cm.strToHTML(node) : node;
-            cm.remove(block.getInnerNode());
+            cm.clearNode(block.getInnerNode());
             cm.appendChild(node, block.getInnerNode());
             that.triggerEvent('update', node);
             that.triggerEvent('onProcessEnd', node);
@@ -22524,10 +20969,12 @@ function(params){
     that.addZone = function(zone){
         that.zones.push(zone);
         that.components['dashboard'].addZone(zone);
-        if(that.components['sidebar'] && that.components['sidebar'].isExpanded){
-            zone.enableEditing();
-        }else{
-            zone.disableEditing();
+        if(that.isRendered){
+            if(that.components['sidebar'] && that.components['sidebar'].isExpanded){
+                zone.enableEditing();
+            }else{
+                zone.disableEditing();
+            }
         }
         return that;
     };
@@ -22554,10 +21001,12 @@ function(params){
             that.blocks.push(block);
         }
         that.components['dashboard'].addBlock(block);
-        if(that.components['sidebar'] && that.components['sidebar'].isExpanded){
-            block.enableEditing();
-        }else{
-            block.disableEditing();
+        if(that.isRendered){
+            if(that.components['sidebar'] && that.components['sidebar'].isExpanded){
+                block.enableEditing();
+            }else{
+                block.disableEditing();
+            }
         }
         return that;
     };
@@ -23235,45 +21684,6 @@ function(params){
 
     init();
 });
-cm.define('App.ModuleMenu', {
-    'modules' : [
-        'Params',
-        'DataNodes'
-    ],
-    'params' : {
-        'node' : cm.Node('div')
-    }
-},
-function(params){
-    var that = this;
-
-    that.nodes = {
-        'select' : cm.Node('select')
-    };
-
-    /* *** CLASS FUNCTIONS *** */
-
-    var init = function(){
-        that.setParams(params);
-        that.getDataNodes(that.params['node']);
-        render();
-    };
-
-    var render = function(){
-        cm.addEvent(that.nodes['select'], 'change', toggle);
-    };
-
-    var toggle = function(){
-        var value = that.nodes['select'].value;
-        if(!cm.isEmpty(value)){
-            window.location.href = value;
-        }
-    };
-
-    /* *** MAIN *** */
-
-    init();
-});
 cm.define('App.SearchBox', {
     'modules' : [
         'Params',
@@ -23392,7 +21802,7 @@ function(params){
         'tabs' : []
     };
     that.components = {};
-    that.isExpanded = false;
+    that.isExpanded = null;
     that.openInterval = null;
 
     /* *** CLASS FUNCTIONS *** */
@@ -23421,7 +21831,7 @@ function(params){
     };
 
     var render = function(){
-        var helperMenuRule, helperContentRule;
+        var isExpanded, helperMenuRule, helperContentRule;
         // Init tabset
         processTabset();
         // Get sidebar dimensions from CSS
@@ -23439,20 +21849,16 @@ function(params){
         // Resize sidebar relative to scroll bar size
         resize();
         // Check toggle class
-        that.isExpanded = cm.isClass(that.nodes['container'], 'is-expanded');
+        isExpanded = cm.isClass(that.nodes['container'], 'is-expanded');
         // Check storage
         if(that.params['remember']){
-            that.isExpanded = that.storageRead('isExpanded');
-        }
-        // Check sidebars visibility
-        if(!cm.inDOM(that.nodes['container']) || cm.getStyle(that.nodes['container'], 'display') == 'none'){
-            that.isExpanded = false;
+            isExpanded = that.storageRead('isExpanded');
         }
         // Trigger events
-        if(that.isExpanded){
-            that.expand(true);
+        if(isExpanded){
+            that.expand(true, true);
         }else{
-            that.collapse(true);
+            that.collapse(true, true);
         }
         cm.addEvent(window, 'resize', resizeAction);
         cm.customEvent.add(that.nodes['container'], 'scrollSizeChange', resizeAction);
@@ -23461,7 +21867,7 @@ function(params){
     var processTabset = function(){
         cm.getConstructor('Com.TabsetHelper', function(classConstructor){
             that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper'])
-                .addEvent('onLabelClick', function(tabset, data){
+                .addEvent('onLabelTarget', function(tabset, data){
                     if(!that.isExpanded || tabset.get() == data['item']['id']){
                         that.toggle();
                     }
@@ -23521,74 +21927,78 @@ function(params){
 
     /* ******* MAIN ******* */
 
-    that.collapse = function(isImmediately){
-        that.isExpanded = false;
-        // Write storage
-        if(that.params['remember']){
-            that.storageWrite('isExpanded', false);
-        }
-        that.triggerEvent('onCollapseStart');
-        // Set immediately animation hack
-        if(isImmediately){
-            cm.addClass(that.nodes['container'], 'is-immediately');
-            cm.addClass(that.params['target'], 'is-immediately');
-        }
-        cm.replaceClass(that.nodes['container'], 'is-expanded', 'is-collapsed', true);
-        cm.replaceClass(that.params['target'], 'is-sidebar--expanded', 'is-sidebar--collapsed', true);
-        // Unset active class to collapse buttons
-        cm.forEach(that.nodes['collapseButtons'], function(item){
-            cm.removeClass(item['container'], 'active');
-        });
-        // Remove immediately animation hack
-        that.openInterval && clearTimeout(that.openInterval);
-        if(isImmediately){
-            that.openInterval = setTimeout(function(){
-                cm.removeClass(that.nodes['container'], 'is-immediately');
-                cm.removeClass(that.params['target'], 'is-immediately');
+    that.collapse = function(isImmediately, force){
+        if(force || typeof that.isExpanded !== 'boolean' || that.isExpanded){
+            that.isExpanded = false;
+            // Write storage
+            if(that.params['remember']){
+                that.storageWrite('isExpanded', false);
+            }
+            that.triggerEvent('onCollapseStart');
+            // Set immediately animation hack
+            if(isImmediately){
+                cm.addClass(that.nodes['container'], 'is-immediately');
+                cm.addClass(that.params['target'], 'is-immediately');
+            }
+            cm.replaceClass(that.nodes['container'], 'is-expanded', 'is-collapsed', true);
+            cm.replaceClass(that.params['target'], 'is-sidebar--expanded', 'is-sidebar--collapsed', true);
+            // Unset active class to collapse buttons
+            cm.forEach(that.nodes['collapseButtons'], function(item){
+                cm.removeClass(item['container'], 'active');
+            });
+            // Remove immediately animation hack
+            that.openInterval && clearTimeout(that.openInterval);
+            if(isImmediately){
                 that.triggerEvent('onCollapse');
                 that.triggerEvent('onCollapseEnd');
-            }, 5);
-        }else{
-            that.openInterval = setTimeout(function(){
-                that.triggerEvent('onCollapse');
-                that.triggerEvent('onCollapseEnd');
-            }, that.params['duration'] + 5);
+                that.openInterval = setTimeout(function(){
+                    cm.removeClass(that.nodes['container'], 'is-immediately');
+                    cm.removeClass(that.params['target'], 'is-immediately');
+                }, 5);
+            }else{
+                that.openInterval = setTimeout(function(){
+                    that.triggerEvent('onCollapse');
+                    that.triggerEvent('onCollapseEnd');
+                }, that.params['duration'] + 5);
+            }
         }
         return that;
     };
 
-    that.expand = function(isImmediately){
-        that.isExpanded = true;
-        // Write storage
-        if(that.params['remember']){
-            that.storageWrite('isExpanded', true);
-        }
-        that.triggerEvent('onExpandStart');
-        // Set immediately animation hack
-        if(isImmediately){
-            cm.addClass(that.nodes['container'], 'is-immediately');
-            cm.addClass(that.params['target'], 'is-immediately');
-        }
-        cm.replaceClass(that.nodes['container'], 'is-collapsed', 'is-expanded', true);
-        cm.replaceClass(that.params['target'], 'is-sidebar--collapsed', 'is-sidebar--expanded', true);
-        // Set active class to collapse buttons
-        cm.forEach(that.nodes['collapseButtons'], function(item){
-            cm.addClass(item['container'], 'active');
-        });
-        // Remove immediately animation hack
-        that.openInterval && clearTimeout(that.openInterval);
-        if(isImmediately){
-            that.openInterval = setTimeout(function(){
-                cm.removeClass(that.nodes['container'], 'is-immediately');
-                cm.removeClass(that.params['target'], 'is-immediately');
+    that.expand = function(isImmediately, force){
+        if(force || typeof that.isExpanded !== 'boolean' || !that.isExpanded){
+            that.isExpanded = true;
+            // Write storage
+            if(that.params['remember']){
+                that.storageWrite('isExpanded', true);
+            }
+            that.triggerEvent('onExpandStart');
+            // Set immediately animation hack
+            if(isImmediately){
+                cm.addClass(that.nodes['container'], 'is-immediately');
+                cm.addClass(that.params['target'], 'is-immediately');
+            }
+            cm.replaceClass(that.nodes['container'], 'is-collapsed', 'is-expanded', true);
+            cm.replaceClass(that.params['target'], 'is-sidebar--collapsed', 'is-sidebar--expanded', true);
+            // Set active class to collapse buttons
+            cm.forEach(that.nodes['collapseButtons'], function(item){
+                cm.addClass(item['container'], 'active');
+            });
+            // Remove immediately animation hack
+            that.openInterval && clearTimeout(that.openInterval);
+            if(isImmediately){
                 that.triggerEvent('onExpand');
                 that.triggerEvent('onExpandEnd');
-            }, 5);
-        }else{
-            that.openInterval = setTimeout(function(){
-                that.triggerEvent('onExpand');
-                that.triggerEvent('onExpandEnd');
-            }, that.params['duration'] + 5);
+                that.openInterval = setTimeout(function(){
+                    cm.removeClass(that.nodes['container'], 'is-immediately');
+                    cm.removeClass(that.params['target'], 'is-immediately');
+                }, 5);
+            }else{
+                that.openInterval = setTimeout(function(){
+                    that.triggerEvent('onExpand');
+                    that.triggerEvent('onExpandEnd');
+                }, that.params['duration'] + 5);
+            }
         }
         return that;
     };
@@ -24156,7 +22566,7 @@ function(params){
         'buttonUp' : cm.Node('div')
     };
 
-    that.isEditing = false;
+    that.isEditing = null;
     that.compoennts = {};
     that.anim = {};
     that.offsets = {};
@@ -24181,10 +22591,10 @@ function(params){
         cm.find('App.Sidebar', that.params['sidebarName'], null, function(classObject){
             that.compoennts['sidebar'] = classObject;
         });
-        cm.find('App.Editor', that.params['editorName'], null, function(classObject){
+        new cm.Finder('App.Editor', that.params['editorName'], null, function(classObject){
             that.compoennts['editor'] = classObject
                 .addEvent('onResize', resize);
-        });
+        }, {'event' : 'onProcessStart'});
         // Scroll Controllers
         that.anim['scroll'] = new cm.Animation(that.params['scrollNode']);
         cm.addEvent(that.nodes['buttonUp'], 'click', that.scrollToTop);
@@ -24248,7 +22658,7 @@ function(params){
     };
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             cm.removeClass(that.nodes['headerContainer'], 'is-overlapping is-fixed');
             that.redraw();
@@ -24258,7 +22668,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
             if(that.params['header']['overlapping']){
                 cm.addClass(that.nodes['headerContainer'], 'is-overlapping');
@@ -24440,7 +22850,7 @@ cm.define('App.Zone', {
 function(params){
     var that = this;
 
-    that.isEditing = false;
+    that.isEditing = null;
     that.isRemoved = false;
     that.isActive = false;
     that.styleObject = null;
@@ -24483,7 +22893,7 @@ function(params){
         }
         // Construct
         new cm.Finder('App.Block', that.params['blockName'], null, constructBlock);
-        new cm.Finder('App.Editor', that.params['editorName'], null, constructEditor);
+        new cm.Finder('App.Editor', that.params['editorName'], null, constructEditor, {'event' : 'onProcessStart'});
     };
 
     var constructBlock = function(classObject){
@@ -24518,22 +22928,22 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
-            cm.addClass(that.node, 'is-editing');
+            cm.addClass(that.node, 'is-editing', true);
             if(!that.params['locked']){
-                cm.addClass(that.node, 'is-editable');
+                cm.addClass(that.node, 'is-editable', true);
             }
         }
         return that;
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
-            cm.removeClass(that.node, 'is-editing');
+            cm.removeClass(that.node, 'is-editing', true);
             if(!that.params['locked']){
-                cm.removeClass(that.node, 'is-editable');
+                cm.removeClass(that.node, 'is-editable', true);
             }
         }
         return that;
@@ -24637,6 +23047,241 @@ function(params){
 
     init();
 });
+cm.define('App.ModuleHiddenTabs', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onTabShow',
+        'onTabHide',
+        'enableEditing',
+        'disableEditing',
+        'enableEditable',
+        'disableEditable'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'event' : 'hover',              // hover | click
+        'duration' : 'cm._config.animDuration',
+        'delay' : 'cm._config.hideDelay',
+        'isEditing' : false,
+        'customEvents' : true,
+        'Com.TabsetHelper' : {
+
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'container' : cm.node('div'),
+        'inner' : cm.node('div'),
+        'menu-label' : cm.node('div'),
+        'labels' : [],
+        'options' : [],
+        'tabs' : []
+    };
+    that.components = {};
+
+    that.isEditing = null;
+    that.isProcessing = false;
+    that.hideInterval = null;
+    that.changeInterval = null;
+
+    var init = function(){
+        getCSSHelpers();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        that.triggerEvent('onRenderStart');
+        render();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRender');
+    };
+
+    var getCSSHelpers = function(){
+        that.params['duration'] = cm.getTransitionDurationFromRule('.app-mod__hidden-tabs__duration') || that.params['duration'];
+    };
+
+    var validateParams = function(){
+        that.params['Com.TabsetHelper']['node'] = that.nodes['inner'];
+        that.params['Com.TabsetHelper']['name'] = [that.params['name'], 'tabset'].join('-');
+        that.params['Com.TabsetHelper']['targetEvent'] = that.params['event'];
+    };
+
+    var render = function(){
+        // Process Tabset
+        cm.getConstructor('Com.TabsetHelper', function(classConstructor){
+            that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper'])
+                .addEvent('onTabHide', function(tabset, data){
+                    that.triggerEvent('onTabHide', data);
+                })
+                .addEvent('onTabShowStart', function(tabset, data){
+                    if(!that.isProcessing){
+                        that.nodes['content-list'].style.overflow = 'hidden';
+                        that.nodes['content-list'].style.height = that.nodes['content-list'].offsetHeight + 'px';
+                    }
+                    that.isProcessing = true;
+                    that.changeInterval && clearTimeout(that.changeInterval);
+                    that.changeInterval = setTimeout(function(){
+                        that.isProcessing = false;
+                        that.nodes['content-list'].style.height = 'auto';
+                        that.nodes['content-list'].style.overflow = 'visible';
+                    }, that.params['duration']);
+                })
+                .addEvent('onTabShow', function(tabset, data){
+                    that.nodes['content-list'].style.height = data['item']['tab']['container'].offsetHeight + 'px';
+                    that.nodes['menu-label'].innerHTML = data['item']['title'];
+                    that.triggerEvent('onTabShow', data);
+                })
+                .addEvent('onLabelTarget', function(tabset, data){
+                    show();
+                })
+                .processTabs(that.nodes['tabs'], that.nodes['labels']);
+        });
+        // Mobile menu
+        cm.forEach(that.nodes['options'], function(item){
+            var config = that.getNodeDataConfig(item['container']);
+            cm.addEvent(item['container'], 'click', function(){
+                that.components['tabset'].set(config['id']);
+                show();
+            });
+        });
+        // Target events
+        if(that.params['event'] == 'hover'){
+            cm.addEvent(that.nodes['container'], 'mouseover', function(e){
+                show();
+            });
+            cm.addEvent(that.nodes['container'], 'mouseout', function(e){
+                var target = cm.getRelatedTarget(e);
+                if(!cm.isParent(that.nodes['container'], target, true)){
+                    !that.isEditing && hide();
+                }
+            });
+        }
+        cm.addEvent(window, 'click', function(e){
+            var target = cm.getEventTarget(e);
+            if(!cm.isParent(that.nodes['container'], target, true)){
+                !that.isEditing && hide();
+            }else{
+                show();
+            }
+        });
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
+        // Editing
+        that.params['isEditing'] && that.enableEditing();
+    };
+
+    var hide = function(){
+        that.hideInterval && clearTimeout(that.hideInterval);
+        that.hideInterval = setTimeout(function(){
+            cm.removeClass(that.nodes['content'], 'is-show');
+            that.nodes['menu-label'].innerHTML = '';
+            that.hideInterval = setTimeout(function(){
+                that.components['tabset'].unset();
+            }, that.params['delay']);
+        }, that.params['delay']);
+    };
+
+    var show = function(){
+        if(that.components['tabset'].current){
+            that.hideInterval && clearTimeout(that.hideInterval);
+            cm.addClass(that.nodes['content'], 'is-show', true);
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.enableEditing = function(){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
+            that.isEditing = true;
+            cm.addClass(that.params['node'], 'is-editing is-editable');
+            that.components['tabset'].setByIndex(0);
+            show();
+            that.triggerEvent('enableEditing');
+            that.triggerEvent('enableEditable');
+        }
+        return that;
+    };
+
+    that.disableEditing = function(){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
+            that.isEditing = false;
+            cm.removeClass(that.params['node'], 'is-editing is-editable');
+            hide();
+            that.triggerEvent('disableEditing');
+            that.triggerEvent('disableEditable');
+        }
+        return that;
+    };
+
+    that.redraw = function(){
+        return that;
+    };
+
+    init();
+});
+cm.define('App.ModuleMenu', {
+    'modules' : [
+        'Params',
+        'DataNodes'
+    ],
+    'params' : {
+        'node' : cm.Node('div')
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'select' : cm.Node('select')
+    };
+
+    /* *** CLASS FUNCTIONS *** */
+
+    var init = function(){
+        that.setParams(params);
+        that.getDataNodes(that.params['node']);
+        render();
+    };
+
+    var render = function(){
+        cm.addEvent(that.nodes['select'], 'change', toggle);
+    };
+
+    var toggle = function(){
+        var value = that.nodes['select'].value;
+        if(!cm.isEmpty(value)){
+            window.location.href = value;
+        }
+    };
+
+    /* *** MAIN *** */
+
+    init();
+});
 
 window.Collector = new Com.Collector({
         'autoInit' : true
@@ -24722,12 +23367,6 @@ window.Collector = new Com.Collector({
         });
     })
 
-    .add('app-template', function(node){
-        new App.Template({
-            'node' : node
-        });
-    })
-
     .add('app-sidebar', function(node){
         new App.Sidebar({
             'node' : node,
@@ -24777,6 +23416,12 @@ window.Collector = new Com.Collector({
 
     .add('login-box', function(node){
         new App.LoginBox({
+            'node' : node
+        });
+    })
+
+    .add('app-template', function(node){
+        new App.Template({
             'node' : node
         });
     })

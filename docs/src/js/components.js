@@ -83,12 +83,6 @@ window.Collector = new Com.Collector({
         });
     })
 
-    .add('app-template', function(node){
-        new App.Template({
-            'node' : node
-        });
-    })
-
     .add('app-sidebar', function(node){
         new App.Sidebar({
             'node' : node,
@@ -138,6 +132,12 @@ window.Collector = new Com.Collector({
 
     .add('login-box', function(node){
         new App.LoginBox({
+            'node' : node
+        });
+    })
+
+    .add('app-template', function(node){
+        new App.Template({
             'node' : node
         });
     })
