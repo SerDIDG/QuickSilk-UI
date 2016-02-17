@@ -5,11 +5,19 @@ $config = array(
 	'positionId' => $date->getTimestamp(),
 	'zone' => $_POST['zone'],
 	'parentId' => $_POST['parentId'],
-	'type' => $_POST['type']
+	'type' => $_POST['type'],
 );
+if(!empty($_POST['instanceId']) && $_POST['instanceId'] != 'false'){
+	$config['instanceId'] = $_POST['instanceId'];
+}
 
 $module = '';
 switch($_POST['keyword']){
+	case 'form_builder':
+		$module =   '<div class="app__module app-mod__default">
+					 	<div data-element="App.Zone" data-config=\'{"instanceId" : 1, "zone" : "content", "parentId" : "0", "type" : "form-manager", "link" : {"parentId" : "'.$config['parentId'].'", "type" : "'.$config['type'].'"}}\'></div>
+					 </div>';
+		break;
 	case 'spacer':
 		$module =   '<div class="app__module app-mod__spacer com__spacer is-chassis-visible" style="height:24px" data-element="spacer"></div>';
 		break;
@@ -31,7 +39,7 @@ switch($_POST['keyword']){
                     </div>';
 		break;
 	case 'hidden_tabs':
-		$module =  '<div class="app__module app-mod__hidden-tabs pull-left theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container">
+		$module =  '<div class="app__module app-mod__hidden-tabs pull-left expand-bottom theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container">
 						<div class="inner" data-node="inner">
 							<div class="tabs__head" data-node="head">
 								<div class="inner" data-node="head-inner">

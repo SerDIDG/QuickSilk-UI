@@ -3340,7 +3340,7 @@ Copyright (c) 2015 Daniel Eden
 
 // /* ******* UI ******* */
 
-@CmUI-Transition-Duration: 300ms;
+@CmUI-Transition-Duration: 250ms;
 @CmUI-Transition-DurationReverse: 100ms;
 @CmUI-Opacity-Hover: 0.7;
 @CmUI-Shadow: 0 0 8px rgba(0, 0, 0, 0.15);
@@ -3353,6 +3353,7 @@ Copyright (c) 2015 Daniel Eden
 @CmUI-Overlay-Light: rgba(255, 255, 255, 0.7);
 @CmUI-Overlay-Duration: 500ms;
 @CmUI-AdaptiveFrom: @CmScreen-TabletPortrait;
+@CmUI-TooltipWidth: 320px;
 
 // /* ************************************************ */
 // /* ******* COLORS ******* */
@@ -3745,8 +3746,8 @@ Copyright (c) 2015 Daniel Eden
 @PtToolbar-GroupIndent: @CmIndent-Small;
 @PtToolbar-ItemIndent: @CmIndent-XXXSmall;
 @PtToolbar-XXXSmall: 32px;
-@PtToolbar-XXSmall: 52px;
-@PtToolbar-XSmall: 70px;
+@PtToolbar-XXSmall: 56px;
+@PtToolbar-XSmall: 76px;
 @PtToolbar-Small: 100px;
 @PtToolbar-Medium: 150px;
 @PtToolbar-Large: 250px;
@@ -3927,6 +3928,40 @@ Copyright (c) 2015 Daniel Eden
 @ComCalendar-Active-Border: @CmColor-Primary-DarkDefault;
 @ComCalendar-Active-BorderHover: @CmColor-Primary-DarkHover;
 
+// /* ******* BIG CALENDAR ******* */
+
+@ComBigCalendar-BorderWidth: @CmBorder-Width;
+@ComBigCalendar-BorderColor: @CmColor-Border;
+@ComBigCalendar-Border: @ComBigCalendar-BorderWidth solid @ComBigCalendar-BorderColor;
+@ComBigCalendar-Background: @CmColor-Background;
+
+@ComCalendarEvent-TooltipWidth: @CmUI-TooltipWidth;
+@ComCalendarEvent-Indent: 1px;
+@ComCalendarEvent-LineHeight: @CmFont-Base-LineHeight;
+
+@ComCalendarTable-Border: @ComBigCalendar-Border;
+@ComCalendarTable-Default-Background: @CmColor-Background;
+@ComCalendarTable-Default-BackgroundHover: @CmColor-Secondary-LightHover;
+@ComCalendarTable-Inactive-Background: @CmColor-Background;
+@ComCalendarTable-Inactive-BackgroundHover: @CmColor-Secondary-LightHover;
+@ComCalendarTable-Weekend-Background: @CmColor-Secondary-LightActive;
+@ComCalendarTable-Weekend-BackgroundHover: @CmColor-Secondary-LightActiveHover;
+@ComCalendarTable-Today-Background: @CmColor-Primary-LightActive;
+@ComCalendarTable-Today-BackgroundHover: @CmColor-Primary-LightActiveHover;
+@ComCalendarTable-Active-Background: @CmColor-Primary-LightActive;
+@ComCalendarTable-Active-BackgroundHover: @CmColor-Primary-LightActiveHover;
+
+@ComCalendarWeek-Day-Indent: @CmIndent-XXXSmall;
+@ComCalendarMonth-Item-Height: @ComCalendarEvent-LineHeight + (@ComBigCalendar-BorderWidth * 2);
+
+@ComCalendarMonth-Item-Count: 3;
+@ComCalendarMonth-Item-LineHeight: @ComCalendarEvent-LineHeight;
+@ComCalendarMonth-Item-Height: @ComCalendarMonth-Item-LineHeight + (@ComBigCalendar-BorderWidth * 2);
+@ComCalendarMonth-Item-Indent: @ComCalendarEvent-Indent;
+@ComCalendarMonth-Day-Indent: @CmIndent-XXXSmall;
+@ComCalendarMonth-Day-Items : @ComCalendarMonth-Item-Count + 2;
+@ComCalendarMonth-Day-Height: (@ComCalendarMonth-Item-Height * @ComCalendarMonth-Day-Items) + (@ComCalendarMonth-Item-Indent * (@ComCalendarMonth-Day-Items - 1));
+
 // /* ******* COLUMNS ******* */
 
 @ComColumns-AdaptiveFrom: @CmUI-AdaptiveFrom;
@@ -3994,7 +4029,7 @@ Copyright (c) 2015 Daniel Eden
 @ComTabset-Tabs-FontSize: @CmFont-Base-Size;
 @ComTabset-Tabs-DefaultBackground: @CmColor-Secondary-LightHighlight;
 @ComTabset-Tabs-HoverBackground: @CmColor-Secondary-LightHover;
-@ComTabset-Tabs-ActiveBackground: #ffffff;
+@ComTabset-Tabs-ActiveBackground: @CmColor-Background;
 @ComTabset-TabsTitle-Background: @CmColor-Secondary-LightHighlight;
 
 // /* ******* PAGINATION ******* */
@@ -4532,6 +4567,17 @@ Copyright (c) 2015 Daniel Eden
     display: block;
 
 }
+
+.cm__image-centered {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
+    position: absolute;
+    .mx__position(0, 0, 0, 0);
+}
+
 .cm__text-nowrap,
 .cm__text-overflow {
     overflow: hidden;
@@ -8393,7 +8439,7 @@ button {
 
         input[type="checkbox"],
         input[type="radio"] {
-            vertical-align: middle;
+            vertical-align: baseline;
             margin: 0;
         }
     }
@@ -8574,6 +8620,8 @@ button {
     .mx__user-select(none);
 
     > .inner {
+        width: 100%;
+        height: 100%;
         display: block;
         position: relative;
         z-index: 1;
@@ -8758,21 +8806,14 @@ button {
             text-align: center;
             .mx__position(0, 0, 0, 0);
 
-            &:before {
-                height: 100%;
-                display: inline-block;
-                vertical-align: middle;
-                content: "";
-            }
-
             > .descr {
-                display: inline-block;
                 width: auto;
                 height: auto;
                 max-width: 100%;
                 max-height: 100%;
                 margin: auto;
-                vertical-align: middle;
+                position: absolute;
+                .mx__position(0, 0, 0, 0);
             }
 
             > iframe.descr {
@@ -9878,14 +9919,24 @@ button {
         }
     }
 
-    &.is-adaptive {
+    &.is-flex {
         > .inner {
-            .mx__flex-wrap(nowrap);
-        }
+            > .left {
+                .display-flex;
+                .mx__flex(1 1 auto);
+                .mx__justify-content(flex-start);
+            }
 
-        .group {
-            .display-flex;
-            .mx__justify-content(flex-start);
+            > .center {
+                .display-flex;
+                .mx__flex(0 1 auto);
+            }
+
+            > .right {
+                .display-flex;
+                .mx__flex(1 1 auto);
+                .mx__justify-content(flex-end);
+            }
         }
     }
 }
@@ -9898,6 +9949,7 @@ button {
         .pt__toolbar {
             > .inner {
                 > .left,
+                > .center,
                 > .right {
                     width: 100%;
                     float: none;
@@ -9940,6 +9992,12 @@ button {
             &.is-adaptive {
                 > .inner {
                     display: block;
+
+                    > .left,
+                    > .center,
+                    > .right {
+                        display: block;
+                    }
                 }
 
                 .button {
@@ -10800,7 +10858,8 @@ button {
         }
     }
 
-    &.theme-black{
+    &.theme-dark,
+    &.theme-black {
         > .inner {
             .pt__box--black;
         }
@@ -10832,6 +10891,305 @@ button {
         }
     }
 }
+/* ******* COMPONENTS: BIG CALENDAR *** */
+
+.com__big-calendar {
+}
+
+.com__calendar-event {
+    border: @CmBorder-Default;
+    border-radius: @CmBorder-Radius;
+    background-color: @CmColor-Secondary-LightHighlight;
+    cursor: pointer;
+    .mx__transition(all, @CmUI-Transition-Duration);
+
+    > .label {
+        .cm__font--hint;
+        padding: 0 @CmIndent-XXXSmall;
+        color: @CmColor-Font;
+
+        .time {
+            color: @CmColor-Font-Hint;
+        }
+    }
+
+    &.is-short {
+        margin-top: @ComCalendarEvent-Indent;
+
+        &:first-child {
+            margin-top: 0;
+        }
+
+        > .label {
+            .cm__text-nowrap;
+            line-height: @ComCalendarEvent-LineHeight;
+
+            .time {
+                margin: 0 0 0 @CmIndent-XXXSmall;
+                float: right;
+            }
+
+            .title {
+                .cm__text-nowrap;
+            }
+        }
+    }
+
+    &:hover {
+        border-color: @CmColor-Primary-DarkDefault;
+        background-color: @CmColor-Primary-LightHover;
+        .mx__transition(all, @CmUI-Transition-DurationReverse);
+    }
+}
+
+/* *** AGENDA VIEW *** */
+
+.com__calendar-agenda {
+    .calendar__templates {
+        display: none;
+    }
+
+    .calendar__day {
+        margin-top: @CmIndent-Medium;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
+    .calendar__dayname {
+        margin-bottom: @CmIndent-XXSmall;
+    }
+}
+
+/* *** WEEK VIEW *** */
+
+.com__calendar-week {
+    .calendar__table {
+        > table {
+            table-layout: fixed;
+
+            th {
+                padding: @CmIndent-XXXSmall;
+                vertical-align: top;
+                text-align: center;
+            }
+
+            td {
+                border: @ComCalendarTable-Border;
+                vertical-align: top;
+                text-align: left;
+                .mx__transition(all, @CmUI-Transition-Duration);
+
+                &:hover {
+                    .mx__transition(all, @CmUI-Transition-DurationReverse);
+                }
+
+                &.default {
+                    background-color: @ComCalendarTable-Default-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Default-BackgroundHover;
+                    }
+                }
+
+                &.inactive {
+                    background-color: @ComCalendarTable-Inactive-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Inactive-BackgroundHover;
+                    }
+                }
+
+                &.weekend {
+                    background-color: @ComCalendarTable-Weekend-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Weekend-BackgroundHover;
+                    }
+                }
+
+                &.today {
+                    background-color: @ComCalendarTable-Today-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Today-BackgroundHover;
+                    }
+                }
+            }
+        }
+    }
+
+    .calendar__templates {
+        display: none;
+    }
+
+    .calendar__day {
+        padding: @ComCalendarWeek-Day-Indent;
+        position: relative;
+
+        > .inner {
+            min-height: @ComCalendarMonth-Item-Height;
+        }
+    }
+}
+
+/* *** MONTH VIEW *** */
+
+.com__calendar-month {
+    .calendar__table {
+        > table {
+            table-layout: fixed;
+
+            th {
+                padding: @CmIndent-XXXSmall;
+                vertical-align: top;
+                text-align: center;
+            }
+
+            td {
+                border: @ComCalendarTable-Border;
+                vertical-align: top;
+                text-align: left;
+                .mx__transition(all, @CmUI-Transition-Duration);
+
+                &:hover {
+                    .mx__transition(all, @CmUI-Transition-DurationReverse);
+                }
+
+                &.default {
+                    background-color: @ComCalendarTable-Default-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Default-BackgroundHover;
+                    }
+
+                    .calendar__dayname {
+                        .calendar__dayname--default;
+                    }
+                }
+
+                &.inactive {
+                    background-color: @ComCalendarTable-Inactive-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Inactive-BackgroundHover;
+                    }
+                }
+
+                &.weekend {
+                    background-color: @ComCalendarTable-Weekend-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Weekend-BackgroundHover;
+                    }
+                }
+
+                &.today {
+                    background-color: @ComCalendarTable-Today-Background;
+
+                    &:hover {
+                        background-color: @ComCalendarTable-Today-BackgroundHover;
+                    }
+                }
+            }
+        }
+    }
+
+    .calendar__templates {
+        display: none;
+    }
+
+    .calendar__day {
+        padding: @ComCalendarMonth-Day-Indent;
+        position: relative;
+
+        > .inner {
+            height: @ComCalendarMonth-Day-Height;
+        }
+    }
+
+    .calendar__dayname {
+        height: @ComCalendarMonth-Item-Height;
+
+        > .label {
+            .cm__font--hint;
+            line-height: @ComCalendarMonth-Item-Height;
+            text-align: right;
+        }
+    }
+
+    .calendar__dayname--default {
+        > .label {
+            color: @CmColor-Font;
+            font-weight: @CmFont-Base-BoldWeight;
+        }
+    }
+
+    .calendar__events-holder {
+        margin-top: @ComCalendarMonth-Item-Indent;
+    }
+
+    .calendar__more {
+        height: @ComCalendarMonth-Item-Height;
+        margin-top: @ComCalendarMonth-Item-Indent;
+
+        > .label {
+            .cm__font--hint;
+            .cm__text-nowrap;
+            line-height: @ComCalendarMonth-Item-Height;
+            text-align: right;
+        }
+    }
+
+    .calendar__more-holder {
+        .cm__scroll-y-a;
+        position: absolute;
+        z-index: 10;
+        visibility: hidden;
+        opacity: 0;
+        .mx__position(0, 0, 0, 0);
+        .mx__transition(all, @CmUI-Transition-Duration);
+
+        > .inner {
+            padding: @ComCalendarMonth-Day-Indent;
+            background-color: @ComBigCalendar-Background;
+        }
+
+        &.is-show {
+            visibility: visible;
+            opacity: 1;
+            .mx__transition(all, @CmUI-Transition-DurationReverse);
+        }
+    }
+}
+
+/* *** TOOLTIP *** */
+
+.com__tooltip {
+    &.com__calendar-event-tooltip {
+        width: @ComCalendarEvent-TooltipWidth;
+
+        > .inner {
+            padding: @CmIndent-XSmall;
+        }
+    }
+}
+
+/* *** HELPERS *** */
+
+.com__calendar-event-helper__indent {
+    height: @ComCalendarEvent-Indent;
+}
+
+.com__calendar-month-helper__day-indent {
+    height: @ComCalendarMonth-Day-Indent;
+}
+
+.com__calendar-week-helper__day-indent {
+    height: @ComCalendarWeek-Day-Indent;
+}
+
 /* ******* COMPONENTS: CALENDAR ******* */
 
 .com__calendar {
@@ -11033,6 +11391,7 @@ button {
     .display-flex;
     vertical-align: top;
     .mx__flex(1 1 auto);
+    .mx__flex-direction(column);
 
     > .inner {
         position: relative;
@@ -11042,8 +11401,9 @@ button {
         .mx__transition(background-color, @CmUI-Transition-Duration);
     }
 
-    .firefox & {
-        .mx__flex-direction(column);
+    .ie10 &,
+    .ie11 & {
+        .mx__flex-direction(row);
     }
 
     .ie8 &,
@@ -11682,6 +12042,17 @@ button {
 
 .com__form {
     .cm__box;
+    position: relative;
+}
+
+.com__form__fields {
+    .clearfix;
+    position: relative;
+}
+
+.com__form__buttons {
+    .clearfix;
+    position: relative;
 }
 /* ******* COMPONENTS: GALLERY ******* */
 
@@ -14612,7 +14983,7 @@ button {
 @AppBlock-Dummy-ThemeDark-ColorActive: @CmColor-Font;
 @AppBlock-Dummy-ThemeDark-BackgroundNormal: trannsparent;
 @AppBlock-Dummy-ThemeDark-BackgroundHover: trannsparent;
-@AppBlock-Dummy-ThemeDark-BackgroundActive: #ffffff;
+@AppBlock-Dummy-ThemeDark-BackgroundActive: @CmColor-Background;
 @AppBlock-Dummy-ThemeDark-IconBackgroundNormal: rgba(255, 255, 255, 0.2);
 @AppBlock-Dummy-ThemeDark-IconBackgroundHover: rgba(255, 255, 255, 0.5);
 @AppBlock-Dummy-ThemeDark-IconBackgroundActive: @CmColor-Primary-DarkDefault;
@@ -14622,7 +14993,7 @@ button {
 @AppBlock-Dummy-ThemeLight-ColorActive: @CmColor-Font;
 @AppBlock-Dummy-ThemeLight-BackgroundNormal: trannsparent;
 @AppBlock-Dummy-ThemeLight-BackgroundHover: trannsparent;
-@AppBlock-Dummy-ThemeLight-BackgroundActive: #ffffff;
+@AppBlock-Dummy-ThemeLight-BackgroundActive: @CmColor-Background;
 @AppBlock-Dummy-ThemeLight-IconBackgroundNormal: @CmColor-Secondary-LightHover;
 @AppBlock-Dummy-ThemeLight-IconBackgroundHover: @CmColor-Primary-LightActive;
 @AppBlock-Dummy-ThemeLight-IconBackgroundActive: @CmColor-Primary-LightActive;
@@ -14703,19 +15074,21 @@ button {
 @AppMod-HiddenTabs-BorderWidth: @CmBorder-Width;
 @AppMod-HiddenTabs-Border: @AppMod-HiddenTabs-BorderWidth solid transparent;
 @AppMod-HiddenTabs-Duration: @CmUI-Transition-Duration;
+@AppMod-HiddenTabs-Theme: 'Light';
 
 @AppMod-HiddenTabs-Label-Height: @CmForm-FieldHeight;
 @AppMod-HiddenTabs-Label-Indent: @CmIndent-XXXSmall;
 @AppMod-HiddenTabs-Label-InnerIndent: @CmIndent-XSmall;
+@AppMod-HiddenTabs-Label-TitleIndent: @CmIndent-XXSmall;
+@AppMod-HiddenTabs-Image-Size: @CmSize-Medium;
 @AppMod-HiddenTabs-Menu-Height: @CmForm-FieldHeight;
 @AppMod-HiddenTabs-Menu-Indent: @CmIndent-XSmall;
 @AppMod-HiddenTabs-Content-Indent: 4px;
 
 @AppMod-HiddenTabs-ThemeLight-BorderColor: @CmColor-Border;
-
-@AppMod-HiddenTabs-ThemeLight-Label-DefaultBackground: @CmColor-Secondary-LightHighlight;
+@AppMod-HiddenTabs-ThemeLight-Label-DefaultBackground: @CmColor-Secondary-LightActive;
 @AppMod-HiddenTabs-ThemeLight-Label-HoverBackground: @CmColor-Secondary-LightHover;
-@AppMod-HiddenTabs-ThemeLight-Label-ActiveBackground: #ffffff;
+@AppMod-HiddenTabs-ThemeLight-Label-ActiveBackground: @CmColor-Background;
 @AppMod-HiddenTabs-ThemeLight-Menu-Background: @CmColor-Background;
 @AppMod-HiddenTabs-ThemeLight-Content-Background: @CmColor-Background;
 
@@ -14781,6 +15154,12 @@ button {
 html {
     .cm__scroll-y;
     height: 100%;
+
+    &.is-partial-view {
+        body {
+            min-width: 0;
+        }
+    }
 }
 
 body {
@@ -16857,6 +17236,10 @@ html {
     width: @AppSidebar-WidthExpanded;
 }
 
+.app__sidebar-helper__duration {
+    transition-duration: @AppSidebar-Duration;
+}
+
 /* *** FONT *** */
 
 .app__sidebar-font {
@@ -16960,12 +17343,6 @@ html {
 
 .app__sidebar-tag__menu-item () {
 
-}
-
-/* *** HELPERS *** */
-
-.app__sidebar__duration {
-    transition-duration: @AppSidebar-Duration;
 }
 
 /* ******* COMPONENT: SIDEBAR: ADAPTIVE ******* */
@@ -17546,6 +17923,10 @@ html {
         .app-pt__latest-posts__descr-lines(@AppMod-BlogWidget-DescrLines);
     }
 }
+/* ******* MODULES: CALENDAR ******* */
+
+.module__calendar {
+}
 /* ******* MODULES: COLUMNS ******* */
 
 .app-mod__columns {
@@ -17578,6 +17959,9 @@ html {
 /* ******* MODULES: HIDDEN TABS ******* */
 
 .app-mod__hidden-tabs {
+    z-index: 1;
+    .mx__transition(z-index, @CmUI-Transition-Duration);
+
     > .inner {
         position: relative;
 
@@ -17587,7 +17971,7 @@ html {
 
             ul {
                 .cm__list-clear;
-                .cm__list-inline--base;
+                .cm__list-inline;
 
                 > li {
                     position: relative;
@@ -17595,22 +17979,33 @@ html {
                     .mx__transition(all, @CmUI-Transition-Duration);
 
                     > a {
-                        display: block;
+                        .display-flex;
                         white-space: nowrap;
-                        line-height: @ComTabset-Tabs-Height;
                         .mx__transition(all, @CmUI-Transition-Duration);
+                        .mx__align-items(center);
+                        .mx__flex-flow(row nowrap);
+
+                        .image {
+                            position: relative;
+
+                            img {
+                                .cm__image-centered;
+                            }
+                        }
+
+                        .title {
+                            &:first-child {
+                                margin-left: 0;
+                            }
+
+                            &:last-child {
+                                margin-right: 0;
+                            }
+                        }
 
                         &:hover {
                             .mx__transition(all, @CmUI-Transition-DurationReverse);
                         }
-                    }
-
-                    &:first-child {
-                        margin: 0;
-                    }
-
-                    &:last-child {
-                        margin: 0;
                     }
 
                     &:hover {
@@ -17621,12 +18016,47 @@ html {
             }
         }
 
+        > .tabs__menu {
+            display: none;
+            position: relative;
+            z-index: 3;
+
+            > .inner {
+                position: relative;
+
+                .label {
+                    .cm__text-nowrap;
+                }
+
+                .icon {
+                    float: right;
+
+                    &.default {
+                        .icon.medium.menu;
+                    }
+                }
+
+                &:hover,
+                &.active {
+                    .pt__menu-dropdown {
+                        .pt__menu-dropdown--active;
+                    }
+                }
+            }
+
+            .pt__menu-dropdown {
+                .pt__menu-dropdown--base;
+                min-width: 100%;
+                top: 100%;
+            }
+        }
+
         > .tabs__content {
             position: absolute;
             z-index: 1;
             visibility: hidden;
             opacity: 0;
-            .mx__position(100%, 0, auto, 0);
+            .mx__position(auto, 0, auto, 0);
             .mx__transition(opacity visibility height, @CmUI-Transition-Duration);
 
             > .inner {
@@ -17661,54 +18091,12 @@ html {
                 .mx__transition(opacity visibility height, @CmUI-Transition-DurationReverse);
             }
         }
-
-        > .tabs__menu {
-            display: none;
-            position: relative;
-            z-index: 3;
-
-            > .inner {
-                position: relative;
-
-                .label {
-                    .cm__font;
-                    .cm__text-nowrap;
-                    min-height: @AppMod-HiddenTabs-Menu-Height;
-                    line-height: @AppMod-HiddenTabs-Menu-Height;
-                    padding: 0 @AppMod-HiddenTabs-Menu-Indent;
-                }
-
-                .icon {
-                    width: @AppMod-HiddenTabs-Menu-Height;
-                    height: @AppMod-HiddenTabs-Menu-Height;
-                    float: right;
-
-                    &.default {
-                        .icon.medium.menu;
-                    }
-                }
-
-                &:hover,
-                &.active {
-                    .pt__menu-dropdown {
-                        .pt__menu-dropdown--active;
-                    }
-                }
-            }
-
-            .pt__menu-dropdown {
-                .pt__menu-dropdown--base;
-                min-width: 100%;
-                top: 100%;
-            }
-        }
     }
 
     &.is-editing {
         > .inner {
             > .tabs__content {
                 position: relative;
-                top: auto;
 
                 > .inner {
                     > ul {
@@ -17723,6 +18111,52 @@ html {
                 }
             }
         }
+
+        &.expand-top {
+            > .inner {
+                > .tabs__content {
+                    bottom: auto;
+                }
+            }
+        }
+
+        &.expand-bottom {
+            > .inner {
+                > .tabs__content {
+                    top: auto;
+                }
+            }
+        }
+    }
+
+    &.pull-left {
+        > .inner {
+            > .tabs__head {
+                ul {
+                    text-align: left;
+                }
+            }
+        }
+    }
+
+    &.pull-center {
+        > .inner {
+            > .tabs__head {
+                ul {
+                    text-align: center;
+                }
+            }
+        }
+    }
+
+    &.pull-right {
+        > .inner {
+            > .tabs__head {
+                ul {
+                    text-align: right;
+                }
+            }
+        }
     }
 
     &.pull-justify {
@@ -17730,15 +18164,19 @@ html {
             > .tabs__head {
                 ul {
                     .display-flex;
+                    text-align: center;
                     .mx__flex-flow(row wrap);
 
                     > li {
                         max-width: 100%;
-                        .mx__flex(1 1 auto);
+                        .mx__flex(1 1 0);
 
                         > a {
-                            .cm__text-nowrap;
-                            text-align: center;
+                            .mx__justify-content(center);
+
+                            .title {
+                                .cm__text-nowrap;
+                            }
                         }
                     }
                 }
@@ -17746,8 +18184,14 @@ html {
         }
     }
 
+    &:hover {
+        z-index: 10;
+    }
+
     .app-mod__hidden-tabs__label-indent(@AppMod-HiddenTabs-Label-Indent);
+    .app-mod__hidden-tabs__label-title-indent(@AppMod-HiddenTabs-Label-TitleIndent);
     .app-mod__hidden-tabs__content-indent(@AppMod-HiddenTabs-Content-Indent);
+    .app-mod__hidden-tabs__image-size(@AppMod-HiddenTabs-Image-Size);
 }
 
 /* *** THEMES *** */
@@ -17764,8 +18208,6 @@ html {
 
                             > a {
                                 .cm__font;
-                                padding: 0 @AppMod-HiddenTabs-Label-InnerIndent;
-                                line-height: @AppMod-HiddenTabs-Label-Height;
                                 text-decoration: none;
                             }
                         }
@@ -17777,6 +18219,18 @@ html {
                 > .inner {
                     border: @AppMod-HiddenTabs-Border;
                     border-radius: @AppMod-HiddenTabs-BorderRadius;
+
+                    .label {
+                        .cm__font;
+                        min-height: @AppMod-HiddenTabs-Menu-Height;
+                        line-height: @AppMod-HiddenTabs-Menu-Height;
+                        padding: 0 @AppMod-HiddenTabs-Menu-Indent;
+                    }
+
+                    .icon {
+                        width: @AppMod-HiddenTabs-Menu-Height;
+                        height: @AppMod-HiddenTabs-Menu-Height;
+                    }
                 }
             }
 
@@ -17789,6 +18243,9 @@ html {
                 }
             }
         }
+
+        .app-mod__hidden-tabs__label-inner-indent(@AppMod-HiddenTabs-Label-InnerIndent);
+        .app-mod__hidden-tabs__label-height(@AppMod-HiddenTabs-Label-Height);
     }
 
     &.theme-light {
@@ -17797,15 +18254,15 @@ html {
                 > .inner {
                     ul {
                         > li {
-                            background: @ComTabset-Tabs-DefaultBackground;
+                            background: @AppMod-HiddenTabs-ThemeLight-Label-DefaultBackground;
                             border-color: @AppMod-HiddenTabs-ThemeLight-BorderColor;
 
                             &:hover {
-                                background: @ComTabset-Tabs-HoverBackground;
+                                background: @AppMod-HiddenTabs-ThemeLight-Label-HoverBackground;
                             }
 
                             &.active {
-                                background: @ComTabset-Tabs-ActiveBackground;
+                                background: @AppMod-HiddenTabs-ThemeLight-Label-ActiveBackground;
                             }
                         }
                     }
@@ -17837,71 +18294,69 @@ html {
 // /* *** MIXINS *** */
 
 .app-mod__hidden-tabs__label-indent (@indent: @AppMod-HiddenTabs-Label-Indent) {
-    &.pull-left {
-        > .inner {
-            > .tabs__head {
+    > .inner {
+        > .tabs__head {
+            ul {
+                margin: -(@indent / 2);
+
+                > li {
+                    margin: (@indent / 2);
+                }
+            }
+        }
+    }
+}
+
+.app-mod__hidden-tabs__label-inner-indent (@indent: @AppMod-HiddenTabs-Label-InnerIndent) {
+    > .inner {
+        > .tabs__head {
+            > .inner {
                 ul {
-                    text-align: left;
-
                     > li {
-                        margin-right: @indent;
-
-                        &:last-child {
-                            margin-right: 0;
+                        > a {
+                            padding: 0 @indent;
                         }
                     }
                 }
             }
         }
     }
+}
 
-    &.pull-center {
-        > .inner {
-            > .tabs__head {
+.app-mod__hidden-tabs__label-height (@height: @AppMod-HiddenTabs-Label-Height) {
+    > .inner {
+        > .tabs__head {
+            > .inner {
                 ul {
-                    text-align: center;
-
                     > li {
-                        margin-right: @indent;
-
-                        &:last-child {
-                            margin-right: 0;
+                        > a {
+                            height: @height;
+                            line-height: @height;
                         }
                     }
                 }
             }
         }
     }
+}
 
-    &.pull-right {
-        > .inner {
-            > .tabs__head {
-                ul {
-                    text-align: right;
+.app-mod__hidden-tabs__label-title-indent (@indent: @AppMod-HiddenTabs-Label-TitleIndent) {
+    > .inner {
+        > .tabs__head {
+            ul {
+                > li {
+                    > a {
+                        .title {
+                            margin-left: @indent;
+                            margin-right: @indent;
 
-                    > li {
-                        margin-left: @indent;
+                            &:first-child {
+                                margin-left: 0;
+                            }
 
-                        &:first-child {
-                            margin-left: 0;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    &.pull-justify {
-        > .inner {
-            > .tabs__head {
-                ul {
-                    text-align: center;
-
-                    > li {
-                        margin-right: @indent;
-
-                        &:last-child {
-                            margin-right: 0;
+                            &:last-child {
+                                margin-right: 0;
+                            }
                         }
                     }
                 }
@@ -17911,16 +18366,56 @@ html {
 }
 
 .app-mod__hidden-tabs__content-indent (@indent: @AppMod-HiddenTabs-Content-Indent) {
-    > .inner {
-        > .tabs__content {
-            top: ~'calc(100% + @{indent})';
+    &.expand-bottom {
+        > .inner {
+            > .tabs__content {
+                top: ~'calc(100% + @{indent})';
+            }
+        }
+
+        &.is-editing {
+            > .inner {
+                > .tabs__content {
+                    margin-top: @indent;
+                }
+            }
         }
     }
 
-    &.is-editing {
+    &.expand-top {
         > .inner {
             > .tabs__content {
-                margin-top: @indent;
+                bottom: ~'calc(100% + @{indent})';
+            }
+        }
+
+        &.is-editing {
+            > .inner {
+                > .tabs__content {
+                    margin-bottom: @indent;
+                }
+            }
+        }
+    }
+}
+
+.app-mod__hidden-tabs__image-size (@size: @AppMod-HiddenTabs-Image-Size) {
+    > .inner {
+        > .tabs__head {
+            ul {
+                > li {
+                    > a {
+                        .image {
+                            width: @size;
+                            height: @size;
+                        }
+                    }
+                }
+            }
+
+            .pt__image {
+                width: @size;
+                height: @size;
             }
         }
     }
@@ -17928,7 +18423,7 @@ html {
 
 // /* *** HELPERS *** */
 
-.app-mod__hidden-tabs__duration {
+.app-mod__hidden-tabs-helper__duration {
     transition-duration: @AppMod-HiddenTabs-Duration;
 }
 
@@ -18086,6 +18581,12 @@ html {
             .icon {
                 display: none;
                 vertical-align: middle;
+            }
+
+            &.active {
+                a {
+                    color: @CmFont-Base-Color;
+                }
             }
         }
     }

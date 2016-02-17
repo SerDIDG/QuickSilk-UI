@@ -2980,8 +2980,8 @@ Copyright (c) 2015 Daniel Eden
   -webkit-background-clip: border-box;
   -moz-background-clip: border-box;
   background-clip: border-box;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .cm__counter.active {
   background-color: #16599c;
@@ -3064,6 +3064,18 @@ Copyright (c) 2015 Daniel Eden
   max-width: 100%;
   height: auto;
   display: block;
+}
+.cm__image-centered {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 .cm__text-nowrap,
 .cm__text-overflow {
@@ -3417,8 +3429,8 @@ Copyright (c) 2015 Daniel Eden
 .cm__icon.linked,
 .icon.linked {
   cursor: pointer;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .cm__icon.linked:hover,
 .icon.linked:hover {
@@ -4215,8 +4227,8 @@ select {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: background 300ms ease-in-out, border-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out, text-shadow 300ms ease-in-out;
-  transition: background 300ms ease-in-out, border-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out, text-shadow 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
+  transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
 }
 .input:hover,
 input[type="text"]:hover,
@@ -4385,8 +4397,8 @@ button {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  -webkit-transition: background-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out;
   background-color: #2985e0;
   color: #ffffff;
 }
@@ -6087,8 +6099,8 @@ button::-moz-focus-inner {
 /* *** ANIMATION ON HOVER *** */
 .cm__animate.hover--fadeIn {
   opacity: 0;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .cm__animate.hover--fadeIn:hover {
   opacity: 1;
@@ -6139,8 +6151,8 @@ button::-moz-focus-inner {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: border-color 300ms ease-in-out;
-  transition: border-color 300ms ease-in-out;
+  -webkit-transition: border-color 250ms ease-in-out;
+  transition: border-color 250ms ease-in-out;
 }
 .pt__box-border.active {
   border: 2px solid #2985e0;
@@ -6155,8 +6167,8 @@ button::-moz-focus-inner {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: background 300ms ease-in-out;
-  transition: background 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out;
+  transition: background 250ms ease-in-out;
 }
 .pt__box-flat:last-child {
   margin: 0;
@@ -6649,8 +6661,8 @@ button::-moz-focus-inner {
   position: absolute;
   z-index: 1;
   background: #e8e8e8;
-  -webkit-transition: background-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
 .pt__drag .helper {
   position: absolute;
@@ -6668,8 +6680,8 @@ button::-moz-focus-inner {
   left: 50%;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  -webkit-transition: background-color 300ms ease-in-out, border-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out, border-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out, border-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out, border-color 250ms ease-in-out;
 }
 .pt__drag .drag .icon {
   position: absolute;
@@ -6804,8 +6816,8 @@ button::-moz-focus-inner {
   right: 0;
   bottom: 24px;
   left: 0;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .pt__dnd-chassis.is-highlight:before {
   opacity: 1;
@@ -6834,12 +6846,12 @@ button::-moz-focus-inner {
   height: 0;
 }
 .pt__dnd-area.is-available {
-  -webkit-transition: background-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
 .pt__dnd-area.is-available:before {
-  -webkit-transition: border-color 300ms ease-in-out;
-  transition: border-color 300ms ease-in-out;
+  -webkit-transition: border-color 250ms ease-in-out;
+  transition: border-color 250ms ease-in-out;
 }
 .pt__dnd-area.is-available.is-highlight {
   background-color: rgba(54, 140, 226, 0.05);
@@ -6901,8 +6913,8 @@ button::-moz-focus-inner {
   border: 1px dashed #2985e0;
   border-radius: 3px;
   opacity: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   top: 0;
   right: 0;
   bottom: 0;
@@ -6935,8 +6947,8 @@ button::-moz-focus-inner {
   -webkit-background-clip: border-box;
   -moz-background-clip: border-box;
   background-clip: border-box;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .pt__editable.is-editable > .drag .icon {
   width: 34px;
@@ -6961,8 +6973,8 @@ button::-moz-focus-inner {
   z-index: 4;
   opacity: 0;
   cursor: pointer;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   top: -12px;
   right: -12px;
   bottom: auto;
@@ -6999,8 +7011,8 @@ button::-moz-focus-inner {
   top: 100%;
   right: auto;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   z-index: 1;
   top: 12px;
   right: 12px;
@@ -7209,8 +7221,8 @@ button::-moz-focus-inner {
   display: block;
   position: relative;
   cursor: pointer;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .pt__grid > ul > li > a:hover > img {
   opacity: 0.7;
@@ -7571,8 +7583,8 @@ button::-moz-focus-inner {
   user-select: none;
 }
 .pt__gridlist table th.sort {
-  -webkit-transition: background-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
 .pt__gridlist table th.sort .inner {
   display: block;
@@ -7693,7 +7705,7 @@ button::-moz-focus-inner {
 }
 .pt__gridlist .control input[type="checkbox"],
 .pt__gridlist .control input[type="radio"] {
-  vertical-align: middle;
+  vertical-align: baseline;
   margin: 0;
 }
 .pt__gridlist .cm__form__icons-inside .text {
@@ -7804,13 +7816,15 @@ button::-moz-focus-inner {
   margin-bottom: 0;
 }
 .pt__image > .inner {
+  width: 100%;
+  height: 100%;
   display: block;
   position: relative;
   z-index: 1;
   overflow: hidden;
   font-size: 0;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .pt__image > .inner > .descr {
   width: 100%;
@@ -7818,8 +7832,8 @@ button::-moz-focus-inner {
   display: block;
   position: relative;
   z-index: 1;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .pt__image > .inner > .text {
   padding: 24px;
@@ -7867,8 +7881,8 @@ button::-moz-focus-inner {
   z-index: 3;
   background: rgba(0, 0, 0, 0.7);
   opacity: 0;
-  -webkit-transition: bottom 300ms ease-in-out, opacity 300ms ease-in-out;
-  transition: bottom 300ms ease-in-out, opacity 300ms ease-in-out;
+  -webkit-transition: bottom 250ms ease-in-out, opacity 250ms ease-in-out;
+  transition: bottom 250ms ease-in-out, opacity 250ms ease-in-out;
   top: auto;
   right: 0;
   bottom: -26px;
@@ -7980,8 +7994,8 @@ button::-moz-focus-inner {
 }
 .pt__image.is-checkable > .inner > .descr {
   opacity: 0.7;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .pt__image.is-checkable:hover > .inner > .descr,
 .pt__image.is-checkable.active > .inner > .descr {
@@ -8001,20 +8015,17 @@ button::-moz-focus-inner {
   bottom: 0;
   left: 0;
 }
-.pt__image.is-centered > .inner:before {
-  height: 100%;
-  display: inline-block;
-  vertical-align: middle;
-  content: "";
-}
 .pt__image.is-centered > .inner > .descr {
-  display: inline-block;
   width: auto;
   height: auto;
   max-width: 100%;
   max-height: 100%;
   margin: auto;
-  vertical-align: middle;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 .pt__image.is-centered > .inner > iframe.descr {
   width: 100%;
@@ -8183,8 +8194,8 @@ button::-moz-focus-inner {
   vertical-align: top;
 }
 .pt__line-share .icon.default {
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .pt__line-share .icon.default.facebook {
   background-image: url("../img/magpieui//icons/large/facebook.png");
@@ -8208,8 +8219,8 @@ button::-moz-focus-inner {
   display: inline-block;
   vertical-align: top;
   padding: 0 12px;
-  -webkit-transition: background 300ms ease-in-out;
-  transition: background 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out;
+  transition: background 250ms ease-in-out;
 }
 .pt__line-share .label {
   background: #e8e8e8;
@@ -8533,8 +8544,8 @@ button::-moz-focus-inner {
   line-height: 18px;
   text-decoration: none;
   color: #666666;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .pt__listing-items ul li a .icon {
   display: inline-block;
@@ -8596,8 +8607,8 @@ button::-moz-focus-inner {
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .pt__menu-dropdown--base li {
   position: relative;
@@ -8782,8 +8793,8 @@ button::-moz-focus-inner {
   position: absolute;
   left: 0;
   top: 0;
-  -webkit-transition: width 300ms ease-in-out, background-color 300ms ease-in-out;
-  transition: width 300ms ease-in-out, background-color 300ms ease-in-out;
+  -webkit-transition: width 250ms ease-in-out, background-color 250ms ease-in-out;
+  transition: width 250ms ease-in-out, background-color 250ms ease-in-out;
 }
 .pt__progress-bar .green {
   background: #339900;
@@ -8816,8 +8827,8 @@ button::-moz-focus-inner {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  -webkit-transition: border 300ms ease-in-out;
-  transition: border 300ms ease-in-out;
+  -webkit-transition: border 250ms ease-in-out;
+  transition: border 250ms ease-in-out;
 }
 .pt__ruler .line {
   position: relative;
@@ -8834,8 +8845,8 @@ button::-moz-focus-inner {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: background-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
 .pt__ruler .counter {
   white-space: nowrap;
@@ -8914,8 +8925,8 @@ button::-moz-focus-inner {
   content: '';
   border: 2px solid transparent;
   border-radius: 3px;
-  -webkit-transition: border-color 300ms ease-in-out, background-color 300ms ease-in-out;
-  transition: border-color 300ms ease-in-out, background-color 300ms ease-in-out;
+  -webkit-transition: border-color 250ms ease-in-out, background-color 250ms ease-in-out;
+  transition: border-color 250ms ease-in-out, background-color 250ms ease-in-out;
 }
 .pt__selectable:hover:before {
   background-color: #fafafa;
@@ -9023,10 +9034,10 @@ button::-moz-focus-inner {
   width: 32px;
 }
 .pt__toolbar .group > li.xx-small {
-  width: 52px;
+  width: 56px;
 }
 .pt__toolbar .group > li.x-small {
-  width: 70px;
+  width: 76px;
 }
 .pt__toolbar .group > li.small {
   width: 100px;
@@ -9084,22 +9095,41 @@ button::-moz-focus-inner {
 .pt__toolbar .group.is-merged > libutton.active {
   z-index: 2;
 }
-.pt__toolbar.is-adaptive > .inner {
-  -webkit-flex-wrap: nowrap;
-  -ms-flex-wrap: nowrap;
-  flex-wrap: nowrap;
-}
-.pt__toolbar.is-adaptive .group {
+.pt__toolbar.is-flex > .inner > .left {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
   -webkit-justify-content: flex-start;
   justify-content: flex-start;
+}
+.pt__toolbar.is-flex > .inner > .center {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+}
+.pt__toolbar.is-flex > .inner > .right {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
 }
 /* ******* PARTS: TOOLBAR: ADAPTIVE ********** */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .pt__toolbar > .inner > .left,
+  html.is-adaptive .pt__toolbar > .inner > .center,
   html.is-adaptive .pt__toolbar > .inner > .right {
     width: 100%;
     float: none;
@@ -9134,6 +9164,11 @@ button::-moz-focus-inner {
     margin-right: 0;
   }
   html.is-adaptive .pt__toolbar.is-adaptive > .inner {
+    display: block;
+  }
+  html.is-adaptive .pt__toolbar.is-adaptive > .inner > .left,
+  html.is-adaptive .pt__toolbar.is-adaptive > .inner > .center,
+  html.is-adaptive .pt__toolbar.is-adaptive > .inner > .right {
     display: block;
   }
   html.is-adaptive .pt__toolbar.is-adaptive .button,
@@ -9947,6 +9982,7 @@ button::-moz-focus-inner {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
 }
+.com__tooltip.theme-dark > .inner,
 .com__tooltip.theme-black > .inner {
   padding: 4px;
   background: #ffffff;
@@ -9975,6 +10011,247 @@ button::-moz-focus-inner {
 }
 .com__tooltip.com__ac-tooltip > .inner > .scroll {
   max-height: 160px;
+}
+/* ******* COMPONENTS: BIG CALENDAR *** */
+.com__calendar-event {
+  border: 1px solid #cccccc;
+  border-radius: 3px;
+  background-color: #fafafa;
+  cursor: pointer;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.com__calendar-event > .label {
+  font: 400 11px/18px Open Sans, sans-serif;
+  color: #999999;
+  padding: 0 4px;
+  color: #666666;
+}
+.com__calendar-event > .label .time {
+  color: #999999;
+}
+.com__calendar-event.is-short {
+  margin-top: 1px;
+}
+.com__calendar-event.is-short:first-child {
+  margin-top: 0;
+}
+.com__calendar-event.is-short > .label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 18px;
+}
+.com__calendar-event.is-short > .label .time {
+  margin: 0 0 0 4px;
+  float: right;
+}
+.com__calendar-event.is-short > .label .title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.com__calendar-event:hover {
+  border-color: #2985e0;
+  background-color: #e9f2fb;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+/* *** AGENDA VIEW *** */
+.com__calendar-agenda .calendar__templates {
+  display: none;
+}
+.com__calendar-agenda .calendar__day {
+  margin-top: 24px;
+}
+.com__calendar-agenda .calendar__day:first-child {
+  margin-top: 0;
+}
+.com__calendar-agenda .calendar__dayname {
+  margin-bottom: 8px;
+}
+/* *** WEEK VIEW *** */
+.com__calendar-week .calendar__table > table {
+  table-layout: fixed;
+}
+.com__calendar-week .calendar__table > table th {
+  padding: 4px;
+  vertical-align: top;
+  text-align: center;
+}
+.com__calendar-week .calendar__table > table td {
+  border: 1px solid #cccccc;
+  vertical-align: top;
+  text-align: left;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.com__calendar-week .calendar__table > table td:hover {
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+.com__calendar-week .calendar__table > table td.default {
+  background-color: #ffffff;
+}
+.com__calendar-week .calendar__table > table td.default:hover {
+  background-color: #f2f2f2;
+}
+.com__calendar-week .calendar__table > table td.inactive {
+  background-color: #ffffff;
+}
+.com__calendar-week .calendar__table > table td.inactive:hover {
+  background-color: #f2f2f2;
+}
+.com__calendar-week .calendar__table > table td.weekend {
+  background-color: #e8e8e8;
+}
+.com__calendar-week .calendar__table > table td.weekend:hover {
+  background-color: #dbdbdb;
+}
+.com__calendar-week .calendar__table > table td.today {
+  background-color: #d8e8f8;
+}
+.com__calendar-week .calendar__table > table td.today:hover {
+  background-color: #c2dbf4;
+}
+.com__calendar-week .calendar__templates {
+  display: none;
+}
+.com__calendar-week .calendar__day {
+  padding: 4px;
+  position: relative;
+}
+.com__calendar-week .calendar__day > .inner {
+  min-height: 20px;
+}
+/* *** MONTH VIEW *** */
+.com__calendar-month .calendar__table > table {
+  table-layout: fixed;
+}
+.com__calendar-month .calendar__table > table th {
+  padding: 4px;
+  vertical-align: top;
+  text-align: center;
+}
+.com__calendar-month .calendar__table > table td {
+  border: 1px solid #cccccc;
+  vertical-align: top;
+  text-align: left;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.com__calendar-month .calendar__table > table td:hover {
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+.com__calendar-month .calendar__table > table td.default {
+  background-color: #ffffff;
+}
+.com__calendar-month .calendar__table > table td.default:hover {
+  background-color: #f2f2f2;
+}
+.com__calendar-month .calendar__table > table td.default .calendar__dayname > .label {
+  color: #666666;
+  font-weight: 600;
+}
+.com__calendar-month .calendar__table > table td.inactive {
+  background-color: #ffffff;
+}
+.com__calendar-month .calendar__table > table td.inactive:hover {
+  background-color: #f2f2f2;
+}
+.com__calendar-month .calendar__table > table td.weekend {
+  background-color: #e8e8e8;
+}
+.com__calendar-month .calendar__table > table td.weekend:hover {
+  background-color: #dbdbdb;
+}
+.com__calendar-month .calendar__table > table td.today {
+  background-color: #d8e8f8;
+}
+.com__calendar-month .calendar__table > table td.today:hover {
+  background-color: #c2dbf4;
+}
+.com__calendar-month .calendar__templates {
+  display: none;
+}
+.com__calendar-month .calendar__day {
+  padding: 4px;
+  position: relative;
+}
+.com__calendar-month .calendar__day > .inner {
+  height: 104px;
+}
+.com__calendar-month .calendar__dayname {
+  height: 20px;
+}
+.com__calendar-month .calendar__dayname > .label {
+  font: 400 11px/18px Open Sans, sans-serif;
+  color: #999999;
+  line-height: 20px;
+  text-align: right;
+}
+.com__calendar-month .calendar__dayname--default > .label {
+  color: #666666;
+  font-weight: 600;
+}
+.com__calendar-month .calendar__events-holder {
+  margin-top: 1px;
+}
+.com__calendar-month .calendar__more {
+  height: 20px;
+  margin-top: 1px;
+}
+.com__calendar-month .calendar__more > .label {
+  font: 400 11px/18px Open Sans, sans-serif;
+  color: #999999;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 20px;
+  text-align: right;
+}
+.com__calendar-month .calendar__more-holder {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+  opacity: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.com__calendar-month .calendar__more-holder > .inner {
+  padding: 4px;
+  background-color: #ffffff;
+}
+.com__calendar-month .calendar__more-holder.is-show {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+/* *** TOOLTIP *** */
+.com__tooltip.com__calendar-event-tooltip {
+  width: 320px;
+}
+.com__tooltip.com__calendar-event-tooltip > .inner {
+  padding: 12px;
+}
+/* *** HELPERS *** */
+.com__calendar-event-helper__indent {
+  height: 1px;
+}
+.com__calendar-month-helper__day-indent {
+  height: 4px;
+}
+.com__calendar-week-helper__day-indent {
+  height: 4px;
 }
 /* ******* COMPONENTS: CALENDAR ******* */
 .com__calendar {
@@ -10030,8 +10307,8 @@ button::-moz-focus-inner {
   cursor: pointer;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .com__calendar table td div:hover {
   -webkit-transition: all 100ms ease-in-out;
@@ -10117,8 +10394,8 @@ button::-moz-focus-inner {
 }
 .com__colorpicker .form-field .icon.default {
   background-image: url("../img/magpieui//icons/medium/palette.png");
-  -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
+  -webkit-transition: -webkit-transform 250ms ease-in-out;
+  transition: -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
 }
 .com__colorpicker > .icon {
   width: 28px;
@@ -10151,6 +10428,9 @@ button::-moz-focus-inner {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 .com__column > .inner {
   position: relative;
@@ -10160,13 +10440,14 @@ button::-moz-focus-inner {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
-  -webkit-transition: background-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
-.firefox .com__column {
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
+.ie10 .com__column,
+.ie11 .com__column {
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 .ie8 .com__column,
 .ie9 .com__column {
@@ -10185,8 +10466,8 @@ button::-moz-focus-inner {
   right: auto;
   bottom: 0;
   left: auto;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .com__columns__ruler {
   display: none;
@@ -10200,8 +10481,8 @@ button::-moz-focus-inner {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: background 300ms ease-in-out, opacity 300ms ease-in-out, visibility 300ms ease-in-out;
-  transition: background 300ms ease-in-out, opacity 300ms ease-in-out, visibility 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out, opacity 250ms ease-in-out, visibility 250ms ease-in-out;
+  transition: background 250ms ease-in-out, opacity 250ms ease-in-out, visibility 250ms ease-in-out;
 }
 .com__columns {
   margin: 0 0 24px;
@@ -10403,8 +10684,8 @@ button::-moz-focus-inner {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .com__dashboard__placeholder.is-expand {
   height: 48px;
@@ -10643,8 +10924,8 @@ button::-moz-focus-inner {
   height: 24px;
   font-size: 0;
   opacity: 0.4;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
   top: 24px;
   right: 24px;
   bottom: auto;
@@ -10797,11 +11078,36 @@ button::-moz-focus-inner {
 /* ******* COMPONENTS: FORM ******* */
 .com__form {
   margin: 0 0 24px;
+  position: relative;
 }
 .com__form.bottom,
 .com__form.is-last,
 .com__form:last-child {
   margin-bottom: 0;
+}
+.com__form__fields {
+  position: relative;
+}
+.com__form__fields:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  font-size: 0;
+  height: 0;
+}
+.com__form__buttons {
+  position: relative;
+}
+.com__form__buttons:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  font-size: 0;
+  height: 0;
 }
 /* ******* COMPONENTS: GALLERY ******* */
 /* *** CORE *** */
@@ -10904,8 +11210,8 @@ button::-moz-focus-inner {
   opacity: 0;
   cursor: pointer;
   background-color: rgba(255, 255, 255, 0.7);
-  -webkit-transition: background-color 300ms ease-in-out, opacity 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out, opacity 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out, opacity 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out, opacity 250ms ease-in-out;
 }
 .com__gallery-bar .bar-arrow:hover {
   background-color: rgba(255, 255, 255, 0.9);
@@ -10985,8 +11291,8 @@ button::-moz-focus-inner {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .com__gallery-controls .bar-arrow {
   position: absolute;
@@ -10996,16 +11302,16 @@ button::-moz-focus-inner {
   left: auto;
   z-index: 2;
   opacity: 1;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
   cursor: pointer;
 }
 .com__gallery-controls .bar-arrow .icon {
   position: absolute;
   top: 0;
   opacity: 0.3;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .com__gallery-controls .bar-arrow.next {
   right: 0;
@@ -11048,8 +11354,8 @@ button::-moz-focus-inner {
   cursor: pointer;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .com__gallery-controls .bar-buttons ul li:first-child {
   margin: 0;
@@ -11078,8 +11384,8 @@ button::-moz-focus-inner {
 }
 .com__gallery-controls .bar-zoom .icon {
   opacity: 0.3;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .com__gallery-controls .bar-zoom:hover .icon {
   opacity: 1;
@@ -11501,8 +11807,8 @@ button::-moz-focus-inner {
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
-  transition: all 300ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  transition: all 250ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   visibility: visible;
   opacity: 1;
   position: static;
@@ -11782,8 +12088,8 @@ button::-moz-focus-inner {
   margin-bottom: 0;
 }
 .com__pagination.is-animated .com__pagination__page {
-  -webkit-transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out, visibility 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out, visibility 250ms ease-in-out;
 }
 .com__pagination__content {
   position: relative;
@@ -11889,8 +12195,8 @@ button::-moz-focus-inner {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  -webkit-transition: background-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out;
   background-color: #2985e0;
   color: #ffffff;
   background-color: #fafafa;
@@ -12187,7 +12493,7 @@ button::-moz-focus-inner {
 }
 /* *** HELPERS *** */
 .com__pagination-helper__duration {
-  transition-duration: 300ms;
+  transition-duration: 250ms;
 }
 /* ******* COMPONENTS: COLOR PALETTE ****** */
 .com__palette > .inner {
@@ -12454,8 +12760,8 @@ html.ie9 .com__palette .b-range {
 }
 .com__select .form-field .icon.default {
   background-image: url("../img/magpieui//icons/medium/select-arrow.png");
-  -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
+  -webkit-transition: -webkit-transform 250ms ease-in-out;
+  transition: -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
 }
 .com__select:focus .form-field .icon.default,
 .com__select.active .form-field .icon.default {
@@ -12494,8 +12800,8 @@ html.ie9 .com__palette .b-range {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: background 300ms ease-in-out, border-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out, text-shadow 300ms ease-in-out;
-  transition: background 300ms ease-in-out, border-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out, text-shadow 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
+  transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
   height: auto;
   min-height: 28px;
   padding: 4px;
@@ -12600,8 +12906,8 @@ html.ie9 .com__palette .b-range {
 }
 .com__slider > .inner > .slides > ul > li > .pt__image > .pull {
   opacity: 0;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .com__slider > .inner > .slides > ul > li > .image {
   width: 100%;
@@ -12853,8 +13159,8 @@ html.ie9 .com__palette .b-range {
   right: 0;
   bottom: auto;
   left: 0;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .com__spacer > .com__spacer__ruler {
   position: absolute;
@@ -12866,8 +13172,8 @@ html.ie9 .com__palette .b-range {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: background-color 300ms ease-in-out, opacity 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out, opacity 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out, opacity 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out, opacity 250ms ease-in-out;
 }
 .com__spacer.is-editable > .com__spacer__chassis,
 .com__spacer.is-editable > .com__spacer__ruler {
@@ -12961,8 +13267,8 @@ html.ie9 .com__palette .b-range {
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .com__tabset__head-menu .pt__menu-dropdown li {
   position: relative;
@@ -13076,8 +13382,8 @@ html.ie9 .com__palette .b-range {
   background: #fafafa;
   border: 1px solid #cccccc;
   border-radius: 3px;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .com__tabset__head-tabs ul li a {
   font: 400 13px/18px Open Sans, sans-serif;
@@ -13159,8 +13465,8 @@ html.ie9 .com__palette .b-range {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out, visibility 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out, visibility 250ms ease-in-out;
 }
 .com__tabset__content.is-animated > ul > li.active {
   visibility: visible;
@@ -13381,7 +13687,7 @@ html.ie9 .com__palette .b-range {
   width: 256px;
 }
 .com__tabset-helper__duration {
-  transition-duration: 300ms;
+  transition-duration: 250ms;
 }
 /* ******* COMPONENTS: TABSET: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
@@ -13577,8 +13883,8 @@ html.ie9 .com__timeselect > .inner > .sep {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  -webkit-transition: background 300ms ease-in-out;
-  transition: background 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out;
+  transition: background 250ms ease-in-out;
 }
 .com__togglebox > dt:hover {
   -webkit-transition: background 100ms ease-in-out, color 100ms ease-in-out;
@@ -13592,8 +13898,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 .com__togglebox > dt .icon.default {
   width: 16px;
-  -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
+  -webkit-transition: -webkit-transform 250ms ease-in-out;
+  transition: -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
 }
 .com__togglebox > dt .title {
   font: 300 28px/38px 'Open Sans', arial, helvetica, sans-serif;
@@ -13603,8 +13909,8 @@ html.ie9 .com__timeselect > .inner > .sep {
   text-overflow: ellipsis;
   display: block;
   padding: 0px 0;
-  -webkit-transition: color 300ms ease-in-out;
-  transition: color 300ms ease-in-out;
+  -webkit-transition: color 250ms ease-in-out;
+  transition: color 250ms ease-in-out;
 }
 .com__togglebox > dt .cm__inherit,
 .com__togglebox > dt .link,
@@ -13947,6 +14253,9 @@ html {
   overflow-x: hidden;
   overflow-y: scroll;
   height: 100%;
+}
+html.is-partial-view body {
+  min-width: 0;
 }
 body {
   min-width: 320px;
@@ -14880,8 +15189,8 @@ html.is-immediately .tpl__header__container {
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: background 300ms ease-in-out;
-  transition: background 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out;
+  transition: background 250ms ease-in-out;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -15039,8 +15348,8 @@ html.is-immediately .tpl__header__container {
 .app-lt__templates__item {
   cursor: pointer;
   border: 2px solid #cccccc;
-  -webkit-transition: border-color 300ms ease-in-out;
-  transition: border-color 300ms ease-in-out;
+  -webkit-transition: border-color 250ms ease-in-out;
+  transition: border-color 250ms ease-in-out;
 }
 .app-lt__templates__item > .inner {
   position: relative;
@@ -15064,8 +15373,8 @@ html.is-immediately .tpl__header__container {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: background 300ms ease-in-out, opacity 300ms ease-in-out;
-  transition: background 300ms ease-in-out, opacity 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out, opacity 250ms ease-in-out;
+  transition: background 250ms ease-in-out, opacity 250ms ease-in-out;
 }
 .app-lt__templates__item .info > .inner {
   position: absolute;
@@ -15084,14 +15393,14 @@ html.is-immediately .tpl__header__container {
   right: 0;
   bottom: auto;
   left: 0;
-  -webkit-transition: background 300ms ease-in-out, -webkit-transform 300ms ease-in-out;
-  transition: background 300ms ease-in-out, -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out, -webkit-transform 250ms ease-in-out;
+  transition: background 250ms ease-in-out, -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
 }
 .app-lt__templates__item .info .title .icon {
   opacity: 0;
   float: right;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .app-lt__templates__item .info .btn-wrap {
   position: absolute;
@@ -15102,8 +15411,8 @@ html.is-immediately .tpl__header__container {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: -webkit-transform 300ms ease-in-out;
-  transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out;
+  -webkit-transition: -webkit-transform 250ms ease-in-out;
+  transition: -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
 }
 .app-lt__templates__item.active {
   border: 2px solid #25b125;
@@ -15140,8 +15449,8 @@ html.is-immediately .tpl__header__container {
   position: relative;
   z-index: 1;
   margin: 0 0 24px;
-  -webkit-transition: z-index 300ms ease-in-out;
-  transition: z-index 300ms ease-in-out;
+  -webkit-transition: z-index 250ms ease-in-out;
+  transition: z-index 250ms ease-in-out;
 }
 .app__block-container > .app__block {
   width: 100%;
@@ -15176,8 +15485,8 @@ html.is-immediately .tpl__header__container {
   display: inline-block;
   cursor: text;
   vertical-align: top;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .app__block-container.is-editable > .app__block > .border {
   display: block;
@@ -15186,8 +15495,8 @@ html.is-immediately .tpl__header__container {
   border: 1px dashed #2985e0;
   border-radius: 3px;
   opacity: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   top: 0;
   right: 0;
   bottom: 0;
@@ -15220,8 +15529,8 @@ html.is-immediately .tpl__header__container {
   -webkit-background-clip: border-box;
   -moz-background-clip: border-box;
   background-clip: border-box;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__block-container.is-editable > .app__block > .drag .icon {
   width: 34px;
@@ -15246,8 +15555,8 @@ html.is-immediately .tpl__header__container {
   z-index: 4;
   opacity: 0;
   cursor: pointer;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   top: -12px;
   right: -12px;
   bottom: auto;
@@ -15284,8 +15593,8 @@ html.is-immediately .tpl__header__container {
   top: 100%;
   right: auto;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   z-index: 1;
   top: 12px;
   right: 12px;
@@ -15520,8 +15829,8 @@ html.is-immediately .tpl__header__container {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__block-spinner.is-visible {
   visibility: visible;
@@ -15535,8 +15844,8 @@ html.is-immediately .tpl__header__container {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  -webkit-transition: background-color 300ms ease-in-out, box-shadow 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out, box-shadow 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out, box-shadow 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out, box-shadow 250ms ease-in-out;
 }
 .app__block-dummy > .inner {
   padding: 2px;
@@ -15548,16 +15857,16 @@ html.is-immediately .tpl__header__container {
   overflow: hidden;
   text-align: center;
   line-height: 15px;
-  -webkit-transition: color 300ms ease-in-out;
-  transition: color 300ms ease-in-out;
+  -webkit-transition: color 250ms ease-in-out;
+  transition: color 250ms ease-in-out;
 }
 .app__block-dummy .icon {
   height: 90px;
   margin: 0 auto;
   border-radius: 0px;
   background-repeat: no-repeat;
-  -webkit-transition: background-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
 .app__block-dummy .icon.module-default {
   background-position: 50% 0px;
@@ -15947,8 +16256,8 @@ html.is-immediately .tpl__header__container {
 }
 .app__helptour__popup .popup__close {
   cursor: pointer;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
   font-family: 'Magpie-UI-Glyphs';
   font-style: normal;
   font-weight: normal;
@@ -16205,8 +16514,8 @@ html.is-immediately .tpl__header__container {
 }
 .app__sidebar .sidebar__menu > ul > li {
   margin: 4px 0 0 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__sidebar .sidebar__menu > ul > li > a:hover:after {
   background-color: #2985e0;
@@ -16229,8 +16538,8 @@ html.is-immediately .tpl__header__container {
   width: 48px;
   height: 48px;
   line-height: 48px;
-  -webkit-transition: background 300ms ease-in-out, color 300ms ease-in-out;
-  transition: background 300ms ease-in-out, color 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out, color 250ms ease-in-out;
+  transition: background 250ms ease-in-out, color 250ms ease-in-out;
 }
 .app__sidebar .sidebar__menu > ul > li > a:after {
   width: 3px;
@@ -16242,8 +16551,8 @@ html.is-immediately .tpl__header__container {
   right: auto;
   bottom: 0;
   left: 0;
-  -webkit-transition: background 300ms ease-in-out;
-  transition: background 300ms ease-in-out;
+  -webkit-transition: background 250ms ease-in-out;
+  transition: background 250ms ease-in-out;
 }
 .app__sidebar .sidebar__menu > ul > li > a:hover {
   -webkit-transition: background 100ms ease-in-out;
@@ -16323,8 +16632,8 @@ html.is-immediately .tpl__header__container {
   right: 0;
   bottom: 0;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__sidebar .sidebar__content > ul > li.hidden {
   visibility: hidden;
@@ -16347,8 +16656,8 @@ html.is-immediately .tpl__header__container {
   right: 0;
   bottom: 0;
   left: auto;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__sidebar .sidebar__remove-zone .sidebar__content__title {
   overflow: visible;
@@ -16370,8 +16679,8 @@ html.is-immediately .tpl__header__container {
   left: 0;
 }
 .app__sidebar .sidebar__remove-zone.app__zone.is-available {
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__sidebar .sidebar__remove-zone.app__zone.is-available.is-highlight {
   visibility: visible;
@@ -16419,8 +16728,8 @@ html.is-immediately .tpl__header__container {
   user-select: none;
 }
 .app__sidebar .sidebar__content__title .icon {
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
   position: absolute;
   cursor: pointer;
   line-height: 24px;
@@ -16634,11 +16943,10 @@ html.is-immediately .tpl__header__container {
 .app__sidebar-helper__width-expanded {
   width: 350px;
 }
-/* *** FONT *** */
-/* *** HELPERS *** */
-.app__sidebar__duration {
+.app__sidebar-helper__duration {
   transition-duration: 500ms;
 }
+/* *** FONT *** */
 /* ******* COMPONENT: SIDEBAR: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .app__sidebar {
@@ -16685,8 +16993,8 @@ html.is-immediately .tpl__header__container {
   content: '';
   border: 2px solid transparent;
   border-radius: 3px;
-  -webkit-transition: border-color 300ms ease-in-out, background-color 300ms ease-in-out;
-  transition: border-color 300ms ease-in-out, background-color 300ms ease-in-out;
+  -webkit-transition: border-color 250ms ease-in-out, background-color 250ms ease-in-out;
+  transition: border-color 250ms ease-in-out, background-color 250ms ease-in-out;
 }
 .app__stylizer__item:hover:before {
   background-color: #fafafa;
@@ -16700,8 +17008,8 @@ html.is-immediately .tpl__header__container {
 }
 .app__stylizer__item > .item-preview {
   margin: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -16747,8 +17055,8 @@ html.is-immediately .tpl__header__container {
   z-index: 3;
   display: block;
   float: left;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
 }
 .app__topmenu .menu-logo:hover {
   opacity: 0.7;
@@ -16756,8 +17064,8 @@ html.is-immediately .tpl__header__container {
 .app__topmenu .menu-button {
   background-image: url("../img/magpieui//icons/medium/menu-white.png");
   cursor: pointer;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
   width: 48px;
   height: 48px;
   display: none;
@@ -16832,8 +17140,8 @@ html.is-immediately .tpl__header__container {
   display: block;
   position: relative;
   text-decoration: none;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__topmenu .menu li a:hover {
   -webkit-transition: all 100ms ease-in-out;
@@ -16927,8 +17235,8 @@ html.is-immediately .tpl__header__container {
     right: auto;
     bottom: auto;
     left: 0;
-    -webkit-transition: all 300ms ease-in-out;
-    transition: all 300ms ease-in-out;
+    -webkit-transition: all 250ms ease-in-out;
+    transition: all 250ms ease-in-out;
     z-index: 1;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li {
@@ -17180,12 +17488,12 @@ html.is-immediately .tpl__header__container {
   height: 0;
 }
 .app__zone.is-available {
-  -webkit-transition: background-color 300ms ease-in-out;
-  transition: background-color 300ms ease-in-out;
+  -webkit-transition: background-color 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
 .app__zone.is-available:before {
-  -webkit-transition: border-color 300ms ease-in-out;
-  transition: border-color 300ms ease-in-out;
+  -webkit-transition: border-color 250ms ease-in-out;
+  transition: border-color 250ms ease-in-out;
 }
 .app__zone.is-available.is-highlight {
   background-color: rgba(54, 140, 226, 0.05);
@@ -17301,6 +17609,7 @@ html.is-immediately .tpl__header__container {
   height: 18px;
   overflow: hidden;
 }
+/* ******* MODULES: CALENDAR ******* */
 /* ******* MODULES: COLUMNS ******* */
 /* ******* MODULES: DIVIDER ******* */
 .app-mod__divider hr {
@@ -17324,6 +17633,11 @@ html.is-immediately .tpl__header__container {
   overflow: hidden;
 }
 /* ******* MODULES: HIDDEN TABS ******* */
+.app-mod__hidden-tabs {
+  z-index: 1;
+  -webkit-transition: z-index 250ms ease-in-out;
+  transition: z-index 250ms ease-in-out;
+}
 .app-mod__hidden-tabs > .inner {
   position: relative;
 }
@@ -17356,86 +17670,54 @@ html.is-immediately .tpl__header__container {
   text-align: right;
 }
 .app-mod__hidden-tabs > .inner > .tabs__head ul > li {
-  font: 400 13px/18px Open Sans, sans-serif;
-  color: #666666;
-}
-.app-mod__hidden-tabs > .inner > .tabs__head ul > li {
   position: relative;
   z-index: 1;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app-mod__hidden-tabs > .inner > .tabs__head ul > li > a {
-  display: block;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
   white-space: nowrap;
-  line-height: 28px;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+}
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .image {
+  position: relative;
+}
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .image img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .title:first-child {
+  margin-left: 0;
+}
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .title:last-child {
+  margin-right: 0;
 }
 .app-mod__hidden-tabs > .inner > .tabs__head ul > li > a:hover {
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.app-mod__hidden-tabs > .inner > .tabs__head ul > li:first-child {
-  margin: 0;
-}
-.app-mod__hidden-tabs > .inner > .tabs__head ul > li:last-child {
-  margin: 0;
-}
 .app-mod__hidden-tabs > .inner > .tabs__head ul > li:hover {
   z-index: 2;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
-}
-.app-mod__hidden-tabs > .inner > .tabs__content {
-  position: absolute;
-  z-index: 1;
-  visibility: hidden;
-  opacity: 0;
-  top: 100%;
-  right: 0;
-  bottom: auto;
-  left: 0;
-  -webkit-transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out, height 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out, height 300ms ease-in-out;
-}
-.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  position: relative;
-  -webkit-transition: height 300ms ease-in-out;
-  transition: height 300ms ease-in-out;
-}
-.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul > li {
-  margin: 0;
-  padding: 0;
-}
-.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul > li {
-  position: absolute;
-  z-index: 1;
-  visibility: hidden;
-  opacity: 0;
-  overflow: hidden;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
-}
-.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul > li.active {
-  position: relative;
-  z-index: 2;
-  visibility: visible;
-  opacity: 1;
-  overflow: visible;
-}
-.app-mod__hidden-tabs > .inner > .tabs__content.is-show {
-  visibility: visible;
-  opacity: 1;
-  -webkit-transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
-  transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
 }
 .app-mod__hidden-tabs > .inner > .tabs__menu {
   display: none;
@@ -17446,18 +17728,11 @@ html.is-immediately .tpl__header__container {
   position: relative;
 }
 .app-mod__hidden-tabs > .inner > .tabs__menu > .inner .label {
-  font: 400 13px/18px Open Sans, sans-serif;
-  color: #666666;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  min-height: 28px;
-  line-height: 28px;
-  padding: 0 12px;
 }
 .app-mod__hidden-tabs > .inner > .tabs__menu > .inner .icon {
-  width: 28px;
-  height: 28px;
   float: right;
 }
 .app-mod__hidden-tabs > .inner > .tabs__menu > .inner .icon.default {
@@ -17491,8 +17766,8 @@ html.is-immediately .tpl__header__container {
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
   min-width: 100%;
   top: 100%;
 }
@@ -17581,9 +17856,58 @@ html.is-immediately .tpl__header__container {
   bottom: auto;
   left: auto;
 }
+.app-mod__hidden-tabs > .inner > .tabs__content {
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+  opacity: 0;
+  top: auto;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  -webkit-transition: opacity 250ms ease-in-out, visibility 250ms ease-in-out, height 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out, visibility 250ms ease-in-out, height 250ms ease-in-out;
+}
+.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+  -webkit-transition: height 250ms ease-in-out;
+  transition: height 250ms ease-in-out;
+}
+.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul > li {
+  margin: 0;
+  padding: 0;
+}
+.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul > li {
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+  opacity: 0;
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.app-mod__hidden-tabs > .inner > .tabs__content > .inner > ul > li.active {
+  position: relative;
+  z-index: 2;
+  visibility: visible;
+  opacity: 1;
+  overflow: visible;
+}
+.app-mod__hidden-tabs > .inner > .tabs__content.is-show {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
+  transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
+}
 .app-mod__hidden-tabs.is-editing > .inner > .tabs__content {
   position: relative;
-  top: auto;
 }
 .app-mod__hidden-tabs.is-editing > .inner > .tabs__content > .inner > ul > li {
   display: none;
@@ -17591,68 +17915,84 @@ html.is-immediately .tpl__header__container {
 .app-mod__hidden-tabs.is-editing > .inner > .tabs__content > .inner > ul > li.active {
   display: block;
 }
+.app-mod__hidden-tabs.is-editing.expand-top > .inner > .tabs__content {
+  bottom: auto;
+}
+.app-mod__hidden-tabs.is-editing.expand-bottom > .inner > .tabs__content {
+  top: auto;
+}
+.app-mod__hidden-tabs.pull-left > .inner > .tabs__head ul {
+  text-align: left;
+}
+.app-mod__hidden-tabs.pull-center > .inner > .tabs__head ul {
+  text-align: center;
+}
+.app-mod__hidden-tabs.pull-right > .inner > .tabs__head ul {
+  text-align: right;
+}
 .app-mod__hidden-tabs.pull-justify > .inner > .tabs__head ul {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  text-align: center;
   -webkit-flex-flow: row wrap;
   -ms-flex-flow: row wrap;
   flex-flow: row wrap;
 }
 .app-mod__hidden-tabs.pull-justify > .inner > .tabs__head ul > li {
   max-width: 100%;
-  -webkit-flex: 1 1 auto;
-  -ms-flex: 1 1 auto;
-  flex: 1 1 auto;
+  -webkit-flex: 1 1 0;
+  -ms-flex: 1 1 0;
+  flex: 1 1 0;
 }
 .app-mod__hidden-tabs.pull-justify > .inner > .tabs__head ul > li > a {
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+.app-mod__hidden-tabs.pull-justify > .inner > .tabs__head ul > li > a .title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  text-align: center;
 }
-.app-mod__hidden-tabs.pull-left > .inner > .tabs__head ul {
-  text-align: left;
+.app-mod__hidden-tabs:hover {
+  z-index: 10;
 }
-.app-mod__hidden-tabs.pull-left > .inner > .tabs__head ul > li {
-  margin-right: 4px;
+.app-mod__hidden-tabs > .inner > .tabs__head ul {
+  margin: -2px;
 }
-.app-mod__hidden-tabs.pull-left > .inner > .tabs__head ul > li:last-child {
-  margin-right: 0;
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li {
+  margin: 2px;
 }
-.app-mod__hidden-tabs.pull-center > .inner > .tabs__head ul {
-  text-align: center;
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .title {
+  margin-left: 8px;
+  margin-right: 8px;
 }
-.app-mod__hidden-tabs.pull-center > .inner > .tabs__head ul > li {
-  margin-right: 4px;
-}
-.app-mod__hidden-tabs.pull-center > .inner > .tabs__head ul > li:last-child {
-  margin-right: 0;
-}
-.app-mod__hidden-tabs.pull-right > .inner > .tabs__head ul {
-  text-align: right;
-}
-.app-mod__hidden-tabs.pull-right > .inner > .tabs__head ul > li {
-  margin-left: 4px;
-}
-.app-mod__hidden-tabs.pull-right > .inner > .tabs__head ul > li:first-child {
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .title:first-child {
   margin-left: 0;
 }
-.app-mod__hidden-tabs.pull-justify > .inner > .tabs__head ul {
-  text-align: center;
-}
-.app-mod__hidden-tabs.pull-justify > .inner > .tabs__head ul > li {
-  margin-right: 4px;
-}
-.app-mod__hidden-tabs.pull-justify > .inner > .tabs__head ul > li:last-child {
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .title:last-child {
   margin-right: 0;
 }
-.app-mod__hidden-tabs > .inner > .tabs__content {
+.app-mod__hidden-tabs.expand-bottom > .inner > .tabs__content {
   top: calc(100% + 4px);
 }
-.app-mod__hidden-tabs.is-editing > .inner > .tabs__content {
+.app-mod__hidden-tabs.expand-bottom.is-editing > .inner > .tabs__content {
   margin-top: 4px;
+}
+.app-mod__hidden-tabs.expand-top > .inner > .tabs__content {
+  bottom: calc(100% + 4px);
+}
+.app-mod__hidden-tabs.expand-top.is-editing > .inner > .tabs__content {
+  margin-bottom: 4px;
+}
+.app-mod__hidden-tabs > .inner > .tabs__head ul > li > a .image {
+  width: 24px;
+  height: 24px;
+}
+.app-mod__hidden-tabs > .inner > .tabs__head .pt__image {
+  width: 24px;
+  height: 24px;
 }
 /* *** THEMES *** */
 .app-mod__hidden-tabs.theme-initial > .inner > .tabs__head > .inner ul > li,
@@ -17664,14 +18004,25 @@ html.is-immediately .tpl__header__container {
 .app-mod__hidden-tabs.theme-default > .inner > .tabs__head > .inner ul > li > a {
   font: 400 13px/18px Open Sans, sans-serif;
   color: #666666;
-  padding: 0 12px;
-  line-height: 28px;
   text-decoration: none;
 }
 .app-mod__hidden-tabs.theme-initial > .inner > .tabs__menu > .inner,
 .app-mod__hidden-tabs.theme-default > .inner > .tabs__menu > .inner {
   border: 1px solid transparent;
   border-radius: 3px;
+}
+.app-mod__hidden-tabs.theme-initial > .inner > .tabs__menu > .inner .label,
+.app-mod__hidden-tabs.theme-default > .inner > .tabs__menu > .inner .label {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  min-height: 28px;
+  line-height: 28px;
+  padding: 0 12px;
+}
+.app-mod__hidden-tabs.theme-initial > .inner > .tabs__menu > .inner .icon,
+.app-mod__hidden-tabs.theme-default > .inner > .tabs__menu > .inner .icon {
+  width: 28px;
+  height: 28px;
 }
 .app-mod__hidden-tabs.theme-initial > .inner > .tabs__content > .inner,
 .app-mod__hidden-tabs.theme-default > .inner > .tabs__content > .inner {
@@ -17680,9 +18031,18 @@ html.is-immediately .tpl__header__container {
   border-radius: 3px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
 }
+.app-mod__hidden-tabs.theme-initial > .inner > .tabs__head > .inner ul > li > a,
+.app-mod__hidden-tabs.theme-default > .inner > .tabs__head > .inner ul > li > a {
+  padding: 0 12px;
+}
+.app-mod__hidden-tabs.theme-initial > .inner > .tabs__head > .inner ul > li > a,
+.app-mod__hidden-tabs.theme-default > .inner > .tabs__head > .inner ul > li > a {
+  height: 28px;
+  line-height: 28px;
+}
 .app-mod__hidden-tabs.theme-light > .inner > .tabs__head > .inner ul > li,
 .app-mod__hidden-tabs.theme-default > .inner > .tabs__head > .inner ul > li {
-  background: #fafafa;
+  background: #e8e8e8;
   border-color: #cccccc;
 }
 .app-mod__hidden-tabs.theme-light > .inner > .tabs__head > .inner ul > li:hover,
@@ -17703,8 +18063,8 @@ html.is-immediately .tpl__header__container {
   background-color: #ffffff;
   border-color: #cccccc;
 }
-.app-mod__hidden-tabs__duration {
-  transition-duration: 300ms;
+.app-mod__hidden-tabs-helper__duration {
+  transition-duration: 250ms;
 }
 /* ******* COMPONENTS: TABSET: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
@@ -17787,8 +18147,8 @@ html.is-immediately .tpl__header__container {
   border-style: solid;
   border-width: 6px 8px 6px 0;
   border-color: transparent;
-  -webkit-transition: border-color 300ms ease-in-out;
-  transition: border-color 300ms ease-in-out;
+  -webkit-transition: border-color 250ms ease-in-out;
+  transition: border-color 250ms ease-in-out;
   top: 6px;
   right: -16px;
   bottom: auto;
@@ -17854,6 +18214,9 @@ html.is-immediately .tpl__header__container {
 .app-mod__lang-switch ul li .icon {
   display: none;
   vertical-align: middle;
+}
+.app-mod__lang-switch ul li.active a {
+  color: #666666;
 }
 .app-mod__lang-switch.pull-left > ul {
   text-align: left;
@@ -17983,8 +18346,8 @@ html.is-immediately .tpl__header__container {
 .app-mod__menu > ul > li > a {
   display: block;
   white-space: nowrap;
-  -webkit-transition: color 300ms ease-in-out;
-  transition: color 300ms ease-in-out;
+  -webkit-transition: color 250ms ease-in-out;
+  transition: color 250ms ease-in-out;
 }
 .app-mod__menu > ul > li > a:hover {
   -webkit-transition: color 100ms ease-in-out;
@@ -18028,8 +18391,8 @@ html.is-immediately .tpl__header__container {
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app-mod__menu .pt__menu-dropdown li {
   position: relative;
@@ -18139,8 +18502,8 @@ html.is-immediately .tpl__header__container {
 }
 .app-mod__menu .menu-button {
   cursor: pointer;
-  -webkit-transition: opacity 300ms ease-in-out;
-  transition: opacity 300ms ease-in-out;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
   background-image: url("../img/magpieui//icons/medium/menu.png");
   position: absolute;
   z-index: 1;
@@ -18478,8 +18841,8 @@ html.is-immediately .tpl__header__container {
   display: inline-block;
   vertical-align: top;
   white-space: normal;
-  -webkit-transition: color 300ms ease-in-out;
-  transition: color 300ms ease-in-out;
+  -webkit-transition: color 250ms ease-in-out;
+  transition: color 250ms ease-in-out;
 }
 .app-mod__menu.vertical a:hover {
   -webkit-transition: color 100ms ease-in-out;
@@ -18604,8 +18967,8 @@ html.is-immediately .tpl__header__container {
 }
 .app-mod__search .icon.default {
   background-image: url("../img/magpieui//icons/small/search.png");
-  -webkit-transition: all 300ms ease-in-out;
-  transition: all 300ms ease-in-out;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app-mod__search .icon.default:hover {
   background-image: url("../img/magpieui//icons/small/search-white.png");

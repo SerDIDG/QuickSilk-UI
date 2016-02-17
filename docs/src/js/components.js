@@ -81,7 +81,7 @@ window.Collector = new Com.Collector({
         new App.TopMenu({
             'node' : node
         });
-    })
+    }, null, 900)
 
     .add('app-sidebar', function(node){
         new App.Sidebar({
@@ -92,25 +92,25 @@ window.Collector = new Com.Collector({
                 }
             }
         });
-    })
+    }, null, 910)
 
     .add('app-zone', function(node){
         new App.Zone({
             'node' : node
         });
-    })
+    }, null, 920)
 
     .add('app-block', function(node){
         new App.Block({
             'node' : node
         });
-    })
+    }, null, 930)
 
     .add('app-dummy-block', function(node){
         new App.DummyBlock({
             'node' : node
         });
-    })
+    }, null, 940)
 
     .add('app-helptour', function(node){
         new App.HelpTour({
@@ -136,19 +136,19 @@ window.Collector = new Com.Collector({
         });
     })
 
+    /* *** MODULES *** */
+
+    .add('module-menu', function(node){
+        new Module.Menu({
+            'node' : node
+        });
+    })
+
     .add('app-template', function(node){
         new App.Template({
             'node' : node
         });
-    })
-
-    /* *** MODULES *** */
-
-    .add('module-menu', function(node){
-        new App.ModuleMenu({
-            'node' : node
-        });
-    })
+    }, null, 990)
 
     /* *** DOCS *** */
 
@@ -201,6 +201,7 @@ window.Collector = new Com.Collector({
                         'method' : 'POST',
                         'url' : cm._baseUrl + '/stuff/ajax.editor.create.php',
                         'params' : {
+                            'instanceId' : block.zone.params['instanceId'],
                             'keyword' : block.params['keyword'],
                             'parentId' : block.zone.params['parentId'],
                             'type' : block.params['type'],
@@ -257,7 +258,7 @@ window.Collector = new Com.Collector({
                 }
             }
         });
-    });
+    }, null, 1000);
 
 cm.onReady(function(){
     window.Collector.construct(document.body);

@@ -1415,7 +1415,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.10.6',
+        '_version' : '3.12.2',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -1426,9 +1426,12 @@ var cm = {
         '_pageSize' : {},
         '_clientPosition' : {'left' : 0, 'top' : 0},
         '_config' : {
-            'animDuration' : 300,
-            'animDurationQuick' : 150,
-            'hideDelay' : 300,
+            'animDuration' : 250,
+            'animDurationShort' : 150,
+            'animDurationLong' : 500,
+            'hideDelay' : 250,
+            'hideDelayShort' : 150,
+            'hideDelayLong' : 500,
             'adaptiveFrom' : 768,
             'screenTablet' : 1024,
             'screenTabletPortrait' : 768,
@@ -1478,6 +1481,10 @@ cm.isType = function(o, types){
         return match;
     }
     return false;
+};
+
+cm.isBoolean = function(o){
+    return Object.prototype.toString.call(o) === '[object Boolean]';
 };
 
 cm.isString = function(o){
@@ -1895,31 +1902,35 @@ cm.crossEvents = function(key){
 };
 
 cm.addEvent = function(el, type, handler, useCapture){
-    useCapture = typeof useCapture == 'undefined' ? false : useCapture;
-    // Process touch events
-    if(cm.isTouch && cm.crossEvents(type)){
-        el.addEventListener(cm.crossEvents(type), handler, useCapture);
-        return el;
-    }
-    try{
-        el.addEventListener(type, handler, useCapture);
-    }catch(e){
-        el.attachEvent('on' + type, handler);
+    if(el){
+        useCapture = typeof useCapture == 'undefined' ? false : useCapture;
+        // Process touch events
+        if(cm.isTouch && cm.crossEvents(type)){
+            el.addEventListener(cm.crossEvents(type), handler, useCapture);
+            return el;
+        }
+        try{
+            el.addEventListener(type, handler, useCapture);
+        }catch(e){
+            el.attachEvent('on' + type, handler);
+        }
     }
     return el;
 };
 
 cm.removeEvent = function(el, type, handler, useCapture){
-    useCapture = typeof useCapture == 'undefined' ? false : useCapture;
-    // Process touch events
-    if(cm.isTouch && cm.crossEvents(type)){
-        el.removeEventListener(cm.crossEvents(type), handler, useCapture);
-        return el;
-    }
-    try{
-        el.removeEventListener(type, handler, useCapture);
-    }catch(e){
-        el.detachEvent('on' + type, handler);
+    if(el){
+        useCapture = typeof useCapture == 'undefined' ? false : useCapture;
+        // Process touch events
+        if(cm.isTouch && cm.crossEvents(type)){
+            el.removeEventListener(cm.crossEvents(type), handler, useCapture);
+            return el;
+        }
+        try{
+            el.removeEventListener(type, handler, useCapture);
+        }catch(e){
+            el.detachEvent('on' + type, handler);
+        }
     }
     return el;
 };
@@ -2065,9 +2076,9 @@ cm.customEvent = (function(){
             if(_stack[type]){
                 _stack[type].sort(function(a, b){
                     if(params['type'] == 'parent'){
-                        return cm.getNodeOffsetIndex(a['node']) > cm.getNodeOffsetIndex(b['node']) ? -1 : 1;
+                        return cm.getNodeOffsetIndex(b['node']) > cm.getNodeOffsetIndex(a['node']);
                     }
-                    return cm.getNodeOffsetIndex(a['node']) > cm.getNodeOffsetIndex(b['node']) ? 1 : -1;
+                    return cm.getNodeOffsetIndex(a['node']) - cm.getNodeOffsetIndex(b['node']);
                 });
                 cm.forEach(_stack[type], function(item){
                     if(!stopPropagation){
@@ -2170,6 +2181,32 @@ cm.removeScrollEvent = function(node, callback, useCapture){
             cm.removeEvent(node, 'scroll', callback, useCapture);
         }
     }
+    return node;
+};
+
+cm.isolateScrolling = function(e){
+    var that = this;
+    if(e.deltaY > 0 && that.clientHeight + that.scrollTop >= that.scrollHeight){
+        that.scrollTop = that.scrollHeight - that.clientHeight;
+        cm.stopPropagation(e);
+        cm.preventDefault(e);
+        return false;
+    }else if (e.deltaY < 0 && that.scrollTop <= 0){
+        that.scrollTop = 0;
+        cm.stopPropagation(e);
+        cm.preventDefault(e);
+        return false;
+    }
+    return true;
+};
+
+cm.addIsolateScrolling = function(node){
+    cm.addEvent(node, 'wheel', cm.isolateScrolling);
+    return node;
+};
+
+cm.removeIsolateScrolling = function(node){
+    cm.removeEvent(node, 'wheel', cm.isolateScrolling);
     return node;
 };
 
@@ -2998,62 +3035,13 @@ cm.toDegrees = function(radians) {
 /* ******* DATE AND TIME ******* */
 
 cm.getCurrentDate = function(format){
-    format = format || cm._config['dateTimeFormat'];
+    format = format || cm._config.dateTimeFormat;
     return cm.dateFormat(new Date(), format);
 };
 
 cm.dateFormat = function(date, format, langs){
-    var str = format,
-        formats = function(date){
-            return {
-                '%Y' : function(){
-                    return date ? date.getFullYear() : '0000';
-                },
-                '%m' : function(){
-                    return date ? cm.addLeadZero(date.getMonth() + 1) : '00';
-                },
-                '%n' : function(){
-                    return date ? (date.getMonth() + 1) : '00';
-                },
-                '%F' : function(){
-                    return date ? langs['months'][date.getMonth()] : '00';
-                },
-                '%d' : function(){
-                    return date ? cm.addLeadZero(date.getDate()) : '00';
-                },
-                '%j' : function(){
-                    return date ? date.getDate() : '00';
-                },
-                '%l' : function(){
-                    return date ? langs['days'][date.getDay()] : '00';
-                },
-                '%a' : function(){
-                    return date ? (date.getHours() >= 12? 'pm' : 'am') : '';
-                },
-                '%A' : function(){
-                    return date ? (date.getHours() >= 12? 'PM' : 'AM') : '';
-                },
-                '%g' : function(){
-                    return date ? (date.getHours() % 12 || 12) : '00';
-                },
-                '%G' : function(){
-                    return date ? date.getHours() : '00';
-                },
-                '%h' : function(){
-                    return date ? cm.addLeadZero(date.getHours() % 12 || 12) : '00';
-                },
-                '%H' : function(){
-                    return date ? cm.addLeadZero(date.getHours()) : '00';
-                },
-                '%i' : function(){
-                    return date ? cm.addLeadZero(date.getMinutes()) : '00';
-                },
-                '%s' : function(){
-                    return date ? cm.addLeadZero(date.getSeconds()) : '00';
-                }
-            }
-        };
-
+    date = cm.isDate(date) ? date : new Date();
+    format = cm.isString(format) ? format : cm._config.dateTimeFormat;
     langs = cm.merge({
         'months' : [
             'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
@@ -3063,10 +3051,60 @@ cm.dateFormat = function(date, format, langs){
         ]
     }, langs);
 
+    var formats = function(date){
+        return {
+            '%Y' : function(){
+                return date ? date.getFullYear() : '0000';
+            },
+            '%m' : function(){
+                return date ? cm.addLeadZero(date.getMonth() + 1) : '00';
+            },
+            '%n' : function(){
+                return date ? (date.getMonth() + 1) : '00';
+            },
+            '%F' : function(){
+                return date ? langs['months'][date.getMonth()] : '00';
+            },
+            '%d' : function(){
+                return date ? cm.addLeadZero(date.getDate()) : '00';
+            },
+            '%j' : function(){
+                return date ? date.getDate() : '00';
+            },
+            '%l' : function(){
+                return date ? langs['days'][date.getDay()] : '00';
+            },
+            '%a' : function(){
+                return date ? (date.getHours() >= 12? 'pm' : 'am') : '';
+            },
+            '%A' : function(){
+                return date ? (date.getHours() >= 12? 'PM' : 'AM') : '';
+            },
+            '%g' : function(){
+                return date ? (date.getHours() % 12 || 12) : '00';
+            },
+            '%G' : function(){
+                return date ? date.getHours() : '00';
+            },
+            '%h' : function(){
+                return date ? cm.addLeadZero(date.getHours() % 12 || 12) : '00';
+            },
+            '%H' : function(){
+                return date ? cm.addLeadZero(date.getHours()) : '00';
+            },
+            '%i' : function(){
+                return date ? cm.addLeadZero(date.getMinutes()) : '00';
+            },
+            '%s' : function(){
+                return date ? cm.addLeadZero(date.getSeconds()) : '00';
+            }
+        }
+    };
+
     cm.forEach(formats(date), function(item, key){
-        str = str.replace(key, item);
+        format = format.replace(key, item);
     });
-    return str;
+    return format;
 };
 
 cm.parseDate = function(str, format){
@@ -3862,6 +3900,21 @@ cm.setCSSTranslate = (function(){
     }
 })();
 
+cm.setCSSTransitionDuration = (function(){
+    var rule = cm.getSupportedStyle('transition-duration');
+
+    return function(node, time){
+        if(!rule){
+            return node;
+        }
+        if(cm.isNumber(time)){
+            time = [time, 'ms'].join('');
+        }
+        node.style[rule] = time;
+        return node;
+    };
+})();
+
 cm.inRange = function(a1, b1, a2, b2){
     return a1 >= a2 && a1 <= b2 || b1 >= a2 && b1 <= b2 || a2 >= a1 && a2 <= b1
 };
@@ -3902,61 +3955,6 @@ cm.Animation = function(o){
                 return (progress < 0.5) ? animationMethod.acceleration(2 * progress) / 2 : 1 - animationMethod.acceleration(2 * (1 - progress)) / 2;
             }
         };
-
-    that.getTarget = function(){
-        return obj;
-    };
-
-    that.go = function(){
-        var params = arguments[0],
-            args = cm.merge({
-                'style' : '',
-                'duration' : '',
-                'anim' : 'simple',
-                'onStop' : function(){}
-            }, params),
-            pId = 'animation_process_' + Math.random(),
-            delta = animationMethod[args.anim] || animationMethod['simple'],
-            properties = [];
-        for(var name in args.style){
-            var value = args.style[name].toString();
-            var dimension = cm.getStyleDimension(value);
-            properties.push({
-                'name' : name,
-                'new' : prepareEndPosition(name, value),
-                'dimension' : dimension,
-                'old' : cm.getCurrentStyle(obj, name, dimension)
-            });
-        }
-
-        var start = Date.now();
-        for(var i in processes){
-            processes[i] = false;
-        }
-        processes[pId] = true;
-        // Run process
-        (function process(){
-            var processId = pId;
-            if(!processes[processId]){
-                delete processes[processId];
-                return false;
-            }
-            var now = Date.now() - start;
-            var progress = now / args.duration;
-            if(setProperties(progress, delta, properties, args['duration'])){
-                delete processes[processId];
-                args.onStop && args.onStop();
-            }else{
-                animFrame(process);
-            }
-        })();
-    };
-
-    that.stop = function(){
-        for(var i in processes){
-            processes[i] = false;
-        }
-    };
 
     var setProperties = function(progress, delta, properties, duration){
         if(progress <= 1){
@@ -4010,6 +4008,62 @@ cm.Animation = function(o){
             }
         }
         return value.replace(/[^\-0-9\.]/g, '');
+    };
+
+    that.getTarget = function(){
+        return obj;
+    };
+
+    that.go = function(){
+        var params = arguments[0],
+            args = cm.merge({
+                'style' : '',
+                'duration' : '',
+                'anim' : 'simple',
+                'onStop' : function(){}
+            }, params),
+            pId = 'animation_process_' + Math.random(),
+            delta = animationMethod[args.anim] || animationMethod['simple'],
+            properties = [],
+            start = Date.now();
+        for(var name in args.style){
+            var value = args.style[name].toString();
+            var dimension = cm.getStyleDimension(value);
+            properties.push({
+                'name' : name,
+                'new' : prepareEndPosition(name, value),
+                'dimension' : dimension,
+                'old' : cm.getCurrentStyle(obj, name, dimension)
+            });
+        }
+        for(var i in processes){
+            processes[i] = false;
+        }
+        processes[pId] = true;
+        // Run process
+        (function process(){
+            var processId = pId;
+            if(!processes[processId]){
+                delete processes[processId];
+                return false;
+            }
+            var now = Date.now() - start;
+            var progress = now / args.duration;
+            if(setProperties(progress, delta, properties, args['duration'])){
+                delete processes[processId];
+                args.onStop && args.onStop();
+            }else{
+                animFrame(process);
+            }
+        })();
+        return that;
+    };
+
+    that.stop = function(){
+        for(var i in processes){
+            processes[i] = false;
+        }
+        return that;
     };
 };
 
@@ -5175,13 +5229,17 @@ Mod['Stack'] = {
     },
     'addToStack' : function(node){
         var that = this;
-        that._stackItem = {
-            'name' : that.params['name'],
-            'node' : node,
-            'class' : that,
-            'className' : that._name['full']
-        };
-        that._stack.push(that._stackItem);
+        if(!that._stackItem){
+            that._stackItem = {
+                'name' : that.params['name'],
+                'node' : node,
+                'class' : that,
+                'className' : that._name['full']
+            };
+            that._stack.push(that._stackItem);
+        }else{
+            that._stackItem['node'] = node;
+        }
         return that;
     },
     'removeFromStack' : function(){
@@ -5226,8 +5284,29 @@ Mod['Structure'] = {
         if(typeof that.build['params']['renderStructure'] == 'undefined'){
             that.build['params']['renderStructure'] = true;
         }
+        if(typeof that.build['params']['embedStructure'] == 'undefined'){
+            that.build['params']['embedStructure'] = 'append';
+        }
+    },
+    'embedStructure' : function(node){
+        var that = this;
+        if(that.params['embedStructure'] == 'replace'){
+            that.replaceStructure(node);
+        }else{
+            that.appendStructure(node);
+        }
+        return that;
     },
     'appendStructure' : function(node){
+        var that = this;
+        if(that.params['container']){
+            that.params['container'].appendChild(node);
+        }else if(that.params['node']){
+            that.params['node'].appendChild(node);
+        }
+        return that;
+    },
+    'replaceStructure' : function(node){
         var that = this;
         if(that.params['container']){
             if(that.params['container'] === that.params['node']){
@@ -5238,6 +5317,7 @@ Mod['Structure'] = {
         }else if(that.params['node'].parentNode){
             cm.insertBefore(node, that.params['node']);
         }
+        cm.remove(that.params['node']);
         return that;
     }
 };
@@ -5485,6 +5565,7 @@ cm.define('Com.Form', {
         'Structure'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onError',
         'onAbort',
@@ -5494,22 +5575,41 @@ cm.define('Com.Form', {
     ],
     'params' : {
         'node' : cm.Node('div'),
+        'container' : null,
         'name' : '',
         'renderStructure' : true,
+        'embedStructure' : 'append',
+        'renderButtons' : true,
+        'renderButtonsSeparator' : true,
+        'buttonsAlign' : 'right',
+        'showLoader' : true,
+        'loaderCoverage' : 'fields',                                // fields, all
+        'loaderDelay' : 'cm._config.hideDelay',                     // in ms
         'ajax' : {
             'type' : 'json',
             'method' : 'post',
             'formData' : true,
             'url' : '',                                             // Request URL. Variables: %baseurl%, %callback% for JSONP.
             'params' : ''                                           // Params object. %baseurl%, %callback% for JSONP.
+        },
+        'Com.Overlay' : {
+            'position' : 'absolute',
+            'autoOpen' : false,
+            'removeOnClose' : true
         }
     }
 },
 function(params){
     var that = this;
 
-    that.ajaxHandler = null;
+    that.nodes = {};
+    that.components = {};
     that.fields = {};
+    that.buttons = {};
+    that.ajaxHandler = null;
+    that.loaderDelay = null;
+
+    that.isProcess = false;
 
     var init = function(){
         that.setParams(params);
@@ -5517,23 +5617,61 @@ function(params){
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
         that.callbacksProcess();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        validateParams();
         render();
         that.addToStack(that.nodes['container']);
         that.triggerEvent('onRender');
     };
 
+    var validateParams = function(){
+        that.params['buttonsAlign'] = cm.inArray(['left', 'center', 'right', 'justify'], that.params['buttonsAlign']) ? that.params['buttonsAlign'] : 'right';
+        that.params['loaderCoverage'] = cm.inArray(['fields', 'all'], that.params['loaderCoverage']) ? that.params['loaderCoverage'] : 'all';
+    };
+
     var render = function(){
+        var overlayContainer;
+        // Structure
         if(that.params['renderStructure']){
             that.nodes['container'] = cm.node('div', {'class' : 'com__form'},
-                that.nodes['form'] = cm.node('form', {'class' : 'form'})
+                that.nodes['form'] = cm.node('form', {'class' : 'form'},
+                    that.nodes['fields'] = cm.node('div', {'class' : 'com__form__fields'}))
             );
-            that.appendStructure(that.nodes['container']);
-            cm.remove(that.params['node']);
+            // Buttons
+            that.nodes['buttonsSeparator'] = cm.node('hr');
+            that.nodes['buttonsContainer'] = cm.node('form', {'class' : 'com__form__buttons'},
+                that.nodes['buttons'] = cm.node('div', {'class' : 'btn-wrap'})
+            );
+            cm.addClass(that.nodes['buttons'], ['pull', that.params['buttonsAlign']].join('-'));
+            // Embed
+            that.params['renderButtonsSeparator'] && cm.insertFirst(that.nodes['buttonsSeparator'], that.nodes['buttonsContainer']);
+            that.params['renderButtons'] && cm.appendChild(that.nodes['buttonsContainer'], that.nodes['form']);
+            that.embedStructure(that.nodes['container']);
         }
+        // Overlay
+        cm.getConstructor('Com.Overlay', function(classConstructor, className){
+            switch(that.params['loaderCoverage']){
+                case 'fields':
+                    overlayContainer = that.nodes['fields'];
+                    break;
+                case 'all':
+                default:
+                    overlayContainer = that.nodes['container'];
+                    break;
+            }
+            that.components['loader'] = new classConstructor(
+                cm.merge(that.params[className], {
+                    'container' : overlayContainer
+                })
+            );
+        });
         // Events
         cm.addEvent(that.nodes['form'], 'submit', function(e){
             cm.preventDefault(e);
-            that.send();
+            if(!that.isProcess){
+                that.send();
+            }
         });
     };
 
@@ -5544,11 +5682,11 @@ function(params){
             'name' : '',
             'label' : '',
             'options' : [],
-            'container' : that.nodes['form'],
+            'container' : that.nodes['fields'],
             'form' : that
         }, params);
         // Render
-        if(fieldParams = Com.FormFields.get(type)){
+        if(!that.fields[params['name']] && (fieldParams = Com.FormFields.get(type))){
             cm.getConstructor('Com.FormField', function(classConstructor){
                 params = cm.merge(fieldParams, params);
                 field = new classConstructor(params);
@@ -5556,6 +5694,63 @@ function(params){
                     that.fields[params['name']] = field;
                 }
             });
+        }
+    };
+
+    var renderButton = function(params){
+        params = cm.merge({
+            'name' : '',
+            'label' : '',
+            'action' : 'submit',          // submit | reset | clear | custom
+            'handler' : function(){}
+        }, params);
+        // Render
+        if(!that.buttons[params['name']]){
+            params['node'] = cm.node('button', {'name' : params['name']}, params['label']);
+            switch(params['action']){
+                case 'submit':
+                    params['node'].type = 'submit';
+                    cm.addClass(params['node'], 'button-primary');
+                    cm.addEvent(params['node'], 'click', function(e){
+                        cm.preventDefault(e);
+                        if(that.isProcess){
+                            that.abort();
+                        }else{
+                            that.send();
+                        }
+                    });
+                    break;
+
+                case 'reset':
+                    params['node'].type = 'reset';
+                    cm.addClass(params['node'], 'button-secondary');
+                    cm.addEvent(params['node'], 'click', function(e){
+                        cm.preventDefault(e);
+                        if(!that.isProcess){
+                            that.reset();
+                        }
+                    });
+                    break;
+
+                case 'clear':
+                    cm.addClass(params['node'], 'button-secondary');
+                    cm.addEvent(params['node'], 'click', function(e){
+                        cm.preventDefault(e);
+                        if(!that.isProcess){
+                            that.clear();
+                        }
+                    });
+                    break;
+
+                case 'custom':
+                default:
+                    cm.addEvent(params['node'], 'click', function(e){
+                        cm.preventDefault(e);
+                        cm.isFunction(params['handler']) && params['handler'](that, params, e);
+                    });
+                    break;
+            }
+            cm.appendChild(params['node'], that.nodes['buttons']);
         }
     };
 
@@ -5599,10 +5794,27 @@ function(params){
     };
 
     that.callbacks.start = function(that, config){
+        that.isProcess = true;
+        // Show Loader
+        if(that.params['showLoader']){
+            that.loaderDelay = setTimeout(function(){
+                if(that.components['loader'] && !that.components['loader'].isOpen){
+                    that.components['loader'].open();
+                }
+            }, that.params['loaderDelay']);
+        }
         that.triggerEvent('onSendStart');
     };
 
     that.callbacks.end = function(that, config){
+        that.isProcess = false;
+        // Hide Loader
+        if(that.params['showLoader']){
+            that.loaderDelay && clearTimeout(that.loaderDelay);
+            if(that.components['loader'] && that.components['loader'].isOpen){
+                that.components['loader'].close();
+            }
+        }
         that.triggerEvent('onSendEnd');
     };
 
@@ -5628,8 +5840,29 @@ function(params){
 
     /* ******* PUBLIC ******* */
 
+    that.destruct = function(){
+        cm.forEach(that.fields, function(field){
+            field.destruct();
+        });
+        return that;
+    };
+
     that.add = function(type, params){
         renderField(type, params);
+        return that;
+    };
+
+    that.addButton = function(o){
+        renderButton(o);
+        return that;
+    };
+
+    that.addButtons = function(o){
+        if(cm.isArray(o)){
+            cm.forEach(o, function(item){
+                renderButton(item);
+            });
+        }
         return that;
     };
 
@@ -5642,7 +5875,16 @@ function(params){
     };
 
     that.clear = function(){
-        cm.clearNode(that.nodes['form']);
+        cm.forEach(that.fields, function(field){
+            field.destruct();
+        });
+        that.fields = {};
+        cm.clearNode(that.nodes['fields']);
+        cm.forEach(that.buttons, function(button){
+            cm.remove(button.node);
+        });
+        that.buttons = {};
+        cm.clearNode(that.nodes['buttons']);
         return that;
     };
 
@@ -5803,16 +6045,20 @@ function(params){
     };
 
     that.callbacks.set = function(that, value){
-        cm.isFunction(that.component.set) && that.component.set(value);
+        that.component && cm.isFunction(that.component.set) && that.component.set(value);
         return value;
     };
 
     that.callbacks.get = function(that){
-        return cm.isFunction(that.component.get) ? that.component.get() : null;
+        return that.component && cm.isFunction(that.component.get) ? that.component.get() : null;
     };
 
     that.callbacks.reset = function(that){
-        cm.isFunction(that.component.reset) && that.component.reset();
+        that.component && cm.isFunction(that.component.reset) && that.component.reset();
+    };
+
+    that.callbacks.destruct = function(that){
+        that.component && cm.isFunction(that.component.destruct) && that.component.destruct();
     };
 
     /* ******* PUBLIC ******* */
@@ -5829,6 +6075,11 @@ function(params){
 
     that.reset = function(){
         that.callbacks.reset(that);
+        return that;
+    };
+
+    that.destruct = function(){
+        that.callbacks.destruct(that);
         return that;
     };
 
@@ -6270,6 +6521,7 @@ function(params){
     /* *** AJAX *** */
 
     that.callbacks.prepare = function(that, config, query){
+        config = that.callbacks.beforePrepare(that, config, query);
         config['url'] = cm.strReplace(config['url'], {
             '%query%' : query,
             '%baseurl%' : cm._baseUrl
@@ -6278,6 +6530,15 @@ function(params){
             '%query%' : query,
             '%baseurl%' : cm._baseUrl
         });
+        config = that.callbacks.afterPrepare(that, config, query);
+        return config;
+    };
+
+    that.callbacks.beforePrepare = function(that, config, query){
+        return config;
+    };
+
+    that.callbacks.afterPrepare = function(that, config, query){
         return config;
     };
 
@@ -6533,6 +6794,421 @@ function(params){
     that.isOwnNode = function(node){
         return that.components['tooltip'].isOwnNode(node);
     };
+
+    init();
+});
+/* ******* COMPONENTS: BIG CALENDAR ******* */
+
+/* *** CALENDAR EVENT *** */
+
+cm.define('Com.CalendarEvent', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'data' : {
+            'title' : null,
+            'date' : null,
+            'description' : null
+        },
+        'Com.Tooltip' : {
+            'delay' : 'cm._config.hideDelayLong',
+            'className' : 'com__calendar-event-tooltip',
+            'minWidth' : 250
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'template' : null
+    };
+    that.components = {};
+    that.template = null;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.triggerEvent('onRender');
+    };
+
+    var render = function(){
+        // Render tooltip
+        cm.getConstructor('Com.Tooltip', function(classConstructor, className){
+            that.components['tooltip'] = new classConstructor(
+                cm.merge(that.params[className],{
+                    'target' : that.params['node']
+                })
+            );
+        });
+    };
+
+    var renderContent = function(template){
+        if(!cm.isEmpty(that.params['data']['title'])){
+            template['title'].innerHTML = that.params['data']['title'];
+        }
+        if(!cm.isEmpty(that.params['data']['date'])){
+            template['date'].innerHTML = that.params['data']['date'];
+        }
+        if(!cm.isEmpty(that.params['data']['description'])){
+            template['description'].innerHTML = that.params['data']['description'];
+        }else{
+            cm.remove(template['description-container']);
+        }
+        if(!cm.isEmpty(that.params['data']['url'])){
+            template['button'].setAttribute('href', that.params['data']['url']);
+        }else{
+            cm.remove(template['button-container']);
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.setTemplate = function(node){
+        that.nodes['template'] = cm.getNodes(node);
+        if(that.nodes['template']){
+            renderContent(that.nodes['template']);
+            that.components['tooltip'] && that.components['tooltip'].setContent(that.nodes['template']['container']);
+        }
+        return that;
+    };
+
+    that.setTooltipParams = function(o){
+        that.params['Com.Tooltip'] = cm.merge(that.params['Com.Tooltip'], o);
+        that.components['tooltip'] && that.components['tooltip'].setParams(that.params['Com.Tooltip']);
+        return that;
+    };
+
+    init();
+});
+
+/* *** CALENDAR MONTH VIEW *** */
+
+cm.define('Com.CalendarMonth', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'itemIndent' : 1,
+        'dayIndent' : 4,
+        'Com.Tooltip' : {
+            'width' : '(targetWidth + %dayIndent%) * 2 - targetHeight * 2',
+            'top' : 'targetHeight + %itemIndent%',
+            'left' : '-(selfWidth - targetWidth) - targetHeight'
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'templates' : {}
+    };
+    that.days = [];
+
+    var init = function(){
+        getCSSHelpers();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.triggerEvent('onRender');
+    };
+
+    var getCSSHelpers = function(){
+        var rule;
+        if(rule = cm.getCSSRule('.com__calendar-event-helper__indent')[0]){
+            that.params['itemIndent'] = cm.styleToNumber(rule.style.height);
+        }
+        if(rule = cm.getCSSRule('.com__calendar-week-helper__day-indent')[0]){
+            that.params['dayIndent'] = cm.styleToNumber(rule.style.height);
+        }
+    };
+
+    var validateParams = function(){
+        if(that.params['Com.Tooltip']['width'] != 'auto'){
+            that.params['Com.Tooltip']['width'] = cm.strReplace(that.params['Com.Tooltip']['width'], {
+                '%itemIndent%' : that.params['itemIndent'],
+                '%dayIndent%' : that.params['dayIndent']
+            });
+        }
+        that.params['Com.Tooltip']['top'] = cm.strReplace(that.params['Com.Tooltip']['top'], {
+            '%itemIndent%' : that.params['itemIndent'],
+            '%dayIndent%' : that.params['dayIndent']
+        });
+        that.params['Com.Tooltip']['left'] = cm.strReplace(that.params['Com.Tooltip']['left'], {
+            '%itemIndent%' : that.params['itemIndent'],
+            '%dayIndent%' : that.params['dayIndent']
+        });
+    };
+
+    var render = function(){
+        cm.log(that.nodes);
+        var template;
+        // Find events and set template and tooltip config
+        new cm.Finder('Com.CalendarEvent', null, that.params['node'], function(classObject){
+            // Clone template
+            template = cm.clone(that.nodes['templates']['event']['container'], true);
+            // Set Node
+            classObject
+                .setTooltipParams(that.params['Com.Tooltip'])
+                .setTemplate(template);
+        });
+        // Process Days
+        cm.forEach(that.nodes['days'], processDay);
+    };
+
+    var processDay = function(nodes){
+        var item = {
+            'isShow' : false,
+            'nodes' : nodes
+        };
+        // Show all events on more button click
+        cm.addEvent(item.nodes['more-button'], 'click', function(){
+            showMoreEvents(item);
+        });
+        // Prevent document scrolling while scroll all events block
+        cm.addIsolateScrolling(item.nodes['more-holder']);
+        // Push
+        that.days.push(item);
+    };
+
+    var showMoreEvents = function(item){
+        item.delay && clearTimeout(item.delay);
+        if(!item.isShow){
+            item.isShow = true;
+            cm.setScrollTop(item.nodes['more-holder'], 0);
+            cm.addClass(item.nodes['more-holder'], 'is-show');
+        }
+    };
+
+    var hideMoreEvents = function(item, isImmediately){
+        item.delay && clearTimeout(item.delay);
+        if(item.isShow){
+            if(isImmediately){
+                item.isShow = false;
+                cm.removeClass(item.nodes['more-holder'], 'is-show');
+            }else{
+                item.delay = setTimeout(function(){
+                    item.isShow = false;
+                    cm.removeClass(item.nodes['more-holder'], 'is-show');
+                }, that.params['delay']);
+            }
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    init();
+});
+
+/* *** CALENDAR AGENDA VIEW *** */
+
+cm.define('Com.CalendarWeek', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'itemIndent' : 1,
+        'dayIndent' : 4,
+        'Com.Tooltip' : {
+            'width' : '(targetWidth + %dayIndent%) * 2 - targetHeight * 2',
+            'top' : 'targetHeight + %itemIndent%',
+            'left' : 'targetHeight'
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'templates' : {}
+    };
+    that.days = [];
+
+    var init = function(){
+        getCSSHelpers();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.triggerEvent('onRender');
+    };
+
+    var getCSSHelpers = function(){
+        var rule;
+        if(rule = cm.getCSSRule('.com__calendar-event-helper__indent')[0]){
+            that.params['itemIndent'] = cm.styleToNumber(rule.style.height);
+        }
+        if(rule = cm.getCSSRule('.com__calendar-week-helper__day-indent')[0]){
+            that.params['dayIndent'] = cm.styleToNumber(rule.style.height);
+        }
+    };
+
+    var validateParams = function(){
+        that.params['Com.Tooltip']['width'] = cm.strReplace(that.params['Com.Tooltip']['width'], {
+            '%itemIndent%' : that.params['itemIndent'],
+            '%dayIndent%' : that.params['dayIndent']
+        });
+        that.params['Com.Tooltip']['top'] = cm.strReplace(that.params['Com.Tooltip']['top'], {
+            '%itemIndent%' : that.params['itemIndent'],
+            '%dayIndent%' : that.params['dayIndent']
+        });
+        that.params['Com.Tooltip']['left'] = cm.strReplace(that.params['Com.Tooltip']['left'], {
+            '%itemIndent%' : that.params['itemIndent'],
+            '%dayIndent%' : that.params['dayIndent']
+        });
+    };
+
+    var render = function(){
+        cm.log(that.nodes);
+        var template;
+        // Find events and set template and tooltip config
+        new cm.Finder('Com.CalendarEvent', null, that.params['node'], function(classObject){
+            // Clone template
+            template = cm.clone(that.nodes['templates']['event']['container'], true);
+            // Set Node
+            classObject
+                .setTooltipParams(that.params['Com.Tooltip'])
+                .setTemplate(template);
+        });
+    };
+
+    /* ******* PUBLIC ******* */
+
+    init();
+});
+
+/* *** CALENDAR AGENDA VIEW *** */
+
+cm.define('Com.CalendarAgenda', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'itemIndent' : 1,
+        'Com.Tooltip' : {
+            'width' : 'targetWidth - targetHeight * 2',
+            'top' : 'targetHeight + %itemIndent%',
+            'left' : 'targetHeight'
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'templates' : {}
+    };
+    that.days = [];
+
+    var init = function(){
+        getCSSHelpers();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.triggerEvent('onRender');
+    };
+
+    var getCSSHelpers = function(){
+        var rule;
+        if(rule = cm.getCSSRule('.com__calendar-event-helper__indent')[0]){
+            that.params['itemIndent'] = cm.styleToNumber(rule.style.height);
+        }
+    };
+
+    var validateParams = function(){
+        if(that.params['Com.Tooltip']['width'] != 'auto'){
+            that.params['Com.Tooltip']['width'] = cm.strReplace(that.params['Com.Tooltip']['width'], {
+                '%itemIndent%' : that.params['itemIndent']
+            });
+        }
+        that.params['Com.Tooltip']['top'] = cm.strReplace(that.params['Com.Tooltip']['top'], {
+            '%itemIndent%' : that.params['itemIndent']
+        });
+        that.params['Com.Tooltip']['left'] = cm.strReplace(that.params['Com.Tooltip']['left'], {
+            '%itemIndent%' : that.params['itemIndent']
+        });
+    };
+
+    var render = function(){
+        cm.log(that.nodes);
+        var template;
+        // Find events and set template and tooltip config
+        new cm.Finder('Com.CalendarEvent', null, that.params['node'], function(classObject){
+            // Clone template
+            template = cm.clone(that.nodes['templates']['event']['container'], true);
+            // Set Node
+            classObject
+                .setTooltipParams(that.params['Com.Tooltip'])
+                .setTemplate(template);
+        });
+    };
+
+    /* ******* PUBLIC ******* */
 
     init();
 });
@@ -6844,13 +7520,18 @@ function(params){
 cm.define('Com.CalendarEvents', {
     'modules' : [
         'Params',
+        'Structure',
+        'Stack',
         'DataConfig',
         'Langs'
     ],
     'params' : {
-        'node' : cm.Node('div'),
+        'node' : cm.node('div'),
+        'container' : null,
+        'embedStructure' : 'append',
+        'name' : '',
         'data' : {},
-        'format' : cm._config['displayDateFormat'],
+        'format' : 'cm._config.displayDateFormat',
         'startYear' : 1950,
         'endYear' : new Date().getFullYear() + 10,
         'startWeekDay' : 0,
@@ -6877,11 +7558,12 @@ function(params){
         // Render
         render();
         setMiscEvents();
+        that.addToStack(that.nodes['container']);
     };
 
     var render = function(){
         // Structure
-        that.nodes['container'] = cm.Node('div', {'class' : 'com__calendar-events'});
+        that.nodes['container'] = cm.node('div', {'class' : 'com__calendar-events'});
         // Render calendar
         that.components['calendar'] = new Com.Calendar({
             'node' : that.nodes['container'],
@@ -6893,8 +7575,8 @@ function(params){
         });
         // Render tooltip
         that.components['tooltip'] = new Com.Tooltip(that.params['Com.Tooltip']);
-        // Insert into DOM
-        that.params['node'].appendChild(that.nodes['container']);
+        // Append
+        that.embedStructure(that.nodes['container']);
     };
 
     var setMiscEvents = function(){
@@ -6922,14 +7604,14 @@ function(params){
 
         if((data = that.params['data'][params['year']]) && (data = data[(params['month'] + 1)]) && (data = data[params['day']])){
             // Structure
-            myNodes['content'] = cm.Node('div', {'class' : 'pt__listing com__calendar-events-listing'},
-                myNodes['list'] = cm.Node('ul', {'class' : 'list'})
+            myNodes['content'] = cm.node('div', {'class' : 'pt__listing com__calendar-events-listing'},
+                myNodes['list'] = cm.node('ul', {'class' : 'list'})
             );
             // Foreach events
             cm.forEach(data, function(value){
                 myNodes['list'].appendChild(
-                    cm.Node('li',
-                        cm.Node('a', {'href' : value['url'], 'target' : that.params['target']}, value['title'])
+                    cm.node('li',
+                        cm.node('a', {'href' : value['url'], 'target' : that.params['target']}, value['title'])
                     )
                 );
             });
@@ -7171,6 +7853,8 @@ cm.define('Com.Collector', {
     ],
     'events' : [
         'onRender',
+        'onAdd',
+        'onRemove',
         'onConstructStart',
         'onConstruct',
         'onDestructStart',
@@ -7186,7 +7870,9 @@ cm.define('Com.Collector', {
 function(params){
     var that = this;
 
-    that.stack = {};
+    that.isChanged = false;
+    that.stackList = [];
+    that.stackNodes = {};
 
     var init = function(){
         that.setParams(params);
@@ -7209,7 +7895,7 @@ function(params){
         }
     };
 
-    var constructItem = function(item, name, parentNode){
+    var findNodes = function(parentNode, name){
         var nodes = [];
         // Find element in specified node
         if(parentNode.getAttribute(that.params['attribute']) == name){
@@ -7221,140 +7907,206 @@ function(params){
                 cm.getByAttr(that.params['attribute'], name, parentNode)
             )
         );
+        return nodes;
+    };
+
+    var addNodes = function(parentNode, name){
+        var nodes = findNodes(parentNode, name);
         // Filter off existing nodes
         nodes = nodes.filter(function(node){
-            return !cm.inArray(item['nodes'], node);
+            return !cm.inArray(that.stackNodes[name], node);
         });
         // Push new nodes in constructed nodes array
-        item['nodes'] = item['nodes'].concat(nodes);
-        // Construct
-        cm.forEach(nodes, function(node){
-            cm.forEach(item['construct'], function(handler){
-                handler(node);
+        that.stackNodes[name] = that.stackNodes[name].concat(nodes);
+        return nodes;
+    };
+
+    var removeNodes = function(parentNode, name){
+        var nodes = findNodes(parentNode, name),
+            inArray;
+        // Filter off not existing nodes and remove existing from global array
+        nodes = nodes.filter(function(node){
+            if(inArray = cm.inArray(that.stackNodes[name], node)){
+                that.stackNodes[name].splice(that.stackNodes[name].indexOf(node), 1);
+            }
+            return inArray;
+        });
+        return nodes;
+    };
+
+    var sortList = function(){
+        if(that.isChanged){
+            that.stackList.sort(function(a, b){
+                return a['priority'] - b['priority'];
+            });
+        }
+        that.isChanged = false;
+    };
+
+    var constructAll = function(parentNode){
+        var processNodes = {},
+            processArray = that.stackList.slice(0);
+        // Find new nodes to process
+        cm.forEach(that.stackNodes, function(item, name){
+            processNodes[name] = addNodes(parentNode, name);
+        });
+        // Process nodes
+        cm.forEach(processArray, function(item){
+            cm.forEach(processNodes[item['name']], function(node){
+                item['construct'] && item['construct'](node, item['priority']);
             });
         });
     };
 
-    var destructItem = function(item, name, parentNode){
-        var nodes = [],
-            inArray;
-        if(parentNode){
-            // Find element in specified node
-            if(parentNode.getAttribute(that.params['attribute']) == name){
-                nodes.push(parentNode)
-            }
-            // Search for nodes in specified node
-            nodes = nodes.concat(
-                cm.clone(
-                    cm.getByAttr(that.params['attribute'], name, parentNode)
-                )
-            );
-            // Filter off not existing nodes and remove existing from global array
-            nodes = nodes.filter(function(node){
-                if(inArray = cm.inArray(item['nodes'], node)){
-                    item['nodes'].splice(item['nodes'].indexOf(node), 1);
-                }
-                return inArray;
+    var constructItem = function(parentNode, name){
+        var processNodes = addNodes(parentNode, name),
+            processArray = that.stackList.filter(function(item){
+                return item['name'] === name;
             });
-            // Destruct
-            cm.forEach(nodes, function(node){
-                cm.forEach(item['destruct'], function(handler){
-                    handler(node);
+        cm.forEach(processArray, function(item){
+            cm.forEach(processNodes, function(node){
+                item['construct'] && item['construct'](node, item['priority']);
+            });
+        });
+    };
+
+    var destructAll = function(parentNode){
+        var processNodes = {},
+            processArray = that.stackList.slice(0);
+        if(cm.isNode(parentNode)){
+            cm.forEach(that.stackNodes, function(item, name){
+                processNodes[name] = removeNodes(parentNode, name);
+            });
+            cm.forEach(processArray, function(item){
+                cm.forEach(processNodes[item['name']], function(node){
+                    item['destruct'] && item['destruct'](node, item['priority']);
                 });
             });
         }else{
-            cm.forEach(item['nodes'], function(node){
-                cm.forEach(item['destruct'], function(handler){
-                    handler(node);
+            cm.forEach(processArray, function(item){
+                cm.forEach(that.stackNodes[item['name']], function(node){
+                    item['destruct'] && item['destruct'](node, item['priority']);
                 });
             });
-            delete that.stack[name];
+            that.stackNodes = [];
+        }
+    };
+
+    var destructItem = function(parentNode, name){
+        var processNodes = {},
+            processArray = that.stackList.filter(function(item){
+                return item['name'] === name;
+            });
+        if(cm.isNode(parentNode)){
+            processNodes = removeNodes(parentNode, name);
+            cm.forEach(processArray, function(item){
+                cm.forEach(processNodes, function(node){
+                    item['destruct'] && item['destruct'](node, item['priority']);
+                });
+            });
+        }else{
+            cm.forEach(processArray, function(item){
+                cm.forEach(that.stackNodes[item['name']], function(node){
+                    item['destruct'] && item['destruct'](node, item['priority']);
+                });
+            });
+            delete that.stackNodes[name];
         }
     };
 
     /* ******* PUBLIC ******* */
-    
-    that.add = function(name, construct, destruct){
+
+    that.add = function(name, construct, destruct, priority){
         if(name){
-            if(!that.stack[name]){
-                that.stack[name] = {
-                    'construct' : [],
-                    'destruct' : [],
-                    'nodes' : []
-                };
+            if(!that.stackNodes[name]){
+                that.stackNodes[name] = [];
             }
-            if(typeof construct == 'function'){
-                that.stack[name]['construct'].push(construct);
+            var item = {
+                'name' : name,
+                'priority' : priority || 0,
+                'construct' : construct,
+                'destruct' : destruct
+            };
+            if(typeof priority != 'undefined' && cm.isNumber(priority)){
+                that.stackList.splice(priority, 0, item);
+            }else{
+                that.stackList.push(item);
             }
-            if(typeof destruct == 'function'){
-                that.stack[name]['destruct'].push(destruct);
-            }
+            that.isChanged = true;
+            that.triggerEvent('onAdd', item);
         }
         return that;
     };
 
     that.remove = function(name, construct, destruct){
-        if(name && that.stack[name]){
-            if(construct || destruct){
-                // Remove item's handlers
-                if(typeof construct == 'function'){
-                    that.stack[name]['construct'] = that.stack[name]['construct'].filter(function(handler){
-                        return handler != construct;
-                    });
-                }
-                if(typeof destruct == 'function'){
-                    that.stack[name]['destruct'] = that.stack[name]['destruct'].filter(function(handler){
-                        return handler != destruct;
-                    });
-                }
+        if(name){
+            if(typeof construct == 'undefined'){
+                that.stackList = that.stackList.filter(function(item){
+                    return !(item['name'] === name);
+                });
             }else{
-                // Remove item from global array
-                delete that.stack[name];
+                that.stackList = that.stackList.filter(function(item){
+                    return !(item['name'] === name && item['construct'] === construct && item['destruct'] === destruct);
+                });
             }
+            that.isChanged = true;
+            that.triggerEvent('onRemove', {
+                'name' : name
+            });
         }
         return that;
     };
 
     that.construct = function(node, name){
+        var timer = Date.now();
         node = node || document.body;
         that.triggerEvent('onConstructStart', {
             'node' : node,
             'name' : name
         });
-        if(name && that.stack[name]){
-            constructItem(that.stack[name], name, node);
+        sortList();
+        if(name){
+            constructItem(node, name)
         }else{
-            cm.forEach(that.stack, function(item, name){
-                constructItem(item, name, node);
-            });
+            constructAll(node);
         }
         that.triggerEvent('onConstruct', {
             'node' : node,
             'name' : name
         });
+        cm.errorLog({
+            'type' : 'common',
+            'name' : 'Com.Collector',
+            'message' : ['Construct time', (Date.now() - timer), 'ms.'].join(' ')
+        });
         return that;
     };
 
     that.destruct = function(node, name){
+        var timer = Date.now();
         node = node || null;
         that.triggerEvent('onDestructStart', {
             'node' : node,
             'name' : name
         });
-        if(name && that.stack[name]){
-            destructItem(that.stack[name], name, node);
+        sortList();
+        if(name){
+            destructItem(node, name)
         }else{
-            cm.forEach(that.stack, function(item, name){
-                destructItem(item, name, node);
-            });
+            destructAll(node);
         }
         that.triggerEvent('onDestruct', {
             'node' : node,
             'name' : name
         });
+        cm.errorLog({
+            'type' : 'common',
+            'name' : 'Com.Collector',
+            'message' : ['Destruct time', (Date.now() - timer), 'ms.'].join(' ')
+        });
         return that;
     };
-    
+
     init();
 });
 cm.define('Com.ColorPicker', {
@@ -7362,6 +8114,7 @@ cm.define('Com.ColorPicker', {
         'Params',
         'Events',
         'Langs',
+        'Structure',
         'DataConfig',
         'Storage',
         'Stack'
@@ -7377,9 +8130,10 @@ cm.define('Com.ColorPicker', {
         'onClear'
     ],
     'params' : {
-        'container' : false,
         'input' : null,                                     // Deprecated, use 'node' parameter instead.
         'node' : cm.Node('input', {'type' : 'text'}),
+        'container' : null,
+        'embedStructure' : 'replace',
         'name' : '',
         'value' : null,                                     // Color string: transparent | hex | rgba.
         'defaultValue' : 'transparent',
@@ -7472,9 +8226,9 @@ function(params){
         if(that.params['node'].id){
             that.nodes['container'].id = that.params['node'].id;
         }
-        // Set hidden input attributes
-        if(that.params['node'].getAttribute('name')){
-            that.nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
+        // Name
+        if(that.params['name']){
+            that.nodes['hidden'].setAttribute('name', that.params['name']);
         }
         // Clear Button
         if(that.params['showClearButton']){
@@ -7484,12 +8238,7 @@ function(params){
             );
         }
         /* *** INSERT INTO DOM *** */
-        if(that.params['container']){
-            that.params['container'].appendChild(that.nodes['container']);
-        }else if(that.params['node'].parentNode){
-            cm.insertBefore(that.nodes['container'], that.params['node']);
-        }
-        cm.remove(that.params['node']);
+        that.embedStructure(that.nodes['container']);
     };
 
     var setLogic = function(){
@@ -8086,10 +8835,10 @@ cm.define('Com.ColumnsHelper', {
     'params' : {
         'node' : cm.node('div'),
         'name' : '',
-        'isEditing' : true,
         'items' : [],
         'showDrag' : true,
         'minColumnWidth' : 48,              // in px
+        'isEditing' : true,
         'customEvents' : true,
         'ajax' : {
             'type' : 'json',
@@ -8105,7 +8854,7 @@ function(params){
     that.items = [];
     that.chassis = [];
     that.current = null;
-    that.isEditing = false;
+    that.isEditing = null;
     that.isRendered = false;
     that.isAjax = false;
     that.isProcess = false;
@@ -8225,22 +8974,19 @@ function(params){
     /* *** DRAG FUNCTIONS *** */
 
     var start = function(e, chassis){
-        // If current exists, we don't need to start another drag event until previous will not stop
+        cm.preventDefault(e);
+        if(!cm.isTouch && e.button){
+            return;
+        }
         if(that.current){
-            return false;
+            return;
         }
         // Abort ajax handler
         if(that.isProcess){
             that.abort();
         }
-        e = cm.getEvent(e);
-        cm.preventDefault(e);
         // Hide IFRAMES and EMBED tags
         cm.hideSpecialTags();
-        // If not left mouse button, don't duplicate drag event
-        if((cm.is('IE') && cm.isVersion() < 9 && e.button != 1) || (!cm.is('IE') && e.button)){
-            return false;
-        }
         // Current
         var index = that.chassis.indexOf(chassis),
             leftColumn = that.items[index],
@@ -8283,7 +9029,7 @@ function(params){
 
             that.current['left']['column']['container'].style.width = that.current['left']['column']['width'];
             that.current['right']['column']['container'].style.width = that.current['right']['column']['width'];
-            that.current['chassis']['container'].style.left = [((x - that.current['offset']) / that.current['ratio']).toFixed(2), '%'].join('');
+            that.current['chassis']['container'].style.left = [((position['left'] - that.current['offset']) / that.current['ratio']).toFixed(2), '%'].join('');
         }
         // API onResize event
         that.triggerEvent('onChange', that.items);
@@ -8354,7 +9100,7 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             renderChassis();
             that.triggerEvent('enableEditing');
@@ -8364,7 +9110,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
             removeChassis();
             that.triggerEvent('disableEditing');
@@ -8394,16 +9140,20 @@ cm.define('Com.DateSelect', {
         'Params',
         'DataConfig',
         'Langs',
-        'Events'
+        'Events',
+        'Structure',
+        'Stack'
     ],
     'events' : [
         'onSelect',
         'onChange'
     ],
     'params' : {
-        'container' : false,
         'input' : null,                                 // Deprecated, use 'node' parameter instead.
         'node' : cm.Node('input', {'type' : 'text'}),
+        'name' : '',
+        'embedStructure' : 'replace',
+        'container' : null,
         'format' : 'cm._config.dateFormat',
         'startYear' : 1950,
         'endYear' : new Date().getFullYear() + 10,
@@ -8434,7 +9184,9 @@ function(params){
         preValidateParams();
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
+        validateParams();
         render();
+        that.addToStack(nodes['container']);
         // Set selected date
         set(that.params['node'].value);
     };
@@ -8445,9 +9197,15 @@ function(params){
         }
     };
 
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+        }
+    };
+
     var render = function(){
-        /* *** RENDER STRUCTURE *** */
-        nodes['container'] = cm.Node('div', {'class' : 'com-dateselect'},
+        // Structure
+        nodes['container'] = cm.Node('div', {'class' : 'com__dateselect'},
             nodes['hidden'] = cm.Node('input', {'type' : 'hidden'}),
             cm.Node('div', {'class' : 'pt__toolbar bottom'},
                 cm.Node('div', {'class' : 'inner clear'},
@@ -8460,18 +9218,12 @@ function(params){
             )
         );
         renderSelects();
-        /* *** ATTRIBUTES *** */
-        // Set hidden input attributes
-        if(that.params['node'].getAttribute('name')){
-            nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
+        // Attributes
+        if(that.params['name']){
+            nodes['hidden'].setAttribute('name', that.params['name']);
         }
-        /* *** INSERT INTO DOM *** */
-        if(that.params['container']){
-            that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['node'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['node']);
-        }
-        cm.remove(that.params['node']);
+        // Append
+        that.embedStructure(nodes['container']);
     };
 
     var renderSelects = function(){
@@ -8619,7 +9371,7 @@ function(params){
         return str;
     };
 
-    /* ******* MAIN ******* */
+    /* ******* PUBLIC ******* */
 
     that.get = function(format){
         format = format || that.params['format'];
@@ -8648,6 +9400,7 @@ cm.define('Com.Datepicker', {
         'Params',
         'Events',
         'DataConfig',
+        'Structure',
         'Langs',
         'Stack'
     ],
@@ -8660,10 +9413,11 @@ cm.define('Com.Datepicker', {
         'onBlur'
     ],
     'params' : {
-        'container' : false,
         'input' : null,                      // Deprecated, use 'node' parameter instead.
         'node' : cm.Node('input', {'type' : 'text'}),
+        'container' : null,
         'name' : '',
+        'embedStructure' : 'replace',
         'renderInBody' : true,
         'format' : 'cm._config.dateFormat',
         'displayFormat' : 'cm._config.displayDateFormat',
@@ -8816,12 +9570,7 @@ function(params){
             cm.insertAfter(nodes['timeHolder'], nodes['calendarContainer']);
         }
         /* *** INSERT INTO DOM *** */
-        if(that.params['container']){
-            that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['node'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['node']);
-        }
-        cm.remove(that.params['node']);
+        that.embedStructure(nodes['container']);
     };
 
     var setLogic = function(){
@@ -9102,6 +9851,7 @@ cm.define('Com.Dialog', {
         'autoOpen' : true,
         'appendOnRender' : false,
         'removeOnClose' : true,
+        'destructOnRemove' : false,
         'scroll' : true,
         'documentScroll' : false,
         'icons' : {
@@ -9122,6 +9872,9 @@ function(params){
 
     that.isOpen = false;
     that.isFocus = false;
+    that.isRemoved = false;
+    that.isDestructed = false;
+    that.resizeInterval = null;
 
     var init = function(){
         that.setParams(params);
@@ -9267,104 +10020,113 @@ function(params){
         }
     };
 
-    var resize = function(){
-        if(that.isOpen){
-            var winHeight = nodes['container'].offsetHeight - (that.params['indentY'] * 2),
-                winWidth = nodes['container'].offsetWidth - (that.params['indentX'] * 2),
-                windowHeight = nodes['window'].offsetHeight,
-                windowWidth = nodes['window'].offsetWidth,
-                insetHeight = nodes['inner'].offsetHeight,
-
-                AWidth,
-                AHeight,
-                NAHeight,
-
-                maxHeight,
-                minHeight,
-                setHeight,
-                setWidth;
-            // Calculate available width / height
-            AHeight = winHeight
-                - (nodes['title'] && nodes['title'].offsetHeight || 0)
-                - (nodes['buttons'] && nodes['buttons'].offsetHeight || 0)
-                - cm.getIndentY(nodes['windowInner'])
-                - cm.getIndentY(nodes['descr']);
-            NAHeight = winHeight - AHeight;
-            AWidth = winWidth;
-            // Calculate min / max height
-            if(that.params['maxHeight'] == 'auto'){
-                maxHeight = AHeight;
-            }else if(/%/.test(that.params['maxHeight'])){
-                maxHeight = ((winHeight / 100) * parseFloat(that.params['maxHeight'])) - NAHeight;
-            }else{
-                if(/px/.test(that.params['maxHeight'])){
-                    that.params['maxHeight'] = parseFloat(that.params['maxHeight']);
-                }
-                maxHeight = that.params['maxHeight'] - NAHeight;
-            }
-            if(that.params['minHeight'] == 'auto'){
-                minHeight = 0;
-            }else if(/%/.test(that.params['minHeight'])){
-                minHeight = ((winHeight / 100) * parseFloat(that.params['minHeight'])) - NAHeight;
-            }else{
-                if(/px/.test(that.params['minHeight'])){
-                    that.params['minHeight'] = parseFloat(that.params['minHeight']);
-                }
-                minHeight = that.params['minHeight'] - NAHeight;
-            }
-            // Calculate height
-            if(that.params['height'] == 'auto'){
-                if(insetHeight < minHeight){
-                    setHeight = minHeight;
-                }else if(insetHeight > maxHeight){
-                    setHeight = maxHeight;
-                }else{
-                    setHeight = insetHeight;
-                }
-            }else if(/%/.test(that.params['height'])){
-                setHeight = ((winHeight / 100) * parseFloat(that.params['height'])) - NAHeight;
-            }else{
-                if(/px/.test(that.params['height'])){
-                    that.params['height'] = parseFloat(that.params['height']);
-                }
-                setHeight = that.params['height'] - NAHeight;
-            }
-            setHeight = Math.min(Math.max(setHeight, 0), AHeight);
-            // Calculate width
-            if(/%/.test(that.params['width'])){
-                setWidth = ((winWidth / 100) * parseFloat(that.params['width']));
-            }else{
-                if(/px/.test(that.params['width'])){
-                    that.params['width'] = parseFloat(that.params['width']);
-                }
-                setWidth = that.params['width'];
-            }
-            setWidth = Math.min(setWidth, AWidth);
-            // Set window height
-            if(windowHeight != setHeight + NAHeight || contentHeight != insetHeight){
-                contentHeight = insetHeight;
-                if(insetHeight <= setHeight){
-                    cm.removeClass(nodes['scroll'], 'is-scroll');
-                }else if(that.params['scroll']){
-                    cm.addClass(nodes['scroll'], 'is-scroll');
-                }
-                nodes['scroll'].style.height = [setHeight, 'px'].join('');
-            }
-            // Set window width
-            if(windowWidth != setWidth){
-                nodes['window'].style.width = [setWidth, 'px'].join('')
-            }
-        }
-        animFrame(resize);
+    var resizeHelper = function(){
+        resize();
+        clearResizeInterval();
+        that.resizeInterval = setTimeout(resizeHelper, that.params['resizeInterval']);
     };
 
-    var open = function(){
+    var resize = function(){
+        var winHeight = nodes['container'].offsetHeight - (that.params['indentY'] * 2),
+            winWidth = nodes['container'].offsetWidth - (that.params['indentX'] * 2),
+            windowHeight = nodes['window'].offsetHeight,
+            windowWidth = nodes['window'].offsetWidth,
+            insetHeight = nodes['inner'].offsetHeight,
+
+            AWidth,
+            AHeight,
+            NAHeight,
+
+            maxHeight,
+            minHeight,
+            setHeight,
+            setWidth;
+        // Calculate available width / height
+        AHeight = winHeight
+            - (nodes['title'] && nodes['title'].offsetHeight || 0)
+            - (nodes['buttons'] && nodes['buttons'].offsetHeight || 0)
+            - cm.getIndentY(nodes['windowInner'])
+            - cm.getIndentY(nodes['descr']);
+        NAHeight = winHeight - AHeight;
+        AWidth = winWidth;
+        // Calculate min / max height
+        if(that.params['maxHeight'] == 'auto'){
+            maxHeight = AHeight;
+        }else if(/%/.test(that.params['maxHeight'])){
+            maxHeight = ((winHeight / 100) * parseFloat(that.params['maxHeight'])) - NAHeight;
+        }else{
+            if(/px/.test(that.params['maxHeight'])){
+                that.params['maxHeight'] = parseFloat(that.params['maxHeight']);
+            }
+            maxHeight = that.params['maxHeight'] - NAHeight;
+        }
+        if(that.params['minHeight'] == 'auto'){
+            minHeight = 0;
+        }else if(/%/.test(that.params['minHeight'])){
+            minHeight = ((winHeight / 100) * parseFloat(that.params['minHeight'])) - NAHeight;
+        }else{
+            if(/px/.test(that.params['minHeight'])){
+                that.params['minHeight'] = parseFloat(that.params['minHeight']);
+            }
+            minHeight = that.params['minHeight'] - NAHeight;
+        }
+        // Calculate height
+        if(that.params['height'] == 'auto'){
+            if(insetHeight < minHeight){
+                setHeight = minHeight;
+            }else if(insetHeight > maxHeight){
+                setHeight = maxHeight;
+            }else{
+                setHeight = insetHeight;
+            }
+        }else if(/%/.test(that.params['height'])){
+            setHeight = ((winHeight / 100) * parseFloat(that.params['height'])) - NAHeight;
+        }else{
+            if(/px/.test(that.params['height'])){
+                that.params['height'] = parseFloat(that.params['height']);
+            }
+            setHeight = that.params['height'] - NAHeight;
+        }
+        setHeight = Math.min(Math.max(setHeight, 0), AHeight);
+        // Calculate width
+        if(/%/.test(that.params['width'])){
+            setWidth = ((winWidth / 100) * parseFloat(that.params['width']));
+        }else{
+            if(/px/.test(that.params['width'])){
+                that.params['width'] = parseFloat(that.params['width']);
+            }
+            setWidth = that.params['width'];
+        }
+        setWidth = Math.min(setWidth, AWidth);
+        // Set window height
+        if(windowHeight != setHeight + NAHeight || contentHeight != insetHeight){
+            contentHeight = insetHeight;
+            if(insetHeight <= setHeight){
+                cm.removeClass(nodes['scroll'], 'is-scroll');
+            }else if(that.params['scroll']){
+                cm.addClass(nodes['scroll'], 'is-scroll');
+            }
+            nodes['scroll'].style.height = [setHeight, 'px'].join('');
+        }
+        // Set window width
+        if(windowWidth != setWidth){
+            nodes['window'].style.width = [setWidth, 'px'].join('')
+        }
+    };
+
+    var open = function(params){
+        params = {
+            'onEnd' : function(){}
+        };
         if(!that.isOpen){
             that.isOpen = true;
+            that.isFocus = true;
+            that.isRemoved = false;
             if(!cm.inDOM(nodes['container'])){
                 that.params['container'].appendChild(nodes['container']);
             }
             nodes['container'].style.display = 'block';
+            resizeHelper();
             // Show / Hide Document Scroll
             if(!that.params['documentScroll']){
                 cm.addClass(cm.getDocumentHtml(), 'cm__scroll--none');
@@ -9373,6 +10135,7 @@ function(params){
             cm.addEvent(window, 'keydown', windowClickEvent);
             // Animate
             anim['container'].go({'style' : {'opacity' : '1'}, 'duration' : that.params['openTime'], 'onStop' : function(){
+                params['onEnd']();
                 // Open Event
                 that.triggerEvent('onOpen');
             }});
@@ -9381,9 +10144,13 @@ function(params){
         }
     };
 
-    var close = function(){
+    var close = function(params){
+        params = {
+            'onEnd' : function(){}
+        };
         if(that.isOpen){
             that.isOpen = false;
+            that.isFocus = false;
             // Remove close event on Esc press
             cm.removeEvent(window, 'keydown', windowClickEvent);
             // Show / Hide Document Scroll
@@ -9392,12 +10159,16 @@ function(params){
             }
             // Animate
             anim['container'].go({
-                'style' : {'opacity' : '0'}, 'duration' : that.params['openTime'], 'onStop' : function(){
+                'style' : {'opacity' : '0'},
+                'duration' : that.params['openTime'],
+                'onStop' : function(){
+                    clearResizeInterval();
                     nodes['container'].style.display = 'none';
-                    // Close Event
-                    that.triggerEvent('onClose');
                     // Remove Window
                     that.params['removeOnClose'] && remove();
+                    params['onEnd']();
+                    // Close Event
+                    that.triggerEvent('onClose');
                 }
             });
             // Close Event
@@ -9406,17 +10177,33 @@ function(params){
     };
 
     var remove = function(){
-        that.isOpen = false;
-        // Remove dialog container node
-        cm.remove(nodes['container']);
+        if(!that.isRemoved){
+            that.isRemoved = true;
+            if(that.params['destructOnRemove'] && !that.isDestructed){
+                that.isDestructed = true;
+                cm.customEvent.trigger(nodes['container'], 'destruct', {
+                    'type' : 'child',
+                    'self' : false
+                });
+                that.removeFromStack();
+                that.triggerEvent('onClose');
+            }
+            // Remove dialog container node
+            cm.remove(nodes['container']);
+        }
     };
 
     var windowClickEvent = function(e){
         e = cm.getEvent(e);
+        // ESC key
         if(e.keyCode == 27){
-            // ESC key
             that.isFocus && close();
         }
+    };
+
+    var clearResizeInterval = function(){
+        that.resizeInterval && clearTimeout(that.resizeInterval);
+        that.resizeInterval = null;
     };
 
     /* ******* MAIN ******* */
@@ -9474,8 +10261,22 @@ function(params){
     };
 
     that.remove = function(){
-        remove();
+        if(that.isOpen){
+            close({
+                'onEnd' : function(){
+                    if(!that.params['removeOnClose']){
+                        remove();
+                    }
+                }
+            });
+        }else{
+            remove();
+        }
         return that;
+    };
+
+    that.isOwnNode = function(node){
+        return cm.isParent(nodes['window'], node, true);
     };
 
     that.getNodes = function(key){
@@ -11413,7 +12214,9 @@ cm.define('Com.Gridlist', {
         'Params',
         'Events',
         'Langs',
-        'DataConfig'
+        'Structure',
+        'DataConfig',
+        'Stack'
     ],
     'events' : [
         'onSort',
@@ -11425,20 +12228,30 @@ cm.define('Com.Gridlist', {
         'onRenderEnd'
     ],
     'params' : {
-        'node' : cm.Node('div'),
-        'container' : false,
+        'node' : cm.node('div'),
+        'container' : null,
+        'embedStructure' : 'append',
+        'name' : '',
         'data' : [],
         'cols' : [],
         'sort' : true,
-        'sortBy' : 'id',                                    // default sort by key in array
+        'sortBy' : 'id',                                            // Default sort by key in array
         'orderBy' : 'ASC',
-        'childsBy' : false,
+        'childsBy' : false,                                         // Render child rows after parent, WIP - doesn't work checking / uncheking rows and statuses
         'pagination' : true,
         'perPage' : 25,
         'showCounter' : false,
         'className' : '',
-        'dateFormat' : 'cm._config.dateTimeFormat',        // input date format
-        'visibleDateFormat' : 'cm._config.dateTimeFormat', // render date format
+        'dateFormat' : 'cm._config.dateTimeFormat',                 // Input date format
+        'visibleDateFormat' : 'cm._config.dateTimeFormat',          // Render date format
+        'responseCountKey' : 'count',                               // Ajax data count response key
+        'responseKey' : 'data',                                     // Ajax data response key
+        'ajax' : {                                                  // Ajax, WIP - doesn't work checking / uncheking rows and statuses
+            'type' : 'json',
+            'method' : 'get',
+            'url' : '',                                             // Request URL. Variables: %orderBy%, %sortBy%, %page%, %offset%, %perPage%, %limit%, %callback% for JSONP.
+            'params' : ''                                           // Params object. Variables: %orderBy%, %sortBy%, %page%, %offset%, %perPage%, %limit%, %callback% for JSONP.
+        },
         'langs' : {
             'counter' : 'Count: ',
             'check_all' : 'Check all',
@@ -11460,14 +12273,15 @@ cm.define('Com.Gridlist', {
     }
 },
 function(params){
-    var that = this,
-        rows = [],
-        sortBy,
-        orderBy;
+    var that = this;
 
     that.nodes = {};
     that.components = {};
+    that.isAjax = false;
     that.isCheckedAll = false;
+    that.sortBy = null;
+    that.orderBy = 'ASC';
+    that.rows = [];
 
     var init = function(){
         that.setParams(params);
@@ -11475,14 +12289,23 @@ function(params){
         that.getDataConfig(that.params['node']);
         validateParams();
         render();
+        that.addToStack(that.nodes['container']);
     };
 
     var validateParams = function(){
-        if(!that.params['container']){
-            that.params['container'] = that.params['node'];
+        that.sortBy = that.params['sortBy'];
+        that.orderBy = that.params['orderBy'];
+        // Ajax
+        if(!cm.isEmpty(that.params['ajax']['url'])){
+            that.isAjax = true;
+            that.params['pagination'] = true;
+            that.params['Com.Pagination']['ajax'] = that.params['ajax'];
+            that.params['Com.Pagination']['responseCountKey'] = that.params['responseCountKey'];
+            that.params['Com.Pagination']['responseKey'] = that.params['responseKey'];
+        }else{
+            that.params['Com.Pagination']['count'] = that.params['data'].length;
         }
         // Pagination
-        that.params['Com.Pagination']['count'] = that.params['data'].length;
         that.params['Com.Pagination']['perPage'] = that.params['perPage'];
     };
 
@@ -11490,47 +12313,95 @@ function(params){
 
     var render = function(){
         // Container
-        that.params['container'].appendChild(
-            that.nodes['container'] = cm.Node('div', {'class' : 'com__gridlist'})
-        );
+        that.nodes['container'] = cm.node('div', {'class' : 'com__gridlist'});
         // Add css class
-        !cm.isEmpty(that.params['className']) && cm.addClass(that.nodes['container'], that.params['className']);
-        // Counter
-        if(that.params['showCounter']){
-            that.nodes['container'].appendChild(
-                cm.Node('div', {'class' : 'pt__gridlist__counter'}, that.lang('counter') + that.params['data'].length)
-            );
-        }
-        // Sort data array for first time
-        that.params['sort'] && arraySort(that.params['sortBy']);
-        // Render table
-        if(that.params['data'].length){
+        cm.addClass(that.nodes['container'], that.params['className']);
+        // Append
+        that.embedStructure(that.nodes['container']);
+        // Render table page
+        if(that.isAjax){
+            // Render dynamic pagination
+            renderPagination();
+        }else if(that.params['data'].length){
+            // Counter
+            if(that.params['showCounter']){
+                renderCounter(that.params['data'].length);
+            }
+            // Sort data array for first time
+            that.params['sort'] && arraySort();
             if(that.params['pagination']){
-                that.components['pagination'] = new Com.Pagination(
-                    cm.merge(that.params['Com.Pagination'], {
-                        'container' : that.nodes['container'],
-                        'events' : {
-                            'onPageRender' : function(pagination, data){
-                                renderTable(data['page'], data['container']);
-                            }
-                        }
-                    })
-                );
+                // Render static pagination
+                renderPagination();
             }else{
-                renderTable(1, that.nodes['container']);
+                // Render all data items
+                renderTable(1, that.params['data'], that.nodes['container']);
             }
         }else{
-            that.nodes['container'].appendChild(
-                cm.Node('div', {'class' : 'cm__empty'}, that.lang('empty'))
-            );
+            renderEmptiness(that.nodes['container']);
         }
     };
 
-    var renderTable = function(page, container){
-        var start, end;
+    var renderPagination = function(){
+        var startIndex, endIndex, dataArray;
+        cm.getConstructor('Com.Pagination', function(classConstructor){
+            that.components['pagination'] = new classConstructor(
+                cm.merge(that.params['Com.Pagination'], {
+                    'container' : that.nodes['container'],
+                    'callbacks' : {
+                        'afterPrepare' : function(pagination, config){
+                            config['url'] = cm.strReplace(config['url'], {
+                                '%sortBy%' : that.sortBy,
+                                '%orderBy%' : that.orderBy
+                            });
+                            config['params'] = cm.objectReplace(config['params'], {
+                                '%sortBy%' : that.sortBy,
+                                '%orderBy%' : that.orderBy
+                            });
+                            return config;
+                        }
+                    },
+                    'events' : {
+                        'onPageRender' : function(pagination, data){
+                            if(that.isAjax){
+                                if(data['data'].length){
+                                    renderTable(data['page'], data['data'], data['container']);
+                                }else{
+                                    renderEmptiness(data['container']);
+                                }
+                            }else{
+                                startIndex = that.params['perPage'] * (data['page'] - 1);
+                                endIndex = Math.min(that.params['perPage'] * data['page'], that.params['data'].length);
+                                dataArray = that.params['data'].slice(startIndex, endIndex);
+                                renderTable(data['page'], dataArray, data['container']);
+                            }
+                        },
+                        'onSetCount' : function(pagination, count){
+                            that.params['showCounter'] && renderCounter(count);
+                        }
+                    }
+                })
+            );
+        });
+    };
+
+    var renderCounter = function(count){
+        if(that.nodes['counter']){
+            that.nodes['counter'].innerHTML = that.lang('counter') + count;
+        }else{
+            that.nodes['counter'] = cm.node('div', {'class' : 'pt__gridlist__counter'}, that.lang('counter') + count);
+            cm.insertFirst(that.nodes['counter'], that.nodes['container']);
+        }
+    };
+
+    var renderEmptiness = function(container){
+        that.nodes['empty'] = cm.node('div', {'class' : 'cm__empty'}, that.lang('empty'));
+        cm.appendChild(that.nodes['empty'], container);
+    };
+
+    var renderTable = function(page, data, container){
         /*
-        If pagination not exists we need to clean up table before render new one, cause on ech sort will be rendered new table.
-        When pagination exists, ech rendered table will be have his own container, and no needs to clean up previous table.
+            If pagination not exists we need to clean up table before render new one, cause on each sort will be rendered new table.
+            When pagination exists, each rendered table will be have his own container, and no needs to clean up previous table.
         */
         if(!that.params['pagination']){
             cm.remove(that.nodes['table']);
@@ -11541,34 +12412,27 @@ function(params){
             'page' : page
         });
         // Render Table
-        that.nodes['table'] = cm.Node('div', {'class' : 'pt__gridlist'},
-            cm.Node('table',
-                cm.Node('thead',
-                    that.nodes['title'] = cm.Node('tr')
+        that.nodes['table'] = cm.node('div', {'class' : 'pt__gridlist'},
+            cm.node('table',
+                cm.node('thead',
+                    that.nodes['title'] = cm.node('tr')
                 ),
-                that.nodes['content'] = cm.Node('tbody')
+                that.nodes['content'] = cm.node('tbody')
             )
         );
         // Render Table Title
         cm.forEach(that.params['cols'], renderTh);
         // Render Table Row
-        if(that.params['pagination']){
-            end = that.params['perPage'] * page;
-            start = end - that.params['perPage'];
-        }else{
-            end = that.params['data'].length;
-            start = 0;
-        }
-        for(var i = start, l = Math.min(end, that.params['data'].length); i < l; i++){
-            renderRow(rows, that.params['data'][i], i);
-        }
+        cm.forEach(data, function(item, i){
+            renderRow(that.rows, item, (i + (page -1)));
+        });
         // Append
-        container.appendChild(that.nodes['table']);
+        cm.appendChild(that.nodes['table'], container);
         // API onRenderEnd event
         that.triggerEvent('onRenderEnd', {
             'container' : container,
             'page' : page,
-            'rows' : rows
+            'rows' : that.rows
         });
     };
 
@@ -11577,7 +12441,7 @@ function(params){
         item = that.params['cols'][i] = cm.merge({
             'width' : 'auto',               // number | % | auto
             'access' : true,                // Render column if is accessible
-            'type' : 'text',		        // text | number | url | date | html | icon | checkbox | empty | actions
+            'type' : 'text',		        // text | number | url | date | html | icon | checkbox | empty | actions | links
             'key' : '',                     // Data array key
             'title' : '',                   // Table th title
             'sort' : that.params['sort'],   // Sort this column or not
@@ -11588,6 +12452,7 @@ function(params){
             'titleText' : '',               // Alternative title text, if not specified - will be shown key text
             'altText' : '',                 // Alternative column text
             'urlKey' : false,               // Alternative link href, for type="url"
+            'links' : [],                   // Render links menu, for type="links"
             'actions' : [],                 // Render actions menu, for type="actions"
             'onClick' : false,              // Cell click handler
             'onRender' : false              // Cell onRender handler
@@ -11597,8 +12462,8 @@ function(params){
         if(item['access']){
             // Structure
             that.nodes['title'].appendChild(
-                item['nodes']['container'] = cm.Node('th', {'width' : item['width']},
-                    item['nodes']['inner'] = cm.Node('div', {'class' : 'inner'})
+                item['nodes']['container'] = cm.node('th', {'width' : item['width']},
+                    item['nodes']['inner'] = cm.node('div', {'class' : 'inner'})
                 )
             );
             // Insert specific specified content in th
@@ -11606,7 +12471,7 @@ function(params){
                 case 'checkbox' :
                     cm.addClass(item['nodes']['container'], 'control');
                     item['nodes']['inner'].appendChild(
-                        item['nodes']['checkbox'] = cm.Node('input', {'type' : 'checkbox', 'title' : that.lang('check_all')})
+                        item['nodes']['checkbox'] = cm.node('input', {'type' : 'checkbox', 'title' : that.lang('check_all')})
                     );
                     item['nodes']['checkbox'].checked = that.isCheckedAll;
                     cm.addEvent(item['nodes']['checkbox'], 'click', function(){
@@ -11621,45 +12486,47 @@ function(params){
 
                 default:
                     item['nodes']['inner'].appendChild(
-                        cm.Node('span', item['title'])
+                        cm.node('span', item['title'])
                     );
                     break;
             }
             // Render sort arrow and set function on click to th
-            if(!/icon|empty|actions|checkbox/.test(item['type']) && item['sort']){
+            if(item['sort'] && !/icon|empty|actions|links|checkbox/.test(item['type'])){
                 cm.addClass(item['nodes']['container'], 'sort');
-                if(item['key'] == sortBy){
+                if(item['key'] == that.sortBy){
                     item['nodes']['inner'].appendChild(
-                        cm.Node('div', {'class' : that.params['icons']['arrow'][orderBy.toLowerCase()]})
+                        cm.node('div', {'class' : that.params['icons']['arrow'][that.orderBy.toLowerCase()]})
                     );
                 }
                 cm.addEvent(item['nodes']['inner'], 'click', function(){
-                    arraySort(item['key']);
+                    that.sortBy = item['key'];
+                    that.orderBy = that.orderBy == 'ASC' ? 'DESC' : 'ASC';
+                    !that.isAjax && arraySort();
                     if(that.params['pagination']){
                         that.components['pagination'].rebuild();
                     }else{
-                        renderTable(1, that.nodes['container']);
+                        renderTable(1, that.params['data'], that.nodes['container']);
                     }
                 });
             }
         }
     };
 
-    var renderRow = function(parent, row, i){
+    var renderRow = function(parentRow, data, i){
         // Config
         var item = {
             'index' : i,
-            'data' : row,
+            'data' : data,
             'childs' : [],
-            'isChecked' : row['_checked'] || false,
-            'status' : row['_status'] || false,
+            'isChecked' : data['_checked'] || false,
+            'status' : data['_status'] || false,
             'nodes' : {
                 'cols' : []
             }
         };
         // Structure
         that.nodes['content'].appendChild(
-            item['nodes']['container'] = cm.Node('tr')
+            item['nodes']['container'] = cm.node('tr')
         );
         // Render cells
         cm.forEach(that.params['cols'], function(col){
@@ -11667,12 +12534,12 @@ function(params){
         });
         // Render childs
         if(that.params['childsBy']){
-            cm.forEach(row[that.params['childsBy']], function(child, childI){
+            cm.forEach(data[that.params['childsBy']], function(child, childI){
                 renderRow(item['childs'], child, childI);
             });
         }
         // Push to rows array
-        rows.push(item);
+        parentRow.push(item);
     };
 
     var renderCell = function(col, item){
@@ -11686,11 +12553,11 @@ function(params){
             title = cm.isEmpty(col['titleText'])? text : col['titleText'];
             // Structure
             item['nodes']['container'].appendChild(
-                nodes['container'] = cm.Node('td')
+                nodes['container'] = cm.node('td')
             );
             // Text overflow
             if(col['textOverflow']){
-                nodes['inner'] = cm.Node('div', {'class' : 'inner'});
+                nodes['inner'] = cm.node('div', {'class' : 'inner'});
                 nodes['container'].appendChild(nodes['inner']);
             }else{
                 nodes['inner'] = nodes['container'];
@@ -11714,7 +12581,7 @@ function(params){
 
                 case 'icon' :
                     nodes['inner'].appendChild(
-                        nodes['node'] = cm.Node('div', {'class' : col['class']})
+                        nodes['node'] = cm.node('div', {'class' : col['class']})
                     );
                     cm.addClass(nodes['node'], 'icon linked inline');
                     break;
@@ -11723,14 +12590,14 @@ function(params){
                     text = cm.decode(text);
                     href = col['urlKey'] && item['data'][col['urlKey']]? cm.decode(item['data'][col['urlKey']]) : text;
                     nodes['inner'].appendChild(
-                        nodes['node'] = cm.Node('a', {'target' : col['target'], 'href' : href}, !cm.isEmpty(col['altText'])? col['altText'] : text)
+                        nodes['node'] = cm.node('a', {'target' : col['target'], 'href' : href}, !cm.isEmpty(col['altText'])? col['altText'] : text)
                     );
                     break;
 
                 case 'checkbox' :
                     cm.addClass(nodes['container'], 'control');
                     nodes['inner'].appendChild(
-                        nodes['node'] = cm.Node('input', {'type' : 'checkbox'})
+                        nodes['node'] = cm.node('input', {'type' : 'checkbox'})
                     );
                     item['nodes']['checkbox'] = nodes['node'];
                     if(item['isChecked']){
@@ -11745,11 +12612,40 @@ function(params){
                     });
                     break;
 
+                case 'links':
+                    nodes['links'] = [];
+                    nodes['inner'].appendChild(
+                        nodes['node'] = cm.node('div', {'class' : ['pt__links', col['class']].join(' ')},
+                            nodes['linksList'] = cm.node('ul')
+                        )
+                    );
+                    cm.forEach(col['links'], function(actionItem){
+                        var actionNode;
+                        actionItem = cm.merge({
+                            'label' : '',
+                            'attr' : {},
+                            'events' : {}
+                        }, actionItem);
+                        cm.forEach(item['data'], function(itemValue, itemKey){
+                            actionItem['attr'] = cm.replaceDeep(actionItem['attr'], new RegExp([cm.strWrap(itemKey, '%'), cm.strWrap(itemKey, '%25')].join('|'), 'g'), itemValue);
+                        });
+                        nodes['linksList'].appendChild(
+                            cm.node('li',
+                                actionNode = cm.node('a', actionItem['attr'], actionItem['label'])
+                            )
+                        );
+                        cm.forEach(actionItem['events'], function(actionEventHandler, actionEventName){
+                            cm.addEvent(actionNode, actionEventName, actionEventHandler);
+                        });
+                        nodes['links'].push(actionNode);
+                    });
+                    break;
+
                 case 'actions':
                     nodes['actions'] = [];
                     nodes['inner'].appendChild(
-                        nodes['node'] = cm.Node('div', {'class' : ['pt__links', col['class']].join(' ')},
-                            nodes['actionsList'] = cm.Node('ul')
+                        nodes['node'] = cm.node('div', {'class' : ['pt__links', col['class']].join(' ')},
+                            nodes['actionsList'] = cm.node('ul')
                         )
                     );
                     cm.forEach(col['actions'], function(actionItem){
@@ -11763,8 +12659,8 @@ function(params){
                             actionItem['attr'] = cm.replaceDeep(actionItem['attr'], new RegExp([cm.strWrap(itemKey, '%'), cm.strWrap(itemKey, '%25')].join('|'), 'g'), itemValue);
                         });
                         nodes['actionsList'].appendChild(
-                            cm.Node('li',
-                                actionNode = cm.Node('a', actionItem['attr'], actionItem['label'])
+                            cm.node('li',
+                                actionNode = cm.node('a', actionItem['attr'], actionItem['label'])
                             )
                         );
                         cm.forEach(actionItem['events'], function(actionEventHandler, actionEventName){
@@ -11817,54 +12713,49 @@ function(params){
 
     /* *** HELPING FUNCTIONS *** */
 
-    var arraySort = function(key){
-        sortBy = key;
-        orderBy = !orderBy? that.params['orderBy'] : (orderBy == 'ASC' ? 'DESC' : 'ASC');
+    var arraySort = function(){
         // Get item
         var item, textA, textB, t1, t2, value;
         cm.forEach(that.params['cols'], function(col){
-            if(col['key'] == key){
+            if(col['key'] == that.sortBy){
                 item = col;
             }
         });
         // Sort
-        if(that.params['data'].sort){
-            that.params['data'].sort(function(a, b){
-                textA = a[key];
-                textB = b[key];
-                switch(item['type']){
-                    case 'html':
-                        t1 = cm.getTextNodesStr(cm.strToHTML(textA));
-                        t2 = cm.getTextNodesStr(cm.strToHTML(textB));
-                        value = (t1 < t2)? -1 : ((t1 > t2)? 1 : 0);
-                        return (orderBy == 'ASC')? value : (-1 * value);
-                        break;
+        that.params['data'].sort(function(a, b){
+            textA = a[that.sortBy];
+            textB = b[that.sortBy];
+            switch(item['type']){
+                case 'html':
+                    t1 = cm.getTextNodesStr(cm.strToHTML(textA));
+                    t2 = cm.getTextNodesStr(cm.strToHTML(textB));
+                    value = (t1 < t2)? -1 : ((t1 > t2)? 1 : 0);
+                    return (that.orderBy == 'ASC')? value : (-1 * value);
+                    break;
 
-                    case 'date':
-                        t1 = cm.parseDate(textA, that.params['dateFormat']);
-                        t2 = cm.parseDate(textB, that.params['dateFormat']);
-                        return (orderBy == 'ASC')? (t1 - t2) : (t2 - t1);
-                        break;
+                case 'date':
+                    t1 = cm.parseDate(textA, that.params['dateFormat']);
+                    t2 = cm.parseDate(textB, that.params['dateFormat']);
+                    return (that.orderBy == 'ASC')? (t1 - t2) : (t2 - t1);
+                    break;
 
-                    case 'number':
-                        value = textA - textB;
-                        return (orderBy == 'ASC')? value : (-1 * value);
-                        break;
+                case 'number':
+                    value = textA - textB;
+                    return (that.orderBy == 'ASC')? value : (-1 * value);
+                    break;
 
-                    default :
-                        t1 = textA? textA.toLowerCase() : '';
-                        t2 = textB? textB.toLowerCase() : '';
-                        value = (t1 < t2)? -1 : ((t1 > t2)? 1 : 0);
-                        return (orderBy == 'ASC')? value : (-1 * value);
-                        break;
-                }
-            });
-        }
+                default :
+                    t1 = textA? textA.toLowerCase() : '';
+                    t2 = textB? textB.toLowerCase() : '';
+                    value = (t1 < t2)? -1 : ((t1 > t2)? 1 : 0);
+                    return (that.orderBy == 'ASC')? value : (-1 * value);
+                    break;
+            }
+        });
         // API onSort Event
         that.triggerEvent('onSort', {
-            'sortBy' : sortBy,
-            'orderBy' : orderBy,
-            'data' : that.params['data']
+            'sortBy' : that.sortBy,
+            'orderBy' : that.orderBy
         });
     };
 
@@ -11935,7 +12826,7 @@ function(params){
         if(that.params['data'][index]){
             that.params['data'][index]['_checked'] = false;
         }
-        cm.forEach(rows, function(row){
+        cm.forEach(that.rows, function(row){
             if(row['index'] == index){
                 unCheckRow(row, true);
             }
@@ -11949,7 +12840,7 @@ function(params){
         cm.forEach(that.params['data'], function(row){
             row['_checked'] = true;
         });
-        cm.forEach(rows, function(row){
+        cm.forEach(that.rows, function(row){
             checkRow(row);
         });
         // API onUnCheckAll Event
@@ -11963,7 +12854,7 @@ function(params){
         cm.forEach(that.params['data'], function(row){
             row['_checked'] = false;
         });
-        cm.forEach(rows, function(row){
+        cm.forEach(that.rows, function(row){
             unCheckRow(row);
         });
         // API onUnCheckAll Event
@@ -11973,7 +12864,7 @@ function(params){
 
     that.getChecked = function(){
         var checkedRows = [];
-        cm.forEach(rows, function(row){
+        cm.forEach(that.rows, function(row){
             row['isChecked'] && checkedRows.push(row);
         });
         return checkedRows;
@@ -11988,7 +12879,7 @@ function(params){
     };
 
     that.setRowStatus = function(index, status){
-        cm.forEach(rows, function(row){
+        cm.forEach(that.rows, function(row){
             if(row['index'] == index){
                 setRowStatus(row, status);
             }
@@ -11997,7 +12888,7 @@ function(params){
     };
 
     that.clearRowStatus = function(index){
-        cm.forEach(rows, function(row){
+        cm.forEach(that.rows, function(row){
             if(row['index'] == index){
                 clearRowStatus(row);
             }
@@ -12052,7 +12943,7 @@ function(params){
         'items' : []
     };
     that.components = {};
-    that.isEditing = false;
+    that.isEditing = null;
 
     var init = function(){
         that.setParams(params);
@@ -12115,7 +13006,7 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(!that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.params['node'], 'is-editing is-editable');
             that.components['columns'] && that.components['columns'].enableEditing();
@@ -12126,7 +13017,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(that.isEditing){
+        if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.params['node'], 'is-editing is-editable');
             that.components['columns'] && that.components['columns'].disableEditing();
@@ -12356,7 +13247,9 @@ cm.define('Com.ImageInput', {
     ],
     'params' : {
         'node' : cm.Node('div'),
+        'container' : null,
         'name' : '',
+        'embedStructure' : 'replace',
         'title' : '',
         'placeholder' : '',
         'value' : null,
@@ -12441,8 +13334,7 @@ function(params){
             that.nodes['hidden'].setAttribute('name', that.params['name']);
         }
         // Append
-        that.appendStructure(that.nodes['container']);
-        cm.remove(that.params['node']);
+        that.embedStructure(that.nodes['container']);
         // Events
         cm.getConstructor('Com.GalleryPopup', function(classConstructor){
             that.components['popup'] = new classConstructor(
@@ -12619,6 +13511,7 @@ cm.define('Com.MultiField', {
     'modules' : [
         'Params',
         'Events',
+        'Structure',
         'DataConfig',
         'DataNodes',
         'Stack',
@@ -12634,9 +13527,10 @@ cm.define('Com.MultiField', {
     ],
     'params' : {
         'node' : cm.Node('div'),
+        'container' : null,
         'name' : '',
         'renderStructure' : false,
-        'container' : false,
+        'embedStructure' : 'append',
         'renderItems' : 0,
         'maxItems' : 0,                         // 0 - infinity
         'template' : null,                      // Html node or string with items template
@@ -12706,10 +13600,8 @@ cm.define('Com.MultiField', {
                     )
                 )
             );
-            // Embed
-            if(that.params['container']){
-                that.params['container'].appendChild(that.nodes['container']);
-            }
+            // Append
+            that.embedStructure(that.nodes['container']);
         }
         // Add button events
         cm.addEvent(that.nodes['add'], 'click', function(e){
@@ -12735,6 +13627,7 @@ cm.define('Com.MultiField', {
     };
 
     var renderItem = function(){
+        var nodes;
         if(that.params['maxItems'] == 0 || that.items.length < that.params['maxItems']){
             var item = {
                 'isVisible' : false
@@ -12747,8 +13640,21 @@ cm.define('Com.MultiField', {
             // Template
             if(cm.isNode(that.params['template'])){
                 cm.appendChild(that.params['template'], item['field']);
-            }else if(!cm.isEmpty(that.params['template'])){
-                cm.appendChild(cm.strToHTML(that.params['template']), item['field']);
+            }else{
+                nodes = cm.strToHTML(that.params['template']);
+                if(!cm.isEmpty(nodes)){
+                    if(cm.isNode(nodes)){
+                        cm.appendChild(nodes, item['field']);
+                    }else{
+                        while(nodes.length){
+                            if(cm.isNode(nodes[0])){
+                                cm.appendChild(nodes[0], item['field']);
+                            }else{
+                                cm.remove(nodes[0]);
+                            }
+                        }
+                    }
+                }
             }
             // Sortable
             if(that.params['sortable']){
@@ -13260,6 +14166,7 @@ cm.define('Com.Pagination', {
         'Params',
         'Events',
         'Langs',
+        'Structure',
         'DataConfig',
         'DataNodes',
         'Callbacks',
@@ -13273,13 +14180,15 @@ cm.define('Com.Pagination', {
         'onPageRender',
         'onPageRenderEnd',
         'onPageSwitched',
-        'onEnd'
+        'onEnd',
+        'onSetCount'
     ],
     'params' : {
         'node' : cm.Node('div'),
+        'container' : null,
         'name' : '',
         'renderStructure' : false,                                  // Render wrapper nodes if not exists in html
-        'container' : false,
+        'embedStructure' : 'append',
         'scrollNode' : window,
         'data' : [],                                                // Static data
         'count' : 0,
@@ -13304,6 +14213,7 @@ cm.define('Com.Pagination', {
         'responseCountKey' : 'count',                               // Take items count from response
         'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
         'responseHTML' : false,                                     // If true, html will append automatically
+        'cache' : true,                                             // Cache response data
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
@@ -13322,7 +14232,6 @@ cm.define('Com.Pagination', {
     }
 },
 function(params){
-
     var that = this;
 
     that.nodes = {
@@ -13412,10 +14321,8 @@ function(params){
                     })
                 );
             }
-            // Embed
-            if(that.params['container']){
-                that.params['container'].appendChild(that.nodes['container']);
-            }
+            // Append
+            that.embedStructure(that.nodes['container']);
         }
         // Reset styles and variables
         reset();
@@ -13448,7 +14355,7 @@ function(params){
             that.callbacks.rebuildBars(that);
             // Request
             if(!that.currentPage || page != that.currentPage){
-                if(that.pages[that.page] && that.pages[that.page]['isRendered']){
+                if(that.params['cache'] && that.pages[that.page] && that.pages[that.page]['isRendered']){
                     that.callbacks.cached(that, that.pages[that.page]['data']);
                 }else if(that.isAjax){
                     config = cm.clone(that.params['ajax']);
@@ -13465,7 +14372,7 @@ function(params){
     /* *** AJAX *** */
 
     that.callbacks.prepare = function(that, config){
-        // Prepare
+        config = that.callbacks.beforePrepare(that, config);
         config['url'] = cm.strReplace(config['url'], {
             '%perPage%' : that.params['perPage'],
             '%limit%' : that.params['perPage'],
@@ -13482,6 +14389,15 @@ function(params){
             '%token%' : that.pageToken,
             '%baseurl%' : cm._baseUrl
         });
+        config = that.callbacks.afterPrepare(that, config);
+        return config;
+    };
+
+    that.callbacks.beforePrepare = function(that, config){
+        return config;
+    };
+
+    that.callbacks.afterPrepare = function(that, config){
         return config;
     };
 
@@ -13888,6 +14804,7 @@ function(params){
                 that.pageCount = that.params['pageCount'];
             }
             that.callbacks.rebuildBars(that);
+            that.triggerEvent('onSetCount', count);
         }
         return that;
     };
@@ -13905,7 +14822,7 @@ function(params){
         return that;
     };
 
-    that.isParent = function(node, flag){
+    that.isOwnNode = that.isParent = function(node, flag){
         return cm.isParent(that.nodes['container'], node, flag);
     };
 
@@ -14498,6 +15415,7 @@ cm.define('Com.ScrollPagination', {
         'Params',
         'Events',
         'Langs',
+        'Structure',
         'DataConfig',
         'DataNodes',
         'Callbacks',
@@ -14518,9 +15436,10 @@ cm.define('Com.ScrollPagination', {
     ],
     'params' : {
         'node' : cm.Node('div'),
+        'container' : null,
         'name' : '',
         'renderStructure' : false,                                  // Render wrapper nodes if not exists in html
-        'container' : false,
+        'embedStructure' : 'append',
         'scrollNode' : window,
         'scrollIndent' : 'Math.min(%scrollHeight% / 2, 600)',       // Variables: %blockHeight%.
         'data' : [],                                                // Static data
@@ -14622,9 +15541,8 @@ function(params){
                     )
                 )
             );
-            if(that.params['container']){
-                that.params['container'].appendChild(that.nodes['container']);
-            }
+            // Append
+            that.embedStructure(that.nodes['container']);
         }
         // Reset styles and variables
         reset();
@@ -14710,7 +15628,7 @@ function(params){
     /* *** AJAX *** */
 
     that.callbacks.prepare = function(that, config){
-        // Prepare
+        config = that.callbacks.beforePrepare(that, config);
         config['url'] = cm.strReplace(config['url'], {
             '%perPage%' : that.params['perPage'],
             '%limit%' : that.params['perPage'],
@@ -14727,6 +15645,15 @@ function(params){
             '%token%' : that.pageToken,
             '%baseurl%' : cm._baseUrl
         });
+        config = that.callbacks.afterPrepare(that, config);
+        return config;
+    };
+
+    that.callbacks.beforePrepare = function(that, config){
+        return config;
+    };
+
+    that.callbacks.afterPrepare = function(that, config){
         return config;
     };
 
@@ -15011,6 +15938,7 @@ cm.define('Com.Select', {
     'modules' : [
         'Params',
         'Events',
+        'Structure',
         'DataConfig',
         'Stack'
     ],
@@ -15023,10 +15951,11 @@ cm.define('Com.Select', {
         'onBlur'
     ],
     'params' : {
-        'container' : false,                    // Component container that is required in case content is rendered without available select.
         'select' : null,                        // Deprecated, use 'node' parameter instead.
         'node' : cm.Node('select'),             // Html select node to decorate.
+        'container' : null,                    // Component container that is required in case content is rendered without available select.
         'name' : '',
+        'embedStructure' : 'replace',
         'renderInBody' : true,                  // Render dropdowns in document.body, else they will be rendrered in component container.
         'multiple' : false,                     // Render multiple select.
         'placeholder' : '',
@@ -15165,12 +16094,7 @@ function(params){
             renderOption(item);
         });
         /* *** INSERT INTO DOM *** */
-        if(that.params['container']){
-            that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['node'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['node']);
-        }
-        cm.remove(that.params['node']);
+        that.embedStructure(nodes['container']);
     };
 
     var renderSingle = function(){
@@ -15201,7 +16125,6 @@ function(params){
         if(!that.params['multiple']){
             // Switch items on arrows press
             cm.addEvent(nodes['container'], 'keydown', function(e){
-                e = cm.getEvent(e);
                 if(optionsLength){
                     var item = options[active],
                         index = optionsList.indexOf(item),
@@ -15209,6 +16132,7 @@ function(params){
 
                     switch(e.keyCode){
                         case 38:
+                            cm.preventDefault(e);
                             if(index - 1 >= 0){
                                 option = optionsList[index - 1];
                             }else{
@@ -15217,6 +16141,7 @@ function(params){
                             break;
 
                         case 40:
+                            cm.preventDefault(e);
                             if(index + 1 < optionsLength){
                                 option = optionsList[index + 1];
                             }else{
@@ -15236,10 +16161,10 @@ function(params){
                 }
             });
             cm.addEvent(nodes['container'], 'focus', function(){
-                cm.addEvent(document.body, 'keydown', blockDocumentArrows);
+                cm.addEvent(window, 'keydown', blockDocumentArrows);
             });
             cm.addEvent(nodes['container'], 'blur', function(){
-                cm.removeEvent(document.body, 'keydown', blockDocumentArrows);
+                cm.removeEvent(window, 'keydown', blockDocumentArrows);
             });
             // Render tooltip
             components['menu'] = new Com.Tooltip(
@@ -15763,8 +16688,8 @@ function(params){
         renderSlider();
         renderLayout();
         that.setEffect(that.params['effect']);
-        that.params['isEditing'] && that.enableEditing();
         that.addToStack(that.params['node']);
+        that.params['isEditing'] && that.enableEditing();
         that.triggerEvent('onRender');
     };
 
@@ -16697,8 +17622,9 @@ cm.define('Com.Tabset', {
     ],
     'params' : {
         'node' : cm.Node('div'),        // Tabs contained node
-        'container' : false,
+        'container' : null,
         'name' : '',
+        'embedStructure' : 'replace',
         'toggleOnHashChange' : true,
         'renderOnInit' : true,
         'active' : null,
@@ -16840,8 +17766,7 @@ function(params){
             that.nodes['container'].id = that.params['node'].id;
         }
         /* *** INSERT INTO DOM *** */
-        that.appendStructure(that.nodes['container']);
-        cm.remove(that.params['node']);
+        that.embedStructure(that.nodes['container']);
         /* *** EVENTS *** */
         Part.Menu && Part.Menu();
         cm.addEvent(window, 'resize', resizeHandler);
@@ -17239,7 +18164,7 @@ function(params){
             },
             'label' : {
                 'container' : cm.node('li'),
-                'inner' : cm.node('div')
+                'link' : cm.node('a')
             },
             'isHidden' : false,
             'isShow' : false,
@@ -17558,6 +18483,7 @@ cm.define('Com.TagsInput', {
         'Params',
         'Events',
         'Langs',
+        'Structure',
         'DataConfig',
         'Stack'
     ],
@@ -17573,15 +18499,14 @@ cm.define('Com.TagsInput', {
         'onClose'
     ],
     'params' : {
-        'container' : false,
         'input' : null,                                 // Deprecated, use 'node' parameter instead.
         'node' : cm.Node('input', {'type' : 'text'}),
+        'container' : null,
         'name' : '',
+        'embedStructure' : 'replace',
         'data' : [],
         'maxSingleTagLength': 255,
-        'autocomplete' : {                              // All parameters what uses in Com.Autocomplete
-            'clearOnEmpty' : false
-        },
+        'autocomplete' : false,
         'icons' : {
             'add' : 'icon default linked',
             'remove' : 'icon default linked'
@@ -17590,6 +18515,9 @@ cm.define('Com.TagsInput', {
             'tags' : 'Tags',
             'add' : 'Add Tag',
             'remove' : 'Remove Tag'
+        },
+        'Com.Autocomplete' : {
+            'clearOnEmpty' : false
         }
     }
 },
@@ -17611,6 +18539,7 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
         // Render
+        validateParams();
         render();
         setLogic();
         that.addToStack(nodes['container']);
@@ -17628,30 +18557,29 @@ function(params){
         if(cm.isNode(that.params['input'])){
             that.params['node'] = that.params['input'];
         }
-        // Check for autocomplete
-        that.isAutocomplete = !(!cm.isEmpty(params['autocomplete']) && !that.getNodeDataConfig(that.params['node'])['autocomplete']);
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+        }
+        that.isAutocomplete = that.params['autocomplete'];
     };
 
     var render = function(){
-        /* *** STRUCTURE *** */
+        // Structure
         nodes['container'] = cm.Node('div', {'class' : 'com__tags-input'},
             nodes['hidden'] = cm.Node('input', {'type' : 'hidden'}),
             nodes['inner'] = cm.Node('div', {'class' : 'inner'})
         );
         // Render add button
         renderAddButton();
-        /* *** ATTRIBUTES *** */
-        // Set hidden input attributes
-        if(that.params['node'].getAttribute('name')){
-            nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
+        // Attributes
+        if(that.params['name']){
+            nodes['hidden'].setAttribute('name', that.params['name']);
         }
-        /* *** INSERT INTO DOM *** */
-        if(that.params['container']){
-            that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['node'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['node']);
-        }
-        cm.remove(that.params['node']);
+        // Append
+        that.embedStructure(nodes['container']);
 
     };
 
@@ -17659,7 +18587,7 @@ function(params){
         // Autocomplete
         cm.getConstructor('Com.Autocomplete', function(classConstructor){
             that.components['autocomplete'] = new classConstructor(
-                cm.merge(that.params['autocomplete'], {
+                cm.merge(that.params['Com.Autocomplete'], {
                     'events' : {
                         'onClickSelect' : function(){
                             addAdderTags(true);
@@ -17868,6 +18796,10 @@ function(params){
         return that;
     };
 
+    that.getAutocomplete = function(){
+        return that.components['autocomplete'];
+    };
+
     init();
 });
 cm.define('Com.TimeSelect', {
@@ -17875,7 +18807,9 @@ cm.define('Com.TimeSelect', {
         'Params',
         'Events',
         'Langs',
-        'DataConfig'
+        'Structure',
+        'DataConfig',
+        'Stack'
     ],
     'events' : [
         'onRender',
@@ -17884,9 +18818,11 @@ cm.define('Com.TimeSelect', {
         'onClear'
     ],
     'params' : {
-        'container' : false,
         'input' : null,                                  // Deprecated, use 'node' parameter instead.
         'node' : cm.Node('input', {'type' : 'text'}),
+        'container' : null,
+        'embedStructure' : 'replace',
+        'name' : '',
         'renderSelectsInBody' : true,
         'format' : 'cm._config.timeFormat',
         'showTitleTag' : true,
@@ -17926,6 +18862,7 @@ function(params){
         validateParams();
         render();
         setMiscEvents();
+        that.addToStack(nodes['container']);
         // Set selected time
         if(that.params['selected']){
             that.set(that.params['selected'], that.params['format'], false);
@@ -17943,6 +18880,7 @@ function(params){
     var validateParams = function(){
         if(cm.isNode(that.params['node'])){
             that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
         }
         if(cm.isEmpty(that.params['hoursInterval'])){
             that.params['hoursInterval'] = 1;
@@ -18015,17 +18953,12 @@ function(params){
         if(that.params['showTitleTag'] && that.params['title']){
             nodes['container'].title = that.params['title'];
         }
-        // Set hidden input attributes
-        if(that.params['node'].getAttribute('name')){
-            nodes['hidden'].setAttribute('name', that.params['node'].getAttribute('name'));
+        // Name
+        if(that.params['name']){
+            nodes['hidden'].setAttribute('name', that.params['name']);
         }
         /* *** INSERT INTO DOM *** */
-        if(that.params['container']){
-            that.params['container'].appendChild(nodes['container']);
-        }else if(that.params['node'].parentNode){
-            cm.insertBefore(nodes['container'], that.params['node']);
-        }
-        cm.remove(that.params['node']);
+        that.embedStructure(nodes['container']);
     };
 
     var setMiscEvents = function(){
@@ -18249,10 +19182,12 @@ cm.define('Com.ToggleBox', {
     ],
     'params' : {
         'node' : cm.Node('div'),
+        'name' : '',
+        'renderStructure' : false,
+        'embedStructure' : 'replace',
         'duration' : 500,
         'remember' : false,                                 // Remember toggle state
         'toggleTitle' : false,                              // Change title on toggle
-        'renderStructure' : false,
         'container' : false,
         'title' : false,
         'content' : false,
@@ -18312,7 +19247,7 @@ function(params){
             );
             cm.addClass(that.nodes['container'], that.params['className']);
             // Embed
-            that.appendStructure(that.nodes['container']);
+            that.embedStructure(that.nodes['container']);
             // Embed content
             if(that.params['content']){
                 that.nodes['content'].appendChild(that.params['content']);
@@ -18442,6 +19377,166 @@ function(params){
 
     init();
 });
+cm.define('Com.Toolbar', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'Structure',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onProcessEnd'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'container' : null,
+        'name' : '',
+        'embedStructure' : 'append',
+        'flex' : false
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {};
+    that.groups = {};
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+    };
+
+    var render = function(){
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'com__toolbar'},
+            that.nodes['part'] = cm.node('div', {'class' : 'pt__toolbar'},
+                cm.node('div', {'class' : 'inner clear'},
+                    that.nodes['left'] = cm.node('div', {'class' : 'left'}),
+                    that.nodes['right'] = cm.node('div', {'class' : 'right'})
+                )
+            )
+        );
+        that.params['flex'] && cm.addClass(that.nodes['part'], 'is-adaptive');
+        // Append
+        that.embedStructure(that.nodes['container']);
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.clear = function(){
+        cm.forEach(that.groups, function(group){
+            that.removeGroup(group);
+        });
+        that.triggerEvent('onProcessEnd');
+        return that;
+    };
+
+    that.addGroup = function(item){
+        item = cm.merge({
+            'container' : cm.node('ul', {'class' : 'group'}),
+            'node' : null,
+            'adaptive' : true,
+            'name' : '',
+            'position' : 'left',
+            'items' : {}
+        }, item);
+        if(!that.groups[item['name']]){
+            if(!item['node']){
+                item['node'] = item['container'];
+            }
+            item['adaptive'] && cm.addClass(item['container'], 'is-adaptive');
+            if(/left|right/.test(item['position'])){
+                cm.appendChild(item['container'], that.nodes[item['position']]);
+            }
+            that.groups[item['name']] = item;
+        }
+        that.triggerEvent('onProcessEnd');
+        return that;
+    };
+
+    that.getGroup = function(name){
+        return that.groups[name];
+    };
+
+    that.removeGroup = function(name){
+        var item;
+        if(cm.isObject(arguments[0])){
+            item = name;
+        }else{
+            item = that.groups[name];
+        }
+        if(item){
+            cm.remove(item['container']);
+            delete that.groups[item['name']];
+        }
+        that.triggerEvent('onProcessEnd');
+        return that;
+    };
+
+    that.addButton = function(item){
+        var group;
+        item = cm.merge({
+            'container' : cm.node('li'),
+            'node' : cm.node('div', {'class' : 'button'}),
+            'name' : '',
+            'label' : '',
+            'title' : '',
+            'group' : '',
+            'handler' : function(){}
+        }, item);
+        if((group = that.groups[item['group']]) && !group.items[item['name']]){
+            item['node'].innerHTML = item['label'];
+            item['node'].title = item['title'];
+            cm.addEvent(item['node'], 'click', function(e){
+                cm.preventDefault(e);
+                item['handler'](e, item);
+            });
+            cm.appendChild(item['node'], item['container']);
+            cm.appendChild(item['container'], group['node']);
+            group.items[item['name']] = item;
+        }
+        that.triggerEvent('onProcessEnd');
+        return that;
+    };
+
+    that.getButton = function(name, groupName){
+        var item, group;
+        if((group = that.groups[groupName]) && (item = group.items[name])){
+            return item;
+        }
+        return null;
+    };
+
+    that.removeButton = function(name, groupName){
+        var item, group;
+        if(cm.isObject(arguments[0])){
+            item = name;
+            group = that.groups[item['group']];
+        }else if(group = that.groups[groupName]){
+            item = group.items[name];
+        }
+        if(item){
+            cm.remove(item['container']);
+            delete group.items[item['name']];
+        }
+        that.triggerEvent('onProcessEnd');
+        return that;
+    };
+
+    init();
+});
 cm.define('Com.Tooltip', {
     'modules' : [
         'Params',
@@ -18464,7 +19559,10 @@ cm.define('Com.Tooltip', {
         'top' : 0,                                      // Supported properties: targetHeight, selfHeight, number
         'left' : 0,                                     // Supported properties: targetWidth, selfWidth, number
         'width' : 'auto',                               // Supported properties: targetWidth, auto, number
-        'duration' : 'cm._config.animDurationQuick',
+        'minWidth' : 0,
+        'duration' : 'cm._config.animDurationShort',
+        'delay' : 0,
+        'resizeInterval' : 5,
         'position' : 'absolute',
         'className' : '',
         'theme' : 'theme-default',
@@ -18478,11 +19576,17 @@ cm.define('Com.Tooltip', {
     }
 },
 function(params){
-    var that = this,
-        anim;
+    var that = this;
     
     that.nodes = {};
+    that.animation = null;
+    that.delayInterval = null;
+    that.resizeInterval = null;
+
+    that.isHideProcess = false;
+    that.isShowProcess = false;
     that.isShow = false;
+    that.isWindowEvent = false;
     that.disabled = false;
 
     var init = function(){
@@ -18540,22 +19644,20 @@ function(params){
 
     var setMiscEvents = function(){
         // Init animation
-        anim = new cm.Animation(that.nodes['container']);
+        that.animation = new cm.Animation(that.nodes['container']);
         // Add target event
         if(that.params['preventClickEvent']){
-            that.params['target'].onclick = function(e){
+            cm.addEvent(that.params['target'], 'click', function(e){
                 cm.preventDefault(e);
-            };
+            });
         }
         setTargetEvent();
-        // Check position
-        animFrame(getPosition);
     };
 
     var targetEvent = function(){
         if(!that.disabled){
             if(that.isShow && that.params['targetEvent'] == 'click' && that.params['hideOnReClick']){
-                hide(false);
+                hide();
             }else{
                 show();
             }
@@ -18585,157 +19687,246 @@ function(params){
     };
 
     var show = function(immediately){
-        if(!that.isShow){
-            that.isShow = true;
-            // Append child tooltip into body and set position
-            that.params['container'].appendChild(that.nodes['container']);
-            // Show tooltip
-            that.nodes['container'].style.display = 'block';
-            // Animate
-            anim.go({'style' : {'opacity' : 1}, 'duration' : immediately? 0 : that.params['duration'], 'onStop' : function(){
-                that.triggerEvent('onShow');
-            }});
-            // Add document target event
-            if(that.params['hideOnOut']){
-                switch(that.params['targetEvent']){
-                    case 'hover' :
-                        cm.addEvent(document, 'mouseover', bodyEvent);
-                        break;
-                    case 'click' :
-                    default :
-                        cm.addEvent(document, 'mousedown', bodyEvent);
-                        break;
-                }
-            }
+        if((!that.isShow && !that.isShowProcess) || that.isHideProcess){
+            that.isShowProcess = true;
             that.triggerEvent('onShowStart');
+            // Append
+            that.params['container'].appendChild(that.nodes['container']);
+            setWindowEvent();
+            // Show Handler
+            clearDelayInterval();
+            if(immediately){
+                showHandler(immediately);
+            }else if(that.params['delay'] && !that.isHideProcess){
+                that.delayInterval = setTimeout(showHandler, that.params['delay']);
+            }else{
+                showHandler();
+            }
         }
+    };
+
+    var showHandler = function(immediately){
+        that.nodes['container'].style.display = 'block';
+        resizeHelper();
+        // Animate
+        if(immediately || !that.params['duration']){
+            showHandlerEnd();
+        }else{
+            that.animation.stop();
+            that.animation.go({
+                'style' : {'opacity' : 1},
+                'duration' : that.params['duration'],
+                'anim' : 'smooth',
+                'onStop' : showHandlerEnd
+            });
+        }
+    };
+
+    var showHandlerEnd = function(){
+        that.nodes['container'].style.opacity = 1;
+        that.isShow = true;
+        that.isShowProcess = false;
+        that.isHideProcess = false;
+        that.triggerEvent('onShow');
     };
 
     var hide = function(immediately){
-        if(that.isShow){
-            that.isShow = false;
-            // Remove document target event
-            if(that.params['hideOnOut']){
-                switch(that.params['targetEvent']){
-                    case 'hover' :
-                        cm.removeEvent(document, 'mouseover', bodyEvent);
-                        break;
-                    case 'click' :
-                    default :
-                        cm.removeEvent(document, 'mousedown', bodyEvent);
-                        break;
-                }
-            }
-            // Animate
-            anim.go({'style' : {'opacity' : 0}, 'duration' : immediately? 0 : that.params['duration'], 'onStop' : function(){
-                that.nodes['container'].style.display = 'none';
-                cm.remove(that.nodes['container']);
-                that.triggerEvent('onHide');
-            }});
+        if((that.isShow || that.isShowProcess) && !that.isHideProcess){
+            that.isHideProcess = true;
             that.triggerEvent('onHideStart');
+            // Hide Handler
+            clearDelayInterval();
+            if(immediately){
+                hideHandler(immediately);
+            }else if(that.params['delay'] && !that.isShowProcess){
+                that.delayInterval = setTimeout(hideHandler, that.params['delay']);
+            }else{
+                hideHandler();
+            }
         }
     };
 
-    var getPosition = function(){
-        if(that.isShow){
-            var targetWidth =  that.params['target'].offsetWidth,
-                targetHeight = that.params['target'].offsetHeight,
-                selfHeight = that.nodes['container'].offsetHeight,
-                selfWidth = that.nodes['container'].offsetWidth,
-                pageSize = cm.getPageSize(),
-                scrollTop = cm.getScrollTop(window),
-                scrollLeft = cm.getScrollLeft(window);
-            // Calculate size
-            (function(){
-                if(that.params['width'] != 'auto'){
-                    var width = eval(
-                        that.params['width']
-                            .toString()
-                            .replace('targetWidth', targetWidth)
-                    );
-                    if(width != selfWidth){
-                        that.nodes['container'].style.width =  [width, 'px'].join('');
-                    }
-                }
-            })();
-            // Calculate position
-            (function(){
-                var top = cm.getRealY(that.params['target']),
-                    topAdd = eval(
-                        that.params['top']
-                            .toString()
-                            .replace('targetHeight', targetHeight)
-                            .replace('selfHeight', selfHeight)
-                    ),
-                    left =  cm.getRealX(that.params['target']),
-                    leftAdd = eval(
-                        that.params['left']
+    var hideHandler = function(immediately){
+        if(immediately || !that.params['duration']){
+            hideHandlerEnd();
+        }else{
+            that.animation.stop();
+            that.animation.go({
+                'style' : {'opacity' : 0},
+                'duration' : that.params['duration'],
+                'anim' : 'smooth',
+                'onStop' : hideHandlerEnd
+            });
+        }
+    };
+
+    var hideHandlerEnd = function(){
+        clearResizeInterval();
+        removeWindowEvent();
+        that.nodes['container'].style.display = 'none';
+        cm.remove(that.nodes['container']);
+        that.isShow = false;
+        that.isShowProcess = false;
+        that.isHideProcess = false;
+        that.triggerEvent('onHide');
+    };
+
+    var resizeHelper = function(){
+        resize();
+        clearResizeInterval();
+        that.resizeInterval = setTimeout(resizeHelper, that.params['resizeInterval']);
+    };
+
+    var resize = function(){
+        var targetWidth =  that.params['target'].offsetWidth,
+            targetHeight = that.params['target'].offsetHeight,
+            selfHeight = that.nodes['container'].offsetHeight,
+            selfWidth = that.nodes['container'].offsetWidth,
+            pageSize = cm.getPageSize(),
+            scrollTop = cm.getScrollTop(window),
+            scrollLeft = cm.getScrollLeft(window);
+        // Calculate size
+        (function(){
+            var width;
+            if(that.params['width'] != 'auto'){
+                width = Math.max(
+                    eval(
+                        that.params['minWidth']
                             .toString()
                             .replace('targetWidth', targetWidth)
                             .replace('selfWidth', selfWidth)
                     ),
-                    positionTop,
-                    positionLeft;
-                // Calculate adaptive or static vertical position
-                if(that.params['adaptiveY']){
-                    positionTop = Math.max(
-                        Math.min(
-                            ((top + topAdd + selfHeight > pageSize['winHeight'])
-                                    ? (top - topAdd - selfHeight + targetHeight)
-                                    : (top + topAdd)
-                            ),
-                            (pageSize['winHeight'] - selfHeight)
+                    eval(
+                        that.params['width']
+                            .toString()
+                            .replace('targetWidth', targetWidth)
+                            .replace('selfWidth', selfWidth)
+                    )
+                );
+                if(width != selfWidth){
+                    that.nodes['container'].style.width =  [width, 'px'].join('');
+                    selfWidth = that.nodes['container'].offsetWidth;
+                    selfHeight = that.nodes['container'].offsetHeight;
+                }
+            }
+        })();
+        // Calculate position
+        (function(){
+            var top = cm.getRealY(that.params['target']),
+                topAdd = eval(
+                    that.params['top']
+                        .toString()
+                        .replace('targetHeight', targetHeight)
+                        .replace('selfHeight', selfHeight)
+                ),
+                left =  cm.getRealX(that.params['target']),
+                leftAdd = eval(
+                    that.params['left']
+                        .toString()
+                        .replace('targetWidth', targetWidth)
+                        .replace('selfWidth', selfWidth)
+                ),
+                positionTop,
+                positionLeft;
+            // Calculate adaptive or static vertical position
+            if(that.params['adaptiveY']){
+                positionTop = Math.max(
+                    Math.min(
+                        ((top + topAdd + selfHeight > pageSize['winHeight'])
+                                ? (top - topAdd - selfHeight + targetHeight)
+                                : (top + topAdd)
                         ),
-                        0
-                    );
-                }else{
-                    positionTop = top + topAdd;
-                }
-                // Calculate adaptive or static horizontal position
-                if(that.params['adaptiveX']){
-                    positionLeft = Math.max(
-                        Math.min(
-                            ((left + leftAdd + selfWidth > pageSize['winWidth'])
-                                    ? (left - leftAdd - selfWidth + targetWidth)
-                                    : (left + leftAdd)
-                            ),
-                            (pageSize['winWidth'] - selfWidth)
+                        (pageSize['winHeight'] - selfHeight)
+                    ),
+                    0
+                );
+            }else{
+                positionTop = top + topAdd;
+            }
+            // Calculate adaptive or static horizontal position
+            if(that.params['adaptiveX']){
+                positionLeft = Math.max(
+                    Math.min(
+                        ((left + leftAdd + selfWidth > pageSize['winWidth'])
+                                ? (left - leftAdd - selfWidth + targetWidth)
+                                : (left + leftAdd)
                         ),
-                        0
-                    );
+                        (pageSize['winWidth'] - selfWidth)
+                    ),
+                    0
+                );
+            }else{
+                positionLeft = left + leftAdd;
+            }
+            // Fix scroll position for absolute
+            if(that.params['position'] == 'absolute'){
+                if(that.params['container'] == document.body){
+                    positionTop += scrollTop;
+                    positionLeft += scrollLeft;
                 }else{
-                    positionLeft = left + leftAdd;
+                    positionTop -= cm.getRealY(that.params['container']);
+                    positionLeft -= cm.getRealX(that.params['container']);
                 }
-                // Fix scroll position for absolute
-                if(that.params['position'] == 'absolute'){
-                    if(that.params['container'] == document.body){
-                        positionTop += scrollTop;
-                        positionLeft += scrollLeft;
-                    }else{
-                        positionTop -= cm.getRealY(that.params['container']);
-                        positionLeft -= cm.getRealX(that.params['container']);
-                    }
-                }
-                // Apply styles
-                if(positionTop != that.nodes['container'].offsetTop){
-                    that.nodes['container'].style.top =  [positionTop, 'px'].join('');
-                }
-                if(positionLeft != that.nodes['container'].offsetLeft){
-                    that.nodes['container'].style.left = [positionLeft, 'px'].join('');
-                }
-            })();
-        }
-        animFrame(getPosition);
+            }
+            positionTop = Math.round(positionTop);
+            positionLeft = Math.round(positionLeft);
+            // Apply styles
+            if(positionTop != that.nodes['container'].offsetTop){
+                that.nodes['container'].style.top =  [positionTop, 'px'].join('');
+            }
+            if(positionLeft != that.nodes['container'].offsetLeft){
+                that.nodes['container'].style.left = [positionLeft, 'px'].join('');
+            }
+        })();
     };
 
-    var bodyEvent = function(e){
-        if(that.isShow){
-            e = cm.getEvent(e);
-            var target = cm.getEventTarget(e);
-            if(!cm.isParent(that.nodes['container'], target, true) && !cm.isParent(that.params['target'], target, true)){
-                hide(false);
+    var setWindowEvent = function(){
+        if(that.params['hideOnOut'] && !that.isWindowEvent){
+            that.isWindowEvent = true;
+            switch(that.params['targetEvent']){
+                case 'hover' :
+                    cm.addEvent(window, 'mousemove', windowEvent);
+                    break;
+                case 'click' :
+                default :
+                    cm.addEvent(window, 'mousedown', windowEvent);
+                    break;
             }
         }
+    };
+
+    var removeWindowEvent = function(){
+        if(that.params['hideOnOut'] && that.isWindowEvent){
+            that.isWindowEvent = false;
+            switch(that.params['targetEvent']){
+                case 'hover' :
+                    cm.removeEvent(window, 'mousemove', windowEvent);
+                    break;
+                case 'click' :
+                default :
+                    cm.removeEvent(window, 'mousedown', windowEvent);
+                    break;
+            }
+        }
+    };
+
+    var windowEvent = function(e){
+        var target = cm.getEventTarget(e);
+        if(!cm.isParent(that.nodes['container'], target, true) && !cm.isParent(that.params['target'], target, true)){
+            hide(false);
+        }else{
+            show(true);
+        }
+    };
+
+    var clearResizeInterval = function(){
+        that.resizeInterval && clearTimeout(that.resizeInterval);
+        that.resizeInterval = null;
+    };
+
+    var clearDelayInterval = function(){
+        that.delayInterval && clearTimeout(that.delayInterval);
+        that.delayInterval = null;
     };
 
     /* ******* MAIN ******* */
@@ -18801,9 +19992,11 @@ function(params){
 
     init();
 });
+// This file must be deleted in future
+
 Com['UA'] = {
-    'hash' : {'ie':'MSIE','opera':'Opera','ff':'Firefox','firefox':'Firefox','webkit':'AppleWebKit','safari':'Safari','chrome':'Chrome','steam':'Steam'},
-    'fullname' : {'MSIE':'Microsoft Internet Explorer','Firefox':'Mozilla Firefox','Chrome':'Google Chrome','Safari':'Apple Safari','Opera':'Opera','Opera Mini':'Opera Mini','Opera Mobile':'Opera Mobile','IE Mobile':'Internet Explorer Mobile','Steam':'Valve Steam Game Overlay'},
+    'hash' : {'ie':'MSIE','edge':'Edge','opera':'Opera','ff':'Firefox','firefox':'Firefox','webkit':'AppleWebKit','safari':'Safari','chrome':'Chrome','steam':'Steam'},
+    'fullname' : {'Edge':'Microsoft Edge','MSIE':'Microsoft Internet Explorer','Firefox':'Mozilla Firefox','Chrome':'Google Chrome','Safari':'Apple Safari','Opera':'Opera','Opera Mini':'Opera Mini','Opera Mobile':'Opera Mobile','IE Mobile':'Internet Explorer Mobile','Steam':'Valve Steam Game Overlay'},
     'os' : {
         'Windows':{'NT 5.0':'2000','NT 5.1':'XP','NT 5.2':'Server 2003','NT 6.0':'Vista','NT 6.1':'7','NT 6.2':'8','NT 6.3':'8.1','NT 10.0':'10'},
         'Mac OSX':{'10.0':'Cheetah','10.1':'Puma','10.2':'Jaguar','10.3':'Panther','10.4':'Tiger','10.5':'Leopard','10.6':'Snow Leopard','10.7':'Lion','10.8':'Mountain Lion','10.9':'Mavericks','10.10':'Yosemite','10.11':'El Capitan'}
@@ -18882,6 +20075,14 @@ Com['UA'] = {
             var sp = arr['full_version'].toString().split('.');
             arr['version'] = sp[0]+((sp[1])? '.'+sp[1] : '');
             arr['short_version'] = sp[0];
+        }else if(str.indexOf('Edge') > -1){
+            arr['browser'] = 'Edge';
+            arr['hash'] = 'edge';
+            arr['engine'] = 'EdgeHTML';
+            arr['full_version'] = str.replace(/^(?:.+)(?:Edge)(?:[\/]{0,})([0-9\.]{0,})(?:.{0,})$/, '$1');
+            var sp = arr['full_version'].toString().split('.');
+            arr['version'] = sp[0]+((sp[1])? '.'+sp[1] : '');
+            arr['short_version'] = sp[0];
         }else if(str.indexOf('Valve Steam GameOverlay') > -1){
             arr['browser'] = 'Steam';
             arr['hash'] = 'steam';
@@ -18925,7 +20126,11 @@ Com['UA'] = {
             }
         }
         // Check OS
-        if(str.indexOf('Windows Phone OS') > -1){
+        if(str.indexOf('Windows Phone') > -1){
+            arr['os'] = 'Windows Phone';
+            arr['os_type'] = 'mobile';
+            arr['os_version'] = str.replace(/^(?:.+)(?:Windows Phone)(?:[\s]{0,1})([a-zA-Z\s0-9\.]{0,})(?:.+)$/, '$1');
+        }else if(str.indexOf('Windows Phone OS') > -1){
             arr['os'] = 'Windows Phone OS';
             arr['os_type'] = 'mobile';
             arr['os_version'] = str.replace(/^(?:.+)(?:Windows Phone OS)(?:[\s]{0,1})([a-zA-Z\s0-9\.]{0,})(?:.+)$/, '$1');
@@ -19214,6 +20419,8 @@ var App = {
     'Nodes' : {},
     'Test' : []
 };
+
+var Module = {};
 cm.define('App.Block', {
     'modules' : [
         'Params',
@@ -19231,10 +20438,12 @@ cm.define('App.Block', {
     ],
     'params' : {
         'node' : cm.Node('div'),
-        'type' : 'content',                     // content | form | mail
+        'type' : 'template-manager',            // template-manager | form-manager | mail
+        'instanceId' : false,
         'positionId' : 0,
         'zone' : 0,
         'parentId' : 0,
+        'layerId' : 0,
         'index' : false,
         'locked' : false,
         'visible' : true,
@@ -19282,8 +20491,14 @@ function(params){
 
     var validateParams = function(){
         var index;
-        that.params['name'] = that.params['positionId'];
-        that.params['zoneName'] = [that.params['parentId'], that.params['zone']].join('_');
+        if(cm.isNumber(that.params['instanceId']) || cm.isString(that.params['instanceId'])){
+            cm.log(that.params['instanceId']);
+            that.params['name'] = [that.params['type'], that.params['instanceId'], that.params['positionId']].join('_');
+            that.params['zoneName'] = [that.params['type'], that.params['instanceId'], that.params['parentId'], that.params['zone']].join('_');
+        }else{
+            that.params['name'] = [that.params['type'], that.params['positionId']].join('_');
+            that.params['zoneName'] = [that.params['type'], that.params['parentId'], that.params['zone']].join('_');
+        }
         if(index = that.params['node'].getAttribute('data-index')){
             that.params['index'] = parseInt(index);
             that.params['node'].removeAttribute('data-index');
@@ -19338,9 +20553,7 @@ function(params){
         if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.node, 'is-editing');
-            if(!that.params['visible']){
-                cm.addClass(that.node, 'is-visible');
-            }
+            cm.addClass(that.node, 'is-visible');
             if(!that.params['locked']){
                 cm.addClass(that.node, 'is-editable');
                 cm.customEvent.trigger(that.node, 'enableEditable', {
@@ -19412,12 +20625,12 @@ function(params){
 
     that.getLower = function(){
         var index = that.getIndex();
-        return that.zone.getBlock(index - 1) || null;
+        return that.zone.getBlock(index + 1) || null;
     };
 
     that.getUpper = function(){
         var index = that.getIndex();
-        return that.zone.getBlock(index + 1) || null;
+        return that.zone.getBlock(index - 1) || null;
     };
 
     that.getDragNodes = function(){
@@ -20500,7 +21713,7 @@ cm.define('App.DummyBlock', {
         'node' : cm.Node('div'),
         'name' : '',
         'keyword' : '',
-        'type' : 'content',                     // content | form | mail
+        'type' : 'template-manager',            // template-manager | form-manager | mail
         'editorName' : 'app-editor'
     }
 },
@@ -20616,12 +21829,12 @@ function(params){
 
     that.getLower = function(){
         var index = that.getIndex();
-        return that.zone.getBlock(index - 1) || null;
+        return that.zone.getBlock(index) || null;
     };
 
     that.getUpper = function(){
         var index = that.getIndex();
-        return that.zone.getBlock(index + 1) || null;
+        return that.zone.getBlock(index - 1) || null;
     };
 
     that.getDragNodes = function(){
@@ -20709,6 +21922,7 @@ cm.define('App.Editor', {
         'topMenuName' : 'app-topmenu',
         'sidebarName' : 'app-sidebar',
         'templateName' : 'app-template',
+        'editorType' : 'template-manager',
         'App.Dashboard' : {},
         'Com.Overlay' : {
             'container' : 'document.body',
@@ -20724,12 +21938,14 @@ cm.define('App.Editor', {
 function(params){
     var that = this;
 
+    that.types = ['template-manager', 'form-manager'];
     that.components = {};
     that.nodes = {};
 
     that.zones = [];
     that.blocks = [];
     that.dummyBlocks = [];
+    that.editorType = null;
     that.isRendered = false;
     that.isProcessed = false;
     that.isExpanded = null;
@@ -20743,8 +21959,13 @@ function(params){
         that.getDataConfig(that.params['node']);
         that.addToStack(that.params['node']);
         that.triggerEvent('onRenderStart');
+        validateParams();
         render();
         that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        that.editorType = that.params['editorType'];
     };
 
     var render = function(){
@@ -20760,7 +21981,10 @@ function(params){
             that.components['sidebar'] = classObject
                 .addEvent('onResize', sidebarResizeAction)
                 .addEvent('onExpandEnd', sidebarExpandAction)
-                .addEvent('onCollapseEnd', sidebarCollapseAction);
+                .addEvent('onCollapseEnd', sidebarCollapseAction)
+                .addEvent('onTabShow', function(sidebar, data){
+                    setEditorType(data.item['id']);
+                });
         });
         cm.find('App.Template', that.params['templateName'], null, function(classObject){
             that.components['template'] = classObject;
@@ -20838,6 +22062,12 @@ function(params){
         cm.find('Com.GridlistHelper', null, null, function(classObject){
             classObject.enableEditing();
         });
+    };
+
+    var setEditorType = function(type){
+        if(cm.inArray(that.types, type) && type != that.editorType){
+            that.editorType = type;
+        }
     };
 
     /* *** DASHBOARD REQUEST EVENTS *** */
@@ -21558,7 +22788,7 @@ App.HelpTourScenario = [{
         'topMenu' : 'dark',
         'template' : 'dark'
     },
-    'sidebar' : 'modules',
+    'sidebar' : 'template-manager',
     'topMenu' : false,
     'content' : '<h3>Installed Modules</h3><p>The modules tab provides quick access to the modules that you\'ve subscribed to. Once you\'ve opened a page or a template, open the modules tab to drag and drop the modules you wish to include.</p>'
 },{
@@ -21772,7 +23002,7 @@ cm.define('App.Sidebar', {
         'node' : cm.Node('div'),
         'name' : 'app-sidebar',
         'duration' : 300,
-        'active' : 'modules',
+        'active' : 'template-manager',
         'target' : 'document.html',
         'remember' : true,
         'ajax' : {
@@ -21821,7 +23051,7 @@ function(params){
     };
 
     var getCSSHelpers = function(){
-        that.params['duration'] = cm.getTransitionDurationFromRule('.app__sidebar__duration');
+        that.params['duration'] = cm.getTransitionDurationFromRule('.app__sidebar-helper__duration');
     };
 
     var validateParams = function(){
@@ -21880,6 +23110,10 @@ function(params){
                 })
                 .processTabs(that.nodes['tabs'], that.nodes['labels'])
                 .set(that.params['active']);
+        });
+        // Tabs events
+        cm.forEach(that.nodes['tabs'], function(item){
+            cm.addIsolateScrolling(item['descr']);
         });
     };
 
@@ -22840,9 +24074,12 @@ cm.define('App.Zone', {
     ],
     'params' : {
         'node' : cm.Node('div'),
+        'type' : 'template-manager',            // template-manager | form-manager | mail | remove
+        'instanceId' : false,
         'zone' : 0,
         'parentId' : 0,
-        'type' : 'content',          // content | form | mail | remove
+        'layerId' : 0,
+        'link' : false,                         // {'parentId' : 0, 'layerId' : 0, type' : ''}
         'locked' : false,
         'editorName' : 'app-editor'
     }
@@ -22875,8 +24112,17 @@ function(params){
     };
 
     var validateParams = function(){
-        that.params['name'] = [that.params['parentId'], that.params['zone']].join('_');
-        that.params['blockName'] = that.params['parentId'];
+        if(that.params['link']){
+            that.params['linkName'] = [that.params['link']['type'], that.params['link']['parentId'], that.params['zone']].join('_');
+            that.params['blockName'] = [that.params['link']['type'], that.params['link']['parentId']].join('_');
+        }else{
+            that.params['blockName'] = [that.params['type'], that.params['parentId']].join('_');
+        }
+        if(cm.isNumber(that.params['instanceId']) || cm.isString(that.params['instanceId'])){
+            that.params['name'] = [that.params['type'], that.params['instanceId'], that.params['parentId'], that.params['zone']].join('_');
+        }else{
+            that.params['name'] = [that.params['type'], that.params['parentId'], that.params['zone']].join('_');
+        }
     };
 
     var render = function(){
@@ -23047,6 +24293,7 @@ function(params){
 
     init();
 });
+
 cm.define('App.ModuleHiddenTabs', {
     'modules' : [
         'Params',
@@ -23091,6 +24338,8 @@ function(params){
         'tabs' : []
     };
     that.components = {};
+    that.tabs = [];
+    that.options = [];
 
     that.isEditing = null;
     that.isProcessing = false;
@@ -23111,7 +24360,7 @@ function(params){
     };
 
     var getCSSHelpers = function(){
-        that.params['duration'] = cm.getTransitionDurationFromRule('.app-mod__hidden-tabs__duration') || that.params['duration'];
+        that.params['duration'] = cm.getTransitionDurationFromRule('.app-mod__hidden-tabs-helper__duration') || that.params['duration'];
     };
 
     var validateParams = function(){
@@ -23122,8 +24371,8 @@ function(params){
 
     var render = function(){
         // Process Tabset
-        cm.getConstructor('Com.TabsetHelper', function(classConstructor){
-            that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper'])
+        cm.getConstructor('Com.TabsetHelper', function(classConstructor, className){
+            that.components['tabset'] = new classConstructor(that.params[className])
                 .addEvent('onTabHide', function(tabset, data){
                     that.triggerEvent('onTabHide', data);
                 })
@@ -23150,15 +24399,56 @@ function(params){
                 })
                 .processTabs(that.nodes['tabs'], that.nodes['labels']);
         });
+        // Tabs
+        processTabs();
         // Mobile menu
-        cm.forEach(that.nodes['options'], function(item){
-            var config = that.getNodeDataConfig(item['container']);
-            cm.addEvent(item['container'], 'click', function(){
-                that.components['tabset'].set(config['id']);
-                show();
+        processMenu();
+        // Set target events
+        setTargetEvents();
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
+        // Editing
+        that.params['isEditing'] && that.enableEditing();
+    };
+
+    var processTabs = function(){
+        that.tabs = that.components['tabset'].getTabs();
+        cm.forEach(that.tabs, function(item){
+            cm.addEvent(item['label']['link'], 'click', function(e){
+                if(that.params['event'] == 'click' && that.components['tabset'].get() != item['id']){
+                    cm.preventDefault(e);
+                }
             });
         });
-        // Target events
+    };
+
+    var processMenu = function(){
+        var item;
+        cm.forEach(that.nodes['options'], function(nodes){
+            item = that.getNodeDataConfig(nodes['container']) || {};
+            item['nodes'] = nodes;
+            cm.addEvent(nodes['container'], 'click', function(e){
+                if(that.components['tabset'].get() != item['id']){
+                    cm.preventDefault(e);
+                    that.components['tabset'].set(item['id']);
+                    show();
+                }
+            });
+            that.options.push(item);
+        });
+    };
+
+    var setTargetEvents = function(){
         if(that.params['event'] == 'hover'){
             cm.addEvent(that.nodes['container'], 'mouseover', function(e){
                 show();
@@ -23178,20 +24468,6 @@ function(params){
                 show();
             }
         });
-        // Add custom event
-        if(that.params['customEvents']){
-            cm.customEvent.add(that.params['node'], 'redraw', function(){
-                that.redraw();
-            });
-            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
-                that.enableEditing();
-            });
-            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
-                that.disableEditing();
-            });
-        }
-        // Editing
-        that.params['isEditing'] && that.enableEditing();
     };
 
     var hide = function(){
@@ -23215,7 +24491,7 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
+        if(!cm.isBoolean(that.isEditing) || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.params['node'], 'is-editing is-editable');
             that.components['tabset'].setByIndex(0);
@@ -23227,7 +24503,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(typeof that.isEditing !== 'boolean' || that.isEditing){
+        if(!cm.isBoolean(that.isEditing) || that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.params['node'], 'is-editing is-editable');
             hide();
@@ -23365,7 +24641,7 @@ window.Collector = new Com.Collector({
         new App.TopMenu({
             'node' : node
         });
-    })
+    }, null, 900)
 
     .add('app-sidebar', function(node){
         new App.Sidebar({
@@ -23376,25 +24652,25 @@ window.Collector = new Com.Collector({
                 }
             }
         });
-    })
+    }, null, 910)
 
     .add('app-zone', function(node){
         new App.Zone({
             'node' : node
         });
-    })
+    }, null, 920)
 
     .add('app-block', function(node){
         new App.Block({
             'node' : node
         });
-    })
+    }, null, 930)
 
     .add('app-dummy-block', function(node){
         new App.DummyBlock({
             'node' : node
         });
-    })
+    }, null, 940)
 
     .add('app-helptour', function(node){
         new App.HelpTour({
@@ -23420,19 +24696,19 @@ window.Collector = new Com.Collector({
         });
     })
 
+    /* *** MODULES *** */
+
+    .add('module-menu', function(node){
+        new Module.Menu({
+            'node' : node
+        });
+    })
+
     .add('app-template', function(node){
         new App.Template({
             'node' : node
         });
-    })
-
-    /* *** MODULES *** */
-
-    .add('module-menu', function(node){
-        new App.ModuleMenu({
-            'node' : node
-        });
-    })
+    }, null, 990)
 
     /* *** DOCS *** */
 
@@ -23485,6 +24761,7 @@ window.Collector = new Com.Collector({
                         'method' : 'POST',
                         'url' : cm._baseUrl + '/stuff/ajax.editor.create.php',
                         'params' : {
+                            'instanceId' : block.zone.params['instanceId'],
                             'keyword' : block.params['keyword'],
                             'parentId' : block.zone.params['parentId'],
                             'type' : block.params['type'],
@@ -23541,7 +24818,7 @@ window.Collector = new Com.Collector({
                 }
             }
         });
-    });
+    }, null, 1000);
 
 cm.onReady(function(){
     window.Collector.construct(document.body);

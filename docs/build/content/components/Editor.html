@@ -238,7 +238,7 @@
     <div class="inner" data-node="inner">
         <div class="sidebar__menu">
             <ul>
-                <li data-node="labels:[]:container" data-config='{"id" : "modules"}'>
+                <li data-node="labels:[]:container" data-config='{"id" : "template-manager"}'>
                     <a class="icon app-i app-i__gears" title="Modules"></a>
                 </li>
                 <li data-node="labels:[]:container" data-config='{"id" : "pages"}'>
@@ -250,7 +250,7 @@
                 <li data-node="labels:[]:container" data-config='{"id" : "templates"}'>
                     <a class="icon app-i app-i__templates" title="Templates"></a>
                 </li>
-                <li class="hidden" data-node="labels:[]:container" data-config='{"id" : "form-modules", "isHidden" : true, "ajax" : {"url" : "%baseurl%/stuff/ajax.sidebar.php?tab=%tab%"}}'>
+                <li class="hidden" data-node="labels:[]:container" data-config='{"id" : "form-manager", "isHidden" : true, "ajax" : {"url" : "%baseurl%/stuff/ajax.sidebar.php?tab=%tab%"}}'>
                     <a class="icon app-i app-i__form" title="Form Modules"></a>
                 </li>
             </ul>
@@ -261,13 +261,13 @@
 
         <div class="sidebar__content">
             <ul>
-                <li class="sidebar__content__modules" data-node="tabs:[]:container" data-config='{"id" : "modules"}'>
-                    <div class="sidebar__content__title">
+                <li class="sidebar__content__modules" data-node="tabs:[]:container" data-config='{"id" : "template-manager"}'>
+                    <div class="sidebar__content__title" data-node="title">
                         <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Modules
                     </div>
 
-                    <div class="sidebar__content__descr">
-                        <div class="inner">
+                    <div class="sidebar__content__descr" data-node="descr">
+                        <div class="inner" data-node="inner">
                             <dl class="com__togglebox app__blocks-category is-show" data-element="togglebox" data-config='{"remember" : true, "name" : "app__sidebar-main"}' data-node="ComToggleBox.container">
                                 <dt data-node="ComToggleBox.button">
                                     <span class="icon default"></span>
@@ -378,7 +378,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "rss"}'>
+                                    <div class="app__block-container" data-element="app-dummy-block" data-node="AppDummyBlock:{}:container" data-config='{"keyword" : "form_builder"}'>
                                         <div class="app__block-dummy" data-node="dummy">
                                             <div class="inner">
                                                 <div class="icon module-form_builder"></div>
@@ -678,12 +678,12 @@
                     </div>
                 </li>
                 <li class="sidebar__content__pages" data-node="tabs:[]:container" data-config='{"id" : "pages"}'>
-                    <div class="sidebar__content__title">
+                    <div class="sidebar__content__title" data-node="title">
                         <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Pages
                     </div>
 
-                    <div class="sidebar__content__descr">
-                        <div class="inner">
+                    <div class="sidebar__content__descr" data-node="descr">
+                        <div class="inner" data-node="inner">
                             <div class="pt__toolbar">
                                 <div class="inner clear">
                                     <div class="left">
@@ -738,12 +738,12 @@
                     </div>
                 </li>
                 <li class="sidebar__content__layouts" data-node="tabs:[]:container" data-config='{"id" : "layouts"}'>
-                    <div class="sidebar__content__title">
+                    <div class="sidebar__content__title" data-node="title">
                         <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Layouts
                     </div>
 
-                    <div class="sidebar__content__descr">
-                        <div class="inner">
+                    <div class="sidebar__content__descr" data-node="descr">
+                        <div class="inner" data-node="inner">
                             <div class="pt__toolbar">
                                 <div class="inner clear">
                                     <div class="left">
@@ -773,12 +773,12 @@
                     </div>
                 </li>
                 <li class="sidebar__content__templates" data-node="tabs:[]:container" data-config='{"id" : "templates"}'>
-                    <div class="sidebar__content__title">
+                    <div class="sidebar__content__title" data-node="title">
                         <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Templates
                     </div>
 
-                    <div class="sidebar__content__descr">
-                        <div class="inner">
+                    <div class="sidebar__content__descr" data-node="descr">
+                        <div class="inner" data-node="inner">
                             <div class="sidebar__content__text">
                                 <p>Your installed templates are below. If you want to view/install other templates please <a>click here</a> to open Template Gallery.</p>
                             </div>
@@ -856,12 +856,12 @@
                         </div>
                     </div>
                 </li>
-                <li class="sidebar__content__modules" data-node="tabs:[]:container" data-config='{"id" : "form-modules"}'>
-                    <div class="sidebar__content__title">
+                <li class="sidebar__content__modules" data-node="tabs:[]:container" data-config='{"id" : "form-manager"}'>
+                    <div class="sidebar__content__title" data-node="title">
                         <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Form Modules
                     </div>
 
-                    <div class="sidebar__content__descr">
+                    <div class="sidebar__content__descr" data-node="descr">
                         <div class="inner" data-node="inner">
                         </div>
                     </div>
