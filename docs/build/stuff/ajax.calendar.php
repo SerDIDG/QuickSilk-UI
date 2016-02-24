@@ -27,13 +27,23 @@ switch($_GET['view']){
 	                </div>
 
 	                <div class="calendar__title">
-	                    <div class="pt__toolbar is-adaptive" data-node="buttons:{}:container">
+	                    <div class="pt__toolbar is-flex" data-node="buttons:{}:container">
 	                        <div class="inner clear">
 	                            <div class="left">
-	                                <h3>February, 2016</h3>
+				                    <ul class="group" data-node="views:{}">
+				                        <li>
+				                            <div class="button button-primary" data-node="agenda">Agenda</div>
+				                        </li>
+				                        <li>
+				                            <div class="button button-secondary" data-node="week">Week</div>
+				                        </li>
+				                        <li>
+				                            <div class="button button-secondary" data-node="month">Month</div>
+				                        </li>
+				                    </ul>
 	                            </div>
-	                            <div class="right">
-	                                <ul class="group">
+	                            <div class="center">
+	                                <ul class="group is-adaptive">
 	                                    <li>
 	                                        <div class="button" data-node="prev">&lt;</div>
 	                                    </li>
@@ -64,6 +74,16 @@ switch($_GET['view']){
 	                                    </li>
 	                                </ul>
 	                            </div>
+				                <div class="right">
+				                    <ul class="group is-adaptive">
+				                        <li class="is-field large">
+				                            <div class="form-field has-icon-right">
+				                                <input type="text" placeholder="Search" name="search" data-node="search-select">
+				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
+				                            </div>
+				                        </li>
+				                    </ul>
+				                </div>
 	                        </div>
 	                    </div>
 	                </div>
@@ -212,13 +232,23 @@ switch($_GET['view']){
 	                </div>
 
 	                <div class="calendar__title">
-	                    <div class="pt__toolbar is-adaptive" data-node="buttons:{}:container">
+	                    <div class="pt__toolbar is-flex" data-node="buttons:{}:container">
 	                        <div class="inner clear">
 	                            <div class="left">
-	                                <h3>February, 2016</h3>
+				                    <ul class="group" data-node="views:{}">
+				                        <li>
+				                            <div class="button button-secondary" data-node="agenda">Agenda</div>
+				                        </li>
+				                        <li>
+				                            <div class="button button-primary" data-node="week">Week</div>
+				                        </li>
+				                        <li>
+				                            <div class="button button-secondary" data-node="month">Month</div>
+				                        </li>
+				                    </ul>
 	                            </div>
-	                            <div class="right">
-	                                <ul class="group">
+	                            <div class="center">
+	                                <ul class="group is-adaptive">
 	                                    <li>
 	                                        <div class="button" data-node="prev">&lt;</div>
 	                                    </li>
@@ -239,6 +269,16 @@ switch($_GET['view']){
 	                                    </li>
 	                                </ul>
 	                            </div>
+				                <div class="right">
+				                    <ul class="group is-adaptive">
+				                        <li class="is-field large">
+				                            <div class="form-field has-icon-right">
+				                                <input type="text" placeholder="Search" name="search" data-node="search-select">
+				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
+				                            </div>
+				                        </li>
+				                    </ul>
+				                </div>
 	                        </div>
 	                    </div>
 	                </div>
@@ -366,13 +406,23 @@ switch($_GET['view']){
 	                </div>
 
 	                <div class="calendar__title">
-	                    <div class="pt__toolbar is-adaptive" data-node="buttons:{}:container">
+	                    <div class="pt__toolbar is-flex" data-node="buttons:{}:container">
 	                        <div class="inner clear">
 	                            <div class="left">
-	                                <h3>February, 2016</h3>
+				                    <ul class="group" data-node="views:{}">
+				                        <li>
+				                            <div class="button button-secondary" data-node="agenda">Agenda</div>
+				                        </li>
+				                        <li>
+				                            <div class="button button-secondary" data-node="week">Week</div>
+				                        </li>
+				                        <li>
+				                            <div class="button button-primary" data-node="month">Month</div>
+				                        </li>
+				                    </ul>
 	                            </div>
-	                            <div class="right">
-	                                <ul class="group">
+	                            <div class="center">
+	                                <ul class="group is-adaptive">
 	                                    <li>
 	                                        <div class="button" data-node="prev">&lt;</div>
 	                                    </li>
@@ -405,6 +455,16 @@ switch($_GET['view']){
 	                                    </li>
 	                                </ul>
 	                            </div>
+				                <div class="right">
+				                    <ul class="group is-adaptive">
+				                        <li class="is-field large">
+				                            <div class="form-field has-icon-right">
+				                                <input type="text" placeholder="Search" name="search" data-node="search-select">
+				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
+				                            </div>
+				                        </li>
+				                    </ul>
+				                </div>
 	                        </div>
 	                    </div>
 	                </div>

@@ -16,9 +16,13 @@
 
 <div class="app__module module__calendar">
     <div class="com__big-calendar" data-element="big-calendar" data-node="ComBigCalendar:{}:container" data-config='{"name" : "positionId", "ajax" : {"url" : "%baseurl%/stuff/ajax.calendar.php"}}'>
-        <div class="pt__toolbar is-adaptive is-flex" data-node="buttons:{}:container">
+        <div class="calendar__holder" data-node="holder:{}:container">
+            <div class="inner" data-node="inner"></div>
+        </div>
+
+        <div class="pt__toolbar is-adaptive is-flex">
             <div class="inner clear">
-                <div class="left">
+                <div class="right">
                     <ul class="group">
                         <li>
                             <div class="button">Add Event</div>
@@ -29,36 +33,12 @@
                         <li>
                             <div class="button">Export</div>
                         </li>
-                    </ul>
-                </div>
-                <div class="center">
-                    <ul class="group" data-node="views:{}">
                         <li>
-                            <div class="button button-secondary" data-node="agenda">Agenda</div>
-                        </li>
-                        <li>
-                            <div class="button button-secondary" data-node="week">Week</div>
-                        </li>
-                        <li>
-                            <div class="button button-secondary" data-node="month">Month</div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="right">
-                    <ul class="group">
-                        <li class="is-field large">
-                            <div class="form-field has-icon-right">
-                                <input type="text" placeholder="Search" name="search" data-node="search-select">
-                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
-                            </div>
+                            <div class="button">Print</div>
                         </li>
                     </ul>
                 </div>
             </div>
-        </div>
-    
-        <div class="calendar__holder" data-node="holder:{}:container">
-            <div class="inner" data-node="inner"></div>
         </div>
     </div>
 </div>
