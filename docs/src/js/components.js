@@ -166,6 +166,17 @@ window.Collector = new Com.Collector({
 
     /* *** TEST STUFF *** */
 
+    .add('big-calendar', function(node){
+        new Com.BigCalendar({
+            'node' : node,
+            'events' : {
+                'onProcessEnd' : function(calendar, node){
+                    window.Collector.construct(node);
+                }
+            }
+        });
+    })
+
     .add('login-popup', function(node){
         var dialog = new Com.Dialog({
             'content' : cm.getEl('sample-loginPopup'),
