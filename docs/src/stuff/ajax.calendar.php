@@ -429,7 +429,7 @@ switch($_GET['view']){
 	                                    <li class="is-field medium">
 	                                        <select data-element="Com.Select" name="month">
 	                                            <option value="0">January</option>
-	                                            <option value="1" selected>February</option>
+	                                            <option value="1">February</option>
 	                                            <option value="2">March</option>
 	                                            <option value="3">April</option>
 	                                            <option value="4">May</option>
@@ -439,7 +439,7 @@ switch($_GET['view']){
 	                                            <option value="8">September</option>
 	                                            <option value="9">October</option>
 	                                            <option value="10">November</option>
-	                                            <option value="11">December</option>
+	                                            <option value="11" selected>December</option>
 	                                        </select>
 	                                    </li>
 	                                    <li class="is-field x-small">

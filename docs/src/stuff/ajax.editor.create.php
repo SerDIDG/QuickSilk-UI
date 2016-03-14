@@ -39,19 +39,19 @@ switch($_POST['keyword']){
                     </div>';
 		break;
 	case 'hidden_tabs':
-		$module =  '<div class="app__module app-mod__hidden-tabs pull-left expand-bottom theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container">
+		$module =  '<div class="app__module app-mod__hidden-tabs pull-left expand-bottom theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container" data-config=\'{"event" : "click"}\'>
 						<div class="inner" data-node="inner">
 							<div class="tabs__head" data-node="head">
 								<div class="inner" data-node="head-inner">
 									<ul data-node="head-list">
 										<li data-node="labels:[]:container" data-config=\'{"id" : "sample", "title" : "Sample"}\'>
-											<a>Sample</a>
+											<a data-node="link">Sample</a>
 										</li>
 										<li data-node="labels:[]:container" data-config=\'{"id" : "test", "title" : "Test"}\'>
-											<a>Test</a>
+											<a data-node="link">Test</a>
 										</li>
 										<li data-node="labels:[]:container" data-config=\'{"id" : "case", "title" : "Case"}\'>
-											<a>Case</a>
+											<a data-node="link">Case</a>
 										</li>
 									</ul>
 								</div>
@@ -62,13 +62,13 @@ switch($_POST['keyword']){
 									<div class="label" data-node="menu-label"></div>
 									<ul class="pt__menu-dropdown" data-node="menu-list">
 										<li data-node="options:[]:container" data-config=\'{"id" : "sample"}\'>
-											<a>Sample</a>
+											<a data-node="link">Sample</a>
 										</li>
 										<li data-node="options:[]:container" data-config=\'{"id" : "test"}\'>
-											<a>Test</a>
+											<a data-node="link">Test</a>
 										</li>
 										<li data-node="options:[]:container" data-config=\'{"id" : "case"}\'>
-											<a>Case</a>
+											<a data-node="link">Case</a>
 										</li>
 									</ul>
 								</div>

@@ -14,7 +14,7 @@
 <h1 class="pt__box-title">Modules: Hidden Tabs</h1>
 <hr>
 
-<h2>Click event:</h2>
+<h2>Click Editable:</h2>
 <div class="app__module app-mod__hidden-tabs pull-left expand-bottom theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container" data-config='{"event" : "click", "isEditing" : true}'>
     <div class="inner" data-node="inner">
         <div class="tabs__head" data-node="head">
@@ -182,6 +182,67 @@
                     </li>
                     <li data-node="options:[]:container" data-config='{"id" : "case"}'>
                         <a>Case</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="tabs__content" data-node="content">
+            <div class="inner" data-node="content-inner">
+                <ul data-node="content-list">
+                    <li data-node="tabs:[]:container" data-config='{"id" : "sample"}'>
+                        <div class="inner" data-node="inner" data-element="App.Zone" data-config='{"zone" : 0}'>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eu nulla pulvinar, auctor metus a, finibus nunc. Aliquam at massa mattis, suscipit est et, ultrices ante. Vestibulum consequat accumsan urna, quis convallis urna cursus a. Curabitur ullamcorper lacinia metus, eu semper ex pellentesque vitae. Cras ornare nisl nibh, a laoreet sem commodo vel. Nulla venenatis, diam vitae faucibus mattis, tortor quam consequat sem, vitae malesuada magna enim sit amet dolor. Aenean varius rhoncus nunc sit amet molestie. Donec tempus nunc eget diam lacinia tempor. Cras nibh nisi, mollis in nulla quis, aliquam interdum tortor.</p>
+                        </div>
+                    </li>
+                    <li data-node="tabs:[]:container" data-config='{"id" : "test"}'>
+                        <div class="inner" data-node="inner" data-element="App.Zone" data-config='{"zone" : 1}'>
+                            <p>Quisque sed urna at quam feugiat mattis. Aenean ac nisl quis velit tincidunt imperdiet porta quis libero. Maecenas ullamcorper dui vel sapien ultricies vehicula. Donec at varius velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Quisque aliquet diam eget velit aliquam, ut tristique mi ultricies. Nullam ex nibh, pellentesque vitae ante sed, euismod aliquet tellus. Etiam commodo faucibus sem vitae mattis. Sed elementum et dolor sit amet tempor.</p>
+                        </div>
+                    </li>
+                    <li data-node="tabs:[]:container" data-config='{"id" : "case"}'>
+                        <div class="inner" data-node="inner" data-element="App.Zone" data-config='{"zone" : 2}'>
+                            <p>Ut sapien justo, congue ac arcu ut, laoreet feugiat dolor. Mauris eget mauris ut dolor fringilla mollis. Pellentesque nec tristique erat. Integer pretium placerat nisi faucibus mattis. Donec id posuere neque. Aenean arcu urna, suscipit nec porta quis, aliquet vitae massa. Integer tristique vestibulum risus at cursus. Ut at elementum lacus. Etiam sodales vel augue ut gravida. Fusce ut odio ac nunc ornare mattis. Donec dignissim, odio ut consequat tristique, tortor lacus egestas est, ac blandit tellus erat blandit sapien. Suspendisse hendrerit libero lacus, mattis suscipit eros vestibulum eget. Donec lobortis nibh nec consectetur imperdiet. Phasellus consequat blandit porttitor. Mauris et egestas metus, consectetur semper lectus.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<h2>Click Expand Bottom:</h2>
+<div class="app__module app-mod__hidden-tabs pull-left expand-top theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container" data-config='{"event" : "click"}'>
+    <div class="inner" data-node="inner">
+        <div class="tabs__head" data-node="head">
+            <div class="inner" data-node="head-inner">
+                <ul data-node="head-list">
+                    <li data-node="labels:[]:container" data-config='{"id" : "sample", "title" : "Sample"}'>
+                        <a data-node="link">Sample</a>
+                    </li>
+                    <li data-node="labels:[]:container" data-config='{"id" : "test", "title" : "Test"}'>
+                        <a data-node="link">Test</a>
+                    </li>
+                    <li data-node="labels:[]:container" data-config='{"id" : "case", "title" : "Case"}'>
+                        <a data-node="link">Case</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="tabs__menu" data-node="menu">
+            <div class="inner pt__menu menu" data-node="menu-inner">
+                <div class="icon default linked"></div>
+                <div class="label" data-node="menu-label"></div>
+                <ul class="pt__menu-dropdown" data-node="menu-list">
+                    <li data-node="options:[]:container" data-config='{"id" : "sample"}'>
+                        <a data-node="link">Sample</a>
+                    </li>
+                    <li data-node="options:[]:container" data-config='{"id" : "test"}'>
+                        <a data-node="link">Test</a>
+                    </li>
+                    <li data-node="options:[]:container" data-config='{"id" : "case"}'>
+                        <a data-node="link">Case</a>
                     </li>
                 </ul>
             </div>
