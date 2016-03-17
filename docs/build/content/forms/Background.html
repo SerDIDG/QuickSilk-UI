@@ -11,76 +11,165 @@
 
 <body>
 
-<h1 class="app-pt__box-title">Forms: Background</h1>
+<h1 class="app-pt__box-title">Forms: Styles</h1>
 <hr>
 
-<div class="form app-fm__background">
-    <dl>
-        <dt>Background Color:</dt>
-        <dd>
-            <input type="text" data-element="color-picker">
-        </dd>
-    </dl>
-    <dl>
-        <dt>Background Image:</dt>
-        <dd>
-            <div class="browse-button">
-                <input type="button" value="Browse">
-                <div class="inner">
-                    <input type="file">
-                </div>
-            </div>
-        </dd>
-    </dl>
-    <dl>
-        <dt>Image Repeat:</dt>
-        <dd>
-            <select data-element="select">
-                <option>No repeat</option>
-                <option>Repeat vertically</option>
-                <option>Repeat horizontally</option>
-                <option>Repeat both horizontally and vertically</option>
-            </select>
-        </dd>
-    </dl>
-    <dl>
-        <dt>Image Position:</dt>
-        <dd>
-            <div class="check-line">
-                <input id="image-position-select" type="radio" name="image-position" checked>
-                <label for="image-position-select">Select predefined position</label>
-                <div class="unveil">
-                    <select data-element="select">
-                        <option>Top Left</option>
-                        <option>Top Center</option>
-                        <option>Top Right</option>
-                        <option>Middle Left</option>
-                        <option>Middle Center</option>
-                        <option>Middle Right</option>
-                        <option>Bottom Left</option>
-                        <option>Bottom Center</option>
-                        <option>Bottom Right</option>
+<div class="app-fm__background">
+    <div data-element="Com.ToggleBox" data-config='{"name" : "form__styles__styles", "title" : "Styles", "renderStructure" : true, "remember" : true}'>
+        <div class="form">
+            <dl>
+                <dt>Style:</dt>
+                <dd>
+                    <select data-element="select"></select>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Custom CSS Class:</dt>
+                <dd>
+                    <select data-element="select"></select>
+                </dd>
+            </dl>
+            <hr>
+            <dl>
+                <dt>Indent:</dt>
+                <dd>
+                    <div class="check-line">
+                        <input id="indent-auto" type="radio" name="indent" checked>
+                        <label for="indent-auto">Auto</label>
+                    </div>
+                    <div class="check-line">
+                        <input id="indent-custom" type="radio" name="indent">
+                        <label for="indent-custom">Custom value</label>
+                        <div class="unveil">
+                            <input type="text" placeholder="0px">
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Padding:</dt>
+                <dd>
+                    <input type="text" placeholder="0px">
+                </dd>
+            </dl>
+            <dl>
+                <dt>Minimum height:</dt>
+                <dd>
+                    <input type="text" placeholder="0px">
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div data-element="Com.ToggleBox" data-config='{"name" : "form__styles__background", "title" : "Background", "renderStructure" : true, "remember" : true}'>
+        <div class="form">
+            <dl>
+                <dt>Background Color:</dt>
+                <dd>
+                    <input type="text" data-element="color-picker">
+                </dd>
+            </dl>
+            <dl>
+                <dt>Background Image:</dt>
+                <dd>
+                    <div class="pt__box-item size-80">
+                        <div class="l">
+                            <div class="pt__image is-zoom" data-element="Com.ImageBox" data-config='{"zoom" : true}'>
+                                <a class="inner" data-node="items:[]:link" title="Some title text" href="../../img/examples/gallery/1.jpg">
+                                    <img class="descr" alt="" src="../../img/examples/parts/no-avatar-80.png">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="r">
+                            <div class="btn-wrap left">
+                                <div class="browse-button">
+                                    <input type="button" value="Upload">
+                                    <div class="inner">
+                                        <input type="file">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>
+                    Image Scaling:
+                    <div class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                        <div class="icon default linked" data-node="button"></div>
+                        <div class="com__help-bubble__content" data-node="content">
+                            <div class="pt__listing-clear">
+                                <ul>
+                                    <li><b>Original</b> - Image is not scaled but displays as is.</li>
+                                    <li><b>Tile</b> - Scale the image to the largest size such that both its width and its height can fit inside the content area.</li>
+                                    <li><b>Fit</b> - Scale the background image to be as large as possible so that the background area is completely covered by the background image. Some parts of the background image may not be in view within the background positioning area.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </dt>
+                <dd>
+                    <select data-element="Com.Select">
+                        <option value="original">Original</option>
+                        <option value="cover">Tile</option>
+                        <option value="contain">Fit</option>
                     </select>
-                </div>
-            </div>
-            <div class="check-line">
-                <input id="image-position-input" type="radio" name="image-position">
-                <label for="image-position-input">Enter custom values</label>
-                <div class="unveil">
-                    <input type="text" placeholder="0px 0px">
-                    <div class="hint">First value is for vertical position, second value is for horizontal position.</div>
-                </div>
-            </div>
-        </dd>
-    </dl>
-    <dl>
-        <dt>Image Parallax:</dt>
-        <dd>
-            <div class="check-line">
-                <input type="checkbox">
-            </div>
-        </dd>
-    </dl>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Image Repeat:</dt>
+                <dd>
+                    <select data-element="Com.Select">
+                        <option>No repeat</option>
+                        <option>Repeat vertically</option>
+                        <option>Repeat horizontally</option>
+                        <option>Repeat both horizontally and vertically</option>
+                    </select>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Image Position:</dt>
+                <dd>
+                    <div class="check-line">
+                        <input id="image-position-select" type="radio" name="image-position" checked>
+                        <label for="image-position-select">Select predefined position</label>
+                        <div class="unveil">
+                            <select data-element="select">
+                                <option>Top Left</option>
+                                <option>Top Center</option>
+                                <option>Top Right</option>
+                                <option>Middle Left</option>
+                                <option>Middle Center</option>
+                                <option>Middle Right</option>
+                                <option>Bottom Left</option>
+                                <option>Bottom Center</option>
+                                <option>Bottom Right</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="check-line">
+                        <input id="image-position-input" type="radio" name="image-position">
+                        <label for="image-position-input">Enter custom values</label>
+                        <div class="unveil">
+                            <input type="text" placeholder="0px 0px">
+                            <div class="hint">First value is for vertical position, second value is for horizontal position.</div>
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Image Parallax:</dt>
+                <dd>
+                    <div class="check-line">
+                        <input type="checkbox">
+                    </div>
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+
     <hr>
     <div class="btn-wrap">
         <input class="button" type="submit" value="Save" name="save">

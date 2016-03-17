@@ -39,7 +39,7 @@ switch($_POST['keyword']){
                     </div>';
 		break;
 	case 'hidden_tabs':
-		$module =  '<div class="app__module app-mod__hidden-tabs pull-left expand-bottom theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container" data-config=\'{"event" : "click"}\'>
+		$module =  '<div class="app__module app-mod__rollover-tabs pull-left expand-bottom theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container" data-config=\'{"event" : "click"}\'>
 						<div class="inner" data-node="inner">
 							<div class="tabs__head" data-node="head">
 								<div class="inner" data-node="head-inner">
