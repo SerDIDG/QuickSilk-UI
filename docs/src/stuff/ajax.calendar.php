@@ -78,7 +78,7 @@ switch($_GET['view']){
 				                    <ul class="group is-adaptive">
 				                        <li class="is-field large">
 				                            <div class="form-field has-icon-right">
-				                                <input type="text" placeholder="Search" name="search" data-node="search-select">
+				                                <input type="text" placeholder="Search" name="search" data-node="search-input">
 				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
 				                            </div>
 				                        </li>
@@ -273,7 +273,7 @@ switch($_GET['view']){
 				                    <ul class="group is-adaptive">
 				                        <li class="is-field large">
 				                            <div class="form-field has-icon-right">
-				                                <input type="text" placeholder="Search" name="search" data-node="search-select">
+				                                <input type="text" placeholder="Search" name="search" data-node="search-input">
 				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
 				                            </div>
 				                        </li>
@@ -287,6 +287,7 @@ switch($_GET['view']){
 	                    <table>
 	                        <thead>
 	                            <tr>
+	                            	<th class="event-type"></th>
 	                                <th>Sun 7, \'16</th>
 	                                <th>Mon 8, \'16</th>
 	                                <th>Tue 9, \'16</th>
@@ -298,6 +299,11 @@ switch($_GET['view']){
 	                        </thead>
 	                        <tbody>
 	                            <tr class="is-allday">
+	                            	<td class="event-type">
+	                            		<div class="calendar__type">
+	                            			<div class="label">All day</div>
+										</div>
+									</td>
 	                                <td class="weekend" data-node="days:[]:container">
 	                                    <div class="calendar__day" data-node="day">
 	                                        <div class="inner" data-node="inner"></div>
@@ -334,6 +340,7 @@ switch($_GET['view']){
 	                                </td>
 	                            </tr>
 	                            <tr>
+	                            	<td class="event-type"></td>
 	                                <td class="weekend" data-node="days:[]:container">
 	                                    <div class="calendar__day" data-node="day">
 	                                        <div class="inner" data-node="inner"></div>
@@ -459,7 +466,7 @@ switch($_GET['view']){
 				                    <ul class="group is-adaptive">
 				                        <li class="is-field large">
 				                            <div class="form-field has-icon-right">
-				                                <input type="text" placeholder="Search" name="search" data-node="search-select">
+				                                <input type="text" placeholder="Search" name="search" data-node="search-input">
 				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
 				                            </div>
 				                        </li>

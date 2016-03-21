@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.14.1 (2016-03-17 19:11) ************ */
+/*! ************ MagpieUI v3.14.2 (2016-03-21 17:32) ************ */
 /*!
 Animate.css - http://daneden.me/animate
 Licensed under the MIT license - http://opensource.org/licenses/MIT
@@ -12583,6 +12583,9 @@ button::-moz-focus-inner {
   vertical-align: top;
   text-align: center;
 }
+.com__calendar-week .calendar__table > table th.event-type {
+  width: 60px;
+}
 .com__calendar-week .calendar__table > table td {
   border: 1px solid #cccccc;
   vertical-align: top;
@@ -12593,6 +12596,10 @@ button::-moz-focus-inner {
 .com__calendar-week .calendar__table > table td:hover {
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
+}
+.com__calendar-week .calendar__table > table td.event-type {
+  border-width: 0;
+  vertical-align: middle;
 }
 .com__calendar-week .calendar__table > table td.default {
   background-color: #ffffff;
@@ -12618,8 +12625,17 @@ button::-moz-focus-inner {
 .com__calendar-week .calendar__table > table td.today:hover {
   background-color: #e9f2fb;
 }
-.com__calendar-week .calendar__table > table tr.is-allday td {
+.com__calendar-week .calendar__table > table tr.is-allday td,
+.com__calendar-week .calendar__table > table tr.is-allday td.event-type {
   border-bottom-width: 2px;
+}
+.com__calendar-week .calendar__type {
+  padding: 4px;
+}
+.com__calendar-week .calendar__type .label {
+  font: 400 11px/18px Open Sans, sans-serif;
+  color: #999999;
+  text-align: center;
 }
 .com__calendar-week .calendar__day {
   padding: 4px;
@@ -16837,7 +16853,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.7.0 (2016-03-17 18:31) ************ */
+/*! ************ QuickSilk-Application v3.7.0 (2016-03-21 17:34) ************ */
 /* ************ APPLICATION: STYLES ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';

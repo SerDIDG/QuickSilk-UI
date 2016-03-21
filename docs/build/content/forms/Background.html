@@ -14,54 +14,9 @@
 <h1 class="app-pt__box-title">Forms: Styles</h1>
 <hr>
 
-<div class="app-fm__background">
-    <div data-element="Com.ToggleBox" data-config='{"name" : "form__styles__styles", "title" : "Styles", "renderStructure" : true, "remember" : true}'>
-        <div class="form">
-            <dl>
-                <dt>Style:</dt>
-                <dd>
-                    <select data-element="select"></select>
-                </dd>
-            </dl>
-            <dl>
-                <dt>Custom CSS Class:</dt>
-                <dd>
-                    <select data-element="select"></select>
-                </dd>
-            </dl>
-            <hr>
-            <dl>
-                <dt>Indent:</dt>
-                <dd>
-                    <div class="check-line">
-                        <input id="indent-auto" type="radio" name="indent" checked>
-                        <label for="indent-auto">Auto</label>
-                    </div>
-                    <div class="check-line">
-                        <input id="indent-custom" type="radio" name="indent">
-                        <label for="indent-custom">Custom value</label>
-                        <div class="unveil">
-                            <input type="text" placeholder="0px">
-                        </div>
-                    </div>
-                </dd>
-            </dl>
-            <dl>
-                <dt>Padding:</dt>
-                <dd>
-                    <input type="text" placeholder="0px">
-                </dd>
-            </dl>
-            <dl>
-                <dt>Minimum height:</dt>
-                <dd>
-                    <input type="text" placeholder="0px">
-                </dd>
-            </dl>
-        </div>
-    </div>
+<div class="form__background">
 
-    <div data-element="Com.ToggleBox" data-config='{"name" : "form__styles__background", "title" : "Background", "renderStructure" : true, "remember" : true}'>
+    <div data-element="Com.ToggleBox" data-config='{"name" : "form__styles__background", "title" : "Background", "renderStructure" : true, "remember" : true, "className" : false}'>
         <div class="form">
             <dl>
                 <dt>Background Color:</dt>
@@ -96,18 +51,18 @@
             <dl>
                 <dt>
                     Image Scaling:
-                    <div class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
-                        <div class="icon default linked" data-node="button"></div>
-                        <div class="com__help-bubble__content" data-node="content">
-                            <div class="pt__listing-clear">
-                                <ul>
-                                    <li><b>Original</b> - Image is not scaled but displays as is.</li>
-                                    <li><b>Tile</b> - Scale the image to the largest size such that both its width and its height can fit inside the content area.</li>
-                                    <li><b>Fit</b> - Scale the background image to be as large as possible so that the background area is completely covered by the background image. Some parts of the background image may not be in view within the background positioning area.</li>
-                                </ul>
-                            </div>
+                <div class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                    <div class="icon default linked" data-node="button"></div>
+                    <div class="com__help-bubble__content" data-node="content">
+                        <div class="pt__listing-clear">
+                            <ul>
+                                <li><b>Original</b> - Image is not scaled but displays as is.</li>
+                                <li><b>Tile</b> - Scale the image to the largest size such that both its width and its height can fit inside the content area.</li>
+                                <li><b>Fit</b> - Scale the background image to be as large as possible so that the background area is completely covered by the background image. Some parts of the background image may not be in view within the background positioning area.</li>
+                            </ul>
                         </div>
                     </div>
+                </div>
                 </dt>
                 <dd>
                     <select data-element="Com.Select">
@@ -169,8 +124,54 @@
         </div>
     </div>
 
+    <div data-element="Com.ToggleBox" data-config='{"name" : "form__styles__styles", "title" : "Styles", "renderStructure" : true, "remember" : true, "className" : false}'>
+        <div class="form">
+            <dl>
+                <dt>Style:</dt>
+                <dd>
+                    <select data-element="select"></select>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Custom CSS Class:</dt>
+                <dd>
+                    <select data-element="select"></select>
+                </dd>
+            </dl>
+            <hr>
+            <dl>
+                <dt>Indent:</dt>
+                <dd>
+                    <div class="check-line">
+                        <input id="indent-auto" type="radio" name="indent" checked>
+                        <label for="indent-auto">Auto</label>
+                    </div>
+                    <div class="check-line">
+                        <input id="indent-custom" type="radio" name="indent">
+                        <label for="indent-custom">Custom value</label>
+                        <div class="unveil">
+                            <input type="text" placeholder="0px">
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Padding:</dt>
+                <dd>
+                    <input type="text" placeholder="0px">
+                </dd>
+            </dl>
+            <dl>
+                <dt>Minimum height:</dt>
+                <dd>
+                    <input type="text" placeholder="0px">
+                </dd>
+            </dl>
+        </div>
+    </div>
 
     <hr>
+
     <div class="btn-wrap">
         <input class="button" type="submit" value="Save" name="save">
         <input class="transparent" type="button" value="Cancel" name="cancel">
