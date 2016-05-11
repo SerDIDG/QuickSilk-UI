@@ -1,5 +1,6 @@
 .DS_store
 .idea
 .git
+libs
 
 node_modules

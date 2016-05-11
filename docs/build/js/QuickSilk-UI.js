@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.14.2 (2016-03-21 17:52) ************ */
+/*! ************ MagpieUI v3.16.0 (2016-05-11 20:46) ************ */
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -12335,6 +12335,11 @@ if(!Date.now){
         };
     }
 })();
+
+// /* ************************************************ */
+// /* ******* MAGPIE UI: COMMON ******* */
+// /* ************************************************ */
+
 /* ******* INFO ******* */
 
 /* *******
@@ -12361,7 +12366,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.14.2',
+        '_version' : '3.16.0',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -12580,7 +12585,7 @@ cm.merge = function(o1, o2){
                     }else if(cm.isObject(item)){
                         o[key] = cm.merge(o[key], item);
                     }else if(cm.isArray(item)){
-                        o[key] = cm.merge(o[key], item);
+                        o[key] = cm.clone(item);
                     }else{
                         o[key] = item;
                     }
@@ -12854,9 +12859,12 @@ cm.getEventClientPosition = function(e){
         try{
             o['left'] = e.clientX;
             o['top'] = e.clientY;
-            if(e.touches){
+            if(e.touches && e.touches.length){
                 o['left'] = e.touches[0].clientX;
                 o['top'] = e.touches[0].clientY;
+            }else if(e.changedTouches && e.changedTouches.length){
+                o['left'] = e.changedTouches[0].clientX;
+                o['top'] = e.changedTouches[0].clientY;
             }
         }catch(e){}
     }
@@ -13545,14 +13553,14 @@ cm.insertLast = cm.appendChild = function(node, target){
 };
 
 cm.insertBefore = function(node, target){
-    if(cm.isNode(node) && cm.isNode(target)){
+    if(cm.isNode(node) && cm.isNode(target) && target.parentNode){
         target.parentNode.insertBefore(node, target);
     }
     return node;
 };
 
 cm.insertAfter = function(node, target){
-    if(cm.isNode(node) && cm.isNode(target)){
+    if(cm.isNode(node) && cm.isNode(target) && target.parentNode){
         var before = target.nextSibling;
         if(before != null){
             cm.insertBefore(node, before);
@@ -13567,6 +13575,24 @@ cm.replaceNode = function(node, target){
     cm.insertBefore(node, target);
     cm.remove(target);
     return node;
+};
+
+cm.appendNodes = function(nodes, target){
+    if(cm.isEmpty(nodes)){
+        return target;
+    }
+    if(cm.isNode(nodes)){
+        target.appendChild(nodes);
+    }else{
+        while(nodes.length){
+            if(cm.isNode(nodes[0])){
+                target.appendChild(nodes[0]);
+            }else{
+                cm.remove(nodes[0]);
+            }
+        }
+    }
+    return target;
 };
 
 cm.hideSpecialTags = function(){
@@ -13746,12 +13772,17 @@ cm.setFDO = function(o, form){
 };
 
 cm.getFDO = function(o, chbx){
-    var data = {},
-        elements = [
-            o.getElementsByTagName('input'),
-            o.getElementsByTagName('textarea'),
-            o.getElementsByTagName('select')
-        ];
+    var data = {};
+
+    if(!cm.isNode(o)){
+        return data;
+    }
+
+    var elements = [
+        o.getElementsByTagName('input'),
+        o.getElementsByTagName('textarea'),
+        o.getElementsByTagName('select')
+    ];
 
     var setValue = function(name, value){
         if(/\[.*\]$/.test(name)){
@@ -13955,6 +13986,7 @@ cm.strReplace = function(str, vars){
 };
 
 cm.reduceText = function(str, length, points){
+    points = typeof points == 'undefined' ? false : points;
     if(str.length > length){
         return str.slice(0, length) + ((points) ? '...' : '');
     }else{
@@ -14796,18 +14828,37 @@ cm.getSupportedStyle = function(style){
 cm.getTransitionDurationFromRule = function(rule){
     var openDurationRule = cm.getCSSRule(rule)[0],
         openDurationProperty;
-    if(openDurationRule){
-        if(openDurationProperty = openDurationRule.style[cm.getSupportedStyle('transitionDuration')]){
-            if(openDurationProperty.match('ms')){
-                return parseFloat(openDurationProperty);
-            }else if(openDurationProperty.match('s')){
-                return (openDurationProperty) / 1000;
-            }else{
-                return parseFloat(openDurationProperty);
-            }
+    if(
+        openDurationRule
+        && (openDurationProperty = openDurationRule.style[cm.getSupportedStyle('transitionDuration')])
+    ){
+        return cm.parseTransitionDuration(openDurationProperty);
+    }
+    return 0;
+};
+
+cm.getTransitionDurationFromLESS = function(name, defaults){
+    var variable = cm.getLESSVariable(name, defaults, false);
+    return cm.parseTransitionDuration(variable);
+};
+
+cm.parseTransitionDuration = function(value){
+    if(value){
+        if(value.match('ms')){
+            return parseFloat(value);
+        }else if(value.match('s')){
+            return (value) / 1000;
+        }else{
+            return parseFloat(value);
         }
     }
     return 0;
+};
+
+cm.getLESSVariable = function(name, defaults, parse){
+    name = name.replace(/^@/, '');
+    var variable = window.LESS && window.LESS[name] ? window.LESS[name] : defaults;
+    return parse ? cm.styleToNumber(variable) : variable;
 };
 
 cm.createStyleSheet = function(){
@@ -14912,6 +14963,110 @@ cm.setCSSTransitionDuration = (function(){
 
 cm.inRange = function(a1, b1, a2, b2){
     return a1 >= a2 && a1 <= b2 || b1 >= a2 && b1 <= b2 || a2 >= a1 && a2 <= b1
+};
+
+cm.CSSValuesToArray = function(value){
+    if(cm.isEmpty(value)){
+        return [0, 0, 0, 0];
+    }
+    value = value.replace(/[^0-9\s]/g , '').split(/\s+/);
+    cm.forEach(value, function(item, key){
+        value[key] = cm.isEmpty(item) ? 0 : parseFloat(item);
+    });
+    switch(value.length){
+        case 0:
+            value = [0, 0, 0, 0];
+            break;
+        case 1:
+            value = [value[0], value[0], value[0], value[0]];
+            break;
+        case 2:
+            value = [value[0], value[1], value[0], value[1]];
+            break;
+        case 3:
+            value = [value[0], value[1], value[2], value[1]];
+            break;
+    }
+    return value;
+};
+
+cm.arrayToCSSValues = function(a){
+    cm.forEach(a, function(item, key){
+        a[key] = cm.isEmpty(item) ? 0 : parseFloat(item);
+    });
+    return a.reduce(function(prev, next, index, a){
+        return prev + 'px ' + next + ((index == a.length - 1) ? 'px' : '');
+    });
+};
+
+/* ******* VALIDATORS ******* */
+
+cm.keyCodeTable = {
+    8  : 'delete',
+    9  : 'tab',
+    13 : 'enter',
+    27 : 'escape',
+    32 : 'space',
+    35 : 'home',
+    36 : 'end',
+    37 : 'left',
+    38 : 'top',
+    39 : 'right',
+    40 : 'bottom',
+    46 : 'backspace'
+};
+
+cm.isKeyCode = function(code, rules){
+    var isMath = false;
+    if(cm.isString(rules)){
+        rules = rules.split(/\s+/);
+    }
+    cm.forEach(rules, function(rule){
+        if(cm.keyCodeTable[code] == rule){
+            isMath = true;
+        }
+    });
+    return isMath;
+};
+
+cm.allowKeyCode = function(code, rules){
+    var codes = [];
+    cm.forEach(cm.keyCodeTable, function(item, key){
+        if(cm.inArray(rules, item)){
+            codes.push(key);
+        }
+    });
+    return cm.inArray(codes, code.toString());
+};
+
+cm.disallowKeyCode = function(code, rules){
+    var codes = [];
+    cm.forEach(cm.keyCodeTable, function(item, key){
+        if(!cm.inArray(rules, item)){
+            codes.push(key);
+        }
+    });
+    cm.log(codes, code);
+    return cm.inArray(codes, code.toString());
+};
+
+cm.charCodeIsDigit = function(code){
+    var codeString = String.fromCharCode(code);
+    return /^\d$/.test(codeString);
+};
+
+cm.allowOnlyDigitInputEvent = function(input, callback){
+    var value;
+    cm.addEvent(input, 'input', function(e){
+        value = input.value.replace(/[^\d]/, '');
+        if(input.type == 'number'){
+            input.value = Math.min(parseFloat(value), parseFloat(input.max));
+        }else{
+            input.value = cm.reduceText(value, parseInt(input.maxlength));
+        }
+        callback && callback(e, input.value);
+    });
+    return input;
 };
 
 /* ******* ANIMATION ******* */
@@ -15241,9 +15396,15 @@ cm.ajax = function(o){
             config['params'] = cm.obj2FormData(config['params']);
             delete config['headers']['Content-Type'];
         }else if(cm.isObject(config['params'])){
+            config['params'] = cm.objectReplace(config['params'], {
+                '%baseurl%' : cm._baseUrl
+            });
             config['params'] = cm.obj2URI(config['params']);
         }
         // Build request link
+        config['url'] = cm.strReplace(config['url'], {
+            '%baseurl%' : cm._baseUrl
+        });
         if(config['method'] != 'post'){
             if(!cm.isEmpty(config['params'])){
                 config['url'] = [config['url'], config['params']].join('?');
@@ -15331,7 +15492,10 @@ cm.ajax = function(o){
         // Prepare url and attach events
         scriptNode = cm.Node('script', {'type' : 'application/javascript'});
         if(/%callback%|%25callback%25/.test(config['url'])){
-            config['url'] = cm.strReplace(config['url'], {'%callback%' : callbackSuccessName, '%25callback%25' : callbackSuccessName});
+            config['url'] = cm.strReplace(config['url'], {
+                '%callback%' : callbackSuccessName,
+                '%25callback%25' : callbackSuccessName
+            });
         }else{
             cm.addEvent(scriptNode, 'load', window[callbackSuccessName]);
         }
@@ -15592,7 +15756,7 @@ cm.getConstructor = function(className, callback){
     callback = typeof callback != 'undefined' ? callback : function(){}
     if(!className || className == '*'){
         cm.forEach(cm.defineStack, function(classConstructor){
-            callback(classConstructor, className);
+            callback(classConstructor, className, classConstructor.prototype);
         });
         return cm.defineStack;
     }else{
@@ -15607,7 +15771,7 @@ cm.getConstructor = function(className, callback){
             }
             return false;
         }else{
-            callback(classConstructor, className);
+            callback(classConstructor, className, classConstructor.prototype);
             return classConstructor;
         }
     }
@@ -16126,6 +16290,19 @@ Mod['DataNodes'] = {
         }
         that.nodes = cm.merge(that.nodes, that.params['nodes']);
         return that;
+    },
+    'getDataNodesObject' : function(container, dataMarker, className){
+        var that = this,
+            sourceNodes = {};
+        container = typeof container == 'undefined'? document.body : container;
+        dataMarker = typeof dataMarker == 'undefined'? that.params['nodesDataMarker'] : dataMarker;
+        className = typeof className == 'undefined'? that.params['nodesMarker'] : className;
+        if(className){
+            sourceNodes = cm.getNodes(container, dataMarker)[className] || {};
+        }else{
+            sourceNodes = cm.getNodes(container, dataMarker);
+        }
+        return sourceNodes;
     }
 };
 
@@ -16158,7 +16335,7 @@ Mod['Storage'] = {
             cm.errorLog({
                 'type' : 'attention',
                 'name' : that._name['full'],
-                'message' : ['Parameter', cm.strWrap(key, '"'), 'does not exist or is not set.'].join(' ')
+                'message' : ['Parameter', cm.strWrap(key, '"'), 'does not exist or is not set in component with name', cm.strWrap(that.params['name'], '"'), '.'].join(' ')
             });
             return null;
         }
@@ -16306,10 +16483,9 @@ Mod['Stack'] = {
     'findInStack' : function(name, parent, callback){
         var that = this,
             items = [];
-        parent = parent || document.body;
         callback = typeof callback == 'function' ? callback : function(){};
         cm.forEach(that._stack, function(item){
-            if((cm.isEmpty(name) || item['name'] == name) && cm.isParent(parent, item['node'], true)){
+            if((cm.isEmpty(name) || item['name'] == name) && (cm.isEmpty(parent) || cm.isParent(parent, item['node'], true))){
                 items.push(item);
                 callback(item['class'], item, name);
             }
@@ -16777,6 +16953,616 @@ cm.init = function(){
 };
 
 cm.onReady(cm.init, false);
+cm.define('Com.AbstractInput', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'Structure',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onRedraw',
+        'onSet',
+        'onSelect',
+        'onChange',
+        'onDisable',
+        'onEnable'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'container' : null,
+        'name' : '',
+        'embedStructure' : 'replace',
+        'value' : null,
+        'title' : '',
+        'disabled' : false,
+        'className' : '',
+        'ui' : true,
+        'maxlength' : 0                 // 0 - infinity
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.isDestructed = false;
+    that.previousValue = null;
+    that.value = null;
+    that.disabled = false;
+    that.construct(params);
+});
+
+cm.getConstructor('Com.AbstractInput', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        that.redrawHandler = that.redraw.bind(that);
+        that.destructHandler = that.destruct.bind(that);
+        that.setHandler = that.setAction.bind(that);
+        that.selectHandler = that.selectAction.bind(that);
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.setEvents();
+        that.set(that.params['value'], false);
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        return that;
+    };
+
+    classProto.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            that.unsetEvents();
+            that.removeFromStack();
+        }
+        return that;
+    };
+
+    classProto.set = function(value, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        value = that.validateValue(value);
+        that.selectAction(value, triggerEvents);
+        that.setAction(value, triggerEvents);
+        that.changeAction(triggerEvents);
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this;
+        return that.value;
+    };
+
+    classProto.redraw = function(){
+        var that = this;
+        that.triggerEvent('onRedraw');
+        return that;
+    };
+
+    classProto.enable = function(){
+        var that = this;
+        that.disabled = false;
+        cm.removeClass(cm.nodes['container'], 'disabled');
+        cm.removeClass(cm.nodes['content'], 'disabled');
+        that.triggerEvent('onEnable');
+        return that;
+    };
+
+    classProto.disable = function(){
+        var that = this;
+        that.disabled = true;
+        cm.addClass(that.nodes['container'], 'disabled');
+        cm.addClass(that.nodes['content'], 'disabled');
+        that.triggerEvent('onDisable');
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        if(cm.isNode(that.params['node'])){
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+            that.params['disabled'] = that.params['node'].disabled || that.params['node'].readOnly || that.params['disabled'];
+            that.params['value'] = that.params['node'].value || that.params['value'];
+        }
+        that.disabled = that.params['disabled'];
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Structure
+        that.renderView();
+        // Attributes
+        that.setAttributes();
+        // Append
+        that.embedStructure(that.nodes['container']);
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.nodes['container'] = cm.node('div', {'class' : 'com__input'},
+            that.nodes['hidden'] = cm.node('input', {'type' : 'hidden'}),
+            that.nodes['content'] = that.renderContent()
+        );
+        return that;
+    };
+
+    classProto.renderContent = function(){
+        return cm.node('div', {'class' : 'input__content'});
+    };
+
+    classProto.setAttributes = function(){
+        var that = this;
+        cm.addClass(that.nodes['container'], that.params['className']);
+        // Data attributes
+        cm.forEach(that.params['node'].attributes, function(item){
+            if(/^data-(?!node|element)/.test(item.name)){
+                that.nodes['hidden'].setAttribute(item.name, item.value);
+            }
+        });
+        if(that.params['title']){
+            that.nodes['container'].setAttribute('title', that.lang(that.params['title']));
+        }
+        if(that.params['name']){
+            that.nodes['hidden'].setAttribute('name', that.params['name']);
+        }
+        return that;
+    };
+
+    classProto.setEvents = function(){
+        var that = this;
+        // Windows events
+        cm.addEvent(window, 'resize', that.redrawHandler);
+        // Add custom events
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.nodes['container'], 'redraw', that.redrawHandler);
+            cm.customEvent.add(that.nodes['container'], 'destruct', that.destructHandler);
+        }
+        return that;
+    };
+
+    classProto.unsetEvents = function(){
+        var that = this;
+        // Windows events
+        cm.removeEvent(window, 'resize', that.redrawHandler);
+        // Remove custom events
+        if(that.params['customEvents']){
+            cm.customEvent.remove(that.nodes['container'], 'redraw', that.redrawHandler);
+            cm.customEvent.remove(that.nodes['container'], 'destruct', that.destructHandler);
+        }
+        return that;
+    };
+
+    classProto.validateValue = function(value){
+        return value;
+    };
+
+    classProto.selectAction = function(value, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        if(triggerEvents){
+            that.triggerEvent('onSelect', value);
+        }
+        return that;
+    };
+
+    classProto.setAction = function(value, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        that.previousValue = that.value;
+        that.value = value;
+        that.nodes['hidden'].value = that.value;
+        if(triggerEvents){
+            that.triggerEvent('onSet', that.value);
+        }
+        return that;
+    };
+
+    classProto.changeAction = function(triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        if(triggerEvents && that.value != that.previousValue){
+            that.triggerEvent('onChange', that.value);
+        }
+        return that;
+    };
+});
+cm.define('Com.AbstractRange', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'Structure',
+        'DataConfig',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onSet',
+        'onSelect',
+        'onChange'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'container' : null,
+        'name' : '',
+        'embedStructure' : 'replace',
+        'isInput' : true,
+        'content' : null,
+        'drag' : null,
+        'className' : '',
+        'theme' : 'theme--arrows',
+        'min' : 0,
+        'max' : 100,
+        'value' : 0,
+        'direction' : 'horizontal',
+        'showCounter' : true,
+        'customEvents' : true,
+        'Com.Draggable' : {}
+    }
+},
+function(params){
+    var that = this;
+    that.isDestructed = false;
+    that.previousValue = null;
+    that.value = null;
+    that.nodes = {};
+    that.components = {};
+    that.construct(params);
+});
+
+cm.getConstructor('Com.AbstractRange', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        that.redrawHandler = that.redraw.bind(that);
+        that.destructHandler = that.destruct.bind(that);
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.set(that.params['value'], false);
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        return that;
+    };
+
+    classProto.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            that.unsetEvents();
+            that.removeFromStack();
+        }
+        return that;
+    };
+
+    classProto.set = function(value, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        value = that.validateValue(value);
+        that.setCounter(value);
+        that.setDraggable();
+        that.selectAction(value, triggerEvents);
+        that.setAction(value, triggerEvents);
+        that.changeAction(triggerEvents);
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this;
+        return that.value;
+    };
+
+    classProto.redraw = function(){
+        var that = this;
+        that.setDraggable();
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        if(that.params['isInput'] && cm.isNode(that.params['node'])){
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+            that.params['value'] = that.params['node'].getAttribute('value') || that.params['value'];
+        }
+        that.params['Com.Draggable']['direction'] = that.params['direction'];
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Structure
+        that.renderView();
+        // Draggable
+        cm.getConstructor('Com.Draggable', function(classConstructor, className){
+            that.components['draggable'] = new classConstructor(
+                cm.merge(that.params[className], {
+                    'target' : that.nodes['inner'],
+                    'node' : that.nodes['drag'],
+                    'limiter' : that.nodes['inner'],
+                    'events' : {
+                        'onStart' : function(){
+                            switch(that.params['direction']){
+                                case 'horizontal':
+                                    cm.addClass(document.body, 'cm__cursor--col-resize');
+                                    break;
+
+                                case 'vertical':
+                                    cm.addClass(document.body, 'cm__cursor--row-resize');
+                                    break;
+                            }
+                            that.showCounter();
+                        },
+                        'onStop' : function(){
+                            switch(that.params['direction']){
+                                case 'horizontal':
+                                    cm.removeClass(document.body, 'cm__cursor--col-resize');
+                                    break;
+
+                                case 'vertical':
+                                    cm.removeClass(document.body, 'cm__cursor--row-resize');
+                                    break;
+                            }
+                            that.hideCounter();
+                        },
+                        'onSelect' : function(my, data){
+                            var value = that.getRangeValue(data);
+                            value = that.validateValue(value);
+                            that.setCounter(value);
+                            that.selectAction(value);
+                        },
+                        'onSet' : function(my, data){
+                            var value = that.getRangeValue(data);
+                            value = that.validateValue(value);
+                            that.setCounter(value);
+                            that.setAction(value);
+                            that.changeAction();
+                        }
+                    }
+                })
+            );
+        });
+        // Events
+        that.setEvents();
+        // Append
+        that.embedStructure(that.nodes['container']);
+        return that;
+    };
+
+    classProto.setEvents = function(){
+        var that = this;
+        // Windows events
+        cm.addEvent(window, 'resize', that.redrawHandler);
+        // Add custom events
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.nodes['container'], 'redraw', that.redrawHandler);
+            cm.customEvent.add(that.nodes['container'], 'destruct', that.destructHandler);
+        }
+        return that;
+    };
+
+    classProto.unsetEvents = function(){
+        var that = this;
+        // Windows events
+        cm.removeEvent(window, 'resize', that.redrawHandler);
+        // Remove custom events
+        if(that.params['customEvents']){
+            cm.customEvent.remove(that.nodes['container'], 'redraw', that.redrawHandler);
+            cm.customEvent.remove(that.nodes['container'], 'destruct', that.destructHandler);
+        }
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'com__range'},
+            that.nodes['range'] = cm.node('div', {'class' : 'pt__range'},
+                that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
+                    that.nodes['drag'] = cm.node('div', {'class' : 'drag'},
+                        that.nodes['dragContent'] = that.renderDraggable()
+                    ),
+                    that.nodes['range'] = cm.node('div', {'class' : 'range'},
+                        that.nodes['rangeContent'] = that.renderContent()
+                    )
+                )
+            )
+        );
+        // Counter
+        that.nodes['counter'] = that.renderCounter();
+        if(that.params['showCounter']){
+            cm.insertFirst(that.nodes['counter'], that.nodes['drag']);
+        }
+        // Hidden input
+        that.nodes['hidden'] = cm.node('input', {'type' : 'hidden'});
+        if(that.params['name']){
+            that.nodes['hidden'].setAttribute('name', that.params['name']);
+        }
+        if(that.params['isInput']){
+            cm.insertFirst(that.nodes['hidden'], that.nodes['container']);
+        }
+        // Classes
+        if(that.params['isInput']){
+            cm.addClass(that.nodes['container'], 'is-input');
+            cm.addClass(that.nodes['range'], 'is-input');
+        }
+        cm.addClass(that.nodes['container'], that.params['theme']);
+        cm.addClass(that.nodes['range'], that.params['theme']);
+        cm.addClass(that.nodes['container'], that.params['className']);
+        cm.addClass(that.nodes['rangeContent'], 'range-helper');
+        // Direction classes
+        switch(that.params['direction']){
+            case 'horizontal':
+                cm.addClass(that.nodes['container'], 'is-horizontal');
+                cm.addClass(that.nodes['range'], 'is-horizontal');
+                cm.addClass(that.nodes['dragContent'], 'is-horizontal');
+                cm.addClass(that.nodes['rangeContent'], 'is-horizontal');
+                break;
+
+            case 'vertical':
+                cm.addClass(that.nodes['container'], 'is-vertical');
+                cm.addClass(that.nodes['range'], 'is-vertical');
+                cm.addClass(that.nodes['dragContent'], 'is-vertical');
+                cm.addClass(that.nodes['rangeContent'], 'is-vertical');
+                break;
+        }
+        return that;
+    };
+
+    classProto.renderContent = function(){
+        var that = this;
+        return that.params['content'] || cm.node('div', {'class' : 'range__content'});
+    };
+
+    classProto.renderDraggable = function(){
+        var that = this;
+        return that.params['drag'] || cm.node('div', {'class' : 'drag__content'});
+    };
+
+    classProto.renderCounter = function(){
+        var that = this;
+        return that.params['counter'] || cm.node('div', {'class' : 'counter'});
+    };
+
+    classProto.showCounter = function(){
+        var that = this;
+        cm.addClass(that.nodes['counter'], 'is-show');
+        return that;
+    };
+
+    classProto.hideCounter = function(){
+        var that = this;
+        cm.removeClass(that.nodes['counter'], 'is-show');
+        return that;
+    };
+
+    classProto.getRangeValue = function(data){
+        var that = this,
+            dimensions = that.components['draggable'].getDimensions(),
+            xn = that.params['max'] - that.params['min'],
+            yn,
+            zn,
+            value;
+        switch(that.params['direction']){
+            case 'horizontal':
+                yn = dimensions['limiter']['absoluteWidth'];
+                zn = (xn / yn) * data['left'];
+                value = Math.floor(zn) + that.params['min'];
+                break;
+
+            case 'vertical':
+                yn = dimensions['limiter']['absoluteHeight'];
+                zn = (xn / yn) * data['top'];
+                value = Math.floor(zn) + that.params['min'];
+                break;
+        }
+        return value;
+    };
+
+    classProto.setDraggable = function(){
+        var that = this,
+            dimensions = that.components['draggable'].getDimensions(),
+            value = that.value - that.params['min'],
+            xn = that.params['max'] - that.params['min'],
+            yn,
+            zn,
+            position = {
+                'top' : 0,
+                'left' : 0
+            };
+        switch(that.params['direction']){
+            case 'horizontal':
+                yn = dimensions['limiter']['absoluteWidth'];
+                zn = (yn / xn) * value;
+                position['left'] = Math.floor(zn);
+                break;
+
+            case 'vertical':
+                yn = dimensions['limiter']['absoluteHeight'];
+                zn = (yn / xn ) * value;
+                position['top'] = Math.floor(zn);
+                break;
+        }
+        that.components['draggable'].setPosition(position, false);
+        return that;
+    };
+
+    classProto.setCounter = function(value){
+        var that = this;
+        that.nodes['counter'].innerHTML = value;
+        return that;
+    };
+
+    classProto.validateValue = function(value){
+        var that = this;
+        if(that.params['max'] > that.params['min']){
+            value = Math.min(Math.max(value, that.params['min']), that.params['max']);
+        }else{
+            value = Math.max(Math.min(value, that.params['min']), that.params['max']);
+        }
+        return value;
+    };
+
+    classProto.setHelper = function(value, eventName){
+        var that = this;
+        value = that.validateValue(value);
+        that.setCounter(value);
+        // Trigger Events
+        that.triggerEvent(eventName, value);
+        if(eventName == 'onSelect'){
+            that.selectAction(value);
+            that.changeAction();
+        }
+        return that;
+    };
+
+    classProto.selectAction = function(value, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        if(triggerEvents){
+            that.triggerEvent('onSelect', value);
+        }
+        return that;
+    };
+
+    classProto.setAction = function(value, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        that.previousValue = that.value;
+        that.value = value;
+        that.nodes['hidden'].value = that.value;
+        if(triggerEvents){
+            that.triggerEvent('onSet', that.value);
+        }
+        return that;
+    };
+
+    classProto.changeAction = function(triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        if(triggerEvents && that.value != that.previousValue){
+            that.triggerEvent('onChange', that.value);
+        }
+        return that;
+    };
+});
 cm.define('Com.Form', {
     'modules' : [
         'Params',
@@ -16819,6 +17605,7 @@ cm.define('Com.Form', {
             'url' : '',                                             // Request URL. Variables: %baseurl%, %callback% for JSONP.
             'params' : ''                                           // Params object. %baseurl%, %callback% for JSONP.
         },
+        'Com.Notifications' : {},
         'Com.Overlay' : {
             'position' : 'absolute',
             'autoOpen' : false,
@@ -16869,11 +17656,7 @@ function(params){
                     that.nodes['fields'] = cm.node('div', {'class' : 'com__form__fields'}))
             );
             // Notifications
-            that.nodes['notificationsContainer'] = cm.node('div', {'class' : 'com__form__notifications'},
-                cm.node('div', {'class' : 'com-notification'},
-                    that.nodes['notifications'] = cm.node('ul')
-                )
-            );
+            that.nodes['notifications'] = cm.node('div', {'class' : 'com__form__notifications'});
             // Buttons
             that.nodes['buttonsSeparator'] = cm.node('hr');
             that.nodes['buttonsContainer'] = cm.node('div', {'class' : 'com__form__buttons'},
@@ -16883,26 +17666,38 @@ function(params){
             // Embed
             that.params['renderButtonsSeparator'] && cm.insertFirst(that.nodes['buttonsSeparator'], that.nodes['buttonsContainer']);
             that.params['renderButtons'] && cm.appendChild(that.nodes['buttonsContainer'], that.nodes['form']);
-            that.params['showNotifications'] && cm.insertFirst(that.nodes['notificationsContainer'], that.nodes['form']);
+            that.params['showNotifications'] && cm.insertFirst(that.nodes['notifications'], that.nodes['form']);
             that.embedStructure(that.nodes['container']);
         }
-        // Overlay
-        cm.getConstructor('Com.Overlay', function(classConstructor, className){
-            switch(that.params['loaderCoverage']){
-                case 'fields':
-                    overlayContainer = that.nodes['fields'];
-                    break;
-                case 'all':
-                default:
-                    overlayContainer = that.nodes['container'];
-                    break;
-            }
-            that.components['loader'] = new classConstructor(
-                cm.merge(that.params[className], {
-                    'container' : overlayContainer
-                })
-            );
-        });
+        // Notifications
+        if(that.params['showNotifications']){
+            cm.getConstructor('Com.Notifications', function(classConstructor, className){
+                that.components['notifications'] = new classConstructor(
+                    cm.merge(that.params[className], {
+                        'container' : that.nodes['notifications']
+                    })
+                );
+            });
+        }
+        // Overlay Loader
+        if(that.params['showLoader']){
+            cm.getConstructor('Com.Overlay', function(classConstructor, className){
+                switch(that.params['loaderCoverage']){
+                    case 'fields':
+                        overlayContainer = that.nodes['fields'];
+                        break;
+                    case 'all':
+                    default:
+                        overlayContainer = that.nodes['container'];
+                        break;
+                }
+                that.components['loader'] = new classConstructor(
+                    cm.merge(that.params[className], {
+                        'container' : overlayContainer
+                    })
+                );
+            });
+        }
         // Events
         cm.addEvent(that.nodes['form'], 'submit', function(e){
             cm.preventDefault(e);
@@ -17087,33 +17882,35 @@ function(params){
 
     that.callbacks.renderError = function(that, config, errors){
         var field;
-        // Clear old errors
-        cm.clearNode(that.nodes['notifications']);
+        // Clear old errors messages
+        if(that.params['showNotifications']){
+            cm.removeClass(that.nodes['notifications'], 'is-show', true);
+            that.components['notifications'].clear();
+        }
         cm.forEach(that.fields, function(field){
             field.clearError();
         });
-        // Render new errors
+        // Render new errors messages
         if(cm.isArray(errors)){
             cm.forEach(errors, function(item){
-                that.callbacks.renderErrorItem(that, config, item);
+                if(that.params['showNotifications']){
+                    cm.addClass(that.nodes['notifications'], 'is-show', true);
+                    that.components['notifications'].add({
+                        'label' : that.lang(item['message'])
+                    });
+                }
                 if(field = that.getField(item['field'])){
                     field.renderError(item['message']);
                 }
             });
         }else{
-            that.callbacks.renderErrorItem(that, config, {
-                'message' : 'server_error'
-            });
+            if(that.params['showNotifications']){
+                cm.addClass(that.nodes['notifications'], 'is-show', true);
+                that.components['notifications'].add({
+                    'label' : that.lang('server_error')
+                });
+            }
         }
-    };
-
-    that.callbacks.renderErrorItem = function(that, config, item){
-        that.nodes['notifications'].appendChild(
-            cm.node('li', {'class' : 'error'},
-                cm.node('div', {'class' : 'descr'}, that.lang(item['message']))
-            )
-        );
-        cm.addClass(that.nodes['notificationsContainer'], 'is-show', true);
     };
 
     /* ******* PUBLIC ******* */
@@ -17613,6 +18410,202 @@ Com.FormFields.add('buttons', {
             return buttons;
         }
     }
+});
+cm.define('Com.BoxTools', {
+    'extend' : 'Com.AbstractInput',
+    'params' : {
+        'className' : 'com__box-tools',
+        'maxlength' : 3,
+        'inputs' : [
+            {'name' : 'top', 'icon' : 'icon svg__indent-top small linked', 'iconPosition' : 'insideRight'},
+            {'name' : 'right', 'icon' : 'icon svg__indent-right small linked', 'iconPosition' : 'insideRight'},
+            {'name' : 'bottom', 'icon' : 'icon svg__indent-bottom small linked', 'iconPosition' : 'insideRight'},
+            {'name' : 'left', 'icon' : 'icon svg__indent-left small linked', 'iconPosition' : 'insideRight'}
+        ],
+        'langs' : {
+            'link' : 'Link',
+            'unlink' : 'Unlink'
+        }
+    }
+},
+function(params){
+    var that = this;
+    that.myNodes = {};
+    that.inputs = [];
+    that.rawValue = null;
+    that.isInputsLinked = false;
+    that.lastInput = null;
+    Com.AbstractInput.apply(that, arguments);
+});
+
+cm.getConstructor('Com.BoxTools', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        that.linkInputsHandler = that.linkInputs.bind(that);
+        that.setValuesHandler = that.setValues.bind(that);
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.set = function(){
+        var that = this;
+        _inherit.prototype.set.apply(that, arguments);
+        that.setInputs();
+        return that;
+    };
+
+    classProto.validateValue = function(value){
+        var that = this;
+        that.rawValue = cm.CSSValuesToArray(value);
+        return cm.arrayToCSSValues(that.rawValue);
+    };
+
+    classProto.renderContent = function(){
+        var that = this;
+        // Structure
+        that.myNodes['container'] = cm.node('div', {'class' : 'com__box-tools__content'},
+            cm.node('div', {'class' : 'b-line'},
+                that.renderInput(that.params['inputs'][0], 0)
+            ),
+            cm.node('div', {'class' : 'b-line'},
+                that.renderInput(that.params['inputs'][3], 3),
+                cm.node('div', {'class' : 'b-link-container'},
+                    that.myNodes['link'] = cm.node('div', {'class' : 'b-link', 'title' : that.lang('link')},
+                        cm.node('div', {'class' : 'icon'})
+                    )
+                ),
+                that.renderInput(that.params['inputs'][1], 1)
+            ),
+            cm.node('div', {'class' : 'b-line'},
+                that.renderInput(that.params['inputs'][2], 2)
+            )
+        );
+        // Events
+        cm.addEvent(that.myNodes['link'], 'click', that.linkInputsHandler);
+        // Push
+        return that.myNodes['container'];
+    };
+
+    classProto.renderInput = function(item, i){
+        var that = this;
+        item = cm.merge({
+            'i' : i,
+            'icon' : 'small',
+            'iconPosition' : 'leftInside',
+            'name' : '',
+            'nodes' : {}
+        }, item);
+        // Structure
+        item['nodes'] = that.renderInputContainer(item);
+        item['input'] = item['nodes']['input'];
+        // Attributes
+        if(that.params['maxlength']){
+            item['input'].setAttribute('maxlength', that.params['maxlength']);
+        }
+        // Events
+        cm.addEvent(item['nodes']['icon'], 'click', function(e){
+            cm.preventDefault(e);
+            item['input'].setSelectionRange(0, item['input'].value.length);
+            item['input'].focus();
+        });
+        cm.addEvent(item['input'], 'focus', function(){
+            that.lastInput = item;
+        });
+        cm.addEvent(item['input'], 'blur', that.setValuesHandler);
+        cm.addEvent(item['input'], 'keypress', function(e){
+            if(cm.isKeyCode(e.keyCode, 'enter')){
+                cm.preventDefault(e);
+                that.setValues();
+                item['input'].blur();
+            }
+        });
+        cm.allowOnlyDigitInputEvent(item['input'], function(e, value){
+            if(that.isInputsLinked){
+                that.rawValue = [value, value, value, value];
+                that.setInputs();
+            }else{
+                that.rawValue[item['i']] = value;
+            }
+            that.selectAction(cm.arrayToCSSValues(that.rawValue), true);
+        });
+        // Push
+        that.inputs.push(item);
+        return item['nodes']['container'];
+    };
+
+    classProto.renderInputContainer = function(item){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'b-container'},
+            nodes['inner'] = cm.node('div', {'class' : 'pt__input'},
+                nodes['input'] = cm.node('input', {'type' : 'text'})
+            )
+        );
+        if(!cm.isEmpty(item['title'])){
+            nodes['inner'].setAttribute('title', item['title']);
+        }
+        nodes['icon'] = cm.node('div', {'class' : item['icon']});
+        switch(item['iconPosition']){
+            case 'insideLeft':
+                cm.addClass(nodes['inner'], 'less-indent');
+                cm.insertFirst(nodes['icon'], nodes['inner']);
+                break;
+            case 'insideRight':
+                cm.addClass(nodes['inner'], 'less-indent');
+                cm.insertLast(nodes['icon'], nodes['inner']);
+                break;
+            case 'outsideLeft':
+                cm.addClass(nodes['inner'], 'is-icon-outside');
+                cm.insertFirst(nodes['icon'], nodes['inner']);
+                break;
+            case 'outsideRight':
+                cm.addClass(nodes['inner'], 'is-icon-outside');
+                cm.insertLast(nodes['icon'], nodes['inner']);
+                break;
+        }
+        return nodes;
+    };
+
+    classProto.setInputs = function(){
+        var that = this;
+        cm.forEach(that.inputs, function(item){
+            item['input'].value = that.rawValue[item['i']]
+        });
+        return that;
+    };
+
+    classProto.setValues = function(triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        that.set(cm.arrayToCSSValues(that.rawValue), triggerEvents);
+        return that;
+    };
+
+    classProto.linkInputs = function(){
+        var that = this;
+        if(!that.isInputsLinked){
+            that.isInputsLinked = true;
+            cm.addClass(that.myNodes['link'], 'active');
+            that.myNodes['link'].title = that.lang('unlink');
+            if(that.lastInput){
+                that.set(that.lastInput['input'].value);
+            }else{
+                var value = 0;
+                cm.forEach(that.inputs, function(item){
+                    value = Math.max(value, parseInt(item['input'].value));
+                });
+                that.set(value);
+            }
+        }else{
+            that.isInputsLinked = false;
+            cm.removeClass(that.myNodes['link'], 'active');
+            that.myNodes['link'].title = that.lang('link');
+        }
+        return that;
+    };
 });
 cm.define('Com.Autocomplete', {
     'modules' : [
@@ -18197,7 +19190,8 @@ cm.define('Com.BigCalendar', {
         'Com.Overlay' : {
             'position' : 'absolute',
             'autoOpen' : false,
-            'removeOnClose' : true
+            'removeOnClose' : true,
+            'appendMode' : 'insertFirst'
         }
     }
 },
@@ -18474,9 +19468,7 @@ function(params){
         // Wrap old content
         if(!that.nodes['holder']['temporary']){
             that.nodes['holder']['temporary'] = that.callbacks.renderTemporary(that);
-            cm.forEach(that.nodes['holder']['inner'].childNodes, function(node){
-                cm.appendChild(node, that.nodes['holder']['temporary']);
-            });
+            cm.appendNodes(that.nodes['holder']['inner'].childNodes, that.nodes['holder']['temporary']);
             cm.appendChild(that.nodes['holder']['temporary'], that.nodes['holder']['inner']);
         }
         cm.removeClass(that.nodes['holder']['temporary'], 'is-show', true);
@@ -18688,7 +19680,7 @@ function(params){
     that.days = [];
 
     var init = function(){
-        that.getCSSHelpers();
+        that.getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
@@ -18706,20 +19698,15 @@ function(params){
     init();
 });
 
-cm.getConstructor('Com.AbstractCalendarView', function(classConstructor){
-    classConstructor.prototype.getCSSHelpers = function(){
+cm.getConstructor('Com.AbstractCalendarView', function(classConstructor, className, classProto){
+    classProto.getLESSVariables = function(){
         var that = this;
-        var rule;
-        if(rule = cm.getCSSRule('.com__calendar-event-helper__short-indent')[0]){
-            that.params['itemShortIndent'] = cm.styleToNumber(rule.style.height);
-        }
-        if(rule = cm.getCSSRule('.com__calendar-event-helper__short-height')[0]){
-            that.params['itemShortHeight'] = cm.styleToNumber(rule.style.height);
-        }
+        that.params['itemShortIndent'] = cm.getLESSVariable('ComCalendarEvent-Short-Indent', that.params['itemShortIndent'], true);
+        that.params['itemShortHeight'] = cm.getLESSVariable('ComCalendarEvent-Short-Height', that.params['itemShortHeight'], true);
         return that;
     };
 
-    classConstructor.prototype.validateParams = function(){
+    classProto.validateParams = function(){
         var that = this;
         if(that.params['Com.Tooltip']['width'] != 'auto'){
             that.params['Com.Tooltip']['width'] = cm.strReplace(that.params['Com.Tooltip']['width'], {
@@ -18741,7 +19728,7 @@ cm.getConstructor('Com.AbstractCalendarView', function(classConstructor){
         return that;
     };
 
-    classConstructor.prototype.render = function(){
+    classProto.render = function(){
         var that = this;
         // Find events and set template and tooltip config
         new cm.Finder('Com.CalendarEvent', null, that.params['node'], function(classObject){
@@ -18755,26 +19742,20 @@ cm.getConstructor('Com.AbstractCalendarView', function(classConstructor){
         return that;
     };
 
-    classConstructor.prototype.renderToolbar = function(){
+    classProto.renderToolbar = function(){
         var that = this;
         // Toolbar Controls
         new cm.Finder('Com.Select', 'week', that.nodes['buttons']['container'], function(classObject){
             that.components['week'] = classObject
-                .addEvent('onChange', function(){
-                    that.updateView();
-                });
+                .addEvent('onChange', that.updateView.bind(that));
         });
         new cm.Finder('Com.Select', 'month', that.nodes['buttons']['container'], function(classObject){
             that.components['month'] = classObject
-                .addEvent('onChange', function(){
-                    that.updateView();
-                });
+                .addEvent('onChange',  that.updateView.bind(that));
         });
         new cm.Finder('Com.Select', 'year', that.nodes['buttons']['container'], function(classObject){
             that.components['year'] = classObject
-                .addEvent('onChange', function(){
-                    that.updateView();
-                });
+                .addEvent('onChange', that.updateView.bind(that));
         });
         // Search
         cm.addEvent(that.nodes['buttons']['search-input'], 'keypress', function(e){
@@ -18813,7 +19794,7 @@ cm.getConstructor('Com.AbstractCalendarView', function(classConstructor){
         return that;
     };
 
-    classConstructor.prototype.searchQuery = function(str){
+    classProto.searchQuery = function(str){
         var that = this;
         var data = that.getData();
         data.query = str;
@@ -18821,13 +19802,13 @@ cm.getConstructor('Com.AbstractCalendarView', function(classConstructor){
         return that;
     };
 
-    classConstructor.prototype.requestView = function(data){
+    classProto.requestView = function(data){
         var that = this;
         that.triggerEvent('onRequestView', data);
         return that;
     };
 
-    classConstructor.prototype.getData = function(){
+    classProto.getData = function(){
         var that = this;
         return {
             'query' : that.nodes['buttons']['search-input'].value,
@@ -18838,13 +19819,13 @@ cm.getConstructor('Com.AbstractCalendarView', function(classConstructor){
         };
     };
 
-    classConstructor.prototype.updateView = function(){
+    classProto.updateView = function(){
         var that = this;
         that.triggerEvent('onRequestView', that.getData());
         return that;
     };
 
-    classConstructor.prototype.prev = function(){
+    classProto.prev = function(){
         var that = this;
         var data = that.getData();
         if(data['week'] !== null){
@@ -18868,7 +19849,7 @@ cm.getConstructor('Com.AbstractCalendarView', function(classConstructor){
         return that;
     };
 
-    classConstructor.prototype.next = function(){
+    classProto.next = function(){
         var that = this;
         var data = that.getData();
         if(data['week'] !== null){
@@ -18908,11 +19889,13 @@ cm.define('Com.CalendarMonth', {
 },
 function(params){
     var that = this;
-    that._inherit.apply(that, arguments);
+    Com.AbstractCalendarView.apply(that, arguments);
 });
 
-cm.getConstructor('Com.CalendarMonth', function(classConstructor){
-    classConstructor.prototype.processDay = function(nodes){
+cm.getConstructor('Com.CalendarMonth', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.processDay = function(nodes){
         var that = this;
         var item = {
             'isShow' : false,
@@ -18928,7 +19911,7 @@ cm.getConstructor('Com.CalendarMonth', function(classConstructor){
         that.days.push(item);
     };
 
-    classConstructor.prototype.showMoreEvents = function(item){
+    classProto.showMoreEvents = function(item){
         var that = this;
         item.delay && clearTimeout(item.delay);
         if(!item.isShow){
@@ -18938,7 +19921,7 @@ cm.getConstructor('Com.CalendarMonth', function(classConstructor){
         }
     };
 
-    classConstructor.prototype.hideMoreEvents = function(item, isImmediately){
+    classProto.hideMoreEvents = function(item, isImmediately){
         var that = this;
         item.delay && clearTimeout(item.delay);
         if(item.isShow){
@@ -18954,22 +19937,17 @@ cm.getConstructor('Com.CalendarMonth', function(classConstructor){
         }
     };
 
-    classConstructor.prototype.getCSSHelpers = function(){
+    classProto.getLESSVariables = function(){
         var that = this;
-        var rule;
-        that._inherit.prototype.getCSSHelpers.call(that);
-        if(rule = cm.getCSSRule('.com__calendar-month-helper__day-indent')[0]){
-            that.params['dayIndent'] = cm.styleToNumber(rule.style.height);
-        }
+        _inherit.prototype.getLESSVariables.call(that);
+        that.params['dayIndent'] = cm.getLESSVariable('ComCalendarMonth-Day-Indent', that.params['dayIndent'], true);
         return that;
     };
 
-    classConstructor.prototype.render = function(){
+    classProto.render = function(){
         var that = this;
-        that._inherit.prototype.render.call(that);
-        cm.forEach(that.nodes['days'], function(){
-            that.processDay.apply(that, arguments);
-        });
+        _inherit.prototype.render.call(that);
+        cm.forEach(that.nodes['days'], that.processDay.bind(that));
         return that;
     };
 });
@@ -18989,17 +19967,16 @@ cm.define('Com.CalendarWeek', {
 },
 function(params){
     var that = this;
-    that._inherit.apply(that, arguments);
+    Com.AbstractCalendarView.apply(that, arguments);
 });
 
-cm.getConstructor('Com.CalendarWeek', function(classConstructor){
-    classConstructor.prototype.getCSSHelpers = function(){
+cm.getConstructor('Com.CalendarWeek', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.getLESSVariables = function(){
         var that = this;
-        var rule;
-        that._inherit.prototype.getCSSHelpers.call(that);
-        if(rule = cm.getCSSRule('.com__calendar-week-helper__day-indent')[0]){
-            that.params['dayIndent'] = cm.styleToNumber(rule.style.height);
-        }
+        _inherit.prototype.getLESSVariables.call(that);
+        that.params['dayIndent'] = cm.getLESSVariable('ComCalendarWeek-Day-Indent', that.params['dayIndent'], true);
         return that;
     };
 });
@@ -19019,7 +19996,53 @@ cm.define('Com.CalendarAgenda', {
 },
 function(params){
     var that = this;
-    that._inherit.apply(that, arguments);
+    Com.AbstractCalendarView.apply(that, arguments);
+});
+cm.define('Com.BoxRadiusTools', {
+    'extend' : 'Com.BoxTools',
+    'params' : {
+        'className' : 'com__box-tools com__box-tools--radius',
+        'inputs' : [
+            {'name' : 'topleft', 'icon' : 'icon svg__radius-topleft small linked', 'iconPosition' : 'outsideLeft'},
+            {'name' : 'topright', 'icon' : 'icon svg__radius-topright small linked', 'iconPosition' : 'outsideRight'},
+            {'name' : 'bottomright', 'icon' : 'icon svg__radius-bottomright small linked', 'iconPosition' : 'outsideRight'},
+            {'name' : 'bottomleft', 'icon' : 'icon svg__radius-bottomleft small linked', 'iconPosition' : 'outsideLeft'}
+        ]
+    }
+},
+function(params){
+    var that = this;
+    Com.BoxTools.apply(that, arguments);
+});
+
+cm.getConstructor('Com.BoxRadiusTools', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.renderContent = function(){
+        var that = this;
+        // Structure
+        that.myNodes['container'] = cm.node('div', {'class' : 'com__box-tools__content'},
+            cm.node('div', {'class' : 'b-line'},
+                that.renderInput(that.params['inputs'][0], 0),
+                that.renderInput(that.params['inputs'][1], 1)
+            ),
+            cm.node('div', {'class' : 'b-line'},
+                that.renderInput(that.params['inputs'][3], 3),
+                that.renderInput(that.params['inputs'][2], 2)
+            ),
+            cm.node('div', {'class' : 'b-line'},
+                cm.node('div', {'class' : 'b-link-container'},
+                    that.myNodes['link'] = cm.node('div', {'class' : 'b-link', 'title' : that.lang('link')},
+                        cm.node('div', {'class' : 'icon'})
+                    )
+                )
+            )
+        );
+        // Events
+        cm.addEvent(that.myNodes['link'], 'click', that.linkInputsHandler);
+        // Push
+        return that.myNodes['container'];
+    };
 });
 cm.define('Com.Calendar', {
     'modules' : [
@@ -19464,21 +20487,34 @@ cm.define('Com.CodeHighlight', {
         'name' : '',
         'language' : 'javascript',
         'lineNumbers' : true,
-        'customEvents' : true
+        'customEvents' : true,
+        'disabled' : false,
+        'title' :''
     }
 },
 function(params){
     var that = this;
 
     that.components = {};
+    that.disabled = false;
 
     var init = function(){
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
+        validateParams();
         render();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+            that.params['disabled'] = that.params['node'].disabled || that.params['node'].readOnly || that.params['disabled'];
+        }
+        that.disabled = that.params['disabled'];
     };
 
     var render = function(){
@@ -19495,12 +20531,30 @@ function(params){
         if(that.params['customEvents']){
             cm.customEvent.add(that.params['node'], 'redraw', that.redraw);
         }
+        // Enable / Disable
+        if(that.disabled){
+            that.disable();
+        }else{
+            that.enable();
+        }
     };
 
     /* ******* PUBLIC ******* */
 
     that.redraw = function(){
         that.components['codemirror'] && that.components['codemirror'].refresh();
+        return that;
+    };
+
+    that.disable = function(){
+        that.disabled = true;
+        that.components['codemirror'] && that.components['codemirror'].setOption('readOnly', 'nocursor');
+        return that;
+    };
+
+    that.enable = function(){
+        that.disabled = false;
+        that.components['codemirror'] && that.components['codemirror'].setOption('readOnly', false);
         return that;
     };
 
@@ -19667,6 +20721,7 @@ cm.define('Com.Collector', {
         'Stack'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onAdd',
         'onRemove',
@@ -19676,7 +20731,7 @@ cm.define('Com.Collector', {
         'onDestruct'
     ],
     'params' : {
-        'node' : cm.Node('div'),
+        'node' : 'document.body',
         'name' : '',
         'attribute' : 'data-element',
         'autoInit' : false
@@ -19693,6 +20748,8 @@ function(params){
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
         render();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
@@ -19946,7 +21003,7 @@ cm.define('Com.ColorPicker', {
     ],
     'params' : {
         'input' : null,                                     // Deprecated, use 'node' parameter instead.
-        'node' : cm.Node('input', {'type' : 'text'}),
+        'node' : cm.node('input', {'type' : 'text'}),
         'container' : null,
         'embedStructure' : 'replace',
         'name' : '',
@@ -19958,6 +21015,7 @@ cm.define('Com.ColorPicker', {
         'showTitleTooltip' : true,
         'renderInBody' : true,
         'disabled' : false,
+        'size' : 'default',                                 // default | full
         'icons' : {
             'picker' : 'icon default linked',
             'clear' : 'icon default linked'
@@ -20024,7 +21082,7 @@ function(params){
         /* *** RENDER STRUCTURE *** */
         that.nodes['container'] = cm.Node('div', {'class' : 'com__colorpicker'},
             that.nodes['hidden'] = cm.Node('input', {'type' : 'hidden'}),
-            that.nodes['target'] = cm.Node('div', {'class' : 'form-field has-icon-right'},
+            that.nodes['target'] = cm.Node('div', {'class' : 'pt__input has-icon-right'},
                 that.nodes['input'] = cm.Node('input', {'type' : 'text', 'readOnly' : 'true'}),
                 that.nodes['icon'] = cm.Node('div', {'class' : that.params['icons']['picker']})
             ),
@@ -20033,6 +21091,10 @@ function(params){
             )
         );
         /* *** ATTRIBUTES *** */
+        // Size
+        if(!cm.isEmpty(that.params['size'])){
+            cm.addClass(that.nodes['container'], ['size', that.params['size']].join('-'));
+        }
         // Title
         if(that.params['showTitleTooltip'] && !cm.isEmpty(that.params['title'])){
             that.nodes['container'].title = that.params['title'];
@@ -21336,7 +22398,7 @@ function(params){
         /* *** RENDER STRUCTURE *** */
         nodes['container'] = cm.Node('div', {'class' : 'com__datepicker-input'},
             nodes['hidden'] = cm.Node('input', {'type' : 'hidden'}),
-            nodes['target'] = cm.Node('div', {'class' : 'form-field has-icon-right'},
+            nodes['target'] = cm.Node('div', {'class' : 'pt__input has-icon-right'},
                 nodes['input'] = cm.Node('input', {'type' : 'text', 'readOnly' : 'true'}),
                 nodes['icon'] = cm.Node('div', {'class' : that.params['icons']['datepicker']})
             ),
@@ -21650,7 +22712,7 @@ cm.define('Com.Dialog', {
         'position' : 'fixed',
         'indentY' : 24,
         'indentX' : 24,
-        'theme' : 'theme-default',      // theme css class name, default: theme-default | theme-black
+        'theme' : 'theme-light',        // theme css class name, default: theme-default | theme-black | theme-light
         'className' : '',               // custom css class name
         'content' : cm.Node('div'),
         'title' : '',
@@ -21790,6 +22852,7 @@ function(params){
 
     var renderTitle = function(title){
         if(!cm.isEmpty(title)){
+            cm.removeClass(nodes['container'], 'has-no-title');
             // Remove old nodes
             cm.remove(nodes['title']);
             // Render new nodes
@@ -21798,6 +22861,8 @@ function(params){
                 cm.addClass(nodes['title'], 'cm__text-overflow');
             }
             cm.insertFirst(nodes['title'], nodes['windowInner']);
+        }else{
+            cm.addClass(nodes['container'], 'has-no-title');
         }
     };
 
@@ -22165,7 +23230,7 @@ function(params){
     var init = function(){
         var areasNodes;
 
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
 
@@ -22195,9 +23260,9 @@ function(params){
         }
     };
 
-    var getCSSHelpers = function(){
-        that.params['dropDuration'] = cm.getTransitionDurationFromRule('.pt__dnd-helper__drop-duration');
-        that.params['moveDuration'] = cm.getTransitionDurationFromRule('.pt__dnd-helper__move-duration');
+    var getLESSVariables = function(){
+        that.params['dropDuration'] = cm.getTransitionDurationFromLESS('PtDnD-DropDuration', that.params['dropDuration']);
+        that.params['moveDuration'] = cm.getTransitionDurationFromLESS('PtDnD-MoveDuration', that.params['moveDuration']);
     };
 
     var initArea = function(node, params){
@@ -23145,7 +24210,8 @@ cm.define('Com.Draggable', {
         'onStart',
         'onMove',
         'onStop',
-        'onSet'
+        'onSet',
+        'onSelect'
     ],
     'params' : {
         'node' : cm.Node('div'),            // Node, for drag
@@ -23209,7 +24275,7 @@ function(params){
         that.getDimensions();
         that.nodeStartX = cm.getStyle(that.params['node'], 'left', true);
         that.nodeStartY = cm.getStyle(that.params['node'], 'top', true);
-        setPosition(that.startX, that.startY);
+        setPositionHelper(position, 'onSelect');
         // Add move event on document
         cm.addEvent(window, 'mousemove', move);
         cm.addEvent(window, 'mouseup', stop);
@@ -23221,13 +24287,17 @@ function(params){
         cm.preventDefault(e);
         var position = cm.getEventClientPosition(e);
         // Calculate dimensions and position
-        setPosition(position['left'], position['top']);
+        setPositionHelper(position, 'onSelect');
         // Trigger Event
         that.triggerEvent('onMove');
     };
 
-    var stop = function(){
+    var stop = function(e){
+        cm.preventDefault(e);
         that.isDrag = false;
+        // Calculate dimensions and position
+        var position = cm.getEventClientPosition(e);
+        setPositionHelper(position, 'onSet');
         // Remove move events attached on document
         cm.removeEvent(window, 'mousemove', move);
         cm.removeEvent(window, 'mouseup', stop);
@@ -23239,17 +24309,67 @@ function(params){
     
     /* *** HELPERS *** */
 
-    var setPosition = function(x, y){
-        var posX = x,
-            posY = y;
+    var setPositionHelper = function(position, eventName){
+        position = cm.merge({
+            'left' : 0,
+            'top' : 0
+        }, position);
         if(that.params['node'] === that.params['target']){
-            posX += that.nodeStartX - that.startX;
-            posY += that.nodeStartY - that.startY;
+            position['left'] += that.nodeStartX - that.startX;
+            position['top'] += that.nodeStartY - that.startY;
         }else{
-            posX -= that.dimensions['target']['absoluteX1'];
-            posY -= that.dimensions['target']['absoluteY1'];
+            position['left'] -= that.dimensions['target']['absoluteX1'];
+            position['top'] -= that.dimensions['target']['absoluteY1'];
         }
-        that.setPosition(posX, posY, true);
+        position = setPositionAction(position);
+        that.triggerEvent(eventName, position);
+    };
+
+    var setPositionAction = function(position){
+        position = cm.merge({
+            'left' : 0,
+            'top' : 0,
+            'nodeTop' : 0,
+            'nodeLeft' : 0
+        }, position);
+        // Check limit
+        if(that.params['limiter']){
+            if(position['top'] < 0){
+                position['top'] = 0;
+            }else if(position['top'] > that.dimensions['limiter']['absoluteHeight']){
+                position['top'] = that.dimensions['limiter']['absoluteHeight'];
+            }
+            if(position['left'] < 0){
+                position['left'] = 0;
+            }else if(position['left'] > that.dimensions['limiter']['absoluteWidth']){
+                position['left'] = that.dimensions['limiter']['absoluteWidth'];
+            }
+        }
+        // Limiters
+        if(!isNaN(that.params['minY']) && position['top'] < that.params['minY']){
+            position['top'] = that.params['minY'];
+        }
+        // Align node
+        position['nodeTop'] = position['top'];
+        position['nodeLeft'] = position['left'];
+        if(that.params['alignNode']){
+            position['nodeTop'] -= (that.dimensions['node']['absoluteHeight'] / 2);
+            position['nodeLeft'] -= (that.dimensions['node']['absoluteWidth'] / 2);
+        }
+        // Set styles
+        switch(that.params['direction']){
+            case 'vertical' :
+                that.params['node'].style.top = [position['nodeTop'], 'px'].join('');
+                break;
+            case 'horizontal' :
+                that.params['node'].style.left = [position['nodeLeft'], 'px'].join('');
+                break;
+            default :
+                that.params['node'].style.top = [position['nodeTop'], 'px'].join('');
+                that.params['node'].style.left = [position['nodeLeft'], 'px'].join('');
+                break;
+        }
+        return position;
     };
 
     /* ******* MAIN ******* */
@@ -23261,55 +24381,17 @@ function(params){
         return that.dimensions;
     };
 
-    that.setPosition = function(posX, posY, triggerEvents){
-        var nodePosY,
-            nodePosX;
+    that.setPosition = function(position, triggerEvents){
+        position = cm.merge({
+            'left' : 0,
+            'top' : 0
+        }, position);
         triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
-        // Check limit
-        if(that.params['limiter']){
-            if(posY < 0){
-                posY = 0;
-            }else if(posY > that.dimensions['limiter']['absoluteHeight']){
-                posY = that.dimensions['limiter']['absoluteHeight'];
-            }
-            if(posX < 0){
-                posX = 0;
-            }else if(posX > that.dimensions['limiter']['absoluteWidth']){
-                posX = that.dimensions['limiter']['absoluteWidth'];
-            }
-        }
-        // Limiters
-        if(!isNaN(that.params['minY']) && posY < that.params['minY']){
-            posY = that.params['minY'];
-        }
-        // Align node
-        nodePosY = posY;
-        nodePosX = posX;
-        if(that.params['alignNode']){
-            nodePosY -= (that.dimensions['node']['absoluteHeight'] / 2);
-            nodePosX -= (that.dimensions['node']['absoluteWidth'] / 2);
-        }
-        // Set styles
-        switch(that.params['direction']){
-            case 'vertical' :
-                that.params['node'].style.top = [nodePosY, 'px'].join('');
-                break;
-            case 'horizontal' :
-                that.params['node'].style.left = [nodePosX, 'px'].join('');
-                break;
-            default :
-                that.params['node'].style.top = [nodePosY, 'px'].join('');
-                that.params['node'].style.left = [nodePosX, 'px'].join('');
-                break;
-        }
+        position = setPositionAction(position);
         // Trigger Event
         if(triggerEvents){
-            that.triggerEvent('onSet', {
-                'posY' : posY,
-                'posX' : posX,
-                'nodePosY' : nodePosY,
-                'nodePosX' : nodePosX
-            })
+            that.triggerEvent('onSelect', position);
+            that.triggerEvent('onSet', position);
         }
         return that;
     };
@@ -24376,7 +25458,8 @@ cm.define('Com.Gridlist', {
             'counter' : 'Count: ',
             'check_all' : 'Check all',
             'uncheck_all' : 'Uncheck all',
-            'empty' : 'Items does not found'
+            'empty' : 'Items does not found',
+            'actions' : 'Actions'
         },
         'icons' : {
             'arrow' : {
@@ -24559,8 +25642,9 @@ function(params){
     };
 
     var renderTh = function(item, i){
-        // Config
+        // Merge cell parameters
         item = that.params['cols'][i] = cm.merge({
+            '_component' : null,            // System attribute
             'width' : 'auto',               // number | % | auto
             'access' : true,                // Render column if is accessible
             'type' : 'text',		        // text | number | url | date | html | icon | checkbox | empty | actions | links
@@ -24767,7 +25851,15 @@ function(params){
                     nodes['actions'] = [];
                     nodes['inner'].appendChild(
                         nodes['node'] = cm.node('div', {'class' : ['pt__links', col['class']].join(' ')},
-                            nodes['actionsList'] = cm.node('ul')
+                            cm.node('ul',
+                                nodes['componentNode'] = cm.node('li', {'class' : 'com__menu', 'data-node' : 'ComMenu:{}:button'},
+                                    cm.node('a', {'class' : 'label'}, that.lang('actions')),
+                                    cm.node('span', {'class' : 'cm-i__chevron-down xx-small inline'}),
+                                    cm.node('div', {'class' : 'pt__menu', 'data-node' : 'ComMenu.target'},
+                                        nodes['actionsList'] = cm.node('ul', {'class' : 'pt__menu-dropdown'})
+                                    )
+                                )
+                            )
                         )
                     );
                     cm.forEach(col['actions'], function(actionItem){
@@ -24775,20 +25867,44 @@ function(params){
                         actionItem = cm.merge({
                             'label' : '',
                             'attr' : {},
-                            'events' : {}
+                            'events' : {},
+                            'controller' : false,
+                            'controllerParams' : {},
+                            'handler' : function(){}
                         }, actionItem);
                         cm.forEach(item['data'], function(itemValue, itemKey){
                             actionItem['attr'] = cm.replaceDeep(actionItem['attr'], new RegExp([cm.strWrap(itemKey, '%'), cm.strWrap(itemKey, '%25')].join('|'), 'g'), itemValue);
                         });
                         nodes['actionsList'].appendChild(
                             cm.node('li',
-                                actionNode = cm.node('a', actionItem['attr'], actionItem['label'])
+                                actionItem['_node'] = cm.node('a', actionItem['attr'], actionItem['label'])
                             )
                         );
-                        cm.forEach(actionItem['events'], function(actionEventHandler, actionEventName){
-                            cm.addEvent(actionNode, actionEventName, actionEventHandler);
+                        if(actionItem['controller'] || actionItem['handler']){
+                            cm.addEvent(actionItem['_node'], 'click', function(e){
+                                cm.preventDefault(e);
+                                if(actionItem['_controllerObject']){
+                                    actionItem['_controllerObject'].destruct();
+                                }
+                                if(actionItem['controller']){
+                                    cm.getConstructor(actionItem['controller'], function(classConstructor){
+                                        actionItem['_controllerObject'] = new classConstructor(actionItem['controllerParams']);
+                                        actionItem['_controllerObject'].construct();
+                                    });
+                                }
+                                actionItem['handler'](e, actionItem);
+                            });
+                        }else{
+                            cm.forEach(actionItem['events'], function(actionEventHandler, actionEventName){
+                                cm.addEvent(actionItem['_node'], actionEventName, actionEventHandler);
+                            });
+                        }
+                        nodes['actions'].push(actionItem['_node']);
+                    });
+                    cm.getConstructor('Com.Menu', function(classConstructor){
+                        col['_component'] = new classConstructor({
+                            'node' : nodes['componentNode']
                         });
-                        nodes['actions'].push(actionNode);
                     });
                     break;
 
@@ -25993,34 +27109,74 @@ function(params){
     var that = this;
 
     that.nodes = {};
+    that.items = [];
     that.components = {};
 
     var init = function(){
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
-        validateParams();
+        that.validateParams();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRenderStart');
-        render();
+        that.render();
         that.addToStack(that.nodes['container']);
         that.triggerEvent('onRender');
-    };
-
-    var validateParams = function(){
-
-    };
-
-    var render = function(){
-        // Structure
-        that.nodes['container'] = cm.node('div', {'class' : 'com__notifications'});
-        // Append
-        that.embedStructure(that.nodes['container']);
     };
 
     /* ******* PUBLIC ******* */
 
     init();
+});
+
+cm.getConstructor('Com.Notifications', function(classConstructor, className, classProto){
+    classProto.validateParams = function(){
+        var that = this;
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Structure
+        that.renderView();
+        // Append
+        that.embedStructure(that.nodes['container']);
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.nodes['container'] = cm.node('div', {'class' : 'com__notifications'},
+            that.nodes['list'] = cm.node('ul')
+        );
+        return that;
+    };
+
+    classProto.clear = function(){
+        var that = this;
+        cm.forEach(that.items, function(item){
+            that.remove(item);
+        });
+        return that;
+    };
+
+    classProto.add = function(item){
+        var that = this;
+        // Config
+        item = cm.merge({
+            'label' : '',
+            'nodes' : {}
+        }, item);
+        // Structure
+        // Push
+        that.items.push(item);
+        return that;
+    };
+
+    classProto.remove = function(item){
+        var that = this;
+        return that;
+    };
 });
 cm.define('Com.OldBrowserAlert', {
     'modules' : [
@@ -26126,6 +27282,53 @@ function(params){
 
     init();
 });
+cm.define('Com.OpacityRange', {
+    'extend' : 'Com.AbstractRange',
+    'params' : {
+        'className' : 'com__opacity-range',
+        'min' : 100,
+        'max' : 0,
+        'value' : 100,
+        'color' : 'red'
+    }
+},
+function(params){
+    var that = this;
+    that.myNodes = {};
+    Com.AbstractRange.apply(that, arguments);
+});
+
+cm.getConstructor('Com.OpacityRange', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        _inherit.prototype.construct.apply(that, arguments);
+        that.setColor(that.params['color']);
+        return this;
+    };
+
+    classProto.renderContent = function(){
+        var that = this;
+        that.myNodes['content'] = cm.node('div', {'class' : 'com__opacity-range__content'},
+            that.myNodes['inner'] = cm.node('div', {'class' : 'inner range-helper'})
+        );
+        return that.myNodes['content'];
+    };
+
+    classProto.setColor = function(color){
+        var that = this;
+        switch(that.params['direction']){
+            case 'horizontal':
+                that.myNodes['inner'].style.background = 'linear-gradient(to right, ' + color + ', rgba(255,255,255,0))';
+                break;
+            case 'vertical':
+                that.myNodes['inner'].style.background = 'linear-gradient(to bottom, ' + color + ', rgba(255,255,255,0))';
+                break;
+        }
+        return that;
+    };
+});
 cm.define('Com.Overlay', {
     'modules' : [
         'Params',
@@ -26145,13 +27348,14 @@ cm.define('Com.Overlay', {
     'params' : {
         'name' : '',
         'container' : 'document.body',
+        'appendMode' : 'appendChild',
         'theme' : 'default',            // transparent | default | light | dark
         'position' : 'fixed',
         'showSpinner' : true,
         'showContent' : true,
         'autoOpen' : true,
         'removeOnClose' : true,
-        'duration' : 500
+        'duration' : 'cm._config.animDurationLong'
     }
 },
 function(params){
@@ -26165,7 +27369,7 @@ function(params){
     that.openInterval = null;
 
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         validateParams();
@@ -26174,9 +27378,9 @@ function(params){
         that.triggerEvent('onRender');
         that.params['autoOpen'] && that.open();
     };
-    
-    var getCSSHelpers = function(){
-        that.params['duration'] = cm.getTransitionDurationFromRule('.pt__overlay-helper__duration');
+
+    var getLESSVariables = function(){
+        that.params['duration'] = cm.getLESSVariable('PtOverlay-Duration', that.params['duration']);
     };
 
     var validateParams = function(){
@@ -26222,7 +27426,7 @@ function(params){
                 cm.addClass(that.nodes['container'], 'is-immediately');
             }
             if(!cm.inDOM(that.nodes['container'])){
-                that.params['container'].appendChild(that.nodes['container']);
+                cm[that.params['appendMode']](that.nodes['container'], that.params['container']);
             }
             that.triggerEvent('onOpenStart');
             cm.addClass(that.nodes['container'], 'is-open', true);
@@ -26445,7 +27649,7 @@ function(params){
     that.pageCount = 0;
 
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
@@ -26458,8 +27662,8 @@ function(params){
         set(that.params['startPage']);
     };
 
-    var getCSSHelpers = function(){
-        that.params['animateDuration'] = cm.getTransitionDurationFromRule('.com__pagination-helper__duration');
+    var getLESSVariables = function(){
+        that.params['animateDuration'] = cm.getTransitionDurationFromLESS('ComPagination-Duration', that.params['animateDuration']);
     };
 
     var validateParams = function(){
@@ -27034,8 +28238,8 @@ cm.define('Com.Palette', {
         'Params',
         'Events',
         'Langs',
+        'Structure',
         'DataConfig',
-        'Storage',
         'Stack'
     ],
     'require' : [
@@ -27043,6 +28247,7 @@ cm.define('Com.Palette', {
         'tinycolor'
     ],
     'events' : [
+        'onRenderStart',
         'onRender',
         'onDraw',
         'onSet',
@@ -27051,7 +28256,9 @@ cm.define('Com.Palette', {
     ],
     'params' : {
         'node' : cm.node('div'),
+        'container' : null,
         'name' : '',
+        'embedStructure' : 'replace',
         'value' : 'transparent',
         'defaultValue' : 'rgb(255, 255, 255)',
         'setOnInit' : true,
@@ -27072,7 +28279,7 @@ function(params){
         opacityContext;
 
     that.nodes = {};
-    that.componnets = {};
+    that.components = {};
     that.value = null;
     that.previousValue = null;
 
@@ -27080,6 +28287,8 @@ function(params){
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
         render();
         initComponents();
         that.addToStack(that.nodes['container']);
@@ -27141,20 +28350,20 @@ function(params){
         cm.addEvent(that.nodes['inputHEX'], 'input', inputHEXHandler);
         cm.addEvent(that.nodes['inputHEX'], 'keypress', inputHEXKeypressHandler);
         cm.addEvent(that.nodes['buttonSelect'], 'click', buttonSelectHandler);
-        // Embed
-        that.params['node'].appendChild(that.nodes['container']);
+        // Append
+        that.embedStructure(that.nodes['container']);
     };
 
     var initComponents = function(){
-        that.componnets['paletteDrag'] = new Com.Draggable({
+        that.components['paletteDrag'] = new Com.Draggable({
             'target' : that.nodes['paletteZone'],
             'node' : that.nodes['paletteDrag'],
             'limiter' : that.nodes['paletteZone'],
             'events' : {
-                'onSet' : function(my, data){
+                'onSelect' : function(my, data){
                     var dimensions = my.getDimensions();
-                    that.value['v'] = cm.toFixed((100 - (100 / dimensions['limiter']['absoluteHeight']) * data['posY']) / 100, 2);
-                    that.value['s'] = cm.toFixed(((100 / dimensions['limiter']['absoluteWidth']) * data['posX']) / 100, 2);
+                    that.value['v'] = cm.toFixed((100 - (100 / dimensions['limiter']['absoluteHeight']) * data['top']) / 100, 2);
+                    that.value['s'] = cm.toFixed(((100 / dimensions['limiter']['absoluteWidth']) * data['left']) / 100, 2);
                     if(that.value['a'] == 0){
                         that.value['a'] = 1;
                         setOpacityDrag();
@@ -27164,15 +28373,15 @@ function(params){
                 }
             }
         });
-        that.componnets['rangeDrag'] = new Com.Draggable({
+        that.components['rangeDrag'] = new Com.Draggable({
             'target' : that.nodes['rangeZone'],
             'node' : that.nodes['rangeDrag'],
             'limiter' : that.nodes['rangeZone'],
             'direction' : 'vertical',
             'events' : {
-                'onSet' : function(my, data){
+                'onSelect' : function(my, data){
                     var dimensions = my.getDimensions();
-                    that.value['h'] = Math.floor(360 - (360 / 100) * ((100 / dimensions['limiter']['absoluteHeight']) * data['posY']));
+                    that.value['h'] = Math.floor(360 - (360 / 100) * ((100 / dimensions['limiter']['absoluteHeight']) * data['top']));
                     if(that.value['a'] == 0){
                         that.value['a'] = 1;
                         setOpacityDrag();
@@ -27183,15 +28392,15 @@ function(params){
                 }
             }
         });
-        that.componnets['opacityDrag'] = new Com.Draggable({
+        that.components['opacityDrag'] = new Com.Draggable({
             'target' : that.nodes['opacityZone'],
             'node' : that.nodes['opacityDrag'],
             'limiter' : that.nodes['opacityZone'],
             'direction' : 'vertical',
             'events' : {
-                'onSet' : function(my, data){
+                'onSelect' : function(my, data){
                     var dimensions = my.getDimensions();
-                    that.value['a'] = cm.toFixed((100 - (100 / dimensions['limiter']['absoluteHeight']) * data['posY']) / 100, 2);
+                    that.value['a'] = cm.toFixed((100 - (100 / dimensions['limiter']['absoluteHeight']) * data['top']) / 100, 2);
                     setColor();
                 }
             }
@@ -27201,32 +28410,37 @@ function(params){
     /* *** COLORS *** */
 
     var setRangeDrag = function(){
-        var dimensions = that.componnets['rangeDrag'].getDimensions(),
-            posY;
+        var dimensions = that.components['rangeDrag'].getDimensions(),
+            position = {
+                'left' : 0,
+                'top' : 0
+            };
         if(that.value['h'] == 0){
-            posY = 0;
+            position['top'] = 0;
         }else if(that.value['h'] == 360){
-            posY = dimensions['limiter']['absoluteHeight'];
+            position['top'] = dimensions['limiter']['absoluteHeight'];
         }else{
-            posY = dimensions['limiter']['absoluteHeight'] - (dimensions['limiter']['absoluteHeight'] / 100) * ((100 / 360) * that.value['h']);
+            position['top'] = dimensions['limiter']['absoluteHeight'] - (dimensions['limiter']['absoluteHeight'] / 100) * ((100 / 360) * that.value['h']);
         }
-        that.componnets['rangeDrag'].setPosition(0, posY, false);
+        that.components['rangeDrag'].setPosition(position, false);
     };
 
     var setPaletteDrag = function(){
-        var dimensions = that.componnets['paletteDrag'].getDimensions(),
-            posY,
-            posX;
-        posY = dimensions['limiter']['absoluteHeight'] - (dimensions['limiter']['absoluteHeight'] / 100) * (that.value['v'] * 100);
-        posX = (dimensions['limiter']['absoluteWidth'] / 100) * (that.value['s'] * 100);
-        that.componnets['paletteDrag'].setPosition(posX, posY, false);
+        var dimensions = that.components['paletteDrag'].getDimensions(),
+            position = {
+                'left' : (dimensions['limiter']['absoluteWidth'] / 100) * (that.value['s'] * 100),
+                'top' : dimensions['limiter']['absoluteHeight'] - (dimensions['limiter']['absoluteHeight'] / 100) * (that.value['v'] * 100)
+            };
+        that.components['paletteDrag'].setPosition(position, false);
     };
 
     var setOpacityDrag = function(){
-        var dimensions = that.componnets['opacityDrag'].getDimensions(),
-            posY;
-        posY = dimensions['limiter']['absoluteHeight'] - (dimensions['limiter']['absoluteHeight'] / 100) * (that.value['a'] * 100);
-        that.componnets['opacityDrag'].setPosition(0, posY, false);
+        var dimensions = that.components['opacityDrag'].getDimensions(),
+            position = {
+                'left' : 0,
+                'top' : dimensions['limiter']['absoluteHeight'] - (dimensions['limiter']['absoluteHeight'] / 100) * (that.value['a'] * 100)
+            };
+        that.components['opacityDrag'].setPosition(position, false);
     };
 
     var inputHEXHandler = function(){
@@ -27447,6 +28661,472 @@ function(params){
     };
 
     init();
+});
+cm.define('Com.Request', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'Stack',
+        'Structure'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onStart',
+        'onEnd',
+        'onError',
+        'onAbort',
+        'onSuccess',
+        'onContentRenderStart',
+        'onContentRender',
+        'onContentRenderEnd'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'container' : null,
+        'name' : '',
+        'embedStructure' : 'append',
+        'wrapContent' : true,
+        'swapContentOnError' : true,
+        'renderContentOnSuccess' : true,
+        'className' : '',
+        'autoSend' : false,
+        'responseKey' : 'data',
+        'responseHTML' : true,
+        'responseHTMLKey' : 'data',
+        'responseStatusKey' : 'data.success',
+        'responseContainer' : null,
+        'ajax' : {
+            'type' : 'json',
+            'method' : 'get',
+            'url' : '',                                 // Request URL. Variables: %baseurl%, %callback%.
+            'params' : '',                              // Params object. Variables: %baseurl%, %callback%.
+            'formData' : false
+        },
+        'variables' : {},
+        'showOverlay' : true,
+        'overlayContainer' : 'document.body',
+        'overlayDelay' : 'cm._config.loadDelay',
+        'animateDuration' : 'cm._config.animDuration',
+        'langs' : {
+            'server_error' : 'An unexpected error has occurred. Please try again later.'
+        },
+        'Com.Overlay' : {
+            'autoOpen' : false,
+            'removeOnClose' : true,
+            'showSpinner' : true,
+            'showContent' : false,
+            'position' : 'absolute',
+            'theme' : 'light'
+        }
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.animations = {};
+    that.components = {};
+    that.requestData = {};
+    that.responceData = null;
+    that.responceDataFiltered = null;
+    that.responceDataHTML = null;
+    that.responceDataStatus = null;
+    that.overlayDelay = null;
+    that.isProcess = false;
+    that.isError = false;
+    that.isRendering = false;
+    that.construct(params);
+});
+
+cm.getConstructor('Com.Request', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        that.destructHandler = that.destruct.bind(that);
+        that.requestHandler = that.request.bind(that);
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        //that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        that.params['autoSend'] && that.set();
+        return that;
+    };
+
+    classProto.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            that.removeFromStack();
+        }
+        return that;
+    };
+
+    classProto.send = function(){
+        var that = this;
+        if(that.isProcess){
+            that.abort();
+        }
+        if(!that.isProcess && !that.isRendering){
+            that.request();
+        }
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Structure
+        that.renderView();
+        if(that.params['wrapContent'] && cm.isNode(that.params['container'])){
+            cm.appendNodes(that.params['container'].childNodes, that.nodes['inner']);
+        }
+        // Attributes
+        that.setAttributes();
+        // Overlay
+        if(that.params['responseHTML']){
+            that.params['Com.Overlay']['container'] =
+                that.params['Com.Overlay']['container']
+                || that.params['overlayContainer']
+                || that.nodes['container']
+                || document.body;
+        }else{
+            that.params['Com.Overlay']['container'] =
+                that.params['Com.Overlay']['container']
+                || that.params['overlayContainer']
+                || document.body;
+        }
+        cm.getConstructor('Com.Overlay', function(classConstructor, className){
+            that.components['overlay'] = new classConstructor(that.params[className]);
+        });
+        // Append
+        that.embedStructure(that.nodes['container']);
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.nodes['container'] = cm.node('div', {'class' : 'com__request'},
+            that.nodes['inner'] = cm.node('div', {'class' : 'inner'})
+        );
+        return that;
+    };
+    
+    classProto.setAttributes = function(){
+        var that = this;
+        // CSS Class
+        cm.addClass(that.nodes['container'], that.params['className']);
+        // Animations
+        that.animations['container'] = new cm.Animation(that.nodes['container']);
+        return that;
+    };
+
+    classProto.setAction = function(o, mode, update){
+        var that = this;
+        mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
+        switch(mode){
+            case 'raw':
+                that.params['ajax'] = cm.merge(that._raw.params['ajax'], o);
+                break;
+            case 'current':
+                that.params['ajax'] = cm.merge(that.params['ajax'], o);
+                break;
+            case 'update':
+                that.params['ajax'] = cm.merge(that._update.params['ajax'], o);
+                break;
+        }
+        if(update){
+            that._update.params['ajax'] = cm.clone(that.params['ajax']);
+        }
+        return that;
+    };
+
+    classProto.setVariables = function(o, mode, update){
+        var that = this;
+        mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
+        switch(mode){
+            case 'raw':
+                that.params['variables'] = cm.merge(that._raw.params['variables'], o);
+                break;
+            case 'current':
+                that.params['variables'] = cm.merge(that.params['variables'], o);
+                break;
+            case 'update':
+                that.params['variables'] = cm.merge(that._update.params['variables'], o);
+                break;
+        }
+        if(update){
+            that._update.params['variables'] = cm.clone(that.params['variables']);
+        }
+        return that;
+    };
+
+    /* *** REQUEST *** */
+
+    classProto.request = function(){
+        var that = this;
+        that.prepare();
+        that.components['ajax'] = cm.ajax(
+            cm.merge(that.requestData, {
+                'onStart' : function(){
+                    that.start();
+                },
+                'onSuccess' : function(data){
+                    that.responceData = data;
+                    that.response();
+                },
+                'onError' : function(){
+                    that.error();
+                },
+                'onAbort' : function(){
+                    that.aborted();
+                },
+                'onEnd' : function(){
+                    that.end();
+                }
+            })
+        );
+        return that;
+    };
+
+    classProto.prepare = function(){
+        var that = this;
+        that.isError = false;
+        that.responceData = null;
+        that.responceDataFiltered = null;
+        that.responceDataHTML = null;
+        that.responceDataStatus = null;
+        that.requestData = cm.clone(that.params['ajax']);
+        that.requestData['url'] = cm.strReplace(that.requestData['url'], that.params['variables']);
+        that.requestData['params'] = cm.objectReplace(that.requestData['params'], that.params['variables']);
+        return that;
+    };
+
+    classProto.abort = function(){
+        var that = this;
+        if(that.components['ajax'] && that.components['ajax'].abort){
+            that.components['ajax'].abort();
+        }
+        return that;
+    };
+
+    classProto.start = function(){
+        var that = this;
+        that.isProcess = true;
+        // Show Overlay
+        if(that.params['showOverlay']){
+            that.overlayDelay = setTimeout(function(){
+                if(that.components['overlay'] && !that.components['overlay'].isOpen){
+                    that.components['overlay'].open();
+                }
+            }, that.params['overlayDelay']);
+        }
+        that.triggerEvent('onStart');
+        return that;
+    };
+
+    classProto.end = function(){
+        var that = this;
+        that.isProcess = false;
+        // Hide Overlay
+        if(that.params['showOverlay']){
+            that.overlayDelay && clearTimeout(that.overlayDelay);
+            if(that.components['overlay'] && that.components['overlay'].isOpen){
+                that.components['overlay'].close();
+            }
+        }
+        that.triggerEvent('onEnd');
+        return that;
+    };
+
+    classProto.filter = function(){
+        var that = this,
+            dataFiltered = cm.objectSelector(that.params['responseKey'], that.responceData),
+            dataStatus = cm.objectSelector(that.params['responseStatusKey'], that.responceData),
+            dataHTML;
+        if(cm.isEmpty(that.params['responseHTMLKey'])){
+            dataHTML = cm.objectSelector(that.params['responseKey'], that.responceData);
+        }else{
+            dataHTML = cm.objectSelector(that.params['responseHTMLKey'], that.responceData);
+        }
+        that.responceDataFiltered = !cm.isEmpty(dataFiltered) ? dataFiltered : [];
+        that.responceDataHTML = !cm.isEmpty(dataHTML) ? dataHTML : '';
+        that.responceDataStatus = !cm.isEmpty(dataStatus) ? dataStatus : false;
+    };
+
+    classProto.response = function(){
+        var that = this;
+        if(!cm.isEmpty(that.responceData)){
+            that.filter();
+        }
+        if(!cm.isEmpty(that.responceDataFiltered) || that.responceDataStatus){
+            that.success();
+        }else{
+            that.error();
+        }
+        return that;
+    };
+
+    classProto.error = function(){
+        var that = this;
+        that.isError = true;
+        that.renderError();
+        that.triggerEvent('onError');
+        return that;
+    };
+
+    classProto.success = function(){
+        var that = this;
+        that.isError = false;
+        if(!that.responceDataStatus || (that.responceDataStatus && that.params['renderContentOnSuccess'])){
+            that.renderContent();
+        }
+        that.triggerEvent('onSuccess', {
+            'response' : that.responceData,
+            'status' : that.responceDataStatus,
+            'filtered' : that.responceDataFiltered,
+            'html' : that.responceDataHTML
+        });
+        return that;
+    };
+
+    classProto.aborted = function(){
+        var that = this;
+        cm.triggerEvent('onAbort');
+        return that;
+    };
+
+    /* *** RENDER *** */
+
+    classProto.renderTemporary = function(visible){
+        var node = cm.node('div', {'class' : 'com__request__temporary'});
+        if(visible){
+            cm.addClass(node, 'is-show');
+        }
+        return node
+    };
+
+    classProto.renderContent = function(){
+        var that = this,
+            temporary,
+            nodes;
+        if(that.params['responseHTML']){
+            nodes = cm.strToHTML(that.responceDataHTML);
+            // Append
+            if(cm.isNode(that.params['responseContainer'])){
+                that.triggerEvent('onContentRenderStart', nodes);
+                cm.clearNode(that.params['responseContainer']);
+                cm.appendNodes(nodes, that.params['responseContainer']);
+                that.triggerEvent('onContentRender', nodes);
+                that.triggerEvent('onContentRenderEnd', nodes);
+            }else if(cm.isNode(that.params['container'])){
+                temporary = that.renderTemporary(false);
+                cm.appendNodes(nodes, temporary);
+                that.appendResponse(temporary);
+            }else{
+                that.triggerEvent('onContentRenderStart', nodes);
+                that.triggerEvent('onContentRender', nodes);
+                that.triggerEvent('onContentRenderEnd', nodes);
+            }
+        }
+        return that;
+    };
+
+    classProto.renderError = function(){
+        var that = this,
+            temporary,
+            node;
+        if(that.params['responseHTML']){
+            node = cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'));
+            // Append
+            if(cm.isNode(that.params['responseContainer'])){
+                that.triggerEvent('onContentRenderStart', node);
+                if(that.params['swapContentOnError']){
+                    cm.clearNode(that.params['responseContainer']);
+                    cm.appendChild(node, that.params['responseContainer']);
+                }else{
+                    cm.remove(that.nodes['error']);
+                    that.nodes['error'] = node;
+                    cm.insertFirst(that.nodes['error'], that.params['responseContainer']);
+                }
+                that.triggerEvent('onContentRender', node);
+                that.triggerEvent('onContentRenderEnd', node);
+            }else if(cm.isNode(that.params['container'])){
+                temporary = that.renderTemporary();
+                cm.appendChild(node, temporary);
+                if(that.params['swapContentOnError']){
+                    that.appendResponse(temporary);
+                }else{
+                    that.appendError(temporary);
+                }
+            }else{
+                that.triggerEvent('onContentRenderStart', node);
+                that.triggerEvent('onContentRender', node);
+                that.triggerEvent('onContentRenderEnd', node);
+            }
+        }
+        return that;
+    };
+
+    classProto.appendError = function(temporary){
+        var that = this;
+        that.isRendering = true;
+        that.triggerEvent('onContentRenderStart', temporary);
+        cm.remove(that.nodes['error']);
+        that.nodes['error'] = temporary;
+        cm.addClass(that.nodes['error'], 'is-show');
+        if(that.nodes['temporary']){
+            cm.insertFirst(that.nodes['error'], that.nodes['temporary']);
+        }else{
+            cm.insertFirst(that.nodes['error'], that.nodes['inner']);
+        }
+        cm.addClass(that.nodes['container'], 'is-show is-loaded', true);
+        that.isRendering = false;
+        that.triggerEvent('onContentRender', temporary);
+        that.triggerEvent('onContentRenderEnd', temporary);
+        return that;
+    };
+
+    classProto.appendResponse = function(temporary){
+        var that = this,
+            height;
+        that.isRendering = true;
+        that.triggerEvent('onContentRenderStart', temporary);
+        // Wrap old content
+        if(!that.nodes['temporary']){
+            that.nodes['temporary'] = that.renderTemporary(false);
+            cm.appendNodes(that.nodes['inner'].childNodes, that.nodes['temporary']);
+            cm.appendChild(that.nodes['temporary'], that.nodes['inner']);
+        }
+        cm.removeClass(that.nodes['temporary'], 'is-show', true);
+        // Append temporary
+        cm.appendChild(temporary, that.nodes['inner']);
+        cm.addClass(temporary, 'is-show', true);
+        // Show container
+        cm.removeClass(that.nodes['container'], 'is-loaded', true);
+        cm.addClass(that.nodes['container'], 'is-show', true);
+        that.triggerEvent('onContentRender', that.nodes['temporary']);
+        // Animate
+        height = temporary.offsetHeight;
+        that.animations['container'].go({
+            'style' : {'height' : [height, 'px'].join('')},
+            'duration' : that.params['animateDuration'],
+            'anim' : 'smooth',
+            'onStop' : function(){
+                // Remove old temporary
+                cm.remove(that.nodes['temporary']);
+                // Apply new temporary
+                that.nodes['temporary'] = temporary;
+                that.nodes['container'].style.height = '';
+                cm.addClass(that.nodes['container'], 'is-loaded', true);
+                that.isRendering = false;
+                that.triggerEvent('onContentRenderEnd', that.nodes['temporary']);
+            }
+        });
+        return that;
+    };
 });
 Com['Scroll'] = function(o){
     var that = this,
@@ -28145,6 +29825,7 @@ cm.define('Com.Select', {
     ],
     'events' : [
         'onRender',
+        'onRenderStart',
         'onSelect',
         'onChange',
         'onReset',
@@ -28201,6 +29882,8 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['node']);
         validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
         render();
         setMiscEvents();
         // Set selected option
@@ -28243,7 +29926,7 @@ function(params){
             that.params['multiple'] = that.params['node'].multiple;
             that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
             that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
-            that.params['disabled'] = that.params['node'].disabled || that.params['disabled'];
+            that.params['disabled'] = that.params['node'].disabled || that.params['node'].readOnly || that.params['disabled'];
         }
         that.disabled = that.params['disabled'];
     };
@@ -28275,7 +29958,8 @@ function(params){
         }
         // Data
         cm.forEach(that.params['node'].attributes, function(item){
-            if(/^data-/.test(item.name) && item.name != 'data-element'){
+            if(/^data-(?!node|element)/.test(item.name)){
+                nodes['hidden'].setAttribute(item.name, item.value);
                 nodes['container'].setAttribute(item.name, item.value);
             }
         });
@@ -28301,9 +29985,9 @@ function(params){
     var renderSingle = function(){
         nodes['container'] = cm.Node('div', {'class' : 'com__select'},
             nodes['hidden'] = cm.Node('select', {'class' : 'display-none'}),
-            nodes['target'] = cm.Node('div', {'class' : 'form-field has-icon-right'},
-                nodes['arrow'] = cm.Node('div', {'class' : that.params['icons']['arrow']}),
-                nodes['text'] = cm.Node('input', {'type' : 'text', 'readOnly' : 'true'})
+            nodes['target'] = cm.Node('div', {'class' : 'pt__input'},
+                nodes['text'] = cm.Node('input', {'type' : 'text', 'readOnly' : 'true'}),
+                nodes['arrow'] = cm.Node('div', {'class' : that.params['icons']['arrow']})
             ),
             nodes['scroll'] = cm.Node('div', {'class' : 'pt__listing-items'},
                 nodes['items'] = cm.Node('ul')
@@ -28880,7 +30564,7 @@ function(params){
     that.isEditing = null;
 
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
@@ -28895,8 +30579,8 @@ function(params){
         that.triggerEvent('onRender');
     };
 
-    var getCSSHelpers = function(){
-        that.params['time'] = cm.getTransitionDurationFromRule('.com__slider-helper__duration');
+    var getLESSVariables = function(){
+        that.params['time'] = cm.getTransitionDurationFromLESS('ComSlider-Duration', that.params['time']);
     };
 
     var validateParams = function(){
@@ -29619,7 +31303,7 @@ cm.define('Com.Spacer', {
     'params' : {
         'node' : cm.Node('div'),
         'name' : '',
-        'minHeight' : 24,
+        'minHeight' : 0,
         'isEditing' : true,
         'customEvents' : true,
         'Com.Draggable' : {
@@ -29701,8 +31385,8 @@ function(params){
                 'node': that.nodes['dragContainer'],
                 'events' : {
                     'onStart' : start,
-                    'onSet' : function(my, data){
-                        that.value = data['posY'];
+                    'onSelect' : function(my, data){
+                        that.value = data['top'];
                         move();
                     },
                     'onStop' : stop
@@ -29737,8 +31421,8 @@ function(params){
     };
 
     var set = function(height, triggerEvents){
-        that.value = Math.min(height, that.params['minHeight']);
-        setHeight(height);
+        that.value = Math.max(height, that.params['minHeight']);
+        setHeight();
         setRulerCounter();
         if(triggerEvents){
             that.triggerEvent('onChange', {
@@ -29754,8 +31438,8 @@ function(params){
         that.nodes['rulerCounter'].innerHTML = [that.value, ' px'].join('');
     };
 
-    var setHeight = function(height){
-        that.params['node'].style.height = [height, 'px'].join('');
+    var setHeight = function(){
+        that.params['node'].style.height = [that.value, 'px'].join('');
         that.nodes['dragContainer'].style.top = [that.params['node'].offsetHeight, 'px'].join('');
     };
 
@@ -29782,7 +31466,7 @@ function(params){
     };
 
     that.redraw = function(){
-        setHeight(that.value);
+        setHeight();
         return that;
     };
 
@@ -29864,7 +31548,7 @@ function(params){
     that.isProcess = false;
     
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node'], that.params['nodesDataMarker'], false);
@@ -29876,12 +31560,9 @@ function(params){
         that.params['renderOnInit'] && render();
     };
 
-    var getCSSHelpers = function(){
-        var rule;
-        that.params['animateDuration'] = cm.getTransitionDurationFromRule('.com__tabset-helper__duration');
-        if(rule = cm.getCSSRule('.com__tabset-helper__column-width')[0]){
-            that.params['tabsWidth'] = cm.styleToNumber(rule.style.width);
-        }
+    var getLESSVariables = function(){
+        that.params['animateDuration'] = cm.getTransitionDurationFromLESS('ComTabset-Duration', that.params['animateDuration']);
+        that.params['tabsWidth'] = cm.getLESSVariable('ComTabset-Column-Width', that.params['tabsWidth'], true);
     };
 
     var validateParams = function(){
@@ -30814,7 +32495,7 @@ cm.define('Com.TagsInput', {
     ],
     'params' : {
         'input' : null,                                 // Deprecated, use 'node' parameter instead.
-        'node' : cm.Node('input', {'type' : 'text'}),
+        'node' : cm.node('input', {'type' : 'text'}),
         'container' : null,
         'name' : '',
         'embedStructure' : 'replace',
@@ -31475,6 +33156,25 @@ function(params){
     };
 
     init();
+});
+cm.define('Com.TintRange', {
+    'extend' : 'Com.AbstractRange',
+    'params' : {
+        'className' : 'com__tint-range',
+        'min' : 360,
+        'max' : 0,
+        'value' : 360
+    }
+},
+function(params){
+    var that = this;
+    Com.AbstractRange.apply(that, arguments);
+});
+
+cm.getConstructor('Com.TintRange', function(classConstructor, className, classProto){
+    classProto.renderContent = function(){
+        return cm.node('div', {'class' : 'com__tint-range__content'})
+    };
 });
 cm.define('Com.ToggleBox', {
     'modules' : [
@@ -32746,14 +34446,21 @@ function(params){
 
     init();
 });
-/*! ************ QuickSilk-Application v3.7.0 (2016-03-21 17:53) ************ */
+/*! ************ QuickSilk-Application v3.8.0 (2016-05-11 20:46) ************ */
+
+// /* ************************************************ */
+// /* ******* QUICKSILK: COMMON ******* */
+// /* ************************************************ */
+
 var App = {
+    '_version' : '3.5.2',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
 };
 
 var Module = {};
+
 cm.define('App.Block', {
     'modules' : [
         'Params',
@@ -32780,6 +34487,7 @@ cm.define('App.Block', {
         'index' : false,
         'locked' : false,
         'visible' : true,
+        'removable' : true,
         'editorName' : 'app-editor'
     }
 },
@@ -32825,7 +34533,6 @@ function(params){
     var validateParams = function(){
         var index;
         if(cm.isNumber(that.params['instanceId']) || cm.isString(that.params['instanceId'])){
-            cm.log(that.params['instanceId']);
             that.params['name'] = [that.params['type'], that.params['instanceId'], that.params['positionId']].join('_');
             that.params['zoneName'] = [that.params['type'], that.params['instanceId'], that.params['parentId'], that.params['zone']].join('_');
         }else{
@@ -33082,7 +34789,7 @@ function(params){
     /* *** INIT *** */
 
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         validateParams();
@@ -33091,9 +34798,9 @@ function(params){
         that.triggerEvent('onRender');
     };
 
-    var getCSSHelpers = function(){
-        that.params['dropDuration'] = cm.getTransitionDurationFromRule('.app__dashboard__drop-duration');
-        that.params['moveDuration'] = cm.getTransitionDurationFromRule('.app__dashboard__move-duration');
+    var getLESSVariables = function(){
+        that.params['dropDuration'] = cm.getTransitionDurationFromLESS('AppDashboard-DropDuration', that.params['dropDuration']);
+        that.params['moveDuration'] = cm.getTransitionDurationFromLESS('AppDashboard-MoveDuration', that.params['moveDuration']);
     };
 
     var validateParams = function(){
@@ -33679,7 +35386,8 @@ function(params){
             if(
                 cm.isParent(block.params['node'], zone.params['node'])
                 || zone.params['locked']
-                || zone.params['type'] != 'remove' && block.params['type'] != zone.params['type']
+                || (zone.params['type'] != 'remove' && block.params['type'] != zone.params['type'])
+                || (zone.params['type'] == 'remove' && !block.params['removable'])
             ){
                 return false;
             }
@@ -34051,6 +35759,7 @@ cm.define('App.DummyBlock', {
         'name' : '',
         'keyword' : '',
         'type' : 'template-manager',            // template-manager | form-manager | mail
+        'removable' : true,
         'editorName' : 'app-editor'
     }
 },
@@ -34238,6 +35947,7 @@ cm.define('App.Editor', {
         'onResize',
 
         'create',
+        'place',
         'replace',
         'move',
         'delete',
@@ -34316,7 +36026,6 @@ function(params){
         });
         cm.find('App.Sidebar', that.params['sidebarName'], null, function(classObject){
             that.components['sidebar'] = classObject
-                .addEvent('onResize', sidebarResizeAction)
                 .addEvent('onExpandEnd', sidebarExpandAction)
                 .addEvent('onCollapseEnd', sidebarCollapseAction)
                 .addEvent('onTabShow', function(sidebar, data){
@@ -34333,7 +36042,6 @@ function(params){
         that.triggerEvent('onProcessStart');
         cm.addClass(cm.getDocumentHtml(), 'is-editor');
         if(that.components['sidebar']){
-            that.components['sidebar'].resize();
             if(that.components['sidebar'].isExpanded){
                 sidebarExpandAction();
             }else{
@@ -34346,16 +36054,6 @@ function(params){
             adminPageAction();
         }
         that.isRendered = true;
-    };
-
-    var sidebarResizeAction = function(sidebar, params){
-        cm.addClass(cm.getDocumentHtml(), 'is-immediately');
-        that.triggerEvent('onResize', {
-            'sidebar' : params
-        });
-        setTimeout(function(){
-            cm.removeClass(cm.getDocumentHtml(), 'is-immediately');
-        }, 5);
     };
 
     var sidebarExpandAction = function(){
@@ -34468,6 +36166,19 @@ function(params){
                 'index' : block.getIndex(),
                 'onEnd' : function(){
                     that.triggerEvent('create', node);
+                    that.triggerEvent('onProcessEnd', node);
+                }
+            });
+        }
+        return that;
+    };
+
+    that.place = function(node){
+        if(node && block){
+            node = !cm.isNode(node) ? cm.strToHTML(node) : node;
+            that.components['dashboard'].appendBlock(node, {
+                'onEnd' : function(){
+                    that.triggerEvent('place', node);
                     that.triggerEvent('onProcessEnd', node);
                 }
             });
@@ -34659,7 +36370,7 @@ function(params){
     that.sceneIntervals = {};
 
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
@@ -34671,12 +36382,9 @@ function(params){
         that.params['autoStart'] && prepare();
     };
 
-    var getCSSHelpers = function(){
-        var rule;
-        that.params['duration'] = cm.getTransitionDurationFromRule('.app__helptour-helper__duration');
-        if(rule = cm.getCSSRule('.app__helptour-helper__adaptive-from')[0]){
-            that.params['adaptiveFrom'] = cm.styleToNumber(rule.style.width);
-        }
+    var getLESSVariables = function(){
+        that.params['duration'] = cm.getTransitionDurationFromLESS('AppHelpTour-Duration', that.params['duration']);
+        that.params['adaptiveFrom'] = cm.getLESSVariable('AppHelpTour-AdaptiveFrom', that.params['adaptiveFrom'], true);
     };
 
     var validateParams = function(){
@@ -34700,16 +36408,9 @@ function(params){
     };
 
     var getDimensions = function(){
-        var rule;
-        if(rule = cm.getCSSRule('.app__sidebar-helper__width-collapsed')[0]){
-            dimensions['sidebarCollapsed'] = cm.styleToNumber(rule.style.width);
-        }
-        if(rule = cm.getCSSRule('.app__sidebar-helper__width-expanded')[0]){
-            dimensions['sidebarExpanded'] = cm.styleToNumber(rule.style.width);
-        }
-        if(rule = cm.getCSSRule('.app__topmenu-helper__height')[0]){
-            dimensions['topMenu'] = cm.styleToNumber(rule.style.height);
-        }
+        dimensions['sidebarCollapsed'] = cm.getLESSVariable('AppSidebar-WidthCollapsed', 0, true);
+        dimensions['sidebarExpanded'] = cm.getLESSVariable('AppSidebar-WidthExpanded', 0, true);
+        dimensions['topMenu'] = cm.getLESSVariable('AppTopMenu-Height', 0, true);
         if(!dimensions['popupSelfHeight']){
             dimensions['popupSelfHeight'] = that.nodes['popup'].offsetHeight;
         }
@@ -34750,6 +36451,10 @@ function(params){
     var start = function(){
         // Render Popup
         renderPopup();
+        // Close Panels
+        cm.find('App.Panel', null, null, function(classObject){
+            classObject.close();
+        });
         // Save Sidebar State
         startOptions['sidebarExpanded'] = that.components['sidebar'].isExpanded;
         if(that.components['sidebar'].isExpanded){
@@ -35251,6 +36956,664 @@ function(params){
 
     init();
 });
+cm.define('App.Panel', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'Structure',
+        'DataConfig',
+        'Storage',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onOpenStart',
+        'onOpen',
+        'onCloseStart',
+        'onClose',
+        'onError',
+        'onSaveStart',
+        'onSave',
+        'onSaveEnd',
+        'onSaveError',
+        'onSaveSuccess',
+        'onSaveFailure',
+        'onLoadStart',
+        'onLoad',
+        'onLoadEnd',
+        'onLoadError',
+        'onCancelStart',
+        'onCancel'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'container' : 'document.body',
+        'name' : '',
+        'embedStructure' : 'append',
+        'type' : 'sidebar',                             // sidebar | story | fullscreen
+        'duration' : 'cm._config.animDurationLong',
+        'autoOpen' : true,
+        'destructOnClose' : true,
+        'showCloseButton' : true,
+        'showBackButton' : false,
+        'showButtons' : true,
+        'showOverlay' : true,
+        'overlayDelay' : 0 ,
+        'overlayPosition' : 'content',                  // dialog | content
+        'title' : null,
+        'content' : null,
+        'collector' : null,
+        'constructCollector' : true,
+        'responseKey' : 'data',
+        'responseContentKey' : 'data.content',
+        'responseTitleKey' : 'data.title',
+        'responseStatusKey' : 'data.success',
+        'renderContentOnSuccess' : false,
+        'closeOnSuccess' : true,
+        'get' : {                                       // Get dialog content ajax
+            'type' : 'json',
+            'method' : 'GET',
+            'url' : '',                                 // Request URL. Variables: %baseurl%, %callback%.
+            'params' : ''                               // Params object. Variables: %baseurl%, %callback%.
+        },
+        'post' : {                                      // Submit form ajax
+            'type' : 'json',
+            'method' : 'POST',
+            'url' : '',                                 // Request URL. Variables: %baseurl%, %callback%.
+            'params' : ''                               // Params object. Variables: %baseurl%, %callback%.
+        },
+        'langs' : {
+            'close' : 'Close',
+            'cancel' : 'Cancel',
+            'save' : 'Save',
+            'saving' : 'Saving...',
+            'reload' : 'Reload',
+            'cancelDescription' : 'Cancel'
+        },
+        'Com.Request' : {
+            'wrapContent' : true,
+            'swapContentOnError' : false,
+            'renderContentOnSuccess' : false,
+            'autoSend' : false,
+            'responseKey' : 'data',
+            'responseHTML' : true
+        },
+        'Com.Overlay' : {
+            'autoOpen' : false,
+            'removeOnClose' : true,
+            'showSpinner' : true,
+            'showContent' : false,
+            'position' : 'absolute',
+            'theme' : 'light'
+        }
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.isOpen = false;
+    that.isLoaded = false;
+    that.isDestructed = false;
+    that.isProccesing = false;
+    that.destructOnClose = false;
+    that.hasGetRequest = false;
+    that.hasPostRequest = false;
+    that.isGetRequest = false;
+    that.isPostRequest = false;
+    that.transitionInterval = null;
+    that.construct(params);
+});
+
+cm.getConstructor('App.Panel', function(classConstructor, className, classProto){
+
+    /* *** PUBLIC *** */
+
+    classProto.construct = function(params){
+        var that = this;
+        that.openHandler = that.open.bind(that);
+        that.closeHandler = that.close.bind(that);
+        that.saveHandler = that.save.bind(that);
+        that.cancelHandler = that.cancel.bind(that);
+        that.loadHandler = that.load.bind(that);
+        that.transitionOpenHandler = that.transitionOpen.bind(that);
+        that.transitionCloseHandler = that.transitionClose.bind(that);
+        that.windowKeydownHandler = that.windowKeydown.bind(that);
+        that.getLESSVariables();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.setEvents();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        that.params['autoOpen'] && that.open();
+        return that;
+    };
+
+    classProto.destruct = function(){
+        var that = this;
+        if(that.isOpen){
+            that.destructOnClose = true;
+            that.close();
+        }else if(!that.isDestructed){
+            that.isDestructed = true;
+            cm.customEvent.trigger(that.nodes['contentHolder'], 'destruct', {
+                'type' : 'child',
+                'self' : false
+            });
+            that.unsetEvents();
+            that.removeFromStack();
+            cm.remove(that.nodes['container']);
+        }
+        return that;
+    };
+
+    classProto.open = function(){
+        var that = this;
+        if(!that.isOpen){
+            that.embedStructure(that.nodes['container']);
+            that.triggerEvent('onOpenStart');
+            // Get
+            if(that.hasGetRequest){
+                that.load();
+            }else{
+                that.isLoaded = true;
+                that.showButton(['close', 'save']);
+                that.params['showButtons'] && that.showButtons(true);
+                cm.customEvent.trigger(that.nodes['contentHolder'], 'redraw', {
+                    'type' : 'child',
+                    'self' : false
+                });
+            }
+            // Animate
+            that.nodes['contentHolder'].scrollTop = 0;
+            cm.addClass(that.nodes['container'], 'is-open', true);
+            that.transitionInterval = setTimeout(that.transitionOpenHandler, that.params['duration']);
+        }
+        return that;
+    };
+
+    classProto.close = function(){
+        var that = this;
+        if(that.isProccesing){
+            that.cancel();
+        }
+        if(that.isOpen){
+            that.triggerEvent('onCloseStart');
+            cm.removeClass(that.nodes['container'], 'is-open', true);
+            that.transitionInterval = setTimeout(that.transitionCloseHandler, that.params['duration']);
+        }
+        return that;
+    };
+
+    classProto.save = function(){
+        var that = this,
+            params;
+        if(that.isProccesing){
+            that.cancel();
+        }
+        that.isPostRequest = true;
+        that.triggerEvent('onSaveStart');
+        if(that.hasPostRequest){
+            // Get Params and Form Data
+            params = cm.clone(that.params['post']);
+            if(params['formData']){
+                params['params'] = new FormData(that.nodes['contentHolder']);
+            }else{
+                params['params'] = cm.merge(params['params'], cm.getFDO(that.nodes['contentHolder']));
+            }
+            // Send
+            that.showButton(['cancel', 'saving']);
+            that.components['request']
+                .setAction(params, 'update')
+                .send();
+        }else{
+            that.showButton(['close', 'save']);
+            that.triggerEvent('onSave');
+            that.triggerEvent('onSaveEnd');
+        }
+        return that;
+    };
+    
+    classProto.load = function(){
+        var that = this;
+        if(that.isProccesing){
+            that.cancel();
+        }
+        that.isGetRequest = true;
+        that.triggerEvent('onLoadStart');
+        if(that.hasGetRequest){
+            that.showButton('cancel');
+            that.components['request']
+                .setAction(that.params['get'], 'update')
+                .send();
+        }else{
+            that.showButton(['close', 'save']);
+            that.triggerEvent('onLoad');
+            that.triggerEvent('onLoadEnd');
+        }
+        return that;
+    };
+
+    classProto.cancel = function(){
+        var that = this;
+        that.triggerEvent('onCancelStart');
+        that.components['request'].abort();
+        if(that.isLoaded){
+            that.showButton(['close', 'save']);
+        }else{
+            that.showButton(['close', 'reload']);
+        }
+        that.triggerEvent('onCancel');
+        return that;
+    };
+
+    /* *** CONTENT *** */
+
+    classProto.setTitle = function(value){
+        var that = this;
+        cm.clearNode(that.nodes['label']);
+        if(cm.isNode(value)){
+            cm.appendChild(value, that.nodes['label']);
+        }else if(!cm.isEmpty(value)){
+            that.nodes['label'].innerHTML = value;
+        }
+        return that;
+    };
+
+    classProto.setContent = function(node){
+        var that = this;
+        cm.clearNode(that.nodes['contentHolder']);
+        if(cm.isNode(node)){
+            cm.appendChild(node, that.nodes['contentHolder']);
+        }
+        return that;
+    };
+
+    /* *** SYSTEM *** */
+
+    classProto.getLESSVariables = function(){
+        var that = this;
+        that.params['duration'] = cm.getTransitionDurationFromLESS('AppPanel-Duration', that.params['duration']);
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        that.params['Com.Request']['Com.Overlay'] = that.params['Com.Overlay'];
+        that.params['Com.Request']['showOverlay'] = that.params['showOverlay'];
+        that.params['Com.Request']['overlayDelay'] = that.params['overlayDelay'];
+        that.params['Com.Request']['responseKey'] = that.params['responseKey'];
+        that.params['Com.Request']['responseHTMLKey'] = that.params['responseContentKey'];
+        that.params['Com.Request']['responseStatusKey'] = that.params['responseStatusKey'];
+        that.params['Com.Request']['renderContentOnSuccess'] = that.params['renderContentOnSuccess'];
+        that.destructOnClose = that.params['destructOnClose'];
+        that.hasGetRequest = !cm.isEmpty(that.params['get']['url']);
+        that.hasPostRequest = !cm.isEmpty(that.params['post']['url']);
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Structure
+        that.renderView();
+        // Attributes
+        that.setAttributes();
+        // Content
+        that.setTitle(that.params['title']);
+        that.setContent(that.params['content']);
+        // Overlay
+        switch(that.params['overlayPosition']){
+            case 'content':
+                that.params['Com.Overlay']['container'] = that.nodes['content'];
+                that.params['Com.Request']['overlayContainer'] = that.nodes['content'];
+                break;
+            case 'dialog':
+            default:
+                that.params['Com.Overlay']['container'] = that.nodes['dialog'];
+                that.params['Com.Request']['overlayContainer'] = that.nodes['dialog'];
+                break;
+        }
+        // Request
+        that.params['Com.Request']['container'] = that.nodes['contentHolder'];
+        cm.getConstructor('Com.Request', function(classConstructor, className){
+            that.components['request'] = new classConstructor(that.params[className]);
+            that.components['request']
+                .addEvent('onStart', function(){
+                    that.isProccesing = true;
+                })
+                .addEvent('onEnd', function(){
+                    that.isProccesing = false;
+                    that.params['showButtons'] && that.showButtons();
+                    if(that.isGetRequest){
+                        that.triggerEvent('onLoadEnd');
+                    }else if(that.isPostRequest){
+                        that.triggerEvent('onSaveEnd');
+                    }
+                    that.isGetRequest = false;
+                    that.isPostRequest = false;
+                })
+                .addEvent('onSuccess', function(my, data){
+                    if(that.isGetRequest){
+                        that.loadResponse(data);
+                    }else if(that.isPostRequest){
+                        that.saveResponse(data);
+                    }
+                })
+                .addEvent('onError', function(){
+                    if(that.isGetRequest){
+                        that.loadError();
+                    }else if(that.isPostRequest){
+                        that.saveError();
+                    }
+                })
+                .addEvent('onContentRender', function(){
+                    that.constructCollector();
+                })
+                .addEvent('onContentRenderEnd', function(){
+                    cm.customEvent.trigger(that.nodes['contentHolder'], 'redraw', {
+                        'type' : 'child',
+                        'self' : false
+                    });
+                });
+        });
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'app__panel'},
+            that.nodes['dialog'] = cm.node('div', {'class' : 'app__panel__dialog'},
+                that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
+                    that.nodes['title'] = cm.node('div', {'class' : 'title'},
+                        that.nodes['label'] = cm.node('div', {'class' : 'label'})
+                    ),
+                    that.nodes['content'] = cm.node('div', {'class' : 'content'},
+                        that.nodes['contentHolder'] = cm.node('div', {'class' : 'inner'})
+                    )
+                )
+            )
+        );
+        // Close Buttons
+        that.nodes['close'] = cm.node('div', {'class' : 'icon cm-i cm-i__circle-close'});
+        if(that.params['showCloseButton']){
+            cm.insertLast(that.nodes['close'], that.nodes['title']);
+        }
+        that.nodes['back'] = cm.node('div', {'class' : 'icon cm-i cm-i__circle-arrow-left'});
+        if(that.params['showBackButton']){
+            cm.insertFirst(that.nodes['back'], that.nodes['title']);
+        }
+        // Buttons
+        that.nodes['buttons'] = that.renderButtons();
+        if(that.params['showButtons']){
+            cm.appendChild(that.nodes['buttons'], that.nodes['inner']);
+        }
+        return that;
+    };
+
+    classProto.showButton = function(items){
+        var that = this;
+        cm.forEach(that.nodes['button'], function(node){
+            cm.addClass(node, 'display-none');
+        });
+        if(cm.isArray(items)){
+            cm.forEach(items, function(item){
+                if(that.nodes['button'][item]){
+                    cm.removeClass(that.nodes['button'][item], 'display-none');
+                }
+            });
+        }else if(that.nodes['button'][items]){
+            cm.removeClass(that.nodes['button'][items], 'display-none');
+        }
+    };
+
+    classProto.showButtons = function(immediately){
+        var that = this;
+        cm.appendChild(that.nodes['buttons'], that.nodes['inner']);
+        if(immediately){
+            cm.addClass(that.nodes['buttons'], 'is-immediately', true);
+        }
+        cm.addClass(that.nodes['buttons'], 'is-show', true);
+        return that;
+    };
+
+    classProto.renderButtons = function(){
+        var that = this;
+        that.nodes['button'] = {};
+        // Structure
+        that.nodes['buttons'] = cm.node('div', {'class' : 'buttons'},
+            cm.node('div', {'class' : 'inner'},
+                cm.node('div', {'class' : 'pt__buttons pull-justify'},
+                    cm.node('div', {'class' : 'inner'},
+                        that.nodes['button']['close'] = cm.node('div', {'class' : 'button button-danger'}, that.lang('close')),
+                        that.nodes['button']['cancel'] = cm.node('div', {'class' : 'button button-danger'}, that.lang('cancel')),
+                        that.nodes['button']['save'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('save')),
+                        that.nodes['button']['reload'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('reload')),
+                        that.nodes['button']['saving'] = cm.node('div', {'class' : 'button button-primary has-icon has-icon-small'},
+                            cm.node('div', {'class' : 'icon small loader'}),
+                            cm.node('div', {'class' : 'label'}, that.lang('saving'))
+                        )
+                    )
+                )
+            )
+        );
+        // Attributes
+        that.nodes['button']['cancel'].setAttribute('title', that.lang('cancelDescription'));
+        that.nodes['button']['saving'].setAttribute('title', that.lang('cancelDescription'));
+        // Events
+        cm.addEvent(that.nodes['button']['save'], 'click', that.saveHandler);
+        cm.addEvent(that.nodes['button']['close'], 'click', that.closeHandler);
+        cm.addEvent(that.nodes['button']['cancel'], 'click', that.cancelHandler);
+        cm.addEvent(that.nodes['button']['saving'], 'click', that.cancelHandler);
+        cm.addEvent(that.nodes['button']['reload'], 'click', that.loadHandler);
+        return that.nodes['buttons'];
+    };
+
+    classProto.setAttributes = function(){
+        var that = this;
+        // Attributes
+        cm.addClass(that.nodes['container'], ['app__panel', that.params['type']].join('--'));
+        that.nodes['back'].setAttribute('title', that.lang('close'));
+        that.nodes['close'].setAttribute('title', that.lang('close'));
+        // Events
+        cm.addEvent(that.nodes['back'], 'click', that.closeHandler);
+        cm.addEvent(that.nodes['close'], 'click', that.closeHandler);
+        return that;
+    };
+
+    classProto.setEvents = function(){
+        var that = this;
+        cm.addEvent(window, 'keydown', that.windowKeydownHandler);
+        return that;
+    };
+
+    classProto.unsetEvents = function(){
+        var that = this;
+        cm.removeEvent(window, 'keydown', that.windowKeydownHandler);
+        return that;
+    };
+
+    classProto.windowKeydown = function(e){
+        var that = this,
+            target = cm.getEventTarget(e);
+        if(cm.isKeyCode(e.keyCode, 'escape')){
+            that.close();
+        }
+        return that;
+    };
+
+    classProto.constructCollector = function(){
+        var that = this;
+        if(that.params['constructCollector']){
+            if(that.params['collector']){
+                that.params['collector'].construct(that.nodes['contentHolder']);
+            }else{
+                cm.find('Com.Collector', null, null, function(classObject){
+                    classObject.construct(that.nodes['contentHolder']);
+                });
+            }
+        }
+        return that;
+    };
+
+    classProto.transitionOpen = function(){
+        var that = this;
+        that.isOpen = true;
+        that.triggerEvent('onOpen');
+        return that;
+    };
+
+    classProto.transitionClose = function(){
+        var that = this;
+        that.destructOnClose && that.destruct();
+        cm.remove(that.nodes['container']);
+        that.isOpen = false;
+        that.triggerEvent('onClose');
+        return that;
+    };
+
+    classProto.loadResponse = function(data){
+        var that = this;
+        that.isLoaded = true;
+        that.setTitle(cm.objectSelector(that.params['responseTitleKey'], data['response']));
+        that.showButton(['close', 'save']);
+        that.triggerEvent('onLoad');
+        return that;
+    };
+
+    classProto.loadError = function(){
+        var that = this;
+        if(!that.isLoaded){
+            that.showButton(['close', 'reload']);
+        }else{
+            that.showButton(['close', 'save']);
+        }
+        that.triggerEvent('onLoadError');
+        that.triggerEvent('onError', 'load');
+        return that;
+    };
+
+    classProto.saveResponse = function(data){
+        var that = this;
+        if(!data['status'] || (data['status'] && that.params['renderContentOnSuccess'])){
+            that.setTitle(cm.objectSelector(that.params['responseTitleKey'], data['response']));
+            that.showButton(['close', 'save']);
+        }
+        if(data['status']){
+            if(that.params['closeOnSuccess']){
+                that.close();
+            }
+            that.triggerEvent('onSaveSuccess', data);
+        }else{
+            that.triggerEvent('onSaveFailure', data);
+        }
+        that.triggerEvent('onSave', data);
+        return that;
+    };
+
+    classProto.saveError = function(){
+        var that = this;
+        that.showButton(['close', 'save']);
+        that.triggerEvent('onSaveError');
+        that.triggerEvent('onError', 'save');
+        return that;
+    };
+});
+cm.define('App.PanelHolder', {
+    'extend' : 'App.Panel',
+    'modules' : [
+        'DataNodes'
+    ],
+    'params' : {
+        'type' : 'story',
+        'autoOpen' : false,
+        'showButtons' : false,
+        'showBackButton' : true,
+        'showCloseButton' : false
+    }
+},
+function(params){
+    var that = this;
+    that.myNodes = {
+        'container' : cm.node('div'),
+        'button' : cm.node('div'),
+        'holder' : cm.node('div'),
+        'content' : cm.node('div')
+    };
+    App.Panel.apply(that, arguments);
+});
+
+cm.getConstructor('App.PanelHolder', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(params){
+        var that = this;
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        _inherit.prototype.render.apply(that, arguments);
+        // Process holder nodes
+        that.myNodes = cm.merge(that.myNodes, that.getDataNodesObject(that.params['node']));
+        cm.addEvent(that.myNodes['button'], 'click', that.openHandler);
+        return that;
+    };
+
+    classProto.open = function(){
+        var that = this;
+        if(!that.isOpen){
+            that.setContent(that.myNodes['content']);
+        }
+        _inherit.prototype.open.apply(that, arguments);
+        return that;
+    };
+
+    classProto.transitionClose = function(){
+        var that = this;
+        cm.appendChild(that.myNodes['content'], that.myNodes['holder']);
+        _inherit.prototype.transitionClose.apply(that, arguments);
+        return that;
+    };
+});
+cm.define('App.PanelRequest', {
+    'extend' : 'App.Panel',
+    'modules' : [
+        'DataNodes'
+    ],
+    'params' : {
+        'autoOpen' : false
+    }
+},
+function(params){
+    var that = this;
+    App.Panel.apply(that, arguments);
+});
+
+cm.getConstructor('App.PanelRequest', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(params){
+        var that = this;
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        _inherit.prototype.render.apply(that, arguments);
+        cm.addEvent(that.params['node'], 'click', that.openHandler);
+        return that;
+    };
+});
 cm.define('App.SearchBox', {
     'modules' : [
         'Params',
@@ -35356,10 +37719,7 @@ cm.define('App.Sidebar', {
     }
 },
 function(params){
-    var that = this,
-        scrollBarSize = 0,
-        menuWidth = 0,
-        contentWidth;
+    var that = this;
 
     that.nodes = {
         'container' : cm.Node('div'),
@@ -35375,7 +37735,7 @@ function(params){
     /* *** CLASS FUNCTIONS *** */
 
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
@@ -35387,8 +37747,8 @@ function(params){
         that.triggerEvent('onRender');
     };
 
-    var getCSSHelpers = function(){
-        that.params['duration'] = cm.getTransitionDurationFromRule('.app__sidebar-helper__duration');
+    var getLESSVariables = function(){
+        that.params['duration'] = cm.getTransitionDurationFromLESS('AppSidebar-Duration', that.params['duration']);
     };
 
     var validateParams = function(){
@@ -35398,23 +37758,13 @@ function(params){
     };
 
     var render = function(){
-        var isExpanded, helperMenuRule, helperContentRule;
+        var isExpanded;
         // Init tabset
         processTabset();
-        // Get sidebar dimensions from CSS
-        scrollBarSize = cm._scrollSize;
-        if(helperMenuRule = cm.getCSSRule('.app__sidebar-helper__menu-width')[0]){
-            menuWidth = cm.styleToNumber(helperMenuRule.style.width);
-        }
-        if(helperContentRule = cm.getCSSRule('.app__sidebar-helper__content-width')[0]){
-            contentWidth = cm.styleToNumber(helperContentRule.style.width);
-        }
         // Add events on collapse buttons
         cm.forEach(that.nodes['collapseButtons'], function(item){
             cm.addEvent(item['container'], 'click', that.toggle);
         });
-        // Resize sidebar relative to scroll bar size
-        resize();
         // Check toggle class
         isExpanded = cm.isClass(that.nodes['container'], 'is-expanded');
         // Check storage
@@ -35454,40 +37804,8 @@ function(params){
         });
     };
 
-    var resize = function(){
-        var rule,
-            params = {
-                'innerWidth' : contentWidth + scrollBarSize,
-                'width' : menuWidth + contentWidth + scrollBarSize,
-                'contentWidth' : contentWidth,
-                'menuWidth' : menuWidth,
-                'scrollBarSize' : scrollBarSize
-            };
-        cm.addClass(that.nodes['container'], 'is-immediately');
-        if(rule = cm.getCSSRule('.app__sidebar .sidebar__content')[0]){
-            rule.style.width = [params['innerWidth'], 'px'].join('');
-        }
-        if(rule = cm.getCSSRule('.app__sidebar .sidebar__remove-zone')[0]){
-            rule.style.width = [params['innerWidth'], 'px'].join('');
-        }
-        if((rule = cm.getCSSRule('.app__sidebar.is-expanded')[0]) || (rule = cm.getCSSRule('.is-expanded.app__sidebar')[0])){
-            rule.style.width = [params['width'], 'px'].join('');
-        }
-        if(rule = cm.getCSSRule('.app__sidebar-helper__width-expanded')[0]){
-            rule.style.width = [params['width'], 'px'].join('');
-        }
-        that.triggerEvent('onResize', params);
-        setTimeout(function(){
-            cm.removeClass(that.nodes['container'], 'is-immediately');
-        }, 5);
-    };
-
     var resizeAction = function(){
         animFrame(function(){
-            if(cm._scrollSize != scrollBarSize){
-                scrollBarSize = cm._scrollSize;
-                resize();
-            }
             if(cm._pageSize['winWidth'] <= cm._config['adaptiveFrom']){
                 if(that.isExpanded){
                     that.collapse(true);
@@ -35602,11 +37920,6 @@ function(params){
             return that.components['tabset'].get();
         }
         return null;
-    };
-
-    that.resize = function(){
-        resize();
-        return that;
     };
 
     that.getDimensions = function(key){
@@ -36098,7 +38411,6 @@ cm.define('App.Template', {
     'params' : {
         'node' : cm.Node('div'),
         'name' : 'app-template',
-        'stickyFooter' : false,
         'scrollNode' : 'document.body',
         'scrollDuration' : 1000,
         'topMenuName' : 'app-topmenu',
@@ -36111,16 +38423,14 @@ cm.define('App.Template', {
             'indent' : 24
         },
         'header' : {
-            'type' : 'box',            // wide | box
-            'width' : 1000,
-            'align' : 'center',
             'fixed' : false,
             'overlapping' : false
         },
+        'content' : {
+            'editableIndent' : 0
+        },
         'footer' : {
-            'type' : 'box',            // wide | box
-            'width' : 1000,
-            'align' : 'center'
+            'sticky' : true
         }
     }
 },
@@ -36134,7 +38444,8 @@ function(params){
         'header' : cm.Node('div'),
         'content' : cm.Node('div'),
         'footer' : cm.Node('div'),
-        'buttonUp' : cm.Node('div')
+        'buttonUp' : cm.Node('div'),
+        'buttonsUp' : []
     };
 
     that.isEditing = null;
@@ -36143,18 +38454,27 @@ function(params){
     that.offsets = {};
 
     var init = function(){
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
         that.triggerEvent('onRenderStart');
         render();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRender');
+        setState();
         redraw(true);
+        that.triggerEvent('onRender');
+    };
+
+    var getLESSVariables = function(){
+        that.params['content']['editableIndent'] = cm.getLESSVariable('AppTpl-Content-EditableIndent', that.params['content']['editableIndent'], true);
     };
 
     var render = function(){
+        // Structure
+        that.nodes['headerFake'] = cm.node('div', {'class' : 'tpl__header__fake'});
+        cm.insertAfter(that.nodes['headerFake'], that.nodes['headerContainer']);
         // Find components
         cm.find('App.TopMenu', that.params['topMenuName'], null, function(classObject){
             that.components['topMenu'] = classObject;
@@ -36163,8 +38483,7 @@ function(params){
             that.components['sidebar'] = classObject;
         });
         new cm.Finder('App.Editor', that.params['editorName'], null, function(classObject){
-            that.components['editor'] = classObject
-                .addEvent('onResize', resize);
+            that.components['editor'] = classObject;
         }, {'event' : 'onProcessStart'});
         // Scroll Controllers
         that.anim['scroll'] = new cm.Animation(that.params['scrollNode']);
@@ -36178,14 +38497,21 @@ function(params){
         });
     };
 
-    var resize = function(editor, params){
-        var rule;
-        if(rule = cm.getCSSRule('html.is-sidebar--expanded .tpl__container')[0]){
-            rule.style.marginLeft = [params['sidebar']['width'], 'px'].join('');
+    var setState = function(){
+        if(that.params['header']['overlapping']){
+            cm.addClass(that.nodes['headerContainer'], 'is-overlapping');
         }
-        if(rule = cm.getCSSRule('html.is-sidebar--expanded .tpl__header__container.is-fixed')[0]){
-            rule.style.left = [params['sidebar']['width'], 'px'].join('');
+        if(that.params['header']['fixed']){
+            cm.addClass(that.nodes['headerContainer'], 'is-fixed');
         }
+        if(that.params['header']['fixed'] && !that.params['header']['overlapping']){
+            cm.addClass(that.nodes['headerFake'], 'is-show');
+        }
+    };
+
+    var unsetState = function(){
+        cm.removeClass(that.nodes['headerContainer'], 'is-overlapping is-fixed');
+        cm.removeClass(that.nodes['headerFake'], 'is-show');
     };
 
     var redraw = function(triggerEvents){
@@ -36198,15 +38524,19 @@ function(params){
         // Resize
         that.nodes['inner'].style.minHeight = that.offsets['height'] + 'px';
         if(that.isEditing){
-            that.nodes['content'].style.top = 0;
-            if(that.params['stickyFooter']){
-                that.nodes['content'].style.minHeight = Math.max((that.offsets['height'] - that.offsets['header'] - that.offsets['footer']), 0) + 'px';
+            if(that.params['footer']['sticky']){
+                that.nodes['content'].style.minHeight = Math.max((
+                        that.offsets['height']
+                        - that.offsets['header']
+                        - that.offsets['footer']
+                        - (that.params['content']['editableIndent'] * 2)
+                    ), 0) + 'px';
             }
         }else{
             if(that.params['header']['fixed'] && !that.params['header']['overlapping']){
-                that.nodes['content'].style.top = that.offsets['header'] + 'px';
+                that.nodes['headerFake'].style.height = that.offsets['header'] + 'px';
             }
-            if(that.params['stickyFooter']){
+            if(that.params['footer']['sticky']){
                 if(that.params['header']['overlapping']){
                     that.nodes['content'].style.minHeight = Math.max((that.offsets['height'] - that.offsets['footer']), 0) + 'px';
                 }else{
@@ -36231,7 +38561,7 @@ function(params){
     that.enableEditing = function(){
         if(typeof that.isEditing !== 'boolean' || !that.isEditing){
             that.isEditing = true;
-            cm.removeClass(that.nodes['headerContainer'], 'is-overlapping is-fixed');
+            unsetState();
             that.redraw();
             that.triggerEvent('enableEditing');
         }
@@ -36241,12 +38571,7 @@ function(params){
     that.disableEditing = function(){
         if(typeof that.isEditing !== 'boolean' || that.isEditing){
             that.isEditing = false;
-            if(that.params['header']['overlapping']){
-                cm.addClass(that.nodes['headerContainer'], 'is-overlapping');
-            }
-            if(that.params['header']['fixed']){
-                cm.addClass(that.nodes['headerContainer'], 'is-fixed');
-            }
+            setState();
             that.redraw();
             that.triggerEvent('disableEditing');
         }
@@ -36631,20 +38956,90 @@ function(params){
     init();
 });
 
+/* ******* MODULES: MENU ******* */
+
+cm.define('Module.Menu', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'name' : '',
+        'type' : 'horizontal'           // horizontal | vertical
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {
+        'select' : {
+            'select' : cm.node('select')
+        }
+    };
+    that.construct(params);
+});
+
+cm.getConstructor('Module.Menu', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        that.processSelectHandler = that.processSelect.bind(that);
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Events
+        cm.addEvent(that.nodes['select']['select'], 'change', that.processSelectHandler);
+        return that;
+    };
+
+    classProto.processSelect = function(){
+        var that = this;
+        var value = that.nodes['select']['select'].value;
+        if(!cm.isEmpty(value)){
+            window.location.href = value;
+        }
+        return that;
+    };
+});
+/* ******* MODULES: MENU ******* */
+
 cm.define('App.ModuleMenu', {
     'modules' : [
         'Params',
         'DataNodes'
     ],
     'params' : {
-        'node' : cm.Node('div')
+        'node' : cm.node('div')
     }
 },
 function(params){
     var that = this;
 
     that.nodes = {
-        'select' : cm.Node('select')
+        'select' : cm.node('select')
     };
 
     /* *** CLASS FUNCTIONS *** */
@@ -36699,9 +39094,7 @@ cm.define('App.ModuleRolloverTabs', {
         'delay' : 'cm._config.hideDelay',
         'isEditing' : false,
         'customEvents' : true,
-        'Com.TabsetHelper' : {
-
-        }
+        'Com.TabsetHelper' : {}
     }
 },
 function(params){
@@ -36725,7 +39118,7 @@ function(params){
     that.changeInterval = null;
 
     var init = function(){
-        getCSSHelpers();
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
@@ -36737,8 +39130,8 @@ function(params){
         that.triggerEvent('onRender');
     };
 
-    var getCSSHelpers = function(){
-        that.params['duration'] = cm.getTransitionDurationFromRule('.app-mod__rollover-tabs-helper__duration') || that.params['duration'];
+    var getLESSVariables = function(){
+        that.params['duration'] = cm.getTransitionDurationFromLESS('AppMod-RolloverTabs-Duration', that.params['duration']);
     };
 
     var validateParams = function(){
@@ -36938,6 +39331,131 @@ function(params){
 
     init();
 });
+cm.define('Module.WorkingArea', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'enableEditing',
+        'disableEditing',
+        'enableEditable',
+        'disableEditable'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'name' : '',
+        'isEditing' : false,
+        'customEvents' : true,
+        'href' : '',
+        'target' : '_self'
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'container' : cm.node('div')
+    };
+    that.components = {};
+
+    that.isEditing = null;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['href'] = that.params['node'].getAttribute('href') || that.params['href'];
+            that.params['target'] = that.params['node'].getAttribute('target') || that.params['target'];
+        }
+    };
+
+    var render = function(){
+        // Set State
+        defaultState();
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
+        // Editing
+        that.params['isEditing'] && that.enableEditing();
+    };
+
+    var editState = function(){
+        cm.addClass(that.nodes['container'], 'is-editing is-editable');
+        if(!cm.isEmpty(that.params['href'])){
+            cm.removeClass(that.nodes['container'], 'is-link');
+            cm.removeEvent(that.nodes['container'], 'click', linkAction);
+        }
+    };
+
+    var defaultState = function(){
+        cm.removeClass(that.nodes['container'], 'is-editing is-editable');
+        if(!cm.isEmpty(that.params['href'])){
+            cm.addClass(that.nodes['container'], 'is-link');
+            cm.addEvent(that.nodes['container'], 'click', linkAction);
+        }
+    };
+
+    var linkAction = function(e){
+        cm.preventDefault(e);
+        switch(that.params['target']){
+            case '_blank':
+                window.open(that.params['href'],'_blank');
+                break;
+            default:
+                window.location.href = that.params['href'];
+                break;
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.enableEditing = function(){
+        if(!cm.isBoolean(that.isEditing) || !that.isEditing){
+            that.isEditing = true;
+            editState();
+            that.triggerEvent('enableEditing');
+            that.triggerEvent('enableEditable');
+        }
+        return that;
+    };
+
+    that.disableEditing = function(){
+        if(!cm.isBoolean(that.isEditing) || that.isEditing){
+            that.isEditing = false;
+            defaultState();
+            that.triggerEvent('disableEditing');
+            that.triggerEvent('disableEditable');
+        }
+        return that;
+    };
+
+    init();
+});
+window.LESS = cm.merge(window.LESS, {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":13,"CmIcon-Magnify":"\\e600","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleClose":"\\e702","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.16.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationNone":"0ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"250ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Open Sans, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"'Open Sans', arial, helvetica, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-BoxWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmButton-PaddingX":"12px","CmInput-Padding":"6px","CmInput-DefaultBackground":"#ffffff","CmInput-HoverBackground":"#ffffff","CmInput-ActiveBackground":"#ffffff","CmInput-DisabledBackground":"#fafafa","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"28px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"150px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"250ms","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"28px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"24px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"28px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","fa-font-path":"../fonts/MagpieUI/fontawesome","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":23,"AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Default-Family":"Open Sans, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Open Sans, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Open Sans, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Open Sans, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Open Sans, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Open Sans, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Open Sans, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Open Sans, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#000000","AppTopMenu-Color":"#ffffff","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#000000","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"250ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"28px","AppPanel-Dialog-ButtonsHeight":"52px","AppPanel-Box-Indent":["24px","12px"],"AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"28px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"28px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"28px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"28px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"28px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"12px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"});
 
 window.Collector = new Com.Collector({
         'autoInit' : true
@@ -37079,7 +39597,7 @@ window.Collector = new Com.Collector({
     /* *** MODULES *** */
 
     .add('module-menu', function(node){
-        new Module.Menu({
+        new App.ModuleMenu({
             'node' : node
         });
     })

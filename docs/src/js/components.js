@@ -139,7 +139,7 @@ window.Collector = new Com.Collector({
     /* *** MODULES *** */
 
     .add('module-menu', function(node){
-        new Module.Menu({
+        new App.ModuleMenu({
             'node' : node
         });
     })

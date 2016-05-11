@@ -1,0 +1,510 @@
+<?php
+
+include_once 'helper.php';
+$html = get_include_contents('ajax.panel.item.view.phtml');
+
+?>
+
+<div class="app__menu-designer" data-element="App.MenuDesigner">
+    <div class="app__panel__box">
+        <dl class="pt__field is-box">
+            <dt>Name</dt>
+            <dd>
+                <input type="text">
+            </dd>
+        </dl>
+    </div>
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__primary-menu-items"}' data-node="ComToggleBox.container">
+        <dt data-node="ComToggleBox.button">
+            <span class="icon default"></span>
+            <span class="title">Primary Menu Items</span>
+        </dt>
+        <dd data-node="ComToggleBox.target">
+            <div class="app__panel__box">
+                <dl class="pt__field is-box">
+                    <dt>
+                        Click to edit styles
+                        <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                            <span class="icon default linked" data-node="button"></span>
+                            <span class="com__help-bubble__content" data-node="content">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
+                        </span>
+                    </dt>
+                    <dd>
+                        <div class="pt__buttons pull-justify">
+                            <div class="inner">
+                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Default State"}'>
+                                    <div class="button button-secondary" data-node="button">Default</div>
+                                    <div class="hidden" data-node="holder">
+                                        <div data-node="content">
+                                            <?=$html?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Hover State"}'>
+                                    <div class="button button-middle" data-node="button">Hover</div>
+                                    <div class="hidden" data-node="holder">
+                                        <div data-node="content">
+                                            <?=$html?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Active State"}'>
+                                    <div class="button button-primary" data-node="button">Active</div>
+                                    <div class="hidden" data-node="holder">
+                                        <div data-node="content">
+                                            <?=$html?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Item Inner Padding</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Indent Between Items</dt>
+                                <dd>
+                                    <input type="number" min="0" max="999" value="0">
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </dd>
+    </dl>
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__secondary-menu-items"}' data-node="ComToggleBox.container">
+        <dt data-node="ComToggleBox.button">
+            <span class="icon default"></span>
+            <span class="title">Secondary Menu Items</span>
+        </dt>
+        <dd data-node="ComToggleBox.target">
+            <div class="app__panel__box">
+                <dl class="pt__field is-box">
+                    <dt>
+                        Click to edit styles
+                        <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                            <span class="icon default linked" data-node="button"></span>
+                            <span class="com__help-bubble__content" data-node="content">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
+                        </span>
+                    </dt>
+                    <dd>
+                        <div class="pt__buttons pull-justify">
+                            <div class="inner">
+                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Default State"}'>
+                                    <div class="button button-secondary" data-node="button">Default</div>
+                                    <div class="hidden" data-node="holder">
+                                        <div data-node="content">
+                                            <?=$html?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Hover State"}'>
+                                    <div class="button button-middle" data-node="button">Hover</div>
+                                    <div class="hidden" data-node="holder">
+                                        <div data-node="content">
+                                            <?=$html?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Active State"}'>
+                                    <div class="button button-primary" data-node="button">Active</div>
+                                    <div class="hidden" data-node="holder">
+                                        <div data-node="content">
+                                            <?=$html?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Item Inner Padding</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Indent Between Items</dt>
+                                <dd>
+                                    <input type="number" min="0" max="999" value="0">
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </dd>
+    </dl>
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__primary-menu-container"}' data-node="ComToggleBox.container">
+        <dt data-node="ComToggleBox.button">
+            <span class="icon default"></span>
+            <span class="title">Primary Menu Container</span>
+        </dt>
+        <dd data-node="ComToggleBox.target">
+            <div class="app__panel__box">
+                <dl class="pt__field is-box">
+                    <dt>Background Color</dt>
+                    <dd>
+                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}'>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Background Image</dt>
+                    <dd>
+                        <div class="pt__buttons pull-justify">
+                            <div class="inner">
+                                <div class="browse-button">
+                                    <input type="button" value="Browse">
+                                    <div class="inner">
+                                        <input type="file">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Image Scaling</dt>
+                    <dd>
+                        <select data-element="Com.Select">
+                            <option value="auto">Original size</option>
+                            <option value="contain">Contain</option>
+                            <option value="cover">Cover</option>
+                            <option value="fill">Fill</option>
+                        </select>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Image Repeat</dt>
+                    <dd>
+                        <select data-element="Com.Select">
+                            <option value="no_repeat">No repeat</option>
+                            <option value="verically">Repeat vertically</option>
+                            <option value="horizontally">Repeat horizontally</option>
+                            <option value="both">Repeat both horizontally and vertically</option>
+                        </select>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Image Position</dt>
+                    <dd>
+                        <select data-element="Com.Select">
+                            <option value="left top">Top Left</option>
+                            <option value="center top">Top Center</option>
+                            <option value="right top">Top Right</option>
+                            <option value="left center">Middle Left</option>
+                            <option value="center center">Middle Center</option>
+                            <option value="right center">Middle Right</option>
+                            <option value="left bottom">Bottom Left</option>
+                            <option value="center bottom">Bottom Center</option>
+                            <option value="right bottom">Bottom Right</option>
+                        </select>
+                    </dd>
+                </dl>
+                <hr>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Size</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Style</dt>
+                                <dd>
+                                    <select data-element="Com.Select">
+                                        <option>Solid</option>
+                                        <option>Dotted</option>
+                                        <option>Dashed</option>
+                                        <option>Double</option>
+                                        <option>Groove</option>
+                                        <option>Ridge</option>
+                                        <option>Inset</option>
+                                        <option>Outset</option>
+                                    </select>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Radius</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxRadiusTools">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Color</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.ColorPicker">
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Inner Padding</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </dd>
+    </dl>
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__secondary-menu-container"}' data-node="ComToggleBox.container">
+        <dt data-node="ComToggleBox.button">
+            <span class="icon default"></span>
+            <span class="title">Secondary Menu Container</span>
+        </dt>
+        <dd data-node="ComToggleBox.target">
+            <div class="app__panel__box">
+                <dl class="pt__field is-box">
+                    <dt>Background Color</dt>
+                    <dd>
+                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}'>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Background Image</dt>
+                    <dd>
+                        <div class="pt__buttons pull-justify">
+                            <div class="inner">
+                                <div class="browse-button">
+                                    <input type="button" value="Browse">
+                                    <div class="inner">
+                                        <input type="file">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Image Scaling</dt>
+                    <dd>
+                        <select data-element="Com.Select">
+                            <option value="auto">Original size</option>
+                            <option value="contain">Contain</option>
+                            <option value="cover">Cover</option>
+                            <option value="fill">Fill</option>
+                        </select>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Image Repeat</dt>
+                    <dd>
+                        <select data-element="Com.Select">
+                            <option value="no_repeat">No repeat</option>
+                            <option value="verically">Repeat vertically</option>
+                            <option value="horizontally">Repeat horizontally</option>
+                            <option value="both">Repeat both horizontally and vertically</option>
+                        </select>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Image Position</dt>
+                    <dd>
+                        <select data-element="Com.Select">
+                            <option value="left top">Top Left</option>
+                            <option value="center top">Top Center</option>
+                            <option value="right top">Top Right</option>
+                            <option value="left center">Middle Left</option>
+                            <option value="center center">Middle Center</option>
+                            <option value="right center">Middle Right</option>
+                            <option value="left bottom">Bottom Left</option>
+                            <option value="center bottom">Bottom Center</option>
+                            <option value="right bottom">Bottom Right</option>
+                        </select>
+                    </dd>
+                </dl>
+                <hr>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Size</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Style</dt>
+                                <dd>
+                                    <select data-element="Com.Select">
+                                        <option>Solid</option>
+                                        <option>Dotted</option>
+                                        <option>Dashed</option>
+                                        <option>Double</option>
+                                        <option>Groove</option>
+                                        <option>Ridge</option>
+                                        <option>Inset</option>
+                                        <option>Outset</option>
+                                    </select>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Radius</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxRadiusTools">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Color</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.ColorPicker">
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Inner Padding</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </dd>
+    </dl>
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__mobile-view"}' data-node="ComToggleBox.container">
+        <dt data-node="ComToggleBox.button">
+            <span class="icon default"></span>
+            <span class="title">Mobile View</span>
+        </dt>
+        <dd data-node="ComToggleBox.target">
+            <div class="app__panel__box">
+                <dl class="pt__field is-box">
+                    <dt>
+                        Click to edit font properties
+                        <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                            <span class="icon default linked" data-node="button"></span>
+                            <span class="com__help-bubble__content" data-node="content">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
+                        </span>
+                    </dt>
+                    <dd>
+                        <div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"default":{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
+                            <input data-node="input" type="hidden" value="">
+                            <div class="item-preview" data-node="preview">The quick brown fox jumps over the lazy dog</div>
+                        </div>
+                    </dd>
+                </dl>
+                <hr>
+                <dl class="pt__field is-box">
+                    <dt>Background Color</dt>
+                    <dd>
+                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}'>
+                    </dd>
+                </dl>
+                <dl class="pt__field is-box">
+                    <dt>Menu Icon</dt>
+                    <dd>
+                        <div class="pt__buttons pull-justify">
+                            <div class="inner">
+                                <div class="browse-button">
+                                    <input type="button" value="Browse">
+                                    <div class="inner">
+                                        <input type="file">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
+                <hr>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Size</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Style</dt>
+                                <dd>
+                                    <select data-element="Com.Select">
+                                        <option>Solid</option>
+                                        <option>Dotted</option>
+                                        <option>Dashed</option>
+                                        <option>Double</option>
+                                        <option>Groove</option>
+                                        <option>Ridge</option>
+                                        <option>Inset</option>
+                                        <option>Outset</option>
+                                    </select>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Radius</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxRadiusTools">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box align-center">
+                                <dt>Border Color</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.ColorPicker">
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="pt__columns">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box align-center">
+                                <dt>Inner Padding</dt>
+                                <dd>
+                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column"></div>
+                    </div>
+                </div>
+            </div>
+        </dd>
+    </dl>
+</div>

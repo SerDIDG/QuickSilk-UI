@@ -11,7 +11,8 @@ module.exports = function(grunt) {
         paths : {
             components : 'libs',
             src : 'docs/src',
-            build : 'docs/build'
+            build : 'docs/build',
+            temp : 'temp'
         },
 
         packages : {
@@ -79,21 +80,21 @@ module.exports = function(grunt) {
 
         clean : {
             scripts : [
-                '<%= paths.build %>/js'
+                '<%= paths.build %>/js/*'
             ],
             styles : [
-                '<%= paths.build %>/less',
-                '<%= paths.build %>/css'
+                '<%= paths.build %>/less/*',
+                '<%= paths.build %>/css/*'
             ],
             images : [
-                '<%= paths.build %>/img'
+                '<%= paths.build %>/img/*'
             ],
             fonts : [
-                '<%= paths.build %>/fonts'
+                '<%= paths.build %>/fonts/*'
             ],
             stuff : [
-                '<%= paths.build %>/content',
-                '<%= paths.build %>/stuff'
+                '<%= paths.build %>/content/*',
+                '<%= paths.build %>/stuff/*'
             ],
             temp : [
                 '<%= paths.temp %>'
@@ -108,6 +109,7 @@ module.exports = function(grunt) {
                 src : [
                     '<%= components.common.scripts %>',
                     '<%= components.application.scripts %>',
+                    '<%= paths.build %>/js/<%= pkg.name %>.variables.js',
                     '<%= paths.src %>/js/**/*.js'
                 ],
                 dest : '<%= paths.build %>/js/<%= pkg.name %>.js'
@@ -119,11 +121,31 @@ module.exports = function(grunt) {
                 src : [
                     '<%= components.common.styles %>',
                     '<%= components.application.styles %>',
-                    '<%= paths.src %>/less/variables.less',
+                    '<%= paths.src %>/less/variables/*.less',
                     '<%= paths.src %>/less/main.less',
                     '<%= paths.src %>/less/docs.less'
                 ],
                 dest : '<%= paths.build %>/less/<%= pkg.name %>.less'
+            },
+            variables : {
+                src : [
+                    '<%= components.common.path %>/build/less/<%= packages.common.name %>.variables.less',
+                    '<%= components.application.path %>/build/less/<%= packages.application.name %>.variables.less',
+                    '<%= paths.src %>/less/variables/*.less'
+                ],
+                dest : '<%= paths.build %>/less/<%= pkg.name %>.variables.less'
+            }
+        },
+
+        lessvars: {
+            options: {
+                format : function(vars){
+                    return 'window.LESS = cm.merge(window.LESS, '+ JSON.stringify(vars) +');';
+                }
+            },
+            build : {
+                src : ['<%= paths.build %>/less/<%= pkg.name %>.variables.less'],
+                dest : '<%= paths.build %>/js/<%= pkg.name %>.variables.js'
             }
         },
 
@@ -245,13 +267,15 @@ module.exports = function(grunt) {
         }
     });
     // Custom Tasks
-    grunt.registerTask('default', ['scripts', 'styles', 'images', 'fonts', 'stuff']);
+    grunt.registerTask('default', ['clean', 'pre', 'scripts', 'styles', 'images', 'fonts', 'stuff']);
     grunt.registerTask('optimize', ['grunt:common_optimize', 'grunt:application_optimize', 'default']);
     grunt.registerTask('watcher', ['concurrent']);
 
-    grunt.registerTask('scripts', ['clean:scripts', 'concat:scripts']);
-    grunt.registerTask('styles', ['clean:styles', 'concat:styles', 'less:build']);
-    grunt.registerTask('images', ['clean:images', 'copy:images']);
-    grunt.registerTask('fonts', ['clean:fonts', 'copy:fonts']);
-    grunt.registerTask('stuff', ['clean:stuff', 'copy:stuff']);
+    grunt.registerTask('scripts', ['concat:scripts']);
+    grunt.registerTask('styles', ['variables', 'concat:styles', 'less:build']);
+    grunt.registerTask('images', ['copy:images']);
+    grunt.registerTask('fonts', ['copy:fonts']);
+    grunt.registerTask('stuff', ['copy:stuff']);
+    grunt.registerTask('variables', ['concat:variables', 'lessvars']);
+    grunt.registerTask('pre', ['variables']);
 };

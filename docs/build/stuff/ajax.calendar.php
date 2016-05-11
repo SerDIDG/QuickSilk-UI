@@ -77,7 +77,7 @@ switch($_GET['view']){
 				                <div class="right">
 				                    <ul class="group is-adaptive">
 				                        <li class="is-field large">
-				                            <div class="form-field has-icon-right">
+				                            <div class="pt__input has-icon-right">
 				                                <input type="text" placeholder="Search" name="search" data-node="search-input">
 				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
 				                            </div>
@@ -272,7 +272,7 @@ switch($_GET['view']){
 				                <div class="right">
 				                    <ul class="group is-adaptive">
 				                        <li class="is-field large">
-				                            <div class="form-field has-icon-right">
+				                            <div class="pt__input has-icon-right">
 				                                <input type="text" placeholder="Search" name="search" data-node="search-input">
 				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
 				                            </div>
@@ -465,7 +465,7 @@ switch($_GET['view']){
 				                <div class="right">
 				                    <ul class="group is-adaptive">
 				                        <li class="is-field large">
-				                            <div class="form-field has-icon-right">
+				                            <div class="pt__input has-icon-right">
 				                                <input type="text" placeholder="Search" name="search" data-node="search-input">
 				                                <div class="icon small search linked" title="Search" data-node="search-button"></div>
 				                            </div>
@@ -1007,5 +1007,7 @@ switch($_GET['view']){
 $response = json_encode(array(
 	'data' =>  $data
 ));
+
+sleep(1);
 
 echo $response;

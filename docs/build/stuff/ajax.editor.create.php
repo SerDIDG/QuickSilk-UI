@@ -38,6 +38,12 @@ switch($_POST['keyword']){
                         </div>
                     </div>';
 		break;
+
+	case 'workingarea':
+		$module =   '<div href="http://google.com" target="_blank" class="app__module app-mod__area" data-element="Module.WorkingArea" data-node="ModuleWorkingArea:{}:container">
+            			<div class="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentId" : "'.$config['positionId'].'"}\'></div>
+                    </div>';
+		break;
 	case 'hidden_tabs':
 		$module =  '<div class="app__module app-mod__rollover-tabs pull-left expand-bottom theme-default" data-element="App.ModuleHiddenTabs" data-node="AppModuleHiddenTabs:{}:container" data-config=\'{"event" : "click"}\'>
 						<div class="inner" data-node="inner">
