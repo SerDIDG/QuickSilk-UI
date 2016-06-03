@@ -7,13 +7,16 @@
 
 @CmIconVars-Family: 'Magpie-UI-Glyphs';
 @CmIconVars-Color: @CmColor-Icon;
-@CmIconVars-Version: 13;
+@CmIconVars-Version: 14;
 
 @CmIcon-Magnify: '\e600';
+@CmIcon-Reduce: '\e601';
 
 @CmIcon-CircleArrowLeft: '\e700';
 @CmIcon-CircleArrowRight: '\e701';
-@CmIcon-CircleClose: '\e702';
+@CmIcon-CircleArrowUp: '\e702';
+@CmIcon-CircleArrowDown: '\e703';
+@CmIcon-CircleClose: '\e704';
 
 @CmIcon-CircleTwitter: '\e800';
 @CmIcon-CircleInstagram: '\e801';
@@ -73,8 +76,10 @@
 // /* ******* UI ******* */
 
 @CmUI-Transition-Duration: 250ms;
-@CmUI-Transition-DurationReverse: 100ms;
+@CmUI-Transition-DurationShort: 100ms;
 @CmUI-Transition-DurationLong: 500ms;
+@CmUI-Transition-DurationXLong: 750ms;
+@CmUI-Transition-DurationReverse: 100ms;
 @CmUI-Transition-DurationNone: 0ms;
 @CmUI-MotionAsymmetric: cubic-bezier(.5,0,.15,1);
 @CmUI-Opacity-Hover: 0.7;
@@ -84,6 +89,7 @@
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-Right: 2px 0 5px rgba(0,0,0,0.15);
+@CmUI-Shadow-Left: -2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Overlay: @CmUI-Overlay-Light;
 @CmUI-Overlay-Dark: rgba(0, 0, 0, 0.7);
 @CmUI-Overlay-Light: rgba(255, 255, 255, 0.7);
@@ -371,6 +377,7 @@
 @CmBorder-Radius: 3px;
 @CmBorder-Width: 1px;
 @CmBorder-BoxWidth: 2px;
+@CmBorder-TemporaryWidth: @CmBorder-BoxWidth;
 @CmBorder-Default: @CmBorder-Width solid @CmColor-Border;
 @CmBorder-Separator: @CmBorder-Width dotted @CmColor-Border;
 @CmBorder-Editable: @CmBorder-Width dashed @CmColor-BorderActive;
@@ -378,6 +385,10 @@
 @CmBorder-BoxHover: @CmBorder-BoxWidth solid @CmColor-BorderHover;
 @CmBorder-BoxActive: @CmBorder-BoxWidth solid @CmColor-BorderActive;
 @CmBorder-BoxSelected: @CmBorder-BoxWidth solid @CmColor-BorderSelected;
+@CmBorder-Temporary: @CmBorder-TemporaryWidth dashed @CmColor-Border;
+@CmBorder-TemporaryHover: @CmBorder-TemporaryWidth dashed @CmColor-BorderHover;
+@CmBorder-TemporaryActive: @CmBorder-TemporaryWidth dashed @CmColor-BorderActive;
+@CmBorder-TemporarySelected: @CmBorder-TemporaryWidth dashed @CmColor-BorderSelected;
 
 // /* ******* BUTTONS ******* */
 
@@ -769,6 +780,11 @@
 
 @ComColorPicker-Width: @CmForm-FieldSmallWidth;
 
+// /* ******* FILE INPUT ******* */
+
+@ComFileDropzone-Height: 128px;
+@ComFileDropzone-Duration: @CmUI-Transition-Duration;
+
 // /* ******* DIALOG ******* */
 
 @ComDialog-Indent: @CmIndent-Medium;
@@ -888,10 +904,6 @@
 // /* ************************************************ */
 // /* ******* VENDORS ******* */
 // /* ************************************************ */
-
-// /* ******* FONT AWESOME ******* */
-
-@fa-font-path: '@{CmPath-Fonts}/fontawesome';
 
 // /* ************************************************ */
 // /* ******* MAGPIE UI: VARIABLES: ICONS ******* */
@@ -901,13 +913,16 @@
 
 @CmIconVars-Family: 'Magpie-UI-Glyphs';
 @CmIconVars-Color: @CmColor-Icon;
-@CmIconVars-Version: 13;
+@CmIconVars-Version: 14;
 
 @CmIcon-Magnify: '\e600';
+@CmIcon-Reduce: '\e601';
 
 @CmIcon-CircleArrowLeft: '\e700';
 @CmIcon-CircleArrowRight: '\e701';
-@CmIcon-CircleClose: '\e702';
+@CmIcon-CircleArrowUp: '\e702';
+@CmIcon-CircleArrowDown: '\e703';
+@CmIcon-CircleClose: '\e704';
 
 @CmIcon-CircleTwitter: '\e800';
 @CmIcon-CircleInstagram: '\e801';
@@ -967,8 +982,10 @@
 // /* ******* UI ******* */
 
 @CmUI-Transition-Duration: 250ms;
-@CmUI-Transition-DurationReverse: 100ms;
+@CmUI-Transition-DurationShort: 100ms;
 @CmUI-Transition-DurationLong: 500ms;
+@CmUI-Transition-DurationXLong: 750ms;
+@CmUI-Transition-DurationReverse: 100ms;
 @CmUI-Transition-DurationNone: 0ms;
 @CmUI-MotionAsymmetric: cubic-bezier(.5,0,.15,1);
 @CmUI-Opacity-Hover: 0.7;
@@ -978,6 +995,7 @@
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-Right: 2px 0 5px rgba(0,0,0,0.15);
+@CmUI-Shadow-Left: -2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Overlay: @CmUI-Overlay-Light;
 @CmUI-Overlay-Dark: rgba(0, 0, 0, 0.7);
 @CmUI-Overlay-Light: rgba(255, 255, 255, 0.7);
@@ -1265,6 +1283,7 @@
 @CmBorder-Radius: 3px;
 @CmBorder-Width: 1px;
 @CmBorder-BoxWidth: 2px;
+@CmBorder-TemporaryWidth: @CmBorder-BoxWidth;
 @CmBorder-Default: @CmBorder-Width solid @CmColor-Border;
 @CmBorder-Separator: @CmBorder-Width dotted @CmColor-Border;
 @CmBorder-Editable: @CmBorder-Width dashed @CmColor-BorderActive;
@@ -1272,6 +1291,10 @@
 @CmBorder-BoxHover: @CmBorder-BoxWidth solid @CmColor-BorderHover;
 @CmBorder-BoxActive: @CmBorder-BoxWidth solid @CmColor-BorderActive;
 @CmBorder-BoxSelected: @CmBorder-BoxWidth solid @CmColor-BorderSelected;
+@CmBorder-Temporary: @CmBorder-TemporaryWidth dashed @CmColor-Border;
+@CmBorder-TemporaryHover: @CmBorder-TemporaryWidth dashed @CmColor-BorderHover;
+@CmBorder-TemporaryActive: @CmBorder-TemporaryWidth dashed @CmColor-BorderActive;
+@CmBorder-TemporarySelected: @CmBorder-TemporaryWidth dashed @CmColor-BorderSelected;
 
 // /* ******* BUTTONS ******* */
 
@@ -1663,6 +1686,11 @@
 
 @ComColorPicker-Width: @CmForm-FieldSmallWidth;
 
+// /* ******* FILE INPUT ******* */
+
+@ComFileDropzone-Height: 128px;
+@ComFileDropzone-Duration: @CmUI-Transition-Duration;
+
 // /* ******* DIALOG ******* */
 
 @ComDialog-Indent: @CmIndent-Medium;
@@ -1782,10 +1810,6 @@
 // /* ************************************************ */
 // /* ******* VENDORS ******* */
 // /* ************************************************ */
-
-// /* ******* FONT AWESOME ******* */
-
-@fa-font-path: '@{CmPath-Fonts}/fontawesome';
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -2035,7 +2059,7 @@
 @AppSidebar-Title-Height: @AppUI-TitleHeight;
 @AppSidebar-WidthExpanded: @AppSidebar-Width;
 @AppSidebar-WidthCollapsed: @AppSidebar-Menu-Width;
-@AppSidebar-Duration: @CmUI-Overlay-Duration;
+@AppSidebar-Duration: @CmUI-Transition-DurationLong;
 @AppSidebar-Overlay: @CmUI-Overlay;
 
 @AppSidebar-Theme: 'Dark';
@@ -2222,7 +2246,7 @@
 @AppTpl-Container-BackgroundParallax: scroll;
 @AppTpl-Container-Background: @AppTpl-Container-BackgroundColor @AppTpl-Container-BackgroundImage @AppTpl-Container-BackgroundRepeat @AppTpl-Container-BackgroundPosition @AppTpl-Container-BackgroundParallax;
 
-@AppTpl-Content-EditableIndent: @CmIndent-XSmall;
+@AppTpl-Content-EditableIndent: @CmIndent-Medium;
 
 // /* ************************************************ */
 // /* ******* ADDITIONAL STUFF ******* */

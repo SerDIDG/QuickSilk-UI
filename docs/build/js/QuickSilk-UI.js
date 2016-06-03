@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.16.0 (2016-05-11 20:46) ************ */
+/*! ************ MagpieUI v3.18.1 (2016-06-03 19:41) ************ */
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -12115,6 +12115,8 @@ else {
 
 */
 
+window.URL = window.URL || window.webkitURL;
+
 if(!Array.prototype.forEach){
     Array.prototype.forEach = function(fn, scope){
         for(var i = 0, len = this.length; i < len; ++i){
@@ -12366,7 +12368,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.16.0',
+        '_version' : '3.18.1',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -12409,7 +12411,7 @@ var cm = {
 
 cm.isFileReader = (function(){return 'FileReader' in window;})();
 cm.isHistoryAPI = !!(window.history && history.pushState);
-cm.isLocalStorage = (function(){try{return 'localStorage' in window && window['localStorage'] !== null;}catch(e){return false;}})();
+cm.isLocalStorage = (function(){try{return 'localStorage' in window && window.localStorage !== null;}catch(e){return false;}})();
 cm.isCanvas = !!document.createElement("canvas").getContext;
 cm.isTouch = 'ontouchstart' in document.documentElement || !!window.maxTouchPoints || !!navigator.maxTouchPoints;
 
@@ -12417,7 +12419,7 @@ cm.isTouch = 'ontouchstart' in document.documentElement || !!window.maxTouchPoin
 
 cm.top = (function(){
     try {
-        return window.top.cm
+        return window.top.cm;
     }catch(e){
         return window.cm;
     }
@@ -12425,7 +12427,7 @@ cm.top = (function(){
 
 cm.isType = function(o, types){
     if(cm.isString(types)){
-        return Object.prototype.toString.call(o) === '[object ' + types +']'
+        return Object.prototype.toString.call(o) === '[object ' + types +']';
     }
     if(cm.isRegExp(types)){
         return types.test(Object.prototype.toString.call(o));
@@ -12434,7 +12436,7 @@ cm.isType = function(o, types){
         var match = false;
         cm.forEach(types, function(type){
             if(!match){
-                match = Object.prototype.toString.call(o) === '[object ' + type +']'
+                match = Object.prototype.toString.call(o) === '[object ' + type +']';
             }
         });
         return match;
@@ -12478,20 +12480,33 @@ cm.isDate = function(o){
     return Object.prototype.toString.call(o) === '[object Date]';
 };
 
-cm.isWindow = function(o) {
+cm.isFile = function(o){
+    return Object.prototype.toString.call(o) === '[object File]';
+};
+
+cm.isWindow = function(o){
     return Object.prototype.toString.call(o) === '[object Window]' || Object.prototype.toString.call(o) === '[object global]';
 };
 
 cm.isNode = function(node){
-    return !!(node && node.nodeType);
+    try{
+        return !!(node && node.nodeType);
+    }catch(e){}
+    return false;
 };
 
 cm.isTextNode = function(node){
-    return !!(node && node.nodeType && node.nodeType == 3);
+    try{
+        return !!(node && node.nodeType && node.nodeType == 3);
+    }catch(e){}
+    return false;
 };
 
 cm.isElementNode = function(node){
-    return !!(node && node.nodeType && node.nodeType == 1);
+    try{
+        return !!(node && node.nodeType && node.nodeType == 1);
+    }catch(e){}
+    return false;
 };
 
 cm.isPlainObject = function(obj) {
@@ -12692,7 +12707,7 @@ cm.arrayRemove = function(a, item){
 };
 
 cm.arrayIndex = function(a, item){
-    return Array.prototype.indexOf.call(a, item)
+    return Array.prototype.indexOf.call(a, item);
 };
 
 cm.objectToArray = function(o){
@@ -12723,7 +12738,7 @@ cm.objectReplace = function(o, vars){
     cm.forEach(newO, function(value, key){
         if(cm.isObject(value)){
             newO[key] = cm.objectReplace(value, vars);
-        }else{
+        }else if(cm.isString(value)){
             newO[key] = cm.strReplace(value, vars);
         }
     });
@@ -12734,11 +12749,11 @@ cm.isEmpty = function(el){
     if(!el){
         return true;
     }else if(typeof el == 'string' || cm.isArray(el)){
-        return el.length == 0;
+        return el.length === 0;
     }else if(cm.isObject(el)){
         return cm.getLength(el) === 0;
     }else if(typeof el == 'number'){
-        return el == 0;
+        return el === 0;
     }else{
         return false;
     }
@@ -12806,7 +12821,7 @@ cm.log = (function(){
             alert(results.join(', '));
         };
     }else{
-        return function(){}
+        return function(){};
     }
 })();
 
@@ -13075,7 +13090,6 @@ cm.customEvent = (function(){
                                     item['handler'](params);
                                 }
                                 break;
-                            case 'all':
                             default:
                                 if(node !== item['node']){
                                     item['handler'](params);
@@ -13290,7 +13304,8 @@ cm.getByClass = function(str, node){
     if(node.getElementsByClassName){
         return node.getElementsByClassName(str);
     }
-    var els = node.getElementsByTagName('*'), arr = [];
+    var els = node.getElementsByTagName('*'),
+        arr = [];
     for(var i = 0, l = els.length; i < l; i++){
         cm.isClass(els[i], str) && arr.push(els[i]);
     }
@@ -13353,6 +13368,9 @@ cm.getDocumentHtml = function(){
 };
 
 cm.getNodeOffsetIndex = function(node){
+    if(!cm.isNode(node)){
+        return 0;
+    }
     var o = node,
         i = 0;
     while(o.parentNode){
@@ -13364,38 +13382,41 @@ cm.getNodeOffsetIndex = function(node){
 
 cm.node = cm.Node = function(){
     var args = arguments,
-        value,
-        el = document.createElement(args[0]);
-    if(typeof args[1] == "object" && !args[1].nodeType){
-        for(var i in args[1]){
-            value = args[1][i];
-            if(typeof value == 'object'){
+        el = document.createElement(args[0]),
+        i = 0;
+    if(cm.isObject(args[1])){
+        cm.forEach(args[1], function(value, key){
+            if(cm.isObject(value)){
                 value = JSON.stringify(value);
             }
-            if(i == 'style'){
+            if(key == 'style'){
                 el.style.cssText = value;
-            }else if(i == 'class'){
+            }else if(key == 'class'){
                 el.className = value;
-            }else if(i == 'innerHTML'){
+            }else if(key == 'innerHTML'){
                 el.innerHTML = value;
             }else{
-                el.setAttribute(i, value);
+                el.setAttribute(key, value);
             }
-        }
+        });
         i = 2;
     }else{
         i = 1;
     }
     for(var ln = args.length; i < ln; i++){
-        if(typeof arguments[i] != 'undefined'){
-            if(typeof arguments[i] == 'string' || typeof args[i] == 'number'){
-                el.appendChild(document.createTextNode(args[i]));
+        if(typeof args[i] != 'undefined'){
+            if(typeof args[i] == 'string' || typeof args[i] == 'number'){
+                el.appendChild(cm.textNode(args[i]));
             }else{
                 el.appendChild(args[i]);
             }
         }
     }
     return el;
+};
+
+cm.textNode = function(text){
+    return document.createTextNode(text);
 };
 
 cm.wrap = function(target, node){
@@ -13416,7 +13437,7 @@ cm.inDOM = function(o){
             if(el == document){
                 return true;
             }
-            el = el.parentNode
+            el = el.parentNode;
         }
     }
     return false;
@@ -13501,7 +13522,7 @@ cm.remove = function(node){
 };
 
 cm.clearNode = function(node){
-    while(node.childNodes.length != 0){
+    while(node.childNodes.length){
         node.removeChild(node.firstChild);
     }
     return node;
@@ -13562,7 +13583,7 @@ cm.insertBefore = function(node, target){
 cm.insertAfter = function(node, target){
     if(cm.isNode(node) && cm.isNode(target) && target.parentNode){
         var before = target.nextSibling;
-        if(before != null){
+        if(before){
             cm.insertBefore(node, before);
         }else{
             target.parentNode.appendChild(node);
@@ -13666,7 +13687,7 @@ cm.getNodes = function(container, marker){
         var separators = attr? attr.split('.') : [],
             obj = nodes;
         cm.forEach(separators, function(separator, i){
-            if(i == 0 && cm.isEmpty(separator)){
+            if(i === 0 && cm.isEmpty(separator)){
                 obj = nodes;
             }else if((i + 1) == separators.length){
                 process(node, separator, obj, processedObj);
@@ -13749,20 +13770,20 @@ cm.setFDO = function(o, form){
             var type = (el[i].type || '').toLowerCase();
             switch(type){
                 case 'radio':
-                    if(o[name] == el[i].value){
+                    if(item == el[i].value){
                         el[i].checked = true;
                     }
                     break;
 
                 case 'checkbox':
-                    el[i].checked = !!+o[name];
+                    el[i].checked = !!item;
                     break;
 
                 default:
                     if(el[i].tagName.toLowerCase() == 'select'){
-                        cm.setSelect(el[i], o[name]);
+                        cm.setSelect(el[i], item);
                     }else{
-                        el[i].value = o[name];
+                        el[i].value = item;
                     }
                     break;
             }
@@ -13796,7 +13817,7 @@ cm.getFDO = function(o, chbx){
             data[name] = (function(i, obj){
                 var index = indexes[i];
                 var next = typeof(indexes[i + 1]) != 'undefined';
-                if(index == ''){
+                if(index === ''){
                     if(obj && obj instanceof Array){
                         obj.push(next ? arguments.callee(i + 1, obj) : value);
                     }else{
@@ -13995,7 +14016,7 @@ cm.reduceText = function(str, length, points){
 };
 
 cm.removeDanger = function(str){
-    return str.replace(/(\<|\>|&lt;|&gt;)/gim, '');
+    return str.replace(/(<|>|&lt;|&gt;)/gim, '');
 };
 
 cm.cutHTML = function(str){
@@ -14022,12 +14043,8 @@ cm.addLeadZero = function(x){
 cm.getNumberDeclension = function(number, titles){
     var cases = [2, 0, 1, 1, 1, 2];
     return titles[
-        (number % 100 > 4 && number % 100 < 20)
-            ?
-            2
-            :
-            cases[(number % 10 < 5) ? number % 10 : 5]
-        ];
+        (number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]
+    ];
 };
 
 cm.toRadians = function(degrees) {
@@ -14104,7 +14121,7 @@ cm.dateFormat = function(date, format, langs){
             '%s' : function(){
                 return date ? cm.addLeadZero(date.getSeconds()) : '00';
             }
-        }
+        };
     };
 
     cm.forEach(formats(date), function(item, key){
@@ -14288,7 +14305,10 @@ cm.getPageSize = function(key){
 cm.getScrollBarSize = (function(){
     var node;
     return function(){
-        !node && (node = cm.insertFirst(cm.Node('div', {'class' : 'cm__scroll-bar-size-checker'}), document.body));
+        if(!node){
+            node = cm.node('div', {'class' : 'cm__scroll-bar-size-checker'});
+            cm.insertFirst(node, document.body);
+        }
         return Math.max(node.offsetWidth - node.clientWidth, 0);
     };
 })();
@@ -14519,10 +14539,10 @@ cm.getRealHeight = function(node, type, applyType){
 
     height['offset'] = node.offsetHeight;
     height['self'] = height['offset']
-                     - cm.getStyle(styleObject, 'borderTopWidth', true)
-                     - cm.getStyle(styleObject, 'borderBottomWidth', true)
-                     - cm.getStyle(styleObject, 'paddingTop', true)
-                     - cm.getStyle(styleObject, 'paddingBottom', true);
+        - cm.getStyle(styleObject, 'borderTopWidth', true)
+        - cm.getStyle(styleObject, 'borderBottomWidth', true)
+        - cm.getStyle(styleObject, 'paddingTop', true)
+        - cm.getStyle(styleObject, 'paddingBottom', true);
 
     node.style.position = 'relative';
     height['offsetRelative'] = node.offsetHeight;
@@ -14541,9 +14561,9 @@ cm.getIndentX = function(node){
         return null;
     }
     return cm.getStyle(node, 'paddingLeft', true)
-         + cm.getStyle(node, 'paddingRight', true)
-         + cm.getStyle(node, 'borderLeftWidth', true)
-         + cm.getStyle(node, 'borderRightWidth', true);
+        + cm.getStyle(node, 'paddingRight', true)
+        + cm.getStyle(node, 'borderLeftWidth', true)
+        + cm.getStyle(node, 'borderRightWidth', true);
 };
 
 cm.getIndentY = function(node){
@@ -14551,9 +14571,9 @@ cm.getIndentY = function(node){
         return null;
     }
     return cm.getStyle(node, 'paddingTop', true)
-         + cm.getStyle(node, 'paddingBottom', true)
-         + cm.getStyle(node, 'borderTopWidth', true)
-         + cm.getStyle(node, 'borderBottomWidth', true);
+        + cm.getStyle(node, 'paddingBottom', true)
+        + cm.getStyle(node, 'borderTopWidth', true)
+        + cm.getStyle(node, 'borderBottomWidth', true);
 };
 
 cm.addStyles = function(node, str){
@@ -14843,7 +14863,8 @@ cm.getTransitionDurationFromLESS = function(name, defaults){
 };
 
 cm.parseTransitionDuration = function(value){
-    if(value){
+    if(!cm.isEmpty(value)){
+        value = value.toString();
         if(value.match('ms')){
             return parseFloat(value);
         }else if(value.match('s')){
@@ -15753,7 +15774,7 @@ cm.define = (function(){
 
 cm.getConstructor = function(className, callback){
     var classConstructor;
-    callback = typeof callback != 'undefined' ? callback : function(){}
+    callback = typeof callback != 'undefined' ? callback : function(){};
     if(!className || className == '*'){
         cm.forEach(cm.defineStack, function(classConstructor){
             callback(classConstructor, className, classConstructor.prototype);
@@ -15964,6 +15985,9 @@ Mod['Component'] = {
     '_construct' : function(){
         var that = this;
         that.build._isComponent = true;
+        if(typeof that.build['params']['consoleLogErrors'] == 'undefined'){
+            that.build['params']['consoleLogErrors'] = true;
+        }
     },
     'cloneComponent' : function(params){
         var that = this,
@@ -16038,7 +16062,7 @@ Mod['Params'] = {
                     if(/cm._config./i.test(item)){
                         that.params[key] = cm._config[item.replace('cm._config.', '')];
                     }
-                    break
+                    break;
             }
         });
         return that;
@@ -16081,6 +16105,7 @@ Mod['Events'] = {
             }
         }else{
             cm.errorLog({
+                'type' : 'attention',
                 'name' : that._name['full'],
                 'message' : [cm.strWrap(event, '"'), 'does not exists.'].join(' ')
             });
@@ -16110,6 +16135,7 @@ Mod['Events'] = {
             }
         }else{
             cm.errorLog({
+                'type' : 'attention',
                 'name' : that._name['full'],
                 'message' : [cm.strWrap(event, '"'), 'does not exists.'].join(' ')
             });
@@ -16124,11 +16150,16 @@ Mod['Events'] = {
             });
         }else{
             cm.errorLog({
+                'type' : 'attention',
                 'name' : that._name['full'],
                 'message' : [cm.strWrap(event, '"'), 'does not exists.'].join(' ')
             });
         }
         return that;
+    },
+    'hasEvent' : function(event){
+        var that = this;
+        return !!that.events[event];
     },
     'convertEvents' : function(o){
         var that = this;
@@ -16181,7 +16212,7 @@ Mod['Langs'] = {
         if(cm.isFunction(that)){
             that.prototype.params['langs'] = cm.merge(that.prototype._raw.params['langs'], that.prototype._update.params['langs']);
             if(that.prototype._inherit){
-                that.prototype._inherit.prototype.updateLangs.call(that._inherit);
+                that.prototype._inherit.prototype.updateLangs.call(that.prototype._inherit);
                 that.prototype.params['langs'] = cm.merge(that.prototype._inherit.prototype.params['langs'], that.prototype.params['langs']);
             }
         }else{
@@ -16461,7 +16492,7 @@ Mod['Stack'] = {
                 'className' : that._name['full']
             };
             that._stack.push(that._stackItem);
-        }else{
+        }else if(cm.isNode(node)){
             that._stackItem['node'] = node;
         }
         return that;
@@ -16469,6 +16500,7 @@ Mod['Stack'] = {
     'removeFromStack' : function(){
         var that = this;
         cm.arrayRemove(that._stack, that._stackItem);
+        that._stackItem = null;
         return that;
     },
     'isAppropriateToStack' : function(name, parent, callback){
@@ -16517,10 +16549,13 @@ Mod['Structure'] = {
     },
     'embedStructure' : function(node){
         var that = this;
-        if(that.params['embedStructure'] == 'replace'){
-            that.replaceStructure(node);
-        }else{
-            that.appendStructure(node);
+        switch(that.params['embedStructure']){
+            case 'replace':
+                that.replaceStructure(node);
+                break;
+            case 'append':
+                that.appendStructure(node);
+                break;
         }
         return that;
     },
@@ -16917,7 +16952,7 @@ cm.init = function(){
                     'type' : 'all',
                     'self' : true,
                     'scrollSize' : cm._scrollSize
-                })
+                });
             }
         };
     })();
@@ -16953,7 +16988,7 @@ cm.init = function(){
 };
 
 cm.onReady(cm.init, false);
-cm.define('Com.AbstractInput', {
+cm.define('Com.AbstractController', {
     'modules' : [
         'Params',
         'Events',
@@ -16961,24 +16996,494 @@ cm.define('Com.AbstractInput', {
         'Structure',
         'DataConfig',
         'DataNodes',
+        'Storage',
+        'Callbacks',
         'Stack'
     ],
     'events' : [
+        'onConstructStart',
+        'onConstructProcess',
+        'onConstructEnd',
+        'onInitComponentsStart',
+        'onInitComponentsEnd',
+        'onGetLESSVariablesStart',
+        'onGetLESSVariablesEnd',
+        'onValidateParamsStart',
+        'onValidateParamsEnd',
         'onRenderStart',
         'onRender',
+        'onDestructStart',
+        'onDestructProcess',
+        'onDestructEnd',
         'onRedraw',
-        'onSet',
-        'onSelect',
-        'onChange',
-        'onDisable',
-        'onEnable'
+        'onSetEventsStart',
+        'onSetEventsProcess',
+        'onSetEventsEnd',
+        'onUnsetEventsStart',
+        'onUnsetEventsProcess',
+        'onUnsetEventsEnd',
+        'onSetCustomEvents',
+        'onUnsetCustomEvents',
+        'onRenderViewStart',
+        'onRenderViewProcess',
+        'onRenderViewEnd',
+        'onSetAttributesStart',
+        'onSetAttributesEnd'
     ],
     'params' : {
         'node' : cm.node('div'),
         'container' : null,
         'name' : '',
+        'embedStructure' : 'append',
+        'customEvents' : true,
+        'removeOnDestruct' : false,
+        'className' : '',
+        'collector' : null,
+        'constructCollector' : false,
+        'destructCollector' : false
+    }
+},
+function(params){
+    var that = this;
+    that.isDestructed = false;
+    that.nodes = {};
+    that.components = {};
+    that.construct(params);
+});
+
+cm.getConstructor('Com.AbstractController', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        // Bind context to methods
+        that.redrawHandler = that.redraw.bind(that);
+        that.destructHandler = that.destruct.bind(that);
+        that.constructCollectorHandler = that.constructCollector.bind(that);
+        that.destructCollectorHandler = that.destructCollector.bind(that);
+        // Configure class
+        that.triggerEvent('onConstructStart');
+        that.initComponents();
+        that.getLESSVariables();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.callbacksProcess();
+        that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.setEvents();
+        that.triggerEvent('onConstructProcess');
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        that.triggerEvent('onConstructEnd');
+        return that;
+    };
+
+    classProto.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.triggerEvent('onDestructStart');
+            that.isDestructed = true;
+            that.triggerEvent('onDestructProcess');
+            that.unsetEvents();
+            that.params['removeOnDestruct'] && cm.remove(that.getStackNode());
+            that.removeFromStack();
+            that.triggerEvent('onDestructEnd');
+        }
+        return that;
+    };
+
+    classProto.redraw = function(){
+        var that = this;
+        that.triggerEvent('onRedraw');
+        return that;
+    };
+
+    classProto.initComponents = function(){
+        var that = this;
+        that.triggerEvent('onInitComponentsStart');
+        that.triggerEvent('onInitComponentsEnd');
+        return that;
+    };
+
+    classProto.getLESSVariables = function(){
+        var that = this;
+        that.triggerEvent('onGetLESSVariablesStart');
+        that.triggerEvent('onGetLESSVariablesEnd');
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        that.triggerEvent('onValidateParamsStart');
+        that.triggerEvent('onValidateParamsEnd');
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Structure
+        that.renderView();
+        // Attributes
+        that.setAttributes();
+        // Append
+        that.embedStructure(that.nodes['container']);
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderViewStart');
+        that.nodes['container'] = cm.node('div', {'class' : 'com__abstract'});
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    classProto.setAttributes = function(){
+        var that = this;
+        that.triggerEvent('onSetAttributesStart');
+        cm.addClass(that.nodes['container'], that.params['className']);
+        that.triggerEvent('onSetAttributesEnd');
+        return that;
+    };
+
+    classProto.setEvents = function(){
+        var that = this;
+        that.triggerEvent('onSetEventsStart');
+        // Windows events
+        cm.addEvent(window, 'resize', that.redrawHandler);
+        that.triggerEvent('onSetEventsProcess');
+        // Add custom events
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.getStackNode(), 'redraw', that.redrawHandler);
+            cm.customEvent.add(that.getStackNode(), 'destruct', that.destructHandler);
+            that.triggerEvent('onSetCustomEvents');
+        }
+        that.triggerEvent('onSetEventsEnd');
+        return that;
+    };
+
+    classProto.unsetEvents = function(){
+        var that = this;
+        that.triggerEvent('onUnsetEventsStart');
+        // Windows events
+        cm.removeEvent(window, 'resize', that.redrawHandler);
+        that.triggerEvent('onUnsetEventsProcess');
+        // Remove custom events
+        if(that.params['customEvents']){
+            cm.customEvent.remove(that.getStackNode(), 'redraw', that.redrawHandler);
+            cm.customEvent.remove(that.getStackNode(), 'destruct', that.destructHandler);
+            that.triggerEvent('onUnsetCustomEvents');
+        }
+        that.triggerEvent('onUnsetEventsEnd');
+        return that;
+    };
+
+    classProto.constructCollector = function(){
+        var that = this;
+        if(that.params['constructCollector']){
+            if(that.params['collector']){
+                that.params['collector'].construct(that.getStackNode());
+            }else{
+                cm.find('Com.Collector', null, null, function(classObject){
+                    classObject.construct(that.getStackNode());
+                });
+            }
+        }
+        return that;
+    };
+
+    classProto.destructCollector = function(){
+        var that = this;
+        if(that.params['constructCollector']){
+            if(that.params['collector']){
+                that.params['collector'].destruct(that.getStackNode());
+            }else{
+                cm.find('Com.Collector', null, null, function(classObject){
+                    classObject.destruct(that.getStackNode());
+                });
+            }
+        }
+        return that;
+    };
+});
+cm.define('Com.AbstractContainer', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onOpenStart',
+        'onOpen',
+        'onCloseStart',
+        'onClose',
+        'onRenderControllerStart',
+        'onRenderControllerProcess',
+        'onRenderControllerEnd',
+        'onRenderPlaceholderStart',
+        'onRenderPlaceholderProcess',
+        'onRenderPlaceholderEnd',
+        'onRenderPlaceholderViewStart',
+        'onRenderPlaceholderViewProcess',
+        'onRenderPlaceholderViewEnd'
+    ],
+    'params' : {
+        'embedStructure' : 'none',
+        'constructor' : null,
+        'params' : {},
+        'placeholder' : false,
+        'placeholderConstructor' : null,
+        'placeholderParams' : {},
+        'langs' : {
+            'title' : 'Container',
+            'close' : 'Close',
+            'save' : 'Save'
+        },
+        'Com.Dialog' : {
+            'width' : 900,
+            'removeOnClose' : false,
+            'destructOnRemove' : false,
+            'autoOpen' : false
+        }
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.AbstractContainer', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.destructProcessHandler = that.destructProcess.bind(that);
+        that.openHandler = that.open.bind(that);
+        that.closeHandler = that.close.bind(that);
+        // Add events
+        that.addEvent('onDestructProcess', that.destructProcessHandler);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.open = function(e){
+        e && cm.preventDefault(e);
+        var that = this;
+        if(that.params['placeholder']){
+            that.openPlaceholder();
+        }else{
+            that.openController();
+        }
+        return that;
+    };
+
+    classProto.close = function(e){
+        e && cm.preventDefault(e);
+        var that = this;
+        if(that.params['placeholder']){
+            that.closePlaceholder();
+        }else{
+            that.closeController();
+        }
+        return that;
+    };
+
+    classProto.getController = function(){
+        var that = this;
+        return that.component['controller'];
+    };
+
+    classProto.getPlaceholder = function(){
+        var that = this;
+        return that.component['placeholder'];
+    };
+
+    classProto.destructProcess = function(){
+        var that = this;
+        that.components['placeholder'] && that.components['placeholder'].destruct && that.components['placeholder'].destruct();
+        that.components['controller'] && that.components['controller'].destruct && that.components['controller'].destruct();
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        that.triggerEvent('onValidateParamsStart');
+        that.params['params']['node'] = that.params['node'];
+        that.params['params']['container'] = that.params['container'];
+        that.triggerEvent('onValidateParamsEnd');
+        return that;
+    };
+
+
+    classProto.render = function(){
+        var that = this;
+        // Add Event
+        if(that.nodes['button']){
+            cm.addEvent(that.nodes['button'], 'click', that.openHandler);
+        }else{
+            cm.addEvent(that.params['node'], 'click', that.openHandler);
+        }
+        return that;
+    };
+
+    /* *** CONTROLLER *** */
+
+    classProto.renderController = function(){
+        var that = this;
+        if(!that.components['controller']){
+            cm.getConstructor(that.params['constructor'], function(classObject){
+                that.triggerEvent('onRenderControllerStart', arguments);
+                // Construct
+                that.components['controller'] = that.constructController(classObject);
+                // Events
+                that.triggerEvent('onRenderControllerProcess', that.components['controller']);
+                that.components['controller']
+                    .addEvent('onOpenStart', function(context){
+                        that.triggerEvent('onOpenStart', context);
+                    })
+                    .addEvent('onOpen', function(context){
+                        that.triggerEvent('onOpen', context);
+                    })
+                    .addEvent('onCloseStart', function(context){
+                        that.triggerEvent('onCloseStart', context);
+                    })
+                    .addEvent('onClose', function(context){
+                        that.triggerEvent('onClose', context);
+                    });
+                that.triggerEvent('onRenderControllerEnd', that.components['controller']);
+            });
+        }
+        return that;
+    };
+
+    classProto.constructController = function(classObject){
+        var that = this;
+        return new classObject(
+            cm.merge(that.params['params'], {
+                'container' : that.params['placeholder'] ? that.nodes['placeholder']['content'] : that.params['container'],
+                'content' : that.params['params']['content'] || that.nodes['holder'] || that.params['content']
+            })
+        );
+    };
+
+    classProto.openController = function(){
+        var that = this;
+        if(!that.components['controller']){
+            that.renderController();
+            that.components['controller'] && that.openController();
+        }else{
+            that.components['controller'].open && that.components['controller'].open();
+        }
+        return that;
+    };
+
+    classProto.closeController = function(){
+        var that = this;
+        that.components['controller'] && that.components['controller'].close && that.components['controller'].close();
+        return that;
+    };
+
+    /* *** PLACEHOLDER *** */
+
+    classProto.renderPlaceholderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderPlaceholderViewStart');
+        // Structure
+        that.nodes['placeholder'] = {};
+        that.nodes['placeholder']['title'] = cm.textNode(that.lang('title'));
+        that.nodes['placeholder']['content'] = cm.node('div', {'class' : 'com__container__content'});
+        that.renderPlaceholderViewButtons();
+        // Events
+        that.triggerEvent('onRenderPlaceholderViewProcess', that.nodes['placeholder']);
+        that.triggerEvent('onRenderPlaceholderViewEnd', that.nodes['placeholder']);
+        return that;
+    };
+
+    classProto.renderPlaceholderViewButtons = function(){
+        var that = this;
+        // Structure
+        that.nodes['placeholder']['buttons'] = cm.node('div', {'class' : 'pt__buttons pull-right'},
+            that.nodes['placeholder']['buttonsInner'] = cm.node('div', {'class' : 'inner'},
+                that.nodes['placeholder']['close'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('close'))
+            )
+        );
+        // Events
+        cm.addEvent(that.nodes['placeholder']['close'], 'click', that.closeHandler);
+        return that;
+    };
+
+    classProto.renderPlaceholder = function(){
+        var that = this;
+        if(!that.components['placeholder']){
+            cm.getConstructor(that.params['placeholderConstructor'], function(classObject){
+                that.triggerEvent('onRenderPlaceholderStart', arguments);
+                // Construct
+                that.renderPlaceholderView();
+                that.components['placeholder'] = new classObject(
+                    cm.merge(that.params['placeholderParams'], {
+                        'content' : that.nodes['placeholder']
+                    })
+                );
+                // Events
+                that.triggerEvent('onRenderPlaceholderProcess', that.components['placeholder']);
+                that.components['placeholder'].addEvent('onOpenStart', function(){
+                    that.openController();
+                });
+                that.components['placeholder'].addEvent('onOpen', function(context){
+                    that.constructCollector();
+                    that.triggerEvent('onOpen', context);
+                });
+                that.components['placeholder'].addEvent('onCloseStart', function(){
+                    that.closeController();
+                });
+                that.components['placeholder'].addEvent('onClose', function(context){
+                    that.destructCollector();
+                    that.triggerEvent('onClose', context);
+                });
+                that.triggerEvent('onRenderPlaceholderEnd', that.components['placeholder']);
+            });
+        }
+        return that;
+    };
+
+    classProto.openPlaceholder = function(){
+        var that = this;
+        if(!that.components['placeholder']){
+            that.renderPlaceholder();
+            that.components['placeholder'] && that.openPlaceholder();
+        }else{
+            that.components['placeholder'].open && that.components['placeholder'].open();
+        }
+        return that;
+    };
+
+    classProto.closePlaceholder = function(){
+        var that = this;
+        that.components['placeholder'] && that.components['placeholder'].close && that.components['placeholder'].close();
+        return that;
+    };
+});
+cm.define('Com.AbstractInput', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onSet',
+        'onSelect',
+        'onChange',
+        'onClear',
+        'onDisable',
+        'onEnable',
+        'onRenderContentStart',
+        'onRenderContentProcess',
+        'onRenderContentEnd'
+    ],
+    'params' : {
         'embedStructure' : 'replace',
-        'value' : null,
+        'value' : '',
+        'defaultValue' : '',
         'title' : '',
         'disabled' : false,
         'className' : '',
@@ -16990,42 +17495,31 @@ function(params){
     var that = this;
     that.nodes = {};
     that.components = {};
-    that.isDestructed = false;
     that.previousValue = null;
     that.value = null;
     that.disabled = false;
-    that.construct(params);
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
 });
 
 cm.getConstructor('Com.AbstractInput', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
     classProto.construct = function(params){
         var that = this;
-        that.redrawHandler = that.redraw.bind(that);
-        that.destructHandler = that.destruct.bind(that);
-        that.setHandler = that.setAction.bind(that);
-        that.selectHandler = that.selectAction.bind(that);
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        that.validateParams();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRenderStart');
-        that.render();
-        that.setEvents();
-        that.set(that.params['value'], false);
-        that.addToStack(that.nodes['container']);
-        that.triggerEvent('onRender');
-        return that;
-    };
-
-    classProto.destruct = function(){
-        var that = this;
-        if(!that.isDestructed){
-            that.isDestructed = true;
-            that.unsetEvents();
-            that.removeFromStack();
-        }
+        // Bind context to methods
+        that.setHandler = that.set.bind(that);
+        that.getHandler = that.get.bind(that);
+        that.clearHandler = that.clear.bind(that);
+        that.enableHandler = that.enable.bind(that);
+        that.disableHandler = that.disable.bind(that);
+        that.setActionHandler = that.setAction.bind(that);
+        that.selectActionHandler = that.selectAction.bind(that);
+        that.constructProcessHandler = that.constructProcess.bind(that);
+        // Add events
+        that.addEvent('onConstructProcess', that.constructProcessHandler);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
         return that;
     };
 
@@ -17044,32 +17538,40 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         return that.value;
     };
 
-    classProto.redraw = function(){
+    classProto.clear = function(triggerEvents){
         var that = this;
-        that.triggerEvent('onRedraw');
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents && that.triggerEvent('onClear');
+        that.set(that.params['defaultValue'], triggerEvents);
         return that;
     };
 
     classProto.enable = function(){
         var that = this;
-        that.disabled = false;
-        cm.removeClass(cm.nodes['container'], 'disabled');
-        cm.removeClass(cm.nodes['content'], 'disabled');
-        that.triggerEvent('onEnable');
+        if(!that.disabled){
+            that.disabled = false;
+            cm.removeClass(that.nodes['container'], 'disabled');
+            cm.removeClass(that.nodes['content'], 'disabled');
+            that.triggerEvent('onEnable');
+        }
         return that;
     };
 
     classProto.disable = function(){
         var that = this;
-        that.disabled = true;
-        cm.addClass(that.nodes['container'], 'disabled');
-        cm.addClass(that.nodes['content'], 'disabled');
-        that.triggerEvent('onDisable');
+        if(that.disabled){
+            that.disabled = true;
+            cm.addClass(that.nodes['container'], 'disabled');
+            cm.addClass(that.nodes['content'], 'disabled');
+            that.triggerEvent('onDisable');
+        }
         return that;
     };
 
     classProto.validateParams = function(){
         var that = this;
+        that.triggerEvent('onValidateParamsStart');
+        // Get parameters from provided input
         if(cm.isNode(that.params['node'])){
             that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
             that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
@@ -17077,40 +17579,46 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
             that.params['value'] = that.params['node'].value || that.params['value'];
         }
         that.disabled = that.params['disabled'];
+        that.triggerEvent('onValidateParamsEnd');
         return that;
     };
 
-    classProto.render = function(){
+    classProto.constructProcess = function(){
         var that = this;
-        // Structure
-        that.renderView();
-        // Attributes
-        that.setAttributes();
-        // Append
-        that.embedStructure(that.nodes['container']);
+        that.set(that.params['value'], false);
         return that;
     };
 
     classProto.renderView = function(){
         var that = this;
+        that.triggerEvent('onRenderViewStart');
         that.nodes['container'] = cm.node('div', {'class' : 'com__input'},
             that.nodes['hidden'] = cm.node('input', {'type' : 'hidden'}),
             that.nodes['content'] = that.renderContent()
         );
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
         return that;
     };
 
     classProto.renderContent = function(){
-        return cm.node('div', {'class' : 'input__content'});
+        var that = this;
+        that.triggerEvent('onRenderContentStart');
+        var node = cm.node('div', {'class' : 'input__content'});
+        that.triggerEvent('onRenderContentProcess');
+        that.triggerEvent('onRenderContentEnd');
+        return node;
     };
 
     classProto.setAttributes = function(){
         var that = this;
+        that.triggerEvent('onSetAttributesStart');
         cm.addClass(that.nodes['container'], that.params['className']);
         // Data attributes
         cm.forEach(that.params['node'].attributes, function(item){
             if(/^data-(?!node|element)/.test(item.name)){
                 that.nodes['hidden'].setAttribute(item.name, item.value);
+                that.nodes['container'].setAttribute(item.name, item.value);
             }
         });
         if(that.params['title']){
@@ -17119,30 +17627,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         if(that.params['name']){
             that.nodes['hidden'].setAttribute('name', that.params['name']);
         }
-        return that;
-    };
-
-    classProto.setEvents = function(){
-        var that = this;
-        // Windows events
-        cm.addEvent(window, 'resize', that.redrawHandler);
-        // Add custom events
-        if(that.params['customEvents']){
-            cm.customEvent.add(that.nodes['container'], 'redraw', that.redrawHandler);
-            cm.customEvent.add(that.nodes['container'], 'destruct', that.destructHandler);
-        }
-        return that;
-    };
-
-    classProto.unsetEvents = function(){
-        var that = this;
-        // Windows events
-        cm.removeEvent(window, 'resize', that.redrawHandler);
-        // Remove custom events
-        if(that.params['customEvents']){
-            cm.customEvent.remove(that.nodes['container'], 'redraw', that.redrawHandler);
-            cm.customEvent.remove(that.nodes['container'], 'destruct', that.destructHandler);
-        }
+        that.triggerEvent('onSetAttributesEnd');
         return that;
     };
 
@@ -17153,9 +17638,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
     classProto.selectAction = function(value, triggerEvents){
         var that = this;
         triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
-        if(triggerEvents){
-            that.triggerEvent('onSelect', value);
-        }
+        triggerEvents && that.triggerEvent('onSelect', value);
         return that;
     };
 
@@ -17165,9 +17648,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         that.previousValue = that.value;
         that.value = value;
         that.nodes['hidden'].value = that.value;
-        if(triggerEvents){
-            that.triggerEvent('onSet', that.value);
-        }
+        triggerEvents && that.triggerEvent('onSet', that.value);
         return that;
     };
 
@@ -17177,6 +17658,271 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         if(triggerEvents && that.value != that.previousValue){
             that.triggerEvent('onChange', that.value);
         }
+        return that;
+    };
+});
+cm.define('Com.AbstractFileManager', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onSelect',
+        'onRenderHolderStart',
+        'onRenderHolderProcess',
+        'onRenderHolderEnd',
+        'onRenderContentStart',
+        'onRenderContentProcess',
+        'onRenderContentEnd'
+    ],
+    'params' : {
+        'embedStructure' : 'replace',
+        'showStats' : true,
+        'max' : 0,                                                        // 0 - infinity
+        'stats' : {
+            'mfu' : 0,                                                    // Max files per upload
+            'umf' : 0,                                                    // Max file size
+            'quote' : 0,
+            'usage' : 0
+        },
+        'langs' : {
+            'stats' : 'Statistics',
+            'stats_mfu' : 'You can upload up to %mfu% files at a time.',
+            'stats_umf' : 'Max file size: %umf%.',
+            'stats_quote' : 'Total storage: %quote%.',
+            'stats_usage' : 'Storage used: %usage%.',
+            'quote_unlimited' : 'Unlimited'
+        },
+        'Com.ToggleBox' : {
+            'renderStructure' : true
+        }
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.items = [];
+    that.isMultiple = false;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.AbstractFileManager', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.validateParams = function(){
+        var that = this;
+        that.isMultiple = !that.params['max'] || that.params['max'] > 1;
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this;
+        return that.items;
+    };
+
+    classProto.select = function(){
+        var that = this;
+        that.triggerEvent('onSelect', that.items);
+        return that.items;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderViewStart');
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'com__file-manager'},
+            that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
+                that.nodes['holder'] = that.renderHolder(),
+                that.nodes['content'] = that.renderContent()
+            )
+        );
+        // Events
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    classProto.renderHolder = function(){
+        var that = this;
+        that.triggerEvent('onRenderHolderStart');
+        var node = cm.node('div', {'class' : 'com__file-manager__holder'});
+        that.triggerEvent('onRenderHolderProcess');
+        that.triggerEvent('onRenderHolderEnd');
+        return node;
+    };
+
+    classProto.renderContent = function(){
+        var that = this,
+            nodes = {};
+        that.triggerEvent('onRenderContentStart');
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'com__file-manager__content'});
+        // Render Stats
+        if(that.params['showStats']){
+            nodes['stats'] = that.renderStats();
+            cm.appendChild(nodes['stats'], nodes['container']);
+        }
+        // Events
+        that.triggerEvent('onRenderContentProcess');
+        that.nodes['content'] = nodes;
+        that.triggerEvent('onRenderContentEnd');
+        return nodes['container'];
+    };
+
+    classProto.renderStats = function(){
+        var that = this,
+            nodes = {},
+            vars = {
+                '%mfu%' : that.params['stats']['mfu'],
+                '%umf%' : that.params['stats']['umf'],
+                '%quote%' : that.params['stats']['quote'],
+                '%usage%' : that.params['stats']['usage']
+            };
+        vars['%quote%'] = parseFloat(vars['%quote%']) === 0 ? that.lang('quote_unlimited') : vars['%quote%'] + ' Mb';
+        vars['%usage%'] = vars['%usage%'] + ' Mb';
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'com__file-manager__stats'},
+            nodes['content'] = cm.node('div', {'class' : 'com__file-manager__stats-list'},
+                cm.node('ul',
+                    cm.node('li', that.lang('stats_mfu', vars)),
+                    cm.node('li', that.lang('stats_umf', vars)),
+                    cm.node('li', that.lang('stats_quote', vars)),
+                    cm.node('li', that.lang('stats_usage', vars))
+                )
+            )
+        );
+        // Init Stats ToggleBox
+        cm.getConstructor('Com.ToggleBox', function(classObject, className){
+            that.components['togglebox'] = new classObject(
+                cm.merge(that.params[className], {
+                    'node' : nodes['content'],
+                    'title' : that.lang('stats')
+                })
+            );
+        });
+        // Append
+        that.nodes['stats'] = nodes;
+        return nodes['container'];
+    };
+
+    /* *** PROCESS FILES *** */
+
+    classProto.processFiles = function(data){
+        var that = this,
+            files = [],
+            max;
+        if(cm.isArray(data)){
+            files = data.map(function(file){
+                return that.convertFile(file);
+            });
+        }else if(cm.isObject(data)){
+            files.push(that.convertFile(data));
+        }
+        if(!that.params['max']){
+            that.items = files;
+        }else if(files.length){
+            max = Math.min(0, that.params['max'], files.length);
+            that.items = files.slice(0, max);
+        }else{
+            that.items = [];
+        }
+        that.triggerEvent('onSelect', that.items);
+        return that;
+    };
+
+    classProto.convertFile = function(data){
+        return data;
+    };
+});
+cm.define('Com.AbstractFileManagerContainer', {
+    'extend' : 'Com.AbstractContainer',
+    'events' : [
+        'onSelect'
+    ],
+    'params' : {
+        'constructor' : 'Com.AbstractFileManager',
+        'params' : {
+            'embedStructure' : 'append'
+        },
+        'placeholder' : true,
+        'placeholderConstructor' : 'Com.DialogContainer',
+        'placeholderParams' : {
+            'params' : {
+                'width' : 900
+            }
+        },
+        'langs' : {
+            'title_single' : 'Please select file',
+            'title_multiple' : 'Please select files',
+            'close' : 'Cancel',
+            'save' : 'Select'
+        }
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractContainer.apply(that, arguments);
+});
+
+cm.getConstructor('Com.AbstractFileManagerContainer', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.validateParamsEndHandler = that.validateParamsEnd.bind(that);
+        that.renderControllerProcessHandler = that.renderControllerProcess.bind(that);
+        that.getHandler = that.get.bind(that);
+        that.selectHandler = that.select.bind(that);
+        // Add events
+        that.addEvent('onValidateParamsEnd', that.validateParamsEndHandler);
+        that.addEvent('onRenderControllerProcess', that.renderControllerProcessHandler);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.get = function(e){
+        e && cm.preventDefault(e);
+        var that = this;
+        return that.components['controller'] && that.components['controller'].get && that.components['controller'].get();
+    };
+
+    classProto.select = function(e){
+        e && cm.preventDefault(e);
+        var that = this;
+        return that.components['controller'] && that.components['controller'].select && that.components['controller'].select();
+    };
+
+    classProto.validateParamsEnd = function(){
+        var that = this;
+        // Validate Language Strings
+        that.setLangs({
+            'title' : !that.params['params']['max'] || that.params['params']['max'] > 1 ? that.lang('title_multiple') : that.lang('title_single')
+        });
+    };
+
+    classProto.renderControllerProcess = function(){
+        var that = this;
+        that.components['controller'].addEvent('onSelect', function(my, data){
+            that.triggerEvent('onSelect', data);
+            that.close();
+        });
+        return that;
+    };
+
+    classProto.renderPlaceholderViewButtons = function(){
+        var that = this;
+        // Structure
+        that.nodes['placeholder']['buttons'] = cm.node('div', {'class' : 'pt__buttons pull-right'},
+            that.nodes['placeholder']['buttonsInner'] = cm.node('div', {'class' : 'inner'},
+                that.nodes['placeholder']['close'] = cm.node('button', {'class' : 'button button-transparent'}, that.lang('close')),
+                that.nodes['placeholder']['save'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('save'))
+            )
+        );
+        // Events
+        cm.addEvent(that.nodes['placeholder']['close'], 'click', that.closeHandler);
+        cm.addEvent(that.nodes['placeholder']['save'], 'click', that.selectHandler);
         return that;
     };
 });
@@ -18411,6 +19157,247 @@ Com.FormFields.add('buttons', {
         }
     }
 });
+cm.define('Com.MultipleInput', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onSet',
+        'onSelect',
+        'onChange',
+        'onClear',
+        'onDisable',
+        'onEnable',
+        'onRenderContentStart',
+        'onRenderContentProcess',
+        'onRenderContentEnd',
+        'onRenderInputViewStart',
+        'onRenderInputViewProcess',
+        'onRenderInputViewEnd',
+        'onRenderItemViewStart',
+        'onRenderItemViewProcess',
+        'onRenderItemViewEnd',
+        'onSetAttributes',
+        'onItemAddStart',
+        'onItemAddProcess',
+        'onItemAddEnd',
+        'onItemRemoveStart',
+        'onItemRemoveProcess',
+        'onItemRemoveEnd'
+    ],
+    'params' : {
+        'embedStructure' : 'replace',
+        'className' : 'com__multiple-input',
+        'inputConstructor' : 'Com.AbstractInput',
+        'inputParams' : {},
+        'value' : [],
+        'defaultValue' : []
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.items = [];
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.MultipleInput', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(params){
+        var that = this;
+        // Bind context to methods
+        that.setHandler = that.set.bind(that);
+        that.getHandler = that.get.bind(that);
+        that.clearHandler = that.clear.bind(that);
+        that.enableHandler = that.enable.bind(that);
+        that.disableHandler = that.disable.bind(that);
+        that.addItemHandler = that.addItem.bind(that);
+        that.removeItemHandler = that.removeItem.bind(that);
+        that.constructProcessHandler = that.constructProcess.bind(that);
+        // Add events
+        that.addEvent('onConstructProcess', that.constructProcessHandler);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.set = function(value, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        cm.forEach(that.items, function(item){
+            that.removeItem(item, false);
+        });
+        cm.forEach(value, function(item){
+            that.addItem({'value' : item}, false);
+        });
+        // Trigger set events
+        triggerEvents && that.triggerEvent('onSelect');
+        triggerEvents && that.triggerEvent('onSet');
+        triggerEvents && that.triggerEvent('onChange');
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this,
+            value = [];
+        cm.forEach(that.items, function(item){
+            value.push(item.get());
+        });
+        return value;
+    };
+
+    classProto.clear = function(triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents && that.triggerEvent('onClear');
+        that.set(that.params['defaultValue'], triggerEvents);
+        return that;
+    };
+
+    classProto.enable = function(){
+        var that = this;
+        if(!that.disabled){
+            that.disabled = false;
+            cm.removeClass(that.nodes['container'], 'disabled');
+            cm.removeClass(that.nodes['content'], 'disabled');
+            that.triggerEvent('onEnable');
+        }
+        return that;
+    };
+
+    classProto.disable = function(){
+        var that = this;
+        if(that.disabled){
+            that.disabled = true;
+            cm.addClass(that.nodes['container'], 'disabled');
+            cm.addClass(that.nodes['content'], 'disabled');
+            that.triggerEvent('onDisable');
+        }
+        return that;
+    };
+
+    classProto.addItem = function(item, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        if(!that.params['max'] || that.items.length < that.params['max']){
+            that.triggerEvent('onItemAddStart', item);
+            // Merge config
+            item = cm.merge({
+                'input' : null,
+                'container' : null,
+                'name' : that.params['name'],
+                'value' : '',
+                'constructor' : that.params['inputConstructor'],
+                'nodes' : {}
+            }, item);
+            // Render views
+            if(!item['input']){
+                item['input'] = that.renderInputView(item);
+            }
+            item['container'] = that.renderItemView(item);
+            cm.appendChild(item['container'], that.nodes['items']);
+            // Process
+            cm.getConstructor(item['constructor'], function(classConstructor){
+                item['controller'] = new classConstructor(
+                    cm.merge(that.params['inputParams'], {
+                        'node' : item['input'],
+                        'name' : item['name'],
+                        'value' : item['value']
+                    })
+                );
+                that.triggerEvent('onItemAddProcess', item);
+                // Trigger set events
+                triggerEvents && that.triggerEvent('onSelect');
+                triggerEvents && that.triggerEvent('onSet');
+                triggerEvents && that.triggerEvent('onChange');
+            });
+            // Push
+            that.items.push(item);
+            that.triggerEvent('onItemAddEnd', item);
+            return item;
+        }
+        return null;
+    };
+
+    classProto.removeItem = function(item, triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        that.triggerEvent('onItemRemoveStart', item);
+        that.items = cm.arrayRemove(that.items, item);
+        that.triggerEvent('onItemRemoveProcess', item);
+        item['controller'].destruct();
+        cm.remove(item['container']);
+        that.triggerEvent('onItemRemoveEnd', item);
+        // Trigger set events
+        triggerEvents && that.triggerEvent('onSelect');
+        triggerEvents && that.triggerEvent('onSet');
+        triggerEvents && that.triggerEvent('onChange');
+        return that;
+    };
+
+    classProto.constructProcess = function(){
+        var that = this;
+        // Render inputs provided in DOM
+        cm.forEach(that.nodes['inputs'], function(item){
+            that.addItem({'input' : item['input']}, false);
+        });
+        // Render inputs provided in parameters
+        if(cm.isArray(that.params['value'])){
+            cm.forEach(that.params['value'], function(item){
+                that.addItem({'value' : item}, false);
+            });
+        }
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderViewStart');
+        that.nodes['container'] = cm.node('div', {'class' : 'com__multiple-input'},
+            that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
+                that.nodes['holder'] = cm.node('div', {'class' : 'com__multiple-input__holder'},
+                    that.nodes['items'] = cm.node('div', {'class' : 'com__multiple-input__items'}),
+                    that.nodes['content'] = that.renderContent()
+                )
+            )
+        );
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    classProto.renderContent = function(){
+        var that = this;
+        that.triggerEvent('onRenderContentStart');
+        var node = cm.node('div', {'class' : 'com__multiple-input__content'});
+        that.triggerEvent('onRenderContentProcess');
+        that.triggerEvent('onRenderContentEnd');
+        return node;
+    };
+
+    classProto.renderInputView = function(item){
+        var that = this;
+        that.triggerEvent('onRenderInputViewStart');
+        item['input'] = cm.node('input', {'type' : 'hidden'});
+        that.triggerEvent('onRenderInputViewProcess');
+        that.triggerEvent('onRenderInputViewEnd');
+        return item['input'];
+    };
+
+    classProto.renderItemView = function(item){
+        var that = this;
+        that.triggerEvent('onRenderItemViewStart');
+        item['nodes']['container'] = cm.node('div', {'class' : 'com__multiple-input__item'},
+            item['nodes']['inner'] = cm.node('div', {'class' : 'inner'},
+                item['nodes']['input'] = item['input']
+            )
+        );
+        that.triggerEvent('onRenderItemViewProcess');
+        that.triggerEvent('onRenderItemViewEnd');
+        return item['nodes']['container'];
+    };
+});
 cm.define('Com.BoxTools', {
     'extend' : 'Com.AbstractInput',
     'params' : {
@@ -18443,8 +19430,10 @@ cm.getConstructor('Com.BoxTools', function(classConstructor, className, classPro
 
     classProto.construct = function(){
         var that = this;
+        // Bind context to methods
         that.linkInputsHandler = that.linkInputs.bind(that);
         that.setValuesHandler = that.setValues.bind(that);
+        // Call parent method
         _inherit.prototype.construct.apply(that, arguments);
         return that;
     };
@@ -18464,6 +19453,7 @@ cm.getConstructor('Com.BoxTools', function(classConstructor, className, classPro
 
     classProto.renderContent = function(){
         var that = this;
+        that.triggerEvent('onRenderContentStart');
         // Structure
         that.myNodes['container'] = cm.node('div', {'class' : 'com__box-tools__content'},
             cm.node('div', {'class' : 'b-line'},
@@ -18483,7 +19473,9 @@ cm.getConstructor('Com.BoxTools', function(classConstructor, className, classPro
             )
         );
         // Events
+        that.triggerEvent('onRenderContentProcess');
         cm.addEvent(that.myNodes['link'], 'click', that.linkInputsHandler);
+        that.triggerEvent('onRenderContentEnd');
         // Push
         return that.myNodes['container'];
     };
@@ -18572,7 +19564,7 @@ cm.getConstructor('Com.BoxTools', function(classConstructor, className, classPro
     classProto.setInputs = function(){
         var that = this;
         cm.forEach(that.inputs, function(item){
-            item['input'].value = that.rawValue[item['i']]
+            item['input'].value = that.rawValue[item['i']];
         });
         return that;
     };
@@ -18742,8 +19734,8 @@ function(params){
             case 38:
                 listLength = that.registeredItems.length;
                 if(listLength){
-                    if(that.selectedItemIndex == null){
-                        that.selectedItemIndex = listLength - 1;
+                    if(that.selectedItemIndex === null){
+                        listIndex = listLength - 1;
                     }else if(that.selectedItemIndex - 1 >= 0){
                         listIndex = that.selectedItemIndex - 1;
                     }else{
@@ -18756,7 +19748,7 @@ function(params){
             case 40:
                 listLength = that.registeredItems.length;
                 if(listLength){
-                    if(that.selectedItemIndex == null){
+                    if(that.selectedItemIndex === null){
                         listIndex = 0;
                     }else if(that.selectedItemIndex + 1 < listLength){
                         listIndex = that.selectedItemIndex + 1;
@@ -20020,6 +21012,7 @@ cm.getConstructor('Com.BoxRadiusTools', function(classConstructor, className, cl
 
     classProto.renderContent = function(){
         var that = this;
+        that.triggerEvent('onRenderContentStart');
         // Structure
         that.myNodes['container'] = cm.node('div', {'class' : 'com__box-tools__content'},
             cm.node('div', {'class' : 'b-line'},
@@ -20039,7 +21032,9 @@ cm.getConstructor('Com.BoxRadiusTools', function(classConstructor, className, cl
             )
         );
         // Events
+        that.triggerEvent('onRenderContentProcess');
         cm.addEvent(that.myNodes['link'], 'click', that.linkInputsHandler);
+        that.triggerEvent('onRenderContentEnd');
         // Push
         return that.myNodes['container'];
     };
@@ -20426,7 +21421,7 @@ function(params){
                 if(day = params['days'][key]){
                     cm.addClass(day['container'], 'active');
                 }
-            })
+            });
         }
     };
 
@@ -20771,7 +21766,7 @@ function(params){
         var nodes = [];
         // Find element in specified node
         if(parentNode.getAttribute(that.params['attribute']) == name){
-            nodes.push(parentNode)
+            nodes.push(parentNode);
         }
         // Search for nodes in specified node
         nodes = nodes.concat(
@@ -20938,7 +21933,7 @@ function(params){
         });
         sortList();
         if(name){
-            constructItem(node, name)
+            constructItem(node, name);
         }else{
             constructAll(node);
         }
@@ -20963,7 +21958,7 @@ function(params){
         });
         sortList();
         if(name){
-            destructItem(node, name)
+            destructItem(node, name);
         }else{
             destructAll(node);
         }
@@ -22240,7 +23235,7 @@ function(params){
                     '%d' : function(){
                         return o['day'];
                     }
-                }
+                };
             };
         cm.forEach(formats(o), function(item, key){
             str = str.replace(key, item);
@@ -22291,10 +23286,11 @@ cm.define('Com.Datepicker', {
     ],
     'params' : {
         'input' : null,                                                     // Deprecated, use 'node' parameter instead.
-        'node' : cm.Node('input', {'type' : 'text'}),
+        'node' : cm.node('input', {'type' : 'text'}),
         'container' : null,
         'name' : '',
         'embedStructure' : 'replace',
+        'customEvents' : true,
         'renderInBody' : true,
         'format' : 'cm._config.dateFormat',
         'displayFormat' : 'cm._config.displayDateFormat',
@@ -22346,8 +23342,10 @@ function(params){
     that.format = null;
     that.displayFormat = null;
     that.disabled = false;
+    that.isDestructed = null;
 
     var init = function(){
+        that.destructHandler = that.destruct.bind(that);
         that.setParams(params);
         preValidateParams();
         that.convertEvents(that.params['events']);
@@ -22355,6 +23353,7 @@ function(params){
         validateParams();
         render();
         setLogic();
+        setEvents();
         // Add to stack
         that.addToStack(nodes['container']);
         // Set selected date
@@ -22540,10 +23539,24 @@ function(params){
         }
     };
 
+    var setEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
+    var unsetEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.remove(nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
     var show = function(){
         // Render calendar month
         if(that.date){
-            components['calendar'].set(that.date.getFullYear(), that.date.getMonth())
+            components['calendar'].set(that.date.getFullYear(), that.date.getMonth());
         }
         components['calendar'].renderMonth();
         // Set classes
@@ -22592,6 +23605,20 @@ function(params){
     };
 
     /* ******* MAIN ******* */
+
+    that.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            cm.customEvent.trigger(nodes['calendarContainer'], 'destruct', {
+                'type' : 'child',
+                'self' : false
+            });
+            unsetEvents();
+            that.removeFromStack();
+        }
+        return that;
+    };
 
     that.get = function(format){
         format = typeof format != 'undefined'? format : that.format;
@@ -22992,7 +24019,7 @@ function(params){
         }
         // Set window width
         if(windowWidth != setWidth){
-            nodes['window'].style.width = [setWidth, 'px'].join('')
+            nodes['window'].style.width = [setWidth, 'px'].join('');
         }
     };
 
@@ -23061,14 +24088,8 @@ function(params){
     var remove = function(){
         if(!that.isRemoved){
             that.isRemoved = true;
-            if(that.params['destructOnRemove'] && !that.isDestructed){
-                that.isDestructed = true;
-                cm.customEvent.trigger(nodes['container'], 'destruct', {
-                    'type' : 'child',
-                    'self' : false
-                });
-                that.removeFromStack();
-                that.triggerEvent('onClose');
+            if(that.params['destructOnRemove']){
+                that.destruct();
             }
             // Remove dialog container node
             cm.remove(nodes['container']);
@@ -23157,6 +24178,19 @@ function(params){
         return that;
     };
 
+    that.destruct = function(){
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            cm.customEvent.trigger(nodes['container'], 'destruct', {
+                'type' : 'child',
+                'self' : false
+            });
+            that.removeFromStack();
+            cm.remove(nodes['container']);
+        }
+        return that;
+    };
+
     that.isOwnNode = function(node){
         return cm.isParent(nodes['window'], node, true);
     };
@@ -23166,6 +24200,50 @@ function(params){
     };
 
     init();
+});
+cm.define('Com.DialogContainer', {
+    'extend' : 'Com.AbstractContainer',
+    'params' : {
+        'constructor' : 'Com.Dialog',
+        'container' : 'document.body',
+        'params' : {
+            'removeOnClose' : false,
+            'destructOnRemove' : false,
+            'autoOpen' : false
+        }
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    // Call parent class construct
+    Com.AbstractContainer.apply(that, arguments);
+});
+
+cm.getConstructor('Com.DialogContainer', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.validateParamsEndHandler = that.validateParamsEnd.bind(that);
+        // Add events
+        that.addEvent('onValidateParamsEnd', that.validateParamsEndHandler);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.validateParamsEnd = function(){
+        var that = this;
+        if(cm.isObject(that.params['content'])){
+            that.params['params']['title'] = that.params['content']['title'] || that.params['params']['title'];
+            that.params['params']['content'] = that.params['content']['content'] || that.params['params']['content'];
+            that.params['params']['buttons'] = that.params['content']['buttons'] || that.params['params']['buttons'];
+        }
+        return that;
+    };
 });
 cm.define('Com.Draganddrop', {
     'modules' : [
@@ -23783,14 +24861,14 @@ function(params){
                 style = {
                     'left' : [-(draggable['dimensions']['absoluteWidth'] + 50), 'px'].join(''),
                     'opacity' : 0
-                }
+                };
             }else{
                 node = cm.wrap(cm.Node('div', {'class' : 'pt__dnd-removable'}), draggable['node']);
                 anim = new cm.Animation(node);
                 style = {
                     'height' : '0px',
                     'opacity' : 0
-                }
+                };
             }
             // Animate draggable, like it disappear
             anim.go({
@@ -24398,6 +25476,553 @@ function(params){
 
     init();
 });
+cm.define('Com.FileDropzone', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onDrop'
+    ],
+    'params' : {
+        'embedStructure' : 'append',
+        'target' : null,
+        'height' : 128,
+        'max' : 0,                                  // 0 - infinity
+        'duration' : 'cm._config.animDuration',
+        'langs' : {
+            'drop_here' : 'drop files here'
+        },
+        'Com.FileReader' : {}
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.dragInterval = null;
+    that.isDropzoneShow = false;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.FileDropzone', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.dragOverHandler = that.dragOver.bind(that);
+        that.dragDropHandler = that.dragDrop.bind(that);
+        that.showDropzoneHandler = that.showDropzone.bind(that);
+        that.hideDropzoneHandler = that.hideDropzone.bind(that);
+        that.getLESSVariablesEndHandler = that.getLESSVariablesEnd.bind(that);
+        that.setEventsProcessHander = that.setEventsProcess.bind(that);
+        that.unsetEventsProcessHander = that.unsetEventsProcess.bind(that);
+        // Add events
+        that.addEvent('onGetLESSVariablesEnd', that.getLESSVariablesEndHandler);
+        that.addEvent('onSetEventsProcess', that.setEventsProcessHander);
+        that.addEvent('onUnsetEventsProcess', that.unsetEventsProcessHander);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.getLESSVariablesEnd = function(){
+        var that = this;
+        that.params['height'] = cm.getLESSVariable('ComFileDropzone-Height', that.params['height'], true);
+        that.params['duration'] = cm.getTransitionDurationFromLESS('ComFileDropzone-Duration', that.params['duration']);
+        return that;
+    };
+
+    classProto.setEventsProcess = function(){
+        var that = this;
+        cm.addEvent(window, 'dragover', that.dragOverHandler);
+        cm.addEvent(window, 'drop', that.dragDropHandler);
+        return that;
+    };
+
+    classProto.unsetEventsProcess = function(){
+        var that = this;
+        cm.removeEvent(window, 'dragover', that.dragOverHandler);
+        cm.removeEvent(window, 'drop', that.dragDropHandler);
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Call parent method - render
+        _inherit.prototype.render.apply(that, arguments);
+        // Init container animation
+        that.components['animation'] = new cm.Animation(that.params['container']);
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderViewStart');
+        that.nodes['container'] = cm.node('div', {'class' : 'com__file-dropzone is-hidden'},
+            cm.node('div', {'class' : 'inner'},
+                cm.node('div', {'class' : 'title'},
+                    cm.node('div', {'class' : 'label'}, that.lang('drop_here')),
+                    cm.node('div', {'class' : 'icon cm-i cm-i__circle-arrow-down'})
+                )
+            )
+        );
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    /* *** PROCESS FILES *** */
+
+    classProto.processFile = function(file){
+        var that = this;
+        that.components['reader'].read(file);
+        return that;
+    };
+
+    /* *** DROPZONE *** */
+
+    classProto.dragOver = function(e){
+        var that = this,
+            target = cm.getEventTarget(e);
+        cm.preventDefault(e);
+        // Show dropzone
+        that.showDropzone();
+        // Hide dropzone if event not triggering inside the current document window (hax)
+        that.dragInterval && clearTimeout(that.dragInterval);
+        that.dragInterval = setTimeout(that.hideDropzoneHandler, 100);
+        // Highlight dropzone
+        if(cm.isParent(that.nodes['container'], target, true)){
+            cm.addClass(that.nodes['container'], 'is-highlight');
+        }else{
+            cm.removeClass(that.nodes['container'], 'is-highlight');
+        }
+        return that;
+    };
+
+    classProto.dragDrop = function(e){
+        var that = this,
+            target = cm.getEventTarget(e),
+            length = 0;
+        cm.preventDefault(e);
+        // Hide dropzone and reset his state
+        that.dragInterval && clearTimeout(that.dragInterval);
+        that.hideDropzone();
+        // Process file
+        if(cm.isParent(that.nodes['container'], target, true)){
+            if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+                length = that.params['max'] ? Math.min(e.dataTransfer.files.length, that.params['max']) : e.dataTransfer.files.length;
+                cm.forEach(length, function(i){
+                    that.triggerEvent('onDrop', e.dataTransfer.files[i]);
+                });
+            }
+        }
+        return that;
+    };
+
+    classProto.showDropzone = function(){
+        var that = this,
+            height;
+        if(!that.isDropzoneShow){
+            that.isDropzoneShow = true;
+            // Set classes
+            cm.addClass(that.params['container'], 'is-dragging');
+            cm.addClass(that.params['target'], 'is-hidden');
+            cm.removeClass(that.nodes['container'], 'is-hidden');
+            cm.removeClass(that.nodes['container'], 'is-highlight');
+            // Animate
+            height = Math.max(that.params['height'], that.params['target'].offsetHeight);
+            that.components['animation'].go({
+                'style' : {'height' : (height + 'px')},
+                'duration' : that.params['duration'],
+                'anim' : 'smooth'
+            });
+        }
+        return that;
+    };
+
+    classProto.hideDropzone = function(){
+        var that = this,
+            height;
+        if(that.isDropzoneShow){
+            that.isDropzoneShow = false;
+            // Set classes
+            cm.removeClass(that.params['container'], 'is-dragging');
+            cm.removeClass(that.params['target'], 'is-hidden');
+            cm.addClass(that.nodes['container'], 'is-hidden');
+            cm.removeClass(that.nodes['container'], 'is-highlight');
+            // Animate
+            height = that.params['target'].offsetHeight;
+            that.components['animation'].go({
+                'style' : {'height' : (height + 'px')},
+                'duration' : that.params['duration'],
+                'anim' : 'smooth',
+                'onStop' : function(){
+                    that.params['container'].style.height = 'auto';
+                }
+            });
+        }
+        return that;
+    };
+});
+cm.define('Com.FileInput', {
+    'extend' : 'Com.AbstractInput',
+    'params' : {
+        'embedStructure' : 'replace',
+        'className' : 'com__file-input',
+        'file' : null,
+        'dropzone' : true,
+        'showLink' : true,
+        'local' : true,
+        'fileManager' : false,
+        'fileManagerConstructor' : 'Com.AbstractFileManagerContainer',
+        'fileManagerParams' : {
+            'params' : {
+                'max' : 1
+            }
+        },
+        'langs' : {
+            'browse' : 'Browse',
+            'browse_local' : 'Browse Local',
+            'browse_filemanager' : 'Browse File Manager',
+            'remove' : 'Remove',
+            'open' : 'Open'
+        },
+        'Com.FileReader' : {},
+        'Com.FileDropzone' : {
+            'max' : 1
+        }
+    }
+},
+function(params){
+    var that = this;
+    that.myNodes = {};
+    that.myComponents = {};
+    that.rawValue = null;
+    // Call parent class construct
+    Com.AbstractInput.apply(that, arguments);
+});
+
+cm.getConstructor('Com.FileInput', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.initComponentsStartHandler = that.initComponentsStart.bind(that);
+        that.validateParamsEndHandler = that.validateParamsEnd.bind(that);
+        that.browseActionHandler = that.browseAction.bind(that);
+        that.processFilesHandler = that.processFiles.bind(that);
+        // Add events
+        that.addEvent('onInitComponentsStart', that.initComponentsStartHandler);
+        that.addEvent('onValidateParamsEnd', that.validateParamsEndHandler);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.set = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.set.apply(that, arguments);
+        // Set data
+        that.setData();
+        return that;
+    };
+
+    classProto.clear = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.clear.apply(that, arguments);
+        // Set data
+        that.setData();
+        return that;
+    };
+
+    classProto.initComponentsStart = function(){
+        var that = this;
+        cm.getConstructor('Com.FileReader', function(classObject){
+            that.myComponents['validator'] = new classObject();
+        });
+        return that;
+    };
+
+    classProto.constructProcess = function(){
+        var that = this;
+        that.set(that.rawValue, false);
+        return that;
+    };
+
+    classProto.validateParamsEnd = function(){
+        var that = this;
+        // Validate Language Strings
+        that.setLangs({
+            '_browse_local' : that.params['fileManager'] ? that.lang('browse_local') : that.lang('browse'),
+            '_browse_filemanager' : that.params['local'] ? that.lang('browse_filemanager') : that.lang('browse')
+        });
+        // Validate Value
+        if(!cm.isEmpty(that.params['file'])){
+            if(cm.isEmpty(that.params['file']['value'])){
+                if(cm.isObject(that.params['value'])){
+                    that.params['file']['value'] = that.params['value']['value'];
+                }else{
+                    that.params['file']['value'] = that.params['value'];
+                }
+            }
+            that.rawValue = that.myComponents['validator'].validate(that.params['file']);
+        }else if(cm.isObject(that.params['value'])){
+            that.rawValue = that.myComponents['validator'].validate(that.params['value']);
+        }else if(!cm.isEmpty(that.params['value'])){
+            that.rawValue = that.myComponents['validator'].validate({
+                'value' : that.params['value']
+            });
+        }else{
+            that.rawValue = that.myComponents['validator'].validate();
+        }
+        // Other
+        that.params['dropzone'] = !that.params['local'] ? false : that.params['dropzone'];
+        return that;
+    };
+
+    classProto.validateValue = function(value){
+        var that = this;
+        if(cm.isObject(value)){
+            that.rawValue = that.myComponents['validator'].validate(value);
+        }else if(!cm.isEmpty(value)){
+            that.rawValue = that.myComponents['validator'].validate({
+                'value' : value
+            });
+        }else{
+            that.rawValue = that.myComponents['validator'].validate();
+        }
+        return that.rawValue['value'];
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Call parent method - render
+        _inherit.prototype.render.apply(that, arguments);
+        // Init FilerReader
+        cm.getConstructor('Com.FileReader', function(classObject, className){
+            that.myComponents['reader'] = new classObject(className);
+            that.myComponents['reader'].addEvent('onReadSuccess', function(my, item){
+                that.set(item, true);
+            });
+        });
+        // Init Dropzone
+        if(that.params['dropzone']){
+            cm.getConstructor('Com.FileDropzone', function(classObject, className){
+                that.myComponents['dropzone'] = new classObject(
+                    cm.merge(that.params[className], {
+                        'container' : that.myNodes['inner'],
+                        'target' : that.myNodes['content']
+                    })
+                );
+                that.myComponents['dropzone'].addEvent('onDrop', function(my, data){
+                    that.processFiles(data);
+                });
+            });
+        }
+        // Init File Manager
+        if(that.params['fileManager']){
+            cm.getConstructor(that.params['fileManagerConstructor'], function(classObject){
+                that.myComponents['filemanager'] = new classObject(
+                    cm.merge(that.params['fileManagerParams'], {
+                        'node' : that.myNodes['browseFileManager']
+                    })
+                );
+                that.myComponents['filemanager'].addEvent('onSelect', function(my, data){
+                    that.processFiles(data);
+                });
+            });
+        }
+        return that;
+    };
+
+    classProto.renderContent = function(){
+        var that = this;
+        that.triggerEvent('onRenderContentStart');
+        // Structure
+        that.myNodes['container'] = cm.node('div', {'class' : 'com__file-input__content'},
+            that.myNodes['inner'] = cm.node('div', {'class' : 'inner'},
+                that.myNodes['content'] = cm.node('div', {'class' : 'com__file-input__holder'},
+                    cm.node('div', {'class' : 'pt__file-line'},
+                        that.myNodes['contentInner'] = cm.node('div', {'class' : 'inner'},
+                            that.myNodes['clear'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('remove')),
+                            that.myNodes['label'] = cm.node('div', {'class' : 'label'})
+                        )
+                    )
+                )
+            )
+        );
+        // Render Browse Buttons
+        if(that.params['local']){
+            that.myNodes['browseLocal'] = cm.node('div', {'class' : 'browse-button'},
+                cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_local')),
+                cm.node('div', {'class' : 'inner'},
+                    that.myNodes['input'] = cm.node('input', {'type' : 'file'})
+                )
+            );
+            cm.insertFirst(that.myNodes['browseLocal'], that.myNodes['contentInner']);
+        }
+        if(that.params['fileManager']){
+            that.myNodes['browseFileManager'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
+            cm.insertFirst(that.myNodes['browseFileManager'], that.myNodes['contentInner']);
+        }
+        // Events
+        that.triggerEvent('onRenderContentProcess');
+        cm.addEvent(that.myNodes['clear'], 'click', that.clearHandler);
+        cm.addEvent(that.myNodes['input'], 'change', that.browseActionHandler);
+        that.triggerEvent('onRenderContentEnd');
+        // Push
+        return that.myNodes['container'];
+    };
+
+    classProto.setData = function(){
+        var that = this,
+            url;
+        if(cm.isEmpty(that.value)){
+            cm.clearNode(that.myNodes['label']);
+            cm.addClass(that.myNodes['label'], 'is-hidden');
+            cm.removeClass(that.myNodes['browseLocal'], 'is-hidden');
+            cm.removeClass(that.myNodes['browseFileManager'], 'is-hidden');
+            cm.addClass(that.myNodes['clear'], 'is-hidden');
+        }else{
+            cm.clearNode(that.myNodes['label']);
+            if(that.params['showLink']){
+                that.myNodes['link'] = cm.node('a', {'target' : '_blank', 'href' : that.rawValue['url'], 'title' : that.lang('open')}, that.rawValue['name']);
+            }else{
+                that.myNodes['link'] = cm.textNode(that.rawValue['name']);
+            }
+            cm.appendChild(that.myNodes['link'], that.myNodes['label']);
+            cm.addClass(that.myNodes['browseLocal'], 'is-hidden');
+            cm.addClass(that.myNodes['browseFileManager'], 'is-hidden');
+            cm.removeClass(that.myNodes['clear'], 'is-hidden');
+            cm.removeClass(that.myNodes['label'], 'is-hidden');
+        }
+        return that;
+    };
+
+    /* *** PROCESS FILES *** */
+
+    classProto.browseAction = function(e){
+        var that = this,
+            file = e.target.files[0];
+        // Read File
+        that.processFiles(file);
+        return that;
+    };
+
+    classProto.processFiles = function(data){
+        var that = this;
+        if(cm.isFile(data)){
+            that.myComponents['reader'].read(data);
+        }else if(cm.isArray(data)){
+            cm.forEach(data, function(file){
+                that.processFiles(file);
+            })
+        }else if(!cm.isEmpty(data)){
+            that.set(data, true);
+        }
+        return that;
+    };
+});
+cm.define('Com.FileReader', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs'
+    ],
+    'events' : [
+        'onConstruct',
+        'onConstructStart',
+        'onConstructEnd',
+        'onValidateParams',
+        'onRenderStart',
+        'onRender',
+        'onReadStart',
+        'onReadProcess',
+        'onReadSuccess',
+        'onReadError',
+        'onReadEnd'
+    ],
+    'params' : {
+        'file' : null
+    }
+},
+function(params){
+    var that = this;
+    that.isDestructed = false;
+    that.nodes = {};
+    that.components = {};
+    that.construct(params);
+});
+
+cm.getConstructor('Com.FileReader', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        that.triggerEvent('onConstructStart');
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.triggerEvent('onRender');
+        that.triggerEvent('onConstruct');
+        that.triggerEvent('onConstructEnd');
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        that.read(that.params['file']);
+        return that;
+    };
+
+    classProto.read = function(file){
+        var that = this;
+        if(cm.isFileReader && cm.isFile(file)){
+            that.triggerEvent('onReadStart', file);
+            // Config
+            var item = that.validate({
+                'file' : file
+            });
+            that.triggerEvent('onReadProcess', item);
+            // Read File
+            var reader = new FileReader();
+            cm.addEvent(reader, 'load', function(e){
+                item['value'] = e.target.result;
+                that.triggerEvent('onReadSuccess', item);
+                that.triggerEvent('onReadEnd', item);
+            });
+            cm.addEvent(reader, 'error', function(e){
+                item['error'] = e;
+                that.triggerEvent('onReadError', item);
+                that.triggerEvent('onReadEnd', item);
+            });
+            reader.readAsDataURL(file);
+        }
+        return that;
+    };
+
+    classProto.validate = function(o){
+        o = cm.merge({
+            'file' : null,
+            'value' : null,
+            'error' : null,
+            'name' : '',
+            'size' : 0,
+            'url' : null
+        }, o);
+        if(cm.isFile(o['file'])){
+            o['name'] = o['file'].name;
+            o['size'] = o['file'].size;
+            o['url'] = window.URL.createObjectURL(o['file']);
+        }else{
+            o['name'] = cm.isEmpty(o['name']) ? o['value'] : o['name'];
+            o['url'] = cm.isEmpty(o['url']) ? o['value'] : o['url'];
+        }
+        return o;
+    };
+});
 cm.define('Com.FormStepsLoader', {
     'modules' : [
         'Params',
@@ -24825,7 +26450,7 @@ function(params){
 
     var collectItem = function(item){
         if(!item['link']){
-            item['link'] = cm.Node('a')
+            item['link'] = cm.node('a');
         }
         item = cm.merge({
             'src' : item['link'].getAttribute('href') || '',
@@ -24854,7 +26479,7 @@ function(params){
         }
         // Structure
         if(!item['link']){
-            item['link'] = cm.Node('a')
+            item['link'] = cm.node('a');
         }
         item['nodes']['container'] = cm.Node('div', {'class' : 'pt__image is-centered'},
             item['nodes']['inner'] = cm.Node('div', {'class' : 'inner'})
@@ -25238,7 +26863,7 @@ function(params){
         );
         // Set aspect ration
         if(that.params['aspectRatio'] != 'auto'){
-            cm.addClass(nodes['container'], ['cm__aspect', that.params['aspectRatio']].join('-'))
+            cm.addClass(nodes['container'], ['cm__aspect', that.params['aspectRatio']].join('-'));
         }
     };
 
@@ -26628,7 +28253,7 @@ function(params){
                     'link' : that.nodes['link'],
                     'src' : url,
                     'title' : ''
-                })
+                });
         }
     };
 
@@ -26662,10 +28287,7 @@ function(params){
         cm.replaceClass(that.nodes['imageContainer'], 'is-zoom', 'is-no-hover is-no-image');
         cm.remove(that.nodes['remove']);
         // Clear gallery item
-        if(that.components['popup']){
-            that.components['popup']
-                .clear()
-        }
+        that.components['popup'] && that.components['popup'].clear();
         return that;
     };
 
@@ -26861,7 +28483,7 @@ cm.define('Com.MultiField', {
         if(that.params['sortable']){
             that.components['sortable'].addEvent('onSort', function(my, data){
                 var item = that.items.find(function(item){
-                    return item['container'] === data['node']
+                    return item['container'] === data['node'];
                 });
                 if(item){
                     sortItem(item, data['index']);
@@ -27084,6 +28706,212 @@ cm.define('Com.MultiField', {
     };
 
     init();
+});
+cm.define('Com.MultipleFileInput', {
+    'extend' : 'Com.MultipleInput',
+    'params' : {
+        'embedStructure' : 'replace',
+        'className' : 'com__multiple-file-input',
+        'inputConstructor' : 'Com.FileInput',
+        'inputParams' : {
+            'dropzone' : false,
+            'local' : false,
+            'fileManager' : false
+        },
+        'max' : 0,                                  // 0 - infinity
+        'dropzone' : true,
+        'local' : true,
+        'fileManager' : false,
+        'fileManagerConstructor' : 'Com.AbstractFileManagerContainer',
+        'fileManagerParams' : {
+            'params' : {}
+        },
+        'langs' : {
+            'browse' : 'Browse',
+            'browse_local' : 'Browse Local',
+            'browse_filemanager' : 'Browse File Manager'
+        },
+        'Com.FileReader' : {},
+        'Com.FileDropzone' : {}
+    }
+},
+function(params){
+    var that = this;
+    that.myNodes = {};
+    that.myComponents = {};
+    that.dragInterval = null;
+    that.isDropzoneShow = false;
+    // Call parent class construct
+    Com.MultipleInput.apply(that, arguments);
+});
+
+cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.validateParamsEndHandler = that.validateParamsEnd.bind(that);
+        that.itemAddProcessHandler = that.itemAddProcess.bind(that);
+        that.itemAddEndHandler = that.itemAddEnd.bind(that);
+        that.itemRemoveEndHandler = that.itemRemoveEnd.bind(that);
+        that.browseActionHandler = that.browseAction.bind(that);
+        that.processFilesHandler = that.processFiles.bind(that);
+        // Add events
+        that.addEvent('onValidateParamsEnd', that.validateParamsEndHandler);
+        that.addEvent('onItemAddProcess', that.itemAddProcessHandler);
+        that.addEvent('onItemAddEnd', that.itemAddEndHandler);
+        that.addEvent('onItemRemoveEnd', that.itemRemoveEndHandler);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.clear = function(){
+        var that = this;
+        cm.removeClass(that.myNodes['browseHolder'], 'is-hidden');
+        // Call parent method
+        _inherit.prototype.clear.apply(that, arguments);
+        return that;
+    };
+
+    classProto.validateParamsEnd = function(){
+        var that = this;
+        // Validate Language Strings
+        that.setLangs({
+            '_browse_local' : that.params['fileManager'] ? that.lang('browse_local') : that.lang('browse'),
+            '_browse_filemanager' : that.params['local'] ? that.lang('browse_filemanager') : that.lang('browse')
+        });
+        // File Dropzone Params
+        that.params['Com.FileDropzone']['max'] = that.params['max'];
+        that.params['fileManagerParams']['params']['max'] = that.params['max'];
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Call parent method - render
+        _inherit.prototype.render.apply(that, arguments);
+        // Init FilerReader
+        cm.getConstructor('Com.FileReader', function(classObject, className){
+            that.myComponents['reader'] = new classObject(className);
+            that.myComponents['reader'].addEvent('onReadSuccess', function(my, item){
+                that.addItem({'value' : item}, true);
+            });
+        });
+        // Init Dropzone
+        if(that.params['dropzone']){
+            cm.getConstructor('Com.FileDropzone', function(classObject, className){
+                that.myComponents['dropzone'] = new classObject(
+                    cm.merge(that.params[className], {
+                        'container' : that.nodes['inner'],
+                        'target' : that.nodes['holder']
+                    })
+                );
+                that.myComponents['dropzone'].addEvent('onDrop', function(my, data){
+                    that.processFiles(data);
+                });
+            });
+        }
+        // Init File Manager
+        if(that.params['fileManager']){
+            cm.getConstructor(that.params['fileManagerConstructor'], function(classObject){
+                that.myComponents['filemanager'] = new classObject(
+                    cm.merge(that.params['fileManagerParams'], {
+                        'node' : that.myNodes['browseFileManager']
+                    })
+                );
+                that.myComponents['filemanager'].addEvent('onSelect', function(my, data){
+                    that.processFiles(data);
+                });
+            });
+        }
+        return that;
+    };
+
+    classProto.renderContent = function(){
+        var that = this;
+        that.triggerEvent('onRenderContentStart');
+        // Structure
+        that.myNodes['container'] = cm.node('div', {'class' : 'com__multiple-file-input__content'},
+            that.myNodes['content'] = cm.node('div', {'class' : 'pt__file-line'},
+                that.myNodes['contentInner'] = cm.node('div', {'class' : 'inner'})
+            )
+        );
+        // Render Browse Buttons
+        if(that.params['local']){
+            that.myNodes['browseLocal'] = cm.node('div', {'class' : 'browse-button'},
+                cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_local')),
+                cm.node('div', {'class' : 'inner'},
+                    that.myNodes['input'] = cm.node('input', {'type' : 'file', 'multiple' : true})
+                )
+            );
+            cm.insertFirst(that.myNodes['browseLocal'], that.myNodes['contentInner']);
+        }
+        if(that.params['fileManager']){
+            that.myNodes['browseFileManager'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
+            cm.insertFirst(that.myNodes['browseFileManager'], that.myNodes['contentInner']);
+        }
+        // Events
+        that.triggerEvent('onRenderContentProcess');
+        cm.addEvent(that.myNodes['input'], 'change', that.browseActionHandler);
+        that.triggerEvent('onRenderContentEnd');
+        // Push
+        return that.myNodes['container'];
+    };
+
+    classProto.itemAddProcess = function(my, item){
+        var that = this;
+        item['controller'].addEvent('onClear', function(){
+            that.removeItem(item);
+        });
+        return that;
+    };
+
+    classProto.itemAddEnd = function(){
+        var that = this;
+        if(that.params['max'] && (that.items.length == that.params['max'])){
+            cm.addClass(that.myNodes['container'], 'is-hidden');
+        }else{
+            cm.removeClass(that.myNodes['container'], 'is-hidden');
+        }
+        return that;
+    };
+
+    classProto.itemRemoveEnd = function(){
+        var that = this;
+        if(that.params['max'] && (that.items.length == that.params['max'])){
+            cm.addClass(that.myNodes['container'], 'is-hidden');
+        }else{
+            cm.removeClass(that.myNodes['container'], 'is-hidden');
+        }
+        return that;
+    };
+
+    /* *** PROCESS FILES *** */
+
+    classProto.browseAction = function(e){
+        var that = this,
+            length = that.params['max'] ? Math.min(e.target.files.length, (that.params['max'] - that.items.length)) : e.target.files.length;
+        cm.forEach(length, function(i){
+            that.processFiles(e.target.files[i]);
+        });
+        return that;
+    };
+
+    classProto.processFiles = function(data){
+        var that = this;
+        if(cm.isFile(data)){
+            that.myComponents['reader'].read(data);
+        }else if(cm.isArray(data)){
+            cm.forEach(data, function(file){
+                that.processFiles(file);
+            })
+        }else if(!cm.isEmpty(data)){
+            that.addItem({'value' : data}, true);
+        }
+        return that;
+    };
 });
 cm.define('Com.Notifications', {
     'modules' : [
@@ -27676,8 +29504,8 @@ function(params){
             }
             that.params['showLoader'] = false;
         }
-        if(that.params['pageCount'] == 0){
-            that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
+        if(that.params['pageCount'] == 0 && that.params['count'] && that.params['perPage']){
+            that.pageCount = Math.floor(that.params['count'] / that.params['perPage']);
         }else{
             that.pageCount = that.params['pageCount'];
         }
@@ -28203,8 +30031,8 @@ function(params){
     that.setCount = function(count){
         if(count && (count = parseInt(count.toString())) && count != that.params['count']){
             that.params['count'] = count;
-            if(that.params['pageCount'] == 0){
-                that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
+            if(that.params['pageCount'] == 0 && that.params['count'] && that.params['perPage']){
+                that.pageCount = Math.floor(that.params['count'] / that.params['perPage']);
             }else{
                 that.pageCount = that.params['pageCount'];
             }
@@ -29005,7 +30833,7 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         if(visible){
             cm.addClass(node, 'is-show');
         }
-        return node
+        return node;
     };
 
     classProto.renderContent = function(){
@@ -29099,6 +30927,10 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
             that.nodes['temporary'] = that.renderTemporary(false);
             cm.appendNodes(that.nodes['inner'].childNodes, that.nodes['temporary']);
             cm.appendChild(that.nodes['temporary'], that.nodes['inner']);
+            cm.customEvent.trigger(that.nodes['temporary'], 'destruct', {
+                'type' : 'child',
+                'self' : false
+            });
         }
         cm.removeClass(that.nodes['temporary'], 'is-show', true);
         // Append temporary
@@ -29313,7 +31145,8 @@ cm.define('Com.ScrollPagination', {
         'onPageShow',
         'onPageHide',
         'onEnd',
-        'onFinalize'
+        'onFinalize',
+        'onSetCount'
     ],
     'params' : {
         'node' : cm.Node('div'),
@@ -29324,6 +31157,7 @@ cm.define('Com.ScrollPagination', {
         'scrollNode' : window,
         'scrollIndent' : 'Math.min(%scrollHeight% / 2, 600)',       // Variables: %blockHeight%.
         'data' : [],                                                // Static data
+        'count' : 0,
         'perPage' : 0,                                              // 0 - render all data in one page
         'startPage' : 1,                                            // Start page
         'startPageToken' : '',
@@ -29336,6 +31170,7 @@ cm.define('Com.ScrollPagination', {
         'pageAttributes' : {
             'class' : 'com__scroll-pagination__page'
         },
+        'responseCountKey' : 'count',                               // Take items count from response
         'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
         'responseHTML' : false,                                     // If true, html will append automatically
         'ajax' : {
@@ -29377,6 +31212,7 @@ function(params){
     that.currentPage = null;
     that.previousPage = null;
     that.nextPage = null;
+    that.pageCount = 0;
 
     var init = function(){
         that.setParams(params);
@@ -29401,6 +31237,11 @@ function(params){
             that.isAjax = true;
         }else{
             that.params['showLoader'] = false;
+        }
+        if(that.params['pageCount'] == 0 && that.params['perPage'] && that.params['count']){
+            that.pageCount = Math.floor(that.params['count'] / that.params['perPage']);
+        }else{
+            that.pageCount = that.params['pageCount'];
         }
         // Set start page token
         that.setToken(that.params['startPage'], that.params['startPageToken']);
@@ -29564,9 +31405,17 @@ function(params){
 
     that.callbacks.filter = function(that, config, response){
         var data = [],
-            dataItem = cm.objectSelector(that.params['responseKey'], response);
-        if(dataItem && !cm.isEmpty(dataItem)){
-            data = dataItem;
+            dataItem = cm.objectSelector(that.params['responseKey'], response),
+            countItem = cm.objectSelector(that.params['responseCountKey'], response);
+        if(!cm.isEmpty(dataItem)){
+            if(!that.params['responseHTML'] && that.params['perPage']){
+                data = dataItem.slice(0, that.params['perPage']);
+            }else{
+                data = dataItem;
+            }
+        }
+        if(countItem){
+            that.setCount(countItem);
         }
         return data;
     };
@@ -29586,6 +31435,7 @@ function(params){
     };
 
     that.callbacks.error = function(that, config){
+        that.callbacks.finalize(that);
         that.triggerEvent('onError');
     };
 
@@ -29697,7 +31547,7 @@ function(params){
         that.loaderDelay && clearTimeout(that.loaderDelay);
         cm.addClass(that.nodes['loader'], 'is-hidden');
         // Check pages count
-        if(that.params['pageCount'] > 0 && that.params['pageCount'] == that.currentPage){
+        if(that.pageCount > 0 && that.pageCount == that.currentPage){
             that.callbacks.finalize(that);
         }
         // Show / Hide Load More Button
@@ -29745,6 +31595,22 @@ function(params){
             that.pages[page] = {};
         }
         that.pages[page]['token'] = token;
+        return that;
+    };
+
+    that.setCount = function(count){
+        if(count && (count = parseInt(count.toString())) && count != that.params['count']){
+            that.params['count'] = count;
+            if(that.params['pageCount'] == 0 && that.params['count'] && that.params['perPage']){
+                that.pageCount = Math.floor(that.params['count'] / that.params['perPage']);
+            }else{
+                that.pageCount = that.params['pageCount'];
+            }
+            if(that.pageCount > 0 && that.pageCount == that.currentPage){
+                that.callbacks.finalize(that);
+            }
+            that.triggerEvent('onSetCount', count);
+        }
         return that;
     };
 
@@ -29838,6 +31704,7 @@ cm.define('Com.Select', {
         'container' : null,                    // Component container that is required in case content is rendered without available select.
         'name' : '',
         'embedStructure' : 'replace',
+        'customEvents' : true,
         'renderInBody' : true,                  // Render dropdowns in document.body, else they will be rendrered in component container.
         'multiple' : false,                     // Render multiple select.
         'placeholder' : '',
@@ -29873,10 +31740,12 @@ function(params){
         active;
 
     that.disabled = false;
+    that.isDestructed = null;
 
     /* *** CLASS FUNCTIONS *** */
 
     var init = function(){
+        that.destructHandler = that.destruct.bind(that);
         that.setParams(params);
         preValidateParams();
         that.convertEvents(that.params['events']);
@@ -29886,6 +31755,7 @@ function(params){
         that.triggerEvent('onRenderStart');
         render();
         setMiscEvents();
+        setEvents();
         // Set selected option
         if(that.params['multiple']){
             active = [];
@@ -30074,6 +31944,20 @@ function(params){
         }
     };
 
+    var setEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
+    var unsetEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.remove(nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
     /* *** COLLECTORS *** */
 
     var collectSelectOptions = function(){
@@ -30145,8 +32029,10 @@ function(params){
             'value' : '',
             'text' : '',
             'className' : '',
-            'group': group
+            'group': null
         }, item);
+        // Add link to group
+        item['group'] = group;
         // Structure
         item['node'] = cm.Node('li', {'class' : item['className']},
             cm.Node('a', {'innerHTML' : item['text']})
@@ -30205,7 +32091,7 @@ function(params){
                     set(optionsList[0], true);
                 }else{
                     active = null;
-                    nodes['text'].value = ''
+                    nodes['text'].value = '';
                 }
             }
         }
@@ -30310,6 +32196,16 @@ function(params){
     };
 
     /* ******* MAIN ******* */
+
+    that.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            unsetEvents();
+            that.removeFromStack();
+        }
+        return that;
+    };
 
     that.get = function(){
         return active || null;
@@ -30507,6 +32403,8 @@ cm.define('Com.Slider', {
     'params' : {
         'node' : cm.Node('div'),
         'name' : '',
+        'customEvents' : true,
+        'isEditing' : false,
         'time' : 500,                   // Fade time
         'delay' : 4000,                 // Delay before slide will be changed
         'slideshow' : true,             // Turn on / off slideshow
@@ -30522,8 +32420,6 @@ cm.define('Com.Slider', {
         'minHeight' : 48,               // Set min-height of slider, work with calculateMaxHeight parameter
         'hasBar' : false,
         'barDirection' : 'horizontal',  // horizontal | vertical
-        'isEditing' : false,
-        'customEvents' : true,
         'Com.Scroll' : {
             'step' : 25,
             'time' : 25
@@ -30562,17 +32458,22 @@ function(params){
     that.pausedOutside = false;
     that.isProcess = false;
     that.isEditing = null;
+    that.isDestructed = null;
 
     var init = function(){
+        that.redrawHandler = that.redraw.bind(that);
+        that.destructHandler = that.destruct.bind(that);
+        that.enableEditingHandler = that.enableEditing.bind(that);
+        that.disableEditingHandler = that.disableEditing.bind(that);
         getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
-
         validateParams();
         renderSlider();
         renderLayout();
+        setEvents();
         that.setEffect(that.params['effect']);
         that.addToStack(that.params['node']);
         that.params['isEditing'] && that.enableEditing();
@@ -30643,21 +32544,29 @@ function(params){
         // Init animations
         that.anim['slides'] = new cm.Animation(that.nodes['slides']);
         that.anim['slidesInner'] = new cm.Animation(that.nodes['slidesInner']);
+    };
+
+    var setEvents = function(){
         // Resize events
-        cm.addEvent(window, 'resize', function(){
-            that.redraw();
-        });
+        cm.addEvent(window, 'resize', that.redrawHandler);
         // Add custom event
         if(that.params['customEvents']){
-            cm.customEvent.add(that.params['node'], 'redraw', function(){
-                that.redraw();
-            });
-            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
-                that.enableEditing();
-            });
-            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
-                that.disableEditing();
-            });
+            cm.customEvent.add(that.params['node'], 'redraw', that.redrawHandler);
+            cm.customEvent.add(that.params['node'], 'enableEditable', that.enableEditingHandler);
+            cm.customEvent.add(that.params['node'], 'disableEditable', that.disableEditingHandler);
+            cm.customEvent.add(that.params['node'], 'destruct', that.destructHandler);
+        }
+    };
+
+    var unsetEvents = function(){
+        // Resize events
+        cm.removeEvent(window, 'resize', that.redrawHandler);
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.remove(that.params['node'], 'redraw', that.redrawHandler);
+            cm.customEvent.remove(that.params['node'], 'enableEditable', that.enableEditingHandler);
+            cm.customEvent.remove(that.params['node'], 'disableEditable', that.disableEditingHandler);
+            cm.customEvent.remove(that.params['node'], 'destruct', that.destructHandler);
         }
     };
 
@@ -30925,6 +32834,16 @@ function(params){
             that.disableEditMode();
             that.triggerEvent('disableEditing');
             that.triggerEvent('disableEditable');
+        }
+        return that;
+    };
+
+    that.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            unsetEvents();
+            that.removeFromStack();
         }
         return that;
     };
@@ -33173,7 +35092,7 @@ function(params){
 
 cm.getConstructor('Com.TintRange', function(classConstructor, className, classProto){
     classProto.renderContent = function(){
-        return cm.node('div', {'class' : 'com__tint-range__content'})
+        return cm.node('div', {'class' : 'com__tint-range__content'});
     };
 });
 cm.define('Com.ToggleBox', {
@@ -34446,14 +36365,134 @@ function(params){
 
     init();
 });
-/*! ************ QuickSilk-Application v3.8.0 (2016-05-11 20:46) ************ */
+cm.define('Com.elFinderFileManager', {
+    'extend' : 'Com.AbstractFileManager',
+    'params' : {
+        'config' : {
+            url : '',
+            lang : {},
+            dotFiles : false,
+            destroyOnClose : true,
+            useBrowserHistory : false,
+            commandsOptions : {
+                getfile : {
+                    oncomplete: 'close',
+                    folders : false,
+                    multiple : false
+                }
+            }
+        }
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractFileManager.apply(that, arguments);
+});
+
+cm.getConstructor('Com.elFinderFileManager', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.selectFileEventHandler = that.selectFileEvent.bind(that);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.select = function(){
+        var that = this;
+        if(that.components['controller']){
+            that.components['controller'].exec('getfile')
+        }else{
+            that.triggerEvent('onSelect', that.items);
+        }
+        return that.items;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.render.apply(that, arguments);
+        // Init elFinder
+        if(typeof elFinder != 'undefined'){
+            that.components['controller'] = new elFinder(that.nodes['holder'], cm.merge(that.params['config'], {
+                commandsOptions : {
+                    getfile : {
+                        multiple: that.isMultiple
+                    }
+                },
+                getFileCallback : function(data) {
+                    that.processFiles(data);
+                }
+            }));
+            that.components['controller'].bind('select', that.selectFileEventHandler);
+            that.components['controller'].show();
+        }else{
+            cm.errorLog({
+                'name' : that._name['full'],
+                'message' : ['elFinder does not exists.'].join(' ')
+            });
+        }
+        return that;
+    };
+
+    classProto.selectFileEvent = function(e){
+        var that = this,
+            selected = e.data.selected,
+            files = [],
+            file,
+            max;
+        if(selected.length){
+            cm.forEach(selected, function(item){
+                file = that.components['controller'].file(item);
+                file && files.push(file);
+            });
+        }
+        if(!that.params['max']){
+            that.items = files;
+        }else if(files.length){
+            max = Math.min(0, that.params['max'], files.length);
+            that.items = files.slice(0, max);
+        }else{
+            that.items = [];
+        }
+    };
+
+    classProto.convertFile = function(data){
+        if(!data || data['mime'] == 'directory'){
+            return false;
+        }
+        return {
+            'value' : data['url'],
+            'name' : data['name'],
+            'mime' : data['mime'],
+            'size' : data['size'],
+            'url' : data['url']
+        }
+    };
+});
+cm.define('Com.elFinderFileManagerContainer', {
+    'extend' : 'Com.AbstractFileManagerContainer',
+    'params' : {
+        'constructor' : 'Com.elFinderFileManager'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractFileManagerContainer.apply(that, arguments);
+});
+/*! ************ QuickSilk-Application v3.9.0 (2016-06-03 19:41) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.5.2',
+    '_version' : '3.9.0',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
@@ -34754,7 +36793,7 @@ cm.define('App.Dashboard', {
         'moveDuration' : 200,
         'highlightZones' : true,                     // highlight zones on drag start
         'highlightPlaceholders' : true,
-        'placeholderHeight' : 64,
+        'placeholderHeight' : 48,
         'Com.Overlay' : {
             'container' : 'document.body',
             'duration' : 0,
@@ -36026,8 +38065,8 @@ function(params){
         });
         cm.find('App.Sidebar', that.params['sidebarName'], null, function(classObject){
             that.components['sidebar'] = classObject
-                .addEvent('onExpandEnd', sidebarExpandAction)
-                .addEvent('onCollapseEnd', sidebarCollapseAction)
+                .addEvent('onExpand', sidebarExpandAction)
+                .addEvent('onCollapse', sidebarCollapseAction)
                 .addEvent('onTabShow', function(sidebar, data){
                     setEditorType(data.item['id']);
                 });
@@ -36167,6 +38206,7 @@ function(params){
                 'onEnd' : function(){
                     that.triggerEvent('create', node);
                     that.triggerEvent('onProcessEnd', node);
+                    that.components['template'].redraw();
                 }
             });
         }
@@ -36180,6 +38220,7 @@ function(params){
                 'onEnd' : function(){
                     that.triggerEvent('place', node);
                     that.triggerEvent('onProcessEnd', node);
+                    that.components['template'].redraw();
                 }
             });
         }
@@ -36196,6 +38237,7 @@ function(params){
                 'onEnd' : function(){
                     that.triggerEvent('replace', node);
                     that.triggerEvent('onProcessEnd', node);
+                    that.components['template'].redraw();
                 }
             });
         }
@@ -36209,6 +38251,7 @@ function(params){
                 'onEnd' : function(){
                     that.triggerEvent('delete', block.node);
                     that.triggerEvent('onProcessEnd', block.node);
+                    that.components['template'].redraw();
                 }
             });
         }
@@ -36225,6 +38268,7 @@ function(params){
                 'onEnd' : function(){
                     that.triggerEvent('duplicate', node);
                     that.triggerEvent('onProcessEnd', node);
+                    that.components['template'].redraw();
                 }
             });
         }
@@ -36238,6 +38282,7 @@ function(params){
             cm.appendChild(node, block.getInnerNode());
             that.triggerEvent('update', node);
             that.triggerEvent('onProcessEnd', node);
+            that.components['template'].redraw();
         }
         return that;
     };
@@ -36299,6 +38344,18 @@ function(params){
     };
 
     init();
+});
+cm.define('App.FileInput', {
+    'extend' : 'Com.FileInput',
+    'params' : {
+        'fileManager' : true,
+        'fileManagerConstructor' : 'Com.elFinderFileManagerContainer'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.FileInput.apply(that, arguments);
 });
 cm.define('App.HelpTour', {
     'modules' : [
@@ -36401,7 +38458,11 @@ function(params){
             );
             that.components['overlays']['sidebar'] = new classConstructor(that.params['Com.Overlay']);
             that.components['overlays']['topMenu'] = new classConstructor(that.params['Com.Overlay']);
-            that.components['overlays']['template'] = new classConstructor(that.params['Com.Overlay']);
+            that.components['overlays']['template'] = new classConstructor(
+                cm.merge(that.params['Com.Overlay'], {
+                    'position' : 'fixed'
+                })
+            );
             // Start tour on click
             cm.addEvent(that.params['node'], 'click', prepare);
         });
@@ -36614,7 +38675,7 @@ function(params){
     };
 
     var popupClickEvents = function(e){
-        e = cm.getEvent(e);
+        cm.preventDefault(e);
         switch(e.keyCode){
             case 27:
                 stop();
@@ -36956,6 +39017,19 @@ function(params){
 
     init();
 });
+cm.define('App.MultipleFileInput', {
+    'extend' : 'Com.MultipleFileInput',
+    'params' : {
+        'inputConstructor' : 'App.FileInput',
+        'fileManager' : true,
+        'fileManagerConstructor' : 'Com.elFinderFileManagerContainer'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.MultipleFileInput.apply(that, arguments);
+});
 cm.define('App.Panel', {
     'modules' : [
         'Params',
@@ -36992,6 +39066,7 @@ cm.define('App.Panel', {
         'container' : 'document.body',
         'name' : '',
         'embedStructure' : 'append',
+        'customEvents' : true,
         'type' : 'sidebar',                             // sidebar | story | fullscreen
         'duration' : 'cm._config.animDurationLong',
         'autoOpen' : true,
@@ -37055,6 +39130,7 @@ function(params){
     that.nodes = {};
     that.components = {};
     that.isOpen = false;
+    that.isHide = false;
     that.isLoaded = false;
     that.isDestructed = false;
     that.isProccesing = false;
@@ -37073,6 +39149,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
 
     classProto.construct = function(params){
         var that = this;
+        that.destructHandler = that.destruct.bind(that);
         that.openHandler = that.open.bind(that);
         that.closeHandler = that.close.bind(that);
         that.saveHandler = that.save.bind(that);
@@ -37090,7 +39167,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
         that.triggerEvent('onRenderStart');
         that.render();
         that.setEvents();
-        that.addToStack(that.nodes['container']);
+        that.addToStack(that.params['node']);
         that.triggerEvent('onRender');
         that.params['autoOpen'] && that.open();
         return that;
@@ -37103,6 +39180,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
             that.close();
         }else if(!that.isDestructed){
             that.isDestructed = true;
+            that.destructOnClose = that.params['destructOnClose'];
             cm.customEvent.trigger(that.nodes['contentHolder'], 'destruct', {
                 'type' : 'child',
                 'self' : false
@@ -37116,8 +39194,13 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
 
     classProto.open = function(){
         var that = this;
+        if(that.isDestructed){
+            that.setEvents();
+            that.isDestructed = false;
+        }
         if(!that.isOpen){
             that.embedStructure(that.nodes['container']);
+            that.addToStack(that.nodes['container']);
             that.triggerEvent('onOpenStart');
             // Get
             if(that.hasGetRequest){
@@ -37148,6 +39231,24 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
             that.triggerEvent('onCloseStart');
             cm.removeClass(that.nodes['container'], 'is-open', true);
             that.transitionInterval = setTimeout(that.transitionCloseHandler, that.params['duration']);
+        }
+        return that;
+    };
+
+    classProto.hide = function(){
+        var that = this;
+        if(!that.isHide){
+            that.isHide = true;
+            cm.replaceClass(that.nodes['container'], 'is-show', 'is-hide');
+        }
+        return that;
+    };
+
+    classProto.show = function(){
+        var that = this;
+        if(that.isHide){
+            that.isHide = false;
+            cm.replaceClass(that.nodes['container'], 'is-hide', 'is-show');
         }
         return that;
     };
@@ -37218,6 +39319,10 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
 
     classProto.setTitle = function(value){
         var that = this;
+        cm.customEvent.trigger(that.nodes['label'], 'destruct', {
+            'type' : 'child',
+            'self' : false
+        });
         cm.clearNode(that.nodes['label']);
         if(cm.isNode(value)){
             cm.appendChild(value, that.nodes['label']);
@@ -37229,6 +39334,10 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
 
     classProto.setContent = function(node){
         var that = this;
+        cm.customEvent.trigger(that.nodes['contentHolder'], 'destruct', {
+            'type' : 'child',
+            'self' : false
+        });
         cm.clearNode(that.nodes['contentHolder']);
         if(cm.isNode(node)){
             cm.appendChild(node, that.nodes['contentHolder']);
@@ -37330,13 +39439,15 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
         var that = this;
         // Structure
         that.nodes['container'] = cm.node('div', {'class' : 'app__panel'},
-            that.nodes['dialog'] = cm.node('div', {'class' : 'app__panel__dialog'},
-                that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
-                    that.nodes['title'] = cm.node('div', {'class' : 'title'},
-                        that.nodes['label'] = cm.node('div', {'class' : 'label'})
-                    ),
-                    that.nodes['content'] = cm.node('div', {'class' : 'content'},
-                        that.nodes['contentHolder'] = cm.node('div', {'class' : 'inner'})
+            that.nodes['dialogHolder'] = cm.node('div', {'class' : 'app__panel__holder'},
+                that.nodes['dialog'] = cm.node('div', {'class' : 'app__panel__dialog'},
+                    that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
+                        that.nodes['title'] = cm.node('div', {'class' : 'title'},
+                            that.nodes['label'] = cm.node('div', {'class' : 'label'})
+                        ),
+                        that.nodes['content'] = cm.node('div', {'class' : 'content'},
+                            that.nodes['contentHolder'] = cm.node('div', {'class' : 'inner'})
+                        )
                     )
                 )
             )
@@ -37431,18 +39542,27 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
     classProto.setEvents = function(){
         var that = this;
         cm.addEvent(window, 'keydown', that.windowKeydownHandler);
+        // Add custom events
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'destruct', that.destructHandler);
+            cm.customEvent.add(that.nodes['container'], 'destruct', that.destructHandler);
+        }
         return that;
     };
 
     classProto.unsetEvents = function(){
         var that = this;
         cm.removeEvent(window, 'keydown', that.windowKeydownHandler);
+        // Remove custom events
+        if(that.params['customEvents']){
+            cm.customEvent.remove(that.params['node'], 'destruct', that.destructHandler);
+            cm.customEvent.remove(that.nodes['container'], 'destruct', that.destructHandler);
+        }
         return that;
     };
 
     classProto.windowKeydown = function(e){
-        var that = this,
-            target = cm.getEventTarget(e);
+        var that = this;
         if(cm.isKeyCode(e.keyCode, 'escape')){
             that.close();
         }
@@ -37472,9 +39592,9 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
 
     classProto.transitionClose = function(){
         var that = this;
+        that.isOpen = false;
         that.destructOnClose && that.destruct();
         cm.remove(that.nodes['container']);
-        that.isOpen = false;
         that.triggerEvent('onClose');
         return that;
     };
@@ -37547,6 +39667,7 @@ function(params){
         'holder' : cm.node('div'),
         'content' : cm.node('div')
     };
+    that.myComponents = {};
     App.Panel.apply(that, arguments);
 });
 
@@ -37563,6 +39684,9 @@ cm.getConstructor('App.PanelHolder', function(classConstructor, className, class
         var that = this;
         _inherit.prototype.render.apply(that, arguments);
         // Process holder nodes
+        cm.find('App.PanelRequest', null, null, function(classObject){
+            that.myComponents['panel'] = classObject;
+        });
         that.myNodes = cm.merge(that.myNodes, that.getDataNodesObject(that.params['node']));
         cm.addEvent(that.myNodes['button'], 'click', that.openHandler);
         return that;
@@ -37570,10 +39694,20 @@ cm.getConstructor('App.PanelHolder', function(classConstructor, className, class
 
     classProto.open = function(){
         var that = this;
+        _inherit.prototype.open.apply(that, arguments);
         if(!that.isOpen){
+            that.myComponents['panel'] && that.myComponents['panel'].hide();
             that.setContent(that.myNodes['content']);
         }
-        _inherit.prototype.open.apply(that, arguments);
+        return that;
+    };
+
+    classProto.close = function(){
+        var that = this;
+        _inherit.prototype.close.apply(that, arguments);
+        if(that.isOpen){
+            that.myComponents['panel'] && that.myComponents['panel'].show();
+        }
         return that;
     };
 
@@ -37701,7 +39835,7 @@ cm.define('App.Sidebar', {
     'params' : {
         'node' : cm.Node('div'),
         'name' : 'app-sidebar',
-        'duration' : 300,
+        'duration' : 'cm._config.animDurationLong',
         'active' : 'template-manager',
         'target' : 'document.html',
         'remember' : true,
@@ -37831,6 +39965,8 @@ function(params){
             }
             cm.replaceClass(that.nodes['container'], 'is-expanded', 'is-collapsed', true);
             cm.replaceClass(that.params['target'], 'is-sidebar--expanded', 'is-sidebar--collapsed', true);
+            // Trigger collapse event after change classes
+            that.triggerEvent('onCollapse');
             // Unset active class to collapse buttons
             cm.forEach(that.nodes['collapseButtons'], function(item){
                 cm.removeClass(item['container'], 'active');
@@ -37838,7 +39974,6 @@ function(params){
             // Remove immediately animation hack
             that.openInterval && clearTimeout(that.openInterval);
             if(isImmediately){
-                that.triggerEvent('onCollapse');
                 that.triggerEvent('onCollapseEnd');
                 that.openInterval = setTimeout(function(){
                     cm.removeClass(that.nodes['container'], 'is-immediately');
@@ -37846,7 +39981,6 @@ function(params){
                 }, 5);
             }else{
                 that.openInterval = setTimeout(function(){
-                    that.triggerEvent('onCollapse');
                     that.triggerEvent('onCollapseEnd');
                 }, that.params['duration'] + 5);
             }
@@ -37869,6 +40003,8 @@ function(params){
             }
             cm.replaceClass(that.nodes['container'], 'is-collapsed', 'is-expanded', true);
             cm.replaceClass(that.params['target'], 'is-sidebar--collapsed', 'is-sidebar--expanded', true);
+            // Trigger expand event after change classes
+            that.triggerEvent('onExpand');
             // Set active class to collapse buttons
             cm.forEach(that.nodes['collapseButtons'], function(item){
                 cm.addClass(item['container'], 'active');
@@ -37876,7 +40012,6 @@ function(params){
             // Remove immediately animation hack
             that.openInterval && clearTimeout(that.openInterval);
             if(isImmediately){
-                that.triggerEvent('onExpand');
                 that.triggerEvent('onExpandEnd');
                 that.openInterval = setTimeout(function(){
                     cm.removeClass(that.nodes['container'], 'is-immediately');
@@ -37884,7 +40019,6 @@ function(params){
                 }, 5);
             }else{
                 that.openInterval = setTimeout(function(){
-                    that.triggerEvent('onExpand');
                     that.triggerEvent('onExpandEnd');
                 }, that.params['duration'] + 5);
             }
@@ -37950,6 +40084,7 @@ cm.define('App.Stylizer', {
     'params' : {
         'node' : cm.Node('div'),
         'name' : '',
+        'customEvents' : true,
         'active' : {},
         'default' : {},
         'styles' : {
@@ -38025,8 +40160,10 @@ function(params){
     that.components = {};
     that.value = null;
     that.previousValue = null;
+    that.isDestructed = null;
 
     var init = function(){
+        that.destructHandler = that.destruct.bind(that);
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
@@ -38034,6 +40171,7 @@ function(params){
         validateParams();
         // Render editor toolbar
         renderTooltip();
+        setEvents();
         // Add to stack
         that.addToStack(that.nodes['container']);
         // Set
@@ -38320,6 +40458,20 @@ function(params){
         );
     };
 
+    var setEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
+    var unsetEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.remove(that.nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
     var set = function(styles, triggerEvents){
         var prepared = cm.clone(styles);
         that.previousValue = cm.clone(that.value);
@@ -38378,6 +40530,20 @@ function(params){
     };
 
     /* ******* MAIN ******* */
+
+    that.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            cm.customEvent.trigger(that.nodes['tooltip']['container'], 'destruct', {
+                'type' : 'child',
+                'self' : false
+            });
+            unsetEvents();
+            that.removeFromStack();
+        }
+        return that;
+    };
 
     that.set = function(styles, triggerEvents){
         triggerEvents = typeof triggerEvents != 'undefined'? triggerEvents : true;
@@ -38559,8 +40725,9 @@ function(params){
     };
 
     that.enableEditing = function(){
-        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
+        if(!cm.isBoolean(that.isEditing) || !that.isEditing){
             that.isEditing = true;
+            cm.addClass(that.nodes['container'], 'is-editing');
             unsetState();
             that.redraw();
             that.triggerEvent('enableEditing');
@@ -38569,8 +40736,9 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(typeof that.isEditing !== 'boolean' || that.isEditing){
+        if(!cm.isBoolean(that.isEditing) || that.isEditing){
             that.isEditing = false;
+            cm.removeClass(that.nodes['container'], 'is-editing');
             setState();
             that.redraw();
             that.triggerEvent('disableEditing');
@@ -39455,7 +41623,286 @@ function(params){
 
     init();
 });
-window.LESS = cm.merge(window.LESS, {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":13,"CmIcon-Magnify":"\\e600","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleClose":"\\e702","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.16.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationNone":"0ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"250ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Open Sans, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"'Open Sans', arial, helvetica, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-BoxWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmButton-PaddingX":"12px","CmInput-Padding":"6px","CmInput-DefaultBackground":"#ffffff","CmInput-HoverBackground":"#ffffff","CmInput-ActiveBackground":"#ffffff","CmInput-DisabledBackground":"#fafafa","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"28px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"150px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"250ms","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"28px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"24px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"28px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","fa-font-path":"../fonts/MagpieUI/fontawesome","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":23,"AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Default-Family":"Open Sans, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Open Sans, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Open Sans, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Open Sans, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Open Sans, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Open Sans, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Open Sans, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Open Sans, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#000000","AppTopMenu-Color":"#ffffff","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#000000","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"250ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"28px","AppPanel-Dialog-ButtonsHeight":"52px","AppPanel-Box-Indent":["24px","12px"],"AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"28px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"28px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"28px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"28px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"28px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"12px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"});
+cm.define('Dev.Parallax', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'Structure',
+        'DataConfig',
+        'DataNodes',
+        'Storage',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'name' : '',
+        'speed' : 1
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.construct(params);
+});
+
+cm.getConstructor('Dev.Parallax', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        that.setHandler = that.set.bind(that);
+        that.refreshHandler = that.refresh.bind(that);
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Refresh Layout
+        that.refresh();
+        // Set Events
+        cm.addEvent(window, 'scroll', that.setHandler);
+        cm.addEvent(window, 'resize', that.refreshHandler);
+        return that;
+    };
+
+    classProto.refresh = function(){
+        var that = this;
+        that.posY = cm.getY(that.nodes['container']);
+        that.selfHeight = that.nodes['container'].offsetHeight;
+        that.posY2 = that.posY + that.selfHeight;
+        that.winHeight = cm.getPageSize('winHeight');
+        that.halfY = (that.winHeight - that.selfHeight) / 2;
+        that.set();
+        return that;
+    };
+
+    classProto.set = function(){
+        var that = this;
+        var scrollTop = cm.getBodyScrollTop();
+        if(cm.inRange(scrollTop, scrollTop + that.winHeight, that.posY, that.posY2)){
+            var posY = scrollTop + that.halfY - that.posY;
+            var transY = posY - (posY * that.params['speed']);
+            cm.setCSSTranslate(that.nodes['backgroundInner'], '0px', (transY + 'px'))
+        }
+    };
+});
+cm.define('Dev.TBSC', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'Structure',
+        'DataConfig',
+        'DataNodes',
+        'Storage',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'name' : '',
+        'customEvents' : true,
+        'ipadSpeed' : 0.12,
+        'characterSpeed' : 0.4,
+        'character2Speed' : 0.288,
+        'raysSpeed' : 0.342
+    }
+},
+function(params){
+    var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.isEditing = null;
+    that.isDestructed = false;
+    that.construct(params);
+});
+
+cm.getConstructor('Dev.TBSC', function(classConstructor, className, classProto){
+    classProto.construct = function(params){
+        var that = this;
+        that.resizeHandler = that.resize.bind(that);
+        that.scrollHandler = that.scroll.bind(that);
+        that.setHandler = that.set.bind(that);
+        that.redrawHandler = that.redraw.bind(that);
+        that.enableEditingHandler = that.enableEditing.bind(that);
+        that.disableEditingHandler = that.disableEditing.bind(that);
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+        return that;
+    };
+
+    classProto.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            cm.removeEvent(window, 'scroll', that.scrollHandler);
+            cm.removeEvent(window, 'resize', that.resizeHandler);
+            that.removeFromStack();
+        }
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Refresh Layout
+        that.redraw();
+        // Set Events
+        cm.addEvent(window, 'scroll', that.scrollHandler);
+        cm.addEvent(window, 'resize', that.resizeHandler);
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(that.params['node'], 'destruct', function(){
+                that.destruct();
+            });
+            cm.customEvent.add(that.params['node'], 'redraw', function(){
+                that.redraw();
+            });
+            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
+                that.enableEditing();
+            });
+            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
+                that.disableEditing();
+            });
+        }
+        return that;
+    };
+
+    classProto.resize = function(){
+        var that = this;
+        that.redraw();
+        return that;
+    };
+
+    classProto.scroll = function(){
+        var that = this;
+        if(!that.isEditing){
+            that.set();
+        }
+        return that;
+    };
+
+    classProto.redraw = function(){
+        var that = this;
+        if(!that.isEditing){
+            cm.addClass(that.nodes['line']['container'], 'is-start');
+            cm.removeClass(that.nodes['height'], 'is-hidden');
+            // Position
+            that.winWidth = cm.getPageSize('winWidth');
+            that.posX = cm.getX(that.nodes['container']);
+            that.posY = cm.getY(that.nodes['container']);
+            // iPad
+            that.ipadStartY = 70;
+            that.ipadEndY = 0;
+            // Character
+            that.characterStartY = -210;
+            that.characterEndY = 0;
+            // Character 2
+            that.character2StartY = -150;
+            that.character2EndY = 0;
+            // Rays
+            that.raysStartY = -180;
+            that.raysEndY = 0;
+            // Set
+            that.set();
+        }else {
+            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', '0px');
+            cm.setCSSTranslate(that.nodes['line']['character'], '0px', '0px');
+            cm.setCSSTranslate(that.nodes['line']['character2'], '0px', '0px');
+            cm.setCSSTranslate(that.nodes['line']['rays'], '0px', '0px');
+        }
+        return that;
+    };
+
+    classProto.set = function(){
+        var that = this,
+            scrollTop = cm.getBodyScrollTop(),
+            scrollOffset = scrollTop,
+            ipadTrans = that.ipadStartY - (scrollOffset * that.params['ipadSpeed']),
+            characterTrans = that.characterStartY + (scrollOffset * that.params['characterSpeed']),
+            character2Trans = that.character2StartY + (scrollOffset * that.params['character2Speed']),
+            raysTransTrans = that.raysStartY + (scrollOffset * that.params['raysSpeed']);
+        // Ipad
+        if(ipadTrans >= that.ipadStartY){
+            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', (that.ipadStartY + 'px'));
+        }else if(ipadTrans >= that.ipadEndY){
+            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', (ipadTrans + 'px'));
+        }else{
+            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', (that.ipadEndY + 'px'));
+        }
+        // Character
+        if(characterTrans <= that.characterStartY){
+            cm.setCSSTranslate(that.nodes['line']['character'], (that.characterStartY + 'px'), '0px');
+        }else if(characterTrans <= that.characterEndY){
+            cm.setCSSTranslate(that.nodes['line']['character'], (characterTrans + 'px'), '0px');
+        }else{
+            cm.setCSSTranslate(that.nodes['line']['character'], (that.characterEndY + 'px'), '0px');
+        }
+        // Character 2
+        if(character2Trans <= that.character2StartY){
+            cm.setCSSTranslate(that.nodes['line']['character2'], (that.character2StartY + 'px'), '0px');
+        }else if(character2Trans <= that.character2EndY){
+            cm.setCSSTranslate(that.nodes['line']['character2'], (character2Trans + 'px'), '0px');
+        }else{
+            cm.setCSSTranslate(that.nodes['line']['character2'], (that.character2EndY + 'px'), '0px');
+        }
+        // Rays
+        if(raysTransTrans <= that.raysStartY){
+            cm.setCSSTranslate(that.nodes['line']['rays'], (that.raysStartY + 'px'), '0px');
+        }else if(raysTransTrans <= that.raysEndY){
+            cm.setCSSTranslate(that.nodes['line']['rays'], (raysTransTrans + 'px'), '0px');
+        }else{
+            cm.setCSSTranslate(that.nodes['line']['rays'], (that.raysEndY + 'px'), '0px');
+        }
+    };
+
+    classProto.enableEditing = function(){
+        var that = this;
+        if(!cm.isBoolean(that.isEditing) || !that.isEditing){
+            that.isEditing = true;
+            that.redraw();
+        }
+        return that;
+    };
+
+    classProto.disableEditing = function(){
+        var that = this;
+        if(!cm.isBoolean(that.isEditing) || that.isEditing){
+            that.isEditing = false;
+            that.redraw();
+        }
+        return that;
+    };
+});
+window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":14,"CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.16.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"250ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Open Sans, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"'Open Sans', arial, helvetica, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmInput-Padding":"6px","CmInput-DefaultBackground":"#ffffff","CmInput-HoverBackground":"#ffffff","CmInput-ActiveBackground":"#ffffff","CmInput-DisabledBackground":"#fafafa","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"28px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"150px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"250ms","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"28px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"24px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"28px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":23,"AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Default-Family":"Open Sans, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Open Sans, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Open Sans, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Open Sans, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Open Sans, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Open Sans, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Open Sans, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Open Sans, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#000000","AppTopMenu-Color":"#ffffff","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#000000","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"28px","AppPanel-Dialog-ButtonsHeight":"52px","AppPanel-Box-Indent":["24px","12px"],"AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"28px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"28px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"28px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"28px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"28px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
 
 window.Collector = new Com.Collector({
         'autoInit' : true
