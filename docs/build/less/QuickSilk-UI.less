@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.18.1 (2016-06-03 19:41) ************ */
+/*! ************ MagpieUI v3.18.5 (2016-06-13 18:28) ************ */
 @charset "UTF-8";
 
 /*!
@@ -4404,6 +4404,10 @@ span.CodeMirror-selectedtext { background: none; }
 @ComFileDropzone-Height: 128px;
 @ComFileDropzone-Duration: @CmUI-Transition-Duration;
 
+// /* ******* MULTIPLE FILE INPUT ******* */
+
+@CmMultipleFileInput-Count: @CmForm-FilesList-Count;
+
 // /* ******* DIALOG ******* */
 
 @ComDialog-Indent: @CmIndent-Medium;
@@ -4443,6 +4447,8 @@ span.CodeMirror-selectedtext { background: none; }
 @ComTabset-Tabs-HoverBackground: @CmColor-Secondary-LightHover;
 @ComTabset-Tabs-ActiveBackground: @CmColor-Background;
 @ComTabset-TabsTitle-Background: @CmColor-Secondary-LightHighlight;
+@ComTabset-Tabs-ImageSize: @CmSize-Medium;
+@ComTabset-Tabs-TitleIndent: @CmIndent-XXSmall;
 
 // /* ******* PAGINATION ******* */
 
@@ -5639,7 +5645,7 @@ span.CodeMirror-selectedtext { background: none; }
     // /* *** LARGE *** */
 
     &.large {
-        .for(message page page-featured google linkedin twitter facebook favorite); .-each(@name) {
+        .for(message message-draft message-pending page page-draft page-pending page-featured google linkedin twitter facebook favorite); .-each(@name) {
             &.@{name} {
                 background-image: url("@{CmPath-Images}/icons/large/@{name}.png");
             }
@@ -6459,6 +6465,14 @@ select {
         border: none;
         color: @CmColor-Primary-DarkDefault;
         cursor: default;
+    }
+
+    // /* *** SIZES *** */
+
+    &.button--xlarge {
+        @padding: max(ceil((@CmSize-XLarge - @CmFont-Base-LineHeight) / 2), 0px);
+        min-height: @CmSize-XLarge;
+        padding: @padding @CmIndent-Large;
     }
 
     // /* *** ICONS *** */
@@ -11288,13 +11302,44 @@ button {
             .icon.large.message;
         }
 
-        &.default-page {
+        &.default-category {
+            .cm__size__large;
+            .icon.large.message;
+        }
+
+        &.default-category-draft {
+            .cm__size__large;
+            .icon.large.message-draft;
+        }
+
+        &.default-category-pending {
+            .cm__size__large;
+            .icon.large.message-pending;
+        }
+
+        &.default-page,
+        &.default-topic {
             .cm__size__large;
             .icon.large.page;
             margin: 3px 0 0 0;
         }
 
-        &.default-featured {
+        &.default-page-draft,
+        &.default-topic-draft {
+            .cm__size__large;
+            .icon.large.page-draft;
+            margin: 3px 0 0 0;
+        }
+
+        &.default-page-pending,
+        &.default-topic-pending {
+            .cm__size__large;
+            .icon.large.page-pending;
+            margin: 3px 0 0 0;
+        }
+
+        &.default-featured,
+        &.default-topic-featured {
             .cm__size__large;
             .icon.large.page-featured;
             margin: 3px 0 0 0;
@@ -13353,17 +13398,54 @@ button {
 
 .com__file-manager {
     > .inner {
-        .marginfix;
     }
 }
 
-.com__file-manager__content {
-    .cm__box-reverse;
+.com__file-manager__holder {
+    .cm__box;
+
+    &.is-hidden {
+        display: none;
+    }
 }
 
 .com__file-manager__stats-list {
     > ul {
         .cm__list-clear;
+    }
+}
+/* ******* COMPONENTS: FILE UPLOADER ******* */
+
+.com__file-uploader__dropzone {
+    position: relative;
+}
+
+.com__file-uploader__title {
+    .cm__font--ui-h4;
+    text-align: center;
+}
+
+.com__file-uploader__files {
+    margin-top: @CmIndent-Medium;
+
+    &:first-child {
+        margin-top: 0;
+    }
+
+    &.is-hidden {
+        display: none;
+    }
+}
+
+.com__file-uploader__local {
+    .com__file-uploader__title,
+    .com__file-uploader__holder,
+    .com__file-uploader__dropzone {
+        margin-top: @CmIndent-XSmall;
+
+        &:first-child {
+            margin-top: 0;
+        }
     }
 }
 /* ******* COMPONENTS: FORM ******* */
@@ -14207,10 +14289,24 @@ button {
 /* ******* COMPONENTS: MULTIPLE FILE INPUT ******* */
 
 .com__multiple-file-input__content {
-    margin-top: @CmForm-FieldInnerIndent;
-
     &.is-hidden {
         display: none;
+    }
+}
+
+.com__multiple-file-input__content {
+    margin-top: @CmForm-FieldInnerIndent;
+}
+
+.com__multiple-file-input {
+    .com__multiple-input__items {
+        .cm__scroll-y-a;
+        max-height: (@CmForm-FilesList-Count * (@CmForm-FieldInnerIndent + @CmForm-FieldHeight)) - @CmForm-FieldInnerIndent;
+        margin-bottom: 0;
+
+        &.is-hidden + .com__multiple-file-input__content {
+            margin-top: 0;
+        }
     }
 }
 /* ******* COMPONENTS: MULTIPLE INPUT ******* */
@@ -14230,6 +14326,14 @@ button {
 
     &.is-hidden {
         opacity: 0;
+    }
+}
+
+.com__multiple-input__items {
+    margin-bottom: @CmForm-FieldInnerIndent;
+
+    &.is-hidden {
+        display: none;
     }
 }
 
@@ -15355,14 +15459,38 @@ button {
             .mx__transition(all, @ComTabset-Duration);
 
             a {
+                .display-flex;
                 .cm__font;
-                .cm__text-overflow;
-                display: block;
                 padding: 0 @ComTabset-Tabs-IndentInner;
                 line-height: @ComTabset-Tabs-Height;
                 font-size: @ComTabset-Tabs-FontSize;
                 text-decoration: none;
                 .mx__only__color(@ComTabset-Tabs-DefaultBackground, @CmFont-Base-Color, @CmFont-Base-ColorOpposite);
+                .mx__align-items(center);
+                .mx__justify-content(flex-start);
+                .mx__flex-flow(row nowrap);
+
+
+                .image {
+                    position: relative;
+                    .mx__flex(0 0 auto);
+
+                    img {
+                        .cm__image-centered;
+                    }
+                }
+
+                .title {
+                    .cm__text-nowrap;
+
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
             }
 
             &:hover {
@@ -15383,6 +15511,9 @@ button {
             }
         }
     }
+
+    .com__tabset__tabs__image-size(@ComTabset-Tabs-ImageSize);
+    .com__tabset__tabs__title-indent(@ComTabset-Tabs-TitleIndent);
 }
 
 /* *** TABS CONTENT *** */
@@ -15608,8 +15739,13 @@ button {
 .com__tabset__head-tabs--flexible () {
     ul {
         li {
-            .mx__flex(1 1);
+            max-width: 100%;
             text-align: center;
+            .mx__flex(1 1);
+
+            a {
+                .mx__justify-content(center);
+            }
         }
     }
 }
@@ -15669,6 +15805,45 @@ button {
 
             &.active {
                 border-right-color: @ComTabset-BorderOverlap;
+            }
+        }
+    }
+}
+
+.com__tabset__tabs__image-size (@size: @ComTabset-Tabs-ImageSize) {
+    ul {
+        li {
+            a {
+                .image {
+                    width: @size;
+                    height: @size;
+                }
+            }
+        }
+    }
+
+    .pt__image {
+        width: @size;
+        height: @size;
+    }
+}
+
+.com__tabset__tabs__title-indent (@indent: @ComTabset-Tabs-TitleIndent) {
+    ul {
+        li {
+            a {
+                .title {
+                    margin-left: @indent;
+                    margin-right: @indent;
+
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
             }
         }
     }
@@ -16213,7 +16388,7 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.9.0 (2016-06-03 19:41) ************ */
+/*! ************ QuickSilk-Application v3.9.0 (2016-06-13 18:28) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
