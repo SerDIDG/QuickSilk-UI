@@ -2,13 +2,15 @@
 
 include_once 'helper.php';
 
-$html = get_include_contents('ajax.panel.view.phtml');
+$contentView = get_include_contents('ajax.panel.content.view.phtml');
+$previewView = get_include_contents('ajax.panel.preview.view.phtml');
 
 $response = json_encode(array(
 	'data' => array(
 		'success' => isset($_POST) && isset($_POST['status']) && $_POST['status'] == 'true' ? true : false,
 		'title' => 'Menu Constructor',
-		'content' => $html
+		'content' => $contentView,
+		'preview' => $previewView
 	)
 ));
 

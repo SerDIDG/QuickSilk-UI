@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.18.5 (2016-06-13 18:28) ************ */
+/*! ************ MagpieUI v3.18.8 (2016-06-23 19:58) ************ */
 /*!
 Animate.css - http://daneden.me/animate
 Licensed under the MIT license - http://opensource.org/licenses/MIT
@@ -2908,7 +2908,7 @@ Copyright (c) 2015 Daniel Eden
 }
 .cm-fat-cursor .CodeMirror-cursor {
   width: auto;
-  border: 0;
+  border: 0 !important;
   background: #7e7;
 }
 .cm-fat-cursor div.CodeMirror-cursors {
@@ -3071,7 +3071,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   border-right: 30px solid transparent;
 }
 /* The fake, visible scrollbars. Used to force redraw during scrolling
-   before actuall scrolling happens, thus preventing shaking and
+   before actual scrolling happens, thus preventing shaking and
    flickering artifacts. */
 .CodeMirror-vscrollbar,
 .CodeMirror-hscrollbar,
@@ -3105,12 +3105,14 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   position: absolute;
   left: 0;
   top: 0;
+  min-height: 100%;
   z-index: 3;
 }
 .CodeMirror-gutter {
   white-space: normal;
   height: 100%;
   display: inline-block;
+  vertical-align: top;
   margin-bottom: -30px;
   /* Hack to make IE7 behave */
   *zoom: 1;
@@ -3161,6 +3163,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   position: relative;
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-variant-ligatures: none;
+  font-variant-ligatures: none;
 }
 .CodeMirror-wrap pre {
   word-wrap: break-word;
@@ -4119,6 +4123,9 @@ span.CodeMirror-selectedtext {
 .icon.small.help {
   background-image: url("../img/MagpieUI/icons/small/help.png");
 }
+.icon.small.info {
+  background-image: url("../img/MagpieUI/icons/small/info.png");
+}
 .icon.small.remove {
   background-image: url("../img/MagpieUI/icons/small/remove.png");
 }
@@ -4906,7 +4913,8 @@ select[multiple] {
 }
 input,
 select,
-textarea {
+textarea,
+button {
   font: 400 13px/18px Open Sans, sans-serif;
   color: #666666;
   margin: 0;
@@ -4914,25 +4922,29 @@ textarea {
 }
 input::-webkit-input-placeholder,
 select::-webkit-input-placeholder,
-textarea::-webkit-input-placeholder {
+textarea::-webkit-input-placeholder,
+button::-webkit-input-placeholder {
   opacity: 1;
   color: #b7b7b7;
 }
 input:-moz-placeholder,
 select:-moz-placeholder,
-textarea:-moz-placeholder {
+textarea:-moz-placeholder,
+button:-moz-placeholder {
   opacity: 1;
   color: #b7b7b7;
 }
 input::-moz-placeholder,
 select::-moz-placeholder,
-textarea::-moz-placeholder {
+textarea::-moz-placeholder,
+button::-moz-placeholder {
   opacity: 1;
   color: #b7b7b7;
 }
 input:-ms-input-placeholder,
 select:-ms-input-placeholder,
-textarea:-ms-input-placeholder {
+textarea:-ms-input-placeholder,
+button:-ms-input-placeholder {
   opacity: 1;
   color: #b7b7b7;
 }
@@ -12219,12 +12231,17 @@ button.is-hidden {
   width: 100%;
   height: 100%;
   display: none;
+  visibility: hidden;
   position: fixed;
-  top: 0;
-  left: 0;
   z-index: 1000;
   opacity: 0;
   text-align: center;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
 }
 .com__dialog .cm__inherit,
 .com__dialog .link,
@@ -12287,6 +12304,11 @@ button.is-hidden {
   display: inline-block;
   text-align: left;
   vertical-align: middle;
+  -webkit-transform: scale(0.9);
+  -ms-transform: scale(0.9);
+  transform: scale(0.9);
+  -webkit-transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
 }
 .com__dialog > .window > .icon {
   position: absolute;
@@ -12328,6 +12350,15 @@ button.is-hidden {
 }
 .com__dialog.has-close-background > .bg {
   cursor: pointer;
+}
+.com__dialog.is-open {
+  visibility: visible;
+  opacity: 1;
+}
+.com__dialog.is-open > .window {
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
 }
 .com__dialog__inner {
   overflow: hidden;
@@ -12684,25 +12715,44 @@ button.is-hidden {
   opacity: 0;
 }
 /* ******* COMPONENTS: FILE MANAGER ******* */
-.com__file-manager__holder {
-  margin-bottom: 24px;
+.com__file-manager__content {
+  margin-top: 24px;
 }
-.com__file-manager__holder.bottom,
-.com__file-manager__holder.is-last,
-.com__file-manager__holder:last-child {
-  margin-bottom: 0;
+.com__file-manager__content:first-child {
+  margin-top: 0;
+}
+.com__file-manager__content.is-hidden {
+  display: none;
 }
 .com__file-manager__holder.is-hidden {
   display: none;
 }
-.com__file-manager__stats-list > ul {
+.com__file-manager__holder.is-hidden + .com__file-manager__content {
+  margin-top: 0;
+}
+/* ******* COMPONENTS: FILE STATISTICS ******* */
+.com__file-stats__list > ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.com__file-manager__stats-list > ul > li {
+.com__file-stats__list > ul > li {
   margin: 0;
   padding: 0;
+}
+.com__file-stats__list.is-inline > ul {
+  display: flex;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
+  -webkit-align-items: center;
+  align-items: center;
+}
+.com__file-stats__list.is-inline > ul > li {
+  margin-right: 12px;
+}
+.com__file-stats__list.is-inline > ul > li:last-child {
+  margin-right: 0;
 }
 /* ******* COMPONENTS: FILE UPLOADER ******* */
 .com__file-uploader__dropzone {
@@ -16212,7 +16262,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.9.0 (2016-06-13 18:28) ************ */
+/*! ************ QuickSilk-Application v3.9.0 (2016-06-23 19:58) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?23');
@@ -18349,6 +18399,7 @@ html:not(.is-editing).is-editor .app__module__controls {
     flex: 0 0 auto;
   }
 }
+/* ******* COMPONENTS: MENU CONSTRUCTOR ******* */
 /* ******* COMPONENTS: MODULE ******* */
 .app__page:after,
 .app__module:after {
@@ -18372,8 +18423,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   visibility: hidden;
   position: fixed;
   z-index: 210;
-  -webkit-transition: all 500ms ease-in-out;
-  transition: all 500ms ease-in-out;
+  -webkit-transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
 }
 .app__panel.is-open {
   visibility: visible;
@@ -18384,13 +18435,18 @@ html:not(.is-editing).is-editor .app__module__controls {
   bottom: 0;
   left: 0;
 }
-.app__panel--sidebar .app__panel__holder {
+.app__panel--sidebar .app__panel__dialog-holder {
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15);
-}
-.app__panel--sidebar .app__panel__dialog {
   -webkit-transform: translateX(-100%);
   -ms-transform: translateX(-100%);
   transform: translateX(-100%);
+  -webkit-transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__panel--sidebar .app__panel__dialog {
+  -webkit-transform: translateX(0);
+  -ms-transform: translateX(0);
+  transform: translateX(0);
   -webkit-transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
   transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
 }
@@ -18399,12 +18455,22 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
   transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
 }
-.app__panel--sidebar.is-open .app__panel__dialog {
+.app__panel--sidebar .app__panel__preview-holder {
+  visibility: hidden;
+  opacity: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.app__panel--sidebar.is-open .app__panel__dialog-holder {
   -webkit-transform: translateX(0);
   -ms-transform: translateX(0);
   transform: translateX(0);
 }
 .app__panel--sidebar.is-open .app__panel__dialog > .inner {
+  opacity: 1;
+}
+.app__panel--sidebar.is-open .app__panel__preview-holder.is-show {
+  visibility: visible;
   opacity: 1;
 }
 .app__panel--sidebar.is-hide .app__panel__dialog {
@@ -18419,6 +18485,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   right: auto;
   bottom: 0;
   left: 0;
+}
+.app__panel--story .app__panel__dialog-holder {
+  overflow: hidden;
 }
 .app__panel--story .app__panel__dialog {
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.15);
@@ -18440,10 +18509,42 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: all 500ms ease-in-out;
   transition: all 500ms ease-in-out;
 }
+.app__panel--full {
+  visibility: hidden;
+  opacity: 0;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transform: scale(0.9);
+  -ms-transform: scale(0.9);
+  transform: scale(0.9);
+}
+.app__panel--full .app__panel__dialog {
+  -webkit-transform: translateX(0);
+  -ms-transform: translateX(0);
+  transform: translateX(0);
+  -webkit-transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__panel--full.is-open {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+}
+.app__panel--full.is-hide .app__panel__dialog {
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+  -webkit-transition: all 500ms ease-in-out;
+  transition: all 500ms ease-in-out;
+}
 /* *** DIALOG *** */
-.app__panel__holder {
+.app__panel__dialog-holder {
   width: 360px;
-  overflow: hidden;
   position: absolute;
   top: 0;
   right: auto;
@@ -18577,6 +18678,115 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__panel__dialog > .inner > .buttons.is-immediately > .inner {
   -webkit-transition: none !important;
   transition: none !important;
+}
+/* *** PREVIEW *** */
+.app__panel__preview-holder {
+  overflow: hidden;
+  position: absolute;
+  border-left: 1px solid #cccccc;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 360px;
+}
+.app__panel__preview {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app__panel__preview > .inner {
+  position: absolute;
+  background-color: #ffffff;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app__panel__preview > .inner > .title {
+  height: 48px;
+  position: absolute;
+  z-index: 3;
+  background-color: #e8e8e8;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.app__panel__preview > .inner > .title > .label {
+  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  color: #666666;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 48px;
+}
+.app__panel__preview > .inner > .title > .label:first-child {
+  margin-left: 12px;
+}
+.app__panel__preview > .inner > .title > .label:last-child {
+  margin-right: 12px;
+}
+.app__panel__preview > .inner > .title > .label:not(:first-child) {
+  margin-left: 48px;
+}
+.app__panel__preview > .inner > .title > .label:not(:last-child) {
+  margin-right: 48px;
+}
+.app__panel__preview > .inner > .title > .icon {
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
+  position: absolute;
+  cursor: pointer;
+  line-height: 24px;
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+}
+.app__panel__preview > .inner > .title > .icon:hover {
+  opacity: 0.7;
+  -webkit-transition: opacity 100ms ease-in-out;
+  transition: opacity 100ms ease-in-out;
+}
+.app__panel__preview > .inner > .title > .icon:first-child {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 0;
+}
+.app__panel__preview > .inner > .title > .icon:last-child {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+}
+.app__panel__preview > .inner > .content {
+  position: absolute;
+  z-index: 1;
+  background-color: #ffffff;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app__panel__preview > .inner > .content > .inner {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: absolute;
+  padding: 48px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app__panel__preview > .inner > .content:not(:first-child) {
+  top: 48px;
 }
 /* *** COMPONENTS *** */
 .app__panel__togglebox {
@@ -20081,6 +20291,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin: 0;
   padding: 0;
   list-style: none;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .mod__menu .menu__menu ul > li,
 .mod__menu .menu__sub ul > li {
@@ -20238,6 +20450,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
+.mod__menu.is-horizontal .menu__sub a {
+  white-space: nowrap;
+}
 .mod__menu.pull-left .menu__menu ul,
 .mod__menu.pull-left .menu__menu a {
   text-align: left;
@@ -20325,6 +20540,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   opacity: 1;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
+}
+.mod__menu__sub--dropdown a {
+  white-space: nowrap;
 }
 .mod__menu__sub--dropdown-active {
   visibility: visible;
@@ -21662,13 +21880,17 @@ html:not(.is-editing).is-editor .app__module__controls {
 .mod__menu--default .menu__menu > ul {
   padding: 0;
   background: transparent none top left no-repeat;
-  border: 0 solid transparent;
+  background-size: auto;
+  border: solid transparent;
+  border-width: 0;
   border-radius: 0;
 }
 .mod__menu--default .menu__menu > ul > li > a {
   padding: 2px 4px;
   background: transparent none top left no-repeat;
-  border: 0 solid transparent;
+  background-size: auto;
+  border: solid transparent;
+  border-width: 0;
   border-radius: 0;
   font: 400 inherit/inherit inherit;
   font-style: normal;
@@ -21678,7 +21900,9 @@ html:not(.is-editing).is-editor .app__module__controls {
 .mod__menu--default .menu__menu > ul > li > a:hover,
 .mod__menu--default .menu__menu > ul > li > a.hover {
   background: transparent none top left no-repeat;
-  border: 0 solid transparent;
+  background-size: auto;
+  border: solid transparent;
+  border-width: 0;
   border-radius: 0;
   font: 400 inherit/inherit inherit;
   font-style: normal;
@@ -21688,7 +21912,9 @@ html:not(.is-editing).is-editor .app__module__controls {
 .mod__menu--default .menu__menu > ul > li > a:active,
 .mod__menu--default .menu__menu > ul > li > a.active {
   background: transparent none top left no-repeat;
-  border: 0 solid transparent;
+  background-size: auto;
+  border: solid transparent;
+  border-width: 0;
   border-radius: 0;
   font: 400 inherit/inherit inherit;
   font-style: normal;
@@ -21698,7 +21924,9 @@ html:not(.is-editing).is-editor .app__module__controls {
 .mod__menu--default .menu__sub > ul {
   padding: 4px;
   background: #ffffff none top left no-repeat;
-  border: 1px solid #cccccc;
+  background-size: auto;
+  border: solid #cccccc;
+  border-width: 1px;
   border-radius: 3px;
 }
 .mod__menu--default .menu__sub > ul > li {
@@ -21710,7 +21938,9 @@ html:not(.is-editing).is-editor .app__module__controls {
 .mod__menu--default .menu__sub > ul > li > a {
   padding: 2px 4px;
   background: transparent none top left no-repeat;
-  border: 0 solid transparent;
+  background-size: auto;
+  border: solid transparent;
+  border-width: 0;
   border-radius: 0;
   font: 400 inherit/inherit inherit;
   font-style: normal;
@@ -21720,7 +21950,9 @@ html:not(.is-editing).is-editor .app__module__controls {
 .mod__menu--default .menu__sub > ul > li > a:hover,
 .mod__menu--default .menu__sub > ul > li > a.hover {
   background: transparent none top left no-repeat;
-  border: 0 solid transparent;
+  background-size: auto;
+  border: solid transparent;
+  border-width: 0;
   border-radius: 0;
   font: 400 inherit/inherit inherit;
   font-style: normal;
@@ -21730,7 +21962,9 @@ html:not(.is-editing).is-editor .app__module__controls {
 .mod__menu--default .menu__sub > ul > li > a:active,
 .mod__menu--default .menu__sub > ul > li > a.active {
   background: transparent none top left no-repeat;
-  border: 0 solid transparent;
+  background-size: auto;
+  border: solid transparent;
+  border-width: 0;
   border-radius: 0;
   font: 400 inherit/inherit inherit;
   font-style: normal;
@@ -21739,7 +21973,8 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__select {
   background: transparent;
-  border: 1px solid #cccccc;
+  border: solid #cccccc;
+  border-width: 1px;
   border-radius: 3px;
 }
 .mod__menu--default .menu__select .select__button {

@@ -1,16 +1,51 @@
 <?php
 
 include_once 'helper.php';
-$html = get_include_contents('ajax.panel.item.view.phtml');
+//
+$variables = array(
+    'name' => 'primary_items',
+    'state' => 'default'
+);
+$primary_default = get_include_contents('ajax.panel.item.view.phtml', $variables);
+//
+$variables = array(
+    'name' => 'primary_items',
+    'state' => 'hover'
+);
+$primary_hover = get_include_contents('ajax.panel.item.view.phtml', $variables);
+//
+$variables = array(
+    'name' => 'primary_items',
+    'state' => 'active'
+);
+$primary_active = get_include_contents('ajax.panel.item.view.phtml', $variables);
+//
+$variables = array(
+    'name' => 'secondary_items',
+    'state' => 'default'
+);
+$secondary_default = get_include_contents('ajax.panel.item.view.phtml', $variables);
+//
+$variables = array(
+    'name' => 'secondary_items',
+    'state' => 'hover'
+);
+$secondary_hover = get_include_contents('ajax.panel.item.view.phtml', $variables);
+//
+$variables = array(
+    'name' => 'secondary_items',
+    'state' => 'active'
+);
+$secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variables);
 
 ?>
 
-<div class="app__menu-designer" data-element="App.MenuDesigner">
+<div class="app__menu-constructor" data-element="App.MenuConstructor" data-node="AppMenuConstructor:{}:container">
     <div class="app__panel__box">
         <dl class="pt__field is-box">
             <dt>Name</dt>
             <dd>
-                <input type="text">
+                <input type="text" name="title">
             </dd>
         </dl>
     </div>
@@ -36,7 +71,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                                     <div class="button button-secondary" data-node="button">Default</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
-                                            <?=$html?>
+                                            <?=$primary_default?>
                                         </div>
                                     </div>
                                 </div>
@@ -44,7 +79,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                                     <div class="button button-middle" data-node="button">Hover</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
-                                            <?=$html?>
+                                            <?=$primary_hover?>
                                         </div>
                                     </div>
                                 </div>
@@ -52,7 +87,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                                     <div class="button button-primary" data-node="button">Active</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
-                                            <?=$html?>
+                                            <?=$primary_active?>
                                         </div>
                                     </div>
                                 </div>
@@ -66,7 +101,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Item Inner Padding</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[primary_items][inner-padding]">
                                 </dd>
                             </dl>
                         </div>
@@ -74,7 +109,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Indent Between Items</dt>
                                 <dd>
-                                    <input type="number" min="0" max="999" value="0">
+                                    <input type="number" min="0" max="999" value="0" data-element="Com.Input" name="params[primary_items][inner-between]">
                                 </dd>
                             </dl>
                         </div>
@@ -105,7 +140,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                                     <div class="button button-secondary" data-node="button">Default</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
-                                            <?=$html?>
+                                            <?=$secondary_default?>
                                         </div>
                                     </div>
                                 </div>
@@ -113,7 +148,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                                     <div class="button button-middle" data-node="button">Hover</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
-                                            <?=$html?>
+                                            <?=$secondary_hover?>
                                         </div>
                                     </div>
                                 </div>
@@ -121,7 +156,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                                     <div class="button button-primary" data-node="button">Active</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
-                                            <?=$html?>
+                                            <?=$secondary_active?>
                                         </div>
                                     </div>
                                 </div>
@@ -135,7 +170,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Item Inner Padding</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[secondary_items][inner-padding]">
                                 </dd>
                             </dl>
                         </div>
@@ -143,7 +178,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Indent Between Items</dt>
                                 <dd>
-                                    <input type="number" min="0" max="999" value="0">
+                                    <input type="number" min="0" max="999" value="0" data-element="Com.Input" name="params[secondary_items][inner-between]">
                                 </dd>
                             </dl>
                         </div>
@@ -152,7 +187,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
             </div>
         </dd>
     </dl>
-    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__primary-menu-container"}' data-node="ComToggleBox.container">
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-hide" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__primary-menu-container"}' data-node="ComToggleBox.container">
         <dt data-node="ComToggleBox.button">
             <span class="icon default"></span>
             <span class="title">Primary Menu Container</span>
@@ -162,28 +197,19 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                 <dl class="pt__field is-box">
                     <dt>Background Color</dt>
                     <dd>
-                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}'>
+                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}' name="params[primary_container][background-color]">
                     </dd>
                 </dl>
                 <dl class="pt__field is-box">
                     <dt>Background Image</dt>
                     <dd>
-                        <div class="pt__buttons pull-justify">
-                            <div class="inner">
-                                <div class="browse-button">
-                                    <input type="button" value="Browse">
-                                    <div class="inner">
-                                        <input type="file">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <input type="text" data-element="Com.FileInput" name="params[primary_container][background-image]">
                     </dd>
                 </dl>
                 <dl class="pt__field is-box">
                     <dt>Image Scaling</dt>
                     <dd>
-                        <select data-element="Com.Select">
+                        <select data-element="Com.Select" name="params[primary_container][background-scaling]">
                             <option value="auto">Original size</option>
                             <option value="contain">Contain</option>
                             <option value="cover">Cover</option>
@@ -194,18 +220,18 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                 <dl class="pt__field is-box">
                     <dt>Image Repeat</dt>
                     <dd>
-                        <select data-element="Com.Select">
-                            <option value="no_repeat">No repeat</option>
-                            <option value="verically">Repeat vertically</option>
-                            <option value="horizontally">Repeat horizontally</option>
-                            <option value="both">Repeat both horizontally and vertically</option>
+                        <select data-element="Com.Select" name="params[primary_container][background-repeat]">
+                            <option value="no-repeat">No repeat</option>
+                            <option value="repeat-y">Repeat vertically</option>
+                            <option value="repeat-x">Repeat horizontally</option>
+                            <option value="repeat">Repeat both horizontally and vertically</option>
                         </select>
                     </dd>
                 </dl>
                 <dl class="pt__field is-box">
                     <dt>Image Position</dt>
                     <dd>
-                        <select data-element="Com.Select">
+                        <select data-element="Com.Select" name="params[primary_container][background-position]">
                             <option value="left top">Top Left</option>
                             <option value="center top">Top Center</option>
                             <option value="right top">Top Right</option>
@@ -225,21 +251,21 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Size</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[primary_container][border-size]">
                                 </dd>
                             </dl>
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Style</dt>
                                 <dd>
-                                    <select data-element="Com.Select">
-                                        <option>Solid</option>
-                                        <option>Dotted</option>
-                                        <option>Dashed</option>
-                                        <option>Double</option>
-                                        <option>Groove</option>
-                                        <option>Ridge</option>
-                                        <option>Inset</option>
-                                        <option>Outset</option>
+                                    <select data-element="Com.Select" name="params[primary_container][border-style]">
+                                        <option value="solid">Solid</option>
+                                        <option value="dotted">Dotted</option>
+                                        <option value="dashed">Dashed</option>
+                                        <option value="double">Double</option>
+                                        <option value="groove">Groove</option>
+                                        <option value="ridge">Ridge</option>
+                                        <option value="inset">Inset</option>
+                                        <option value="outset">Outset</option>
                                     </select>
                                 </dd>
                             </dl>
@@ -248,13 +274,13 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Radius</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxRadiusTools">
+                                    <input type="text" value="0" data-element="Com.BoxRadiusTools" name="params[primary_container][border-radius]">
                                 </dd>
                             </dl>
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Color</dt>
                                 <dd>
-                                    <input type="text" data-element="Com.ColorPicker">
+                                    <input type="text" data-element="Com.ColorPicker" name="params[primary_container][border-color]">
                                 </dd>
                             </dl>
                         </div>
@@ -267,7 +293,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Inner Padding</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[primary_container][inner-padding]">
                                 </dd>
                             </dl>
                         </div>
@@ -278,7 +304,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
             </div>
         </dd>
     </dl>
-    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__secondary-menu-container"}' data-node="ComToggleBox.container">
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-hide" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__secondary-menu-container"}' data-node="ComToggleBox.container">
         <dt data-node="ComToggleBox.button">
             <span class="icon default"></span>
             <span class="title">Secondary Menu Container</span>
@@ -288,28 +314,19 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                 <dl class="pt__field is-box">
                     <dt>Background Color</dt>
                     <dd>
-                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}'>
+                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}' name="params[secondary_container][background-color]">
                     </dd>
                 </dl>
                 <dl class="pt__field is-box">
                     <dt>Background Image</dt>
                     <dd>
-                        <div class="pt__buttons pull-justify">
-                            <div class="inner">
-                                <div class="browse-button">
-                                    <input type="button" value="Browse">
-                                    <div class="inner">
-                                        <input type="file">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <input type="text" data-element="Com.FileInput" name="params[secondary_container][background-image]">
                     </dd>
                 </dl>
                 <dl class="pt__field is-box">
                     <dt>Image Scaling</dt>
                     <dd>
-                        <select data-element="Com.Select">
+                        <select data-element="Com.Select" name="params[secondary_container][background-scaling]">
                             <option value="auto">Original size</option>
                             <option value="contain">Contain</option>
                             <option value="cover">Cover</option>
@@ -320,18 +337,18 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                 <dl class="pt__field is-box">
                     <dt>Image Repeat</dt>
                     <dd>
-                        <select data-element="Com.Select">
-                            <option value="no_repeat">No repeat</option>
-                            <option value="verically">Repeat vertically</option>
-                            <option value="horizontally">Repeat horizontally</option>
-                            <option value="both">Repeat both horizontally and vertically</option>
+                        <select data-element="Com.Select" name="params[secondary_container][background-repeat]">
+                            <option value="no-repeat">No repeat</option>
+                            <option value="repeat-y">Repeat vertically</option>
+                            <option value="repeat-x">Repeat horizontally</option>
+                            <option value="repeat">Repeat both horizontally and vertically</option>
                         </select>
                     </dd>
                 </dl>
                 <dl class="pt__field is-box">
                     <dt>Image Position</dt>
                     <dd>
-                        <select data-element="Com.Select">
+                        <select data-element="Com.Select" name="params[secondary_container][background-position]">
                             <option value="left top">Top Left</option>
                             <option value="center top">Top Center</option>
                             <option value="right top">Top Right</option>
@@ -351,21 +368,21 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Size</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[secondary_container][border-size]">
                                 </dd>
                             </dl>
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Style</dt>
                                 <dd>
-                                    <select data-element="Com.Select">
-                                        <option>Solid</option>
-                                        <option>Dotted</option>
-                                        <option>Dashed</option>
-                                        <option>Double</option>
-                                        <option>Groove</option>
-                                        <option>Ridge</option>
-                                        <option>Inset</option>
-                                        <option>Outset</option>
+                                    <select data-element="Com.Select" name="params[secondary_container][border-style]">
+                                        <option value="solid">Solid</option>
+                                        <option value="dotted">Dotted</option>
+                                        <option value="dashed">Dashed</option>
+                                        <option value="double">Double</option>
+                                        <option value="groove">Groove</option>
+                                        <option value="ridge">Ridge</option>
+                                        <option value="inset">Inset</option>
+                                        <option value="outset">Outset</option>
                                     </select>
                                 </dd>
                             </dl>
@@ -374,13 +391,13 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Radius</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxRadiusTools">
+                                    <input type="text" value="0" data-element="Com.BoxRadiusTools" name="params[secondary_container][border-radius]">
                                 </dd>
                             </dl>
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Color</dt>
                                 <dd>
-                                    <input type="text" data-element="Com.ColorPicker">
+                                    <input type="text" data-element="Com.ColorPicker" name="params[secondary_container][border-color]">
                                 </dd>
                             </dl>
                         </div>
@@ -393,7 +410,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Inner Padding</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[secondary_container][inner-padding]">
                                 </dd>
                             </dl>
                         </div>
@@ -404,7 +421,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
             </div>
         </dd>
     </dl>
-    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-show" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__mobile-view"}' data-node="ComToggleBox.container">
+    <dl class="com__togglebox app__panel__togglebox is-ui has-title-bg is-hide" data-element="Com.ToggleBox" data-config='{"remember" : true, "name" : "form__menu-designer__mobile-view"}' data-node="ComToggleBox.container">
         <dt data-node="ComToggleBox.button">
             <span class="icon default"></span>
             <span class="title">Mobile View</span>
@@ -420,8 +437,8 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                         </span>
                     </dt>
                     <dd>
-                        <div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"default":{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
-                            <input data-node="input" type="hidden" value="">
+                        <div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"name" : "params[mobile][font]", "default":{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
+                            <input data-node="input" type="hidden" value="" name="params[mobile][font]">
                             <div class="item-preview" data-node="preview">The quick brown fox jumps over the lazy dog</div>
                         </div>
                     </dd>
@@ -430,22 +447,13 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                 <dl class="pt__field is-box">
                     <dt>Background Color</dt>
                     <dd>
-                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}'>
+                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}' name="params[mobile][background-color]">
                     </dd>
                 </dl>
                 <dl class="pt__field is-box">
                     <dt>Menu Icon</dt>
                     <dd>
-                        <div class="pt__buttons pull-justify">
-                            <div class="inner">
-                                <div class="browse-button">
-                                    <input type="button" value="Browse">
-                                    <div class="inner">
-                                        <input type="file">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <input type="text" data-element="Com.FileInput" name="params[mobile][menu-icon]">
                     </dd>
                 </dl>
                 <hr>
@@ -455,21 +463,21 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Size</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[mobile][border-size]">
                                 </dd>
                             </dl>
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Style</dt>
                                 <dd>
-                                    <select data-element="Com.Select">
-                                        <option>Solid</option>
-                                        <option>Dotted</option>
-                                        <option>Dashed</option>
-                                        <option>Double</option>
-                                        <option>Groove</option>
-                                        <option>Ridge</option>
-                                        <option>Inset</option>
-                                        <option>Outset</option>
+                                    <select data-element="Com.Select" name="params[mobile][border-style]">
+                                        <option value="solid">Solid</option>
+                                        <option value="dotted">Dotted</option>
+                                        <option value="dashed">Dashed</option>
+                                        <option value="double">Double</option>
+                                        <option value="groove">Groove</option>
+                                        <option value="ridge">Ridge</option>
+                                        <option value="inset">Inset</option>
+                                        <option value="outset">Outset</option>
                                     </select>
                                 </dd>
                             </dl>
@@ -478,13 +486,13 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Radius</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxRadiusTools">
+                                    <input type="text" value="0" data-element="Com.BoxRadiusTools" name="params[mobile][border-radius]">
                                 </dd>
                             </dl>
                             <dl class="pt__field is-box align-center">
                                 <dt>Border Color</dt>
                                 <dd>
-                                    <input type="text" data-element="Com.ColorPicker">
+                                    <input type="text" data-element="Com.ColorPicker" name="params[mobile][border-color]">
                                 </dd>
                             </dl>
                         </div>
@@ -497,7 +505,7 @@ $html = get_include_contents('ajax.panel.item.view.phtml');
                             <dl class="pt__field is-box align-center">
                                 <dt>Inner Padding</dt>
                                 <dd>
-                                    <input type="text" value="0" data-element="Com.BoxTools">
+                                    <input type="text" value="0" data-element="Com.BoxTools" name="params[mobile][inner-padding]">
                                 </dd>
                             </dl>
                         </div>

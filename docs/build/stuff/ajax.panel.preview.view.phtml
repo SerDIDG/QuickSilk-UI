@@ -1,0 +1,68 @@
+<?php
+
+include_once 'helper.php';
+$html = file_get_contents('ajax.panel.preview.less');
+
+?>
+
+<div class="app__panel__preview" data-element="App.MenuConstructorPreview" data-node="AppMenuConstructorPreview:{}:container">
+    <div class="inner" data-node="inner">
+        <div class="title" data-node="title">
+            <div class="label" data-node="label">Preview</div>
+        </div>
+
+        <div class="content" data-node="content">
+            <div class="inner" data-node="contentInner">
+                <style type="text/css" rel="stylesheet/less" data-node="less"><?=$html?></style>
+                <style type="text/css" rel="stylesheet" data-node="css"></style>
+
+                <div class="app__module mod__menu is-adaptive is-horizontal pull-left mod__menu--preview" data-element="Module.Menu" data-node="ModuleMenu:{}:container">
+                    <div class="menu__menu" data-node="menu:{}:container">
+                        <ul>
+                            <li class="active" data-node="items:[]:container">
+                                <a>Home</a>
+                            </li>
+                            <li class="has-sub" data-node="items:[]:container">
+                                <a>About</a>
+                                <div class="menu__sub" data-node="sub:{}:container">
+                                    <ul>
+                                        <li data-node="items:[]:container">
+                                            <a>Small Business</a>
+                                        </li>
+                                        <li data-node="items:[]:container">
+                                            <a>Business</a>
+                                        </li>
+                                        <li data-node="items:[]:container">
+                                            <a>Government</a>
+                                        </li>
+                                        <li data-node="items:[]:container">
+                                            <a>Non-profit</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li data-node="items:[]:container">
+                                <a>Services</a>
+                            </li>
+                            <li data-node="items:[]:container">
+                                <a>Blog</a>
+                            </li>
+                            <li data-node="items:[]:container">
+                                <a>Contact</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="menu__select" data-node="select:{}:container">
+                        <div class="select__button" data-node="button"></div>
+                        <select class="select__select" data-node="select">
+                            <option value="http://google.com">About</option>
+                            <option>Services</option>
+                            <option>Blog</option>
+                            <option>Contact</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

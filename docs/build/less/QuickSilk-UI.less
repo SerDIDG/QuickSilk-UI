@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.18.5 (2016-06-13 18:28) ************ */
+/*! ************ MagpieUI v3.18.8 (2016-06-23 19:58) ************ */
 @charset "UTF-8";
 
 /*!
@@ -3326,7 +3326,7 @@ Copyright (c) 2015 Daniel Eden
 }
 .cm-fat-cursor .CodeMirror-cursor {
   width: auto;
-  border: 0;
+  border: 0 !important;
   background: #7e7;
 }
 .cm-fat-cursor div.CodeMirror-cursors {
@@ -3439,7 +3439,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 }
 
 /* The fake, visible scrollbars. Used to force redraw during scrolling
-   before actuall scrolling happens, thus preventing shaking and
+   before actual scrolling happens, thus preventing shaking and
    flickering artifacts. */
 .CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
   position: absolute;
@@ -3465,12 +3465,14 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 
 .CodeMirror-gutters {
   position: absolute; left: 0; top: 0;
+  min-height: 100%;
   z-index: 3;
 }
 .CodeMirror-gutter {
   white-space: normal;
   height: 100%;
   display: inline-block;
+  vertical-align: top;
   margin-bottom: -30px;
   /* Hack to make IE7 behave */
   *zoom:1;
@@ -3518,6 +3520,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   position: relative;
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-variant-ligatures: none;
+  font-variant-ligatures: none;
 }
 .CodeMirror-wrap pre {
   word-wrap: break-word;
@@ -4410,6 +4414,7 @@ span.CodeMirror-selectedtext { background: none; }
 
 // /* ******* DIALOG ******* */
 
+@ComDialog-Duration: @CmUI-Transition-Duration;
 @ComDialog-Indent: @CmIndent-Medium;
 @ComDialog-TitleIndent: @CmIndent-XSmall;
 @ComDialog-Overlay: @CmUI-Overlay-Dark;
@@ -5609,7 +5614,7 @@ span.CodeMirror-selectedtext { background: none; }
     // /* *** SMALL *** */
 
     &.small {
-        .for(tags add arrow-priority-down arrow-priority-up arrow-left arrow-right arrow-top arrow-bottom copy check edit help remove settings settings-white view search search-white arrow-white-left arrow-white-right arrow-white-top arrow-white-bottom drag-vertical transparent); .-each(@name) {
+        .for(tags add arrow-priority-down arrow-priority-up arrow-left arrow-right arrow-top arrow-bottom copy check edit help info remove settings settings-white view search search-white arrow-white-left arrow-white-right arrow-white-top arrow-white-bottom drag-vertical transparent); .-each(@name) {
             &.@{name} {
                 background-image: url("@{CmPath-Images}/icons/small/@{name}.png");
             }
@@ -6179,7 +6184,7 @@ tbody, thead, td, th, tr {
     }
 }
 
-input, select, textarea {
+input, select, textarea, button {
     .cm__font;
     margin: 0;
     outline: none;
@@ -12939,12 +12944,13 @@ button {
     width: 100%;
     height: 100%;
     display: none;
+    visibility: hidden;
     position: fixed;
-    top: 0;
-    left: 0;
     z-index: 1000;
     opacity: 0;
     text-align: center;
+    .mx__position(0, 0, 0, 0);
+    .mx__transition(all, @ComDialog-Duration, @CmUI-MotionAsymmetric);
 
     &:before {
         height: 100%;
@@ -12975,6 +12981,8 @@ button {
         display: inline-block;
         text-align: left;
         vertical-align: middle;
+        .mx__transform(scale(0.9));
+        .mx__transition(all, @ComDialog-Duration, @CmUI-MotionAsymmetric);
 
         > .icon {
             position: absolute;
@@ -13032,6 +13040,15 @@ button {
     &.has-close-background {
         > .bg {
             cursor: pointer;
+        }
+    }
+
+    &.is-open {
+        visibility: visible;
+        opacity: 1;
+
+        > .window {
+            .mx__transform(scale(1));
         }
     }
 }
@@ -13401,17 +13418,48 @@ button {
     }
 }
 
-.com__file-manager__holder {
-    .cm__box;
+.com__file-manager__content {
+    .cm__box-reverse;
 
     &.is-hidden {
         display: none;
     }
 }
 
-.com__file-manager__stats-list {
+.com__file-manager__holder {
+    > .inner {
+    }
+
+    &.is-hidden {
+        display: none;
+    }
+
+    &.is-hidden + .com__file-manager__content {
+        margin-top: 0;
+    }
+}
+/* ******* COMPONENTS: FILE STATISTICS ******* */
+
+
+.com__file-stats__list {
     > ul {
         .cm__list-clear;
+    }
+
+    &.is-inline {
+        > ul {
+            display: flex;
+            .mx__flex-flow(row wrap);
+            .mx__align-items(center);
+
+            > li {
+                margin-right: @CmIndent-XSmall;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
     }
 }
 /* ******* COMPONENTS: FILE UPLOADER ******* */
@@ -16388,7 +16436,7 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.9.0 (2016-06-13 18:28) ************ */
+/*! ************ QuickSilk-Application v3.9.0 (2016-06-23 19:58) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -16718,11 +16766,20 @@ button {
 
 @AppPanel-Dialog-Width: @AppUI-SidebarWidth;
 @AppPanel-Dialog-Background: @CmColor-Primary-DarkDefault;
-@AppPanel-Dialog-TitleHeight: @AppUI-TitleHeight;
 @AppPanel-Dialog-Indent: @CmIndent-XSmall;
+@AppPanel-Dialog-TitleHeight: @AppUI-TitleHeight;
+@AppPanel-Dialog-TitleBackground: @AppPanel-Dialog-Background;
 @AppPanel-Dialog-ContentBackground: @CmColor-Background;
 @AppPanel-Dialog-ButtonHeight: @CmForm-FieldHeight;
 @AppPanel-Dialog-ButtonsHeight: @AppPanel-Dialog-ButtonHeight + (@AppPanel-Dialog-Indent * 2);
+@AppPanel-Dialog-ButtonsBackground: @CmColor-Secondary-LightActive;
+
+@AppPanel-Preview-Indent: @AppPanel-Dialog-Indent;
+@AppPanel-Preview-Border: @CmBorder-Default;
+@AppPanel-Preview-TitleHeight: @AppPanel-Dialog-TitleHeight;
+@AppPanel-Preview-TitleBackground: @CmColor-Secondary-LightActive;
+@AppPanel-Preview-ContentBackground: @CmColor-Background;
+@AppPanel-Preview-ContentIndent: @CmIndent-XLarge;
 
 @AppPanel-Box-Indent: @CmIndent-Medium @AppPanel-Dialog-Indent;
 
@@ -18408,6 +18465,7 @@ html {
     }
 
 }
+/* ******* COMPONENTS: MENU CONSTRUCTOR ******* */
 /* ******* COMPONENTS: MODULE ******* */
 
 .app__page,
@@ -18437,7 +18495,7 @@ html {
     visibility: hidden;
     position: fixed;
     z-index: 210;
-    .mx__transition(all, @AppPanel-Duration);
+    .mx__transition(all, @AppPanel-Duration, @CmUI-MotionAsymmetric);
 
     &.is-open {
         visibility: visible;
@@ -18447,12 +18505,14 @@ html {
 .app__panel--sidebar {
     .mx__position(0, 0, 0, 0);
 
-    .app__panel__holder {
+    .app__panel__dialog-holder {
         box-shadow: @CmUI-Shadow-Right;
+        .mx__transform(translateX(-100%));
+        .mx__transition(all, @AppPanel-Duration, @CmUI-MotionAsymmetric);
     }
 
     .app__panel__dialog {
-        .mx__transform(translateX(-100%));
+        .mx__transform(translateX(0));
         .mx__transition(all, @AppPanel-Duration, @CmUI-MotionAsymmetric);
 
         > .inner {
@@ -18461,11 +18521,26 @@ html {
         }
     }
 
-    &.is-open {
-        .app__panel__dialog {
-            .mx__transform(translateX(0));
+    .app__panel__preview-holder {
+        visibility: hidden;
+        opacity: 0;
+        .mx__transition(all, @CmUI-Transition-Duration);
+    }
 
+    &.is-open {
+        .app__panel__dialog-holder {
+            .mx__transform(translateX(0));
+        }
+
+        .app__panel__dialog {
             > .inner {
+                opacity: 1;
+            }
+        }
+
+        .app__panel__preview-holder {
+            &.is-show {
+                visibility: visible;
                 opacity: 1;
             }
         }
@@ -18481,6 +18556,10 @@ html {
 
 .app__panel--story {
     .mx__position(0, auto, 0, 0);
+
+    .app__panel__dialog-holder {
+        overflow: hidden;
+    }
 
     .app__panel__dialog {
         box-shadow: @CmUI-Shadow-Left;
@@ -18502,11 +18581,36 @@ html {
     }
 }
 
+.app__panel--full {
+    visibility: hidden;
+    opacity: 0;
+    box-shadow: @CmUI-Shadow;
+    .mx__position(0, 0, 0, 0);
+    .mx__transform(scale(0.9));
+
+    .app__panel__dialog {
+        .mx__transform(translateX(0));
+        .mx__transition(all, @AppPanel-Duration, @CmUI-MotionAsymmetric);
+    }
+
+    &.is-open {
+        visibility: visible;
+        opacity: 1;
+        .mx__transform(scale(1));
+    }
+
+    &.is-hide {
+        .app__panel__dialog {
+            .mx__transform(translateX(-50%));
+            .mx__transition(all, @AppPanel-Duration);
+        }
+    }
+}
+
 /* *** DIALOG *** */
 
-.app__panel__holder {
+.app__panel__dialog-holder {
     width: @AppPanel-Dialog-Width;
-    overflow: hidden;
     position: absolute;
     .mx__position(0, auto, 0, 0);
 }
@@ -18558,7 +18662,7 @@ html {
                 cursor: pointer;
                 color: @CmColor-Font-Opposite;
                 .cm-i__size(@CmSize-Medium);
-                .cm-i__b-size(@AppSidebar-Title-Height);
+                .cm-i__b-size(@AppPanel-Dialog-TitleHeight);
 
                 &:first-child {
                     .mx__position(0, auto, 0, 0);
@@ -18595,7 +18699,7 @@ html {
             position: absolute;
             z-index: 2;
             padding: @AppPanel-Dialog-Indent;
-            background-color: @CmColor-Secondary-LightActive;
+            background-color: @AppPanel-Dialog-ButtonsBackground;
             .mx__position(auto, 0, 0, 0);
 
             > .inner {
@@ -18615,6 +18719,91 @@ html {
                 > .inner {
                     .cm__transition-none;
                 }
+            }
+        }
+    }
+}
+
+/* *** PREVIEW *** */
+
+.app__panel__preview-holder {
+    overflow: hidden;
+    position: absolute;
+    border-left: @AppPanel-Preview-Border;
+    .mx__position(0, 0, 0, @AppPanel-Dialog-Width);
+}
+
+.app__panel__preview {
+    position: absolute;
+    .mx__position(0, 0, 0, 0);
+
+    > .inner {
+        position: absolute;
+        background-color: @AppPanel-Preview-ContentBackground;
+        .mx__position(0, 0, 0, 0);
+
+        > .title {
+            height: @AppPanel-Preview-TitleHeight;
+            position: absolute;
+            z-index: 3;
+            background-color: @AppPanel-Preview-TitleBackground;
+            .mx__position(0, 0, auto, 0);
+            .mx__user-select(none);
+
+            > .label {
+                .cm__font--ui-h1;
+                .cm__text-nowrap;
+                line-height: @AppPanel-Preview-TitleHeight;
+
+                &:first-child {
+                    margin-left: @AppPanel-Preview-Indent;
+                }
+
+                &:last-child {
+                    margin-right: @AppPanel-Preview-Indent;
+                }
+
+                &:not(:first-child) {
+                    margin-left: @AppPanel-Preview-TitleHeight;
+                }
+
+                &:not(:last-child) {
+                    margin-right: @AppPanel-Preview-TitleHeight;
+                }
+            }
+
+            > .icon {
+                .icon.linked;
+                position: absolute;
+                cursor: pointer;
+                .cm-i__size(@CmSize-Medium);
+                .cm-i__b-size(@AppPanel-Preview-TitleHeight);
+
+                &:first-child {
+                    .mx__position(0, auto, 0, 0);
+                }
+
+                &:last-child {
+                    .mx__position(0, 0, 0, auto);
+                }
+            }
+        }
+
+        > .content {
+            position: absolute;
+            z-index: 1;
+            background-color: @AppPanel-Preview-ContentBackground;
+            .mx__position(0, 0, 0, 0);
+
+            > .inner {
+                .cm__scroll-y-a;
+                position: absolute;
+                padding: @AppPanel-Preview-ContentIndent;
+                .mx__position(0, 0, 0, 0);
+            }
+
+            &:not(:first-child) {
+                top: @AppPanel-Preview-TitleHeight;
             }
         }
     }
@@ -20081,6 +20270,7 @@ html {
 
         ul {
             .cm__list-clear;
+            .mx__transition(all, @CmUI-Transition-Duration);
         }
 
         li {
@@ -20261,6 +20451,10 @@ html {
                 .mod__menu__sub--dropdown-active;
             }
         }
+    }
+
+    a {
+        white-space: nowrap;
     }
 }
 
@@ -21771,14 +21965,18 @@ html {
         > ul {
             padding: @Primary-Container-Padding;
             background: @Primary-Container-BackgroundColor @Primary-Container-BackgroundImage @Primary-Container-BackgroundPosition @Primary-Container-BackgroundRepeat;
-            border: @Primary-Container-BorderSize @Primary-Container-BorderStyle @Primary-Container-BorderColor;
+            background-size: @Primary-Container-BackgroundScaling;
+            border: @Primary-Container-BorderStyle @Primary-Container-BorderColor;
+            border-width: @Primary-Container-BorderSize;
             border-radius: @Primary-Container-BorderRadius;
 
             > li {
                 > a {
                     padding: @Primary-Item-Padding;
                     background: @Primary-Default-BackgroundColor @Primary-Default-BackgroundImage @Primary-Default-BackgroundPosition @Primary-Default-BackgroundRepeat;
-                    border: @Primary-Default-BorderSize @Primary-Default-BorderStyle @Primary-Default-BorderColor;
+                    background-size: @Primary-Default-BackgroundScaling;
+                    border: @Primary-Default-BorderStyle @Primary-Default-BorderColor;
+                    border-width: @Primary-Default-BorderSize;
                     border-radius: @Primary-Default-BorderRadius;
                     font: @Primary-Default-FontWeight ~'@{Primary-Default-FontSize}/@{Primary-Default-FontLineHeight}' @Primary-Default-FontFamily;
                     font-style: @Primary-Default-FontStyle;
@@ -21788,7 +21986,9 @@ html {
                     &:hover,
                     &.hover {
                         background: @Primary-Hover-BackgroundColor @Primary-Hover-BackgroundImage @Primary-Hover-BackgroundPosition @Primary-Hover-BackgroundRepeat;
-                        border: @Primary-Hover-BorderSize @Primary-Hover-BorderStyle @Primary-Hover-BorderColor;
+                        background-size: @Primary-Hover-BackgroundScaling;
+                        border: @Primary-Hover-BorderStyle @Primary-Hover-BorderColor;
+                        border-width: @Primary-Hover-BorderSize;
                         border-radius: @Primary-Hover-BorderRadius;
                         font: @Primary-Hover-FontWeight ~'@{Primary-Hover-FontSize}/@{Primary-Hover-FontLineHeight}' @Primary-Hover-FontFamily;
                         font-style: @Primary-Hover-FontStyle;
@@ -21799,7 +21999,9 @@ html {
                     &:active,
                     &.active {
                         background: @Primary-Active-BackgroundColor @Primary-Active-BackgroundImage @Primary-Active-BackgroundPosition @Primary-Active-BackgroundRepeat;
-                        border: @Primary-Active-BorderSize @Primary-Active-BorderStyle @Primary-Active-BorderColor;
+                        background-size: @Primary-Active-BackgroundScaling;
+                        border: @Primary-Active-BorderStyle @Primary-Active-BorderColor;
+                        border-width: @Primary-Active-BorderSize;
                         border-radius: @Primary-Active-BorderRadius;
                         font: @Primary-Active-FontWeight ~'@{Primary-Active-FontSize}/@{Primary-Active-FontLineHeight}' @Primary-Active-FontFamily;
                         font-style: @Primary-Active-FontStyle;
@@ -21815,7 +22017,9 @@ html {
         > ul {
             padding: @Secondary-Container-Padding;
             background: @Secondary-Container-BackgroundColor @Secondary-Container-BackgroundImage @Secondary-Container-BackgroundPosition @Secondary-Container-BackgroundRepeat;
-            border: @Secondary-Container-BorderSize @Secondary-Container-BorderStyle @Secondary-Container-BorderColor;
+            background-size: @Secondary-Container-BackgroundScaling;
+            border: @Secondary-Container-BorderStyle @Secondary-Container-BorderColor;
+            border-width: @Secondary-Container-BorderSize;
             border-radius: @Secondary-Container-BorderRadius;
 
             > li {
@@ -21828,7 +22032,9 @@ html {
                 > a {
                     padding: @Secondary-Item-Padding;
                     background: @Secondary-Default-BackgroundColor @Secondary-Default-BackgroundImage @Secondary-Default-BackgroundPosition @Secondary-Default-BackgroundRepeat;
-                    border: @Secondary-Default-BorderSize @Secondary-Default-BorderStyle @Secondary-Default-BorderColor;
+                    background-size: @Secondary-Default-BackgroundScaling;
+                    border: @Secondary-Default-BorderStyle @Secondary-Default-BorderColor;
+                    border-width: @Secondary-Default-BorderSize;
                     border-radius: @Secondary-Default-BorderRadius;
                     font: @Secondary-Default-FontWeight ~'@{Secondary-Default-FontSize}/@{Secondary-Default-FontLineHeight}' @Secondary-Default-FontFamily;
                     font-style: @Secondary-Default-FontStyle;
@@ -21838,7 +22044,9 @@ html {
                     &:hover,
                     &.hover {
                         background: @Secondary-Hover-BackgroundColor @Secondary-Hover-BackgroundImage @Secondary-Hover-BackgroundPosition @Secondary-Hover-BackgroundRepeat;
-                        border: @Secondary-Hover-BorderSize @Secondary-Hover-BorderStyle @Secondary-Hover-BorderColor;
+                        background-size: @Secondary-Hover-BackgroundScaling;
+                        border: @Secondary-Hover-BorderStyle @Secondary-Hover-BorderColor;
+                        border-width: @Secondary-Hover-BorderSize;
                         border-radius: @Secondary-Hover-BorderRadius;
                         font: @Secondary-Hover-FontWeight ~'@{Secondary-Hover-FontSize}/@{Secondary-Hover-FontLineHeight}' @Secondary-Hover-FontFamily;
                         font-style: @Secondary-Hover-FontStyle;
@@ -21849,7 +22057,9 @@ html {
                     &:active,
                     &.active {
                         background: @Secondary-Active-BackgroundColor @Secondary-Active-BackgroundImage @Secondary-Active-BackgroundPosition @Secondary-Active-BackgroundRepeat;
-                        border: @Secondary-Active-BorderSize @Secondary-Active-BorderStyle @Secondary-Active-BorderColor;
+                        background-size: @Secondary-Active-BackgroundScaling;
+                        border: @Secondary-Active-BorderStyle @Secondary-Active-BorderColor;
+                        border-width: @Secondary-Active-BorderSize;
                         border-radius: @Secondary-Active-BorderRadius;
                         font: @Secondary-Active-FontWeight ~'@{Secondary-Active-FontSize}/@{Secondary-Active-FontLineHeight}' @Secondary-Active-FontFamily;
                         font-style: @Secondary-Active-FontStyle;
@@ -21863,7 +22073,8 @@ html {
 
     .menu__select {
         background: @Mobile-BackgroundColor;
-        border: @Mobile-BorderSize @Mobile-BorderStyle @Mobile-BorderColor;
+        border: @Mobile-BorderStyle @Mobile-BorderColor;
+        border-width: @Mobile-BorderSize;
         border-radius: @Mobile-BorderRadius;
 
         .select__button {

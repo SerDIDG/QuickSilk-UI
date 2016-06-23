@@ -1,3 +1,9 @@
+<?php
+
+global $variables;
+
+?>
+
 <div class="app__panel__box">
 	<dl class="pt__field is-box">
 		<dt>
@@ -8,7 +14,7 @@
             </span>
 		</dt>
 		<dd>
-			<div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"default":{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
+			<div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"name" : "params[<?=$variables['name']?>][<?=$variables['state']?>][font]", "default":{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
 				<input data-node="input" type="hidden" value="">
 				<div class="item-preview" data-node="preview">The quick brown fox jumps over the lazy dog</div>
 			</div>
@@ -18,28 +24,19 @@
 	<dl class="pt__field is-box">
 		<dt>Background Color</dt>
 		<dd>
-			<input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}'>
+			<input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}' name="params[<?=$variables['name']?>][<?=$variables['state']?>][background-color]">
 		</dd>
 	</dl>
 	<dl class="pt__field is-box">
 		<dt>Background Image</dt>
 		<dd>
-			<div class="pt__buttons pull-justify">
-				<div class="inner">
-					<div class="browse-button">
-						<input type="button" value="Browse">
-						<div class="inner">
-							<input type="file">
-						</div>
-					</div>
-				</div>
-			</div>
+			<input type="text" data-element="Com.FileInput" name="params[<?=$variables['name']?>][<?=$variables['state']?>][background-image]">
 		</dd>
 	</dl>
 	<dl class="pt__field is-box">
 		<dt>Image Scaling</dt>
 		<dd>
-			<select data-element="Com.Select">
+			<select data-element="Com.Select" name="params[<?=$variables['name']?>][<?=$variables['state']?>][background-scaling]">
 				<option value="auto">Original size</option>
 				<option value="contain">Contain</option>
 				<option value="cover">Cover</option>
@@ -50,18 +47,18 @@
 	<dl class="pt__field is-box">
 		<dt>Image Repeat</dt>
 		<dd>
-			<select data-element="Com.Select">
-				<option value="no_repeat">No repeat</option>
-				<option value="verically">Repeat vertically</option>
-				<option value="horizontally">Repeat horizontally</option>
-				<option value="both">Repeat both horizontally and vertically</option>
+			<select data-element="Com.Select" name="params[<?=$variables['name']?>][<?=$variables['state']?>][background-repeat]">
+				<option value="no-repeat">No repeat</option>
+				<option value="repeat-y">Repeat vertically</option>
+				<option value="repeat-x">Repeat horizontally</option>
+				<option value="repeat">Repeat both horizontally and vertically</option>
 			</select>
 		</dd>
 	</dl>
 	<dl class="pt__field is-box">
 		<dt>Image Position</dt>
 		<dd>
-			<select data-element="Com.Select">
+			<select data-element="Com.Select" name="params[<?=$variables['name']?>][<?=$variables['state']?>][background-position]">
 				<option value="left top">Top Left</option>
 				<option value="center top">Top Center</option>
 				<option value="right top">Top Right</option>
@@ -81,21 +78,21 @@
 				<dl class="pt__field is-box align-center">
 					<dt>Border Size</dt>
 					<dd>
-						<input type="text" value="0" data-element="Com.BoxTools">
+						<input type="text" value="0" data-element="Com.BoxTools" name="params[<?=$variables['name']?>][<?=$variables['state']?>][border-size]">
 					</dd>
 				</dl>
 				<dl class="pt__field is-box align-center">
 					<dt>Border Style</dt>
 					<dd>
-						<select data-element="Com.Select">
-							<option>Solid</option>
-							<option>Dotted</option>
-							<option>Dashed</option>
-							<option>Double</option>
-							<option>Groove</option>
-							<option>Ridge</option>
-							<option>Inset</option>
-							<option>Outset</option>
+						<select data-element="Com.Select" name="params[<?=$variables['name']?>][<?=$variables['state']?>][border-style]">
+							<option value="solid">Solid</option>
+							<option value="dotted">Dotted</option>
+							<option value="dashed">Dashed</option>
+							<option value="double">Double</option>
+							<option value="groove">Groove</option>
+							<option value="ridge">Ridge</option>
+							<option value="inset">Inset</option>
+							<option value="outset">Outset</option>
 						</select>
 					</dd>
 				</dl>
@@ -104,13 +101,13 @@
 				<dl class="pt__field is-box align-center">
 					<dt>Border Radius</dt>
 					<dd>
-						<input type="text" value="0" data-element="Com.BoxRadiusTools">
+						<input type="text" value="0" data-element="Com.BoxRadiusTools" name="params[<?=$variables['name']?>][<?=$variables['state']?>][border-radius]">
 					</dd>
 				</dl>
 				<dl class="pt__field is-box align-center">
 					<dt>Border Color</dt>
 					<dd>
-						<input type="text" data-element="Com.ColorPicker">
+						<input type="text" data-element="Com.ColorPicker" name="params[<?=$variables['name']?>][<?=$variables['state']?>][border-color]">
 					</dd>
 				</dl>
 			</div>

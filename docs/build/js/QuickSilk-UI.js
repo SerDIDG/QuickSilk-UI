@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.18.5 (2016-06-13 18:28) ************ */
+/*! ************ MagpieUI v3.18.8 (2016-06-23 19:58) ************ */
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -15,7 +15,7 @@
   else if (typeof define == "function" && define.amd) // AMD
     return define([], mod);
   else // Plain browser env
-    this.CodeMirror = mod();
+    (this || window).CodeMirror = mod();
 })(function() {
   "use strict";
 
@@ -43,6 +43,7 @@
   // This is woefully incomplete. Suggestions for alternative methods welcome.
   var mobile = ios || /Android|webOS|BlackBerry|Opera Mini|Opera Mobi|IEMobile/i.test(userAgent);
   var mac = ios || /Mac/.test(platform);
+  var chromeOS = /\bCrOS\b/.test(userAgent);
   var windows = /win/i.test(platform);
 
   var presto_version = presto && userAgent.match(/Version\/(\d*\.\d*)/);
@@ -412,7 +413,7 @@
       if (horiz.clientWidth) scroll(horiz.scrollLeft, "horizontal");
     });
 
-    this.checkedOverlay = false;
+    this.checkedZeroWidth = false;
     // Need to set a minimum width to see the scrollbar on IE7 (but must not set it on IE8).
     if (ie && ie_version < 8) this.horiz.style.minHeight = this.vert.style.minWidth = "18px";
   }
@@ -447,29 +448,43 @@
         this.horiz.firstChild.style.width = "0";
       }
 
-      if (!this.checkedOverlay && measure.clientHeight > 0) {
-        if (sWidth == 0) this.overlayHack();
-        this.checkedOverlay = true;
+      if (!this.checkedZeroWidth && measure.clientHeight > 0) {
+        if (sWidth == 0) this.zeroWidthHack();
+        this.checkedZeroWidth = true;
       }
 
       return {right: needsV ? sWidth : 0, bottom: needsH ? sWidth : 0};
     },
     setScrollLeft: function(pos) {
       if (this.horiz.scrollLeft != pos) this.horiz.scrollLeft = pos;
+      if (this.disableHoriz) this.enableZeroWidthBar(this.horiz, this.disableHoriz);
     },
     setScrollTop: function(pos) {
       if (this.vert.scrollTop != pos) this.vert.scrollTop = pos;
+      if (this.disableVert) this.enableZeroWidthBar(this.vert, this.disableVert);
     },
-    overlayHack: function() {
+    zeroWidthHack: function() {
       var w = mac && !mac_geMountainLion ? "12px" : "18px";
-      this.horiz.style.minHeight = this.vert.style.minWidth = w;
-      var self = this;
-      var barMouseDown = function(e) {
-        if (e_target(e) != self.vert && e_target(e) != self.horiz)
-          operation(self.cm, onMouseDown)(e);
-      };
-      on(this.vert, "mousedown", barMouseDown);
-      on(this.horiz, "mousedown", barMouseDown);
+      this.horiz.style.height = this.vert.style.width = w;
+      this.horiz.style.pointerEvents = this.vert.style.pointerEvents = "none";
+      this.disableHoriz = new Delayed;
+      this.disableVert = new Delayed;
+    },
+    enableZeroWidthBar: function(bar, delay) {
+      bar.style.pointerEvents = "auto";
+      function maybeDisable() {
+        // To find out whether the scrollbar is still visible, we
+        // check whether the element under the pixel in the bottom
+        // left corner of the scrollbar box is the scrollbar box
+        // itself (when the bar is still visible) or its filler child
+        // (when the bar is hidden). If it is still visible, we keep
+        // it enabled, if it's hidden, we disable pointer events.
+        var box = bar.getBoundingClientRect();
+        var elt = document.elementFromPoint(box.left + 1, box.bottom - 1);
+        if (elt != bar) bar.style.pointerEvents = "none";
+        else delay.set(1000, maybeDisable);
+      }
+      delay.set(1000, maybeDisable);
     },
     clear: function() {
       var parent = this.horiz.parentNode;
@@ -531,6 +546,7 @@
 
     d.sizer.style.paddingRight = (d.barWidth = sizes.right) + "px";
     d.sizer.style.paddingBottom = (d.barHeight = sizes.bottom) + "px";
+    d.heightForcer.style.borderBottom = sizes.bottom + "px solid transparent"
 
     if (sizes.right && sizes.bottom) {
       d.scrollbarFiller.style.display = "block";
@@ -734,6 +750,7 @@
 
   function postUpdateDisplay(cm, update) {
     var viewport = update.viewport;
+
     for (var first = true;; first = false) {
       if (!first || !cm.options.lineWrapping || update.oldDisplayWidth == displayWidth(cm)) {
         // Clip forced viewport to actual scrollable area.
@@ -749,8 +766,8 @@
       updateHeightsInViewport(cm);
       var barMeasure = measureForScrollbars(cm);
       updateSelection(cm);
-      setDocumentHeight(cm, barMeasure);
       updateScrollbars(cm, barMeasure);
+      setDocumentHeight(cm, barMeasure);
     }
 
     update.signal(cm, "update", cm);
@@ -767,17 +784,16 @@
       postUpdateDisplay(cm, update);
       var barMeasure = measureForScrollbars(cm);
       updateSelection(cm);
-      setDocumentHeight(cm, barMeasure);
       updateScrollbars(cm, barMeasure);
+      setDocumentHeight(cm, barMeasure);
       update.finish();
     }
   }
 
   function setDocumentHeight(cm, measure) {
     cm.display.sizer.style.minHeight = measure.docHeight + "px";
-    var total = measure.docHeight + cm.display.barHeight;
-    cm.display.heightForcer.style.top = total + "px";
-    cm.display.gutters.style.height = Math.max(total + scrollGap(cm), measure.clientHeight) + "px";
+    cm.display.heightForcer.style.top = measure.docHeight + "px";
+    cm.display.gutters.style.height = (measure.docHeight + cm.display.barHeight + scrollGap(cm)) + "px";
   }
 
   // Read the actual heights of the rendered lines, and update their
@@ -811,7 +827,7 @@
   // given line.
   function updateWidgetHeight(line) {
     if (line.widgets) for (var i = 0; i < line.widgets.length; ++i)
-      line.widgets[i].height = line.widgets[i].node.offsetHeight;
+      line.widgets[i].height = line.widgets[i].node.parentNode.offsetHeight;
   }
 
   // Do a bulk-read of the DOM positions and sizes needed to draw the
@@ -1082,13 +1098,9 @@
     if (!cm.state.focused) { cm.display.input.focus(); onFocus(cm); }
   }
 
-  function isReadOnly(cm) {
-    return cm.options.readOnly || cm.doc.cantEdit;
-  }
-
-  // This will be set to an array of strings when copying, so that,
-  // when pasting, we know what kind of selections the copied text
-  // was made out of.
+  // This will be set to a {lineWise: bool, text: [string]} object, so
+  // that, when pasting, we know what kind of selections the copied
+  // text was made out of.
   var lastCopied = null;
 
   function applyTextInput(cm, inserted, deleted, sel, origin) {
@@ -1097,14 +1109,14 @@
     if (!sel) sel = doc.sel;
 
     var paste = cm.state.pasteIncoming || origin == "paste";
-    var textLines = doc.splitLines(inserted), multiPaste = null;
+    var textLines = doc.splitLines(inserted), multiPaste = null
     // When pasing N lines into N selections, insert one line per selection
     if (paste && sel.ranges.length > 1) {
-      if (lastCopied && lastCopied.join("\n") == inserted) {
-        if (sel.ranges.length % lastCopied.length == 0) {
+      if (lastCopied && lastCopied.text.join("\n") == inserted) {
+        if (sel.ranges.length % lastCopied.text.length == 0) {
           multiPaste = [];
-          for (var i = 0; i < lastCopied.length; i++)
-            multiPaste.push(doc.splitLines(lastCopied[i]));
+          for (var i = 0; i < lastCopied.text.length; i++)
+            multiPaste.push(doc.splitLines(lastCopied.text[i]));
         }
       } else if (textLines.length == sel.ranges.length) {
         multiPaste = map(textLines, function(l) { return [l]; });
@@ -1120,6 +1132,8 @@
           from = Pos(from.line, from.ch - deleted);
         else if (cm.state.overwrite && !paste) // Handle overwrite
           to = Pos(to.line, Math.min(getLine(doc, to.line).text.length, to.ch + lst(textLines).length));
+        else if (lastCopied && lastCopied.lineWise && lastCopied.text.join("\n") == inserted)
+          from = to = Pos(from.line, 0)
       }
       var updateInput = cm.curOp.updateInput;
       var changeEvent = {from: from, to: to, text: multiPaste ? multiPaste[i % multiPaste.length] : textLines,
@@ -1140,7 +1154,7 @@
     var pasted = e.clipboardData && e.clipboardData.getData("text/plain");
     if (pasted) {
       e.preventDefault();
-      if (!isReadOnly(cm) && !cm.options.disableInput)
+      if (!cm.isReadOnly() && !cm.options.disableInput)
         runInOp(cm, function() { applyTextInput(cm, pasted, 0, null, "paste"); });
       return true;
     }
@@ -1243,26 +1257,27 @@
       });
 
       on(te, "paste", function(e) {
-        if (handlePaste(e, cm)) return true;
+        if (signalDOMEvent(cm, e) || handlePaste(e, cm)) return
 
         cm.state.pasteIncoming = true;
         input.fastPoll();
       });
 
       function prepareCopyCut(e) {
+        if (signalDOMEvent(cm, e)) return
         if (cm.somethingSelected()) {
-          lastCopied = cm.getSelections();
+          lastCopied = {lineWise: false, text: cm.getSelections()};
           if (input.inaccurateSelection) {
             input.prevInput = "";
             input.inaccurateSelection = false;
-            te.value = lastCopied.join("\n");
+            te.value = lastCopied.text.join("\n");
             selectInput(te);
           }
         } else if (!cm.options.lineWiseCopyCut) {
           return;
         } else {
           var ranges = copyableRanges(cm);
-          lastCopied = ranges.text;
+          lastCopied = {lineWise: true, text: ranges.text};
           if (e.type == "cut") {
             cm.setSelections(ranges.ranges, null, sel_dontScroll);
           } else {
@@ -1277,7 +1292,7 @@
       on(te, "copy", prepareCopyCut);
 
       on(display.scroller, "paste", function(e) {
-        if (eventInWidget(display, e)) return;
+        if (eventInWidget(display, e) || signalDOMEvent(cm, e)) return;
         cm.state.pasteIncoming = true;
         input.focus();
       });
@@ -1411,7 +1426,7 @@
       // in which case reading its value would be expensive.
       if (this.contextMenuPending || !cm.state.focused ||
           (hasSelection(input) && !prevInput && !this.composing) ||
-          isReadOnly(cm) || cm.options.disableInput || cm.state.keySeq)
+          cm.isReadOnly() || cm.options.disableInput || cm.state.keySeq)
         return false;
 
       var text = input.value;
@@ -1473,10 +1488,11 @@
       if (reset && cm.doc.sel.contains(pos) == -1)
         operation(cm, setSelection)(cm.doc, simpleSelection(pos), sel_dontScroll);
 
-      var oldCSS = te.style.cssText;
-      input.wrapper.style.position = "absolute";
-      te.style.cssText = "position: fixed; width: 30px; height: 30px; top: " + (e.clientY - 5) +
-        "px; left: " + (e.clientX - 5) + "px; z-index: 1000; background: " +
+      var oldCSS = te.style.cssText, oldWrapperCSS = input.wrapper.style.cssText;
+      input.wrapper.style.cssText = "position: absolute"
+      var wrapperBox = input.wrapper.getBoundingClientRect()
+      te.style.cssText = "position: absolute; width: 30px; height: 30px; top: " + (e.clientY - wrapperBox.top - 5) +
+        "px; left: " + (e.clientX - wrapperBox.left - 5) + "px; z-index: 1000; background: " +
         (ie ? "rgba(255, 255, 255, .05)" : "transparent") +
         "; outline: none; border-width: 0; outline: none; overflow: hidden; opacity: .05; filter: alpha(opacity=5);";
       if (webkit) var oldScrollY = window.scrollY; // Work around Chrome issue (#2712)
@@ -1507,7 +1523,7 @@
       }
       function rehide() {
         input.contextMenuPending = false;
-        input.wrapper.style.position = "relative";
+        input.wrapper.style.cssText = oldWrapperCSS
         te.style.cssText = oldCSS;
         if (ie && ie_version < 9) display.scrollbars.setScrollTop(display.scroller.scrollTop = scrollPos);
 
@@ -1562,7 +1578,9 @@
       var div = input.div = display.lineDiv;
       disableBrowserMagic(div);
 
-      on(div, "paste", function(e) { handlePaste(e, cm); })
+      on(div, "paste", function(e) {
+        if (!signalDOMEvent(cm, e)) handlePaste(e, cm);
+      })
 
       on(div, "compositionstart", function(e) {
         var data = e.data;
@@ -1600,19 +1618,20 @@
 
       on(div, "input", function() {
         if (input.composing) return;
-        if (isReadOnly(cm) || !input.pollContent())
+        if (cm.isReadOnly() || !input.pollContent())
           runInOp(input.cm, function() {regChange(cm);});
       });
 
       function onCopyCut(e) {
+        if (signalDOMEvent(cm, e)) return
         if (cm.somethingSelected()) {
-          lastCopied = cm.getSelections();
+          lastCopied = {lineWise: false, text: cm.getSelections()};
           if (e.type == "cut") cm.replaceSelection("", null, "cut");
         } else if (!cm.options.lineWiseCopyCut) {
           return;
         } else {
           var ranges = copyableRanges(cm);
-          lastCopied = ranges.text;
+          lastCopied = {lineWise: true, text: ranges.text};
           if (e.type == "cut") {
             cm.operation(function() {
               cm.setSelections(ranges.ranges, 0, sel_dontScroll);
@@ -1624,12 +1643,12 @@
         if (e.clipboardData && !ios) {
           e.preventDefault();
           e.clipboardData.clearData();
-          e.clipboardData.setData("text/plain", lastCopied.join("\n"));
+          e.clipboardData.setData("text/plain", lastCopied.text.join("\n"));
         } else {
           // Old-fashioned briefly-focus-a-textarea hack
           var kludge = hiddenTextarea(), te = kludge.firstChild;
           cm.display.lineSpace.insertBefore(kludge, cm.display.lineSpace.firstChild);
-          te.value = lastCopied.join("\n");
+          te.value = lastCopied.text.join("\n");
           var hadFocus = document.activeElement;
           selectInput(te);
           setTimeout(function() {
@@ -1648,9 +1667,9 @@
       return result;
     },
 
-    showSelection: function(info) {
+    showSelection: function(info, takeFocus) {
       if (!info || !this.cm.display.view.length) return;
-      if (info.focus) this.showPrimarySelection();
+      if (info.focus || takeFocus) this.showPrimarySelection();
       this.showMultipleSelections(info);
     },
 
@@ -1680,8 +1699,13 @@
       try { var rng = range(start.node, start.offset, end.offset, end.node); }
       catch(e) {} // Our model of the DOM might be outdated, in which case the range we try to set can be impossible
       if (rng) {
-        sel.removeAllRanges();
-        sel.addRange(rng);
+        if (!gecko && this.cm.state.focused) {
+          sel.collapse(start.node, start.offset);
+          if (!rng.collapsed) sel.addRange(rng);
+        } else {
+          sel.removeAllRanges();
+          sel.addRange(rng);
+        }
         if (old && sel.anchorNode == null) sel.addRange(old);
         else if (gecko) this.startGracePeriod();
       }
@@ -1825,7 +1849,7 @@
       this.div.focus();
     },
     applyComposition: function(composing) {
-      if (isReadOnly(this.cm))
+      if (this.cm.isReadOnly())
         operation(this.cm, regChange)(this.cm)
       else if (composing.data && composing.data != composing.startData)
         operation(this.cm, applyTextInput)(this.cm, composing.data, 0, composing.sel);
@@ -1837,7 +1861,7 @@
 
     onKeyPress: function(e) {
       e.preventDefault();
-      if (!isReadOnly(this.cm))
+      if (!this.cm.isReadOnly())
         operation(this.cm, applyTextInput)(this.cm, String.fromCharCode(e.charCode == null ? e.keyCode : e.charCode), 0);
     },
 
@@ -2142,7 +2166,7 @@
 
   // Give beforeSelectionChange handlers a change to influence a
   // selection update.
-  function filterSelectionChange(doc, sel) {
+  function filterSelectionChange(doc, sel, options) {
     var obj = {
       ranges: sel.ranges,
       update: function(ranges) {
@@ -2150,7 +2174,8 @@
         for (var i = 0; i < ranges.length; i++)
           this.ranges[i] = new Range(clipPos(doc, ranges[i].anchor),
                                      clipPos(doc, ranges[i].head));
-      }
+      },
+      origin: options && options.origin
     };
     signal(doc, "beforeSelectionChange", doc, obj);
     if (doc.cm) signal(doc.cm, "beforeSelectionChange", doc.cm, obj);
@@ -2176,7 +2201,7 @@
 
   function setSelectionNoUndo(doc, sel, options) {
     if (hasHandler(doc, "beforeSelectionChange") || doc.cm && hasHandler(doc.cm, "beforeSelectionChange"))
-      sel = filterSelectionChange(doc, sel);
+      sel = filterSelectionChange(doc, sel, options);
 
     var bias = options && options.bias ||
       (cmp(sel.primary().head, doc.sel.primary().head) < 0 ? -1 : 1);
@@ -2210,8 +2235,9 @@
     var out;
     for (var i = 0; i < sel.ranges.length; i++) {
       var range = sel.ranges[i];
-      var newAnchor = skipAtomic(doc, range.anchor, bias, mayClear);
-      var newHead = skipAtomic(doc, range.head, bias, mayClear);
+      var old = sel.ranges.length == doc.sel.ranges.length && doc.sel.ranges[i];
+      var newAnchor = skipAtomic(doc, range.anchor, old && old.anchor, bias, mayClear);
+      var newHead = skipAtomic(doc, range.head, old && old.head, bias, mayClear);
       if (out || newAnchor != range.anchor || newHead != range.head) {
         if (!out) out = sel.ranges.slice(0, i);
         out[i] = new Range(newAnchor, newHead);
@@ -2220,54 +2246,61 @@
     return out ? normalizeSelection(out, sel.primIndex) : sel;
   }
 
-  // Ensure a given position is not inside an atomic range.
-  function skipAtomic(doc, pos, bias, mayClear) {
-    var flipped = false, curPos = pos;
-    var dir = bias || 1;
-    doc.cantEdit = false;
-    search: for (;;) {
-      var line = getLine(doc, curPos.line);
-      if (line.markedSpans) {
-        for (var i = 0; i < line.markedSpans.length; ++i) {
-          var sp = line.markedSpans[i], m = sp.marker;
-          if ((sp.from == null || (m.inclusiveLeft ? sp.from <= curPos.ch : sp.from < curPos.ch)) &&
-              (sp.to == null || (m.inclusiveRight ? sp.to >= curPos.ch : sp.to > curPos.ch))) {
-            if (mayClear) {
-              signal(m, "beforeCursorEnter");
-              if (m.explicitlyCleared) {
-                if (!line.markedSpans) break;
-                else {--i; continue;}
-              }
-            }
-            if (!m.atomic) continue;
-            var newPos = m.find(dir < 0 ? -1 : 1);
-            if (cmp(newPos, curPos) == 0) {
-              newPos.ch += dir;
-              if (newPos.ch < 0) {
-                if (newPos.line > doc.first) newPos = clipPos(doc, Pos(newPos.line - 1));
-                else newPos = null;
-              } else if (newPos.ch > line.text.length) {
-                if (newPos.line < doc.first + doc.size - 1) newPos = Pos(newPos.line + 1, 0);
-                else newPos = null;
-              }
-              if (!newPos) {
-                if (flipped) {
-                  // Driven in a corner -- no valid cursor position found at all
-                  // -- try again *with* clearing, if we didn't already
-                  if (!mayClear) return skipAtomic(doc, pos, bias, true);
-                  // Otherwise, turn off editing until further notice, and return the start of the doc
-                  doc.cantEdit = true;
-                  return Pos(doc.first, 0);
-                }
-                flipped = true; newPos = pos; dir = -dir;
-              }
-            }
-            curPos = newPos;
-            continue search;
+  function skipAtomicInner(doc, pos, oldPos, dir, mayClear) {
+    var line = getLine(doc, pos.line);
+    if (line.markedSpans) for (var i = 0; i < line.markedSpans.length; ++i) {
+      var sp = line.markedSpans[i], m = sp.marker;
+      if ((sp.from == null || (m.inclusiveLeft ? sp.from <= pos.ch : sp.from < pos.ch)) &&
+          (sp.to == null || (m.inclusiveRight ? sp.to >= pos.ch : sp.to > pos.ch))) {
+        if (mayClear) {
+          signal(m, "beforeCursorEnter");
+          if (m.explicitlyCleared) {
+            if (!line.markedSpans) break;
+            else {--i; continue;}
           }
         }
+        if (!m.atomic) continue;
+
+        if (oldPos) {
+          var near = m.find(dir < 0 ? 1 : -1), diff;
+          if (dir < 0 ? m.inclusiveRight : m.inclusiveLeft)
+            near = movePos(doc, near, -dir, near && near.line == pos.line ? line : null);
+          if (near && near.line == pos.line && (diff = cmp(near, oldPos)) && (dir < 0 ? diff < 0 : diff > 0))
+            return skipAtomicInner(doc, near, pos, dir, mayClear);
+        }
+
+        var far = m.find(dir < 0 ? -1 : 1);
+        if (dir < 0 ? m.inclusiveLeft : m.inclusiveRight)
+          far = movePos(doc, far, dir, far.line == pos.line ? line : null);
+        return far ? skipAtomicInner(doc, far, pos, dir, mayClear) : null;
       }
-      return curPos;
+    }
+    return pos;
+  }
+
+  // Ensure a given position is not inside an atomic range.
+  function skipAtomic(doc, pos, oldPos, bias, mayClear) {
+    var dir = bias || 1;
+    var found = skipAtomicInner(doc, pos, oldPos, dir, mayClear) ||
+        (!mayClear && skipAtomicInner(doc, pos, oldPos, dir, true)) ||
+        skipAtomicInner(doc, pos, oldPos, -dir, mayClear) ||
+        (!mayClear && skipAtomicInner(doc, pos, oldPos, -dir, true));
+    if (!found) {
+      doc.cantEdit = true;
+      return Pos(doc.first, 0);
+    }
+    return found;
+  }
+
+  function movePos(doc, pos, dir, line) {
+    if (dir < 0 && pos.ch == 0) {
+      if (pos.line > doc.first) return clipPos(doc, Pos(pos.line - 1));
+      else return null;
+    } else if (dir > 0 && pos.ch == (line || getLine(doc, pos.line)).text.length) {
+      if (pos.line < doc.first + doc.size - 1) return Pos(pos.line + 1, 0);
+      else return null;
+    } else {
+      return new Pos(pos.line, pos.ch + dir);
     }
   }
 
@@ -2285,6 +2318,7 @@
     for (var i = 0; i < doc.sel.ranges.length; i++) {
       if (primary === false && i == doc.sel.primIndex) continue;
       var range = doc.sel.ranges[i];
+      if (range.from().line >= cm.display.viewTo || range.to().line < cm.display.viewFrom) continue;
       var collapsed = range.empty();
       if (collapsed || cm.options.showCursorWhenSelecting)
         drawSelectionCursor(cm, range.head, curFragment);
@@ -3071,7 +3105,7 @@
     }
 
     if (op.updatedDisplay || op.selectionChanged)
-      op.preparedSelection = display.input.prepareSelection();
+      op.preparedSelection = display.input.prepareSelection(op.focus);
   }
 
   function endOperation_W2(op) {
@@ -3084,18 +3118,19 @@
       cm.display.maxLineChanged = false;
     }
 
+    var takeFocus = op.focus && op.focus == activeElt() && (!document.hasFocus || document.hasFocus())
     if (op.preparedSelection)
-      cm.display.input.showSelection(op.preparedSelection);
-    if (op.updatedDisplay)
-      setDocumentHeight(cm, op.barMeasure);
+      cm.display.input.showSelection(op.preparedSelection, takeFocus);
     if (op.updatedDisplay || op.startHeight != cm.doc.height)
       updateScrollbars(cm, op.barMeasure);
+    if (op.updatedDisplay)
+      setDocumentHeight(cm, op.barMeasure);
 
     if (op.selectionChanged) restartBlink(cm);
 
     if (cm.state.focused && op.updateInput)
       cm.display.input.reset(op.typing);
-    if (op.focus && op.focus == activeElt()) ensureFocus(op.cm);
+    if (takeFocus) ensureFocus(op.cm);
   }
 
   function endOperation_finish(op) {
@@ -3114,7 +3149,7 @@
       display.scroller.scrollTop = doc.scrollTop;
     }
     if (op.scrollLeft != null && (display.scroller.scrollLeft != op.scrollLeft || op.forceScroll)) {
-      doc.scrollLeft = Math.max(0, Math.min(display.scroller.scrollWidth - displayWidth(cm), op.scrollLeft));
+      doc.scrollLeft = Math.max(0, Math.min(display.scroller.scrollWidth - display.scroller.clientWidth, op.scrollLeft));
       display.scrollbars.setScrollLeft(doc.scrollLeft);
       display.scroller.scrollLeft = doc.scrollLeft;
       alignHorizontally(cm);
@@ -3410,7 +3445,7 @@
       return dx * dx + dy * dy > 20 * 20;
     }
     on(d.scroller, "touchstart", function(e) {
-      if (!isMouseLikeTouchEvent(e)) {
+      if (!signalDOMEvent(cm, e) && !isMouseLikeTouchEvent(e)) {
         clearTimeout(touchFinished);
         var now = +new Date;
         d.activeTouch = {start: now, moved: false,
@@ -3465,7 +3500,7 @@
       over: function(e) {if (!signalDOMEvent(cm, e)) { onDragOver(cm, e); e_stop(e); }},
       start: function(e){onDragStart(cm, e);},
       drop: operation(cm, onDrop),
-      leave: function() {clearDragCursor(cm);}
+      leave: function(e) {if (!signalDOMEvent(cm, e)) { clearDragCursor(cm); }}
     };
 
     var inp = d.input.getField();
@@ -3539,7 +3574,7 @@
   // not interfere with, such as a scrollbar or widget.
   function onMouseDown(e) {
     var cm = this, display = cm.display;
-    if (display.activeTouch && display.input.supportsTouch() || signalDOMEvent(cm, e)) return;
+    if (signalDOMEvent(cm, e) || display.activeTouch && display.input.supportsTouch()) return;
     display.shift = e.shiftKey;
 
     if (eventInWidget(display, e)) {
@@ -3595,7 +3630,7 @@
     }
 
     var sel = cm.doc.sel, modifier = mac ? e.metaKey : e.ctrlKey, contained;
-    if (cm.options.dragDrop && dragAndDrop && !isReadOnly(cm) &&
+    if (cm.options.dragDrop && dragAndDrop && !cm.isReadOnly() &&
         type == "single" && (contained = sel.contains(start)) > -1 &&
         (cmp((contained = sel.ranges[contained]).from(), start) < 0 || start.xRel > 0) &&
         (cmp(contained.to(), start) > 0 || start.xRel < 0))
@@ -3650,7 +3685,7 @@
       ourIndex = doc.sel.primIndex;
     }
 
-    if (e.altKey) {
+    if (chromeOS ? e.shiftKey && e.metaKey : e.altKey) {
       type = "rect";
       if (!addNew) ourRange = new Range(start, start);
       start = posFromMouse(cm, e, true, true);
@@ -3780,7 +3815,7 @@
 
   // Determines whether an event happened in the gutter, and fires the
   // handlers for the corresponding event.
-  function gutterEvent(cm, e, type, prevent, signalfn) {
+  function gutterEvent(cm, e, type, prevent) {
     try { var mX = e.clientX, mY = e.clientY; }
     catch(e) { return false; }
     if (mX >= Math.floor(cm.display.gutters.getBoundingClientRect().right)) return false;
@@ -3797,14 +3832,14 @@
       if (g && g.getBoundingClientRect().right >= mX) {
         var line = lineAtHeight(cm.doc, mY);
         var gutter = cm.options.gutters[i];
-        signalfn(cm, type, cm, line, gutter, e);
+        signal(cm, type, cm, line, gutter, e);
         return e_defaultPrevented(e);
       }
     }
   }
 
   function clickInGutter(cm, e) {
-    return gutterEvent(cm, e, "gutterClick", true, signalLater);
+    return gutterEvent(cm, e, "gutterClick", true);
   }
 
   // Kludge to work around strange IE behavior where it'll sometimes
@@ -3819,7 +3854,7 @@
     e_preventDefault(e);
     if (ie) lastDrop = +new Date;
     var pos = posFromMouse(cm, e, true), files = e.dataTransfer.files;
-    if (!pos || isReadOnly(cm)) return;
+    if (!pos || cm.isReadOnly()) return;
     // Might be a file drop, in which case we simply extract the text
     // and insert it.
     if (files && files.length && window.FileReader && window.File) {
@@ -3875,6 +3910,7 @@
     if (signalDOMEvent(cm, e) || eventInWidget(cm.display, e)) return;
 
     e.dataTransfer.setData("Text", cm.getSelection());
+    e.dataTransfer.effectAllowed = "copyMove"
 
     // Use dummy image instead of default browsers image.
     // Recent Safari (~6.0.2) have a tendency to segfault when this happens, so we don't do it there.
@@ -4058,7 +4094,7 @@
     cm.display.input.ensurePolled();
     var prevShift = cm.display.shift, done = false;
     try {
-      if (isReadOnly(cm)) cm.state.suppressEdits = true;
+      if (cm.isReadOnly()) cm.state.suppressEdits = true;
       if (dropShift) cm.display.shift = false;
       done = bound(cm) != Pass;
     } finally {
@@ -4243,7 +4279,7 @@
 
   function contextMenuInGutter(cm, e) {
     if (!hasHandler(cm, "gutterContextMenu")) return false;
-    return gutterEvent(cm, e, "gutterContextMenu", false, signal);
+    return gutterEvent(cm, e, "gutterContextMenu", false);
   }
 
   // UPDATING
@@ -4791,10 +4827,9 @@
   function findPosH(doc, pos, dir, unit, visually) {
     var line = pos.line, ch = pos.ch, origDir = dir;
     var lineObj = getLine(doc, line);
-    var possible = true;
     function findNextLine() {
       var l = line + dir;
-      if (l < doc.first || l >= doc.first + doc.size) return (possible = false);
+      if (l < doc.first || l >= doc.first + doc.size) return false
       line = l;
       return lineObj = getLine(doc, l);
     }
@@ -4804,14 +4839,16 @@
         if (!boundToLine && findNextLine()) {
           if (visually) ch = (dir < 0 ? lineRight : lineLeft)(lineObj);
           else ch = dir < 0 ? lineObj.text.length : 0;
-        } else return (possible = false);
+        } else return false
       } else ch = next;
       return true;
     }
 
-    if (unit == "char") moveOnce();
-    else if (unit == "column") moveOnce(true);
-    else if (unit == "word" || unit == "group") {
+    if (unit == "char") {
+      moveOnce()
+    } else if (unit == "column") {
+      moveOnce(true)
+    } else if (unit == "word" || unit == "group") {
       var sawType = null, group = unit == "group";
       var helper = doc.cm && doc.cm.getHelper(pos, "wordChars");
       for (var first = true;; first = false) {
@@ -4831,8 +4868,8 @@
         if (dir > 0 && !moveOnce(!first)) break;
       }
     }
-    var result = skipAtomic(doc, Pos(line, ch), origDir, true);
-    if (!possible) result.hitSide = true;
+    var result = skipAtomic(doc, Pos(line, ch), pos, origDir, true);
+    if (!cmp(pos, result)) result.hitSide = true;
     return result;
   }
 
@@ -5219,6 +5256,7 @@
       signal(this, "overwriteToggle", this, this.state.overwrite);
     },
     hasFocus: function() { return this.display.input.getField() == activeElt(); },
+    isReadOnly: function() { return !!(this.options.readOnly || this.doc.cantEdit); },
 
     scrollTo: methodOp(function(x, y) {
       if (x != null || y != null) resolveScrollToPos(this);
@@ -5358,7 +5396,7 @@
     for (var i = newBreaks.length - 1; i >= 0; i--)
       replaceRange(cm.doc, val, newBreaks[i], Pos(newBreaks[i].line, newBreaks[i].ch + val.length))
   });
-  option("specialChars", /[\t\u0000-\u0019\u00ad\u200b-\u200f\u2028\u2029\ufeff]/g, function(cm, val, old) {
+  option("specialChars", /[\u0000-\u001f\u007f\u00ad\u200b-\u200f\u2028\u2029\ufeff]/g, function(cm, val, old) {
     cm.state.specialChars = new RegExp(val.source + (val.test("\t") ? "" : "|\t"), "g");
     if (old != CodeMirror.Init) cm.refresh();
   });
@@ -5687,7 +5725,7 @@
       for (var i = 0; i < ranges.length; i++) {
         var pos = ranges[i].from();
         var col = countColumn(cm.getLine(pos.line), pos.ch, tabSize);
-        spaces.push(new Array(tabSize - col % tabSize + 1).join(" "));
+        spaces.push(spaceStr(tabSize - col % tabSize));
       }
       cm.replaceSelections(spaces);
     },
@@ -5730,6 +5768,7 @@
         ensureCursorVisible(cm);
       });
     },
+    openLine: function(cm) {cm.replaceSelection("\n", "start")},
     toggleOverwrite: function(cm) {cm.toggleOverwrite();}
   };
 
@@ -5764,7 +5803,8 @@
     "Ctrl-F": "goCharRight", "Ctrl-B": "goCharLeft", "Ctrl-P": "goLineUp", "Ctrl-N": "goLineDown",
     "Alt-F": "goWordRight", "Alt-B": "goWordLeft", "Ctrl-A": "goLineStart", "Ctrl-E": "goLineEnd",
     "Ctrl-V": "goPageDown", "Shift-Ctrl-V": "goPageUp", "Ctrl-D": "delCharAfter", "Ctrl-H": "delCharBefore",
-    "Alt-D": "delWordAfter", "Alt-Backspace": "delWordBefore", "Ctrl-K": "killLine", "Ctrl-T": "transposeChars"
+    "Alt-D": "delWordAfter", "Alt-Backspace": "delWordBefore", "Ctrl-K": "killLine", "Ctrl-T": "transposeChars",
+    "Ctrl-O": "openLine"
   };
   keyMap.macDefault = {
     "Cmd-A": "selectAll", "Cmd-D": "deleteLine", "Cmd-Z": "undo", "Shift-Cmd-Z": "redo", "Cmd-Y": "redo",
@@ -6526,8 +6566,8 @@
       var fromCmp = cmp(found.from, from) || extraLeft(sp.marker) - extraLeft(marker);
       var toCmp = cmp(found.to, to) || extraRight(sp.marker) - extraRight(marker);
       if (fromCmp >= 0 && toCmp <= 0 || fromCmp <= 0 && toCmp >= 0) continue;
-      if (fromCmp <= 0 && (cmp(found.to, from) > 0 || (sp.marker.inclusiveRight && marker.inclusiveLeft)) ||
-          fromCmp >= 0 && (cmp(found.from, to) < 0 || (sp.marker.inclusiveLeft && marker.inclusiveRight)))
+      if (fromCmp <= 0 && (sp.marker.inclusiveRight && marker.inclusiveLeft ? cmp(found.to, from) >= 0 : cmp(found.to, from) > 0) ||
+          fromCmp >= 0 && (sp.marker.inclusiveRight && marker.inclusiveLeft ? cmp(found.from, to) <= 0 : cmp(found.from, to) < 0))
         return true;
     }
   }
@@ -6655,7 +6695,7 @@
         parentStyle += "width: " + cm.display.wrapper.clientWidth + "px;";
       removeChildrenAndAdd(cm.display.measure, elt("div", [widget.node], null, parentStyle));
     }
-    return widget.height = widget.node.offsetHeight;
+    return widget.height = widget.node.parentNode.offsetHeight;
   }
 
   function addLineWidget(doc, handle, node, options) {
@@ -6929,8 +6969,11 @@
     }
 
     // See issue #2901
-    if (webkit && /\bcm-tab\b/.test(builder.content.lastChild.className))
-      builder.content.className = "cm-tab-wrap-hack";
+    if (webkit) {
+      var last = builder.content.lastChild
+      if (/\bcm-tab\b/.test(last.className) || (last.querySelector && last.querySelector(".cm-tab")))
+        builder.content.className = "cm-tab-wrap-hack";
+    }
 
     signal(cm, "renderLine", cm, lineView.line, builder.pre);
     if (builder.pre.className)
@@ -7065,7 +7108,7 @@
       if (nextChange == pos) { // Update current marker set
         spanStyle = spanEndStyle = spanStartStyle = title = css = "";
         collapsed = null; nextChange = Infinity;
-        var foundBookmarks = [];
+        var foundBookmarks = [], endStyles
         for (var j = 0; j < spans.length; ++j) {
           var sp = spans[j], m = sp.marker;
           if (m.type == "bookmark" && sp.from == pos && m.widgetNode) {
@@ -7076,9 +7119,9 @@
               spanEndStyle = "";
             }
             if (m.className) spanStyle += " " + m.className;
-            if (m.css) css = m.css;
+            if (m.css) css = (css ? css + ";" : "") + m.css;
             if (m.startStyle && sp.from == pos) spanStartStyle += " " + m.startStyle;
-            if (m.endStyle && sp.to == nextChange) spanEndStyle += " " + m.endStyle;
+            if (m.endStyle && sp.to == nextChange) (endStyles || (endStyles = [])).push(m.endStyle, sp.to)
             if (m.title && !title) title = m.title;
             if (m.collapsed && (!collapsed || compareCollapsedMarkers(collapsed.marker, m) < 0))
               collapsed = sp;
@@ -7086,14 +7129,17 @@
             nextChange = sp.from;
           }
         }
+        if (endStyles) for (var j = 0; j < endStyles.length; j += 2)
+          if (endStyles[j + 1] == nextChange) spanEndStyle += " " + endStyles[j]
+
+        if (!collapsed || collapsed.from == pos) for (var j = 0; j < foundBookmarks.length; ++j)
+          buildCollapsedSpan(builder, 0, foundBookmarks[j]);
         if (collapsed && (collapsed.from || 0) == pos) {
           buildCollapsedSpan(builder, (collapsed.to == null ? len + 1 : collapsed.to) - pos,
                              collapsed.marker, collapsed.from == null);
           if (collapsed.to == null) return;
           if (collapsed.to == pos) collapsed = false;
         }
-        if (!collapsed && foundBookmarks.length) for (var j = 0; j < foundBookmarks.length; ++j)
-          buildCollapsedSpan(builder, 0, foundBookmarks[j]);
       }
       if (pos >= len) break;
 
@@ -7279,13 +7325,16 @@
         if (at <= sz) {
           child.insertInner(at, lines, height);
           if (child.lines && child.lines.length > 50) {
-            while (child.lines.length > 50) {
-              var spilled = child.lines.splice(child.lines.length - 25, 25);
-              var newleaf = new LeafChunk(spilled);
-              child.height -= newleaf.height;
-              this.children.splice(i + 1, 0, newleaf);
-              newleaf.parent = this;
+            // To avoid memory thrashing when child.lines is huge (e.g. first view of a large file), it's never spliced.
+            // Instead, small slices are taken. They're taken in order because sequential memory accesses are fastest.
+            var remaining = child.lines.length % 25 + 25
+            for (var pos = remaining; pos < child.lines.length;) {
+              var leaf = new LeafChunk(child.lines.slice(pos, pos += 25));
+              child.height -= leaf.height;
+              this.children.splice(++i, 0, leaf);
+              leaf.parent = this;
             }
+            child.lines = child.lines.slice(0, remaining);
             this.maybeSpill();
           }
           break;
@@ -7305,7 +7354,7 @@
           copy.parent = me;
           me.children = [copy, sibling];
           me = copy;
-        } else {
+       } else {
           me.size -= sibling.size;
           me.height -= sibling.height;
           var myIndex = indexOf(me.parent.children, me);
@@ -7345,6 +7394,7 @@
     this.id = ++nextDocId;
     this.modeOption = mode;
     this.lineSep = lineSep;
+    this.extend = false;
 
     if (typeof text == "string") text = this.splitLines(text);
     updateDoc(this, {from: start, to: start, text: text});
@@ -7432,10 +7482,11 @@
       extendSelection(this, clipPos(this, head), other && clipPos(this, other), options);
     }),
     extendSelections: docMethodOp(function(heads, options) {
-      extendSelections(this, clipPosArray(this, heads, options));
+      extendSelections(this, clipPosArray(this, heads), options);
     }),
     extendSelectionsBy: docMethodOp(function(f, options) {
-      extendSelections(this, map(this.sel.ranges, f), options);
+      var heads = map(this.sel.ranges, f);
+      extendSelections(this, clipPosArray(this, heads), options);
     }),
     setSelections: docMethodOp(function(ranges, primary, options) {
       if (!ranges.length) return;
@@ -7588,9 +7639,9 @@
         var spans = line.markedSpans;
         if (spans) for (var i = 0; i < spans.length; i++) {
           var span = spans[i];
-          if (!(lineNo == from.line && from.ch > span.to ||
-                span.from == null && lineNo != from.line||
-                lineNo == to.line && span.from > to.ch) &&
+          if (!(span.to != null && lineNo == from.line && from.ch >= span.to ||
+                span.from == null && lineNo != from.line ||
+                span.from != null && lineNo == to.line && span.from >= to.ch) &&
               (!filter || filter(span.marker)))
             found.push(span.marker.parent || span.marker);
         }
@@ -7609,9 +7660,9 @@
     },
 
     posFromIndex: function(off) {
-      var ch, lineNo = this.first;
+      var ch, lineNo = this.first, sepSize = this.lineSeparator().length;
       this.iter(function(line) {
-        var sz = line.text.length + 1;
+        var sz = line.text.length + sepSize;
         if (sz > off) { ch = off; return true; }
         off -= sz;
         ++lineNo;
@@ -7622,8 +7673,9 @@
       coords = clipPos(this, coords);
       var index = coords.ch;
       if (coords.line < this.first || coords.ch < 0) return 0;
+      var sepSize = this.lineSeparator().length;
       this.iter(this.first, coords.line, function (line) {
-        index += line.text.length + 1;
+        index += line.text.length + sepSize;
       });
       return index;
     },
@@ -8852,7 +8904,7 @@
 
   // THE END
 
-  CodeMirror.version = "5.8.0";
+  CodeMirror.version = "5.15.2";
 
   return CodeMirror;
 });
@@ -8871,6 +8923,11 @@
     mod(CodeMirror);
 })(function(CodeMirror) {
 "use strict";
+
+function expressionAllowed(stream, state, backUp) {
+  return /^(?:operator|sof|keyword c|case|new|[\[{}\(,;:]|=>)$/.test(state.lastType) ||
+    (state.lastType == "quasi" && /\{\s*$/.test(stream.string.slice(0, stream.pos - (backUp || 0))))
+}
 
 CodeMirror.defineMode("javascript", function(config, parserConfig) {
   var indentUnit = config.indentUnit;
@@ -8891,12 +8948,13 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       "if": kw("if"), "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
       "return": C, "break": C, "continue": C, "new": kw("new"), "delete": C, "throw": C, "debugger": C,
       "var": kw("var"), "const": kw("var"), "let": kw("var"),
-      "async": kw("async"), "function": kw("function"), "catch": kw("catch"),
+      "function": kw("function"), "catch": kw("catch"),
       "for": kw("for"), "switch": kw("switch"), "case": kw("case"), "default": kw("default"),
       "in": operator, "typeof": operator, "instanceof": operator,
       "true": atom, "false": atom, "null": atom, "undefined": atom, "NaN": atom, "Infinity": atom,
       "this": kw("this"), "class": kw("class"), "super": kw("atom"),
-      "await": C, "yield": C, "export": kw("export"), "import": kw("import"), "extends": C
+      "yield": C, "export": kw("export"), "import": kw("import"), "extends": C,
+      "await": C, "async": kw("async")
     };
 
     // Extend the 'normal' keywords with the TypeScript language extensions
@@ -8904,15 +8962,20 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       var type = {type: "variable", style: "variable-3"};
       var tsKeywords = {
         // object-like things
-        "interface": kw("interface"),
-        "extends": kw("extends"),
-        "constructor": kw("constructor"),
+        "interface": kw("class"),
+        "implements": C,
+        "namespace": C,
+        "module": kw("module"),
+        "enum": kw("module"),
 
         // scope modifiers
-        "public": kw("public"),
-        "private": kw("private"),
-        "protected": kw("protected"),
-        "static": kw("static"),
+        "public": kw("modifier"),
+        "private": kw("modifier"),
+        "protected": kw("modifier"),
+        "abstract": kw("modifier"),
+
+        // operators
+        "as": operator,
 
         // types
         "string": type, "number": type, "boolean": type, "any": type
@@ -8980,8 +9043,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       } else if (stream.eat("/")) {
         stream.skipToEnd();
         return ret("comment", "comment");
-      } else if (state.lastType == "operator" || state.lastType == "keyword c" ||
-                 state.lastType == "sof" || /^[\[{}\(,;:]$/.test(state.lastType)) {
+      } else if (expressionAllowed(stream, state, 1)) {
         readRegexp(stream);
         stream.match(/^\b(([gimyu])(?![gimyu]*\2))+\b/);
         return ret("regexp", "string-2");
@@ -9215,6 +9277,8 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "class") return cont(pushlex("form"), className, poplex);
     if (type == "export") return cont(pushlex("stat"), afterExport, poplex);
     if (type == "import") return cont(pushlex("stat"), afterImport, poplex);
+    if (type == "module") return cont(pushlex("form"), pattern, pushlex("}"), expect("{"), block, poplex, poplex)
+    if (type == "async") return cont(statement)
     return pass(pushlex("stat"), expression, expect(";"), poplex);
   }
   function expression(type) {
@@ -9232,7 +9296,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
 
     var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
     if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
-    if (type == "async") return cont(expression);
     if (type == "function") return cont(functiondef, maybeop);
     if (type == "keyword c") return cont(noComma ? maybeexpressionNoComma : maybeexpression);
     if (type == "(") return cont(pushlex(")"), maybeexpression, comprehension, expect(")"), poplex, maybeop);
@@ -9311,9 +9374,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "variable") {cx.marked = "property"; return cont();}
   }
   function objprop(type, value) {
-    if (type == "async") {
-      return cont(objprop);
-    } else if (type == "variable" || cx.style == "keyword") {
+    if (type == "variable" || cx.style == "keyword") {
       cx.marked = "property";
       if (value == "get" || value == "set") return cont(getterSetter);
       return cont(afterprop);
@@ -9322,8 +9383,12 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(afterprop);
     } else if (type == "jsonld-keyword") {
       return cont(afterprop);
+    } else if (type == "modifier") {
+      return cont(objprop)
     } else if (type == "[") {
       return cont(expression, expect("]"), afterprop);
+    } else if (type == "spread") {
+      return cont(expression);
     }
   }
   function getterSetter(type) {
@@ -9336,17 +9401,17 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "(") return pass(functiondef);
   }
   function commasep(what, end) {
-    function proceed(type) {
+    function proceed(type, value) {
       if (type == ",") {
         var lex = cx.state.lexical;
         if (lex.info == "call") lex.pos = (lex.pos || 0) + 1;
         return cont(what, proceed);
       }
-      if (type == end) return cont();
+      if (type == end || value == end) return cont();
       return cont(expect(end));
     }
-    return function(type) {
-      if (type == end) return cont();
+    return function(type, value) {
+      if (type == end || value == end) return cont();
       return pass(what, proceed);
     };
   }
@@ -9360,18 +9425,23 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     return pass(statement, block);
   }
   function maybetype(type) {
-    if (isTS && type == ":") return cont(typedef);
+    if (isTS && type == ":") return cont(typeexpr);
   }
   function maybedefault(_, value) {
     if (value == "=") return cont(expressionNoComma);
   }
-  function typedef(type) {
-    if (type == "variable") {cx.marked = "variable-3"; return cont();}
+  function typeexpr(type) {
+    if (type == "variable") {cx.marked = "variable-3"; return cont(afterType);}
+  }
+  function afterType(type, value) {
+    if (value == "<") return cont(commasep(typeexpr, ">"), afterType)
+    if (type == "[") return cont(expect("]"), afterType)
   }
   function vardef() {
     return pass(pattern, maybetype, maybeAssign, vardefCont);
   }
   function pattern(type, value) {
+    if (type == "modifier") return cont(pattern)
     if (type == "variable") { register(value); return cont(); }
     if (type == "spread") return cont(pattern);
     if (type == "[") return contCommasep(pattern, "]");
@@ -9384,6 +9454,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
     if (type == "variable") cx.marked = "property";
     if (type == "spread") return cont(pattern);
+    if (type == "}") return pass();
     return cont(expect(":"), pattern, maybeAssign);
   }
   function maybeAssign(_type, value) {
@@ -9419,7 +9490,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   function functiondef(type, value) {
     if (value == "*") {cx.marked = "keyword"; return cont(functiondef);}
     if (type == "variable") {register(value); return cont(functiondef);}
-    if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, statement, popcontext);
+    if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, maybetype, statement, popcontext);
   }
   function funarg(type) {
     if (type == "spread") return cont(funarg);
@@ -9506,7 +9577,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
         lexical: new JSLexical((basecolumn || 0) - indentUnit, 0, "block", false),
         localVars: parserConfig.localVars,
         context: parserConfig.localVars && {vars: parserConfig.localVars},
-        indented: 0
+        indented: basecolumn || 0
       };
       if (parserConfig.globalVars && typeof parserConfig.globalVars == "object")
         state.globalVars = parserConfig.globalVars;
@@ -9562,7 +9633,13 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
 
     helperType: jsonMode ? "json" : "javascript",
     jsonldMode: jsonldMode,
-    jsonMode: jsonMode
+    jsonMode: jsonMode,
+
+    expressionAllowed: expressionAllowed,
+    skipExpression: function(state) {
+      var top = state.cc[state.cc.length - 1]
+      if (top == expression || top == expressionNoComma) state.cc.pop()
+    }
   };
 });
 
@@ -9595,9 +9672,8 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
 "use strict";
 
 CodeMirror.defineMode("css", function(config, parserConfig) {
-  var provided = parserConfig;
+  var inline = parserConfig.inline
   if (!parserConfig.propertyKeywords) parserConfig = CodeMirror.resolveMode("text/css");
-  parserConfig.inline = provided.inline;
 
   var indentUnit = config.indentUnit,
       tokenHooks = parserConfig.tokenHooks,
@@ -9811,7 +9887,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     if (type == "}" || type == "{") return popAndPass(type, stream, state);
     if (type == "(") return pushContext(state, stream, "parens");
 
-    if (type == "hash" && !/^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/.test(stream.current())) {
+    if (type == "hash" && !/^#([0-9a-fA-f]{3,4}|[0-9a-fA-f]{6}|[0-9a-fA-f]{8})$/.test(stream.current())) {
       override += " error";
     } else if (type == "word") {
       wordAsValue(stream);
@@ -9951,9 +10027,9 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
   return {
     startState: function(base) {
       return {tokenize: null,
-              state: parserConfig.inline ? "block" : "top",
+              state: inline ? "block" : "top",
               stateArg: null,
-              context: new Context(parserConfig.inline ? "block" : "top", base || 0, null)};
+              context: new Context(inline ? "block" : "top", base || 0, null)};
     },
 
     token: function(stream, state) {
@@ -10036,8 +10112,8 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "animation-direction", "animation-duration", "animation-fill-mode",
     "animation-iteration-count", "animation-name", "animation-play-state",
     "animation-timing-function", "appearance", "azimuth", "backface-visibility",
-    "background", "background-attachment", "background-clip", "background-color",
-    "background-image", "background-origin", "background-position",
+    "background", "background-attachment", "background-blend-mode", "background-clip",
+    "background-color", "background-image", "background-origin", "background-position",
     "background-repeat", "background-size", "baseline-shift", "binding",
     "bleed", "bookmark-label", "bookmark-level", "bookmark-state",
     "bookmark-target", "border", "border-bottom", "border-bottom-color",
@@ -10068,9 +10144,9 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "font-variant-alternates", "font-variant-caps", "font-variant-east-asian",
     "font-variant-ligatures", "font-variant-numeric", "font-variant-position",
     "font-weight", "grid", "grid-area", "grid-auto-columns", "grid-auto-flow",
-    "grid-auto-position", "grid-auto-rows", "grid-column", "grid-column-end",
-    "grid-column-start", "grid-row", "grid-row-end", "grid-row-start",
-    "grid-template", "grid-template-areas", "grid-template-columns",
+    "grid-auto-rows", "grid-column", "grid-column-end", "grid-column-gap",
+    "grid-column-start", "grid-gap", "grid-row", "grid-row-end", "grid-row-gap",
+    "grid-row-start", "grid-template", "grid-template-areas", "grid-template-columns",
     "grid-template-rows", "hanging-punctuation", "height", "hyphens",
     "icon", "image-orientation", "image-rendering", "image-resolution",
     "inline-box-align", "justify-content", "left", "letter-spacing",
@@ -10181,11 +10257,12 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "capitalize", "caps-lock-indicator", "caption", "captiontext", "caret",
     "cell", "center", "checkbox", "circle", "cjk-decimal", "cjk-earthly-branch",
     "cjk-heavenly-stem", "cjk-ideographic", "clear", "clip", "close-quote",
-    "col-resize", "collapse", "column", "column-reverse", "compact", "condensed", "contain", "content",
+    "col-resize", "collapse", "color", "color-burn", "color-dodge", "column", "column-reverse",
+    "compact", "condensed", "contain", "content",
     "content-box", "context-menu", "continuous", "copy", "counter", "counters", "cover", "crop",
-    "cross", "crosshair", "currentcolor", "cursive", "cyclic", "dashed", "decimal",
-    "decimal-leading-zero", "default", "default-button", "destination-atop",
-    "destination-in", "destination-out", "destination-over", "devanagari",
+    "cross", "crosshair", "currentcolor", "cursive", "cyclic", "darken", "dashed", "decimal",
+    "decimal-leading-zero", "default", "default-button", "dense", "destination-atop",
+    "destination-in", "destination-out", "destination-over", "devanagari", "difference",
     "disc", "discard", "disclosure-closed", "disclosure-open", "document",
     "dot-dash", "dot-dot-dash",
     "dotted", "double", "down", "e-resize", "ease", "ease-in", "ease-in-out", "ease-out",
@@ -10196,23 +10273,23 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "ethiopic-halehame-gez", "ethiopic-halehame-om-et",
     "ethiopic-halehame-sid-et", "ethiopic-halehame-so-et",
     "ethiopic-halehame-ti-er", "ethiopic-halehame-ti-et", "ethiopic-halehame-tig",
-    "ethiopic-numeric", "ew-resize", "expanded", "extends", "extra-condensed",
+    "ethiopic-numeric", "ew-resize", "exclusion", "expanded", "extends", "extra-condensed",
     "extra-expanded", "fantasy", "fast", "fill", "fixed", "flat", "flex", "flex-end", "flex-start", "footnotes",
-    "forwards", "from", "geometricPrecision", "georgian", "graytext", "groove",
-    "gujarati", "gurmukhi", "hand", "hangul", "hangul-consonant", "hebrew",
+    "forwards", "from", "geometricPrecision", "georgian", "graytext", "grid", "groove",
+    "gujarati", "gurmukhi", "hand", "hangul", "hangul-consonant", "hard-light", "hebrew",
     "help", "hidden", "hide", "higher", "highlight", "highlighttext",
-    "hiragana", "hiragana-iroha", "horizontal", "hsl", "hsla", "icon", "ignore",
+    "hiragana", "hiragana-iroha", "horizontal", "hsl", "hsla", "hue", "icon", "ignore",
     "inactiveborder", "inactivecaption", "inactivecaptiontext", "infinite",
     "infobackground", "infotext", "inherit", "initial", "inline", "inline-axis",
-    "inline-block", "inline-flex", "inline-table", "inset", "inside", "intrinsic", "invert",
+    "inline-block", "inline-flex", "inline-grid", "inline-table", "inset", "inside", "intrinsic", "invert",
     "italic", "japanese-formal", "japanese-informal", "justify", "kannada",
     "katakana", "katakana-iroha", "keep-all", "khmer",
     "korean-hangul-formal", "korean-hanja-formal", "korean-hanja-informal",
-    "landscape", "lao", "large", "larger", "left", "level", "lighter",
+    "landscape", "lao", "large", "larger", "left", "level", "lighter", "lighten",
     "line-through", "linear", "linear-gradient", "lines", "list-item", "listbox", "listitem",
     "local", "logical", "loud", "lower", "lower-alpha", "lower-armenian",
     "lower-greek", "lower-hexadecimal", "lower-latin", "lower-norwegian",
-    "lower-roman", "lowercase", "ltr", "malayalam", "match", "matrix", "matrix3d",
+    "lower-roman", "lowercase", "ltr", "luminosity", "malayalam", "match", "matrix", "matrix3d",
     "media-controls-background", "media-current-time-display",
     "media-fullscreen-button", "media-mute-button", "media-play-button",
     "media-return-to-realtime-button", "media-rewind-button",
@@ -10221,7 +10298,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "media-volume-slider-container", "media-volume-sliderthumb", "medium",
     "menu", "menulist", "menulist-button", "menulist-text",
     "menulist-textfield", "menutext", "message-box", "middle", "min-intrinsic",
-    "mix", "mongolian", "monospace", "move", "multiple", "myanmar", "n-resize",
+    "mix", "mongolian", "monospace", "move", "multiple", "multiply", "myanmar", "n-resize",
     "narrower", "ne-resize", "nesw-resize", "no-close-quote", "no-drop",
     "no-open-quote", "no-repeat", "none", "normal", "not-allowed", "nowrap",
     "ns-resize", "numbers", "numeric", "nw-resize", "nwse-resize", "oblique", "octal", "open-quote",
@@ -10235,7 +10312,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "repeating-radial-gradient", "repeat-x", "repeat-y", "reset", "reverse",
     "rgb", "rgba", "ridge", "right", "rotate", "rotate3d", "rotateX", "rotateY",
     "rotateZ", "round", "row", "row-resize", "row-reverse", "rtl", "run-in", "running",
-    "s-resize", "sans-serif", "scale", "scale3d", "scaleX", "scaleY", "scaleZ",
+    "s-resize", "sans-serif", "saturation", "scale", "scale3d", "scaleX", "scaleY", "scaleZ", "screen",
     "scroll", "scrollbar", "se-resize", "searchfield",
     "searchfield-cancel-button", "searchfield-decoration",
     "searchfield-results-button", "searchfield-results-decoration",
@@ -10243,7 +10320,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "simp-chinese-formal", "simp-chinese-informal", "single",
     "skew", "skewX", "skewY", "skip-white-space", "slide", "slider-horizontal",
     "slider-vertical", "sliderthumb-horizontal", "sliderthumb-vertical", "slow",
-    "small", "small-caps", "small-caption", "smaller", "solid", "somali",
+    "small", "small-caps", "small-caption", "smaller", "soft-light", "solid", "somali",
     "source-atop", "source-in", "source-out", "source-over", "space", "space-around", "space-between", "spell-out", "square",
     "square-button", "start", "static", "status-bar", "stretch", "stroke", "sub",
     "subpixel-antialiased", "super", "sw-resize", "symbolic", "symbols", "table",
@@ -10420,54 +10497,56 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
 })(function(CodeMirror) {
 "use strict";
 
-CodeMirror.defineMode("xml", function(config, parserConfig) {
-  var indentUnit = config.indentUnit;
-  var multilineTagIndentFactor = parserConfig.multilineTagIndentFactor || 1;
-  var multilineTagIndentPastTag = parserConfig.multilineTagIndentPastTag;
-  if (multilineTagIndentPastTag == null) multilineTagIndentPastTag = true;
+var htmlConfig = {
+  autoSelfClosers: {'area': true, 'base': true, 'br': true, 'col': true, 'command': true,
+                    'embed': true, 'frame': true, 'hr': true, 'img': true, 'input': true,
+                    'keygen': true, 'link': true, 'meta': true, 'param': true, 'source': true,
+                    'track': true, 'wbr': true, 'menuitem': true},
+  implicitlyClosed: {'dd': true, 'li': true, 'optgroup': true, 'option': true, 'p': true,
+                     'rp': true, 'rt': true, 'tbody': true, 'td': true, 'tfoot': true,
+                     'th': true, 'tr': true},
+  contextGrabbers: {
+    'dd': {'dd': true, 'dt': true},
+    'dt': {'dd': true, 'dt': true},
+    'li': {'li': true},
+    'option': {'option': true, 'optgroup': true},
+    'optgroup': {'optgroup': true},
+    'p': {'address': true, 'article': true, 'aside': true, 'blockquote': true, 'dir': true,
+          'div': true, 'dl': true, 'fieldset': true, 'footer': true, 'form': true,
+          'h1': true, 'h2': true, 'h3': true, 'h4': true, 'h5': true, 'h6': true,
+          'header': true, 'hgroup': true, 'hr': true, 'menu': true, 'nav': true, 'ol': true,
+          'p': true, 'pre': true, 'section': true, 'table': true, 'ul': true},
+    'rp': {'rp': true, 'rt': true},
+    'rt': {'rp': true, 'rt': true},
+    'tbody': {'tbody': true, 'tfoot': true},
+    'td': {'td': true, 'th': true},
+    'tfoot': {'tbody': true},
+    'th': {'td': true, 'th': true},
+    'thead': {'tbody': true, 'tfoot': true},
+    'tr': {'tr': true}
+  },
+  doNotIndent: {"pre": true},
+  allowUnquoted: true,
+  allowMissing: true,
+  caseFold: true
+}
 
-  var Kludges = parserConfig.htmlMode ? {
-    autoSelfClosers: {'area': true, 'base': true, 'br': true, 'col': true, 'command': true,
-                      'embed': true, 'frame': true, 'hr': true, 'img': true, 'input': true,
-                      'keygen': true, 'link': true, 'meta': true, 'param': true, 'source': true,
-                      'track': true, 'wbr': true, 'menuitem': true},
-    implicitlyClosed: {'dd': true, 'li': true, 'optgroup': true, 'option': true, 'p': true,
-                       'rp': true, 'rt': true, 'tbody': true, 'td': true, 'tfoot': true,
-                       'th': true, 'tr': true},
-    contextGrabbers: {
-      'dd': {'dd': true, 'dt': true},
-      'dt': {'dd': true, 'dt': true},
-      'li': {'li': true},
-      'option': {'option': true, 'optgroup': true},
-      'optgroup': {'optgroup': true},
-      'p': {'address': true, 'article': true, 'aside': true, 'blockquote': true, 'dir': true,
-            'div': true, 'dl': true, 'fieldset': true, 'footer': true, 'form': true,
-            'h1': true, 'h2': true, 'h3': true, 'h4': true, 'h5': true, 'h6': true,
-            'header': true, 'hgroup': true, 'hr': true, 'menu': true, 'nav': true, 'ol': true,
-            'p': true, 'pre': true, 'section': true, 'table': true, 'ul': true},
-      'rp': {'rp': true, 'rt': true},
-      'rt': {'rp': true, 'rt': true},
-      'tbody': {'tbody': true, 'tfoot': true},
-      'td': {'td': true, 'th': true},
-      'tfoot': {'tbody': true},
-      'th': {'td': true, 'th': true},
-      'thead': {'tbody': true, 'tfoot': true},
-      'tr': {'tr': true}
-    },
-    doNotIndent: {"pre": true},
-    allowUnquoted: true,
-    allowMissing: true,
-    caseFold: true
-  } : {
-    autoSelfClosers: {},
-    implicitlyClosed: {},
-    contextGrabbers: {},
-    doNotIndent: {},
-    allowUnquoted: false,
-    allowMissing: false,
-    caseFold: false
-  };
-  var alignCDATA = parserConfig.alignCDATA;
+var xmlConfig = {
+  autoSelfClosers: {},
+  implicitlyClosed: {},
+  contextGrabbers: {},
+  doNotIndent: {},
+  allowUnquoted: false,
+  allowMissing: false,
+  caseFold: false
+}
+
+CodeMirror.defineMode("xml", function(editorConf, config_) {
+  var indentUnit = editorConf.indentUnit
+  var config = {}
+  var defaults = config_.htmlMode ? htmlConfig : xmlConfig
+  for (var prop in defaults) config[prop] = defaults[prop]
+  for (var prop in config_) config[prop] = config_[prop]
 
   // Return variables for tokenizers
   var type, setStyle;
@@ -10597,7 +10676,7 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
     this.tagName = tagName;
     this.indent = state.indented;
     this.startOfLine = startOfLine;
-    if (Kludges.doNotIndent.hasOwnProperty(tagName) || (state.context && state.context.noIndent))
+    if (config.doNotIndent.hasOwnProperty(tagName) || (state.context && state.context.noIndent))
       this.noIndent = true;
   }
   function popContext(state) {
@@ -10610,8 +10689,8 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
         return;
       }
       parentTagName = state.context.tagName;
-      if (!Kludges.contextGrabbers.hasOwnProperty(parentTagName) ||
-          !Kludges.contextGrabbers[parentTagName].hasOwnProperty(nextTagName)) {
+      if (!config.contextGrabbers.hasOwnProperty(parentTagName) ||
+          !config.contextGrabbers[parentTagName].hasOwnProperty(nextTagName)) {
         return;
       }
       popContext(state);
@@ -10642,9 +10721,9 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
     if (type == "word") {
       var tagName = stream.current();
       if (state.context && state.context.tagName != tagName &&
-          Kludges.implicitlyClosed.hasOwnProperty(state.context.tagName))
+          config.implicitlyClosed.hasOwnProperty(state.context.tagName))
         popContext(state);
-      if (state.context && state.context.tagName == tagName) {
+      if ((state.context && state.context.tagName == tagName) || config.matchClosing === false) {
         setStyle = "tag";
         return closeState;
       } else {
@@ -10678,7 +10757,7 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
       var tagName = state.tagName, tagStart = state.tagStart;
       state.tagName = state.tagStart = null;
       if (type == "selfcloseTag" ||
-          Kludges.autoSelfClosers.hasOwnProperty(tagName)) {
+          config.autoSelfClosers.hasOwnProperty(tagName)) {
         maybePopContext(state, tagName);
       } else {
         maybePopContext(state, tagName);
@@ -10691,12 +10770,12 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
   }
   function attrEqState(type, stream, state) {
     if (type == "equals") return attrValueState;
-    if (!Kludges.allowMissing) setStyle = "error";
+    if (!config.allowMissing) setStyle = "error";
     return attrState(type, stream, state);
   }
   function attrValueState(type, stream, state) {
     if (type == "string") return attrContinuedState;
-    if (type == "word" && Kludges.allowUnquoted) {setStyle = "string"; return attrState;}
+    if (type == "word" && config.allowUnquoted) {setStyle = "string"; return attrState;}
     setStyle = "error";
     return attrState(type, stream, state);
   }
@@ -10706,12 +10785,14 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
   }
 
   return {
-    startState: function() {
-      return {tokenize: inText,
-              state: baseState,
-              indented: 0,
-              tagName: null, tagStart: null,
-              context: null};
+    startState: function(baseIndent) {
+      var state = {tokenize: inText,
+                   state: baseState,
+                   indented: baseIndent || 0,
+                   tagName: null, tagStart: null,
+                   context: null}
+      if (baseIndent != null) state.baseIndent = baseIndent
+      return state
     },
 
     token: function(stream, state) {
@@ -10744,19 +10825,19 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
         return fullLine ? fullLine.match(/^(\s*)/)[0].length : 0;
       // Indent the starts of attribute names.
       if (state.tagName) {
-        if (multilineTagIndentPastTag)
+        if (config.multilineTagIndentPastTag !== false)
           return state.tagStart + state.tagName.length + 2;
         else
-          return state.tagStart + indentUnit * multilineTagIndentFactor;
+          return state.tagStart + indentUnit * (config.multilineTagIndentFactor || 1);
       }
-      if (alignCDATA && /<!\[CDATA\[/.test(textAfter)) return 0;
+      if (config.alignCDATA && /<!\[CDATA\[/.test(textAfter)) return 0;
       var tagAfter = textAfter && /^<(\/)?([\w_:\.-]*)/.exec(textAfter);
       if (tagAfter && tagAfter[1]) { // Closing tag spotted
         while (context) {
           if (context.tagName == tagAfter[2]) {
             context = context.prev;
             break;
-          } else if (Kludges.implicitlyClosed.hasOwnProperty(context.tagName)) {
+          } else if (config.implicitlyClosed.hasOwnProperty(context.tagName)) {
             context = context.prev;
           } else {
             break;
@@ -10764,25 +10845,30 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
         }
       } else if (tagAfter) { // Opening tag spotted
         while (context) {
-          var grabbers = Kludges.contextGrabbers[context.tagName];
+          var grabbers = config.contextGrabbers[context.tagName];
           if (grabbers && grabbers.hasOwnProperty(tagAfter[2]))
             context = context.prev;
           else
             break;
         }
       }
-      while (context && !context.startOfLine)
+      while (context && context.prev && !context.startOfLine)
         context = context.prev;
       if (context) return context.indent + indentUnit;
-      else return 0;
+      else return state.baseIndent || 0;
     },
 
     electricInput: /<\/[\s\w:]+>$/,
     blockCommentStart: "<!--",
     blockCommentEnd: "-->",
 
-    configuration: parserConfig.htmlMode ? "html" : "xml",
-    helperType: parserConfig.htmlMode ? "html" : "xml"
+    configuration: config.htmlMode ? "html" : "xml",
+    helperType: config.htmlMode ? "html" : "xml",
+
+    skipAttribute: function(state) {
+      if (state.state == attrValueState)
+        state.state = attrState
+    }
   };
 });
 
@@ -10839,13 +10925,9 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
     return attrRegexpCache[attr] = new RegExp("\\s+" + attr + "\\s*=\\s*('|\")?([^'\"]+)('|\")?\\s*");
   }
 
-  function getAttrValue(stream, attr) {
-    var pos = stream.pos, match;
-    while (pos >= 0 && stream.string.charAt(pos) !== "<") pos--;
-    if (pos < 0) return pos;
-    if (match = stream.string.slice(pos, stream.pos).match(getAttrRegexp(attr)))
-      return match[2];
-    return "";
+  function getAttrValue(text, attr) {
+    var match = text.match(getAttrRegexp(attr))
+    return match ? match[2] : ""
   }
 
   function getTagRegexp(tagName, anchored) {
@@ -10861,10 +10943,10 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
     }
   }
 
-  function findMatchingMode(tagInfo, stream) {
+  function findMatchingMode(tagInfo, tagText) {
     for (var i = 0; i < tagInfo.length; i++) {
       var spec = tagInfo[i];
-      if (!spec[0] || spec[1].test(getAttrValue(stream, spec[0]))) return spec[2];
+      if (!spec[0] || spec[1].test(getAttrValue(tagText, spec[0]))) return spec[2];
     }
   }
 
@@ -10884,15 +10966,17 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
       tags.script.unshift(["type", configScript[i].matches, configScript[i].mode])
 
     function html(stream, state) {
-      var tagName = state.htmlState.tagName && state.htmlState.tagName.toLowerCase();
-      var tagInfo = tagName && tags.hasOwnProperty(tagName) && tags[tagName];
-
-      var style = htmlMode.token(stream, state.htmlState), modeSpec;
-
-      if (tagInfo && /\btag\b/.test(style) && stream.current() === ">" &&
-          (modeSpec = findMatchingMode(tagInfo, stream))) {
-        var mode = CodeMirror.getMode(config, modeSpec);
-        var endTagA = getTagRegexp(tagName, true), endTag = getTagRegexp(tagName, false);
+      var style = htmlMode.token(stream, state.htmlState), tag = /\btag\b/.test(style), tagName
+      if (tag && !/[<>\s\/]/.test(stream.current()) &&
+          (tagName = state.htmlState.tagName && state.htmlState.tagName.toLowerCase()) &&
+          tags.hasOwnProperty(tagName)) {
+        state.inTag = tagName + " "
+      } else if (state.inTag && tag && />$/.test(stream.current())) {
+        var inTag = /^([\S]+) (.*)/.exec(state.inTag)
+        state.inTag = null
+        var modeSpec = stream.current() == ">" && findMatchingMode(tags[inTag[1]], inTag[2])
+        var mode = CodeMirror.getMode(config, modeSpec)
+        var endTagA = getTagRegexp(inTag[1], true), endTag = getTagRegexp(inTag[1], false);
         state.token = function (stream, state) {
           if (stream.match(endTagA, false)) {
             state.token = html;
@@ -10903,14 +10987,17 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
         };
         state.localMode = mode;
         state.localState = CodeMirror.startState(mode, htmlMode.indent(state.htmlState, ""));
+      } else if (state.inTag) {
+        state.inTag += stream.current()
+        if (stream.eol()) state.inTag += " "
       }
       return style;
     };
 
     return {
       startState: function () {
-        var state = htmlMode.startState();
-        return {token: html, localMode: null, localState: null, htmlState: state};
+        var state = CodeMirror.startState(htmlMode);
+        return {token: html, inTag: null, localMode: null, localState: null, htmlState: state};
       },
 
       copyState: function (state) {
@@ -10918,7 +11005,8 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
         if (state.localState) {
           local = CodeMirror.copyState(state.localMode, state.localState);
         }
-        return {token: state.token, localMode: state.localMode, localState: local,
+        return {token: state.token, inTag: state.inTag,
+                localMode: state.localMode, localState: local,
                 htmlState: CodeMirror.copyState(htmlMode, state.htmlState)};
       },
 
@@ -12368,7 +12456,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.18.5',
+        '_version' : '3.18.8',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -12398,8 +12486,7 @@ var cm = {
             'displayDateFormat' : '%F %j, %Y',
             'displayDateTimeFormat' : '%F %j, %Y, %H:%i',
             'tooltipTop' : 'targetHeight + 4'
-        },
-        'MAX_SAFE_INTEGER' : 9007199254740991
+        }
     },
     Mod = {},
     Part = {},
@@ -12591,22 +12678,26 @@ cm.merge = function(o1, o2){
     if(cm.isObject(o1)){
         o = cm.clone(o1);
         cm.forEach(o2, function(item, key){
-            if(item !== null){
-                try{
-                    if(item._isComponent){
-                        o[key] = item;
-                    }else if(cm.isObject(item) && item.constructor != Object){
-                        o[key] = item;
-                    }else if(cm.isObject(item)){
+            try{
+                if(item === undefined){
+                    o[key] = item;
+                }else if(item._isComponent){
+                    o[key] = item;
+                }else if(cm.isObject(item) && item.constructor != Object){
+                    o[key] = item;
+                }else if(cm.isObject(item)){
+                    if(cm.isObject(o[key])){
                         o[key] = cm.merge(o[key], item);
-                    }else if(cm.isArray(item)){
-                        o[key] = cm.clone(item);
                     }else{
-                        o[key] = item;
+                        o[key] = cm.clone(item);
                     }
-                }catch(e){
+                }else if(cm.isArray(item)){
+                    o[key] = cm.clone(item);
+                }else{
                     o[key] = item;
                 }
+            }catch(e){
+                o[key] = item;
             }
         });
     }else if(cm.isArray(o1)){
@@ -13406,9 +13497,9 @@ cm.node = cm.Node = function(){
     for(var ln = args.length; i < ln; i++){
         if(typeof args[i] != 'undefined'){
             if(typeof args[i] == 'string' || typeof args[i] == 'number'){
-                el.appendChild(cm.textNode(args[i]));
+                cm.appendChild(cm.textNode(args[i]), el);
             }else{
-                el.appendChild(args[i]);
+                cm.appendChild(args[i], el);
             }
         }
     }
@@ -13651,8 +13742,8 @@ cm.showSpecialTags = function(){
 };
 
 cm.strToHTML = function(str){
-    if(!str){
-        return null;
+    if(!str || cm.isNode(str)){
+        return str;
     }
     var node = cm.Node('div');
     node.insertAdjacentHTML('beforeend', str);
@@ -15710,7 +15801,8 @@ cm.createSvg = function(){
 
 /* ******* CLASS FABRIC ******* */
 
-cm.defineStack = {};
+cm._defineStack = {};
+cm._defineExtendStack = {};
 
 cm.defineHelper = function(name, data, handler){
     var that = this;
@@ -15732,15 +15824,23 @@ cm.defineHelper = function(name, data, handler){
             'short' : name.replace('.', ''),
             'split' : name.split('.')
         },
+        '_className' : name,
+        '_constructor' : handler,
         '_modules' : {},
         'params' : data['params']
     };
     // Inheritance
     if(data['extend']){
-        cm.getConstructor(data['extend'], function(classConstructor){
+        cm.getConstructor(data['extend'], function(classConstructor, className){
             handler.prototype = Object.create(classConstructor.prototype);
+            that.build._inheritName = className;
             that.build._inherit = classConstructor;
+            // Merge modules
             that.build._raw['modules'] = cm.merge(that.build._inherit.prototype._raw['modules'], that.build._raw['modules']);
+            // Add to extend stack
+            if(cm._defineExtendStack[className]){
+                cm._defineExtendStack[className].push(name);
+            }
         });
     }
     // Extend class by predefine modules
@@ -15759,10 +15859,13 @@ cm.defineHelper = function(name, data, handler){
     cm.forEach(that.build, function(value, key){
         handler.prototype[key] = value;
     });
-    // Extend Window object
-    cm.objectSelector(that.build._name['full'], window, handler);
     // Add to stack
-    cm.defineStack[name] = handler;
+    if(!cm._defineExtendStack[name]){
+        cm._defineExtendStack[name] = [];
+    }
+    cm._defineStack[name] = handler;
+    // Extend Window object
+    cm.objectSelector(name, window, handler);
 };
 
 cm.define = (function(){
@@ -15776,12 +15879,12 @@ cm.getConstructor = function(className, callback){
     var classConstructor;
     callback = typeof callback != 'undefined' ? callback : function(){};
     if(!className || className == '*'){
-        cm.forEach(cm.defineStack, function(classConstructor){
+        cm.forEach(cm._defineStack, function(classConstructor){
             callback(classConstructor, className, classConstructor.prototype);
         });
-        return cm.defineStack;
+        return cm._defineStack;
     }else{
-        classConstructor = cm.defineStack[className];
+        classConstructor = cm._defineStack[className];
         if(!classConstructor){
             if(cm._debug){
                 cm.errorLog({
@@ -15798,17 +15901,23 @@ cm.getConstructor = function(className, callback){
     }
 };
 
-cm.find = function(className, name, parentNode, callback){
+cm.find = function(className, name, parentNode, callback, params){
+    var items = [],
+        processed = {};
+    // Config
+    callback = typeof callback == 'function' ? callback : function(){};
+    params = cm.merge({
+        'childs' : false
+    }, params);
+    // Process
     if(!className || className == '*'){
-        var classes = [];
-        cm.forEach(cm.defineStack, function(classConstructor){
+        cm.forEach(cm._defineStack, function(classConstructor){
             if(classConstructor.prototype.findInStack){
-                classes = cm.extend(classes, classConstructor.prototype.findInStack(name, parentNode, callback));
+                items = cm.extend(items, classConstructor.prototype.findInStack(name, parentNode, callback));
             }
         });
-        return classes;
     }else{
-        var classConstructor = cm.defineStack[className];
+        var classConstructor = cm._defineStack[className];
         if(!classConstructor){
             cm.errorLog({
                 'type' : 'error',
@@ -15822,10 +15931,18 @@ cm.find = function(className, name, parentNode, callback){
                 'message' : ['Class', cm.strWrap(className, '"'), 'does not support Module Stack.'].join(' ')
             });
         }else{
-            return classConstructor.prototype.findInStack(name, parentNode, callback);
+            // Find instances of current constructor
+            items = cm.extend(items, classConstructor.prototype.findInStack(name, parentNode, callback));
+            // Find child instances, and stack processed parent classes to avoid infinity loops
+            if(params['childs'] && cm._defineExtendStack[className] && !processed[className]){
+                processed[className] = true;
+                cm.forEach(cm._defineExtendStack[className], function(childName){
+                    items = cm.extend(items, cm.find(childName, name, parentNode, callback, params));
+                });
+            }
         }
     }
-    return null;
+    return items;
 };
 
 cm.Finder = function(className, name, parentNode, callback, params){
@@ -15839,7 +15956,8 @@ cm.Finder = function(className, name, parentNode, callback, params){
         callback = typeof callback == 'function' ? callback : function(){};
         params = cm.merge({
             'event' : 'onRender',
-            'multiple' : false
+            'multiple' : false,
+            'childs' : false
         }, params);
         // Search in constructed classes
         finder = cm.find(className, name, parentNode, callback);
@@ -15856,14 +15974,18 @@ cm.Finder = function(className, name, parentNode, callback, params){
         classObject.removeEvent(params['event'], watcher);
         var isSame = classObject.isAppropriateToStack(name, parentNode, callback);
         if(isSame && !params['multiple'] && isEventBind){
-            that.remove();
+            that.remove(classObject._constructor);
         }
     };
 
-    that.remove = function(){
-        cm.getConstructor(className, function(classConstructor){
+    that.remove = function(classConstructor){
+        if(classConstructor){
             classConstructor.prototype.removeEvent(params['event'], watcher);
-        });
+        }else{
+            cm.getConstructor(className, function(classConstructor){
+                classConstructor.prototype.removeEvent(params['event'], watcher);
+            });
+        }
         return that;
     };
 
@@ -15954,7 +16076,7 @@ Mod['Extend'] = {
             if(o._config['extend']){
                 cm.forEach(o, function(item, key){
                     if(!/^(_)/.test(key)){
-                        cm.defineStack[that._name['full']].prototype[key] = item;
+                        cm._defineStack[that._name['full']].prototype[key] = item;
                     }
                 });
             }
@@ -16146,7 +16268,7 @@ Mod['Events'] = {
         var that = this;
         if(that.events[event]){
             cm.forEach(that.events[event], function(item){
-                item(that, params || {});
+                item(that, params);
             });
         }else{
             cm.errorLog({
@@ -17563,6 +17685,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         that.clearHandler = that.clear.bind(that);
         that.enableHandler = that.enable.bind(that);
         that.disableHandler = that.disable.bind(that);
+        that.clearEventHandler = that.clearEvent.bind(that);
         that.setActionHandler = that.setAction.bind(that);
         that.selectActionHandler = that.selectAction.bind(that);
         that.constructProcessHandler = that.constructProcess.bind(that);
@@ -17615,6 +17738,13 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
             cm.addClass(that.nodes['content'], 'disabled');
             that.triggerEvent('onDisable');
         }
+        return that;
+    };
+
+    classProto.clearEvent = function(e){
+        var that = this;
+        cm.preventDefault(e);
+        that.clear();
         return that;
     };
 
@@ -17685,6 +17815,14 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         return value;
     };
 
+    classProto.saveValue = function(value){
+        var that = this;
+        that.previousValue = that.value;
+        that.value = value;
+        that.nodes['hidden'].value = value;
+        return that;
+    };
+
     classProto.selectAction = function(value, triggerEvents){
         var that = this;
         triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
@@ -17695,9 +17833,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
     classProto.setAction = function(value, triggerEvents){
         var that = this;
         triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
-        that.previousValue = that.value;
-        that.value = value;
-        that.nodes['hidden'].value = that.value;
+        that.saveValue(value);
         triggerEvents && that.triggerEvent('onSet', that.value);
         return that;
     };
@@ -17715,6 +17851,8 @@ cm.define('Com.AbstractFileManager', {
     'extend' : 'Com.AbstractController',
     'events' : [
         'onSelect',
+        'onComplete',
+        'onGet',
         'onRenderHolderStart',
         'onRenderHolderProcess',
         'onRenderHolderEnd',
@@ -17726,22 +17864,8 @@ cm.define('Com.AbstractFileManager', {
         'embedStructure' : 'replace',
         'showStats' : true,
         'max' : 0,                                                        // 0 - infinity
-        'stats' : {
-            'mfu' : 0,                                                    // Max files per upload
-            'umf' : 0,                                                    // Max file size
-            'quote' : 0,
-            'usage' : 0
-        },
-        'langs' : {
-            'stats' : 'Statistics',
-            'stats_mfu' : 'You can upload up to %mfu% files at a time.',
-            'stats_umf' : 'Max file size: %umf%.',
-            'stats_quote' : 'Total storage: %quote%.',
-            'stats_usage' : 'Storage used: %usage%.',
-            'quote_unlimited' : 'Unlimited'
-        },
-        'Com.ToggleBox' : {
-            'renderStructure' : true
+        'Com.FileStats' : {
+            'embedStructure' : 'append'
         }
     }
 },
@@ -17758,6 +17882,16 @@ function(params){
 cm.getConstructor('Com.AbstractFileManager', function(classConstructor, className, classProto){
     var _inherit = classProto._inherit;
 
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.completeHandler = that.complete.bind(that);
+        // Add events
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
     classProto.validateParams = function(){
         var that = this;
         that.isMultiple = !that.params['max'] || that.params['max'] > 1;
@@ -17766,13 +17900,14 @@ cm.getConstructor('Com.AbstractFileManager', function(classConstructor, classNam
 
     classProto.get = function(){
         var that = this;
-        return that.items;
+        that.triggerEvent('onGet', that.items);
+        return that;
     };
 
-    classProto.select = function(){
+    classProto.complete = function(){
         var that = this;
-        that.triggerEvent('onSelect', that.items);
-        return that.items;
+        that.triggerEvent('onComplete', that.items);
+        return that
     };
 
     classProto.renderView = function(){
@@ -17781,8 +17916,8 @@ cm.getConstructor('Com.AbstractFileManager', function(classConstructor, classNam
         // Structure
         that.nodes['container'] = cm.node('div', {'class' : 'com__file-manager'},
             that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
-                that.nodes['holder'] = that.renderHolder(),
-                that.nodes['content'] = that.renderContent()
+                that.renderHolder(),
+                that.renderContent()
             )
         );
         // Events
@@ -17792,12 +17927,18 @@ cm.getConstructor('Com.AbstractFileManager', function(classConstructor, classNam
     };
 
     classProto.renderHolder = function(){
-        var that = this;
+        var that = this,
+            nodes = {};
         that.triggerEvent('onRenderHolderStart');
-        var node = cm.node('div', {'class' : 'com__file-manager__holder is-hidden'});
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'com__file-manager__holder is-hidden'},
+            nodes['inner'] = cm.node('div', {'class' : 'inner'})
+        );
+        // Events
         that.triggerEvent('onRenderHolderProcess');
+        that.nodes['holder'] = nodes;
         that.triggerEvent('onRenderHolderEnd');
-        return node;
+        return nodes['container'];
     };
 
     classProto.renderContent = function(){
@@ -17805,12 +17946,7 @@ cm.getConstructor('Com.AbstractFileManager', function(classConstructor, classNam
             nodes = {};
         that.triggerEvent('onRenderContentStart');
         // Structure
-        nodes['container'] = cm.node('div', {'class' : 'com__file-manager__content'});
-        // Render Stats
-        if(that.params['showStats']){
-            nodes['stats'] = that.renderStats();
-            cm.appendChild(nodes['stats'], nodes['container']);
-        }
+        nodes['container'] = cm.node('div', {'class' : 'com__file-manager__content is-hidden'});
         // Events
         that.triggerEvent('onRenderContentProcess');
         that.nodes['content'] = nodes;
@@ -17818,40 +17954,19 @@ cm.getConstructor('Com.AbstractFileManager', function(classConstructor, classNam
         return nodes['container'];
     };
 
-    classProto.renderStats = function(){
-        var that = this,
-            nodes = {},
-            vars = {
-                '%mfu%' : that.params['stats']['mfu'],
-                '%umf%' : that.params['stats']['umf'],
-                '%quote%' : that.params['stats']['quote'],
-                '%usage%' : that.params['stats']['usage']
-            };
-        vars['%quote%'] = parseFloat(vars['%quote%']) === 0 ? that.lang('quote_unlimited') : vars['%quote%'] + ' Mb';
-        vars['%usage%'] = vars['%usage%'] + ' Mb';
-        // Structure
-        nodes['container'] = cm.node('div', {'class' : 'com__file-manager__stats'},
-            nodes['content'] = cm.node('div', {'class' : 'com__file-manager__stats-list'},
-                cm.node('ul',
-                    cm.node('li', that.lang('stats_mfu', vars)),
-                    cm.node('li', that.lang('stats_umf', vars)),
-                    cm.node('li', that.lang('stats_quote', vars)),
-                    cm.node('li', that.lang('stats_usage', vars))
-                )
-            )
-        );
-        // Init Stats ToggleBox
-        cm.getConstructor('Com.ToggleBox', function(classObject, className){
-            that.components['togglebox'] = new classObject(
-                cm.merge(that.params[className], {
-                    'node' : nodes['content'],
-                    'title' : that.lang('stats')
-                })
-            );
-        });
-        // Append
-        that.nodes['stats'] = nodes;
-        return nodes['container'];
+    classProto.renderViewModel = function(){
+        var that = this;
+        if(that.params['showStats']){
+            cm.getConstructor('Com.FileStats', function(classObject, className){
+                cm.removeClass(that.nodes['content']['container'], 'is-hidden');
+                that.components['stats'] = new classObject(
+                    cm.merge(that.params[className], {
+                        'container' : that.nodes['content']['container']
+                    })
+                );
+            });
+        }
+        return that;
     };
 
     /* *** PROCESS FILES *** */
@@ -17886,7 +18001,8 @@ cm.getConstructor('Com.AbstractFileManager', function(classConstructor, classNam
 cm.define('Com.AbstractFileManagerContainer', {
     'extend' : 'Com.AbstractContainer',
     'events' : [
-        'onSelect'
+        'onComplete',
+        'onGet'
     ],
     'params' : {
         'constructor' : 'Com.AbstractFileManager',
@@ -17935,13 +18051,15 @@ cm.getConstructor('Com.AbstractFileManagerContainer', function(classConstructor,
     classProto.get = function(e){
         e && cm.preventDefault(e);
         var that = this;
-        return that.components['controller'] && that.components['controller'].get && that.components['controller'].get();
+        that.components['controller'] && that.components['controller'].get && that.components['controller'].get();
+        return that;
     };
 
-    classProto.select = function(e){
+    classProto.complete = function(e){
         e && cm.preventDefault(e);
         var that = this;
-        return that.components['controller'] && that.components['controller'].select && that.components['controller'].select();
+        that.components['controller'] && that.components['controller'].complete && that.components['controller'].complete();
+        return that;
     };
 
     classProto.validateParamsEnd = function(){
@@ -17954,9 +18072,11 @@ cm.getConstructor('Com.AbstractFileManagerContainer', function(classConstructor,
 
     classProto.renderControllerProcess = function(){
         var that = this;
-        that.components['controller'].addEvent('onSelect', function(my, data){
-            that.triggerEvent('onSelect', data);
-            that.close();
+        that.components['controller'].addEvent('onGet', function(my, data){
+            that.afterGet(data);
+        });
+        that.components['controller'].addEvent('onComplete', function(my, data){
+            that.afterComplete(data);
         });
         return that;
     };
@@ -17966,13 +18086,28 @@ cm.getConstructor('Com.AbstractFileManagerContainer', function(classConstructor,
         // Structure
         that.nodes['placeholder']['buttons'] = cm.node('div', {'class' : 'pt__buttons pull-right'},
             that.nodes['placeholder']['buttonsInner'] = cm.node('div', {'class' : 'inner'},
-                that.nodes['placeholder']['close'] = cm.node('button', {'class' : 'button button-transparent'}, that.lang('close')),
-                that.nodes['placeholder']['save'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('save'))
+                that.nodes['placeholder']['close'] = cm.node('button', {'type' : 'button', 'class' : 'button button-transparent'}, that.lang('close')),
+                that.nodes['placeholder']['save'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('save'))
             )
         );
         // Events
         cm.addEvent(that.nodes['placeholder']['close'], 'click', that.closeHandler);
-        cm.addEvent(that.nodes['placeholder']['save'], 'click', that.selectHandler);
+        cm.addEvent(that.nodes['placeholder']['save'], 'click', that.completeHandler);
+        return that;
+    };
+
+    /* *** AFTER EVENTS *** */
+
+    classProto.afterGet = function(data){
+        var that = this;
+        that.triggerEvent('onGet', data);
+        return that;
+    };
+
+    classProto.afterComplete = function(data){
+        var that = this;
+        that.triggerEvent('onComplete', data);
+        that.close();
         return that;
     };
 });
@@ -19480,6 +19615,7 @@ function(params){
     that.rawValue = null;
     that.isInputsLinked = false;
     that.lastInput = null;
+    // Call parent class construct
     Com.AbstractInput.apply(that, arguments);
 });
 
@@ -21665,6 +21801,8 @@ function(params){
     };
 
     var render = function(){
+        var storageLeftCollapsed,
+            storageRightCollapsed;
         // Left Sidebar
         cm.addEvent(that.nodes['leftButton'], 'click', toggleLeft);
         // Right sidebar
@@ -21674,8 +21812,10 @@ function(params){
         that.isRightCollapsed = cm.isClass(that.params['node'], 'is-sidebar-right-collapsed');
         // Check storage
         if(that.params['remember']){
-            that.isLeftCollapsed = that.storageRead('isLeftCollapsed');
-            that.isRightCollapsed = that.storageRead('isRightCollapsed');
+            storageLeftCollapsed = that.storageRead('isLeftCollapsed');
+            storageRightCollapsed = that.storageRead('isRightCollapsed');
+            that.isLeftCollapsed = storageLeftCollapsed !== null ? storageLeftCollapsed : that.isLeftCollapsed;
+            that.isRightCollapsed = storageRightCollapsed !== null ? storageRightCollapsed : that.isRightCollapsed;
         }
         // Check sidebars visibility
         if(!cm.inDOM(that.nodes['leftContainer']) || cm.getStyle(that.nodes['leftContainer'], 'display') == 'none'){
@@ -21818,12 +21958,12 @@ function(params){
 
     var render = function(){
         if(that.params['autoInit']){
-            cm.forEach(cm.defineStack, function(classConstructor){
+            cm.forEach(cm._defineStack, function(classConstructor){
                 that.add(classConstructor.prototype._name['full'], function(node){
                     new classConstructor({
                         'node' : node
                     });
-                });
+                }, null, classConstructor.prototype.params['collectorPriority']);
             });
         }
     };
@@ -23818,7 +23958,8 @@ cm.define('Com.Dialog', {
         'closeButton' : true,
         'closeTitle' : true,
         'closeOnBackground' : false,
-        'openTime' : 'cm._config.animDuration',
+        'openTime' : null,
+        'duration' : 'cm._config.animDuration',
         'autoOpen' : true,
         'appendOnRender' : false,
         'removeOnClose' : true,
@@ -23838,16 +23979,17 @@ cm.define('Com.Dialog', {
 function(params){
     var that = this,
         contentHeight,
-        nodes = {},
-        anim = {};
+        nodes = {};
 
     that.isOpen = false;
     that.isFocus = false;
     that.isRemoved = false;
     that.isDestructed = false;
+    that.openInterval = null;
     that.resizeInterval = null;
 
     var init = function(){
+        getLESSVariables();
         that.setParams(params);
         that.convertEvents(that.params['events']);
         that.getDataConfig(that.params['content']);
@@ -23860,6 +24002,10 @@ function(params){
         // Open
         that.params['autoOpen'] && open();
     };
+
+    var getLESSVariables = function(){
+        that.params['duration'] = cm.getTransitionDurationFromLESS('ComDialog-Duration', that.params['duration']);
+    };
     
     var validateParams = function(){
         if(that.params['size'] == 'fullscreen'){
@@ -23867,6 +24013,9 @@ function(params){
             that.params['height'] = '100%';
             that.params['indentX'] = 0;
             that.params['indentY'] = 0;
+        }
+        if(that.params['openTime'] !== undefined && that.params['openTime'] !== null){
+            that.params['duration'] = that.params['openTime'];
         }
     };
 
@@ -23926,8 +24075,6 @@ function(params){
         renderContent(that.params['content']);
         // Embed buttons
         renderButtons(that.params['buttons']);
-        // Init animation
-        anim['container'] = new cm.Animation(nodes['container']);
         // Events
         cm.addEvent(nodes['container'], 'mouseover', function(e){
             var target = cm.getEventTarget(e);
@@ -24111,12 +24258,14 @@ function(params){
             // Add close event on Esc press
             cm.addEvent(window, 'keydown', windowClickEvent);
             // Animate
-            anim['container'].go({'style' : {'opacity' : '1'}, 'duration' : that.params['openTime'], 'onStop' : function(){
+            cm.addClass(nodes['container'], 'is-open', true);
+            that.openInterval && clearTimeout(that.openInterval);
+            that.openInterval = setTimeout(function(){
                 params['onEnd']();
                 // Open Event
                 that.triggerEvent('onOpen');
                 that.triggerEvent('onOpenEnd');
-            }});
+            }, that.params['duration']);
             // Open Event
             that.triggerEvent('onOpenStart');
         }
@@ -24136,20 +24285,18 @@ function(params){
                 cm.removeClass(cm.getDocumentHtml(), 'cm__scroll--none');
             }
             // Animate
-            anim['container'].go({
-                'style' : {'opacity' : '0'},
-                'duration' : that.params['openTime'],
-                'onStop' : function(){
-                    clearResizeInterval();
-                    nodes['container'].style.display = 'none';
-                    // Remove Window
-                    that.params['removeOnClose'] && remove();
-                    params['onEnd']();
-                    // Close Event
-                    that.triggerEvent('onClose');
-                    that.triggerEvent('onCloseEnd');
-                }
-            });
+            cm.removeClass(nodes['container'], 'is-open', true);
+            that.openInterval && clearTimeout(that.openInterval);
+            that.openInterval = setTimeout(function(){
+                clearResizeInterval();
+                nodes['container'].style.display = 'none';
+                // Remove Window
+                that.params['removeOnClose'] && remove();
+                params['onEnd']();
+                // Close Event
+                that.triggerEvent('onClose');
+                that.triggerEvent('onCloseEnd');
+            }, that.params['duration']);
             // Close Event
             that.triggerEvent('onCloseStart');
         }
@@ -25567,7 +25714,8 @@ cm.define('Com.FileDropzone', {
         'max' : 0,                                  // 0 - infinity
         'duration' : 'cm._config.animDuration',
         'langs' : {
-            'drop_here' : 'drop files here'
+            'drop_single' : 'drop file here',
+            'drop_multiple' : 'drop files here'
         },
         'Com.FileReader' : {}
     }
@@ -25604,6 +25752,15 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
         return that;
     };
 
+    classProto.validateParams = function(){
+        var that = this;
+        // Validate Language Strings
+        that.setLangs({
+            'drop' : !that.params['max'] || that.params['max'] > 1 ? that.lang('drop_multiple') : that.lang('drop_single')
+        });
+        return that;
+    };
+
     classProto.getLESSVariablesEnd = function(){
         var that = this;
         that.params['height'] = cm.getLESSVariable('ComFileDropzone-Height', that.params['height'], true);
@@ -25631,7 +25788,7 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
         that.nodes['container'] = cm.node('div', {'class' : 'com__file-dropzone'},
             cm.node('div', {'class' : 'inner'},
                 cm.node('div', {'class' : 'title'},
-                    cm.node('div', {'class' : 'label'}, that.lang('drop_here')),
+                    cm.node('div', {'class' : 'label'}, that.lang('drop')),
                     cm.node('div', {'class' : 'icon cm-i cm-i__circle-arrow-down'})
                 )
             )
@@ -25798,7 +25955,6 @@ function(params){
     var that = this;
     that.myNodes = {};
     that.myComponents = {};
-    that.rawValue = null;
     // Call parent class construct
     Com.AbstractInput.apply(that, arguments);
 });
@@ -25839,22 +25995,11 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
         return that;
     };
 
-    classProto.getFile = function(){
-        var that = this;
-        return that.rawValue;
-    };
-
     classProto.initComponentsStart = function(){
         var that = this;
         cm.getConstructor('Com.FileReader', function(classObject){
             that.myComponents['validator'] = new classObject();
         });
-        return that;
-    };
-
-    classProto.constructProcess = function(){
-        var that = this;
-        that.set(that.rawValue, false);
         return that;
     };
 
@@ -25865,25 +26010,6 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
             '_browse_local' : that.params['fileManager'] ? that.lang('browse_local') : that.lang('browse'),
             '_browse_filemanager' : that.params['local'] ? that.lang('browse_filemanager') : that.lang('browse')
         });
-        // Validate Value
-        if(!cm.isEmpty(that.params['file'])){
-            if(cm.isEmpty(that.params['file']['value'])){
-                if(cm.isObject(that.params['value'])){
-                    that.params['file']['value'] = that.params['value']['value'];
-                }else{
-                    that.params['file']['value'] = that.params['value'];
-                }
-            }
-            that.rawValue = that.myComponents['validator'].validate(that.params['file']);
-        }else if(cm.isObject(that.params['value'])){
-            that.rawValue = that.myComponents['validator'].validate(that.params['value']);
-        }else if(!cm.isEmpty(that.params['value'])){
-            that.rawValue = that.myComponents['validator'].validate({
-                'value' : that.params['value']
-            });
-        }else{
-            that.rawValue = that.myComponents['validator'].validate();
-        }
         // Other
         that.params['dropzone'] = !that.params['local'] ? false : that.params['dropzone'];
         that.params['local'] = that.params['fileUploader'] ? false : that.params['local'];
@@ -25892,17 +26018,21 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
     };
 
     classProto.validateValue = function(value){
+        var that = this,
+            item = that.myComponents['validator'].validate(value);
+        return !cm.isEmpty(item['value']) ? item : '';
+    };
+
+    classProto.saveValue = function(value){
         var that = this;
-        if(cm.isObject(value)){
-            that.rawValue = that.myComponents['validator'].validate(value);
-        }else if(!cm.isEmpty(value)){
-            that.rawValue = that.myComponents['validator'].validate({
-                'value' : value
-            });
+        that.previousValue = that.value;
+        that.value = value;
+        if(!cm.isEmpty(value)){
+            that.nodes['hidden'].value = JSON.stringify(value);
         }else{
-            that.rawValue = that.myComponents['validator'].validate();
+            that.nodes['hidden'].value = ''
         }
-        return that.rawValue['value'];
+        return that;
     };
 
     classProto.renderViewModel = function(){
@@ -25938,7 +26068,7 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
                         'node' : that.myNodes['browseFileManager']
                     })
                 );
-                that.myComponents['fileManager'].addEvent('onSelect', function(my, data){
+                that.myComponents['fileManager'].addEvent('onComplete', function(my, data){
                     that.processFiles(data);
                 });
             });
@@ -25951,7 +26081,7 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
                         'node' : that.myNodes['browseFileUploader']
                     })
                 );
-                that.myComponents['fileUploader'].addEvent('onSelect', function(my, data){
+                that.myComponents['fileUploader'].addEvent('onComplete', function(my, data){
                     that.processFiles(data);
                 });
             });
@@ -25968,7 +26098,7 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
                 that.myNodes['content'] = cm.node('div', {'class' : 'com__file-input__holder'},
                     cm.node('div', {'class' : 'pt__file-line'},
                         that.myNodes['contentInner'] = cm.node('div', {'class' : 'inner'},
-                            that.myNodes['clear'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('remove')),
+                            that.myNodes['clear'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('remove')),
                             that.myNodes['label'] = cm.node('div', {'class' : 'label'})
                         )
                     )
@@ -25978,7 +26108,7 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
         // Render Browse Buttons
         if(that.params['local']){
             that.myNodes['browseLocal'] = cm.node('div', {'class' : 'browse-button'},
-                cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_local')),
+                cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('_browse_local')),
                 cm.node('div', {'class' : 'inner'},
                     that.myNodes['input'] = cm.node('input', {'type' : 'file'})
                 )
@@ -25986,16 +26116,16 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
             cm.insertFirst(that.myNodes['browseLocal'], that.myNodes['contentInner']);
         }
         if(that.params['fileManager']){
-            that.myNodes['browseFileManager'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
+            that.myNodes['browseFileManager'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
             cm.insertFirst(that.myNodes['browseFileManager'], that.myNodes['contentInner']);
         }
         if(that.params['fileUploader']){
-            that.myNodes['browseFileUploader'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('browse'));
+            that.myNodes['browseFileUploader'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('browse'));
             cm.insertFirst(that.myNodes['browseFileUploader'], that.myNodes['contentInner']);
         }
         // Events
         that.triggerEvent('onRenderContentProcess');
-        cm.addEvent(that.myNodes['clear'], 'click', that.clearHandler);
+        cm.addEvent(that.myNodes['clear'], 'click', that.clearEventHandler);
         cm.addEvent(that.myNodes['input'], 'change', that.browseActionHandler);
         that.triggerEvent('onRenderContentEnd');
         // Push
@@ -26015,9 +26145,9 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
         }else{
             cm.clearNode(that.myNodes['label']);
             if(that.params['showLink']){
-                that.myNodes['link'] = cm.node('a', {'target' : '_blank', 'href' : that.rawValue['url'], 'title' : that.lang('open')}, that.rawValue['name']);
+                that.myNodes['link'] = cm.node('a', {'target' : '_blank', 'href' : that.value['url'], 'title' : that.lang('open')}, that.value['name']);
             }else{
-                that.myNodes['link'] = cm.textNode(that.rawValue['name']);
+                that.myNodes['link'] = cm.textNode(that.value['name']);
             }
             cm.appendChild(that.myNodes['link'], that.myNodes['label']);
             cm.addClass(that.myNodes['browseLocal'], 'is-hidden');
@@ -26034,6 +26164,7 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
     classProto.browseAction = function(e){
         var that = this,
             file = e.target.files[0];
+        cm.preventDefault(e);
         // Read File
         that.processFiles(file);
         return that;
@@ -26097,9 +26228,7 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
         that.triggerEvent('onConstructStart');
         that.setParams(params);
         that.convertEvents(that.params['events']);
-        that.triggerEvent('onRenderStart');
         that.render();
-        that.triggerEvent('onRender');
         that.triggerEvent('onConstruct');
         that.triggerEvent('onConstructEnd');
         return that;
@@ -26107,7 +26236,9 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
 
     classProto.render = function(){
         var that = this;
+        that.triggerEvent('onRenderStart');
         that.read(that.params['file']);
+        that.triggerEvent('onRender');
         return that;
     };
 
@@ -26116,9 +26247,7 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
         if(cm.isFileReader && cm.isFile(file)){
             that.triggerEvent('onReadStart', file);
             // Config
-            var item = that.validate({
-                'file' : file
-            });
+            var item = that.validate(file);
             that.triggerEvent('onReadProcess', item);
             // Read File
             var reader = new FileReader();
@@ -26138,32 +26267,124 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
     };
 
     classProto.validate = function(o){
-        o = cm.merge({
-            'file' : null,
-            'value' : null,
-            'error' : null,
-            'name' : '',
-            'size' : 0,
-            'url' : null
-        }, o);
-        if(cm.isFile(o['file'])){
-            o['name'] = o['file'].name;
-            o['size'] = o['file'].size;
-            o['url'] = window.URL.createObjectURL(o['file']);
-        }else{
-            o['name'] = cm.isEmpty(o['name']) ? o['value'] : o['name'];
-            o['url'] = cm.isEmpty(o['url']) ? o['value'] : o['url'];
+        var that = this,
+            item = {
+                '_type' : 'file',
+                'value' : null,
+                'error' : null,
+                'name' : '',
+                'size' : 0,
+                'url' : null
+            },
+            parsed;
+        if(cm.isFile(o)){
+            item['name'] = o.name;
+            item['size'] = o.size;
+            item['url'] = window.URL.createObjectURL(o);
+        }else if(cm.isObject(o)){
+            item = cm.merge(item, o);
+            item['name'] = cm.isEmpty(item['name']) ? item['value'] : item['name'];
+            item['url'] = cm.isEmpty(item['url']) ? item['value'] : item['url'];
+        }else if(!cm.isEmpty(o)){
+            parsed = cm.parseJSON(o);
+            if(cm.isObject(parsed)){
+                item = that.validate(parsed);
+            }else{
+                item = that.validate({
+                    'value' : o
+                })
+            }
         }
-        return o;
+        return item;
+    };
+});
+cm.define('Com.FileStats', {
+    'extend' : 'Com.AbstractController',
+    'params' : {
+        'mfu' : 0,                                                    // Max files per upload
+        'umf' : 0,                                                    // Max file size
+        'quote' : 0,
+        'usage' : 0,
+        'inline' : false,
+        'toggleBox' : true,
+        'langs' : {
+            'stats' : 'Statistics',
+            'mfu' : 'You can upload up to %mfu% files at a time.',
+            'umf' : 'Max file size: %umf%.',
+            'quote' : 'Total storage: %quote%.',
+            'usage' : 'Storage used: %usage%.',
+            'quote_unlimited' : 'Unlimited'
+        },
+        'Com.ToggleBox' : {
+            'renderStructure' : true
+        }
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.FileStats', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.renderView = function(){
+        var that = this,
+            vars = {
+                '%mfu%' : that.params['mfu'],
+                '%umf%' : that.params['umf'],
+                '%quote%' : that.params['quote'],
+                '%usage%' : that.params['usage']
+            };
+        vars['%quote%'] = parseFloat(vars['%quote%']) === 0 ? that.lang('quote_unlimited') : vars['%quote%'] + ' Mb';
+        vars['%usage%'] = vars['%usage%'] + ' Mb';
+        that.triggerEvent('onRenderViewStart');
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'com__file-stats'},
+            that.nodes['content'] = cm.node('div', {'class' : 'com__file-stats__list'},
+                cm.node('ul',
+                    cm.node('li', {'class' : 'icon small info'}),
+                    cm.node('li', that.lang('mfu', vars)),
+                    cm.node('li', that.lang('umf', vars)),
+                    cm.node('li', that.lang('quote', vars)),
+                    cm.node('li', that.lang('usage', vars))
+                )
+            )
+        );
+        that.params['inline'] && cm.addClass(that.nodes['content'], 'is-inline');
+        // Events
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Init ToggleBox
+        if(that.params['toggleBox']){
+            cm.getConstructor('Com.ToggleBox', function(classObject, className){
+                that.components['togglebox'] = new classObject(
+                    cm.merge(that.params[className], {
+                        'node' : that.nodes['content'],
+                        'title' : that.lang('stats')
+                    })
+                );
+            });
+        }
+        return that;
     };
 });
 cm.define('Com.FileUploader', {
     'extend' : 'Com.AbstractController',
     'events' : [
-        'onSelect'
+        'onSelect',
+        'onComplete',
+        'onGet'
     ],
     'params' : {
         'max' : 0,
+        'showStats' : true,
         'local' : true,
         'inputConstructor' : 'Com.MultipleFileInput',
         'inputParams' : {
@@ -26176,7 +26397,8 @@ cm.define('Com.FileUploader', {
         'fileManager' : true,
         'fileManagerConstructor' : 'Com.AbstractFileManager',
         'fileManagerParams' : {
-            'embedStructure' : 'append'
+            'embedStructure' : 'append',
+            'showStats' : false
         },
         'dropzone' : true,
         'dropzoneConstructor' : 'Com.FileDropzone',
@@ -26188,9 +26410,14 @@ cm.define('Com.FileUploader', {
             'embedStructure' : 'append',
             'toggleOnHashChange' : false
         },
+        'Com.FileStats' : {
+            'embedStructure' : 'append',
+            'toggleBox' : false,
+            'inline' : true
+        },
         'Com.FileReader' : {},
         'langs' : {
-            'tab_local' : 'Upload Local',
+            'tab_local' : 'Select From PC',
             'tab_filemanager' : 'File Manager',
             'browse_local_single' : 'Choose file',
             'browse_local_multiple' : 'Choose files',
@@ -26215,6 +26442,7 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
     classProto.construct = function(){
         var that = this;
         // Bind context to methods
+        that.completeHandler = that.complete.bind(that);
         that.browseActionHandler = that.browseAction.bind(that);
         that.processFilesHandler = that.processFiles.bind(that);
         // Add events
@@ -26224,25 +26452,37 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
     };
 
     classProto.get = function(){
-        var that = this;
+        var that = this,
+            data;
         if(that.activeTab){
             switch(that.activeTab['id']){
                 case 'local':
-                    that.items = that.components['local'].getFiles();
+                    data = that.components['local'].get();
+                    that.afterGet(data);
                     break;
                 case 'fileManager':
-                    that.items = that.components['fileManager'].get();
+                    that.components['fileManager'].get();
                     break;
             }
         }
-        return that.items || [];
+        return that;
     };
 
-    classProto.select = function(){
-        var that = this;
-        that.items = that.get();
-        that.triggerEvent('onSelect', that.items);
-        return that.items;
+    classProto.complete = function(){
+        var that = this,
+            data;
+        if(that.activeTab){
+            switch(that.activeTab['id']){
+                case 'local':
+                    data = that.components['local'].get();
+                    that.afterComplete(data);
+                    break;
+                case 'fileManager':
+                    that.components['fileManager'].complete();
+                    break;
+            }
+        }
+        return that;
     };
 
     classProto.validateParams = function(){
@@ -26334,6 +26574,12 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
                         'node' : that.nodes['fileManager']['holder']
                     })
                 );
+                that.components['fileManager'].addEvent('onGet', function(my, data){
+                    that.afterGet(data);
+                });
+                that.components['fileManager'].addEvent('onComplete', function(my, data){
+                    that.afterComplete(data);
+                });
             });
         }
         // Init Tabset
@@ -26362,6 +26608,16 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
             }
             that.components['tabset'].set(that.params['local'] ? 'local' : 'fileManager');
         });
+        // Init Stats
+        if(that.params['showStats']){
+            cm.getConstructor('Com.FileStats', function(classObject, className){
+                that.components['stats'] = new classObject(
+                    cm.merge(that.params[className], {
+                        'container' : that.nodes['content']
+                    })
+                );
+            });
+        }
         return that;
     };
 
@@ -26375,9 +26631,9 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
                     cm.node('div', {'class' : 'pt__buttons pull-center'},
                         cm.node('div', {'class' : 'inner'},
                             cm.node('div', {'class' : 'browse-button'},
-                                cm.node('button', {'class' : 'button button-primary button--xlarge'}, that.lang('browse_local')),
+                                cm.node('button', {'type' : 'button','class' : 'button button-primary button--xlarge'}, that.lang('browse_local')),
                                 cm.node('div', {'class' : 'inner'},
-                                    nodes['input'] = cm.node('input', {'type' : 'file', 'multiple' : that.isMultiple})
+                                    nodes['input'] = cm.node('input', {'type' : 'file'})
                                 )
                             )
                         )
@@ -26389,6 +26645,7 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
             )
         );
         // Events
+        that.isMultiple && nodes['input'].setAttribute('multiple', 'multiple');
         cm.addEvent(nodes['input'], 'change', that.browseActionHandler);
         return nodes;
     };
@@ -26405,11 +26662,28 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
         return nodes;
     };
 
+    /* *** AFTER EVENTS *** */
+
+    classProto.afterGet = function(data){
+        var that = this;
+        that.items = data;
+        that.triggerEvent('onGet', that.items);
+        return that;
+    };
+
+    classProto.afterComplete = function(data){
+        var that = this;
+        that.items = data;
+        that.triggerEvent('onComplete', that.items);
+        return that;
+    };
+
     /* *** PROCESS FILES *** */
 
     classProto.browseAction = function(e){
         var that = this,
             length = that.params['max'] ? Math.min(e.target.files.length, (that.params['max'] - that.items.length)) : e.target.files.length;
+        cm.preventDefault(e);
         cm.forEach(length, function(i){
             that.processFiles(e.target.files[i]);
         });
@@ -26433,7 +26707,8 @@ cm.getConstructor('Com.FileUploader', function(classConstructor, className, clas
 cm.define('Com.FileUploaderContainer', {
     'extend' : 'Com.AbstractContainer',
     'events' : [
-        'onSelect'
+        'onComplete',
+        'onGet'
     ],
     'params' : {
         'constructor' : 'Com.FileUploader',
@@ -26467,7 +26742,8 @@ cm.getConstructor('Com.FileUploaderContainer', function(classConstructor, classN
         that.validateParamsEndHandler = that.validateParamsEnd.bind(that);
         that.renderControllerProcessHandler = that.renderControllerProcess.bind(that);
         that.getHandler = that.get.bind(that);
-        that.selectHandler = that.select.bind(that);
+        that.completeHandler = that.complete.bind(that);
+        that.afterCompleteHandler = that.afterComplete.bind(that);
         // Add events
         that.addEvent('onValidateParamsEnd', that.validateParamsEndHandler);
         that.addEvent('onRenderControllerProcess', that.renderControllerProcessHandler);
@@ -26479,13 +26755,15 @@ cm.getConstructor('Com.FileUploaderContainer', function(classConstructor, classN
     classProto.get = function(e){
         e && cm.preventDefault(e);
         var that = this;
-        return that.components['controller'] && that.components['controller'].get && that.components['controller'].get();
+        that.components['controller'] && that.components['controller'].get && that.components['controller'].get();
+        return that;
     };
 
-    classProto.select = function(e){
+    classProto.complete = function(e){
         e && cm.preventDefault(e);
         var that = this;
-        return that.components['controller'] && that.components['controller'].select && that.components['controller'].select();
+        that.components['controller'] && that.components['controller'].complete && that.components['controller'].complete();
+        return that;
     };
 
     classProto.validateParamsEnd = function(){
@@ -26498,9 +26776,11 @@ cm.getConstructor('Com.FileUploaderContainer', function(classConstructor, classN
 
     classProto.renderControllerProcess = function(){
         var that = this;
-        that.components['controller'].addEvent('onSelect', function(my, data){
-            that.triggerEvent('onSelect', data);
-            that.close();
+        that.components['controller'].addEvent('onGet', function(my, data){
+            that.afterGet(data);
+        });
+        that.components['controller'].addEvent('onComplete', function(my, data){
+            that.afterComplete(data);
         });
         return that;
     };
@@ -26510,13 +26790,28 @@ cm.getConstructor('Com.FileUploaderContainer', function(classConstructor, classN
         // Structure
         that.nodes['placeholder']['buttons'] = cm.node('div', {'class' : 'pt__buttons pull-right'},
             that.nodes['placeholder']['buttonsInner'] = cm.node('div', {'class' : 'inner'},
-                that.nodes['placeholder']['close'] = cm.node('button', {'class' : 'button button-transparent'}, that.lang('close')),
-                that.nodes['placeholder']['save'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('save'))
+                that.nodes['placeholder']['close'] = cm.node('button', {'type' : 'button', 'class' : 'button button-transparent'}, that.lang('close')),
+                that.nodes['placeholder']['save'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('save'))
             )
         );
         // Events
         cm.addEvent(that.nodes['placeholder']['close'], 'click', that.closeHandler);
-        cm.addEvent(that.nodes['placeholder']['save'], 'click', that.selectHandler);
+        cm.addEvent(that.nodes['placeholder']['save'], 'click', that.completeHandler);
+        return that;
+    };
+
+    /* *** AFTER EVENTS *** */
+
+    classProto.afterGet = function(data){
+        var that = this;
+        that.triggerEvent('onGet', data);
+        return that;
+    };
+
+    classProto.afterComplete = function(data){
+        var that = this;
+        that.triggerEvent('onComplete', data);
+        that.close();
         return that;
     };
 });
@@ -28797,6 +29092,59 @@ Com.FormFields.add('image-input', {
     'node' : cm.node('input'),
     'constructor' : 'Com.ImageInput'
 });
+cm.define('Com.Input', {
+    'extend' : 'Com.AbstractInput',
+    'params' : {
+    }
+},
+function(params){
+    var that = this;
+    that.myNodes = {};
+    // Call parent class construct
+    Com.AbstractInput.apply(that, arguments);
+});
+
+cm.getConstructor('Com.Input', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.setValueHandler = that.setValue.bind(that);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.renderContent = function(){
+        var that = this;
+        that.triggerEvent('onRenderContentStart');
+        // Structure
+        that.myNodes['container'] = cm.node('div', {'class' : 'pt__input'},
+            that.myNodes['input'] = cm.node('input', {'type' : 'text'})
+        );
+        // Events
+        that.triggerEvent('onRenderContentProcess');
+        cm.addEvent(that.myNodes['input'], 'blur', that.setValueHandler);
+        cm.addEvent(that.myNodes['input'], 'keypress', function(e){
+            if(cm.isKeyCode(e.keyCode, 'enter')){
+                cm.preventDefault(e);
+                that.setValue();
+                that.myNodes['input'].blur();
+            }
+        });
+        that.triggerEvent('onRenderContentEnd');
+        // Push
+        return that.myNodes['container'];
+    };
+
+    classProto.setValue = function(triggerEvents){
+        var that = this;
+        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        that.set(that.myNodes['input'].value, triggerEvents);
+        return that;
+    };
+});
 cm.define('Com.Menu', {
     'modules' : [
         'Params',
@@ -29284,19 +29632,10 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
         return that;
     };
 
-    classProto.getFiles = function(){
-        var that = this,
-            data = [],
-            value;
-        cm.forEach(that.items, function(item){
-            value = (item['controller'] && item['controller'].getFile) ? item['controller'].getFile() : null;
-            value && data.push(value);
-        });
-        return data;
-    };
 
     classProto.validateParamsEnd = function(){
         var that = this;
+        that.isMultiple = !that.params['max'] || that.params['max'] > 1;
         // Validate Language Strings
         that.setLangs({
             '_browse_local' : that.params['fileManager'] ? that.lang('browse_local') : that.lang('browse'),
@@ -29306,6 +29645,9 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
         that.params['dropzoneParams']['max'] = that.params['max'];
         that.params['fileManagerParams']['params']['max'] = that.params['max'];
         that.params['fileUploaderParams']['params']['max'] = that.params['max'];
+        // File Uploader
+        that.params['fileUploaderParams']['params']['local'] = that.params['local'];
+        that.params['fileUploaderParams']['params']['fileManager'] = that.params['fileManager'];
         // Other
         that.params['dropzone'] = !that.params['local'] ? false : that.params['dropzone'];
         that.params['local'] = that.params['fileUploader'] ? false : that.params['local'];
@@ -29347,7 +29689,7 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
                         'node' : that.myNodes['browseFileManager']
                     })
                 );
-                that.myComponents['fileManager'].addEvent('onSelect', function(my, data){
+                that.myComponents['fileManager'].addEvent('onComplete', function(my, data){
                     that.processFiles(data);
                 });
             });
@@ -29360,7 +29702,7 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
                         'node' : that.myNodes['browseFileUploader']
                     })
                 );
-                that.myComponents['fileUploader'].addEvent('onSelect', function(my, data){
+                that.myComponents['fileUploader'].addEvent('onComplete', function(my, data){
                     that.processFiles(data);
                 });
             });
@@ -29381,19 +29723,20 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
         // Render Browse Buttons
         if(that.params['local']){
             that.myNodes['browseLocal'] = cm.node('div', {'class' : 'browse-button'},
-                cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_local')),
+                cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('_browse_local')),
                 cm.node('div', {'class' : 'inner'},
-                    that.myNodes['input'] = cm.node('input', {'type' : 'file', 'multiple' : that.isMultiple})
+                    that.myNodes['input'] = cm.node('input', {'type' : 'file'})
                 )
             );
+            that.isMultiple && that.myNodes['input'].setAttribute('multiple', 'multiple');
             cm.insertFirst(that.myNodes['browseLocal'], that.myNodes['contentInner']);
         }
         if(that.params['fileManager']){
-            that.myNodes['browseFileManager'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
+            that.myNodes['browseFileManager'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
             cm.insertFirst(that.myNodes['browseFileManager'], that.myNodes['contentInner']);
         }
         if(that.params['fileUploader']){
-            that.myNodes['browseFileUploader'] = cm.node('button', {'class' : 'button button-primary'}, that.lang('browse'));
+            that.myNodes['browseFileUploader'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('browse'));
             cm.insertFirst(that.myNodes['browseFileUploader'], that.myNodes['contentInner']);
         }
         if(!that.hasButtons){
@@ -35693,7 +36036,7 @@ cm.define('Com.ToggleBox', {
         'onHide'
     ],
     'params' : {
-        'node' : cm.Node('div'),
+        'node' : cm.node('div'),
         'name' : '',
         'renderStructure' : false,
         'embedStructure' : 'replace',
@@ -35746,6 +36089,7 @@ function(params){
     };
 
     var render = function(){
+        var storageCollapsed;
         // Render Structure
         if(that.params['renderStructure']){
             that.nodes['container'] = cm.Node('dl', {'class' : 'com__togglebox'},
@@ -35782,7 +36126,8 @@ function(params){
         that.isCollapsed = cm.isClass(that.nodes['container'], 'is-hide') || !cm.isClass(that.nodes['container'], 'is-show');
         // Check storage
         if(that.params['remember']){
-            that.isCollapsed = that.storageRead('isCollapsed');
+            storageCollapsed = that.storageRead('isCollapsed');
+            that.isCollapsed = storageCollapsed !== null ? storageCollapsed : that.isCollapsed;
         }
         // Trigger collapse event
         if(that.isCollapsed){
@@ -36951,11 +37296,10 @@ cm.define('Com.elFinderFileManager', {
             url : '',
             lang : {},
             dotFiles : false,
-            destroyOnClose : true,
             useBrowserHistory : false,
+            resizable : false,
             commandsOptions : {
                 getfile : {
-                    oncomplete: 'close',
                     folders : false,
                     multiple : false
                 }
@@ -36965,6 +37309,7 @@ cm.define('Com.elFinderFileManager', {
 },
 function(params){
     var that = this;
+    that.getFilesProcessType = null;
     // Call parent class construct
     Com.AbstractFileManager.apply(that, arguments);
 });
@@ -36975,49 +37320,61 @@ cm.getConstructor('Com.elFinderFileManager', function(classConstructor, classNam
     classProto.construct = function(){
         var that = this;
         // Bind context to methods
-        that.destructProcessHandler = that.destructProcess.bind(that);
-        that.selectFileEventHandler = that.selectFileEvent.bind(that);
-        // Add events
-        that.addEvent('onDestructProcess', that.destructProcessHandler);
+        that.getFilesEventHandler = that.getFilesEvent.bind(that);
         // Call parent method
         _inherit.prototype.construct.apply(that, arguments);
         return that;
     };
 
-    classProto.select = function(){
+    classProto.get = function(){
         var that = this;
+        that.getFilesProcessType = 'get';
         if(that.components['controller']){
             that.components['controller'].exec('getfile');
         }else{
-            that.triggerEvent('onSelect', that.items);
+            _inherit.prototype.get.apply(that, arguments);
         }
-        return that.items;
+        return that;
     };
 
-    classProto.destructProcess = function(){
+    classProto.complete = function(){
+        var that = this;
+        that.getFilesProcessType = 'complete';
+        if(that.components['controller']){
+            that.components['controller'].exec('getfile');
+        }else{
+            _inherit.prototype.complete.apply(that, arguments);
+        }
+        return that;
+    };
+
+    classProto.redraw = function(){
         var that = this;
         if(that.components['controller']){
-            //that.components['controller'].exec('destroy');
+            that.components['controller'].resize();
         }
+        that.triggerEvent('onRedraw');
         return that;
     };
 
     classProto.renderViewModel = function(){
         var that = this;
+        // Call parent method
+        _inherit.prototype.renderViewModel.apply(that, arguments);
         // Init elFinder
         if(typeof elFinder != 'undefined'){
-            cm.removeClass(that.nodes['holder'], 'is-hidden');
-            that.components['controller'] = new elFinder(that.nodes['holder'], cm.merge(that.params['config'], {
-                commandsOptions : {
-                    getfile : {
-                        multiple: that.isMultiple
-                    }
-                },
-                getFileCallback : function(data) {
-                    that.processFiles(data);
-                }
-            }));
-            that.components['controller'].bind('select', that.selectFileEventHandler);
+            that.components['controller'] = new elFinder(that.nodes['holder']['inner'],
+                cm.merge(that.params['config'], {
+                    commandsOptions : {
+                        getfile : {
+                            multiple: that.isMultiple
+                        }
+                    },
+                    getFileCallback : that.getFilesEventHandler
+                })
+            );
+            // Show
+            cm.removeClass(that.nodes['holder']['container'], 'is-hidden');
             that.components['controller'].show();
         }else{
             cm.errorLog({
@@ -37028,26 +37385,27 @@ cm.getConstructor('Com.elFinderFileManager', function(classConstructor, classNam
         return that;
     };
 
-    classProto.selectFileEvent = function(e){
-        var that = this,
-            selected = e.data.selected,
-            files = [],
-            file,
-            max;
-        if(selected.length){
-            cm.forEach(selected, function(item){
-                file = that.components['controller'].file(item);
-                file && files.push(file);
-            });
+    /* *** PROCESS FILES *** */
+
+    classProto.getFilesEvent = function(data){
+        var that = this;
+        // Read files and convert to file format
+        that.processFiles(data);
+        // Callbacks
+        switch(that.getFilesProcessType){
+            case 'get':
+                _inherit.prototype.get.call(that);
+                break;
+            case 'complete':
+                _inherit.prototype.complete.call(that);
+                break;
+            default:
+                _inherit.prototype.complete.call(that);
+                break;
+
         }
-        if(!that.params['max']){
-            that.items = files;
-        }else if(files.length){
-            max = Math.min(0, that.params['max'], files.length);
-            that.items = files.slice(0, max);
-        }else{
-            that.items = [];
-        }
+        that.getFilesProcessType = null;
+        return that;
     };
 
     classProto.convertFile = function(data){
@@ -37074,7 +37432,7 @@ function(params){
     // Call parent class construct
     Com.AbstractFileManagerContainer.apply(that, arguments);
 });
-/*! ************ QuickSilk-Application v3.9.0 (2016-06-13 18:28) ************ */
+/*! ************ QuickSilk-Application v3.9.0 (2016-06-23 19:58) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
@@ -39124,12 +39482,12 @@ function(params){
     };
 
     var start = function(){
+        // Close Containers
+        cm.find('Com.AbstractContainer', null, null, function(classObject){
+            classObject.close();
+        }, {'childs' : true});
         // Render Popup
         renderPopup();
-        // Close Panels
-        cm.find('App.Panel', null, null, function(classObject){
-            classObject.close();
-        });
         // Save Sidebar State
         startOptions['sidebarExpanded'] = that.components['sidebar'].isExpanded;
         if(that.components['sidebar'].isExpanded){
@@ -39631,10 +39989,358 @@ function(params){
 
     init();
 });
+cm.define('App.MenuConstructor', {
+    'extend' : 'Com.AbstractController',
+    'params' : {
+        'node' : cm.node('div'),
+        'embedStructure' : 'none',
+        'collectorPriority' : 100,
+        'namePrefix' : 'params'
+    }
+},
+function(params){
+    var that = this;
+    that.items = {};
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('App.MenuConstructor', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        // Add events
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        return that;
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - render
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Find Components
+        cm.forEach(App.MenuConstructorNames, function(name, variable){
+            var item = {
+                'variable' : variable,
+                'name' : that.renameTableName(name)
+            };
+            cm.find('*', item['name'], that.nodes['container'], function(classObject){
+                item['controller'] = classObject;
+                item['controller'].addEvent('onChange', function(my, data){
+                    cm.log(data);
+                    item['value'] = data;
+                    that.processPreview();
+                });
+                item['value'] = item['controller'].get();
+            });
+            that.items[item['variable']] = item;
+        });
+        // Find Preview
+        new cm.Finder('App.MenuConstructorPreview', null, null, function(classObject){
+            that.components['preview'] = classObject;
+            that.processPreview();
+        });
+        return that;
+    };
+
+    classProto.renameTableName = function(name){
+        var that = this;
+        return that.params['namePrefix']
+            + name
+                .split('.')
+                .map(function(value){
+                    return '[' + value + ']';
+                })
+                .join('');
+    };
+
+    classProto.processPreview = function(){
+        var that = this,
+            data = {};
+        cm.forEach(that.items, function(item){
+            if(item['value'] !== undefined){
+                switch(item['value']['_type']){
+                    case 'file':
+                        data[item['variable']] = !cm.isEmpty(item['value']['url']) ? 'url("' + item['value']['url'] + '")' : 'none';
+                        break;
+                    case 'font':
+                        cm.forEach(App.MenuConstructorNamesFont, function(rule, name){
+                            data[item['variable'] + name] = item['value'][rule];
+                        });
+                        break;
+                    default:
+                        data[item['variable']] = item['value'];
+                        break;
+                }
+            }
+        });
+        that.components['preview'] && that.components['preview'].set(data);
+    };
+});
+
+/* ******* NAMES ******* */
+
+App.MenuConstructorNamesFont = {
+    'Weight' : 'font-weight',
+    'Style' : 'font-style',
+    'Decoration' : 'text-decoration',
+    'Family' : 'font-family',
+    'Size' : 'font-size',
+    'Color' : 'color'
+};
+
+App.MenuConstructorNames = {
+
+    /* *** PRIMARY ITEM *** */
+
+    'Primary-Item-Padding' : 'primary_items.inner-padding',
+    'Primary-Item-Indent' : 'primary_items.inner-between',
+
+    'Primary-Default-BackgroundColor' : 'primary_items.default.background-color',
+    'Primary-Default-BackgroundImage' : 'primary_items.default.background-image',
+    'Primary-Default-BackgroundRepeat' : 'primary_items.default.background-repeat',
+    'Primary-Default-BackgroundPosition' : 'primary_items.default.background-position',
+    'Primary-Default-BackgroundScaling' : 'primary_items.default.background-scaling',
+    'Primary-Default-BorderSize' : 'primary_items.default.border-size',
+    'Primary-Default-BorderStyle' : 'primary_items.default.border-style',
+    'Primary-Default-BorderColor' : 'primary_items.default.border-color',
+    'Primary-Default-BorderRadius' : 'primary_items.default.border-radius',
+    'Primary-Default-FontLineHeight' : 'primary_items.default.font.line-height',
+    'Primary-Default-FontWeight' : 'primary_items.default.font.font-weight',
+    'Primary-Default-FontStyle' : 'primary_items.default.font.font-style',
+    'Primary-Default-FontDecoration' : 'primary_items.default.font.text-decoration',
+    'Primary-Default-FontFamily' : 'primary_items.default.font.font-family',
+    'Primary-Default-FontSize' : 'primary_items.default.font.font-size',
+    'Primary-Default-FontColor' : 'primary_items.default.font.color',
+    'Primary-Default-Font' : 'primary_items.default.font',
+
+    'Primary-Hover-BackgroundColor' : 'primary_items.hover.background-color',
+    'Primary-Hover-BackgroundImage' : 'primary_items.hover.background-image',
+    'Primary-Hover-BackgroundRepeat' : 'primary_items.hover.background-repeat',
+    'Primary-Hover-BackgroundPosition' : 'primary_items.hover.background-position',
+    'Primary-Hover-BackgroundScaling' : 'primary_items.hover.background-scaling',
+    'Primary-Hover-BorderSize' : 'primary_items.hover.border-size',
+    'Primary-Hover-BorderStyle' : 'primary_items.hover.border-style',
+    'Primary-Hover-BorderColor' : 'primary_items.hover.border-color',
+    'Primary-Hover-BorderRadius' : 'primary_items.hover.border-radius',
+    'Primary-Hover-FontLineHeight' : 'primary_items.hover.font.line-height',
+    'Primary-Hover-FontWeight' : 'primary_items.hover.font.font-weight',
+    'Primary-Hover-FontStyle' : 'primary_items.hover.font.font-style',
+    'Primary-Hover-FontDecoration' : 'primary_items.hover.font.text-decoration',
+    'Primary-Hover-FontFamily' : 'primary_items.hover.font.font-family',
+    'Primary-Hover-FontSize' : 'primary_items.hover.font.font-size',
+    'Primary-Hover-FontColor' : 'primary_items.hover.font.color',
+    'Primary-Hover-Font' : 'primary_items.hover.font',
+
+    'Primary-Active-BackgroundColor' : 'primary_items.active.background-color',
+    'Primary-Active-BackgroundImage' : 'primary_items.active.background-image',
+    'Primary-Active-BackgroundRepeat' : 'primary_items.active.background-repeat',
+    'Primary-Active-BackgroundPosition' : 'primary_items.active.background-position',
+    'Primary-Active-BackgroundScaling' : 'primary_items.active.background-scaling',
+    'Primary-Active-BorderSize' : 'primary_items.active.border-size',
+    'Primary-Active-BorderStyle' : 'primary_items.active.border-style',
+    'Primary-Active-BorderColor' : 'primary_items.active.border-color',
+    'Primary-Active-BorderRadius' : 'primary_items.active.border-radius',
+    'Primary-Active-FontLineHeight' : 'primary_items.active.font.line-height',
+    'Primary-Active-FontWeight' : 'primary_items.active.font.font-weight',
+    'Primary-Active-FontStyle' : 'primary_items.active.font.font-style',
+    'Primary-Active-FontDecoration' : 'primary_items.active.font.text-decoration',
+    'Primary-Active-FontFamily' : 'primary_items.active.font.font-family',
+    'Primary-Active-FontSize' : 'primary_items.active.font.font-size',
+    'Primary-Active-FontColor' : 'primary_items.active.font.color',
+    'Primary-Active-Font' : 'primary_items.active.font',
+
+    /* *** PRIMARY CONTAINER *** */
+
+    'Primary-Container-Padding' : 'primary_container.inner-padding',
+    'Primary-Container-BackgroundColor' : 'primary_container.background-color',
+    'Primary-Container-BackgroundImage' : 'primary_container.background-image',
+    'Primary-Container-BackgroundRepeat' : 'primary_container.background-repeat',
+    'Primary-Container-BackgroundPosition' : 'primary_container.background-position',
+    'Primary-Container-BackgroundScaling' : 'primary_container.background-scaling',
+    'Primary-Container-BorderSize' : 'primary_container.border-size',
+    'Primary-Container-BorderStyle' : 'primary_container.border-style',
+    'Primary-Container-BorderColor' : 'primary_container.border-color',
+    'Primary-Container-BorderRadius' : 'primary_container.border-radius',
+
+    /* *** SECONDARY ITEM *** */
+
+    'Secondary-Item-Padding' : 'secondary_items.inner-padding',
+    'Secondary-Item-Indent' : 'secondary_items.inner-between',
+
+    'Secondary-Default-BackgroundColor' : 'secondary_items.default.background-color',
+    'Secondary-Default-BackgroundImage' : 'secondary_items.default.background-image',
+    'Secondary-Default-BackgroundRepeat' : 'secondary_items.default.background-repeat',
+    'Secondary-Default-BackgroundPosition' : 'secondary_items.default.background-position',
+    'Secondary-Default-BackgroundScaling' : 'secondary_items.default.background-scaling',
+    'Secondary-Default-BorderSize' : 'secondary_items.default.border-size',
+    'Secondary-Default-BorderStyle' : 'secondary_items.default.border-style',
+    'Secondary-Default-BorderColor' : 'secondary_items.default.border-color',
+    'Secondary-Default-BorderRadius' : 'secondary_items.default.border-radius',
+    'Secondary-Default-FontLineHeight' : 'secondary_items.default.font.line-height',
+    'Secondary-Default-FontWeight' : 'secondary_items.default.font.font-weight',
+    'Secondary-Default-FontStyle' : 'secondary_items.default.font.font-style',
+    'Secondary-Default-FontDecoration' : 'secondary_items.default.font.text-decoration',
+    'Secondary-Default-FontFamily' : 'secondary_items.default.font.font-family',
+    'Secondary-Default-FontSize' : 'secondary_items.default.font.font-size',
+    'Secondary-Default-FontColor' : 'secondary_items.default.font.color',
+    'Secondary-Default-Font' : 'secondary_items.default.font',
+
+    'Secondary-Hover-BackgroundColor' : 'secondary_items.hover.background-color',
+    'Secondary-Hover-BackgroundImage' : 'secondary_items.hover.background-image',
+    'Secondary-Hover-BackgroundRepeat' : 'secondary_items.hover.background-repeat',
+    'Secondary-Hover-BackgroundPosition' : 'secondary_items.hover.background-position',
+    'Secondary-Hover-BackgroundScaling' : 'secondary_items.hover.background-scaling',
+    'Secondary-Hover-BorderSize' : 'secondary_items.hover.border-size',
+    'Secondary-Hover-BorderStyle' : 'secondary_items.hover.border-style',
+    'Secondary-Hover-BorderColor' : 'secondary_items.hover.border-color',
+    'Secondary-Hover-BorderRadius' : 'secondary_items.hover.border-radius',
+    'Secondary-Hover-FontLineHeight' : 'secondary_items.hover.font.line-height',
+    'Secondary-Hover-FontWeight' : 'secondary_items.hover.font.font-weight',
+    'Secondary-Hover-FontStyle' : 'secondary_items.hover.font.font-style',
+    'Secondary-Hover-FontDecoration' : 'secondary_items.hover.font.text-decoration',
+    'Secondary-Hover-FontFamily' : 'secondary_items.hover.font.font-family',
+    'Secondary-Hover-FontSize' : 'secondary_items.hover.font.font-size',
+    'Secondary-Hover-FontColor' : 'secondary_items.hover.font.color',
+    'Secondary-Hover-Font' : 'secondary_items.hover.font',
+
+    'Secondary-Active-BackgroundColor' : 'secondary_items.active.background-color',
+    'Secondary-Active-BackgroundImage' : 'secondary_items.active.background-image',
+    'Secondary-Active-BackgroundRepeat' : 'secondary_items.active.background-repeat',
+    'Secondary-Active-BackgroundPosition' : 'secondary_items.active.background-position',
+    'Secondary-Active-BackgroundScaling' : 'secondary_items.active.background-scaling',
+    'Secondary-Active-BorderSize' : 'secondary_items.active.border-size',
+    'Secondary-Active-BorderStyle' : 'secondary_items.active.border-style',
+    'Secondary-Active-BorderColor' : 'secondary_items.active.border-color',
+    'Secondary-Active-BorderRadius' : 'secondary_items.active.border-radius',
+    'Secondary-Active-FontLineHeight' : 'secondary_items.active.font.line-height',
+    'Secondary-Active-FontWeight' : 'secondary_items.active.font.font-weight',
+    'Secondary-Active-FontStyle' : 'secondary_items.active.font.font-style',
+    'Secondary-Active-FontDecoration' : 'secondary_items.active.font.text-decoration',
+    'Secondary-Active-FontFamily' : 'secondary_items.active.font.font-family',
+    'Secondary-Active-FontSize' : 'secondary_items.active.font.font-size',
+    'Secondary-Active-FontColor' : 'secondary_items.active.font.color',
+    'Secondary-Active-Font' : 'secondary_items.active.font',
+
+    'Secondary-Container-Padding' : 'secondary_container.inner-padding',
+    'Secondary-Container-BackgroundColor' : 'secondary_container.background-color',
+    'Secondary-Container-BackgroundImage' : 'secondary_container.background-image',
+    'Secondary-Container-BackgroundRepeat' : 'secondary_container.background-repeat',
+    'Secondary-Container-BackgroundScaling' : 'secondary_container.background-scaling',
+    'Secondary-Container-BackgroundPosition' : 'secondary_container.background-position',
+    'Secondary-Container-BorderSize' : 'secondary_container.border-size',
+    'Secondary-Container-BorderStyle' : 'secondary_container.border-style',
+    'Secondary-Container-BorderColor' : 'secondary_container.border-color',
+    'Secondary-Container-BorderRadius' : 'secondary_container.border-radius',
+
+    /* *** MOBILE *** */
+
+    'Mobile-Padding' : 'mobile.inner-padding',
+    'Mobile-BackgroundColor' : 'mobile.background-color',
+    'Mobile-BackgroundImage' : 'mobile.menu-icon',
+    'Mobile-BorderSize' : 'mobile.border-size',
+    'Mobile-BorderStyle' : 'mobile.border-style',
+    'Mobile-BorderColor' : 'mobile.border-color',
+    'Mobile-BorderRadius' : 'mobile.border-radius',
+    'Mobile-FontLineHeight' : 'mobile.font.line-height',
+    'Mobile-FontWeight' : 'mobile.font.font-weight',
+    'Mobile-FontStyle' : 'mobile.font.font-style',
+    'Mobile-FontDecoration' : 'mobile.font.font-style',
+    'Mobile-FontFamily' : 'mobile.font.font-family',
+    'Mobile-FontSize' : 'mobile.font.font-size',
+    'Mobile-FontColor' : 'mobile.font.font-color',
+    'Mobile-Font' : 'mobile.font'
+};
+cm.define('App.MenuConstructorPreview', {
+    'extend' : 'Com.AbstractController',
+    'params' : {
+        'node' : cm.node('div'),
+        'embedStructure' : 'none',
+        'collectorPriority' : 100
+    }
+},
+function(params){
+    var that = this;
+    that.lessDefault = null;
+    that.lessDefaultVariables = {};
+    that.lessVariables = {};
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('App.MenuConstructorPreview', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.set = function(o){
+        var that = this;
+        that.lessVariables = o || {};
+        cm.log(o);
+        that.components['less'] && that.parseLess();
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        return that;
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - render
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Default Less Styles
+        that.lessDefault = that.nodes['less'].innerHTML;
+        // Less Parser
+        if(typeof window.less != 'undefined'){
+            that.components['less'] = window.less;
+            that.parseDefaultLessVariables();
+        }
+        return that;
+    };
+
+    classProto.parseLess = function(){
+        var that = this;
+        that.components['less'].render(that.lessDefault, {'modifyVars' : that.lessVariables}, function(e, data){
+            if(data && !cm.isEmpty(data['css'])){
+                that.nodes['css'].innerHTML = data['css'];
+            }
+        });
+        return that;
+    };
+
+    classProto.parseDefaultLessVariables = function(){
+        var that = this,
+            o = {},
+            variables,
+            name,
+            value;
+        that.components['less'].parse(that.lessDefault, {}, function (e, tree) {
+            if(tree){
+                variables = tree.variables();
+                cm.forEach(variables, function(item){
+                    name = item['name'].substring(1);
+                    value = item['value'].toCSS();
+                    o[name] = value;
+                });
+            }
+        });
+        that.lessDefaultVariables = o;
+        return that;
+    };
+});
 cm.define('App.MultipleFileInput', {
     'extend' : 'Com.MultipleFileInput',
     'params' : {
         'inputConstructor' : 'App.FileInput',
+        'local' : true,
         'fileManager' : true,
         'fileManagerConstructor' : 'App.elFinderFileManagerContainer',
         'fileUploader' : true,
@@ -39683,7 +40389,7 @@ cm.define('App.Panel', {
         'name' : '',
         'embedStructure' : 'append',
         'customEvents' : true,
-        'type' : 'sidebar',                             // sidebar | story | fullscreen
+        'type' : 'full',                                // sidebar | story | full
         'duration' : 'cm._config.animDurationLong',
         'autoOpen' : true,
         'destructOnClose' : true,
@@ -39701,6 +40407,7 @@ cm.define('App.Panel', {
         'responseContentKey' : 'data.content',
         'responseTitleKey' : 'data.title',
         'responseStatusKey' : 'data.success',
+        'responsePreviewKey' : 'data.preview',
         'renderContentOnSuccess' : false,
         'closeOnSuccess' : true,
         'get' : {                                       // Get dialog content ajax
@@ -39933,17 +40640,17 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
 
     /* *** CONTENT *** */
 
-    classProto.setTitle = function(value){
+    classProto.setTitle = function(node){
         var that = this;
         cm.customEvent.trigger(that.nodes['label'], 'destruct', {
             'type' : 'child',
             'self' : false
         });
         cm.clearNode(that.nodes['label']);
-        if(cm.isNode(value)){
-            cm.appendChild(value, that.nodes['label']);
-        }else if(!cm.isEmpty(value)){
-            that.nodes['label'].innerHTML = value;
+        node = cm.strToHTML(node);
+        if(!cm.isEmpty(node)){
+            cm.appendNodes(node, that.nodes['label']);
+            that.constructCollector(that.nodes['label']);
         }
         return that;
     };
@@ -39955,8 +40662,26 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
             'self' : false
         });
         cm.clearNode(that.nodes['contentHolder']);
-        if(cm.isNode(node)){
-            cm.appendChild(node, that.nodes['contentHolder']);
+        node = cm.strToHTML(node);
+        if(!cm.isEmpty(node)){
+            cm.appendNodes(node, that.nodes['contentHolder']);
+            that.constructCollector(that.nodes['contentHolder']);
+        }
+        return that;
+    };
+
+    classProto.setPreview = function(node){
+        var that = this;
+        cm.customEvent.trigger(that.nodes['previewHolder'], 'destruct', {
+            'type' : 'child',
+            'self' : false
+        });
+        cm.clearNode(that.nodes['previewHolder']);
+        node = cm.strToHTML(node);
+        if(!cm.isEmpty(node)){
+            cm.addClass(that.nodes['previewHolder'], 'is-show');
+            cm.appendNodes(node, that.nodes['previewHolder']);
+            that.constructCollector(that.nodes['previewHolder']);
         }
         return that;
     };
@@ -40039,7 +40764,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
                     }
                 })
                 .addEvent('onContentRender', function(){
-                    that.constructCollector();
+                    that.constructCollector(that.nodes['contentHolder']);
                 })
                 .addEvent('onContentRenderEnd', function(){
                     cm.customEvent.trigger(that.nodes['contentHolder'], 'redraw', {
@@ -40055,7 +40780,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
         var that = this;
         // Structure
         that.nodes['container'] = cm.node('div', {'class' : 'app__panel'},
-            that.nodes['dialogHolder'] = cm.node('div', {'class' : 'app__panel__holder'},
+            that.nodes['dialogHolder'] = cm.node('div', {'class' : 'app__panel__dialog-holder'},
                 that.nodes['dialog'] = cm.node('div', {'class' : 'app__panel__dialog'},
                     that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
                         that.nodes['title'] = cm.node('div', {'class' : 'title'},
@@ -40064,6 +40789,14 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
                         that.nodes['content'] = cm.node('div', {'class' : 'content'},
                             that.nodes['contentHolder'] = cm.node('div', {'class' : 'inner'})
                         )
+                    )
+                )
+            ),
+            that.nodes['previewHolder'] = cm.node('div', {'class' : 'app__panel__preview-holder'},
+                that.nodes['preview'] = cm.node('div', {'class' : 'app__panel__preview'},
+                    cm.node('div', {'class' : 'inner'},
+                        cm.node('div', {'class' : 'title'}),
+                        cm.node('div', {'class' : 'content'})
                     )
                 )
             )
@@ -40185,14 +40918,14 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
         return that;
     };
 
-    classProto.constructCollector = function(){
+    classProto.constructCollector = function(node){
         var that = this;
         if(that.params['constructCollector']){
             if(that.params['collector']){
-                that.params['collector'].construct(that.nodes['contentHolder']);
+                that.params['collector'].construct(node);
             }else{
                 cm.find('Com.Collector', null, null, function(classObject){
-                    classObject.construct(that.nodes['contentHolder']);
+                    classObject.construct(node);
                 });
             }
         }
@@ -40219,6 +40952,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
         var that = this;
         that.isLoaded = true;
         that.setTitle(cm.objectSelector(that.params['responseTitleKey'], data['response']));
+        that.setPreview(cm.objectSelector(that.params['responsePreviewKey'], data['response']));
         that.showButton(['close', 'save']);
         that.triggerEvent('onLoad');
         return that;
@@ -40240,6 +40974,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
         var that = this;
         if(!data['status'] || (data['status'] && that.params['renderContentOnSuccess'])){
             that.setTitle(cm.objectSelector(that.params['responseTitleKey'], data['response']));
+            that.setPreview(cm.objectSelector(that.params['responsePreviewKey'], data['response']));
             that.showButton(['close', 'save']);
         }
         if(data['status']){
@@ -40508,7 +41243,8 @@ function(params){
     };
 
     var render = function(){
-        var isExpanded;
+        var isExpanded,
+            storageExpanded;
         // Init tabset
         processTabset();
         // Add events on collapse buttons
@@ -40519,7 +41255,8 @@ function(params){
         isExpanded = cm.isClass(that.nodes['container'], 'is-expanded');
         // Check storage
         if(that.params['remember']){
-            isExpanded = that.storageRead('isExpanded');
+            storageExpanded = that.storageRead('isExpanded');
+            isExpanded = storageExpanded !== null ? storageExpanded : isExpanded;
         }
         // Trigger events
         if(isExpanded){
@@ -40698,7 +41435,7 @@ cm.define('App.Stylizer', {
         'onChange'
     ],
     'params' : {
-        'node' : cm.Node('div'),
+        'node' : cm.node('div'),
         'name' : '',
         'customEvents' : true,
         'active' : {},
@@ -40768,14 +41505,15 @@ function(params){
     var that = this;
 
     that.nodes = {
-        'container' : cm.Node('div'),
-        'input' : cm.Node('input', {'type' : 'hidden'}),
-        'preview' : cm.Node('div'),
+        'container' : cm.node('div'),
+        'input' : cm.node('input', {'type' : 'hidden'}),
+        'preview' : cm.node('div'),
         'tooltip' : {}
     };
     that.components = {};
     that.value = null;
     that.previousValue = null;
+    that.safeValue = null;
     that.isDestructed = null;
 
     var init = function(){
@@ -40882,24 +41620,24 @@ function(params){
 
     var renderTooltip = function(){
         // Structure
-        that.nodes['tooltip']['container'] = cm.Node('div', {'class' : 'pt__toolbar'},
-            cm.Node('div', {'class' : 'inner'},
-                that.nodes['tooltip']['group1'] = cm.Node('ul', {'class' : 'group'}),
-                that.nodes['tooltip']['group2'] = cm.Node('ul', {'class' : 'group'}),
-                that.nodes['tooltip']['group3'] = cm.Node('ul', {'class' : 'group'}),
-                that.nodes['tooltip']['group4'] = cm.Node('ul', {'class' : 'group'})
+        that.nodes['tooltip']['container'] = cm.node('div', {'class' : 'pt__toolbar'},
+            cm.node('div', {'class' : 'inner'},
+                that.nodes['tooltip']['group1'] = cm.node('ul', {'class' : 'group'}),
+                that.nodes['tooltip']['group2'] = cm.node('ul', {'class' : 'group'}),
+                that.nodes['tooltip']['group3'] = cm.node('ul', {'class' : 'group'}),
+                that.nodes['tooltip']['group4'] = cm.node('ul', {'class' : 'group'})
             )
         );
         // Font-Family
         if(that.params['controls']['font-family']){
             that.nodes['tooltip']['group2'].appendChild(
-                cm.Node('li', {'class' : 'is-select medium'},
-                    that.nodes['tooltip']['font-family'] = cm.Node('select', {'title' : that.lang('Font')})
+                cm.node('li', {'class' : 'is-select medium'},
+                    that.nodes['tooltip']['font-family'] = cm.node('select', {'title' : that.lang('Font')})
                 )
             );
             cm.forEach(that.params['styles']['font-family'], function(item){
                 that.nodes['tooltip']['font-family'].appendChild(
-                    cm.Node('option', {'value' : item, 'style' : {'font-family' : item}}, item.replace(/["']/g, '').split(',')[0])
+                    cm.node('option', {'value' : item, 'style' : {'font-family' : item}}, item.replace(/["']/g, '').split(',')[0])
                 );
             });
             that.components['font-family'] = new Com.Select(
@@ -40917,8 +41655,8 @@ function(params){
         if(that.params['controls']['font-weight']){
             // Button
             that.nodes['tooltip']['group1'].appendChild(
-                that.nodes['tooltip']['font-weight-button'] = cm.Node('li', {'class' : 'button button-secondary is-icon'},
-                    cm.Node('span', {'class' : 'icon toolbar bold'})
+                that.nodes['tooltip']['font-weight-button'] = cm.node('li', {'class' : 'button button-secondary is-icon'},
+                    cm.node('span', {'class' : 'icon toolbar bold'})
                 )
             );
             cm.addEvent(that.nodes['tooltip']['font-weight-button'], 'click', function(){
@@ -40926,13 +41664,13 @@ function(params){
             });
             // Select
             that.nodes['tooltip']['group2'].appendChild(
-                cm.Node('li', {'class' : 'is-select medium'},
-                    that.nodes['tooltip']['font-weight'] = cm.Node('select', {'title' : that.lang('Weight')})
+                cm.node('li', {'class' : 'is-select medium'},
+                    that.nodes['tooltip']['font-weight'] = cm.node('select', {'title' : that.lang('Weight')})
                 )
             );
             cm.forEach(that.params['styles']['font-weight'], function(item){
                 that.nodes['tooltip']['font-weight'].appendChild(
-                    cm.Node('option', {'value' : item}, that.lang(item))
+                    cm.node('option', {'value' : item}, that.lang(item))
                 );
             });
             that.components['font-weight'] = new Com.Select(
@@ -40950,8 +41688,8 @@ function(params){
         if(that.params['controls']['font-style']){
             // Button
             that.nodes['tooltip']['group1'].appendChild(
-                that.nodes['tooltip']['font-style-button'] = cm.Node('li', {'class' : 'button button-secondary is-icon'},
-                    cm.Node('span', {'class' : 'icon toolbar italic'})
+                that.nodes['tooltip']['font-style-button'] = cm.node('li', {'class' : 'button button-secondary is-icon'},
+                    cm.node('span', {'class' : 'icon toolbar italic'})
                 )
             );
             cm.addEvent(that.nodes['tooltip']['font-style-button'], 'click', function(){
@@ -40962,8 +41700,8 @@ function(params){
         if(that.params['controls']['text-decoration']){
             // Button
             that.nodes['tooltip']['group1'].appendChild(
-                that.nodes['tooltip']['text-decoration-button'] = cm.Node('li', {'class' : 'button button-secondary is-icon'},
-                    cm.Node('span', {'class' : 'icon toolbar underline'})
+                that.nodes['tooltip']['text-decoration-button'] = cm.node('li', {'class' : 'button button-secondary is-icon'},
+                    cm.node('span', {'class' : 'icon toolbar underline'})
                 )
             );
             cm.addEvent(that.nodes['tooltip']['text-decoration-button'], 'click', function(){
@@ -40974,13 +41712,13 @@ function(params){
         if(that.params['controls']['font-size']){
             // Select
             that.nodes['tooltip']['group2'].appendChild(
-                cm.Node('li', {'class' : 'is-select x-small'},
-                    that.nodes['tooltip']['font-size'] = cm.Node('select', {'title' : that.lang('Size')})
+                cm.node('li', {'class' : 'is-select x-small'},
+                    that.nodes['tooltip']['font-size'] = cm.node('select', {'title' : that.lang('Size')})
                 )
             );
             cm.forEach(that.params['styles']['font-size'], function(item){
                 that.nodes['tooltip']['font-size'].appendChild(
-                    cm.Node('option', {'value' : item}, item)
+                    cm.node('option', {'value' : item}, item)
                 );
             });
             that.components['font-size'] = new Com.Select(
@@ -40998,13 +41736,13 @@ function(params){
         if(that.params['controls']['line-height']){
             // Select
             that.nodes['tooltip']['group2'].appendChild(
-                cm.Node('li', {'class' : 'is-select x-small'},
-                    that.nodes['tooltip']['line-height'] = cm.Node('select', {'title' : that.lang('Leading')})
+                cm.node('li', {'class' : 'is-select x-small'},
+                    that.nodes['tooltip']['line-height'] = cm.node('select', {'title' : that.lang('Leading')})
                 )
             );
             cm.forEach(that.params['styles']['line-height'], function(item){
                 that.nodes['tooltip']['line-height'].appendChild(
-                    cm.Node('option', {'value' : item}, (item == 'normal'? that.lang('auto') : item))
+                    cm.node('option', {'value' : item}, (item == 'normal'? that.lang('auto') : item))
                 );
             });
             that.components['line-height'] = new Com.Select(
@@ -41021,8 +41759,8 @@ function(params){
         // Color
         if(that.params['controls']['color']){
             that.nodes['tooltip']['group3'].appendChild(
-                cm.Node('li', {'class' : 'is-select medium'},
-                    that.nodes['tooltip']['color'] = cm.Node('input', {'type' : 'text', 'title' : that.lang('Color')})
+                cm.node('li', {'class' : 'is-select medium'},
+                    that.nodes['tooltip']['color'] = cm.node('input', {'type' : 'text', 'title' : that.lang('Color')})
                 )
             );
             that.components['color'] = new Com.ColorPicker(
@@ -41041,13 +41779,13 @@ function(params){
         if(that.params['showResetButtons']){
             // Button
             that.nodes['tooltip']['group4'].appendChild(
-                cm.Node('li',
-                    that.nodes['tooltip']['reset-default-button'] = cm.Node('div', {'class' : 'button button-primary'}, that.lang('Reset to default'))
+                cm.node('li',
+                    that.nodes['tooltip']['reset-default-button'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('Reset to default'))
                 )
             );
             that.nodes['tooltip']['group4'].appendChild(
-                cm.Node('li',
-                    that.nodes['tooltip']['reset-current-button'] = cm.Node('div', {'class' : 'button button-primary'}, that.lang('Reset to current'))
+                cm.node('li',
+                    that.nodes['tooltip']['reset-current-button'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('Reset to current'))
                 )
             );
             cm.addEvent(that.nodes['tooltip']['reset-default-button'], 'click', function(){
@@ -41089,9 +41827,10 @@ function(params){
     };
 
     var set = function(styles, triggerEvents){
-        var prepared = cm.clone(styles);
         that.previousValue = cm.clone(that.value);
-        that.value = styles;
+        that.value = cm.clone(styles);
+        that.value['_type'] = 'font';
+        that.safeValue = cm.clone(that.value);
         // Set components
         cm.forEach(styles, function(value, key){
             if(that.components[key]){
@@ -41121,27 +41860,27 @@ function(params){
                     }
                     break;
                 case 'font-size':
-                    prepared[key] = [value, 'px'].join('');
+                    that.safeValue[key] = cm.isNumber(value) || /^\d+$/.test(value) ? (value + 'px') : value;
                     break;
                 case 'line-height':
-                    prepared[key] = value == 'normal'? value :[value, 'px'].join('');
+                    that.safeValue[key] = cm.isNumber(value) || /^\d+$/.test(value) ? (value + 'px') : value;
                     break;
             }
             // Set preview
-            that.nodes['preview'].style[cm.styleStrToKey(key)] = prepared[key];
+            that.nodes['preview'].style[cm.styleStrToKey(key)] = that.safeValue[key];
         });
         // Set hidden input data
-        that.nodes['input'].value = JSON.stringify(prepared);
+        that.nodes['input'].value = JSON.stringify(that.safeValue);
         // Trigger events
         if(triggerEvents){
-            that.triggerEvent('onSelect', that.value);
+            that.triggerEvent('onSelect', that.safeValue);
             eventOnChange();
         }
     };
 
     var eventOnChange = function(){
         if(JSON.stringify(that.value) != JSON.stringify(that.previousValue)){
-            that.triggerEvent('onChange', that.value);
+            that.triggerEvent('onChange', that.safeValue);
         }
     };
 
@@ -41169,7 +41908,7 @@ function(params){
     };
 
     that.get = function(){
-        return that.value;
+        return that.safeValue;
     };
 
     init();
@@ -42538,7 +43277,7 @@ cm.getConstructor('Dev.TBSC', function(classConstructor, className, classProto){
         return that;
     };
 });
-window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":14,"CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.16.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"250ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Open Sans, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"'Open Sans', arial, helvetica, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmInput-Padding":"6px","CmInput-DefaultBackground":"#ffffff","CmInput-HoverBackground":"#ffffff","CmInput-ActiveBackground":"#ffffff","CmInput-DisabledBackground":"#fafafa","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"28px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"150px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"250ms","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"28px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"24px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","CmMultipleFileInput-Count":3,"ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"28px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":23,"AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Default-Family":"Open Sans, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Open Sans, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Open Sans, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Open Sans, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Open Sans, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Open Sans, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Open Sans, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Open Sans, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#000000","AppTopMenu-Color":"#ffffff","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#000000","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"28px","AppPanel-Dialog-ButtonsHeight":"52px","AppPanel-Box-Indent":["24px","12px"],"AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"28px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"28px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"28px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"28px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"28px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
+window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":14,"CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.16.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"250ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Open Sans, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"'Open Sans', arial, helvetica, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmInput-Padding":"6px","CmInput-DefaultBackground":"#ffffff","CmInput-HoverBackground":"#ffffff","CmInput-ActiveBackground":"#ffffff","CmInput-DisabledBackground":"#fafafa","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"28px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"150px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"250ms","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"28px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"24px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"28px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":23,"AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Default-Family":"Open Sans, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Open Sans, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Open Sans, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Open Sans, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Open Sans, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Open Sans, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Open Sans, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Open Sans, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#000000","AppTopMenu-Color":"#ffffff","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#000000","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"28px","AppPanel-Dialog-ButtonsHeight":"52px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"28px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"28px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"28px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"28px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"28px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
 
 window.Collector = new Com.Collector({
         'autoInit' : true
