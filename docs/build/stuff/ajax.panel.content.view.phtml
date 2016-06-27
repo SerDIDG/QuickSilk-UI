@@ -19,19 +19,19 @@ $variables = array(
     'state' => 'active'
 );
 $primary_active = get_include_contents('ajax.panel.item.view.phtml', $variables);
-//
+
 $variables = array(
     'name' => 'secondary_items',
     'state' => 'default'
 );
 $secondary_default = get_include_contents('ajax.panel.item.view.phtml', $variables);
-//
+
 $variables = array(
     'name' => 'secondary_items',
     'state' => 'hover'
 );
 $secondary_hover = get_include_contents('ajax.panel.item.view.phtml', $variables);
-//
+
 $variables = array(
     'name' => 'secondary_items',
     'state' => 'active'
@@ -109,7 +109,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                             <dl class="pt__field is-box align-center">
                                 <dt>Indent Between Items</dt>
                                 <dd>
-                                    <input type="number" min="0" max="999" value="0" data-element="Com.Input" name="params[primary_items][inner-between]">
+                                    <input type="number" min="0" max="999" value="0" data-element="Com.IndentInput" name="params[primary_items][inner-between]">
                                 </dd>
                             </dl>
                         </div>
@@ -178,7 +178,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                             <dl class="pt__field is-box align-center">
                                 <dt>Indent Between Items</dt>
                                 <dd>
-                                    <input type="number" min="0" max="999" value="0" data-element="Com.Input" name="params[secondary_items][inner-between]">
+                                    <input type="number" min="0" max="999" value="0" data-element="Com.IndentInput" name="params[secondary_items][inner-between]">
                                 </dd>
                             </dl>
                         </div>
@@ -213,7 +213,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                             <option value="auto">Original size</option>
                             <option value="contain">Contain</option>
                             <option value="cover">Cover</option>
-                            <option value="fill">Fill</option>
+                            <option value="100% 100%">Fill</option>
                         </select>
                     </dd>
                 </dl>
@@ -330,7 +330,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                             <option value="auto">Original size</option>
                             <option value="contain">Contain</option>
                             <option value="cover">Cover</option>
-                            <option value="fill">Fill</option>
+                            <option value="100% 100%">Fill</option>
                         </select>
                     </dd>
                 </dl>

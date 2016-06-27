@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.18.8 (2016-06-23 19:58) ************ */
+/*! ************ MagpieUI v3.18.9 (2016-06-24 20:02) ************ */
 /*!
 Animate.css - http://daneden.me/animate
 Licensed under the MIT license - http://opensource.org/licenses/MIT
@@ -12772,6 +12772,9 @@ button.is-hidden {
 .com__file-uploader__files.is-hidden {
   display: none;
 }
+.com__file-uploader__local {
+  position: relative;
+}
 .com__file-uploader__local .com__file-uploader__title,
 .com__file-uploader__local .com__file-uploader__holder,
 .com__file-uploader__local .com__file-uploader__dropzone {
@@ -14386,9 +14389,13 @@ button.is-hidden {
   margin-bottom: 0;
 }
 .com__palette > .inner {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
   margin-top: -16px;
 }
-.com__palette > .inner:after {
+.com__palette > .inner:before {
   content: ".";
   display: block;
   clear: both;
@@ -14405,7 +14412,6 @@ button.is-hidden {
 .com__palette .b-palette,
 .com__palette .b-range {
   margin-right: 16px;
-  float: left;
   border-radius: 3px;
 }
 .com__palette .b-palette > .inner,
@@ -16262,7 +16268,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.9.0 (2016-06-23 19:58) ************ */
+/*! ************ QuickSilk-Application v3.9.1 (2016-06-24 19:56) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?23');

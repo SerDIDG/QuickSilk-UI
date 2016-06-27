@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.18.8 (2016-06-23 19:58) ************ */
+/*! ************ MagpieUI v3.18.9 (2016-06-24 20:02) ************ */
 @charset "UTF-8";
 
 /*!
@@ -13486,6 +13486,8 @@ button {
 }
 
 .com__file-uploader__local {
+    position: relative;
+
     .com__file-uploader__title,
     .com__file-uploader__holder,
     .com__file-uploader__dropzone {
@@ -14632,7 +14634,8 @@ button {
     .cm__box;
 
     > .inner {
-        .clearfix;
+        .display-flex;
+        .marginfix;
         margin-top: -@CmIndent-Small;
     }
 
@@ -14645,7 +14648,6 @@ button {
     .b-palette,
     .b-range {
         margin-right: @CmIndent-Small;
-        float: left;
         border-radius: @CmBorder-Radius;
 
         > .inner {
@@ -14789,7 +14791,6 @@ button {
 .com__palette__body * {
     .mx__user-select(none);
 }
-
 
 // /* *** MIXINS *** */
 
@@ -16436,7 +16437,7 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.9.0 (2016-06-23 19:58) ************ */
+/*! ************ QuickSilk-Application v3.9.1 (2016-06-24 19:56) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
