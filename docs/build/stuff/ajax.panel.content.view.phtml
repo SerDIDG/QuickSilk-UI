@@ -206,44 +206,32 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                         <input type="text" data-element="Com.FileInput" name="params[primary_container][background-image]">
                     </dd>
                 </dl>
-                <dl class="pt__field is-box">
-                    <dt>Image Scaling</dt>
-                    <dd>
-                        <select data-element="Com.Select" name="params[primary_container][background-scaling]">
-                            <option value="auto">Original size</option>
-                            <option value="contain">Contain</option>
-                            <option value="cover">Cover</option>
-                            <option value="100% 100%">Fill</option>
-                        </select>
-                    </dd>
-                </dl>
-                <dl class="pt__field is-box">
-                    <dt>Image Repeat</dt>
-                    <dd>
-                        <select data-element="Com.Select" name="params[primary_container][background-repeat]">
-                            <option value="no-repeat">No repeat</option>
-                            <option value="repeat-y">Repeat vertically</option>
-                            <option value="repeat-x">Repeat horizontally</option>
-                            <option value="repeat">Repeat both horizontally and vertically</option>
-                        </select>
-                    </dd>
-                </dl>
-                <dl class="pt__field is-box">
-                    <dt>Image Position</dt>
-                    <dd>
-                        <select data-element="Com.Select" name="params[primary_container][background-position]">
-                            <option value="left top">Top Left</option>
-                            <option value="center top">Top Center</option>
-                            <option value="right top">Top Right</option>
-                            <option value="left center">Middle Left</option>
-                            <option value="center center">Middle Center</option>
-                            <option value="right center">Middle Right</option>
-                            <option value="left bottom">Bottom Left</option>
-                            <option value="center bottom">Bottom Center</option>
-                            <option value="right bottom">Bottom Right</option>
-                        </select>
-                    </dd>
-                </dl>
+                <div class="pt__columns is-space-between">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box field-indent">
+                                <dt>Repeat</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.RepeatTools" name="params[primary_container][background-repeat]">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box field-indent">
+                                <dt>Scaling</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.ScaleTools" name="params[primary_container][background-scaling]">
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                            <dl class="pt__field is-box field-indent">
+                                <dt>Position</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.PositionTools" name="params[primary_container][background-position]">
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
                 <hr>
                 <div class="pt__columns">
                     <div class="inner">
@@ -323,44 +311,32 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                         <input type="text" data-element="Com.FileInput" name="params[secondary_container][background-image]">
                     </dd>
                 </dl>
-                <dl class="pt__field is-box">
-                    <dt>Image Scaling</dt>
-                    <dd>
-                        <select data-element="Com.Select" name="params[secondary_container][background-scaling]">
-                            <option value="auto">Original size</option>
-                            <option value="contain">Contain</option>
-                            <option value="cover">Cover</option>
-                            <option value="100% 100%">Fill</option>
-                        </select>
-                    </dd>
-                </dl>
-                <dl class="pt__field is-box">
-                    <dt>Image Repeat</dt>
-                    <dd>
-                        <select data-element="Com.Select" name="params[secondary_container][background-repeat]">
-                            <option value="no-repeat">No repeat</option>
-                            <option value="repeat-y">Repeat vertically</option>
-                            <option value="repeat-x">Repeat horizontally</option>
-                            <option value="repeat">Repeat both horizontally and vertically</option>
-                        </select>
-                    </dd>
-                </dl>
-                <dl class="pt__field is-box">
-                    <dt>Image Position</dt>
-                    <dd>
-                        <select data-element="Com.Select" name="params[secondary_container][background-position]">
-                            <option value="left top">Top Left</option>
-                            <option value="center top">Top Center</option>
-                            <option value="right top">Top Right</option>
-                            <option value="left center">Middle Left</option>
-                            <option value="center center">Middle Center</option>
-                            <option value="right center">Middle Right</option>
-                            <option value="left bottom">Bottom Left</option>
-                            <option value="center bottom">Bottom Center</option>
-                            <option value="right bottom">Bottom Right</option>
-                        </select>
-                    </dd>
-                </dl>
+                <div class="pt__columns is-space-between">
+                    <div class="inner">
+                        <div class="column">
+                            <dl class="pt__field is-box field-indent">
+                                <dt>Repeat</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.RepeatTools" name="params[secondary_container][background-repeat]">
+                                </dd>
+                            </dl>
+                            <dl class="pt__field is-box field-indent">
+                                <dt>Scaling</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.ScaleTools" name="params[secondary_container][background-scaling]">
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="column">
+                            <dl class="pt__field is-box field-indent">
+                                <dt>Position</dt>
+                                <dd>
+                                    <input type="text" data-element="Com.PositionTools" name="params[secondary_container][background-position]">
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
                 <hr>
                 <div class="pt__columns">
                     <div class="inner">
