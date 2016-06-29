@@ -229,6 +229,14 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                                     <input type="text" data-element="Com.PositionTools" name="params[primary_container][background-position]">
                                 </dd>
                             </dl>
+                            <dl class="pt__field is-box field-indent">
+                                <dd>
+                                    <div class="check-line">
+                                        <input type="checkbox" name="params[primary_container][background-attachment]">
+                                        <label for="params[primary_container][background-attachment]">Parallax</label>
+                                    </div>
+                                </dd>
+                            </dl>
                         </div>
                     </div>
                 </div>
@@ -334,6 +342,14 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                                     <input type="text" data-element="Com.PositionTools" name="params[secondary_container][background-position]">
                                 </dd>
                             </dl>
+                            <dl class="pt__field is-box field-indent">
+                                <dd>
+                                    <div class="check-line">
+                                        <input type="checkbox" name="params[secondary_container][background-attachment]">
+                                        <label for="params[secondary_container][background-attachment]">Parallax</label>
+                                    </div>
+                                </dd>
+                            </dl>
                         </div>
                     </div>
                 </div>
@@ -413,8 +429,8 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                         </span>
                     </dt>
                     <dd>
-                        <div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"name" : "params[mobile][font]", "default":{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
-                            <input data-node="input" type="hidden" value="" name="params[mobile][font]">
+                        <div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"name" : "params[mobile][font]", "showResetButtons" : false}'>
+                            <input data-node="input" type="hidden" name="params[mobile][font]" value='{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}'>
                             <div class="item-preview" data-node="preview">The quick brown fox jumps over the lazy dog</div>
                         </div>
                     </dd>

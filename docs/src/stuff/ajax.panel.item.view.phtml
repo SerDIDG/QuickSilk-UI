@@ -14,8 +14,8 @@ global $variables;
             </span>
 		</dt>
 		<dd>
-			<div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"name" : "params[<?=$variables['name']?>][<?=$variables['state']?>][font]", "default":{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
-				<input data-node="input" type="hidden" value="">
+			<div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"name" : "params[<?=$variables['name']?>][<?=$variables['state']?>][font]", "showResetButtons" : false}'>
+				<input data-node="input" type="hidden" value='{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}'>
 				<div class="item-preview" data-node="preview">The quick brown fox jumps over the lazy dog</div>
 			</div>
 		</dd>
@@ -54,6 +54,14 @@ global $variables;
 					<dt>Position</dt>
 					<dd>
 						<input type="text" data-element="Com.PositionTools" name="params[<?=$variables['name']?>][<?=$variables['state']?>][background-position]">
+					</dd>
+				</dl>
+				<dl class="pt__field is-box field-indent">
+					<dd>
+						<div class="check-line">
+							<input type="checkbox" value="fixed" name="params[<?=$variables['name']?>][<?=$variables['state']?>][background-attachment]" id="params[<?=$variables['name']?>][<?=$variables['state']?>][background-attachment]">
+							<label for="params[<?=$variables['name']?>][<?=$variables['state']?>][background-attachment]">Parallax</label>
+						</div>
 					</dd>
 				</dl>
 			</div>

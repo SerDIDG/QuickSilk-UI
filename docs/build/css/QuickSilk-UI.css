@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.19.0 (2016-06-28 20:34) ************ */
+/*! ************ MagpieUI v3.19.1 (2016-06-29 21:23) ************ */
 /*!
 Animate.css - http://daneden.me/animate
 Licensed under the MIT license - http://opensource.org/licenses/MIT
@@ -9150,6 +9150,16 @@ button.is-hidden {
   border-radius: 1px;
   color: #cccccc;
 }
+.pt__input.no-label .input,
+.pt__input.no-label input[type="text"],
+.pt__input.no-label input[type="email"],
+.pt__input.no-label input[type="number"],
+.pt__input.no-label input[type="time"],
+.pt__input.no-label input[type="password"],
+.pt__input.no-label textarea,
+.pt__input.no-label select {
+  font-size: 0;
+}
 .pt__input .input,
 .pt__input input[type="text"],
 .pt__input input[type="email"],
@@ -9178,44 +9188,44 @@ button.is-hidden {
   bottom: auto;
   left: auto;
 }
-.pt__input:not(.is-icon-outside) .input:not(:first-child),
-.pt__input:not(.is-icon-outside) input[type="text"]:not(:first-child),
-.pt__input:not(.is-icon-outside) input[type="email"]:not(:first-child),
-.pt__input:not(.is-icon-outside) input[type="number"]:not(:first-child),
-.pt__input:not(.is-icon-outside) input[type="time"]:not(:first-child),
-.pt__input:not(.is-icon-outside) input[type="password"]:not(:first-child),
-.pt__input:not(.is-icon-outside) textarea:not(:first-child),
-.pt__input:not(.is-icon-outside) select:not(:first-child) {
+.pt__input:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
   padding-left: 32px;
 }
-.pt__input:not(.is-icon-outside) .input:not(:last-child),
-.pt__input:not(.is-icon-outside) input[type="text"]:not(:last-child),
-.pt__input:not(.is-icon-outside) input[type="email"]:not(:last-child),
-.pt__input:not(.is-icon-outside) input[type="number"]:not(:last-child),
-.pt__input:not(.is-icon-outside) input[type="time"]:not(:last-child),
-.pt__input:not(.is-icon-outside) input[type="password"]:not(:last-child),
-.pt__input:not(.is-icon-outside) textarea:not(:last-child),
-.pt__input:not(.is-icon-outside) select:not(:last-child) {
+.pt__input:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
   padding-right: 32px;
 }
-.pt__input:not(.is-icon-outside).less-indent .input:not(:first-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="text"]:not(:first-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="email"]:not(:first-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="number"]:not(:first-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="time"]:not(:first-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="password"]:not(:first-child),
-.pt__input:not(.is-icon-outside).less-indent textarea:not(:first-child),
-.pt__input:not(.is-icon-outside).less-indent select:not(:first-child) {
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
   padding-left: 26px;
 }
-.pt__input:not(.is-icon-outside).less-indent .input:not(:last-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="text"]:not(:last-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="email"]:not(:last-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="number"]:not(:last-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="time"]:not(:last-child),
-.pt__input:not(.is-icon-outside).less-indent input[type="password"]:not(:last-child),
-.pt__input:not(.is-icon-outside).less-indent textarea:not(:last-child),
-.pt__input:not(.is-icon-outside).less-indent select:not(:last-child) {
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
   padding-right: 26px;
 }
 .pt__input.is-icon-outside .input:not(:first-child),
@@ -9249,6 +9259,17 @@ button.is-hidden {
 .pt__input.is-icon-outside textarea:not(:first-child):not(:last-child),
 .pt__input.is-icon-outside select:not(:first-child):not(:last-child) {
   width: calc(100% - 52px);
+}
+.pt__input.is-no-label .input,
+.pt__input.is-no-label input[type="text"],
+.pt__input.is-no-label input[type="email"],
+.pt__input.is-no-label input[type="number"],
+.pt__input.is-no-label input[type="time"],
+.pt__input.is-no-label input[type="password"],
+.pt__input.is-no-label textarea,
+.pt__input.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
 }
 /* ******* PART: LINE ******* */
 /* ****** PART: LINE: INFO ******* */
@@ -10326,6 +10347,9 @@ button.is-hidden {
   background-repeat: no-repeat;
   background-position: center center;
 }
+.pt__toolbar .group > li.size-field {
+  width: 28px;
+}
 .pt__toolbar .group > li.xxx-small {
   width: 32px;
 }
@@ -10391,6 +10415,12 @@ button.is-hidden {
 .pt__toolbar .group.is-merged > libutton.active {
   z-index: 2;
 }
+.pt__toolbar.is-inline > .inner {
+  margin-bottom: 0;
+}
+.pt__toolbar.is-inline .group > li {
+  margin-bottom: 0;
+}
 .pt__toolbar.is-flex > .inner > .left {
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -10401,6 +10431,8 @@ button.is-hidden {
   flex: 1 1 0;
   -webkit-justify-content: flex-start;
   justify-content: flex-start;
+  -webkit-align-items: center;
+  align-items: center;
 }
 .pt__toolbar.is-flex > .inner > .center {
   display: -webkit-flex;
@@ -10410,6 +10442,8 @@ button.is-hidden {
   -webkit-flex: 0 1 auto;
   -ms-flex: 0 1 auto;
   flex: 0 1 auto;
+  -webkit-align-items: center;
+  align-items: center;
 }
 .pt__toolbar.is-flex > .inner > .right {
   display: -webkit-flex;
@@ -10421,6 +10455,8 @@ button.is-hidden {
   flex: 1 1 0;
   -webkit-justify-content: flex-end;
   justify-content: flex-end;
+  -webkit-align-items: center;
+  align-items: center;
 }
 .pt__toolbar.is-flex .group {
   display: block;
@@ -16475,7 +16511,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.10.0 (2016-06-28 20:34) ************ */
+/*! ************ QuickSilk-Application v3.10.1 (2016-06-29 21:23) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?23');
@@ -18978,6 +19014,12 @@ html:not(.is-editing).is-editor .app__module__controls {
   bottom: 0;
   left: auto;
 }
+.app__panel__preview > .inner > .title .pt__toolbar:first-child {
+  margin-left: 12px;
+}
+.app__panel__preview > .inner > .title .pt__toolbar:last-child {
+  margin-right: 12px;
+}
 .app__panel__preview > .inner > .content {
   position: absolute;
   z-index: 1;
@@ -18997,11 +19039,21 @@ html:not(.is-editing).is-editor .app__module__controls {
   right: 0;
   bottom: 0;
   left: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
 .app__panel__preview > .inner > .content:not(:first-child) {
   top: 48px;
 }
 /* *** COMPONENTS *** */
+.app__panel__label {
+  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  color: #666666;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 48px;
+}
 .app__panel__togglebox {
   margin: 0;
 }
@@ -20663,8 +20715,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.mod__menu.is-horizontal .menu__sub a {
+.mod__menu.is-horizontal .menu__sub li a {
   white-space: nowrap;
+  text-align: left;
 }
 .mod__menu.pull-left .menu__menu ul,
 .mod__menu.pull-left .menu__menu a {
@@ -20754,8 +20807,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.mod__menu__sub--dropdown a {
+.mod__menu__sub--dropdown li a {
   white-space: nowrap;
+  text-align: left;
 }
 .mod__menu__sub--dropdown-active {
   visibility: visible;
@@ -22092,7 +22146,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__menu > ul {
   padding: 0;
-  background: transparent none top left no-repeat;
+  background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
   border-width: 0;
@@ -22100,7 +22154,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__menu > ul > li > a {
   padding: 2px 4px;
-  background: transparent none top left no-repeat;
+  background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
   border-width: 0;
@@ -22112,7 +22166,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__menu > ul > li > a:hover,
 .mod__menu--default .menu__menu > ul > li > a.hover {
-  background: transparent none top left no-repeat;
+  background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
   border-width: 0;
@@ -22124,7 +22178,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__menu > ul > li > a:active,
 .mod__menu--default .menu__menu > ul > li > a.active {
-  background: transparent none top left no-repeat;
+  background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
   border-width: 0;
@@ -22136,7 +22190,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__sub > ul {
   padding: 4px;
-  background: #ffffff none top left no-repeat;
+  background: #ffffff none top left no-repeat scroll;
   background-size: auto;
   border: solid #cccccc;
   border-width: 1px;
@@ -22150,7 +22204,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__sub > ul > li > a {
   padding: 2px 4px;
-  background: transparent none top left no-repeat;
+  background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
   border-width: 0;
@@ -22162,7 +22216,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__sub > ul > li > a:hover,
 .mod__menu--default .menu__sub > ul > li > a.hover {
-  background: transparent none top left no-repeat;
+  background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
   border-width: 0;
@@ -22174,7 +22228,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .mod__menu--default .menu__sub > ul > li > a:active,
 .mod__menu--default .menu__sub > ul > li > a.active {
-  background: transparent none top left no-repeat;
+  background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
   border-width: 0;

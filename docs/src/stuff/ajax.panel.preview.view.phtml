@@ -8,7 +8,35 @@ $html = file_get_contents('ajax.panel.preview.less');
 <div class="app__panel__preview" data-element="App.MenuConstructorPreview" data-node="AppMenuConstructorPreview:{}:container">
     <div class="inner" data-node="inner">
         <div class="title" data-node="title">
-            <div class="label" data-node="label">Preview</div>
+            <div class="pt__toolbar is-inline is-flex">
+                <div class="inner clear">
+                    <div class="left">
+                        <div class="app__panel__label">Preview</div>
+                    </div>
+                    <div class="right">
+                        <ul class="group">
+                            <li class="is-field medium">
+                                <select title="Set Preview View" name="view" data-element="Com.Select">
+                                    <option value="horizontal">Horizontal View</option>
+                                    <option value="vertical">Vertical View</option>
+                                    <option value="mobile">Mobile View</option>
+                                </select>
+                            </li>
+                            <li class="is-field medium">
+                                <select title="Set Preview Align" name="align" data-element="Com.Select">
+                                    <option value="left">Align Left</option>
+                                    <option value="center">Align Center</option>
+                                    <option value="right">Align Right</option>
+                                    <option value="justify">Align Justify</option>
+                                </select>
+                            </li>
+                            <li class="is-field size-field">
+                                <input type="text" title="Set Preview Background Color" name="background" value="#ffffff" data-element="Com.ColorPicker" data-config='{"showLabel" : false, "showClearButton" : false}'>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="content" data-node="content">
