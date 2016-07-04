@@ -19,19 +19,19 @@ $variables = array(
     'state' => 'active'
 );
 $primary_active = get_include_contents('ajax.panel.item.view.phtml', $variables);
-
+//
 $variables = array(
     'name' => 'secondary_items',
     'state' => 'default'
 );
 $secondary_default = get_include_contents('ajax.panel.item.view.phtml', $variables);
-
+//
 $variables = array(
     'name' => 'secondary_items',
     'state' => 'hover'
 );
 $secondary_hover = get_include_contents('ajax.panel.item.view.phtml', $variables);
-
+//
 $variables = array(
     'name' => 'secondary_items',
     'state' => 'active'
@@ -67,7 +67,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                     <dd>
                         <div class="pt__buttons pull-justify">
                             <div class="inner">
-                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Default State"}'>
+                                <div class="cm__button-wrapper" data-element="App.PanelContainer" data-node="AppPanelContainer:{}:container" data-config='{"title" : "Default State"}'>
                                     <div class="button button-secondary" data-node="button">Default</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
@@ -75,7 +75,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                                         </div>
                                     </div>
                                 </div>
-                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Hover State"}'>
+                                <div class="cm__button-wrapper" data-element="App.PanelContainer" data-node="AppPanelContainer:{}:container" data-config='{"title" : "Hover State"}'>
                                     <div class="button button-middle" data-node="button">Hover</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
@@ -83,7 +83,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                                         </div>
                                     </div>
                                 </div>
-                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Active State"}'>
+                                <div class="cm__button-wrapper" data-element="App.PanelContainer" data-node="AppPanelContainer:{}:container" data-config='{"title" : "Active State"}'>
                                     <div class="button button-primary" data-node="button">Active</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
@@ -136,7 +136,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                     <dd>
                         <div class="pt__buttons pull-justify">
                             <div class="inner">
-                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Default State"}'>
+                                <div class="cm__button-wrapper" data-element="App.PanelContainer" data-node="AppPanelContainer:{}:container" data-config='{"title" : "Default State"}'>
                                     <div class="button button-secondary" data-node="button">Default</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
@@ -144,7 +144,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                                         </div>
                                     </div>
                                 </div>
-                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Hover State"}'>
+                                <div class="cm__button-wrapper" data-element="App.PanelContainer" data-node="AppPanelContainer:{}:container" data-config='{"title" : "Hover State"}'>
                                     <div class="button button-middle" data-node="button">Hover</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
@@ -152,7 +152,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                                         </div>
                                     </div>
                                 </div>
-                                <div class="cm__button-wrapper" data-element="App.PanelHolder" data-node="AppPanelHolder:{}:container" data-config='{"title" : "Active State"}'>
+                                <div class="cm__button-wrapper" data-element="App.PanelContainer" data-node="AppPanelContainer:{}:container" data-config='{"title" : "Active State"}'>
                                     <div class="button button-primary" data-node="button">Active</div>
                                     <div class="hidden" data-node="holder">
                                         <div data-node="content">
@@ -203,7 +203,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                 <dl class="pt__field is-box">
                     <dt>Background Image</dt>
                     <dd>
-                        <input type="text" data-element="Com.FileInput" name="params[primary_container][background-image]">
+                        <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="params[primary_container][background-image]">
                     </dd>
                 </dl>
                 <div class="pt__columns is-space-between">
@@ -316,7 +316,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                 <dl class="pt__field is-box">
                     <dt>Background Image</dt>
                     <dd>
-                        <input type="text" data-element="Com.FileInput" name="params[secondary_container][background-image]">
+                        <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="params[secondary_container][background-image]">
                     </dd>
                 </dl>
                 <div class="pt__columns is-space-between">
