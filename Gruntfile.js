@@ -34,6 +34,9 @@ module.exports = function(grunt) {
                 ],
                 fonts : [
                     '<%= components.application.path %>/build/fonts'
+                ],
+                libs : [
+                    '<%= components.application.path %>/build/libs'
                 ]
             },
             common : {
@@ -49,6 +52,9 @@ module.exports = function(grunt) {
                 ],
                 fonts : [
                     '<%= components.common.path %>/build/fonts'
+                ],
+                libs : [
+                    '<%= components.common.path %>/build/libs'
                 ]
             }
         },
@@ -98,6 +104,9 @@ module.exports = function(grunt) {
             ],
             temp : [
                 '<%= paths.temp %>'
+            ],
+            'libs' : [
+                '<%= paths.build %>/libs/*'
             ]
         },
 
@@ -194,6 +203,19 @@ module.exports = function(grunt) {
                     dest : '<%= paths.build %>/fonts/'
                 }]
             },
+            libs : {
+                files : [{
+                    expand : true,
+                    cwd : '<%= components.common.libs %>/',
+                    src : ['**/*.*'],
+                    dest : '<%= paths.build %>/libs/'
+                },{
+                    expand : true,
+                    cwd : '<%= components.application.libs %>/',
+                    src : ['**/*.*'],
+                    dest : '<%= paths.build %>/libs/'
+                }]
+            },
             stuff : {
                 files : [{
                     expand: true,
@@ -268,7 +290,7 @@ module.exports = function(grunt) {
         }
     });
     // Custom Tasks
-    grunt.registerTask('default', ['clean', 'pre', 'scripts', 'styles', 'images', 'fonts', 'stuff']);
+    grunt.registerTask('default', ['clean', 'pre', 'scripts', 'styles', 'images', 'fonts', 'libs', 'stuff']);
     grunt.registerTask('optimize', ['grunt:common_optimize', 'grunt:application_optimize', 'default']);
     grunt.registerTask('watcher', ['concurrent']);
 
@@ -277,6 +299,7 @@ module.exports = function(grunt) {
     grunt.registerTask('images', ['copy:images']);
     grunt.registerTask('fonts', ['copy:fonts']);
     grunt.registerTask('stuff', ['copy:stuff']);
+    grunt.registerTask('libs', ['copy:libs']);
     grunt.registerTask('variables', ['concat:variables', 'lessvars']);
     grunt.registerTask('pre', ['variables']);
 };
