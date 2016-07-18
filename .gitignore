@@ -2,5 +2,6 @@
 .idea
 .git
 libs
+temp
 
 node_modules

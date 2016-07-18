@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.20.4 (2016-07-06 19:38) ************ */
+/*! ************ MagpieUI v3.20.6 (2016-07-18 19:49) ************ */
 @charset "UTF-8";
 
 /*!
@@ -6597,6 +6597,12 @@ select {
         padding: @padding @CmIndent-Large;
     }
 
+    &.button--xxlarge {
+        @padding: max(ceil((@CmSize-XXLarge - @CmFont-Base-LineHeight) / 2), 0px);
+        min-height: @CmSize-XXLarge;
+        padding: @padding @CmIndent-Large;
+    }
+
     // /* *** ICONS *** */
 
     &.has-icon {
@@ -8923,6 +8929,12 @@ button {
     &.is-inline {
         > ul {
             overflow: hidden;
+            white-space: nowrap;
+        }
+    }
+
+    &.is-nowrap {
+        > ul {
             white-space: nowrap;
         }
     }
@@ -16869,7 +16881,7 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.11.1 (2016-07-06 19:39) ************ */
+/*! ************ QuickSilk-Application v3.11.2 (2016-07-18 19:50) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -19867,7 +19879,7 @@ html {
         }
 
         .tpl__container {
-            margin: 0 !important;
+            margin-left: 0 !important;
         }
 
         .tpl__header__container {
@@ -20705,6 +20717,31 @@ html {
         }
     }
 
+}
+/* ******* MODULES: LOGO CAROUSEL ******* */
+
+.mod__logo-carousel {
+    .pt__grid {
+        > ul {
+            .mx__transition(transform, @CmUI-Transition-Duration);
+        }
+    }
+
+    &.is-infinite {
+        .pt__grid {
+            > ul {
+                .mx__transition(transform, @CmUI-Transition-Duration, linear);
+            }
+        }
+    }
+
+    &.is-immediately {
+        .pt__grid {
+            > ul {
+                .cm__transition-none;
+            }
+        }
+    }
 }
 /* ******* MODULES: MEMBER DIRECTORY WIDGET ******* */
 

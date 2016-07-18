@@ -4,7 +4,7 @@ $date = new DateTime();
 $config = array(
 	'positionId' => $date->getTimestamp(),
 	'zone' => $_POST['zone'],
-	'parentId' => $_POST['parentId'],
+	'parentPositionId' => $_POST['parentPositionId'],
 	'type' => $_POST['type'],
 );
 if(!empty($_POST['instanceId']) && $_POST['instanceId'] != 'false'){
@@ -15,7 +15,7 @@ $module = '';
 switch($_POST['keyword']){
 	case 'form_builder':
 		$module =   '<div class="app__module app-mod__default">
-					 	<div data-element="App.Zone" data-config=\'{"instanceId" : 1, "zone" : "content", "parentId" : "0", "type" : "form-manager", "link" : {"parentId" : "'.$config['parentId'].'", "type" : "'.$config['type'].'"}}\'></div>
+					 	<div data-element="App.Zone" data-config=\'{"instanceId" : 1, "zone" : "content", "parentId" : "0", "type" : "form-manager", "link" : {"parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'", "type" : "'.$config['type'].'"}}\'></div>
 					 </div>';
 		break;
 	case 'spacer':
@@ -26,13 +26,13 @@ switch($_POST['keyword']){
             			<div data-com__columns="inner" class="inner">
                 			<div data-com__columns="holder" class="container">
                                 <div style="width: 33.33%;" class="com__column" data-com__columns="column">
-                            		<div class="inner" data-com__columns="column-inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentId" : "'.$config['positionId'].'"}\'></div>
+                            		<div class="inner" data-com__columns="column-inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
                                 </div>
                                 <div style="width: 33.33%;" class="com__column" data-com__columns="column">
-                            		<div class="inner" data-com__columns="column-inner" data-element="App.Zone" data-config=\'{"zone" : 1, "parentId" : "'.$config['positionId'].'"}\'></div>
+                            		<div class="inner" data-com__columns="column-inner" data-element="App.Zone" data-config=\'{"zone" : 1, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
                                 </div>
                                 <div style="width: 33.33%;" class="com__column" data-com__columns="column">
-                            		<div class="inner" data-com__columns="column-inner" data-element="App.Zone" data-config=\'{"zone" : 2, "parentId" : "'.$config['positionId'].'"}\'></div>
+                            		<div class="inner" data-com__columns="column-inner" data-element="App.Zone" data-config=\'{"zone" : 2, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
                                 </div>
                             </div>
                         </div>
@@ -41,7 +41,7 @@ switch($_POST['keyword']){
 
 	case 'workingarea':
 		$module =   '<div href="http://google.com" target="_blank" class="app__module app-mod__area" data-element="Module.WorkingArea" data-node="ModuleWorkingArea:{}:container">
-            			<div class="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentId" : "'.$config['positionId'].'"}\'></div>
+            			<div class="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
                     </div>';
 		break;
 	case 'hidden_tabs':
@@ -83,13 +83,13 @@ switch($_POST['keyword']){
 								<div class="inner" data-node="content-inner">
 									<ul data-node="content-list">
 										<li data-node="tabs:[]:container" data-config=\'{"id" : "sample"}\'>
-											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentId" : "'.$config['positionId'].'"}\'></div>
+											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
 										</li>
 										<li data-node="tabs:[]:container" data-config=\'{"id" : "test"}\'>
-											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 1, "parentId" : "'.$config['positionId'].'"}\'></div>
+											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 1, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
 										</li>
 										<li data-node="tabs:[]:container" data-config=\'{"id" : "case"}\'>
-											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 2, "parentId" : "'.$config['positionId'].'"}\'></div>
+											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 2, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
 										</li>
 									</ul>
 								</div>

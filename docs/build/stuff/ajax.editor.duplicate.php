@@ -9,7 +9,7 @@ $module =  '<div class="app__module">
 $config = array(
 	'positionId' => $date->getTimestamp(),
 	'zone' => $_POST['zone'],
-	'parentId' => $_POST['parentId'],
+	'parentPositionId' => $_POST['parentPositionId'],
 	'type' => $_POST['type']
 );
 

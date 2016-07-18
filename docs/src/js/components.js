@@ -214,7 +214,7 @@ window.Collector = new Com.Collector({
                         'params' : {
                             'instanceId' : block.zone.params['instanceId'],
                             'keyword' : block.params['keyword'],
-                            'parentId' : block.zone.params['parentId'],
+                            'parentPositionId' : block.zone.params['positionId'],
                             'type' : block.params['type'],
                             'zone' : block.zone.params['zone']
                         },
@@ -228,7 +228,7 @@ window.Collector = new Com.Collector({
                         'method' : 'POST',
                         'url' : cm._baseUrl + '/stuff/ajax.editor.duplicate.php',
                         'params' : {
-                            'parentId' : block.zone.params['parentId'],
+                            'parentPositionId' : block.zone.params['positionId'],
                             'type' : block.params['type'],
                             'zone' : block.zone.params['zone']
                         },
@@ -243,7 +243,7 @@ window.Collector = new Com.Collector({
                         'url' : cm._baseUrl + '/stuff/ajax.editor.replace.php',
                         'params' : {
                             'positionId' : block.params['positionId'],
-                            'parentId' : block.zone.params['parentId'],
+                            'parentPositionId' : block.zone.params['positionId'],
                             'type' : block.params['type'],
                             'zone' : block.zone.params['zone']
                         },

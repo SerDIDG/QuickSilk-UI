@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.20.4 (2016-07-06 19:38) ************ */
+/*! ************ MagpieUI v3.20.6 (2016-07-18 19:49) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -5614,6 +5614,14 @@ button.button--xlarge {
   min-height: 48px;
   padding: 15px 32px;
 }
+.button.button--xxlarge,
+input[type="button"].button--xxlarge,
+input[type="submit"].button--xxlarge,
+input[type="reset"].button--xxlarge,
+button.button--xxlarge {
+  min-height: 64px;
+  padding: 23px 32px;
+}
 .button.has-icon .icon,
 input[type="button"].has-icon .icon,
 input[type="submit"].has-icon .icon,
@@ -8352,6 +8360,9 @@ button.is-hidden {
 }
 .pt__grid.is-inline > ul {
   overflow: hidden;
+  white-space: nowrap;
+}
+.pt__grid.is-nowrap > ul {
   white-space: nowrap;
 }
 .pt__grid.is-inrow {
@@ -14637,6 +14648,10 @@ button.is-hidden {
   min-height: 48px;
   padding: 15px 32px;
 }
+.com__pagination__bar ul li a.button--xxlarge {
+  min-height: 64px;
+  padding: 23px 32px;
+}
 .com__pagination__bar ul li a.has-icon .icon {
   display: inline-block;
   vertical-align: top;
@@ -16726,7 +16741,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.11.1 (2016-07-06 19:39) ************ */
+/*! ************ QuickSilk-Application v3.11.2 (2016-07-18 19:50) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?23');
@@ -19900,7 +19915,7 @@ html:not(.is-editing).is-editor .app__module__controls {
     max-width: 100% !important;
   }
   html.is-adaptive .tpl__container {
-    margin: 0 !important;
+    margin-left: 0 !important;
   }
   html.is-adaptive .tpl__header__container.is-fixed,
   html.is-adaptive .tpl__header__container.is-overlapping {
@@ -20758,6 +20773,19 @@ html:not(.is-editing).is-editor .app__module__controls {
   html.is-adaptive .app-mod__logo.is-adaptive .pt__image > .inner > .descr {
     margin: 0 auto;
   }
+}
+/* ******* MODULES: LOGO CAROUSEL ******* */
+.mod__logo-carousel .pt__grid > ul {
+  -webkit-transition: -webkit-transform 250ms ease-in-out;
+  transition: -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
+}
+.mod__logo-carousel.is-infinite .pt__grid > ul {
+  -webkit-transition: -webkit-transform 250ms linear;
+  transition: -webkit-transform 250ms linear, -ms-transform 250ms linear, transform 250ms linear;
+}
+.mod__logo-carousel.is-immediately .pt__grid > ul {
+  -webkit-transition: none !important;
+  transition: none !important;
 }
 /* ******* MODULES: MEMBER DIRECTORY WIDGET ******* */
 /* ******* MODULES: MENU ******* */
