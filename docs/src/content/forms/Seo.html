@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-docs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Forms: Seo</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body>
+
+<h1 class="app-pt__box-title">Forms: Seo</h1>
+<hr>
+
+<div class="pt__buttons pull-left">
+    <div class="inner">
+        <div class="cm__button-wrapper" data-element="Com.DialogContainer" data-node="ComDialogContainer:{}:container">
+            <div class="button button-primary" data-node="button">Open Dialog</div>
+            <div class="hidden" data-node="holder">
+                <div data-node="title">Page Settings</div>
+
+                <div class="form" data-node="content">
+                    <ul class="com__tabset__content-ul" data-element="Com.Tabset">
+                        <li data-node="tabs:[]:container" data-config='{"id" : "general", "title" : "General"}'></li>
+
+                        <li data-node="tabs:[]:container" data-config='{"id" : "seo", "title" : "SEO"}'>
+                            <div class="form__page-seo">
+                                <div class="pt__box--clear">
+                                    <dl>
+                                        <dt>Field:</dt>
+                                        <dd>
+                                            <input type="text">
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>Field 2:</dt>
+                                        <dd>
+                                            <input type="text">
+                                        </dd>
+                                    </dl>
+                                </div>
+                                <div data-element="Com.ToggleBox" data-config='{"title" : "Advanced SEO", "renderStructure" : true}'>
+                                    <dl>
+                                        <dt>Field:</dt>
+                                        <dd>
+                                            <input type="text">
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>Field 2:</dt>
+                                        <dd>
+                                            <input type="text">
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li data-node="tabs:[]:container" data-config='{"id" : "advanced", "title" : "Advanced"}'></li>
+                    </ul>
+                </div>
+
+                <div data-node="buttons">
+                    <div class="btn-wrap">
+                        <input class="button" type="submit" value="Save" name="save">
+                        <input class="transparent" type="button" value="Cancel" name="cancel">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

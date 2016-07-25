@@ -1,0 +1,147 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-docs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Forms: Styles</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body>
+
+<h1 class="app-pt__box-title">Forms: Styles</h1>
+<hr>
+
+<div class="pt__buttons pull-left">
+    <div class="inner">
+        <div class="cm__button-wrapper" data-element="Com.DialogContainer" data-node="ComDialogContainer:{}:container">
+            <div class="button button-primary" data-node="button">Open Dialog</div>
+            <div class="hidden" data-node="holder">
+                <div data-node="title">Block Settings</div>
+
+                <div data-node="content">
+                    <ul class="com__tabset__content-ul" data-element="Com.Tabset">
+                        <li data-node="tabs:[]:container" data-config='{"id" : "overview", "title" : "General"}'></li>
+
+                        <li data-node="tabs:[]:container" data-config='{"id" : "methods", "title" : "Visibility"}'></li>
+
+                        <li data-node="tabs:[]:container" data-config='{"id" : "examples", "title" : "Styles"}'>
+                            <div class="form__styles">
+                                <dl class="pt__field">
+                                    <dt>Style:</dt>
+                                    <dd>
+                                        <select data-element="Com.Select" name="style"></select>
+                                    </dd>
+                                </dl>
+                                <dl class="pt__field">
+                                    <dt>Custom CSS Class:</dt>
+                                    <dd>
+                                        <input type="text" name="css-class">
+                                    </dd>
+                                </dl>
+                                <hr>
+                                <dl class="pt__field is-box">
+                                    <dt>Background Color:</dt>
+                                    <dd>
+                                        <input type="text" data-element="Com.ColorPicker" name="background-color" data-config='{"showClearButton" : true, "size" : "full"}'>
+                                    </dd>
+                                </dl>
+                                <div class="pt__columns is-space-between is-adaptive">
+                                    <div class="inner">
+                                        <div class="column">
+                                            <dl class="pt__field is-box">
+                                                <dt>Background Image:</dt>
+                                                <dd>
+                                                    <input type="text" data-element="App.ImageInput" name="background-image">
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                        <div class="column">
+                                            <dl class="pt__field is-box field-indent">
+                                                <dt>Repeat:</dt>
+                                                <dd>
+                                                    <input type="text" data-element="Com.RepeatTools" name="background-repeat">
+                                                </dd>
+                                            </dl>
+                                            <dl class="pt__field is-box field-indent">
+                                                <dt>Scaling:</dt>
+                                                <dd>
+                                                    <input type="text" data-element="Com.ScaleTools" name="background-scaling">
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                        <div class="column">
+                                            <dl class="pt__field is-box field-indent">
+                                                <dt>Position:</dt>
+                                                <dd>
+                                                    <input type="text" data-element="Com.PositionTools" name="background-position">
+                                                </dd>
+                                            </dl>
+                                            <dl class="pt__field is-box field-indent">
+                                                <dd>
+                                                    <div class="check-line">
+                                                        <input type="checkbox" name="parallax">
+                                                        <label>Parallax</label>
+                                                    </div>
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="pt__columns is-adaptive">
+                                    <div class="inner">
+                                        <div class="column">
+                                            <dl class="pt__field is-box field-indent align-center">
+                                                <dt>Outer Indent:</dt>
+                                                <dd>
+                                                    <input type="text" value="0" data-element="Com.BoxTools" data-config='{"justify" : "center"}' name="outer-indent">
+                                                </dd>
+                                            </dl>
+                                            <dl class="pt__field is-box field-indent">
+                                                <dd>
+                                                    <div class="check-line pull-center">
+                                                        <input type="checkbox" name="outer-indent-auto">
+                                                        <label>Auto</label>
+                                                    </div>
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                        <div class="column">
+                                            <dl class="pt__field is-box field-indent align-center">
+                                                <dt>Inner Indent:</dt>
+                                                <dd>
+                                                    <input type="text" value="0" data-element="Com.BoxTools" data-config='{"justify" : "center"}' name="inner-indent">
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <dl class="pt__field">
+                                    <dt>Minimum height:</dt>
+                                    <dd>
+                                        <input type="text" name="min-height" maxlength="4" data-element="Com.IndentInput">
+                                    </dd>
+                                </dl>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div data-node="buttons">
+                    <div class="btn-wrap">
+                        <input class="button" type="submit" value="Save" name="save">
+                        <input class="transparent" type="button" value="Cancel" name="cancel">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>
