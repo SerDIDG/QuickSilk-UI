@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.20.9 (2016-07-25 19:49) ************ */
+/*! ************ MagpieUI v3.20.12 (2016-08-08 20:21) ************ */
 @charset "UTF-8";
 
 /*!
@@ -4232,6 +4232,7 @@ span.CodeMirror-selectedtext { background: none; }
 
 @PtToolbar-GroupIndent: @CmIndent-Small;
 @PtToolbar-ItemIndent: @CmIndent-XXXSmall;
+@PtToolbar-ItemIndents: @CmUI-ColumnIndent;
 @PtToolbar-XXXSmall: 32px;
 @PtToolbar-XXSmall: 56px;
 @PtToolbar-XSmall: 76px;
@@ -6049,6 +6050,45 @@ span.CodeMirror-selectedtext { background: none; }
     height: @size;
     line-height: @size;
 }
+
+/* ******* ANIMATED ******* */
+
+.cm-ia__menu {
+    position: relative;
+
+    &:before,
+    &:after {
+        width: 100%;
+        height: 2px;
+        display: block;
+        position: absolute;
+        content: '';
+        background-color: @CmColor-Font-Opposite;
+        .mx__transition(all, @CmUI-Transition-Duration);
+    }
+
+    &:before {
+        .mx__transform(translate(0, -5px));
+        .mx__position(50%, 0, auto, 0);
+    }
+
+    &:after {
+        .mx__transform(translate(0, 5px));
+        .mx__position(auto, 0, 50%, 0);
+    }
+}
+
+.cm-ia__menu--active {
+    &:before {
+        .mx__transform(translate(0, -1px));
+        .mx__transform(rotate(45deg));
+    }
+
+    &:after {
+        .mx__transform(translate(0, 1px));
+        .mx__transform(rotate(-45deg));
+    }
+}
 /* ******* COMMON: TAGS ******* */
 
 *,
@@ -6233,11 +6273,7 @@ tbody, thead, td, th, tr {
 /* ******* COMMON: INPUTS ******* */
 
 .input {
-    @padding: max(ceil((@CmForm-FieldHeight - @CmFont-Base-LineHeight - @CmBorder-Width * 2) / 2), 0px);
-
     width: 100%;
-    height: @CmForm-FieldHeight;
-    padding: @padding @CmInput-Padding;
     margin: 0;
     vertical-align: top;
     background: @CmInput-DefaultBackground;
@@ -6288,6 +6324,20 @@ tbody, thead, td, th, tr {
                      1px 0 1px #ffffff,
                      -1px 0 1px #ffffff;
     }
+
+    .input--size(@CmForm-FieldHeight, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+
+    &.input--large {
+        .input--size(@CmSize-Large, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+    }
+
+    &.input--xlarge {
+        .input--size(@CmSize-XLarge, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+    }
+
+    &.input--xxlarge {
+        .input--size(@CmSize-XXLarge, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+    }
 }
 
 .textarea {
@@ -6303,6 +6353,27 @@ tbody, thead, td, th, tr {
         padding: 0;
     }
 }
+
+/* *** MIXINS *** */
+
+.input--size (@height: @CmForm-FieldHeight, @padding: @CmInput-Padding, @border: @CmBorder-Width, @lineHeight: @CmFont-Base-LineHeight) {
+    .input--size-helper(@height, @padding, @border, @lineHeight);
+
+    &.is-borderless {
+        .input--size-helper(@height, @padding, 0px, @lineHeight);
+    }
+}
+
+.input--size-helper (@height, @padding, @border, @lineHeight) {
+    @padding_calc: max(ceil((@height - @lineHeight - @border * 2) / 2), 0px);
+
+    height: @height;
+    padding: @padding_calc @padding;
+    border-width: @border;
+
+}
+
+/* *** APPLY *** */
 
 input, select, textarea, button {
     .cm__font;
@@ -6593,6 +6664,12 @@ select {
     }
 
     // /* *** SIZES *** */
+
+    &.button--large {
+        @padding: max(ceil((@CmSize-Large - @CmFont-Base-LineHeight) / 2), 0px);
+        min-height: @CmSize-Large;
+        padding: @padding @CmIndent-Medium;
+    }
 
     &.button--xlarge {
         @padding: max(ceil((@CmSize-XLarge - @CmFont-Base-LineHeight) / 2), 0px);
@@ -8385,6 +8462,7 @@ button {
 
 .pt__drag {
     position: absolute;
+    touch-action: none;
     .mx__position(0, 0, 0, 0);
     .mx__user-select(none);
 
@@ -8649,6 +8727,7 @@ button {
             height: 24px;
             margin: 0 0 0 -40px;
             display: block;
+            visibility: hidden;
             position: absolute;
             z-index: 3;
             left: 50%;
@@ -8657,7 +8736,7 @@ button {
             border: @CmBorder-Editable;
             border-radius: @CmBorder-Radius;
             cursor: move;
-            visibility: hidden;
+            touch-action: none;
             .mx__background-clip(border-box);
             .mx__transition(all, @CmUI-Transition-Duration);
 
@@ -9581,22 +9660,25 @@ button {
 
     > .pull {
         position: absolute;
+        padding: @CmIndent-XXSmall;
+        border-radius: @CmBorder-Radius;
+        background-color: @CmUI-Overlay-Light;
         z-index: 3;
 
         &.top-right {
-            .mx__position(@CmIndent-XSmall, @CmIndent-XSmall, auto, auto);
+            .mx__position(@CmIndent-XXXSmall, @CmIndent-XXXSmall, auto, auto);
         }
 
         &.top-left {
-            .mx__position(@CmIndent-XSmall, auto, auto, @CmIndent-XSmall);
+            .mx__position(@CmIndent-XXXSmall, auto, auto, @CmIndent-XXXSmall);
         }
 
         &.bottom-right {
-            .mx__position(auto, @CmIndent-XSmall, @CmIndent-XSmall, auto);
+            .mx__position(auto, @CmIndent-XXXSmall, @CmIndent-XXXSmall, auto);
         }
 
         &.bottom-left {
-            .mx__position(auto, auto, @CmIndent-XSmall, @CmIndent-XSmall);
+            .mx__position(auto, auto, @CmIndent-XXXSmall, @CmIndent-XXXSmall);
         }
 
         input[type="checkbox"],
@@ -9834,19 +9916,38 @@ button {
         }
     }
 
-    .pt__input--size();
+    .pt__input--size(@CmForm-FieldHeight, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+
+    &.size-large {
+        .pt__input--size(@CmSize-Large, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+    }
+
+    &.size-xlarge {
+        .pt__input--size(@CmSize-XLarge, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+    }
+
+    &.size-xxlarge {
+        .pt__input--size(@CmSize-XXLarge, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+    }
 }
 
 .pt__input--size (@height: @CmForm-FieldHeight, @paddingX: @CmInput-Padding, @borderWidth: @CmBorder-Width, @lineHeight: @CmFont-Base-LineHeight){
-    @paddingY: max(round((@height - @lineHeight - @borderWidth * 2) / 2), 0px);
+    .pt__input--size-helper(@height, @paddingX, @borderWidth, @lineHeight);
+
+    &.is-borderless {
+        .pt__input--size-helper(@height, @paddingX, 0px, @lineHeight);
+    }
+}
+
+.pt__input--size-helper (@height, @paddingX, @borderWidth, @lineHeight) {
     @iconSize: @height - @borderWidth * 2;
     @iconSizeDouble: @iconSize * 2;
     @iconPadding: @iconSize + @paddingX;
 
+    height: @height;
+
     .input {
-        height: @height;
-        padding: @paddingY @paddingX;
-        border-width: @borderWidth;
+        .input--size(@height, @paddingX, @borderWidth, @lineHeight);
     }
 
     .icon {
@@ -10481,6 +10582,7 @@ button {
     border-color: @PtMenu-BorderColor;
     list-style: none;
     opacity: 0;
+    touch-action: none;
     .mx__position(100%, auto, auto, 0);
     .mx__transition(all, @CmUI-Transition-Duration);
 
@@ -10567,7 +10669,11 @@ button {
 /* *** MENU *** */
 
 .pt__menu {
+    touch-action: none;
+
     &:hover,
+    &:active,
+    &.active,
     &.is-show {
         > .pt__menu-dropdown {
             .pt__menu-dropdown--active;
@@ -10671,6 +10777,8 @@ button {
 /* ******* PARTS: RANGE ******* */
 
 .pt__range {
+    touch-action: none;
+
     > .inner {
         position: relative;
     }
@@ -10979,12 +11087,8 @@ button {
 
         > li {
             max-width: 100%;
-            margin: 0 @PtToolbar-ItemIndent @CmIndent-Medium 0;
+            margin: 0 0 @CmIndent-Medium 0;
             line-height: @CmForm-FieldHeight;
-
-            &:last-child {
-                margin-right: 0;
-            }
 
             &.label {
                 margin-right: @CmIndent-XXSmall;
@@ -11011,32 +11115,52 @@ button {
                 width: @CmForm-FieldHeight;
             }
 
+            &.size-xxxsmall,
             &.xxx-small {
                 width: @PtToolbar-XXXSmall;
             }
 
+            &.size-xxsmall,
             &.xx-small {
                 width: @PtToolbar-XXSmall;
             }
 
+            &.size-xsmall,
             &.x-small {
                 width: @PtToolbar-XSmall;
             }
 
+            &.size-small,
             &.small {
                 width: @PtToolbar-Small;
             }
 
+            &.size-medium,
             &.medium {
                 width: @PtToolbar-Medium;
             }
 
+            &.size-large,
             &.large {
                 width: @PtToolbar-Large;
             }
 
+            &.size-xlarge,
             &.x-large {
                 width: @PtToolbar-XLarge;
+            }
+        }
+
+        &.is-flex {
+            width: 100%;
+            .display-flex;
+
+            > li {
+                .mx__flex(1 0 auto);
+
+                &.is-prime {
+                    .mx__flex(1 1 100%);
+                }
             }
         }
 
@@ -11108,6 +11232,28 @@ button {
             display: block;
         }
     }
+
+    .pt__toolbar--item-indent(@PtToolbar-ItemIndent);
+
+    .for(@PtToolbar-ItemIndents); .-each(@name) {
+        &.item-indent-@{name} {
+            .pt__toolbar--item-indent(@name);
+        }
+    }
+}
+
+/* ******* PARTS: TOOLBAR: MIXINS ********** */
+
+.pt__toolbar--item-indent (@value : @PtToolbar-ItemIndent) {
+    .group {
+        > li {
+            margin-right: @value;
+
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
 }
 
 /* ******* PARTS: TOOLBAR: ADAPTIVE ********** */
@@ -11116,73 +11262,75 @@ button {
 
     html.is-adaptive {
         .pt__toolbar {
-            > .inner {
-                display: block;
-
-                > .left,
-                > .center,
-                > .right {
-                    width: 100%;
-                    display: block;
-                    float: none;
-                }
-            }
-
-            .group {
-                display: block;
-                margin-top: 0;
-
-                > li {
-                    &.label {
-                        display: block;
-                        margin-right: 0;
-                        margin-bottom: 0;
-                    }
-
-                    &.is-field {
-                        width: 100%;
-                    }
-                }
-
-                &.is-adaptive {
-                    display: block;
-                    margin-left: 0;
-                    margin-right: 0;
-
-                    .button {
-                        width: 100%;
-                        display: block;
-                    }
-
-                    > li {
-                        display: block;
-                        margin-left: 0;
-                        margin-right: 0;
-                    }
-                }
-            }
-
-            &.is-adaptive {
+            &:not(.is-not-adaptive){
                 > .inner {
                     display: block;
 
                     > .left,
                     > .center,
                     > .right {
+                        width: 100%;
                         display: block;
+                        float: none;
                     }
                 }
 
-                .button {
-                    width: 100%;
+                .group {
                     display: block;
+                    margin-top: 0;
+
+                    > li {
+                        &.label {
+                            display: block;
+                            margin-right: 0;
+                            margin-bottom: 0;
+                        }
+
+                        &.is-field {
+                            width: 100%;
+                        }
+                    }
+
+                    &.is-adaptive {
+                        display: block;
+                        margin-left: 0;
+                        margin-right: 0;
+
+                        .button {
+                            width: 100%;
+                            display: block;
+                        }
+
+                        > li {
+                            display: block;
+                            margin-left: 0;
+                            margin-right: 0;
+                        }
+                    }
                 }
 
-                .group,
-                .group > li {
-                    display: block;
-                    margin-left: 0;
-                    margin-right: 0;
+                &.is-adaptive {
+                    > .inner {
+                        display: block;
+
+                        > .left,
+                        > .center,
+                        > .right {
+                            display: block;
+                        }
+                    }
+
+                    .button {
+                        width: 100%;
+                        display: block;
+                    }
+
+                    .group,
+                    .group > li {
+                        display: block;
+                        margin-left: 0;
+                        margin-right: 0;
+                    }
                 }
             }
         }
@@ -12106,7 +12254,7 @@ button {
         opacity: 1;
 
         > .inner {
-            padding: @CmIndent-XSmall 0 0 0;
+            padding: @CmIndent-Small 0 0 0;
         }
     }
 
@@ -14849,7 +14997,8 @@ button {
             }
         }
 
-        &:hover {
+        &:hover,
+        &:active {
             .input__cover {
                 visibility: visible;
                 opacity: 1;
@@ -14964,6 +15113,7 @@ button {
         &.drag {
             .icon.small.drag-vertical;
             cursor: move;
+            touch-action: none;
         }
 
         &.remove {
@@ -15071,7 +15221,6 @@ button {
             border: 1px solid #a2a2a2;
             border-radius: @CmBorder-Radius;
             font-size: @CmFont-UI-Size;
-            font-weight: @CmFont-Base-BoldWeight;
 
             &:first-child {
                 margin: 0;
@@ -15313,6 +15462,7 @@ button {
     .b-range {
         margin-right: @CmIndent-Small;
         border-radius: @CmBorder-Radius;
+        touch-action: none;
 
         > .inner {
             position: relative;
@@ -16933,7 +17083,7 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.12.2 (2016-07-25 19:50) ************ */
+/*! ************ QuickSilk-Application v3.13.0 (2016-08-08 20:21) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -16943,7 +17093,7 @@ button {
 
 @AppIconVars-Family: 'QuickSilk-Glyphs';
 @AppIconVars-Color: @CmIconVars-Color;
-@AppIconVars-Version: 23;
+@AppIconVars-Version: 26;
 
 @AppIcon-QuickSilk: '\e600';
 @AppIcon-Plus: '\e601';
@@ -16962,6 +17112,10 @@ button {
 @AppIcon-CircleStar: '\e705';
 @AppIcon-CircleFlash: '\e706';
 @AppIcon-CircleActions: '\e706';
+
+@AppIcon-Desktop: '\e900';
+@AppIcon-Tablet: '\e901';
+@AppIcon-Mobile: '\e902';
 
 // /* ******* COMPONENTS ******* */
 
@@ -17130,6 +17284,12 @@ button {
 // /* ******* COMMON ******* */
 // /* ************************************************ */
 
+// /* ******* COLORS ******* */
+
+@AppColor-QuickSilk: #0060a0;
+@AppColor-UI-Panel: #000;
+@AppColor-UI-PanelBlock: @CmColor-Primary-DarkActiveHover;
+
 // /* ******* AREA ******* */
 
 @AppUI-Zone-Width: @CmIndent-XLarge;
@@ -17165,8 +17325,10 @@ button {
 
 @AppTopMenu-Height: @CmSize-XLarge;
 @AppTopMenu-Duration: 300ms;
-@AppTopMenu-Background: #000000;
+@AppTopMenu-Background: @AppColor-UI-Panel;
 @AppTopMenu-Color: @CmColor-Font-Opposite;
+@AppTopMenu-ColorHover: @CmColor-Font-Opposite;
+@AppTopMenu-ColorActive: @AppTopMenu-Background;
 @AppTopMenu-HoverBackground: @CmColor-Primary-DarkDefault;
 @AppTopMenu-ItemIndent: 1px;
 @AppTopMenu-ItemBorder: @CmBorder-Width solid rgba(255,255,255,0.4);
@@ -17177,7 +17339,7 @@ button {
 
 @AppSidebar-Width: @AppUI-SidebarWidth;
 @AppSidebar-Menu-Width: @CmSize-XLarge;
-@AppSidebar-Menu-Background: #000000;
+@AppSidebar-Menu-Background: @AppColor-UI-Panel;
 @AppSidebar-Content-Width: @AppSidebar-Width - @AppSidebar-Menu-Width;
 @AppSidebar-Content-Indent: @CmIndent-XSmall;
 @AppSidebar-Title-Height: @AppUI-TitleHeight;
@@ -17279,6 +17441,30 @@ button {
 @AppPanel-Preview-ContentIndent: @CmIndent-XLarge;
 
 @AppPanel-Box-Indent: @CmIndent-Medium @AppPanel-Dialog-Indent;
+
+// /* ******* LIVE PREVIEW ******* */
+
+@AppLivePreview-Device-Duration: @CmUI-Transition-DurationLong;
+
+@AppLivePreview-Tablet-Width: 1024px;
+@AppLivePreview-Tablet-Height: 640px;
+@AppLivePreview-Tablet-Indent: @CmIndent-Medium;
+@AppLivePreview-Tablet-BorderY: @CmSize-XLarge;
+@AppLivePreview-Tablet-BorderX: @CmSize-XLarge;
+@AppLivePreview-Tablet-Border: @AppLivePreview-Tablet-BorderY @AppLivePreview-Tablet-BorderX;
+@AppLivePreview-Tablet-BorderRadius: 16px;
+@AppLivePreview-Tablet-BorderColor: #262626;
+@AppLivePreview-Tablet-ScreenRadius: 3px;
+
+@AppLivePreview-Mobile-Width: 320px;
+@AppLivePreview-Mobile-Height: 568px;
+@AppLivePreview-Mobile-Indent: @CmIndent-Medium;
+@AppLivePreview-Mobile-BorderY: @CmSize-XLarge;
+@AppLivePreview-Mobile-BorderX: @CmIndent-XSmall;
+@AppLivePreview-Mobile-Border: @AppLivePreview-Mobile-BorderY @AppLivePreview-Mobile-BorderX;
+@AppLivePreview-Mobile-BorderRadius: 16px;
+@AppLivePreview-Mobile-BorderColor: #262626;
+@AppLivePreview-Mobile-ScreenRadius: 3px;
 
 // /* ************************************************ */
 // /* ******* MODULES ******* */
@@ -17789,6 +17975,24 @@ body {
     }
 }
 
+.app-i__desktop {
+    &:before {
+        content: @AppIcon-Desktop;
+    }
+}
+
+.app-i__tablet {
+    &:before {
+        content: @AppIcon-Tablet;
+    }
+}
+
+.app-i__mobile {
+    &:before {
+        content: @AppIcon-Mobile;
+    }
+}
+
 /* Circle */
 
 .app-i__circle-help {
@@ -17879,6 +18083,10 @@ h1, h2, h3, h4, h5, h6 {
 /* *** STATES *** */
 
 html {
+    &.is-wrap {
+        overflow: hidden;
+    }
+
     &.is-topmenu {
         .app__sidebar {
             top: @AppTopMenu-Height;
@@ -17886,6 +18094,10 @@ html {
 
         .app__panel {
             top: @AppTopMenu-Height;
+        }
+
+        .app__content {
+            margin-top: @AppTopMenu-Height;
         }
 
         .tpl__container {
@@ -17898,6 +18110,10 @@ html {
     }
 
     &.is-sidebar {
+        .app__content {
+            margin-left: @AppSidebar-WidthCollapsed;
+        }
+
         .tpl__container {
             margin-left: @AppSidebar-WidthCollapsed;
         }
@@ -17910,6 +18126,10 @@ html {
     }
 
     &.is-sidebar--expanded {
+        .app__content {
+            margin-left: @AppSidebar-WidthExpanded;
+        }
+
         .tpl__container {
             margin-left: @AppSidebar-WidthExpanded;
         }
@@ -18468,7 +18688,8 @@ html {
         margin: 0;
     }
 
-    &:hover {
+    &:hover,
+    &:active {
         z-index: 10;
         .mx__transition(z-index, @CmUI-Transition-DurationReverse);
 
@@ -18502,7 +18723,8 @@ html {
             .mx__transition(opacity, @CmUI-Transition-Duration);
         }
 
-        &:hover {
+        &:hover,
+        &:active {
             > .app__block {
                 .pt__editable__bundle > .hover;
             }
@@ -18579,6 +18801,7 @@ html {
     position: relative;
     border-radius: @AppBlock-Dummy-BorderRadius;
     cursor: move;
+    touch-action: none;
     .mx__user-select(none);
     .mx__transition(background-color box-shadow, @CmUI-Transition-Duration);
 
@@ -18767,6 +18990,41 @@ html {
 
 .app__block-dummy-helper__width {
     width: @AppBlock-Dummy-Width;
+}
+/* ******* COMPONENTS: CONTENT ******** */
+
+.app__content {
+    &.is-wrap {
+        position: absolute;
+        .mx__position(0, 0, 0, 0);
+    }
+
+    > iframe {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* ******* COMPONENTS: CONTENT: ADAPTIVE ******* */
+
+@media only screen and (max-width : @CmUI-AdaptiveFrom) {
+
+    html.is-adaptive {
+        .app__content {
+            margin-left: 0 !important;
+        }
+    }
+
+}
+
+/* ******* COMPONENTS: TEMPLATE: PRINT ******** */
+
+@media print {
+
+    .app__content {
+        margin: 0 !important;
+    }
+
 }
 /* ******* COMPONENTS: DASHBOARD ******* */
 
@@ -18957,6 +19215,266 @@ html {
 
             .popup__buttons {
                 .mx__flex(0 0 auto);
+            }
+        }
+    }
+
+}
+/* ******* COMPONENTS: LIVE PREVIEW ******* */
+
+.app__live-preview__menu {
+    position: relative;
+}
+
+.app__live-preview__content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #ffffff;
+    overflow: auto;
+    .mx__justify-content(center);
+    .mx__align-items(center);
+
+    .container {
+        .clearfix;
+        .display-flex;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        .mx__align-items(center);
+        .mx__justify-content(center);
+    }
+
+    .device {
+        position: relative;
+        .mx__box-sizing(content-box);
+        .mx__transition(all, @CmUI-Transition-Duration, @CmUI-MotionAsymmetric);
+
+        .device__power {
+            width: 56px;
+            height: 5px;
+            margin: 0 0 1px;
+            position: absolute;
+            background-color: inherit;
+            border-radius: 3px 3px 0 0;
+            .mx__position(auto, auto, 100%, 0);
+            .mx__transition(all, @CmUI-Transition-Duration, @CmUI-MotionAsymmetric);
+
+            &:active {
+                height: 3px;
+            }
+        }
+
+        .device__camera {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            margin: auto;
+            background-color: inherit;
+            border: 1px solid #ffffff;
+            border-radius: 100%;
+            .mx__position(16px, 0, auto, 0);
+            .mx__background-clip(border-box);
+            .mx__transition(all, @CmUI-Transition-Duration, @CmUI-MotionAsymmetric);
+        }
+
+        .device__screen {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background-color: #000000;
+
+            iframe {
+                width: 100%;
+                height: 100%;
+                background: #ffffff;
+            }
+        }
+
+        .device__content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+            .mx__transition(transform, @AppLivePreview-Device-Duration, @CmUI-MotionAsymmetric);
+
+            &.is-hidden {
+                .mx__transform(scaleY(0));
+            }
+
+            &.is-loading {
+                opacity: 0;
+            }
+        }
+
+        .device__loader {
+            .display-flex;
+            position: absolute;
+            z-index: 2;
+            background-color: #000000;
+            .mx__position(0, 0, 0, 0);
+            .mx__align-items(center);
+            .mx__justify-content(center);
+            .mx__transition(all, @AppLivePreview-Device-Duration, @CmUI-MotionAsymmetric);
+
+            .icon {
+                margin: 0 auto;
+                color: @CmColor-Font-Opposite;
+                .cm-i__size(@CmSize-XXLarge);
+                .cm-i__b-size(@CmSize-XXLarge);
+            }
+
+            &.is-hidden {
+                visibility: hidden;
+                .mx__transform(scaleY(0));
+            }
+
+            &.is-loaded {
+                visibility: hidden;
+                opacity: 0;
+            }
+        }
+
+        .device__blues {
+            .cm__scroll-y-a;
+            position: absolute;
+            z-index: 1;
+            background-color: @AppColor-QuickSilk;
+            .mx__position(0, 0, 0, 0);
+            .mx__align-items(center);
+            .mx__justify-content(center);
+            .mx__transition(all, @AppLivePreview-Device-Duration, @CmUI-MotionAsymmetric);
+
+            > .inner {
+                padding: @CmIndent-XXSmall;
+            }
+
+            .cm__tags {
+                .cm__font--ui;
+                color: @CmColor-Font-Opposite;
+                word-wrap: break-word;
+            }
+
+            &.is-hidden {
+                .mx__transform(scaleY(0));
+            }
+
+            &.is-loading {
+                opacity: 0;
+            }
+        }
+    }
+
+    &.is-desktop {
+        .container {
+            min-height: 0;
+        }
+
+        .device {
+            width: 100%;
+            height: 100%;
+
+            .device__screen {
+                border-radius: 0;
+            }
+
+            .device__power,
+            .device__camera {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+    }
+
+    &.is-tablet {
+        .container {
+            min-height: @AppLivePreview-Tablet-Height + ((@AppLivePreview-Tablet-Indent + @AppLivePreview-Tablet-BorderY) * 2);
+        }
+
+        .device {
+            width: @AppLivePreview-Tablet-Width;
+            height: @AppLivePreview-Tablet-Height;
+            margin: @AppLivePreview-Tablet-Indent;
+            padding: @AppLivePreview-Tablet-Border;
+            border-radius: @AppLivePreview-Tablet-BorderRadius;
+            background-color: @AppLivePreview-Tablet-BorderColor;
+
+            .device__screen {
+                border-radius: @AppLivePreview-Tablet-ScreenRadius;
+            }
+
+            .device__power,
+            .device__camera {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .device__power {
+                left: @AppLivePreview-Tablet-BorderX;
+            }
+        }
+    }
+
+    &.is-mobile {
+        .container {
+            min-height: @AppLivePreview-Mobile-Height + ((@AppLivePreview-Mobile-Indent + @AppLivePreview-Mobile-BorderY) * 2);
+        }
+
+        .device {
+            width: @AppLivePreview-Mobile-Width;
+            height: @AppLivePreview-Mobile-Height;
+            margin: @AppLivePreview-Mobile-Indent;
+            padding: @AppLivePreview-Mobile-Border;
+            border-radius: @AppLivePreview-Mobile-BorderRadius;
+            background-color: @AppLivePreview-Mobile-BorderColor;
+
+            .device__screen {
+                border-radius: @AppLivePreview-Mobile-ScreenRadius;
+            }
+
+            .device__power,
+            .device__camera {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .device__power {
+                left: @AppLivePreview-Mobile-BorderX;
+            }
+        }
+    }
+}
+
+/* *** TABLET VIEW *** */
+
+@media only screen and (max-width: @CmScreen-Tablet) {
+
+    html.is-adaptive {
+        .app__live-preview__menu {
+            .menu__center {
+                display: none;
+            }
+        }
+
+        .app__live-preview__content {
+            overflow: hidden;
+
+            .container {
+                min-height: 0;
+            }
+
+            .device {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                border-radius: 0;
+
+                .device__power,
+                .device__camera {
+                    visibility: hidden;
+                }
             }
         }
     }
@@ -19984,16 +20502,21 @@ html {
         position: relative;
     }
 
-    .icon {
+    // /* Icon */
+
+    .menu__icon {
+        display: inline-block;
+        vertical-align: top;
         color: @AppTopMenu-Color;
         line-height: @AppTopMenu-Height;
         .cm-i__size(@CmSize-Large);
         .cm-i__b-size(@AppTopMenu-Height);
+        .mx__transition(all, @CmUI-Transition-Duration);
     }
 
     // /* QuickSilk Logo */
 
-    .menu-logo {
+    .menu__logo {
         position: relative;
         z-index: 3;
         display: block;
@@ -20005,22 +20528,45 @@ html {
         }
     }
 
+    // /* Title */
+
+    .menu__title {
+        .cm__font--ui-h1;
+        .cm__text-nowrap;
+        position: relative;
+        z-index: 3;
+        line-height: @AppTopMenu-Height;
+        color: @CmColor-Font-Opposite;
+    }
+
     // /* Menu  */
 
-    .menu-button {
-        .icon.medium.menu-white;
-        .icon.linked;
+    .menu__holder-button {
         width: @AppTopMenu-Height;
         height: @AppTopMenu-Height;
         display: none;
         position: absolute;
         z-index: 3;
-        background-position: 50% 50%;
-        background-repeat: no-repeat;
+        cursor: pointer;
         .mx__position(0, 0, 0, auto);
+
+        > .icon {
+            .cm__size__medium;
+            .icon.linked;
+            .cm-ia__menu;
+            position: absolute;
+            margin: auto;
+            .mx__position(0,0,0,0);
+        }
+
+        &.active {
+            > .icon {
+                .cm-ia__menu--active;
+            }
+        }
     }
 
-    .menu-holder {
+    .menu__holder {
         position: absolute;
         z-index: 1;
         .mx__position(0, 0, 0, 0);
@@ -20086,6 +20632,31 @@ html {
 @media only screen and (min-width : (@CmUI-AdaptiveFrom + 1px)) {
     html.is-adaptive {
         .app__topmenu {
+            .menu__title {
+                float: left;
+                margin-left: @CmIndent-XSmall;
+            }
+
+            .menu__right {
+                float: right;
+            }
+
+            .menu__left {
+                float: left;
+                margin: 0 0 0 @CmIndent-XLarge;
+            }
+
+            .menu__block {
+                .display-flex;
+                height: @AppTopMenu-Height;
+                .mx__align-items(center);
+            }
+
+            .menu__toolbar {
+                .menu__block;
+                padding: 0 @CmIndent-XSmall;
+            }
+
             .menu {
                 .cm__list-inline;
 
@@ -20109,11 +20680,6 @@ html {
                         .check-first-level(@AppTopMenu-Dropdown-FirstLevel);
                     }
 
-                    .icon {
-                        display: inline-block;
-                        vertical-align: top;
-                    }
-
                     &.has-icon {
                         > a {
                             padding-left: 0;
@@ -20131,15 +20697,36 @@ html {
                     }
 
                     &:hover,
-                    &.active {
-                        > a {
-                            background-color: @AppTopMenu-HoverBackground;
-                            color: @AppTopMenu-Color;
-                            .mx__transition(all, @CmUI-Transition-DurationReverse);
-                        }
-
+                    &:active,
+                    &.active,
+                    &.is-show {
                         > .pt__menu-dropdown {
                             .pt__menu-dropdown--active;
+                        }
+                    }
+
+                    &:hover,
+                    &:active {
+                        > a {
+                            background-color: @AppTopMenu-HoverBackground;
+                            color: @AppTopMenu-ColorHover;
+                            .mx__transition(all, @CmUI-Transition-DurationReverse);
+
+                            .menu__icon {
+                                color: @AppTopMenu-ColorHover;
+                            }
+                        }
+                    }
+
+                    &.active {
+                        > a {
+                            background-color: #ffffff;
+                            color: @AppTopMenu-ColorActive;
+                            .mx__transition(all, @CmUI-Transition-DurationReverse);
+
+                            .menu__icon {
+                                color: @AppTopMenu-ColorActive;
+                            }
                         }
                     }
                 }
@@ -20148,24 +20735,17 @@ html {
                     .app__topmenu__dropdown--desktop;
                     z-index: 1;
                 }
-
-                &.right {
-                    float: right;
-                }
-
-                &.left {
-                    float: left;
-                    margin: 0 0 0 @CmIndent-XLarge;
-                }
             }
         }
     }
 }
 
+/* *** DESKTOP > 5x4 *** */
+
 @media only screen and (min-width: 1281px) {
     html.is-adaptive {
         .app__topmenu {
-            .menu-centered {
+            .menu__center {
                 position: absolute;
                 margin: 0 50%;
                 .mx__position(0, auto, 0, auto);
@@ -20183,9 +20763,16 @@ html {
     }
 }
 
+/* *** DESKTOP <= 5x4 *** */
+
 @media only screen and (min-width : (@CmUI-AdaptiveFrom + 1px)) and (max-width: 1280px) {
     html.is-adaptive {
         .app__topmenu {
+            .menu__center {
+                float: right;
+                margin: 0 0 0 @AppTopMenu-ItemIndent;
+            }
+
             .menu {
                 > li {
                     font-size: 12px;
@@ -20205,13 +20792,24 @@ html {
                     }
                 }
             }
+        }
+    }
+}
 
-            .menu-centered {
-                float: right;
-                margin: 0 0 0 @AppTopMenu-ItemIndent;
+/* *** TABLET VIEW *** */
+
+@media only screen and (min-width : (@CmUI-AdaptiveFrom + 1px)) and (max-width: @CmScreen-Tablet) {
+
+    html.is-adaptive {
+        .app__topmenu {
+            .menu__title {
+                .cm__font--ui-h4;
+                line-height: @AppTopMenu-Height;
+                color: @CmColor-Font-Opposite;
             }
         }
     }
+
 }
 
 /* *** MOBILE VIEW *** */
@@ -20231,49 +20829,62 @@ html {
                 }
             }
 
-            .menu-button {
+            .menu__title {
+                .cm__font--ui-h4;
+                margin-left: @AppTopMenu-Height;
+                margin-right: @AppTopMenu-Height;
+                line-height: @AppTopMenu-Height;
+                color: @CmColor-Font-Opposite;
+                text-align: center;
+            }
+
+            .menu__holder-button {
                 display: block;
             }
 
-            .menu-holder {
+            .menu__holder {
                 display: block;
                 position: fixed;
                 visibility: hidden;
                 .mx__transform(translate3d(0, -100%, 0));
-                .mx__transition(transform visibility, @AppTopMenu-Duration);
-                .mx__position(0, 0, 0, 0);
+                .mx__transition(transform visibility, @AppTopMenu-Duration, @CmUI-MotionAsymmetric);
+                .mx__position(@AppTopMenu-Height, 0, 0, 0);
 
                 > .inner {
                     .cm__scroll-y-a;
                     position: absolute;
                     padding: 0;
                     background-color: @AppTopMenu-Background;
-                    .mx__position(@AppTopMenu-Height, 0, 0, 0);
+                    .mx__position(0, 0, 0, 0);
                 }
             }
 
-            .menu {
-                margin: 0;
+            .menu__block {
+                margin: @CmIndent-XXSmall;
                 padding: 0;
+                border-radius: @CmBorder-Radius;
+                background-color: @AppColor-UI-PanelBlock;
+                overflow: hidden;
+            }
+
+            .menu__toolbar {
+                .menu__block;
+                padding: @CmIndent-XSmall;
+            }
+
+            .menu {
+                .menu__block;
                 position: relative;
                 float: none;
-                border-top: @AppTopMenu-ItemBorder;
 
                 li {
                     display: block;
-                    margin: 0;
-                    border: none;
                     border-top: @AppTopMenu-ItemBorder;
                     line-height: @AppTopMenu-Height;
                     .mx__background-clip(padding-box);
 
                     &:first-child {
-                        margin: 0;
                         border-top: none;
-                    }
-
-                    &:before {
-                        display: none;
                     }
 
                     &.has-dropdown {
@@ -20282,8 +20893,10 @@ html {
                         }
                     }
 
-                    .icon {
-                        display: none;
+                    &.has-icon {
+                        > a {
+                            padding-left: 0;
+                        }
                     }
                 }
 
@@ -20309,14 +20922,14 @@ html {
             }
 
             &.is-collapsed {
-                .menu-holder {
+                .menu__holder {
                     visibility: hidden;
                     .mx__transform(translate3d(0, -100%, 0));
                 }
             }
 
             &.is-expanded {
-                .menu-holder {
+                .menu__holder {
                     visibility: visible;
                     .mx__transform(translate3d(0, 0, 0));
                 }
@@ -20326,7 +20939,7 @@ html {
 
 }
 
-/* *******  LAYOUTS: TOP MENU: PRINT ******* */
+/* ******* COMPONENTS: TOP MENU: PRINT ******* */
 
 @media print {
 
@@ -20775,14 +21388,17 @@ html {
 .mod__logo-carousel {
     .pt__grid {
         > ul {
-            .mx__transition(transform, @CmUI-Transition-Duration);
+            position: relative;
+
+            img {
+                .mx__transform(none);
+            }
         }
     }
 
     &.is-infinite {
         .pt__grid {
             > ul {
-                .mx__transition(transform, @CmUI-Transition-Duration, linear);
             }
         }
     }
@@ -20790,7 +21406,6 @@ html {
     &.is-immediately {
         .pt__grid {
             > ul {
-                .cm__transition-none;
             }
         }
     }

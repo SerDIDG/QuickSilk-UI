@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-logged is-wrap is-topmenu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Elements: Live Preview</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body>
+
+<!-- [* ******* TOPMENU START ******* *] -->
+
+<div class="app__topmenu" data-node="AppTopMenu:{}:container" data-element="app-topmenu">
+    <div class="inner" data-node="inner">
+        <div class="menu__logo">
+            <a class="menu__icon icon app-i__quicksilk"></a>
+        </div>
+        <div class="menu__title">Templates Live Preview</div>
+        <div class="menu__holder-button" data-node="button">
+            <div class="icon"></div>
+        </div>
+        <div class="menu__holder" data-node="target">
+            <div class="inner">
+                <div class="app__live-preview__menu" data-element="App.LivePreviewMenu" data-node="AppLivePreviewMenu:{}:container">
+                    <div class="menu__right">
+                        <div class="menu__toolbar">
+                            <div class="pt__toolbar is-inline is-not-adaptive item-indent-12px">
+                                <div class="inner">
+                                    <ul class="group is-flex">
+                                        <li class="is-field is-prime size-large">
+                                            <select data-element="Com.Select" name="templates" data-config='{"inputClassName" : "size-large is-borderless"}'>
+                                                <option value="../index.html" selected>Test Category / Test Name</option>
+                                                <option value="../../index.html">Test Category / Test Name 2</option>
+                                            </select>
+                                        </li>
+                                        <li>
+                                            <button class="button--large" type="button" data-node="select">Select</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu__center">
+                        <div class="inner">
+                            <ul class="menu">
+                                <li class="has-icon active" data-node="desktop">
+                                    <a title="Desktop">
+                                        <i class="menu__icon icon app-i__desktop"></i>Desktop
+                                    </a>
+                                </li>
+                                <li class="has-icon" data-node="tablet">
+                                    <a title="Tablet">
+                                        <i class="menu__icon icon app-i__tablet"></i>Tablet
+                                    </a>
+                                </li>
+                                <li class="has-icon" data-node="mobile">
+                                    <a title="Mobile">
+                                        <i class="menu__icon icon app-i__mobile"></i>Mobile
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- [* ******* TOPMENU END ******* *] -->
+
+<!-- [* ******* CONTENT START ******* *] -->
+
+<div class="app__content is-wrap">
+    <div class="app__live-preview__content is-desktop" data-element="App.LivePreviewContent" data-node="AppLivePreviewContent:{}:container">
+        <div class="container">
+            <div class="device">
+                <div class="device__power" data-node="devicePower"></div>
+                <div class="device__camera"></div>
+                <div class="device__screen" data-node="deviceScreen">
+                    <div class="device__content" data-node="deviceContent">
+                        <iframe src="../index.html" data-node="iframe"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- [* ******* CONTENT END ******* *] -->
+
+</body>
+</html>

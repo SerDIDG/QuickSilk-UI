@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.20.9 (2016-07-25 19:49) ************ */
+/*! ************ MagpieUI v3.20.12 (2016-08-08 20:21) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -4706,6 +4706,49 @@ span.CodeMirror-selectedtext {
 .cm-i__chevron-right:before {
   content: '\e903';
 }
+/* ******* ANIMATED ******* */
+.cm-ia__menu {
+  position: relative;
+}
+.cm-ia__menu:before,
+.cm-ia__menu:after {
+  width: 100%;
+  height: 2px;
+  display: block;
+  position: absolute;
+  content: '';
+  background-color: #ffffff;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.cm-ia__menu:before {
+  -webkit-transform: translate(0, -5px);
+  -ms-transform: translate(0, -5px);
+  transform: translate(0, -5px);
+  top: 50%;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.cm-ia__menu:after {
+  -webkit-transform: translate(0, 5px);
+  -ms-transform: translate(0, 5px);
+  transform: translate(0, 5px);
+  top: auto;
+  right: 0;
+  bottom: 50%;
+  left: 0;
+}
+.cm-ia__menu--active:before {
+  -webkit-transform: translate(0, -1px) rotate(45deg);
+  -ms-transform: translate(0, -1px) rotate(45deg);
+  transform: translate(0, -1px) rotate(45deg);
+}
+.cm-ia__menu--active:after {
+  -webkit-transform: translate(0, 1px) rotate(-45deg);
+  -ms-transform: translate(0, 1px) rotate(-45deg);
+  transform: translate(0, 1px) rotate(-45deg);
+}
 /* ******* COMMON: TAGS ******* */
 *,
 *:after,
@@ -4937,8 +4980,6 @@ input[type="password"],
 textarea,
 select {
   width: 100%;
-  height: 28px;
-  padding: 4px 6px;
   margin: 0;
   vertical-align: top;
   background: #ffffff;
@@ -4953,6 +4994,9 @@ select {
   background-clip: padding-box;
   -webkit-transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
   transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
+  height: 28px;
+  padding: 4px 6px;
+  border-width: 1px;
 }
 .input:hover,
 input[type="text"]:hover,
@@ -5036,6 +5080,90 @@ select.input-transparent {
   background-image: url("../img/MagpieUI/parts/transparent.png");
   text-shadow: 0 0 5px #ffffff, 0 0 5px #ffffff, 0 1px 1px #ffffff, 0 -1px 1px #ffffff, 1px 0 1px #ffffff, -1px 0 1px #ffffff;
 }
+.input.is-borderless,
+input[type="text"].is-borderless,
+input[type="email"].is-borderless,
+input[type="number"].is-borderless,
+input[type="time"].is-borderless,
+input[type="password"].is-borderless,
+textarea.is-borderless,
+select.is-borderless {
+  height: 28px;
+  padding: 5px 6px;
+  border-width: 0px;
+}
+.input.input--large,
+input[type="text"].input--large,
+input[type="email"].input--large,
+input[type="number"].input--large,
+input[type="time"].input--large,
+input[type="password"].input--large,
+textarea.input--large,
+select.input--large {
+  height: 32px;
+  padding: 6px 6px;
+  border-width: 1px;
+}
+.input.input--large.is-borderless,
+input[type="text"].input--large.is-borderless,
+input[type="email"].input--large.is-borderless,
+input[type="number"].input--large.is-borderless,
+input[type="time"].input--large.is-borderless,
+input[type="password"].input--large.is-borderless,
+textarea.input--large.is-borderless,
+select.input--large.is-borderless {
+  height: 32px;
+  padding: 7px 6px;
+  border-width: 0px;
+}
+.input.input--xlarge,
+input[type="text"].input--xlarge,
+input[type="email"].input--xlarge,
+input[type="number"].input--xlarge,
+input[type="time"].input--xlarge,
+input[type="password"].input--xlarge,
+textarea.input--xlarge,
+select.input--xlarge {
+  height: 48px;
+  padding: 14px 6px;
+  border-width: 1px;
+}
+.input.input--xlarge.is-borderless,
+input[type="text"].input--xlarge.is-borderless,
+input[type="email"].input--xlarge.is-borderless,
+input[type="number"].input--xlarge.is-borderless,
+input[type="time"].input--xlarge.is-borderless,
+input[type="password"].input--xlarge.is-borderless,
+textarea.input--xlarge.is-borderless,
+select.input--xlarge.is-borderless {
+  height: 48px;
+  padding: 15px 6px;
+  border-width: 0px;
+}
+.input.input--xxlarge,
+input[type="text"].input--xxlarge,
+input[type="email"].input--xxlarge,
+input[type="number"].input--xxlarge,
+input[type="time"].input--xxlarge,
+input[type="password"].input--xxlarge,
+textarea.input--xxlarge,
+select.input--xxlarge {
+  height: 64px;
+  padding: 22px 6px;
+  border-width: 1px;
+}
+.input.input--xxlarge.is-borderless,
+input[type="text"].input--xxlarge.is-borderless,
+input[type="email"].input--xxlarge.is-borderless,
+input[type="number"].input--xxlarge.is-borderless,
+input[type="time"].input--xxlarge.is-borderless,
+input[type="password"].input--xxlarge.is-borderless,
+textarea.input--xxlarge.is-borderless,
+select.input--xxlarge.is-borderless {
+  height: 64px;
+  padding: 23px 6px;
+  border-width: 0px;
+}
 .textarea,
 textarea {
   height: 100px;
@@ -5048,6 +5176,8 @@ select[multiple] {
   height: 128px;
   padding: 0;
 }
+/* *** MIXINS *** */
+/* *** APPLY *** */
 input,
 select,
 textarea,
@@ -5605,6 +5735,14 @@ button.button-clear {
   border: none;
   color: #2985e0;
   cursor: default;
+}
+.button.button--large,
+input[type="button"].button--large,
+input[type="submit"].button--large,
+input[type="reset"].button--large,
+button.button--large {
+  min-height: 32px;
+  padding: 7px 24px;
 }
 .button.button--xlarge,
 input[type="button"].button--xlarge,
@@ -7690,6 +7828,7 @@ button.is-hidden {
 /* ******* PARTS: DRAG ******* */
 .pt__drag {
   position: absolute;
+  touch-action: none;
   top: 0;
   right: 0;
   bottom: 0;
@@ -7969,6 +8108,7 @@ button.is-hidden {
   height: 24px;
   margin: 0 0 0 -40px;
   display: block;
+  visibility: hidden;
   position: absolute;
   z-index: 3;
   left: 50%;
@@ -7977,7 +8117,7 @@ button.is-hidden {
   border: 1px dashed #2985e0;
   border-radius: 3px;
   cursor: move;
-  visibility: hidden;
+  touch-action: none;
   -webkit-background-clip: border-box;
   -moz-background-clip: border-box;
   background-clip: border-box;
@@ -8042,6 +8182,7 @@ button.is-hidden {
   border-color: #cccccc;
   list-style: none;
   opacity: 0;
+  touch-action: none;
   top: 100%;
   right: auto;
   left: 0;
@@ -9086,31 +9227,34 @@ button.is-hidden {
 }
 .pt__image > .pull {
   position: absolute;
+  padding: 8px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.7);
   z-index: 3;
 }
 .pt__image > .pull.top-right {
-  top: 12px;
-  right: 12px;
+  top: 4px;
+  right: 4px;
   bottom: auto;
   left: auto;
 }
 .pt__image > .pull.top-left {
-  top: 12px;
+  top: 4px;
   right: auto;
   bottom: auto;
-  left: 12px;
+  left: 4px;
 }
 .pt__image > .pull.bottom-right {
   top: auto;
-  right: 12px;
-  bottom: 12px;
+  right: 4px;
+  bottom: 4px;
   left: auto;
 }
 .pt__image > .pull.bottom-left {
   top: auto;
   right: auto;
-  bottom: 12px;
-  left: 12px;
+  bottom: 4px;
+  left: 4px;
 }
 .pt__image > .pull input[type="checkbox"],
 .pt__image > .pull input[type="radio"] {
@@ -9265,6 +9409,7 @@ button.is-hidden {
 /* ******* PARTS: INPUT ******* */
 .pt__input {
   position: relative;
+  height: 28px;
 }
 .pt__input .icon {
   background-color: transparent;
@@ -9297,6 +9442,18 @@ button.is-hidden {
   height: 28px;
   padding: 4px 6px;
   border-width: 1px;
+}
+.pt__input .input.is-borderless,
+.pt__input input[type="text"].is-borderless,
+.pt__input input[type="email"].is-borderless,
+.pt__input input[type="number"].is-borderless,
+.pt__input input[type="time"].is-borderless,
+.pt__input input[type="password"].is-borderless,
+.pt__input textarea.is-borderless,
+.pt__input select.is-borderless {
+  height: 28px;
+  padding: 5px 6px;
+  border-width: 0px;
 }
 .pt__input .icon {
   height: 26px;
@@ -9394,6 +9551,888 @@ button.is-hidden {
 .pt__input.is-no-label input[type="password"],
 .pt__input.is-no-label textarea,
 .pt__input.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pt__input.is-borderless {
+  height: 28px;
+}
+.pt__input.is-borderless .input,
+.pt__input.is-borderless input[type="text"],
+.pt__input.is-borderless input[type="email"],
+.pt__input.is-borderless input[type="number"],
+.pt__input.is-borderless input[type="time"],
+.pt__input.is-borderless input[type="password"],
+.pt__input.is-borderless textarea,
+.pt__input.is-borderless select {
+  height: 28px;
+  padding: 5px 6px;
+  border-width: 0px;
+}
+.pt__input.is-borderless .input.is-borderless,
+.pt__input.is-borderless input[type="text"].is-borderless,
+.pt__input.is-borderless input[type="email"].is-borderless,
+.pt__input.is-borderless input[type="number"].is-borderless,
+.pt__input.is-borderless input[type="time"].is-borderless,
+.pt__input.is-borderless input[type="password"].is-borderless,
+.pt__input.is-borderless textarea.is-borderless,
+.pt__input.is-borderless select.is-borderless {
+  height: 28px;
+  padding: 5px 6px;
+  border-width: 0px;
+}
+.pt__input.is-borderless .icon {
+  height: 28px;
+  width: 28px;
+}
+.pt__input.is-borderless .icon:first-child {
+  top: 0px;
+  right: auto;
+  bottom: auto;
+  left: 0px;
+}
+.pt__input.is-borderless .icon:last-child {
+  top: 0px;
+  right: 0px;
+  bottom: auto;
+  left: auto;
+}
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
+  padding-left: 34px;
+}
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
+  padding-right: 34px;
+}
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
+  padding-left: 28px;
+}
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
+  padding-right: 28px;
+}
+.pt__input.is-borderless.is-icon-outside .input:not(:first-child),
+.pt__input.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
+.pt__input.is-borderless.is-icon-outside input[type="email"]:not(:first-child),
+.pt__input.is-borderless.is-icon-outside input[type="number"]:not(:first-child),
+.pt__input.is-borderless.is-icon-outside input[type="time"]:not(:first-child),
+.pt__input.is-borderless.is-icon-outside input[type="password"]:not(:first-child),
+.pt__input.is-borderless.is-icon-outside textarea:not(:first-child),
+.pt__input.is-borderless.is-icon-outside select:not(:first-child) {
+  width: calc(100% - 28px);
+  margin-left: 28px;
+}
+.pt__input.is-borderless.is-icon-outside .input:not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="text"]:not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="email"]:not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="number"]:not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="time"]:not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="password"]:not(:last-child),
+.pt__input.is-borderless.is-icon-outside textarea:not(:last-child),
+.pt__input.is-borderless.is-icon-outside select:not(:last-child) {
+  width: calc(100% - 28px);
+  margin-right: 28px;
+}
+.pt__input.is-borderless.is-icon-outside .input:not(:first-child):not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="text"]:not(:first-child):not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="email"]:not(:first-child):not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="number"]:not(:first-child):not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="time"]:not(:first-child):not(:last-child),
+.pt__input.is-borderless.is-icon-outside input[type="password"]:not(:first-child):not(:last-child),
+.pt__input.is-borderless.is-icon-outside textarea:not(:first-child):not(:last-child),
+.pt__input.is-borderless.is-icon-outside select:not(:first-child):not(:last-child) {
+  width: calc(100% - 56px);
+}
+.pt__input.is-borderless.is-no-label .input,
+.pt__input.is-borderless.is-no-label input[type="text"],
+.pt__input.is-borderless.is-no-label input[type="email"],
+.pt__input.is-borderless.is-no-label input[type="number"],
+.pt__input.is-borderless.is-no-label input[type="time"],
+.pt__input.is-borderless.is-no-label input[type="password"],
+.pt__input.is-borderless.is-no-label textarea,
+.pt__input.is-borderless.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pt__input.size-large {
+  height: 32px;
+}
+.pt__input.size-large .input,
+.pt__input.size-large input[type="text"],
+.pt__input.size-large input[type="email"],
+.pt__input.size-large input[type="number"],
+.pt__input.size-large input[type="time"],
+.pt__input.size-large input[type="password"],
+.pt__input.size-large textarea,
+.pt__input.size-large select {
+  height: 32px;
+  padding: 6px 6px;
+  border-width: 1px;
+}
+.pt__input.size-large .input.is-borderless,
+.pt__input.size-large input[type="text"].is-borderless,
+.pt__input.size-large input[type="email"].is-borderless,
+.pt__input.size-large input[type="number"].is-borderless,
+.pt__input.size-large input[type="time"].is-borderless,
+.pt__input.size-large input[type="password"].is-borderless,
+.pt__input.size-large textarea.is-borderless,
+.pt__input.size-large select.is-borderless {
+  height: 32px;
+  padding: 7px 6px;
+  border-width: 0px;
+}
+.pt__input.size-large .icon {
+  height: 30px;
+  width: 30px;
+}
+.pt__input.size-large .icon:first-child {
+  top: 1px;
+  right: auto;
+  bottom: auto;
+  left: 1px;
+}
+.pt__input.size-large .icon:last-child {
+  top: 1px;
+  right: 1px;
+  bottom: auto;
+  left: auto;
+}
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
+  padding-left: 36px;
+}
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
+  padding-right: 36px;
+}
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
+  padding-left: 30px;
+}
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input.size-large:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
+  padding-right: 30px;
+}
+.pt__input.size-large.is-icon-outside .input:not(:first-child),
+.pt__input.size-large.is-icon-outside input[type="text"]:not(:first-child),
+.pt__input.size-large.is-icon-outside input[type="email"]:not(:first-child),
+.pt__input.size-large.is-icon-outside input[type="number"]:not(:first-child),
+.pt__input.size-large.is-icon-outside input[type="time"]:not(:first-child),
+.pt__input.size-large.is-icon-outside input[type="password"]:not(:first-child),
+.pt__input.size-large.is-icon-outside textarea:not(:first-child),
+.pt__input.size-large.is-icon-outside select:not(:first-child) {
+  width: calc(100% - 30px);
+  margin-left: 30px;
+}
+.pt__input.size-large.is-icon-outside .input:not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="text"]:not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="email"]:not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="number"]:not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="time"]:not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="password"]:not(:last-child),
+.pt__input.size-large.is-icon-outside textarea:not(:last-child),
+.pt__input.size-large.is-icon-outside select:not(:last-child) {
+  width: calc(100% - 30px);
+  margin-right: 30px;
+}
+.pt__input.size-large.is-icon-outside .input:not(:first-child):not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="text"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="email"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="number"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="time"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-icon-outside input[type="password"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-icon-outside textarea:not(:first-child):not(:last-child),
+.pt__input.size-large.is-icon-outside select:not(:first-child):not(:last-child) {
+  width: calc(100% - 60px);
+}
+.pt__input.size-large.is-no-label .input,
+.pt__input.size-large.is-no-label input[type="text"],
+.pt__input.size-large.is-no-label input[type="email"],
+.pt__input.size-large.is-no-label input[type="number"],
+.pt__input.size-large.is-no-label input[type="time"],
+.pt__input.size-large.is-no-label input[type="password"],
+.pt__input.size-large.is-no-label textarea,
+.pt__input.size-large.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pt__input.size-large.is-borderless {
+  height: 32px;
+}
+.pt__input.size-large.is-borderless .input,
+.pt__input.size-large.is-borderless input[type="text"],
+.pt__input.size-large.is-borderless input[type="email"],
+.pt__input.size-large.is-borderless input[type="number"],
+.pt__input.size-large.is-borderless input[type="time"],
+.pt__input.size-large.is-borderless input[type="password"],
+.pt__input.size-large.is-borderless textarea,
+.pt__input.size-large.is-borderless select {
+  height: 32px;
+  padding: 7px 6px;
+  border-width: 0px;
+}
+.pt__input.size-large.is-borderless .input.is-borderless,
+.pt__input.size-large.is-borderless input[type="text"].is-borderless,
+.pt__input.size-large.is-borderless input[type="email"].is-borderless,
+.pt__input.size-large.is-borderless input[type="number"].is-borderless,
+.pt__input.size-large.is-borderless input[type="time"].is-borderless,
+.pt__input.size-large.is-borderless input[type="password"].is-borderless,
+.pt__input.size-large.is-borderless textarea.is-borderless,
+.pt__input.size-large.is-borderless select.is-borderless {
+  height: 32px;
+  padding: 7px 6px;
+  border-width: 0px;
+}
+.pt__input.size-large.is-borderless .icon {
+  height: 32px;
+  width: 32px;
+}
+.pt__input.size-large.is-borderless .icon:first-child {
+  top: 0px;
+  right: auto;
+  bottom: auto;
+  left: 0px;
+}
+.pt__input.size-large.is-borderless .icon:last-child {
+  top: 0px;
+  right: 0px;
+  bottom: auto;
+  left: auto;
+}
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
+  padding-left: 38px;
+}
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
+  padding-right: 38px;
+}
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
+  padding-left: 32px;
+}
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input.size-large.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
+  padding-right: 32px;
+}
+.pt__input.size-large.is-borderless.is-icon-outside .input:not(:first-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="email"]:not(:first-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="number"]:not(:first-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="time"]:not(:first-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="password"]:not(:first-child),
+.pt__input.size-large.is-borderless.is-icon-outside textarea:not(:first-child),
+.pt__input.size-large.is-borderless.is-icon-outside select:not(:first-child) {
+  width: calc(100% - 32px);
+  margin-left: 32px;
+}
+.pt__input.size-large.is-borderless.is-icon-outside .input:not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="text"]:not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="email"]:not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="number"]:not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="time"]:not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="password"]:not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside textarea:not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside select:not(:last-child) {
+  width: calc(100% - 32px);
+  margin-right: 32px;
+}
+.pt__input.size-large.is-borderless.is-icon-outside .input:not(:first-child):not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="text"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="email"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="number"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="time"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside input[type="password"]:not(:first-child):not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside textarea:not(:first-child):not(:last-child),
+.pt__input.size-large.is-borderless.is-icon-outside select:not(:first-child):not(:last-child) {
+  width: calc(100% - 64px);
+}
+.pt__input.size-large.is-borderless.is-no-label .input,
+.pt__input.size-large.is-borderless.is-no-label input[type="text"],
+.pt__input.size-large.is-borderless.is-no-label input[type="email"],
+.pt__input.size-large.is-borderless.is-no-label input[type="number"],
+.pt__input.size-large.is-borderless.is-no-label input[type="time"],
+.pt__input.size-large.is-borderless.is-no-label input[type="password"],
+.pt__input.size-large.is-borderless.is-no-label textarea,
+.pt__input.size-large.is-borderless.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pt__input.size-xlarge {
+  height: 48px;
+}
+.pt__input.size-xlarge .input,
+.pt__input.size-xlarge input[type="text"],
+.pt__input.size-xlarge input[type="email"],
+.pt__input.size-xlarge input[type="number"],
+.pt__input.size-xlarge input[type="time"],
+.pt__input.size-xlarge input[type="password"],
+.pt__input.size-xlarge textarea,
+.pt__input.size-xlarge select {
+  height: 48px;
+  padding: 14px 6px;
+  border-width: 1px;
+}
+.pt__input.size-xlarge .input.is-borderless,
+.pt__input.size-xlarge input[type="text"].is-borderless,
+.pt__input.size-xlarge input[type="email"].is-borderless,
+.pt__input.size-xlarge input[type="number"].is-borderless,
+.pt__input.size-xlarge input[type="time"].is-borderless,
+.pt__input.size-xlarge input[type="password"].is-borderless,
+.pt__input.size-xlarge textarea.is-borderless,
+.pt__input.size-xlarge select.is-borderless {
+  height: 48px;
+  padding: 15px 6px;
+  border-width: 0px;
+}
+.pt__input.size-xlarge .icon {
+  height: 46px;
+  width: 46px;
+}
+.pt__input.size-xlarge .icon:first-child {
+  top: 1px;
+  right: auto;
+  bottom: auto;
+  left: 1px;
+}
+.pt__input.size-xlarge .icon:last-child {
+  top: 1px;
+  right: 1px;
+  bottom: auto;
+  left: auto;
+}
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
+  padding-left: 52px;
+}
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
+  padding-right: 52px;
+}
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
+  padding-left: 46px;
+}
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input.size-xlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
+  padding-right: 46px;
+}
+.pt__input.size-xlarge.is-icon-outside .input:not(:first-child),
+.pt__input.size-xlarge.is-icon-outside input[type="text"]:not(:first-child),
+.pt__input.size-xlarge.is-icon-outside input[type="email"]:not(:first-child),
+.pt__input.size-xlarge.is-icon-outside input[type="number"]:not(:first-child),
+.pt__input.size-xlarge.is-icon-outside input[type="time"]:not(:first-child),
+.pt__input.size-xlarge.is-icon-outside input[type="password"]:not(:first-child),
+.pt__input.size-xlarge.is-icon-outside textarea:not(:first-child),
+.pt__input.size-xlarge.is-icon-outside select:not(:first-child) {
+  width: calc(100% - 46px);
+  margin-left: 46px;
+}
+.pt__input.size-xlarge.is-icon-outside .input:not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="text"]:not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="email"]:not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="number"]:not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="time"]:not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="password"]:not(:last-child),
+.pt__input.size-xlarge.is-icon-outside textarea:not(:last-child),
+.pt__input.size-xlarge.is-icon-outside select:not(:last-child) {
+  width: calc(100% - 46px);
+  margin-right: 46px;
+}
+.pt__input.size-xlarge.is-icon-outside .input:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="text"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="email"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="number"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="time"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-icon-outside input[type="password"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-icon-outside textarea:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-icon-outside select:not(:first-child):not(:last-child) {
+  width: calc(100% - 92px);
+}
+.pt__input.size-xlarge.is-no-label .input,
+.pt__input.size-xlarge.is-no-label input[type="text"],
+.pt__input.size-xlarge.is-no-label input[type="email"],
+.pt__input.size-xlarge.is-no-label input[type="number"],
+.pt__input.size-xlarge.is-no-label input[type="time"],
+.pt__input.size-xlarge.is-no-label input[type="password"],
+.pt__input.size-xlarge.is-no-label textarea,
+.pt__input.size-xlarge.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pt__input.size-xlarge.is-borderless {
+  height: 48px;
+}
+.pt__input.size-xlarge.is-borderless .input,
+.pt__input.size-xlarge.is-borderless input[type="text"],
+.pt__input.size-xlarge.is-borderless input[type="email"],
+.pt__input.size-xlarge.is-borderless input[type="number"],
+.pt__input.size-xlarge.is-borderless input[type="time"],
+.pt__input.size-xlarge.is-borderless input[type="password"],
+.pt__input.size-xlarge.is-borderless textarea,
+.pt__input.size-xlarge.is-borderless select {
+  height: 48px;
+  padding: 15px 6px;
+  border-width: 0px;
+}
+.pt__input.size-xlarge.is-borderless .input.is-borderless,
+.pt__input.size-xlarge.is-borderless input[type="text"].is-borderless,
+.pt__input.size-xlarge.is-borderless input[type="email"].is-borderless,
+.pt__input.size-xlarge.is-borderless input[type="number"].is-borderless,
+.pt__input.size-xlarge.is-borderless input[type="time"].is-borderless,
+.pt__input.size-xlarge.is-borderless input[type="password"].is-borderless,
+.pt__input.size-xlarge.is-borderless textarea.is-borderless,
+.pt__input.size-xlarge.is-borderless select.is-borderless {
+  height: 48px;
+  padding: 15px 6px;
+  border-width: 0px;
+}
+.pt__input.size-xlarge.is-borderless .icon {
+  height: 48px;
+  width: 48px;
+}
+.pt__input.size-xlarge.is-borderless .icon:first-child {
+  top: 0px;
+  right: auto;
+  bottom: auto;
+  left: 0px;
+}
+.pt__input.size-xlarge.is-borderless .icon:last-child {
+  top: 0px;
+  right: 0px;
+  bottom: auto;
+  left: auto;
+}
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
+  padding-left: 54px;
+}
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
+  padding-right: 54px;
+}
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
+  padding-left: 48px;
+}
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input.size-xlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
+  padding-right: 48px;
+}
+.pt__input.size-xlarge.is-borderless.is-icon-outside .input:not(:first-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="email"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="number"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="time"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="password"]:not(:first-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside textarea:not(:first-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside select:not(:first-child) {
+  width: calc(100% - 48px);
+  margin-left: 48px;
+}
+.pt__input.size-xlarge.is-borderless.is-icon-outside .input:not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="text"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="email"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="number"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="time"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="password"]:not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside textarea:not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside select:not(:last-child) {
+  width: calc(100% - 48px);
+  margin-right: 48px;
+}
+.pt__input.size-xlarge.is-borderless.is-icon-outside .input:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="text"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="email"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="number"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="time"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside input[type="password"]:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside textarea:not(:first-child):not(:last-child),
+.pt__input.size-xlarge.is-borderless.is-icon-outside select:not(:first-child):not(:last-child) {
+  width: calc(100% - 96px);
+}
+.pt__input.size-xlarge.is-borderless.is-no-label .input,
+.pt__input.size-xlarge.is-borderless.is-no-label input[type="text"],
+.pt__input.size-xlarge.is-borderless.is-no-label input[type="email"],
+.pt__input.size-xlarge.is-borderless.is-no-label input[type="number"],
+.pt__input.size-xlarge.is-borderless.is-no-label input[type="time"],
+.pt__input.size-xlarge.is-borderless.is-no-label input[type="password"],
+.pt__input.size-xlarge.is-borderless.is-no-label textarea,
+.pt__input.size-xlarge.is-borderless.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pt__input.size-xxlarge {
+  height: 64px;
+}
+.pt__input.size-xxlarge .input,
+.pt__input.size-xxlarge input[type="text"],
+.pt__input.size-xxlarge input[type="email"],
+.pt__input.size-xxlarge input[type="number"],
+.pt__input.size-xxlarge input[type="time"],
+.pt__input.size-xxlarge input[type="password"],
+.pt__input.size-xxlarge textarea,
+.pt__input.size-xxlarge select {
+  height: 64px;
+  padding: 22px 6px;
+  border-width: 1px;
+}
+.pt__input.size-xxlarge .input.is-borderless,
+.pt__input.size-xxlarge input[type="text"].is-borderless,
+.pt__input.size-xxlarge input[type="email"].is-borderless,
+.pt__input.size-xxlarge input[type="number"].is-borderless,
+.pt__input.size-xxlarge input[type="time"].is-borderless,
+.pt__input.size-xxlarge input[type="password"].is-borderless,
+.pt__input.size-xxlarge textarea.is-borderless,
+.pt__input.size-xxlarge select.is-borderless {
+  height: 64px;
+  padding: 23px 6px;
+  border-width: 0px;
+}
+.pt__input.size-xxlarge .icon {
+  height: 62px;
+  width: 62px;
+}
+.pt__input.size-xxlarge .icon:first-child {
+  top: 1px;
+  right: auto;
+  bottom: auto;
+  left: 1px;
+}
+.pt__input.size-xxlarge .icon:last-child {
+  top: 1px;
+  right: 1px;
+  bottom: auto;
+  left: auto;
+}
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
+  padding-left: 68px;
+}
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
+  padding-right: 68px;
+}
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
+  padding-left: 62px;
+}
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input.size-xxlarge:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
+  padding-right: 62px;
+}
+.pt__input.size-xxlarge.is-icon-outside .input:not(:first-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="text"]:not(:first-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="email"]:not(:first-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="number"]:not(:first-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="time"]:not(:first-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="password"]:not(:first-child),
+.pt__input.size-xxlarge.is-icon-outside textarea:not(:first-child),
+.pt__input.size-xxlarge.is-icon-outside select:not(:first-child) {
+  width: calc(100% - 62px);
+  margin-left: 62px;
+}
+.pt__input.size-xxlarge.is-icon-outside .input:not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="text"]:not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="email"]:not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="number"]:not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="time"]:not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="password"]:not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside textarea:not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside select:not(:last-child) {
+  width: calc(100% - 62px);
+  margin-right: 62px;
+}
+.pt__input.size-xxlarge.is-icon-outside .input:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="text"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="email"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="number"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="time"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside input[type="password"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside textarea:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-icon-outside select:not(:first-child):not(:last-child) {
+  width: calc(100% - 124px);
+}
+.pt__input.size-xxlarge.is-no-label .input,
+.pt__input.size-xxlarge.is-no-label input[type="text"],
+.pt__input.size-xxlarge.is-no-label input[type="email"],
+.pt__input.size-xxlarge.is-no-label input[type="number"],
+.pt__input.size-xxlarge.is-no-label input[type="time"],
+.pt__input.size-xxlarge.is-no-label input[type="password"],
+.pt__input.size-xxlarge.is-no-label textarea,
+.pt__input.size-xxlarge.is-no-label select {
+  padding-left: 0;
+  padding-right: 0;
+}
+.pt__input.size-xxlarge.is-borderless {
+  height: 64px;
+}
+.pt__input.size-xxlarge.is-borderless .input,
+.pt__input.size-xxlarge.is-borderless input[type="text"],
+.pt__input.size-xxlarge.is-borderless input[type="email"],
+.pt__input.size-xxlarge.is-borderless input[type="number"],
+.pt__input.size-xxlarge.is-borderless input[type="time"],
+.pt__input.size-xxlarge.is-borderless input[type="password"],
+.pt__input.size-xxlarge.is-borderless textarea,
+.pt__input.size-xxlarge.is-borderless select {
+  height: 64px;
+  padding: 23px 6px;
+  border-width: 0px;
+}
+.pt__input.size-xxlarge.is-borderless .input.is-borderless,
+.pt__input.size-xxlarge.is-borderless input[type="text"].is-borderless,
+.pt__input.size-xxlarge.is-borderless input[type="email"].is-borderless,
+.pt__input.size-xxlarge.is-borderless input[type="number"].is-borderless,
+.pt__input.size-xxlarge.is-borderless input[type="time"].is-borderless,
+.pt__input.size-xxlarge.is-borderless input[type="password"].is-borderless,
+.pt__input.size-xxlarge.is-borderless textarea.is-borderless,
+.pt__input.size-xxlarge.is-borderless select.is-borderless {
+  height: 64px;
+  padding: 23px 6px;
+  border-width: 0px;
+}
+.pt__input.size-xxlarge.is-borderless .icon {
+  height: 64px;
+  width: 64px;
+}
+.pt__input.size-xxlarge.is-borderless .icon:first-child {
+  top: 0px;
+  right: auto;
+  bottom: auto;
+  left: 0px;
+}
+.pt__input.size-xxlarge.is-borderless .icon:last-child {
+  top: 0px;
+  right: 0px;
+  bottom: auto;
+  left: auto;
+}
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:first-child) {
+  padding-left: 70px;
+}
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) .input:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="text"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="email"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="number"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="time"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) input[type="password"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) textarea:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label) select:not(:last-child) {
+  padding-right: 70px;
+}
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:first-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:first-child) {
+  padding-left: 64px;
+}
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent .input:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="text"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="email"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="number"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="time"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent input[type="password"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent textarea:not(:last-child),
+.pt__input.size-xxlarge.is-borderless:not(.is-icon-outside):not(.is-no-label).is-less-indent select:not(:last-child) {
+  padding-right: 64px;
+}
+.pt__input.size-xxlarge.is-borderless.is-icon-outside .input:not(:first-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="email"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="number"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="time"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="password"]:not(:first-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside textarea:not(:first-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside select:not(:first-child) {
+  width: calc(100% - 64px);
+  margin-left: 64px;
+}
+.pt__input.size-xxlarge.is-borderless.is-icon-outside .input:not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="text"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="email"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="number"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="time"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="password"]:not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside textarea:not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside select:not(:last-child) {
+  width: calc(100% - 64px);
+  margin-right: 64px;
+}
+.pt__input.size-xxlarge.is-borderless.is-icon-outside .input:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="text"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="email"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="number"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="time"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="password"]:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside textarea:not(:first-child):not(:last-child),
+.pt__input.size-xxlarge.is-borderless.is-icon-outside select:not(:first-child):not(:last-child) {
+  width: calc(100% - 128px);
+}
+.pt__input.size-xxlarge.is-borderless.is-no-label .input,
+.pt__input.size-xxlarge.is-borderless.is-no-label input[type="text"],
+.pt__input.size-xxlarge.is-borderless.is-no-label input[type="email"],
+.pt__input.size-xxlarge.is-borderless.is-no-label input[type="number"],
+.pt__input.size-xxlarge.is-borderless.is-no-label input[type="time"],
+.pt__input.size-xxlarge.is-borderless.is-no-label input[type="password"],
+.pt__input.size-xxlarge.is-borderless.is-no-label textarea,
+.pt__input.size-xxlarge.is-borderless.is-no-label select {
   padding-left: 0;
   padding-right: 0;
 }
@@ -9926,6 +10965,7 @@ button.is-hidden {
   border-color: #cccccc;
   list-style: none;
   opacity: 0;
+  touch-action: none;
   top: 100%;
   right: auto;
   bottom: auto;
@@ -10043,7 +11083,12 @@ button.is-hidden {
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
 }
 /* *** MENU *** */
+.pt__menu {
+  touch-action: none;
+}
 .pt__menu:hover > .pt__menu-dropdown,
+.pt__menu:active > .pt__menu-dropdown,
+.pt__menu.active > .pt__menu-dropdown,
 .pt__menu.is-show > .pt__menu-dropdown {
   visibility: visible;
   opacity: 1;
@@ -10139,6 +11184,9 @@ button.is-hidden {
   vertical-align: middle;
 }
 /* ******* PARTS: RANGE ******* */
+.pt__range {
+  touch-action: none;
+}
 .pt__range > .inner {
   position: relative;
 }
@@ -10455,11 +11503,8 @@ button.is-hidden {
 }
 .pt__toolbar .group > li {
   max-width: 100%;
-  margin: 0 4px 24px 0;
+  margin: 0 0 24px 0;
   line-height: 28px;
-}
-.pt__toolbar .group > li:last-child {
-  margin-right: 0;
 }
 .pt__toolbar .group > li.label {
   margin-right: 8px;
@@ -10482,26 +11527,50 @@ button.is-hidden {
 .pt__toolbar .group > li.size-field {
   width: 28px;
 }
+.pt__toolbar .group > li.size-xxxsmall,
 .pt__toolbar .group > li.xxx-small {
   width: 32px;
 }
+.pt__toolbar .group > li.size-xxsmall,
 .pt__toolbar .group > li.xx-small {
   width: 56px;
 }
+.pt__toolbar .group > li.size-xsmall,
 .pt__toolbar .group > li.x-small {
   width: 76px;
 }
+.pt__toolbar .group > li.size-small,
 .pt__toolbar .group > li.small {
   width: 100px;
 }
+.pt__toolbar .group > li.size-medium,
 .pt__toolbar .group > li.medium {
   width: 150px;
 }
+.pt__toolbar .group > li.size-large,
 .pt__toolbar .group > li.large {
   width: 250px;
 }
+.pt__toolbar .group > li.size-xlarge,
 .pt__toolbar .group > li.x-large {
   width: 350px;
+}
+.pt__toolbar .group.is-flex {
+  width: 100%;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+}
+.pt__toolbar .group.is-flex > li {
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+}
+.pt__toolbar .group.is-flex > li.is-prime {
+  -webkit-flex: 1 1 100%;
+  -ms-flex: 1 1 100%;
+  flex: 1 1 100%;
 }
 .pt__toolbar .group.is-merged > li {
   margin: 0 0 0 -1px;
@@ -10593,66 +11662,217 @@ button.is-hidden {
 .pt__toolbar.is-flex .group {
   display: block;
 }
+.pt__toolbar .group > li {
+  margin-right: 4px;
+}
+.pt__toolbar .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-1 .group > li {
+  margin-right: 1;
+}
+.pt__toolbar.item-indent-1 .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-2px .group > li {
+  margin-right: 2px;
+}
+.pt__toolbar.item-indent-2px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-3px .group > li {
+  margin-right: 3px;
+}
+.pt__toolbar.item-indent-3px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-4px .group > li {
+  margin-right: 4px;
+}
+.pt__toolbar.item-indent-4px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-5px .group > li {
+  margin-right: 5px;
+}
+.pt__toolbar.item-indent-5px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-6px .group > li {
+  margin-right: 6px;
+}
+.pt__toolbar.item-indent-6px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-7px .group > li {
+  margin-right: 7px;
+}
+.pt__toolbar.item-indent-7px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-8px .group > li {
+  margin-right: 8px;
+}
+.pt__toolbar.item-indent-8px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-9px .group > li {
+  margin-right: 9px;
+}
+.pt__toolbar.item-indent-9px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-10px .group > li {
+  margin-right: 10px;
+}
+.pt__toolbar.item-indent-10px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-11px .group > li {
+  margin-right: 11px;
+}
+.pt__toolbar.item-indent-11px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-12px .group > li {
+  margin-right: 12px;
+}
+.pt__toolbar.item-indent-12px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-13px .group > li {
+  margin-right: 13px;
+}
+.pt__toolbar.item-indent-13px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-14px .group > li {
+  margin-right: 14px;
+}
+.pt__toolbar.item-indent-14px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-15px .group > li {
+  margin-right: 15px;
+}
+.pt__toolbar.item-indent-15px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-16px .group > li {
+  margin-right: 16px;
+}
+.pt__toolbar.item-indent-16px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-17px .group > li {
+  margin-right: 17px;
+}
+.pt__toolbar.item-indent-17px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-18px .group > li {
+  margin-right: 18px;
+}
+.pt__toolbar.item-indent-18px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-19px .group > li {
+  margin-right: 19px;
+}
+.pt__toolbar.item-indent-19px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-20px .group > li {
+  margin-right: 20px;
+}
+.pt__toolbar.item-indent-20px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-21px .group > li {
+  margin-right: 21px;
+}
+.pt__toolbar.item-indent-21px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-22px .group > li {
+  margin-right: 22px;
+}
+.pt__toolbar.item-indent-22px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-23px .group > li {
+  margin-right: 23px;
+}
+.pt__toolbar.item-indent-23px .group > li:last-child {
+  margin-right: 0;
+}
+.pt__toolbar.item-indent-24px .group > li {
+  margin-right: 24px;
+}
+.pt__toolbar.item-indent-24px .group > li:last-child {
+  margin-right: 0;
+}
+/* ******* PARTS: TOOLBAR: MIXINS ********** */
 /* ******* PARTS: TOOLBAR: ADAPTIVE ********** */
 @media only screen and (max-width: 768px) {
-  html.is-adaptive .pt__toolbar > .inner {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) > .inner {
     display: block;
   }
-  html.is-adaptive .pt__toolbar > .inner > .left,
-  html.is-adaptive .pt__toolbar > .inner > .center,
-  html.is-adaptive .pt__toolbar > .inner > .right {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) > .inner > .left,
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) > .inner > .center,
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) > .inner > .right {
     width: 100%;
     display: block;
     float: none;
   }
-  html.is-adaptive .pt__toolbar .group {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group {
     display: block;
     margin-top: 0;
   }
-  html.is-adaptive .pt__toolbar .group > li.label {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group > li.label {
     display: block;
     margin-right: 0;
     margin-bottom: 0;
   }
-  html.is-adaptive .pt__toolbar .group > li.is-field {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group > li.is-field {
     width: 100%;
   }
-  html.is-adaptive .pt__toolbar .group.is-adaptive {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive {
     display: block;
     margin-left: 0;
     margin-right: 0;
   }
-  html.is-adaptive .pt__toolbar .group.is-adaptive .button,
-  html.is-adaptive .pt__toolbar .group.is-adaptive input[type="button"],
-  html.is-adaptive .pt__toolbar .group.is-adaptive input[type="submit"],
-  html.is-adaptive .pt__toolbar .group.is-adaptive input[type="reset"],
-  html.is-adaptive .pt__toolbar .group.is-adaptive button {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive .button,
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="button"],
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="submit"],
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="reset"],
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive button {
     width: 100%;
     display: block;
   }
-  html.is-adaptive .pt__toolbar .group.is-adaptive > li {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive > li {
     display: block;
     margin-left: 0;
     margin-right: 0;
   }
-  html.is-adaptive .pt__toolbar.is-adaptive > .inner {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive > .inner {
     display: block;
   }
-  html.is-adaptive .pt__toolbar.is-adaptive > .inner > .left,
-  html.is-adaptive .pt__toolbar.is-adaptive > .inner > .center,
-  html.is-adaptive .pt__toolbar.is-adaptive > .inner > .right {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive > .inner > .left,
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive > .inner > .center,
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive > .inner > .right {
     display: block;
   }
-  html.is-adaptive .pt__toolbar.is-adaptive .button,
-  html.is-adaptive .pt__toolbar.is-adaptive input[type="button"],
-  html.is-adaptive .pt__toolbar.is-adaptive input[type="submit"],
-  html.is-adaptive .pt__toolbar.is-adaptive input[type="reset"],
-  html.is-adaptive .pt__toolbar.is-adaptive button {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive .button,
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="button"],
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="submit"],
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="reset"],
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive button {
     width: 100%;
     display: block;
   }
-  html.is-adaptive .pt__toolbar.is-adaptive .group,
-  html.is-adaptive .pt__toolbar.is-adaptive .group > li {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive .group,
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive .group > li {
     display: block;
     margin-left: 0;
     margin-right: 0;
@@ -11562,7 +12782,7 @@ button.is-hidden {
   height: 0;
 }
 .com__togglebox > dd > .inner {
-  padding: 12px 0 0 0;
+  padding: 16px 0 0 0;
 }
 .com__togglebox.has-hover-icon > dt {
   cursor: default;
@@ -14283,7 +15503,8 @@ button.is-hidden {
 .com__image-input__content .input__holder .input__buttons button.is-hidden {
   display: none;
 }
-.com__image-input__content .input__holder:hover .input__cover {
+.com__image-input__content .input__holder:hover .input__cover,
+.com__image-input__content .input__holder:active .input__cover {
   visibility: visible;
   opacity: 1;
 }
@@ -14341,6 +15562,7 @@ button.is-hidden {
   border-color: #cccccc;
   list-style: none;
   opacity: 0;
+  touch-action: none;
   top: 100%;
   right: auto;
   bottom: auto;
@@ -14488,6 +15710,7 @@ button.is-hidden {
 .com__multifield__item > .icon.drag {
   background-image: url("../img/MagpieUI/icons/small/drag-vertical.png");
   cursor: move;
+  touch-action: none;
 }
 .com__multifield__item > .icon.remove {
   background-image: url("../img/MagpieUI/icons/small/remove.png");
@@ -14588,7 +15811,6 @@ button.is-hidden {
   border: 1px solid #a2a2a2;
   border-radius: 3px;
   font-size: 13px;
-  font-weight: 600;
 }
 .com__notifications ul li:first-child {
   margin: 0;
@@ -15050,6 +16272,10 @@ button.is-hidden {
   color: #2985e0;
   cursor: default;
 }
+.com__pagination__bar ul li a.button--large {
+  min-height: 32px;
+  padding: 7px 24px;
+}
 .com__pagination__bar ul li a.button--xlarge {
   min-height: 48px;
   padding: 15px 32px;
@@ -15175,6 +16401,7 @@ button.is-hidden {
 .com__palette .b-range {
   margin-right: 16px;
   border-radius: 3px;
+  touch-action: none;
 }
 .com__palette .b-palette > .inner,
 .com__palette .b-range > .inner {
@@ -15609,8 +16836,6 @@ html.ie9 .com__palette .b-range {
 }
 .com__select-multi .inner {
   width: 100%;
-  height: 28px;
-  padding: 4px 6px;
   margin: 0;
   vertical-align: top;
   background: #ffffff;
@@ -15625,6 +16850,9 @@ html.ie9 .com__palette .b-range {
   background-clip: padding-box;
   -webkit-transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
   transition: background 250ms ease-in-out, border-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, text-shadow 250ms ease-in-out;
+  height: 28px;
+  padding: 4px 6px;
+  border-width: 1px;
   height: auto;
   min-height: 28px;
   padding: 4px;
@@ -15654,6 +16882,41 @@ html.ie9 .com__palette .b-range {
   background-color: #fdffff;
   background-image: url("../img/MagpieUI/parts/transparent.png");
   text-shadow: 0 0 5px #ffffff, 0 0 5px #ffffff, 0 1px 1px #ffffff, 0 -1px 1px #ffffff, 1px 0 1px #ffffff, -1px 0 1px #ffffff;
+}
+.com__select-multi .inner.is-borderless {
+  height: 28px;
+  padding: 5px 6px;
+  border-width: 0px;
+}
+.com__select-multi .inner.input--large {
+  height: 32px;
+  padding: 6px 6px;
+  border-width: 1px;
+}
+.com__select-multi .inner.input--large.is-borderless {
+  height: 32px;
+  padding: 7px 6px;
+  border-width: 0px;
+}
+.com__select-multi .inner.input--xlarge {
+  height: 48px;
+  padding: 14px 6px;
+  border-width: 1px;
+}
+.com__select-multi .inner.input--xlarge.is-borderless {
+  height: 48px;
+  padding: 15px 6px;
+  border-width: 0px;
+}
+.com__select-multi .inner.input--xxlarge {
+  height: 64px;
+  padding: 22px 6px;
+  border-width: 1px;
+}
+.com__select-multi .inner.input--xxlarge.is-borderless {
+  height: 64px;
+  padding: 23px 6px;
+  border-width: 0px;
 }
 .com__select-multi .pt__listing-items > ul {
   max-height: 114px;
@@ -16084,6 +17347,7 @@ html.ie9 .com__palette .b-range {
   border-color: #cccccc;
   list-style: none;
   opacity: 0;
+  touch-action: none;
   top: 100%;
   right: auto;
   bottom: auto;
@@ -16796,11 +18060,11 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.12.2 (2016-07-25 19:50) ************ */
+/*! ************ QuickSilk-Application v3.13.0 (2016-08-08 20:21) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?23');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix23') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?23') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?23') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?23#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?26');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix26') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?26') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?26') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?26#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -17213,6 +18477,15 @@ body:before {
 .app-i__form:before {
   content: '\e607';
 }
+.app-i__desktop:before {
+  content: '\e900';
+}
+.app-i__tablet:before {
+  content: '\e901';
+}
+.app-i__mobile:before {
+  content: '\e902';
+}
 /* Circle */
 .app-i__circle-help:before {
   content: '\e701';
@@ -17321,11 +18594,17 @@ h6 .com__glossary .com__glossary__title {
 }
 /* ******* COMMON: UI ******* */
 /* *** STATES *** */
+html.is-wrap {
+  overflow: hidden;
+}
 html.is-topmenu .app__sidebar {
   top: 48px;
 }
 html.is-topmenu .app__panel {
   top: 48px;
+}
+html.is-topmenu .app__content {
+  margin-top: 48px;
 }
 html.is-topmenu .tpl__container {
   margin-top: 48px;
@@ -17333,11 +18612,17 @@ html.is-topmenu .tpl__container {
 html.is-topmenu--expanded {
   overflow: hidden;
 }
+html.is-sidebar .app__content {
+  margin-left: 48px;
+}
 html.is-sidebar .tpl__container {
   margin-left: 48px;
 }
 html.is-sidebar .tpl__header__container.is-fixed {
   left: 48px;
+}
+html.is-sidebar--expanded .app__content {
+  margin-left: 360px;
 }
 html.is-sidebar--expanded .tpl__container {
   margin-left: 360px;
@@ -17968,7 +19253,8 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__block-container > .app__block > .menu {
   display: none;
 }
-.app__block-container:hover {
+.app__block-container:hover,
+.app__block-container:active {
   z-index: 10;
   -webkit-transition: z-index 100ms ease-in-out;
   transition: z-index 100ms ease-in-out;
@@ -18020,6 +19306,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   height: 24px;
   margin: 0 0 0 -40px;
   display: block;
+  visibility: hidden;
   position: absolute;
   z-index: 3;
   left: 50%;
@@ -18028,7 +19315,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   border: 1px dashed #2985e0;
   border-radius: 3px;
   cursor: move;
-  visibility: hidden;
+  touch-action: none;
   -webkit-background-clip: border-box;
   -moz-background-clip: border-box;
   background-clip: border-box;
@@ -18093,6 +19380,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   border-color: #cccccc;
   list-style: none;
   opacity: 0;
+  touch-action: none;
   top: 100%;
   right: auto;
   left: 0;
@@ -18211,7 +19499,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
 }
-.app__block-container.is-editable:hover > .app__block > .border {
+.app__block-container.is-editable:hover > .app__block > .border,
+.app__block-container.is-editable:active > .app__block > .border {
   opacity: 1;
   background: rgba(255, 255, 255, 0.5);
   -webkit-transition: all 100ms ease-in-out;
@@ -18221,19 +19510,23 @@ html:not(.is-editing).is-editor .app__module__controls {
   bottom: -16px;
   left: -16px;
 }
-.app__block-container.is-editable:hover > .app__block > .drag {
+.app__block-container.is-editable:hover > .app__block > .drag,
+.app__block-container.is-editable:active > .app__block > .drag {
   opacity: 1;
   visibility: visible;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
 }
-.app__block-container.is-editable:hover > .app__block > .drag:not(.is-bottom) {
+.app__block-container.is-editable:hover > .app__block > .drag:not(.is-bottom),
+.app__block-container.is-editable:active > .app__block > .drag:not(.is-bottom) {
   top: -28px;
 }
-.app__block-container.is-editable:hover > .app__block > .drag.is-bottom {
+.app__block-container.is-editable:hover > .app__block > .drag.is-bottom,
+.app__block-container.is-editable:active > .app__block > .drag.is-bottom {
   bottom: -28px;
 }
-.app__block-container.is-editable:hover > .app__block > .menu {
+.app__block-container.is-editable:hover > .app__block > .menu,
+.app__block-container.is-editable:active > .app__block > .menu {
   opacity: 1;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
@@ -18347,6 +19640,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   position: relative;
   border-radius: 3px;
   cursor: move;
+  touch-action: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -18576,7 +19870,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   background-position: 50% -4860px;
 }
 .app__block-dummy--hover .icon,
-.app__block-container:hover > .app__block-dummy .icon {
+.app__block-container:hover > .app__block-dummy .icon,
+.app__block-container:active > .app__block-dummy .icon {
   -webkit-transition: background-color 100ms ease-in-out;
   transition: background-color 100ms ease-in-out;
 }
@@ -18645,6 +19940,30 @@ html:not(.is-editing).is-editor .app__module__controls {
 /* *** HELPERS *** */
 .app__block-dummy-helper__width {
   width: 94px;
+}
+/* ******* COMPONENTS: CONTENT ******** */
+.app__content.is-wrap {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app__content > iframe {
+  width: 100%;
+  height: 100%;
+}
+/* ******* COMPONENTS: CONTENT: ADAPTIVE ******* */
+@media only screen and (max-width: 768px) {
+  html.is-adaptive .app__content {
+    margin-left: 0 !important;
+  }
+}
+/* ******* COMPONENTS: TEMPLATE: PRINT ******** */
+@media print {
+  .app__content {
+    margin: 0 !important;
+  }
 }
 /* ******* COMPONENTS: DASHBOARD ******* */
 /* *** COMMON *** */
@@ -18936,6 +20255,278 @@ html:not(.is-editing).is-editor .app__module__controls {
     -webkit-flex: 0 0 auto;
     -ms-flex: 0 0 auto;
     flex: 0 0 auto;
+  }
+}
+/* ******* COMPONENTS: LIVE PREVIEW ******* */
+.app__live-preview__menu {
+  position: relative;
+}
+.app__live-preview__content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #ffffff;
+  overflow: auto;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+.app__live-preview__content .container {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+.app__live-preview__content .container:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  font-size: 0;
+  height: 0;
+}
+.app__live-preview__content .device {
+  position: relative;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  -webkit-transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__live-preview__content .device .device__power {
+  width: 56px;
+  height: 5px;
+  margin: 0 0 1px;
+  position: absolute;
+  background-color: inherit;
+  border-radius: 3px 3px 0 0;
+  top: auto;
+  right: auto;
+  bottom: 100%;
+  left: 0;
+  -webkit-transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__live-preview__content .device .device__power:active {
+  height: 3px;
+}
+.app__live-preview__content .device .device__camera {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  margin: auto;
+  background-color: inherit;
+  border: 1px solid #ffffff;
+  border-radius: 100%;
+  top: 16px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  -webkit-background-clip: border-box;
+  -moz-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__live-preview__content .device .device__screen {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: #000000;
+}
+.app__live-preview__content .device .device__screen iframe {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+}
+.app__live-preview__content .device .device__content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  -webkit-transition: -webkit-transform 500ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: -webkit-transform 500ms cubic-bezier(0.5, 0, 0.15, 1), -ms-transform 500ms cubic-bezier(0.5, 0, 0.15, 1), transform 500ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__live-preview__content .device .device__content.is-hidden {
+  -webkit-transform: scaleY(0);
+  -ms-transform: scaleY(0);
+  transform: scaleY(0);
+}
+.app__live-preview__content .device .device__content.is-loading {
+  opacity: 0;
+}
+.app__live-preview__content .device .device__loader {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  position: absolute;
+  z-index: 2;
+  background-color: #000000;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__live-preview__content .device .device__loader .icon {
+  margin: 0 auto;
+  color: #ffffff;
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  line-height: 64px;
+}
+.app__live-preview__content .device .device__loader.is-hidden {
+  visibility: hidden;
+  -webkit-transform: scaleY(0);
+  -ms-transform: scaleY(0);
+  transform: scaleY(0);
+}
+.app__live-preview__content .device .device__loader.is-loaded {
+  visibility: hidden;
+  opacity: 0;
+}
+.app__live-preview__content .device .device__blues {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: absolute;
+  z-index: 1;
+  background-color: #0060a0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+  transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1);
+}
+.app__live-preview__content .device .device__blues > .inner {
+  padding: 8px;
+}
+.app__live-preview__content .device .device__blues .cm__tags,
+.app__live-preview__content .device .device__blues h1,
+.app__live-preview__content .device .device__blues h2,
+.app__live-preview__content .device .device__blues h3,
+.app__live-preview__content .device .device__blues h4,
+.app__live-preview__content .device .device__blues h5,
+.app__live-preview__content .device .device__blues h6,
+.app__live-preview__content .device .device__blues p,
+.app__live-preview__content .device .device__blues dl,
+.app__live-preview__content .device .device__blues ul,
+.app__live-preview__content .device .device__blues ol,
+.app__live-preview__content .device .device__blues hr {
+  font: 400 13px/18px 'Open Sans', arial, helvetica, sans-serif;
+  color: #666666;
+  color: #ffffff;
+  word-wrap: break-word;
+}
+.app__live-preview__content .device .device__blues.is-hidden {
+  -webkit-transform: scaleY(0);
+  -ms-transform: scaleY(0);
+  transform: scaleY(0);
+}
+.app__live-preview__content .device .device__blues.is-loading {
+  opacity: 0;
+}
+.app__live-preview__content.is-desktop .container {
+  min-height: 0;
+}
+.app__live-preview__content.is-desktop .device {
+  width: 100%;
+  height: 100%;
+}
+.app__live-preview__content.is-desktop .device .device__screen {
+  border-radius: 0;
+}
+.app__live-preview__content.is-desktop .device .device__power,
+.app__live-preview__content.is-desktop .device .device__camera {
+  opacity: 0;
+  visibility: hidden;
+}
+.app__live-preview__content.is-tablet .container {
+  min-height: 784px;
+}
+.app__live-preview__content.is-tablet .device {
+  width: 1024px;
+  height: 640px;
+  margin: 24px;
+  padding: 48px 48px;
+  border-radius: 16px;
+  background-color: #262626;
+}
+.app__live-preview__content.is-tablet .device .device__screen {
+  border-radius: 3px;
+}
+.app__live-preview__content.is-tablet .device .device__power,
+.app__live-preview__content.is-tablet .device .device__camera {
+  opacity: 1;
+  visibility: visible;
+}
+.app__live-preview__content.is-tablet .device .device__power {
+  left: 48px;
+}
+.app__live-preview__content.is-mobile .container {
+  min-height: 712px;
+}
+.app__live-preview__content.is-mobile .device {
+  width: 320px;
+  height: 568px;
+  margin: 24px;
+  padding: 48px 12px;
+  border-radius: 16px;
+  background-color: #262626;
+}
+.app__live-preview__content.is-mobile .device .device__screen {
+  border-radius: 3px;
+}
+.app__live-preview__content.is-mobile .device .device__power,
+.app__live-preview__content.is-mobile .device .device__camera {
+  opacity: 1;
+  visibility: visible;
+}
+.app__live-preview__content.is-mobile .device .device__power {
+  left: 12px;
+}
+/* *** TABLET VIEW *** */
+@media only screen and (max-width: 1024px) {
+  html.is-adaptive .app__live-preview__menu .menu__center {
+    display: none;
+  }
+  html.is-adaptive .app__live-preview__content {
+    overflow: hidden;
+  }
+  html.is-adaptive .app__live-preview__content .container {
+    min-height: 0;
+  }
+  html.is-adaptive .app__live-preview__content .device {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+  html.is-adaptive .app__live-preview__content .device .device__power,
+  html.is-adaptive .app__live-preview__content .device .device__camera {
+    visibility: hidden;
   }
 }
 /* ******* COMPONENTS: MENU CONSTRUCTOR ******* */
@@ -19400,7 +20991,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   width: 48px;
   position: absolute;
   z-index: 3;
-  background-color: #000000;
+  background-color: #000;
   top: 0;
   right: auto;
   bottom: 0;
@@ -19479,7 +21070,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__sidebar .sidebar__menu__button {
   position: absolute;
   z-index: 2;
-  background-color: #000000;
+  background-color: #000;
   top: auto;
   right: 0;
   bottom: 0;
@@ -20003,7 +21594,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   height: 48px;
   position: fixed;
   z-index: 300;
-  background-color: #000000;
+  background-color: #000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   top: 0;
   right: 0;
@@ -20015,15 +21606,19 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin: 0 auto;
   position: relative;
 }
-.app__topmenu .icon {
+.app__topmenu .menu__icon {
+  display: inline-block;
+  vertical-align: top;
   color: #ffffff;
   line-height: 32px;
   font-size: 32px;
   width: 48px;
   height: 48px;
   line-height: 48px;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
 }
-.app__topmenu .menu-logo {
+.app__topmenu .menu__logo {
   position: relative;
   z-index: 3;
   display: block;
@@ -20031,32 +21626,91 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: opacity 250ms ease-in-out;
   transition: opacity 250ms ease-in-out;
 }
-.app__topmenu .menu-logo:hover {
+.app__topmenu .menu__logo:hover {
   opacity: 0.7;
 }
-.app__topmenu .menu-button {
-  background-image: url("../img/MagpieUI/icons/medium/menu-white.png");
-  cursor: pointer;
-  -webkit-transition: opacity 250ms ease-in-out;
-  transition: opacity 250ms ease-in-out;
+.app__topmenu .menu__title {
+  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  color: #666666;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  position: relative;
+  z-index: 3;
+  line-height: 48px;
+  color: #ffffff;
+}
+.app__topmenu .menu__holder-button {
   width: 48px;
   height: 48px;
   display: none;
   position: absolute;
   z-index: 3;
-  background-position: 50% 50%;
-  background-repeat: no-repeat;
+  cursor: pointer;
   top: 0;
   right: 0;
   bottom: 0;
   left: auto;
 }
-.app__topmenu .menu-button:hover {
+.app__topmenu .menu__holder-button > .icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
+  position: relative;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app__topmenu .menu__holder-button > .icon:hover {
   opacity: 0.7;
   -webkit-transition: opacity 100ms ease-in-out;
   transition: opacity 100ms ease-in-out;
 }
-.app__topmenu .menu-holder {
+.app__topmenu .menu__holder-button > .icon:before,
+.app__topmenu .menu__holder-button > .icon:after {
+  width: 100%;
+  height: 2px;
+  display: block;
+  position: absolute;
+  content: '';
+  background-color: #ffffff;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.app__topmenu .menu__holder-button > .icon:before {
+  -webkit-transform: translate(0, -5px);
+  -ms-transform: translate(0, -5px);
+  transform: translate(0, -5px);
+  top: 50%;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.app__topmenu .menu__holder-button > .icon:after {
+  -webkit-transform: translate(0, 5px);
+  -ms-transform: translate(0, 5px);
+  transform: translate(0, 5px);
+  top: auto;
+  right: 0;
+  bottom: 50%;
+  left: 0;
+}
+.app__topmenu .menu__holder-button.active > .icon:before {
+  -webkit-transform: translate(0, -1px) rotate(45deg);
+  -ms-transform: translate(0, -1px) rotate(45deg);
+  transform: translate(0, -1px) rotate(45deg);
+}
+.app__topmenu .menu__holder-button.active > .icon:after {
+  -webkit-transform: translate(0, 1px) rotate(-45deg);
+  -ms-transform: translate(0, 1px) rotate(-45deg);
+  transform: translate(0, 1px) rotate(-45deg);
+}
+.app__topmenu .menu__holder {
   position: absolute;
   z-index: 1;
   top: 0;
@@ -20064,7 +21718,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   bottom: 0;
   left: 0;
 }
-.app__topmenu .menu-holder > .inner {
+.app__topmenu .menu__holder > .inner {
   position: absolute;
   top: 0;
   right: 0;
@@ -20124,6 +21778,36 @@ html:not(.is-editing).is-editor .app__module__controls {
 /* ******* LAYOUTS: TOP MENU: ADAPTIVE *** */
 /* *** DESKTOP VIEW *** */
 @media only screen and (min-width: 769px) {
+  html.is-adaptive .app__topmenu .menu__title {
+    float: left;
+    margin-left: 12px;
+  }
+  html.is-adaptive .app__topmenu .menu__right {
+    float: right;
+  }
+  html.is-adaptive .app__topmenu .menu__left {
+    float: left;
+    margin: 0 0 0 48px;
+  }
+  html.is-adaptive .app__topmenu .menu__block {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: center;
+    height: 48px;
+    -webkit-align-items: center;
+    align-items: center;
+  }
+  html.is-adaptive .app__topmenu .menu__toolbar {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: center;
+    height: 48px;
+    -webkit-align-items: center;
+    align-items: center;
+    padding: 0 12px;
+  }
   html.is-adaptive .app__topmenu .menu {
     text-align: left;
     font-size: 0;
@@ -20155,10 +21839,6 @@ html:not(.is-editing).is-editor .app__module__controls {
     border-top: none;
     border-radius: 0 0 3px 3px;
   }
-  html.is-adaptive .app__topmenu .menu > li .icon {
-    display: inline-block;
-    vertical-align: top;
-  }
   html.is-adaptive .app__topmenu .menu > li.has-icon > a {
     padding-left: 0;
   }
@@ -20168,19 +21848,34 @@ html:not(.is-editing).is-editor .app__module__controls {
     background-position: calc(100% - 6px) center;
     background-repeat: no-repeat;
   }
+  html.is-adaptive .app__topmenu .menu > li:hover > .pt__menu-dropdown,
+  html.is-adaptive .app__topmenu .menu > li:active > .pt__menu-dropdown,
+  html.is-adaptive .app__topmenu .menu > li.active > .pt__menu-dropdown,
+  html.is-adaptive .app__topmenu .menu > li.is-show > .pt__menu-dropdown {
+    visibility: visible;
+    opacity: 1;
+    -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+    transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  }
   html.is-adaptive .app__topmenu .menu > li:hover > a,
-  html.is-adaptive .app__topmenu .menu > li.active > a {
+  html.is-adaptive .app__topmenu .menu > li:active > a {
     background-color: #2985e0;
     color: #ffffff;
     -webkit-transition: all 100ms ease-in-out;
     transition: all 100ms ease-in-out;
   }
-  html.is-adaptive .app__topmenu .menu > li:hover > .pt__menu-dropdown,
-  html.is-adaptive .app__topmenu .menu > li.active > .pt__menu-dropdown {
-    visibility: visible;
-    opacity: 1;
-    -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
-    transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  html.is-adaptive .app__topmenu .menu > li:hover > a .menu__icon,
+  html.is-adaptive .app__topmenu .menu > li:active > a .menu__icon {
+    color: #ffffff;
+  }
+  html.is-adaptive .app__topmenu .menu > li.active > a {
+    background-color: #ffffff;
+    color: #000;
+    -webkit-transition: all 100ms ease-in-out;
+    transition: all 100ms ease-in-out;
+  }
+  html.is-adaptive .app__topmenu .menu > li.active > a .menu__icon {
+    color: #000;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown {
     padding: 4px;
@@ -20200,6 +21895,7 @@ html:not(.is-editing).is-editor .app__module__controls {
     border-color: #cccccc;
     list-style: none;
     opacity: 0;
+    touch-action: none;
     top: 100%;
     right: auto;
     bottom: auto;
@@ -20296,16 +21992,10 @@ html:not(.is-editing).is-editor .app__module__controls {
     bottom: auto;
     left: auto;
   }
-  html.is-adaptive .app__topmenu .menu.right {
-    float: right;
-  }
-  html.is-adaptive .app__topmenu .menu.left {
-    float: left;
-    margin: 0 0 0 48px;
-  }
 }
+/* *** DESKTOP > 5x4 *** */
 @media only screen and (min-width: 1281px) {
-  html.is-adaptive .app__topmenu .menu-centered {
+  html.is-adaptive .app__topmenu .menu__center {
     position: absolute;
     margin: 0 50%;
     top: 0;
@@ -20313,15 +22003,20 @@ html:not(.is-editing).is-editor .app__module__controls {
     bottom: 0;
     left: auto;
   }
-  html.is-adaptive .app__topmenu .menu-centered > .inner {
+  html.is-adaptive .app__topmenu .menu__center > .inner {
     position: relative;
     left: -50%;
   }
-  html.is-adaptive .app__topmenu .menu-centered .menu {
+  html.is-adaptive .app__topmenu .menu__center .menu {
     white-space: nowrap;
   }
 }
+/* *** DESKTOP <= 5x4 *** */
 @media only screen and (min-width: 769px) and (max-width: 1280px) {
+  html.is-adaptive .app__topmenu .menu__center {
+    float: right;
+    margin: 0 0 0 1px;
+  }
   html.is-adaptive .app__topmenu .menu > li {
     font-size: 12px;
   }
@@ -20336,9 +22031,14 @@ html:not(.is-editing).is-editor .app__module__controls {
     background-image: none;
     font-size: 0;
   }
-  html.is-adaptive .app__topmenu .menu-centered {
-    float: right;
-    margin: 0 0 0 1px;
+}
+/* *** TABLET VIEW *** */
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+  html.is-adaptive .app__topmenu .menu__title {
+    font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+    color: #666666;
+    line-height: 48px;
+    color: #ffffff;
   }
 }
 /* *** MOBILE VIEW *** */
@@ -20348,52 +22048,76 @@ html:not(.is-editing).is-editor .app__module__controls {
     z-index: 2;
     display: block;
     content: '';
-    background-color: #000000;
+    background-color: #000;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
   }
-  html.is-adaptive .app__topmenu .menu-button {
+  html.is-adaptive .app__topmenu .menu__title {
+    font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+    color: #666666;
+    margin-left: 48px;
+    margin-right: 48px;
+    line-height: 48px;
+    color: #ffffff;
+    text-align: center;
+  }
+  html.is-adaptive .app__topmenu .menu__holder-button {
     display: block;
   }
-  html.is-adaptive .app__topmenu .menu-holder {
+  html.is-adaptive .app__topmenu .menu__holder {
     display: block;
     position: fixed;
     visibility: hidden;
     -webkit-transform: translate3d(0, -100%, 0);
     -ms-transform: translate3d(0, -100%, 0);
     transform: translate3d(0, -100%, 0);
-    -webkit-transition: -webkit-transform 300ms ease-in-out, visibility 300ms ease-in-out;
-    transition: -webkit-transform 300ms ease-in-out, -ms-transform 300ms ease-in-out, transform 300ms ease-in-out, visibility 300ms ease-in-out;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-  html.is-adaptive .app__topmenu .menu-holder > .inner {
-    -webkit-overflow-scrolling: touch;
-    overflow-x: hidden;
-    overflow-y: auto;
-    position: absolute;
-    padding: 0;
-    background-color: #000000;
+    -webkit-transition: -webkit-transform 300ms cubic-bezier(0.5, 0, 0.15, 1), visibility 300ms cubic-bezier(0.5, 0, 0.15, 1);
+    transition: -webkit-transform 300ms cubic-bezier(0.5, 0, 0.15, 1), -ms-transform 300ms cubic-bezier(0.5, 0, 0.15, 1), transform 300ms cubic-bezier(0.5, 0, 0.15, 1), visibility 300ms cubic-bezier(0.5, 0, 0.15, 1);
     top: 48px;
     right: 0;
     bottom: 0;
     left: 0;
   }
-  html.is-adaptive .app__topmenu .menu {
-    margin: 0;
+  html.is-adaptive .app__topmenu .menu__holder > .inner {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: absolute;
     padding: 0;
+    background-color: #000;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+  html.is-adaptive .app__topmenu .menu__block {
+    margin: 8px;
+    padding: 0;
+    border-radius: 3px;
+    background-color: #104070;
+    overflow: hidden;
+  }
+  html.is-adaptive .app__topmenu .menu__toolbar {
+    margin: 8px;
+    padding: 0;
+    border-radius: 3px;
+    background-color: #104070;
+    overflow: hidden;
+    padding: 12px;
+  }
+  html.is-adaptive .app__topmenu .menu {
+    margin: 8px;
+    padding: 0;
+    border-radius: 3px;
+    background-color: #104070;
+    overflow: hidden;
     position: relative;
     float: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.4);
   }
   html.is-adaptive .app__topmenu .menu li {
     display: block;
-    margin: 0;
-    border: none;
     border-top: 1px solid rgba(255, 255, 255, 0.4);
     line-height: 48px;
     -webkit-background-clip: padding-box;
@@ -20401,17 +22125,13 @@ html:not(.is-editing).is-editor .app__module__controls {
     background-clip: padding-box;
   }
   html.is-adaptive .app__topmenu .menu li:first-child {
-    margin: 0;
     border-top: none;
-  }
-  html.is-adaptive .app__topmenu .menu li:before {
-    display: none;
   }
   html.is-adaptive .app__topmenu .menu li.has-dropdown > a {
     border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   }
-  html.is-adaptive .app__topmenu .menu li .icon {
-    display: none;
+  html.is-adaptive .app__topmenu .menu li.has-icon > a {
+    padding-left: 0;
   }
   html.is-adaptive .app__topmenu .menu ul a {
     background: rgba(255, 255, 255, 0.2);
@@ -20424,20 +22144,20 @@ html:not(.is-editing).is-editor .app__module__controls {
   html.is-adaptive .app__topmenu .menu ul a:hover {
     background-color: #2985e0;
   }
-  html.is-adaptive .app__topmenu.is-collapsed .menu-holder {
+  html.is-adaptive .app__topmenu.is-collapsed .menu__holder {
     visibility: hidden;
     -webkit-transform: translate3d(0, -100%, 0);
     -ms-transform: translate3d(0, -100%, 0);
     transform: translate3d(0, -100%, 0);
   }
-  html.is-adaptive .app__topmenu.is-expanded .menu-holder {
+  html.is-adaptive .app__topmenu.is-expanded .menu__holder {
     visibility: visible;
     -webkit-transform: translate3d(0, 0, 0);
     -ms-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
   }
 }
-/* *******  LAYOUTS: TOP MENU: PRINT ******* */
+/* ******* COMPONENTS: TOP MENU: PRINT ******* */
 @media print {
   .app__topmenu {
     display: none !important;
@@ -20836,16 +22556,12 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 /* ******* MODULES: LOGO CAROUSEL ******* */
 .mod__logo-carousel .pt__grid > ul {
-  -webkit-transition: -webkit-transform 250ms ease-in-out;
-  transition: -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
+  position: relative;
 }
-.mod__logo-carousel.is-infinite .pt__grid > ul {
-  -webkit-transition: -webkit-transform 250ms linear;
-  transition: -webkit-transform 250ms linear, -ms-transform 250ms linear, transform 250ms linear;
-}
-.mod__logo-carousel.is-immediately .pt__grid > ul {
-  -webkit-transition: none !important;
-  transition: none !important;
+.mod__logo-carousel .pt__grid > ul img {
+  -webkit-transform: none;
+  -ms-transform: none;
+  transform: none;
 }
 /* ******* MODULES: MEMBER DIRECTORY WIDGET ******* */
 /* ******* MODULES: MENU ******* */
@@ -21212,6 +22928,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   border-color: #cccccc;
   list-style: none;
   opacity: 0;
+  touch-action: none;
   top: 100%;
   right: auto;
   bottom: auto;
@@ -21920,6 +23637,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   border-color: #cccccc;
   list-style: none;
   opacity: 0;
+  touch-action: none;
   right: auto;
   bottom: auto;
   left: 0;

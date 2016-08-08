@@ -15,18 +15,43 @@
 
 <div class="app__topmenu" data-node="AppTopMenu:{}:container" data-element="app-topmenu">
     <div class="inner" data-node="inner">
-        <div class="menu-logo">
-            <a class="icon app-i__quicksilk"></a>
+        <div class="menu__logo">
+            <a class="menu__icon icon app-i__quicksilk"></a>
         </div>
-        <div class="menu-button" data-node="button"></div>
-        <div class="menu-holder" data-node="target">
+        <div class="menu__holder-button" data-node="button">
+            <div class="icon"></div>
+        </div>
+        <div class="menu__holder" data-node="target">
             <div class="inner" data-node="items:{}">
-                <div class="menu-centered">
+                <div class="menu__right">
+                    <ul class="menu">
+                        <li class="pt__menu has-dropdown has-icon" data-node="user:{}:container">
+                            <a title="User Userberg">
+                                <i class="menu__icon icon app-i__circle-user"></i>User Userberg
+                            </a>
+                            <ul class="pt__menu-dropdown" data-node="dropdown">
+                                <li>
+                                    <a>View Profile</a>
+                                </li>
+                                <li>
+                                    <a>Logout</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="has-icon" data-node="help:{}:container">
+                            <a title="Help" data-element="app-helptour">
+                                <i class="menu__icon icon app-i__circle-help"></i>Help
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="menu__center">
                     <div class="inner">
                         <ul class="menu">
                             <li class="pt__menu has-dropdown has-icon">
                                 <a title="Page Shortcuts">
-                                    <i class="icon app-i__circle-actions"></i>Page Shortcuts
+                                    <i class="menu__icon icon app-i__circle-actions"></i>Page Shortcuts
                                 </a>
                                 <ul class="pt__menu-dropdown">
                                     <li>
@@ -50,184 +75,165 @@
                     </div>
                 </div>
 
-                <ul class="menu right">
-                    <li class="pt__menu has-dropdown has-icon" data-node="user:{}:container">
-                        <a title="User Userberg">
-                            <i class="icon app-i__circle-user"></i>User Userberg
-                        </a>
-                        <ul class="pt__menu-dropdown" data-node="dropdown">
-                            <li>
-                                <a>View Profile</a>
-                            </li>
-                            <li>
-                                <a>Logout</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="has-icon" data-node="help:{}:container">
-                        <a title="Help" data-element="app-helptour">
-                            <i class="icon app-i__circle-help"></i>Help
-                        </a>
-                    </li>
-                </ul>
-
-                <ul class="menu left">
-                    <li data-node="dashboard:{}:container">
-                        <a>Dashboard</a>
-                    </li>
-                    <li data-node="user_manager:{}:container">
-                        <a>User Manager</a>
-                    </li>
-                    <li class="pt__menu has-dropdown" data-node="modules:{}:container">
-                        <a href="http://google.com" target="_blank">Modules</a>
-                        <ul class="pt__menu-dropdown" data-node="dropdown">
-                            <li>
-                                <a>Basic (Included)</a>
-                            </li>
-                            <li class="pt__menu has-dropdown">
-                                <a href="http://facebook.com" target="_blank">Create!</a>
-                                <ul class="pt__menu-dropdown">
-                                    <li>
-                                        <a href="http://twitter.com" target="_blank">Template Manager & Library</a>
-                                    </li>
-                                    <li>
-                                        <a>Email template editor</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="pt__menu has-dropdown">
-                                <a>Manage!</a>
-                                <ul class="pt__menu-dropdown">
-                                    <li>
-                                        <a>User Manager</a>
-                                    </li>
-                                    <li>
-                                        <a>Page Manager</a>
-                                    </li>
-                                    <li>
-                                        <a>Module Manager</a>
-                                    </li>
-                                    <li>
-                                        <a>Language Manager</a>
-                                    </li>
-                                    <li>
-                                        <a>Settings</a>
-                                    </li>
-                                    <li>
-                                        <a>Inline WYSIWYG Editor</a>
-                                    </li>
-                                    <li>
-                                        <a>SEO Page Analysis</a>
-                                    </li>
-                                    <li>
-                                        <a>File Manager</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="pt__menu has-dropdown">
-                                <a>Inform!</a>
-                                <ul class="pt__menu-dropdown">
-                                    <li>
-                                        <a>Blog</a>
-                                    </li>
-                                    <li>
-                                        <a>Discussion Forums</a>
-                                    </li>
-                                    <li>
-                                        <a>Events</a>
-                                    </li>
-                                    <li>
-                                        <a>FAQ's</a>
-                                    </li>
-                                    <li>
-                                        <a>Glossary</a>
-                                    </li>
-                                    <li>
-                                        <a>Google Maps</a>
-                                    </li>
-                                    <li>
-                                        <a>RSS</a>
-                                    </li>
-                                    <li>
-                                        <a>Testimonials</a>
-                                    </li>
-                                    <li>
-                                        <a>Link Manager</a>
-                                    </li>
-                                    <li>
-                                        <a>Image Gallery</a>
-                                    </li>
-                                    <li>
-                                        <a>Portfolio Manager</a>
-                                    </li>
-                                    <li>
-                                        <a>Image Slideshow</a>
-                                    </li>
-                                    <li>
-                                        <a>Video Gallery</a>
-                                    </li>
-                                    <li>
-                                        <a>File Grid List</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="pt__menu has-dropdown">
-                                <a>Socialize!</a>
-                                <ul class="pt__menu-dropdown">
-                                    <li>
-                                        <a>Social Share</a>
-                                    </li>
-                                    <li>
-                                        <a>Social Ratings</a>
-                                    </li>
-                                    <li>
-                                        <a>Comments</a>
-                                    </li>
-                                    <li>
-                                        <a>Twitter (Latest Tweets)</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="pt__menu has-dropdown">
-                                <a>Analyze!</a>
-                                <ul class="pt__menu-dropdown">
-                                    <li>
-                                        <a>Google Analytics</a>
-                                    </li>
-                                    <li>
-                                        <a>Server health Monitoring</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a>Optional Themes</a>
-                            </li>
-                            <li class="pt__menu has-dropdown">
-                                <a>Communicate & Collaborate!</a>
-                                <ul class="pt__menu-dropdown">
-                                    <li>
-                                        <a>Microsites</a>
-                                    </li>
-                                    <li>
-                                        <a>Member Directory</a>
-                                    </li>
-                                    <li>
-                                        <a>WebEx</a>
-                                    </li>
-                                    <li>
-                                        <a>Working Groups</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li data-node="settings:{}:container">
-                        <a>Settings</a>
-                    </li>
-                    <li data-node="support:{}:container">
-                        <a>Support</a>
-                    </li>
-                </ul>
+                <div class="menu__left">
+                    <ul class="menu">
+                        <li data-node="dashboard:{}:container">
+                            <a>Dashboard</a>
+                        </li>
+                        <li data-node="user_manager:{}:container">
+                            <a>User Manager</a>
+                        </li>
+                        <li class="pt__menu has-dropdown" data-node="modules:{}:container">
+                            <a href="http://google.com" target="_blank">Modules</a>
+                            <ul class="pt__menu-dropdown" data-node="dropdown">
+                                <li>
+                                    <a>Basic (Included)</a>
+                                </li>
+                                <li class="pt__menu has-dropdown">
+                                    <a href="http://facebook.com" target="_blank">Create!</a>
+                                    <ul class="pt__menu-dropdown">
+                                        <li>
+                                            <a href="http://twitter.com" target="_blank">Template Manager & Library</a>
+                                        </li>
+                                        <li>
+                                            <a>Email template editor</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="pt__menu has-dropdown">
+                                    <a>Manage!</a>
+                                    <ul class="pt__menu-dropdown">
+                                        <li>
+                                            <a>User Manager</a>
+                                        </li>
+                                        <li>
+                                            <a>Page Manager</a>
+                                        </li>
+                                        <li>
+                                            <a>Module Manager</a>
+                                        </li>
+                                        <li>
+                                            <a>Language Manager</a>
+                                        </li>
+                                        <li>
+                                            <a>Settings</a>
+                                        </li>
+                                        <li>
+                                            <a>Inline WYSIWYG Editor</a>
+                                        </li>
+                                        <li>
+                                            <a>SEO Page Analysis</a>
+                                        </li>
+                                        <li>
+                                            <a>File Manager</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="pt__menu has-dropdown">
+                                    <a>Inform!</a>
+                                    <ul class="pt__menu-dropdown">
+                                        <li>
+                                            <a>Blog</a>
+                                        </li>
+                                        <li>
+                                            <a>Discussion Forums</a>
+                                        </li>
+                                        <li>
+                                            <a>Events</a>
+                                        </li>
+                                        <li>
+                                            <a>FAQ's</a>
+                                        </li>
+                                        <li>
+                                            <a>Glossary</a>
+                                        </li>
+                                        <li>
+                                            <a>Google Maps</a>
+                                        </li>
+                                        <li>
+                                            <a>RSS</a>
+                                        </li>
+                                        <li>
+                                            <a>Testimonials</a>
+                                        </li>
+                                        <li>
+                                            <a>Link Manager</a>
+                                        </li>
+                                        <li>
+                                            <a>Image Gallery</a>
+                                        </li>
+                                        <li>
+                                            <a>Portfolio Manager</a>
+                                        </li>
+                                        <li>
+                                            <a>Image Slideshow</a>
+                                        </li>
+                                        <li>
+                                            <a>Video Gallery</a>
+                                        </li>
+                                        <li>
+                                            <a>File Grid List</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="pt__menu has-dropdown">
+                                    <a>Socialize!</a>
+                                    <ul class="pt__menu-dropdown">
+                                        <li>
+                                            <a>Social Share</a>
+                                        </li>
+                                        <li>
+                                            <a>Social Ratings</a>
+                                        </li>
+                                        <li>
+                                            <a>Comments</a>
+                                        </li>
+                                        <li>
+                                            <a>Twitter (Latest Tweets)</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="pt__menu has-dropdown">
+                                    <a>Analyze!</a>
+                                    <ul class="pt__menu-dropdown">
+                                        <li>
+                                            <a>Google Analytics</a>
+                                        </li>
+                                        <li>
+                                            <a>Server health Monitoring</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a>Optional Themes</a>
+                                </li>
+                                <li class="pt__menu has-dropdown">
+                                    <a>Communicate & Collaborate!</a>
+                                    <ul class="pt__menu-dropdown">
+                                        <li>
+                                            <a>Microsites</a>
+                                        </li>
+                                        <li>
+                                            <a>Member Directory</a>
+                                        </li>
+                                        <li>
+                                            <a>WebEx</a>
+                                        </li>
+                                        <li>
+                                            <a>Working Groups</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li data-node="settings:{}:container">
+                            <a>Settings</a>
+                        </li>
+                        <li data-node="support:{}:container">
+                            <a>Support</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
