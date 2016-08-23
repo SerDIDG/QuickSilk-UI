@@ -7,22 +7,29 @@ $html = file_get_contents('ajax.panel.preview.less');
 
 <div class="app__panel__preview" data-element="App.MenuConstructorPreview" data-node="AppMenuConstructorPreview:{}:container">
     <div class="inner" data-node="inner">
-        <div class="title" data-node="title">
-            <div class="pt__toolbar is-inline is-flex is-not-adaptive">
-                <div class="inner clear">
-                    <div class="left">
-                        <div class="app__panel__label">Preview</div>
-                    </div>
-                    <div class="right">
-                        <ul class="group">
-                            <li class="is-field medium">
+        <div class="title" data-node="title:{}:container">
+            <div class="title__block">
+                <div class="app__panel__label">Preview</div>
+            </div>
+            <div class="title__toolbar">
+                <div class="pt__toolbar is-inline is-not-adaptive" data-node="toolbar:{}:container">
+                    <div class="inner">
+                        <ul class="group is-flex">
+                            <li class="is-field medium" data-node="view">
                                 <select title="Set Preview View" name="view" data-element="Com.Select">
                                     <option value="horizontal">Horizontal View</option>
                                     <option value="vertical">Vertical View</option>
                                     <option value="mobile">Mobile View</option>
                                 </select>
                             </li>
-                            <li class="is-field medium">
+                            <li class="is-field medium is-hidden" data-node="submenu">
+                                <select title="Set Submenu View" name="submenu" data-element="Com.Select">
+                                    <option value="visible">Visible</option>
+                                    <option value="collapsible">Collapsible</option>
+                                    <option value="dropdown">Dropdown</option>
+                                </select>
+                            </li>
+                            <li class="is-field medium" data-node="align">
                                 <select title="Set Preview Align" name="align" data-element="Com.Select">
                                     <option value="left">Align Left</option>
                                     <option value="center">Align Center</option>
@@ -30,7 +37,7 @@ $html = file_get_contents('ajax.panel.preview.less');
                                     <option value="justify">Align Justify</option>
                                 </select>
                             </li>
-                            <li class="is-field size-field">
+                            <li class="is-field size-field" data-node="background">
                                 <input type="text" title="Set Preview Background Color" name="background" value="#ffffff" data-element="Com.ColorPicker" data-config='{"showLabel" : false, "showClearButton" : false}'>
                             </li>
                         </ul>
@@ -44,7 +51,7 @@ $html = file_get_contents('ajax.panel.preview.less');
                 <style type="text/css" rel="stylesheet/less" data-node="less"><?=$html?></style>
                 <style type="text/css" rel="stylesheet" data-node="css"></style>
 
-                <div class="app__module mod__menu is-adaptive is-horizontal pull-left mod__menu--preview" data-element="Module.Menu" data-node="ModuleMenu:{}:container">
+                <div class="app__module mod__menu is-adaptive is-horizontal is-dropdown pull-left mod__menu--preview" data-element="Module.Menu" data-node="ModuleMenu:{}:container" data-config='{"view" : "horizontal", "submenu" : "dropdown"}'>
                     <div class="menu__menu" data-node="menu:{}:container">
                         <ul>
                             <li class="active" data-node="items:[]:container">

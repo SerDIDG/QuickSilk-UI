@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.20.12 (2016-08-08 20:21) ************ */
+/*! ************ MagpieUI v3.21.0 (2016-08-23 20:00) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -11088,7 +11088,6 @@ button.is-hidden {
 }
 .pt__menu:hover > .pt__menu-dropdown,
 .pt__menu:active > .pt__menu-dropdown,
-.pt__menu.active > .pt__menu-dropdown,
 .pt__menu.is-show > .pt__menu-dropdown {
   visibility: visible;
   opacity: 1;
@@ -11523,6 +11522,9 @@ button.is-hidden {
   vertical-align: top;
   background-repeat: no-repeat;
   background-position: center center;
+}
+.pt__toolbar .group > li.is-hidden {
+  display: none;
 }
 .pt__toolbar .group > li.size-field {
   width: 28px;
@@ -15794,16 +15796,16 @@ button.is-hidden {
 .com__notifications:last-child {
   margin-bottom: 0;
 }
-.com__notifications ul {
+.com__notifications > ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.com__notifications ul > li {
+.com__notifications > ul > li {
   margin: 0;
   padding: 0;
 }
-.com__notifications ul li {
+.com__notifications > ul > li {
   margin: 8px 0 0 0;
   padding: 4px 8px;
   background: #f7f7f7;
@@ -15812,43 +15814,43 @@ button.is-hidden {
   border-radius: 3px;
   font-size: 13px;
 }
-.com__notifications ul li:first-child {
+.com__notifications > ul > li:first-child {
   margin: 0;
 }
-.com__notifications ul li.ok,
-.com__notifications ul li.success {
+.com__notifications > ul > li.ok,
+.com__notifications > ul > li.success {
   background: #f3fded;
   border-color: #9ec589;
   color: #5a714e;
 }
-.com__notifications ul li.ok .close,
-.com__notifications ul li.success .close {
+.com__notifications > ul > li.ok .close,
+.com__notifications > ul > li.success .close {
   border-color: #9ec589;
 }
-.com__notifications ul li.error,
-.com__notifications ul li.danger {
+.com__notifications > ul > li.error,
+.com__notifications > ul > li.danger {
   background: #ffe4e4;
   border-color: #df3e3e;
   color: #bf0a0a;
 }
-.com__notifications ul li.error .close,
-.com__notifications ul li.danger .close {
+.com__notifications > ul > li.error .close,
+.com__notifications > ul > li.danger .close {
   border-color: #df3e3e;
 }
-.com__notifications ul li.notice,
-.com__notifications ul li.warning {
+.com__notifications > ul > li.notice,
+.com__notifications > ul > li.warning {
   background: #f8f1d4;
   border-color: #d2a323;
   color: #906901;
 }
-.com__notifications ul li.notice .close,
-.com__notifications ul li.warning .close {
+.com__notifications > ul > li.notice .close,
+.com__notifications > ul > li.warning .close {
   border-color: #d2a323;
 }
-.com__notifications .descr {
+.com__notifications > ul > li .descr {
   overflow: hidden;
 }
-.com__notifications .close {
+.com__notifications > ul > li .close {
   float: right;
   margin-left: 12px;
   padding-left: 12px;
@@ -15858,7 +15860,7 @@ button.is-hidden {
   text-decoration: underline;
   cursor: pointer;
 }
-.com__notifications .close:hover {
+.com__notifications > ul > li .close:hover {
   text-decoration: none;
 }
 /* ******* COMPONENTS: OLD BROWSERS ALERT ******* */
@@ -18060,7 +18062,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.13.0 (2016-08-08 20:21) ************ */
+/*! ************ QuickSilk-Application v3.14.0 (2016-08-23 20:00) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?26');
@@ -20835,6 +20837,10 @@ html:not(.is-editing).is-editor .app__module__controls {
   left: 0;
 }
 .app__panel__preview > .inner > .title {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
   height: 48px;
   position: absolute;
   z-index: 3;
@@ -20846,6 +20852,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
 }
 .app__panel__preview > .inner > .title > .label {
   font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
@@ -20895,11 +20903,25 @@ html:not(.is-editing).is-editor .app__module__controls {
   bottom: 0;
   left: auto;
 }
-.app__panel__preview > .inner > .title .pt__toolbar:first-child {
-  margin-left: 12px;
+.app__panel__preview > .inner > .title .title__block {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  height: 48px;
+  padding: 0 12px;
+  -webkit-align-items: center;
+  align-items: center;
 }
-.app__panel__preview > .inner > .title .pt__toolbar:last-child {
-  margin-right: 12px;
+.app__panel__preview > .inner > .title .title__toolbar {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  height: 48px;
+  padding: 0 12px;
+  -webkit-align-items: center;
+  align-items: center;
 }
 .app__panel__preview > .inner > .content {
   position: absolute;
@@ -20957,6 +20979,12 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__panel__field.is-last,
 .app__panel__field:last-child {
   margin-bottom: 0;
+}
+/* ******* COMPONENTS: PANEL: ADAPTIVE ******* */
+@media only screen and (max-width: 768px) {
+  html.is-adaptive .app__panel__preview > .inner > .title .title__toolbar {
+    display: none;
+  }
 }
 /* ******* COMPONENTS: SIDEBAR ******* */
 .app__sidebar {
@@ -22654,6 +22682,46 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: opacity 100ms ease-in-out;
   transition: opacity 100ms ease-in-out;
 }
+.mod__menu.is-dropdown .menu__menu > ul > li:hover > .menu__sub {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+.mod__menu.is-dropdown .menu__sub {
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.mod__menu.is-dropdown .menu__sub li:hover > .menu__sub {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+.mod__menu.is-dropdown .menu__sub li a {
+  white-space: nowrap;
+  text-align: left;
+}
+.mod__menu.is-specific .menu__menu li.active > .menu__sub,
+.mod__menu.is-specific .menu__sub li.active > .menu__sub {
+  display: block;
+}
+.mod__menu.is-specific .menu__sub {
+  display: none;
+}
+.mod__menu.is-collapsible .menu__menu li.active > .menu__sub,
+.mod__menu.is-collapsible .menu__sub li.active > .menu__sub {
+  height: auto;
+}
+.mod__menu.is-collapsible .menu__sub {
+  height: 0;
+  overflow: hidden;
+  -webkit-transition: none 250ms ease-in-out;
+  transition: none 250ms ease-in-out;
+}
 .mod__menu.is-horizontal .menu__menu > ul {
   text-align: left;
   font-size: 0;
@@ -22680,63 +22748,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.mod__menu.is-horizontal .menu__menu > ul > li:hover > .menu__sub {
-  visibility: visible;
-  opacity: 1;
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
-}
-.mod__menu.is-horizontal .menu__sub {
+.mod__menu.is-horizontal .menu__menu > ul > li > .menu__sub {
   min-width: 100%;
-  visibility: hidden;
-  position: absolute;
-  opacity: 0;
-  top: 100%;
-  right: auto;
-  bottom: auto;
-  left: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
-}
-.mod__menu.is-horizontal .menu__sub.pull-left {
-  top: 100%;
-  right: auto;
-  bottom: auto;
-  left: 0;
-}
-.mod__menu.is-horizontal .menu__sub.pull-right {
-  top: 100%;
-  right: 0;
-  bottom: auto;
-  left: auto;
-}
-.mod__menu.is-horizontal .menu__sub .menu__sub {
-  top: 0;
-  right: auto;
-  bottom: auto;
-  left: 100%;
-}
-.mod__menu.is-horizontal .menu__sub .menu__sub.pull-left {
-  top: 0;
-  right: auto;
-  bottom: auto;
-  left: 100%;
-}
-.mod__menu.is-horizontal .menu__sub .menu__sub.pull-right {
-  top: 0;
-  right: 100%;
-  bottom: auto;
-  left: auto;
-}
-.mod__menu.is-horizontal .menu__sub li:hover > .menu__sub {
-  visibility: visible;
-  opacity: 1;
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
-}
-.mod__menu.is-horizontal .menu__sub li a {
-  white-space: nowrap;
-  text-align: left;
 }
 .mod__menu.pull-left .menu__menu ul,
 .mod__menu.pull-left .menu__menu a {
@@ -22779,46 +22792,11 @@ html:not(.is-editing).is-editor .app__module__controls {
   display: block;
 }
 .mod__menu__sub--dropdown {
-  min-width: 100%;
   visibility: hidden;
   position: absolute;
   opacity: 0;
-  top: 100%;
-  right: auto;
-  bottom: auto;
-  left: 0;
   -webkit-transition: all 250ms ease-in-out;
   transition: all 250ms ease-in-out;
-}
-.mod__menu__sub--dropdown.pull-left {
-  top: 100%;
-  right: auto;
-  bottom: auto;
-  left: 0;
-}
-.mod__menu__sub--dropdown.pull-right {
-  top: 100%;
-  right: 0;
-  bottom: auto;
-  left: auto;
-}
-.mod__menu__sub--dropdown .menu__sub {
-  top: 0;
-  right: auto;
-  bottom: auto;
-  left: 100%;
-}
-.mod__menu__sub--dropdown .menu__sub.pull-left {
-  top: 0;
-  right: auto;
-  bottom: auto;
-  left: 100%;
-}
-.mod__menu__sub--dropdown .menu__sub.pull-right {
-  top: 0;
-  right: 100%;
-  bottom: auto;
-  left: auto;
 }
 .mod__menu__sub--dropdown li:hover > .menu__sub {
   visibility: visible;
@@ -22830,7 +22808,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   white-space: nowrap;
   text-align: left;
 }
-.mod__menu__sub--dropdown-active {
+.mod__menu__sub--dropdown--active {
   visibility: visible;
   opacity: 1;
   -webkit-transition: all 100ms ease-in-out;
@@ -23735,7 +23713,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   left: auto;
 }
 .app-mod__rollover-tabs > .inner > .tabs__content {
-  position: absolute;
+  max-width: 100%;
+  margin-right: auto;
+  margin-left: auto;
   z-index: 1;
   visibility: hidden;
   opacity: 0;
@@ -23784,7 +23764,20 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
   transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
 }
+.app-mod__rollover-tabs:not(.is-editing).expand-top > .inner > .tabs__content {
+  bottom: 100%;
+}
+.app-mod__rollover-tabs:not(.is-editing).expand-bottom > .inner > .tabs__content {
+  top: 100%;
+}
+.app-mod__rollover-tabs:not(.is-editing).attachment-container > .inner > .tabs__content {
+  position: absolute;
+}
+.app-mod__rollover-tabs:not(.is-editing).attachment-screen > .inner > .tabs__content {
+  position: fixed;
+}
 .app-mod__rollover-tabs.is-editing > .inner > .tabs__content {
+  width: auto !important;
   position: relative;
 }
 .app-mod__rollover-tabs.is-editing > .inner > .tabs__content > .inner > ul > li {
@@ -23794,10 +23787,10 @@ html:not(.is-editing).is-editor .app__module__controls {
   display: block;
 }
 .app-mod__rollover-tabs.is-editing.expand-top > .inner > .tabs__content {
-  bottom: auto;
+  bottom: auto !important;
 }
 .app-mod__rollover-tabs.is-editing.expand-bottom > .inner > .tabs__content {
-  top: auto;
+  top: auto !important;
 }
 .app-mod__rollover-tabs.pull-left > .inner > .tabs__head ul {
   text-align: left;
@@ -23853,16 +23846,18 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin-right: 0;
 }
 .app-mod__rollover-tabs.expand-bottom > .inner > .tabs__content {
-  top: calc(100% + 4px);
+  margin-top: 4px;
 }
 .app-mod__rollover-tabs.expand-bottom.is-editing > .inner > .tabs__content {
   margin-top: 4px;
+  margin-bottom: 0;
 }
 .app-mod__rollover-tabs.expand-top > .inner > .tabs__content {
-  bottom: calc(100% + 4px);
+  margin-bottom: 4px;
 }
 .app-mod__rollover-tabs.expand-top.is-editing > .inner > .tabs__content {
-  margin-bottom: 4px;
+  margin-top: 4px;
+  margin-bottom: 0;
 }
 .app-mod__rollover-tabs > .inner > .tabs__head ul > li > a .image {
   width: 24px;
@@ -24165,15 +24160,15 @@ html:not(.is-editing).is-editor .app__module__controls {
     margin: 0 auto;
   }
 }
-.mod__menu--default .menu__menu > ul {
-  padding: 0;
+.mod__menu.mod__menu--default .menu__menu > ul {
+  padding: 0px;
   background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
-  border-width: 0;
-  border-radius: 0;
+  border-width: 0px;
+  border-radius: 0px;
 }
-.mod__menu--default .menu__menu > ul > li > a {
+.mod__menu.mod__menu--default .menu__menu > ul > li > a {
   padding: 2px 4px;
   background: transparent none top left no-repeat scroll;
   background-size: auto;
@@ -24185,8 +24180,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: none;
   color: inherit;
 }
-.mod__menu--default .menu__menu > ul > li > a:hover,
-.mod__menu--default .menu__menu > ul > li > a.hover {
+.mod__menu.mod__menu--default .menu__menu > ul > li > a:hover,
+.mod__menu.mod__menu--default .menu__menu > ul > li > a.hover {
   background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
@@ -24197,19 +24192,19 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: underline;
   color: inherit;
 }
-.mod__menu--default .menu__menu > ul > li > a:active,
-.mod__menu--default .menu__menu > ul > li > a.active {
+.mod__menu.mod__menu--default .menu__menu > ul > li > a:active,
+.mod__menu.mod__menu--default .menu__menu > ul > li > a.active {
   background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
-  border-width: 0;
-  border-radius: 0;
+  border-width: 0px;
+  border-radius: 0px;
   font: 400 inherit/inherit inherit;
   font-style: normal;
   text-decoration: none;
   color: inherit;
 }
-.mod__menu--default .menu__sub > ul {
+.mod__menu.mod__menu--default .menu__sub > ul {
   padding: 4px;
   background: #ffffff none top left no-repeat scroll;
   background-size: auto;
@@ -24217,13 +24212,13 @@ html:not(.is-editing).is-editor .app__module__controls {
   border-width: 1px;
   border-radius: 3px;
 }
-.mod__menu--default .menu__sub > ul > li {
+.mod__menu.mod__menu--default .menu__sub > ul > li {
   margin-top: 4px;
 }
-.mod__menu--default .menu__sub > ul > li:first-child {
+.mod__menu.mod__menu--default .menu__sub > ul > li:first-child {
   margin-top: 0;
 }
-.mod__menu--default .menu__sub > ul > li > a {
+.mod__menu.mod__menu--default .menu__sub > ul > li > a {
   padding: 2px 4px;
   background: transparent none top left no-repeat scroll;
   background-size: auto;
@@ -24235,8 +24230,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: none;
   color: inherit;
 }
-.mod__menu--default .menu__sub > ul > li > a:hover,
-.mod__menu--default .menu__sub > ul > li > a.hover {
+.mod__menu.mod__menu--default .menu__sub > ul > li > a:hover,
+.mod__menu.mod__menu--default .menu__sub > ul > li > a.hover {
   background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
@@ -24247,8 +24242,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: underline;
   color: inherit;
 }
-.mod__menu--default .menu__sub > ul > li > a:active,
-.mod__menu--default .menu__sub > ul > li > a.active {
+.mod__menu.mod__menu--default .menu__sub > ul > li > a:active,
+.mod__menu.mod__menu--default .menu__sub > ul > li > a.active {
   background: transparent none top left no-repeat scroll;
   background-size: auto;
   border: solid transparent;
@@ -24259,45 +24254,117 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: none;
   color: inherit;
 }
-.mod__menu--default .menu__select {
+.mod__menu.mod__menu--default .menu__select {
   background: transparent;
   border: solid #cccccc;
   border-width: 1px;
   border-radius: 3px;
 }
-.mod__menu--default .menu__select .select__button {
+.mod__menu.mod__menu--default .menu__select .select__button {
   background-image: none;
 }
-.mod__menu--default .menu__select .select__select {
+.mod__menu.mod__menu--default .menu__select .select__select {
   padding: 4px;
   font: 400 inherit/inherit inherit;
   font-style: normal;
   text-decoration: none;
   color: inherit;
 }
-.mod__menu--default.is-horizontal.pull-left .menu__menu > ul > li,
-.mod__menu--default.is-horizontal.pull-center .menu__menu > ul > li,
-.mod__menu--default.is-horizontal.pull-justify .menu__menu > ul > li {
+.mod__menu.mod__menu--default.is-horizontal.pull-left .menu__menu > ul > li,
+.mod__menu.mod__menu--default.is-horizontal.pull-center .menu__menu > ul > li,
+.mod__menu.mod__menu--default.is-horizontal.pull-justify .menu__menu > ul > li {
   margin-right: 4px;
 }
-.mod__menu--default.is-horizontal.pull-left .menu__menu > ul > li:last-child,
-.mod__menu--default.is-horizontal.pull-center .menu__menu > ul > li:last-child,
-.mod__menu--default.is-horizontal.pull-justify .menu__menu > ul > li:last-child {
+.mod__menu.mod__menu--default.is-horizontal.pull-left .menu__menu > ul > li:last-child,
+.mod__menu.mod__menu--default.is-horizontal.pull-center .menu__menu > ul > li:last-child,
+.mod__menu.mod__menu--default.is-horizontal.pull-justify .menu__menu > ul > li:last-child {
   margin-right: 0;
 }
-.mod__menu--default.is-horizontal.pull-right .menu__menu > ul > li {
+.mod__menu.mod__menu--default.is-horizontal.pull-right .menu__menu > ul > li {
   margin-left: 4px;
 }
-.mod__menu--default.is-horizontal.pull-right .menu__menu > ul > li:first-child {
+.mod__menu.mod__menu--default.is-horizontal.pull-right .menu__menu > ul > li:first-child {
   margin-left: 0;
 }
-.mod__menu--default.is-vertical .menu__menu > ul > li {
+.mod__menu.mod__menu--default.is-horizontal.is-dropdown .menu__sub {
+  top: 100%;
+  right: auto;
+  bottom: auto;
+  left: 0;
+}
+.mod__menu.mod__menu--default.is-horizontal.is-dropdown .menu__sub.pull-left {
+  top: 100%;
+  right: auto;
+  bottom: auto;
+  left: 0;
+}
+.mod__menu.mod__menu--default.is-horizontal.is-dropdown .menu__sub.pull-right {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: auto;
+}
+.mod__menu.mod__menu--default.is-horizontal.is-dropdown .menu__sub .menu__sub {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 4px + 1px);
+}
+.mod__menu.mod__menu--default.is-horizontal.is-dropdown .menu__sub .menu__sub.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 4px + 1px);
+}
+.mod__menu.mod__menu--default.is-horizontal.is-dropdown .menu__sub .menu__sub.pull-right {
+  top: -5px;
+  right: calc(100% + 4px + 1px);
+  bottom: auto;
+  left: auto;
+}
+.mod__menu.mod__menu--default.is-vertical .menu__menu > ul > li {
   margin-top: 4px;
 }
-.mod__menu--default.is-vertical .menu__menu > ul > li:first-child {
+.mod__menu.mod__menu--default.is-vertical .menu__menu > ul > li:first-child {
   margin-top: 0;
 }
-.mod__menu--default.is-vertical .menu__sub {
+.mod__menu.mod__menu--default.is-vertical.is-dropdown .menu__sub {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 0px + 0px);
+}
+.mod__menu.mod__menu--default.is-vertical.is-dropdown .menu__sub.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 0px + 0px);
+}
+.mod__menu.mod__menu--default.is-vertical.is-dropdown .menu__sub.pull-right {
+  top: -5px;
+  right: calc(100% + 0px + 0px);
+  bottom: auto;
+  left: auto;
+}
+.mod__menu.mod__menu--default.is-vertical.is-dropdown .menu__sub .menu__sub {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 4px + 1px);
+}
+.mod__menu.mod__menu--default.is-vertical.is-dropdown .menu__sub .menu__sub.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 4px + 1px);
+}
+.mod__menu.mod__menu--default.is-vertical.is-dropdown .menu__sub .menu__sub.pull-right {
+  top: -5px;
+  right: calc(100% + 4px + 1px);
+  bottom: auto;
+  left: auto;
+}
+.mod__menu.mod__menu--default.is-vertical:not(.is-dropdown) .menu__sub > ul {
   margin-top: 4px;
 }
 /* ******* PAGES: GROUP PROFILE ******* */
