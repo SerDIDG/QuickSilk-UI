@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.21.0 (2016-08-23 20:00) ************ */
+/*! ************ MagpieUI v3.21.1 (2016-08-25 21:16) ************ */
 // TinyColor v1.3.0
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1427,7 +1427,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.21.0',
+        '_version' : '3.21.1',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -4062,6 +4062,20 @@ cm.setCSSTranslate = (function(){
             node.style.top = y;
             return node;
         };
+    }
+})();
+
+cm.clearCSSTranslate = (function(){
+    var transform = cm.getSupportedStyle('transform');
+    if(transform){
+        return function(node){
+            node.style[transform] = '';
+        }
+    }else{
+        return function(node){
+            node.style.left = '';
+            node.style.top = '';
+        }
     }
 })();
 
@@ -26205,6 +26219,11 @@ function(params){
         that.nodes['target'].style.opacity = 1;
         that.nodes['target'].style.height = 'auto';
         that.nodes['target'].style.overflow = 'visible';
+        // Trigger events
+        cm.customEvent.trigger(that.nodes['target'], 'redraw', {
+            'type' : 'child',
+            'self' : false
+        });
         that.triggerEvent('onShow');
     };
 
@@ -26212,6 +26231,7 @@ function(params){
         that.isProcess = false;
         that.nodes['target'].style.opacity = 0;
         that.nodes['target'].style.height = 0;
+        that.nodes['target'].style.display = 'none';
         that.triggerEvent('onHide');
     };
 
@@ -26264,6 +26284,16 @@ function(params){
             if(isImmediately){
                 expandEnd();
             }else{
+                // Redraw inner content
+                that.nodes['target'].style.height = 'auto';
+                that.nodes['target'].style.display = 'block';
+                // Trigger events
+                cm.customEvent.trigger(that.nodes['target'], 'redraw', {
+                    'type' : 'child',
+                    'self' : false
+                });
+                // Prepare animation
+                that.nodes['target'].style.height = 0;
                 that.nodes['target'].style.overflow = 'hidden';
                 if(!that.nodes['target'].style.opacity){
                     that.nodes['target'].style.opacity = 0;
@@ -27521,14 +27551,14 @@ function(params){
     // Call parent class construct
     Com.AbstractFileManagerContainer.apply(that, arguments);
 });
-/*! ************ QuickSilk-Application v3.14.0 (2016-08-23 20:00) ************ */
+/*! ************ QuickSilk-Application v3.14.1 (2016-08-25 21:16) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.14.0',
+    '_version' : '3.14.1',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
@@ -28409,7 +28439,7 @@ function(params){
         block.node.style.top = '';
         block.node.style.width = '';
         block.node.style.opacity = '';
-        cm.setCSSTranslate(block.node, 'auto', 'auto');
+        cm.clearCSSTranslate(block.node);
     };
 
     /* *** PLACEHOLDER *** */
@@ -33488,7 +33518,6 @@ function(params){
         // Classes
         cm.addClass(that.nodes['container'], ['attachment', that.params['attachment']].join('-'));
         cm.addClass(that.nodes['container'], ['expand', that.params['expand']].join('-'));
-        that.nodes['content'].style.width = that.params['width'];
         // Process Tabset
         cm.getConstructor('Com.TabsetHelper', function(classConstructor, className){
             that.components['tabset'] = new classConstructor(that.params[className])
@@ -33598,9 +33627,9 @@ function(params){
     };
 
     var hide = function(){
-        that.resizeInterval && clearInterval(that.resizeInterval);
         that.hideInterval && clearTimeout(that.hideInterval);
         that.hideInterval = setTimeout(function(){
+            that.resizeInterval && clearInterval(that.resizeInterval);
             cm.removeClass(that.nodes['content'], 'is-show');
             that.nodes['menu-label'].innerHTML = '';
             that.hideInterval = setTimeout(function(){
@@ -33616,8 +33645,16 @@ function(params){
             that.resizeInterval && clearInterval(that.resizeInterval);
             switch(that.params['attachment']) {
                 case 'screen':
-                    contentResizeHandler();
-                    that.resizeInterval = setInterval(contentResizeHandler, 5);
+                    if(that.isEditing){
+                        that.nodes['content'].style.width = 'auto';
+                        that.nodes['content'].style.minWidth = 'auto';
+                        that.nodes['content'].style.top = 'auto';
+                        that.nodes['content'].style.bottom = 'auto';
+                    }else{
+                        that.nodes['content'].style.width = that.params['width'];
+                        contentResizeHandler();
+                        that.resizeInterval = setInterval(contentResizeHandler, 5);
+                    }
                     break;
             }
             // Show
@@ -33656,18 +33693,20 @@ function(params){
         var isSameBottom = that.previousPosition && that.previousPosition['bottom'] == that.currentPosition['bottom'];
         var isSameWidth = that.previousPosition && that.previousPosition['width'] == that.currentPosition['width'];
         // Set Content Min Width
-        if(!that.isEditing && !isSameWidth){
+        if(!isSameWidth){
             that.nodes['content'].style.minWidth = that.currentPosition['width'] + 'px';
         }
         // Set Content Position
-        if(!that.isEditing && (!isSameTop || !isSameBottom)){
+        if(!isSameTop || !isSameBottom){
             var pageSize = cm.getPageSize();
             switch(that.params['expand']) {
                 case 'top':
+                    that.nodes['content'].style.top = 'auto';
                     that.nodes['content'].style.bottom = pageSize['winHeight'] - that.currentPosition['top'] + 'px';
                     break;
                 case 'bottom':
                     that.nodes['content'].style.top = that.currentPosition['bottom'] + 'px';
+                    that.nodes['content'].style.bottom = 'auto';
                     break;
             }
         }

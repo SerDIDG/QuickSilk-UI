@@ -44,8 +44,24 @@ switch($_POST['keyword']){
             			<div class="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
                     </div>';
 		break;
-	case 'hidden_tabs':
-		$module =  '<div class="app__module app-mod__rollover-tabs pull-left expand-bottom theme-default" data-element="App.ModuleRolloverTabs" data-node="AppModuleRolloverTabs:{}:container" data-config=\'{"event" : "click"}\'>
+
+	case 'spoiler':
+		$module =   '<div class="app__module module__spoiler">
+						<dl class="com__togglebox has-title-bg is-base is-show" data-element="Com.ToggleBox" data-node="ComToggleBox:{}:container">
+							<dt data-node="button">
+								<span class="icon default linked"></span>
+								<span class="title">Spoiler</span>
+							</dt>
+							<dd data-node="target">
+								<div class="inner">
+	                                <div class="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
+								</div>
+							</dd>
+						</dl>
+                    </div>';
+		break;
+	case 'rollover-tabs':
+		$module =  '<div class="app__module app-mod__rollover-tabs pull-left expand-bottom theme-default" data-element="App.ModuleRolloverTabs" data-node="AppModuleRolloverTabs:{}:container" data-config=\'{"event" : "hover", "expand" : "bottom", "attachment" : "screen", "width" : "1000px"}\'>
 						<div class="inner" data-node="inner">
 							<div class="tabs__head" data-node="head">
 								<div class="inner" data-node="head-inner">

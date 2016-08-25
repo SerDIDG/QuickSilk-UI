@@ -24,7 +24,8 @@ module.exports = function(grunt) {
             application : {
                 path : '<%= paths.components %>/application',
                 styles : [
-                    '<%= components.application.path %>/build/less/<%= packages.application.name %>.less'
+                    '<%= components.application.path %>/build/less/<%= packages.application.name %>.less',
+                    '<%= components.application.path %>/src/less/modules/templates_default/**/*.less'
                 ],
                 scripts : [
                     '<%= components.application.path %>/build/js/<%= packages.application.name %>.js'
