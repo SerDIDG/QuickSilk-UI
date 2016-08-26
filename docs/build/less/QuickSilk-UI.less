@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.21.1 (2016-08-25 21:16) ************ */
+/*! ************ MagpieUI v3.21.2 (2016-08-26 17:42) ************ */
 @charset "UTF-8";
 
 /*!
@@ -17093,7 +17093,7 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.14.1 (2016-08-25 21:16) ************ */
+/*! ************ QuickSilk-Application v3.14.2 (2016-08-26 17:42) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -21710,28 +21710,28 @@ html {
 .mod__menu__sub-dropdown--parent-horizontal (@parentPadding, @parentBorder, @selfPadding, @selfBorder) {
     @indent_top: -(@selfPadding + @selfBorder);
 
-    .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{parentPadding} + @{parentBorder})");
+    .mx__position(@indent_top, auto, auto, ~"calc(100% + @{parentPadding} + @{parentBorder})");
 
     &.pull-left {
-        .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{parentPadding} + @{parentBorder})");
+        .mx__position(@indent_top, auto, auto, ~"calc(100% + @{parentPadding} + @{parentBorder})");
     }
 
     &.pull-right {
-        .mod__menu__position(@indent_top, ~"calc(100% + @{parentPadding} + @{parentBorder})", auto, auto);
+        .mx__position(@indent_top, ~"calc(100% + @{parentPadding} + @{parentBorder})", auto, auto);
     }
 }
 
 .mod__menu__sub-dropdown--horizontal (@selfPadding, @selfBorder) {
     @indent_top: -(@selfPadding + @selfBorder);
 
-    .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{selfPadding} + @{selfBorder})");
+    .mx__position(@indent_top, auto, auto, ~"calc(100% + @{selfPadding} + @{selfBorder})");
 
     &.pull-left {
-        .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{selfPadding} + @{selfBorder})");
+        .mx__position(@indent_top, auto, auto, ~"calc(100% + @{selfPadding} + @{selfBorder})");
     }
 
     &.pull-right {
-        .mod__menu__position(@indent_top, ~"calc(100% + @{selfPadding} + @{selfBorder})", auto, auto);
+        .mx__position(@indent_top, ~"calc(100% + @{selfPadding} + @{selfBorder})", auto, auto);
     }
 }
 
@@ -23686,10 +23686,10 @@ html {
 
         &.is-dropdown {
             .menu__sub {
-                .mod__menu__sub-dropdown--parent-vertical;
+                .__mixin__sub-dropdown--parent-vertical;
 
                 .menu__sub {
-                    .mod__menu__sub-dropdown--horizontal;
+                    .__mixin__sub-dropdown--horizontal;
                 }
             }
         }
@@ -23710,10 +23710,10 @@ html {
 
         &.is-dropdown {
             .menu__sub {
-                .mod__menu__sub-dropdown--parent-horizontal;
+                .__mixin__sub-dropdown--parent-horizontal;
 
                 .menu__sub {
-                    .mod__menu__sub-dropdown--horizontal;
+                    .__mixin__sub-dropdown--horizontal;
                 }
             }
         }
@@ -23730,50 +23730,50 @@ html {
 
 // /* ******* MIXINS ******* /
 
-.mod__menu__position (@top: auto, @right: auto, @bottom: auto, @left: auto) {
+.__mixin__position (@top: auto, @right: auto, @bottom: auto, @left: auto) {
     top: @top;
     right: @right;
     bottom: @bottom;
     left: @left;
 }
 
-.mod__menu__sub-dropdown--parent-vertical () {
-    .mod__menu__position(100%, auto, auto, 0);
+.__mixin__sub-dropdown--parent-vertical () {
+    .__mixin__position(100%, auto, auto, 0);
 
     &.pull-left {
-        .mod__menu__position(100%, auto, auto, 0);
+        .__mixin__position(100%, auto, auto, 0);
     }
 
     &.pull-right {
-        .mod__menu__position(100%, 0, auto, auto);
+        .__mixin__position(100%, 0, auto, auto);
     }
 }
 
-.mod__menu__sub-dropdown--parent-horizontal () {
+.__mixin__sub-dropdown--parent-horizontal () {
     @indent_top: -(@Secondary-Container-Padding-Top + @Secondary-Container-BorderSize-Top);
 
-    .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{Primary-Container-Padding-Right} + @{Primary-Container-BorderSize-Right})");
+    .__mixin__position(@indent_top, auto, auto, ~"calc(100% + @{Primary-Container-Padding-Right} + @{Primary-Container-BorderSize-Right})");
 
     &.pull-left {
-        .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{Primary-Container-Padding-Right} + @{Primary-Container-BorderSize-Right})");
+        .__mixin__position(@indent_top, auto, auto, ~"calc(100% + @{Primary-Container-Padding-Right} + @{Primary-Container-BorderSize-Right})");
     }
 
     &.pull-right {
-        .mod__menu__position(@indent_top, ~"calc(100% + @{Primary-Container-Padding-Left} + @{Primary-Container-BorderSize-Left})", auto, auto);
+        .__mixin__position(@indent_top, ~"calc(100% + @{Primary-Container-Padding-Left} + @{Primary-Container-BorderSize-Left})", auto, auto);
     }
 }
 
-.mod__menu__sub-dropdown--horizontal () {
+.__mixin__sub-dropdown--horizontal () {
     @indent_top: -(@Secondary-Container-Padding-Top + @Secondary-Container-BorderSize-Top);
 
-    .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{Secondary-Container-Padding-Right} + @{Secondary-Container-BorderSize-Right})");
+    .__mixin__position(@indent_top, auto, auto, ~"calc(100% + @{Secondary-Container-Padding-Right} + @{Secondary-Container-BorderSize-Right})");
 
     &.pull-left {
-        .mod__menu__position(@indent_top, auto, auto, ~"calc(100% + @{Secondary-Container-Padding-Right} + @{Secondary-Container-BorderSize-Right})");
+        .__mixin__position(@indent_top, auto, auto, ~"calc(100% + @{Secondary-Container-Padding-Right} + @{Secondary-Container-BorderSize-Right})");
     }
 
     &.pull-right {
-        .mod__menu__position(@indent_top, ~"calc(100% + @{Secondary-Container-Padding-Left} + @{Secondary-Container-BorderSize-Left})", auto, auto);
+        .__mixin__position(@indent_top, ~"calc(100% + @{Secondary-Container-Padding-Left} + @{Secondary-Container-BorderSize-Left})", auto, auto);
     }
 }
 

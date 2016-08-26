@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.21.1 (2016-08-25 21:16) ************ */
+/*! ************ MagpieUI v3.21.2 (2016-08-26 17:42) ************ */
 // TinyColor v1.3.0
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1427,7 +1427,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.21.1',
+        '_version' : '3.21.2',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -8558,8 +8558,8 @@ cm.define('Com.MultipleInput', {
         'inputParams' : {},
         'value' : [],
         'defaultValue' : [],
-        'max' : 5,
-        'sortable' : true,
+        'max' : 0,
+        'sortable' : false,
         'multiFieldConstructor' : 'Com.MultiField',
         'multiFieldParams' : {
             'embedStructure' : 'append',
@@ -16178,15 +16178,23 @@ cm.getConstructor('Com.FileUploaderContainer', function(classConstructor, classN
     classProto.construct = function(){
         var that = this;
         // Bind context to methods
-        that.validateParamsEndHandler = that.validateParamsEnd.bind(that);
         that.getHandler = that.get.bind(that);
         that.completeHandler = that.complete.bind(that);
         that.afterCompleteHandler = that.afterComplete.bind(that);
         // Add events
-        that.addEvent('onValidateParamsEnd', that.validateParamsEndHandler);
         // Call parent method
         _inherit.prototype.construct.apply(that, arguments);
         return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.validateParams.apply(that, arguments);
+        // Validate Language Strings
+        that.setLangs({
+            'title' : !that.params['params']['max'] || that.params['params']['max'] > 1 ? that.lang('title_multiple') : that.lang('title_single')
+        });
     };
 
     classProto.get = function(e){
@@ -16203,13 +16211,7 @@ cm.getConstructor('Com.FileUploaderContainer', function(classConstructor, classN
         return that;
     };
 
-    classProto.validateParamsEnd = function(){
-        var that = this;
-        // Validate Language Strings
-        that.setLangs({
-            'title' : !that.params['params']['max'] || that.params['params']['max'] > 1 ? that.lang('title_multiple') : that.lang('title_single')
-        });
-    };
+    /* *** SYSTEM *** */
 
     classProto.renderControllerEvents = function(){
         var that = this;
@@ -26995,8 +26997,8 @@ Com['UA'] = {
     'str' : navigator.userAgent,
     'get' : function(str){
         var that = this,
-            str = (str)? str : that.str,
             arr = {};
+        str = (str)? str : that.str;
         // Check browser
         if(str.indexOf('IEMobile') > -1){
             arr['browser'] = 'IE Mobile';
@@ -27551,14 +27553,14 @@ function(params){
     // Call parent class construct
     Com.AbstractFileManagerContainer.apply(that, arguments);
 });
-/*! ************ QuickSilk-Application v3.14.1 (2016-08-25 21:16) ************ */
+/*! ************ QuickSilk-Application v3.14.2 (2016-08-26 17:42) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.14.1',
+    '_version' : '3.14.2',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
@@ -29493,6 +29495,7 @@ function(params){
 cm.define('App.FileUploaderContainer', {
     'extend' : 'Com.FileUploaderContainer',
     'params' : {
+        'action' : '',
         'constructor' : 'App.FileUploader'
     }
 },
@@ -29500,6 +29503,44 @@ function(params){
     var that = this;
     // Call parent class construct
     Com.FileUploaderContainer.apply(that, arguments);
+});
+
+
+cm.getConstructor('App.FileUploaderContainer', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Variables
+        that.isRequest = false;
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.validateParams.apply(that, arguments);
+        // Validate Request
+        that.isRequest = !cm.isEmpty(that.params['action']) && window.Request && window.Request.send;
+    };
+
+    classProto.renderControllerEvents = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.renderControllerEvents.apply(that, arguments);
+        // Add Request Event
+        if(that.isRequest){
+            that.components['controller'].addEvent('onComplete', function(my, data){
+                Request.send(that.params['action'], data, 'post', {
+                    'node' : that.params['node'],
+                    'controller' : that
+                });
+            });
+        }
+        return that;
+    };
 });
 cm.define('App.FileUploaderLocal', {
     'extend' : 'Com.FileUploaderLocal',
