@@ -6,6 +6,7 @@ $config = array(
 	'zone' => $_POST['zone'],
 	'parentPositionId' => $_POST['parentPositionId'],
 	'type' => $_POST['type'],
+	'locked' => false
 );
 if(!empty($_POST['instanceId']) && $_POST['instanceId'] != 'false'){
 	$config['instanceId'] = $_POST['instanceId'];
@@ -61,7 +62,7 @@ switch($_POST['keyword']){
                     </div>';
 		break;
 	case 'rollover-tabs':
-		$module =  '<div class="app__module app-mod__rollover-tabs pull-left expand-bottom theme-default" data-element="App.ModuleRolloverTabs" data-node="AppModuleRolloverTabs:{}:container" data-config=\'{"event" : "hover", "expand" : "bottom", "attachment" : "screen", "width" : "1000px"}\'>
+		$module =  '<div class="app__module app-mod__rollover-tabs pull-left expand-bottom theme-default" data-element="App.ModuleRolloverTabs" data-node="AppModuleRolloverTabs:{}:container" data-config=\'{"event" : "hover", "expand" : "bottom", "attachment" : "screen", "width" : "800px"}\'>
 						<div class="inner" data-node="inner">
 							<div class="tabs__head" data-node="head">
 								<div class="inner" data-node="head-inner">

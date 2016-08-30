@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.21.2 (2016-08-26 17:42) ************ */
+/*! ************ MagpieUI v3.22.0 (2016-08-30 21:06) ************ */
 @charset "UTF-8";
 
 /*!
@@ -15159,27 +15159,7 @@ button {
 }
 /* ******* COMPONENTS: MULTIPLE FILE INPUT ******* */
 
-.com__multiple-file-input__content {
-    &.is-hidden {
-        display: none;
-    }
-}
 
-.com__multiple-file-input__content {
-    margin-top: @CmForm-FieldInnerIndent;
-}
-
-.com__multiple-file-input {
-    .com__multiple-input__items {
-        .cm__scroll-y-a;
-        max-height: (@CmForm-FilesList-Count * (@CmForm-FieldInnerIndent + @CmForm-FieldHeight)) - @CmForm-FieldInnerIndent;
-        margin-bottom: 0;
-
-        &.is-hidden + .com__multiple-file-input__content {
-            margin-top: 0;
-        }
-    }
-}
 /* ******* COMPONENTS: MULTIPLE INPUT ******* */
 
 .com__multiple-input {
@@ -15197,22 +15177,6 @@ button {
 
     &.is-hidden {
         opacity: 0;
-    }
-}
-
-.com__multiple-input__items {
-    margin-bottom: @CmForm-FieldInnerIndent;
-
-    &.is-hidden {
-        display: none;
-    }
-}
-
-.com__multiple-input__item {
-    margin-top: @CmForm-FieldInnerIndent;
-
-    &:first-child {
-        margin-top: 0;
     }
 }
 /* ******* NOTIFICATION ******* */
@@ -17093,7 +17057,7 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.14.2 (2016-08-26 17:42) ************ */
+/*! ************ QuickSilk-Application v3.14.4 (2016-08-30 21:06) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -17132,7 +17096,7 @@ button {
 // /* *** BLOCK *** */
 
 @AppIcon-Block-Size: 90px;
-@AppIcon-Block-Names: default anchor button column menu divider spacer zone workingarea content logo googlemap tabs search blogcontent blogcategories blogroll blogblock blogarchive blogcalendar image imagegallery slider videogallery forum forum_build comment twitter socialmedia socialmedia_rating socialmedia_share login registration memberdirectory memberwidget filegridlist filegridlistwidget webexmeetings events eventscalendar latestevents flickr languageswitcher d3 rss breadcrumb breadcrumbs form_builder;
+@AppIcon-Block-Names: default anchor button column menu divider spacer zone workingarea content logo googlemap tabs search blogcontent blogcategories blogroll blogblock blogarchive blogcalendar image imagegallery slider videogallery forum forum_build comment twitter socialmedia socialmedia_rating socialmedia_share login registration memberdirectory memberwidget filegridlist filegridlistwidget webexmeetings events eventscalendar latestevents flickr languageswitcher d3 rss breadcrumb breadcrumbs form_builder rollover-tabs;
 
 @AppIcon-Block-default: 0;
 @AppIcon-Block-anchor: 1;
@@ -17182,6 +17146,7 @@ button {
 @AppIcon-Block-breadcrumbs: 41;
 @AppIcon-Block-button: 42;
 @AppIcon-Block-form_builder: 56;
+@AppIcon-Block-rollover-tabs: 57;
 
 @AppIcon-Block-Element-Names: button column content divider spacer input text password hidden select checkbox radiobutton textarea wysiwyg multicheckbox captcha imagebrowser datepicker timepicker;
 
@@ -18119,7 +18084,7 @@ html {
         overflow: hidden;
     }
 
-    &.is-sidebar {
+    &.is-editor--collapsed {
         .app__content {
             margin-left: @AppSidebar-WidthCollapsed;
         }
@@ -18135,7 +18100,7 @@ html {
         }
     }
 
-    &.is-sidebar--expanded {
+    &.is-editor--expanded {
         .app__content {
             margin-left: @AppSidebar-WidthExpanded;
         }
@@ -22373,7 +22338,7 @@ html {
         }
     }
 
-    &:not(.is-editing) {
+    &.is-not-editing {
         &.expand-top {
             > .inner {
                 > .tabs__content {
@@ -22490,6 +22455,38 @@ html {
     .app-mod__rollover-tabs__label-title-indent(@AppMod-RolloverTabs-Label-TitleIndent);
     .app-mod__rollover-tabs__content-indent(@AppMod-RolloverTabs-Content-Indent);
     .app-mod__rollover-tabs__image-size(@AppMod-RolloverTabs-Image-Size);
+}
+
+/* *** STATES *** */
+
+html {
+    &.is-editor--expanded {
+        .app-mod__rollover-tabs {
+            &.is-not-editing {
+                &.attachment-screen {
+                    > .inner {
+                        > .tabs__content {
+                            left: @AppSidebar-WidthExpanded;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &.is-editor--collapsed {
+        .app-mod__rollover-tabs {
+            &.is-not-editing {
+                &.attachment-screen {
+                    > .inner {
+                        > .tabs__content {
+                            left: @AppSidebar-WidthCollapsed;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /* *** THEMES *** */
@@ -22737,6 +22734,12 @@ html {
                 }
 
                 > .tabs__content {
+                    position: absolute !important;
+                    left: 0  !important;
+                    right: 0  !important;
+                    top: 100% !important;
+                    bottom: auto !important;
+
                     > .inner {
                         > ul {
                             .cm__transition-none;

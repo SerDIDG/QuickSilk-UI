@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.21.2 (2016-08-26 17:42) ************ */
+/*! ************ MagpieUI v3.22.0 (2016-08-30 21:06) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -15744,22 +15744,6 @@ button.is-hidden {
   border-radius: 3px;
 }
 /* ******* COMPONENTS: MULTIPLE FILE INPUT ******* */
-.com__multiple-file-input__content.is-hidden {
-  display: none;
-}
-.com__multiple-file-input__content {
-  margin-top: 8px;
-}
-.com__multiple-file-input .com__multiple-input__items {
-  -webkit-overflow-scrolling: touch;
-  overflow-x: hidden;
-  overflow-y: auto;
-  max-height: 100px;
-  margin-bottom: 0;
-}
-.com__multiple-file-input .com__multiple-input__items.is-hidden + .com__multiple-file-input__content {
-  margin-top: 0;
-}
 /* ******* COMPONENTS: MULTIPLE INPUT ******* */
 .com__multiple-input {
   position: relative;
@@ -15783,18 +15767,6 @@ button.is-hidden {
 }
 .com__multiple-input__holder.is-hidden {
   opacity: 0;
-}
-.com__multiple-input__items {
-  margin-bottom: 8px;
-}
-.com__multiple-input__items.is-hidden {
-  display: none;
-}
-.com__multiple-input__item {
-  margin-top: 8px;
-}
-.com__multiple-input__item:first-child {
-  margin-top: 0;
 }
 /* ******* NOTIFICATION ******* */
 .com__notifications {
@@ -18071,7 +18043,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.14.2 (2016-08-26 17:42) ************ */
+/*! ************ QuickSilk-Application v3.14.4 (2016-08-30 21:06) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?26');
@@ -18623,31 +18595,31 @@ html.is-topmenu .tpl__container {
 html.is-topmenu--expanded {
   overflow: hidden;
 }
-html.is-sidebar .app__content {
+html.is-editor--collapsed .app__content {
   margin-left: 48px;
 }
-html.is-sidebar .tpl__container {
+html.is-editor--collapsed .tpl__container {
   margin-left: 48px;
 }
-html.is-sidebar .tpl__header__container.is-fixed {
+html.is-editor--collapsed .tpl__header__container.is-fixed {
   left: 48px;
 }
-html.is-sidebar--expanded .app__content {
+html.is-editor--expanded .app__content {
   margin-left: 360px;
 }
-html.is-sidebar--expanded .tpl__container {
+html.is-editor--expanded .tpl__container {
   margin-left: 360px;
 }
-html.is-sidebar--expanded .tpl__header__container.is-fixed {
+html.is-editor--expanded .tpl__header__container.is-fixed {
   left: 360px;
 }
-html.is-sidebar--expanded .tpl__content {
+html.is-editor--expanded .tpl__content {
   margin: 24px 0;
 }
-html.is-sidebar--expanded .tpl__header__container:hover,
-html.is-sidebar--expanded .tpl__header:hover,
-html.is-sidebar--expanded .tpl__content:hover,
-html.is-sidebar--expanded .tpl__footer:hover {
+html.is-editor--expanded .tpl__header__container:hover,
+html.is-editor--expanded .tpl__header:hover,
+html.is-editor--expanded .tpl__content:hover,
+html.is-editor--expanded .tpl__footer:hover {
   z-index: 10;
 }
 html:not(.is-editing) .app__module__controls--edit {
@@ -19822,6 +19794,9 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .app__block-dummy .icon.module-form_builder {
   background-position: 50% -5040px;
+}
+.app__block-dummy .icon.module-rollover-tabs {
+  background-position: 50% -5130px;
 }
 .app__block-dummy .icon.module-element_button {
   background-position: 50% -3780px;
@@ -23929,16 +23904,16 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
   transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
 }
-.app-mod__rollover-tabs:not(.is-editing).expand-top > .inner > .tabs__content {
+.app-mod__rollover-tabs.is-not-editing.expand-top > .inner > .tabs__content {
   bottom: 100%;
 }
-.app-mod__rollover-tabs:not(.is-editing).expand-bottom > .inner > .tabs__content {
+.app-mod__rollover-tabs.is-not-editing.expand-bottom > .inner > .tabs__content {
   top: 100%;
 }
-.app-mod__rollover-tabs:not(.is-editing).attachment-container > .inner > .tabs__content {
+.app-mod__rollover-tabs.is-not-editing.attachment-container > .inner > .tabs__content {
   position: absolute;
 }
-.app-mod__rollover-tabs:not(.is-editing).attachment-screen > .inner > .tabs__content {
+.app-mod__rollover-tabs.is-not-editing.attachment-screen > .inner > .tabs__content {
   position: fixed;
 }
 .app-mod__rollover-tabs.is-editing > .inner > .tabs__content {
@@ -24025,6 +24000,13 @@ html:not(.is-editing).is-editor .app__module__controls {
   width: 24px;
   height: 24px;
 }
+/* *** STATES *** */
+html.is-editor--expanded .app-mod__rollover-tabs.is-not-editing.attachment-screen > .inner > .tabs__content {
+  left: 360px;
+}
+html.is-editor--collapsed .app-mod__rollover-tabs.is-not-editing.attachment-screen > .inner > .tabs__content {
+  left: 48px;
+}
 /* *** THEMES *** */
 .app-mod__rollover-tabs.theme-initial > .inner > .tabs__head > .inner ul > li,
 .app-mod__rollover-tabs.theme-default > .inner > .tabs__head > .inner ul > li {
@@ -24101,6 +24083,13 @@ html:not(.is-editing).is-editor .app__module__controls {
   }
   html.is-adaptive .app-mod__rollover-tabs > .inner > .tabs__menu {
     display: block;
+  }
+  html.is-adaptive .app-mod__rollover-tabs > .inner > .tabs__content {
+    position: absolute !important;
+    left: 0  !important;
+    right: 0  !important;
+    top: 100% !important;
+    bottom: auto !important;
   }
   html.is-adaptive .app-mod__rollover-tabs > .inner > .tabs__content > .inner > ul {
     -webkit-transition: none !important;

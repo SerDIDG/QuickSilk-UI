@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.21.2 (2016-08-26 17:42) ************ */
+/*! ************ MagpieUI v3.22.0 (2016-08-30 21:06) ************ */
 // TinyColor v1.3.0
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1427,7 +1427,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.21.2',
+        '_version' : '3.22.0',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -5709,18 +5709,18 @@ Mod['Structure'] = {
                 that.replaceStructure(node);
                 break;
             case 'append':
-                that.appendStructure(node);
+                that.appendStructure(node, 'insertLast');
+                break;
+            case 'first':
+                that.appendStructure(node, 'insertFirst');
                 break;
         }
         return that;
     },
-    'appendStructure' : function(node){
+    'appendStructure' : function(node, type){
         var that = this;
-        if(that.params['container']){
-            that.params['container'].appendChild(node);
-        }else if(that.params['node']){
-            that.params['node'].appendChild(node);
-        }
+        var container = that.params['container'] || that.params['node'];
+        container && cm[type](node, container);
         return that;
     },
     'replaceStructure' : function(node){
@@ -8531,15 +8531,6 @@ cm.define('Com.MultipleInput', {
         'onClear',
         'onDisable',
         'onEnable',
-        'onRenderContentStart',
-        'onRenderContentProcess',
-        'onRenderContentEnd',
-        'onRenderInputViewStart',
-        'onRenderInputViewProcess',
-        'onRenderInputViewEnd',
-        'onRenderItemViewStart',
-        'onRenderItemViewProcess',
-        'onRenderItemViewEnd',
         'onSetAttributes',
         'onItemAddStart',
         'onItemAddProcess',
@@ -8554,15 +8545,19 @@ cm.define('Com.MultipleInput', {
     'params' : {
         'embedStructure' : 'replace',
         'className' : 'com__multiple-input',
-        'inputConstructor' : 'Com.AbstractInput',
-        'inputParams' : {},
         'value' : [],
         'defaultValue' : [],
         'max' : 0,
         'sortable' : false,
+        'showControls' : true,
+        'showToolbar' : false,
+        'focusInput' : false,
+        'duration' : 'cm._config.animDurationShort',
+        'inputConstructor' : 'Com.AbstractInput',
+        'inputParams' : {},
         'multiFieldConstructor' : 'Com.MultiField',
         'multiFieldParams' : {
-            'embedStructure' : 'append',
+            'embedStructure' : 'first',
             'renderStructure' : true,
             'embedStructureOnRender' : true,
             'template' : false,
@@ -8585,6 +8580,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         that.nodes = {};
         that.components = {};
         that.items = [];
+        that.isToolbarVisible = true;
         // Bind context to methods
         that.setHandler = that.set.bind(that);
         that.getHandler = that.get.bind(that);
@@ -8623,26 +8619,11 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         // Configure MultiField
         that.params['multiFieldParams']['max'] = that.params['max'];
         that.params['multiFieldParams']['sortable'] = that.params['sortable'];
+        that.params['multiFieldParams']['showControls'] = that.params['showControls'];
         return that;
     };
 
     /* *** SYSTEM *** */
-
-    classProto._renderView = function(){
-        var that = this;
-        that.triggerEvent('onRenderViewStart');
-        that.nodes['container'] = cm.node('div', {'class' : 'com__multiple-input'},
-            that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
-                that.nodes['holder'] = cm.node('div', {'class' : 'com__multiple-input__holder'},
-                    that.nodes['items'] = cm.node('div', {'class' : 'com__multiple-input__items is-hidden'}),
-                    that.nodes['content'] = that.renderContent()
-                )
-            )
-        );
-        that.triggerEvent('onRenderViewProcess');
-        that.triggerEvent('onRenderViewEnd');
-        return that;
-    };
 
     classProto.renderView = function(){
         var that = this;
@@ -8652,9 +8633,23 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
                 that.nodes['holder'] = cm.node('div', {'class' : 'com__multiple-input__holder'})
             )
         );
+        if(that.params['showToolbar']){
+            that.nodes['toolbarContainer'] = that.renderToolbarView();
+            cm.appendChild(that.nodes['toolbarContainer'], that.nodes['holder']);
+        }
         that.triggerEvent('onRenderViewProcess');
         that.triggerEvent('onRenderViewEnd');
         return that;
+    };
+
+    classProto.renderToolbarView = function(){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'com__multiple-input__toolbar'});
+        // Push
+        that.nodes['toolbar'] = nodes;
+        return nodes['container'];
     };
 
     classProto.renderViewModel = function(){
@@ -8697,35 +8692,10 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         return that;
     };
 
-    classProto.renderContent = function(){
-        var that = this;
-        that.triggerEvent('onRenderContentStart');
-        var node = cm.node('div', {'class' : 'com__multiple-input__content'});
-        that.triggerEvent('onRenderContentProcess');
-        that.triggerEvent('onRenderContentEnd');
-        return node;
-    };
-
     classProto.renderInputView = function(item){
         var that = this;
-        that.triggerEvent('onRenderInputViewStart');
-        item['input'] = cm.node('input', {'type' : 'hidden'});
-        that.triggerEvent('onRenderInputViewProcess');
-        that.triggerEvent('onRenderInputViewEnd');
+        item['input'] = cm.node('input', {'type' : 'text'});
         return item['input'];
-    };
-
-    classProto.renderItemView = function(item){
-        var that = this;
-        that.triggerEvent('onRenderItemViewStart');
-        item['nodes']['container'] = cm.node('div', {'class' : 'com__multiple-input__item'},
-            item['nodes']['inner'] = cm.node('div', {'class' : 'inner'},
-                item['nodes']['input'] = item['input']
-            )
-        );
-        that.triggerEvent('onRenderItemViewProcess');
-        that.triggerEvent('onRenderItemViewEnd');
-        return item['nodes']['container'];
     };
 
     /* *** ITEMS *** */
@@ -8758,14 +8728,16 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
             'nodes' : {}
         }, item);
         item['field'] = field;
+        item['container'] = item['field']['content'];
+        // Push
+        that.items.push(item);
         // Start
         that.triggerEvent('onItemAddStart', item);
         // Render views
         if(!item['input']){
             item['input'] = that.renderInputView(item);
         }
-        item['container'] = that.renderItemView(item);
-        cm.appendChild(item['container'], item['field']['content']);
+        cm.appendChild(item['input'], item['container']);
         // Process
         cm.getConstructor(item['constructor'], function(classConstructor){
             item['controller'] = new classConstructor(
@@ -8776,13 +8748,15 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
                 })
             );
             that.triggerEvent('onItemAddProcess', item);
+            that.params['focusInput'] && item['controller'].focus && item['controller'].focus();
             // Trigger set events
             triggerEvents && that.triggerEvent('onSelect');
             triggerEvents && that.triggerEvent('onSet');
             triggerEvents && that.triggerEvent('onChange');
         });
-        // Push
-        that.items.push(item);
+        // Toggle toolbar visibility
+        that.toggleToolbarVisibility();
+        // Complete event
         that.triggerEvent('onItemAddEnd', item);
         return item;
     };
@@ -8790,7 +8764,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
     classProto.removeItem = function(item, triggerEvents){
         var that = this;
         triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
-        // Render Fields
+        // Remove Field
         that.components['multiField'].removeItem(item['field'], {
             'triggerEvents' : false,
             'callback' : function(field){
@@ -8808,6 +8782,8 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         that.triggerEvent('onItemRemoveProcess', item);
         item['controller'] && item['controller'].destruct();
         that.triggerEvent('onItemRemoveEnd', item);
+        // Toggle toolbar visibility
+        that.toggleToolbarVisibility();
         // Trigger set events
         triggerEvents && that.triggerEvent('onSelect');
         triggerEvents && that.triggerEvent('onSet');
@@ -8825,6 +8801,61 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         that.items.splice(index, 0, item);
         // Trigger event
         that.triggerEvent('onItemSortEnd', item);
+    };
+
+    /* *** TOOLBAR *** */
+
+    classProto.toggleToolbarVisibility = function(){
+        var that = this;
+        if(that.params['showToolbar']){
+            if(that.params['max'] > 0 && that.items.length == that.params['max']){
+                that.hideToolbar();
+            }else{
+                that.showToolbar();
+            }
+        }
+        return that;
+    };
+
+    classProto.showToolbar = function(){
+        var that = this,
+            height = 0;
+        if(!that.isToolbarVisible){
+            that.isToolbarVisible = true;
+            // Prepare
+            that.nodes['toolbarContainer'].style.height = '';
+            height = that.nodes['toolbarContainer'].offsetHeight;
+            that.nodes['toolbarContainer'].style.height = '0px';
+            that.nodes['toolbarContainer'].style.overflow = 'hidden';
+            // Animate
+            cm.transition(that.nodes['toolbarContainer'], {
+                'properties' : {'height' : height + 'px', 'opacity' : 1},
+                'duration' : that.params['duration'],
+                'easing' : 'ease-in-out',
+                'clear' : true,
+                'onStop' : function(){
+                    that.nodes['toolbarContainer'].style.overflow = '';
+                    that.nodes['toolbarContainer'].style.height = '';
+                }
+            });
+        }
+        return that;
+    };
+
+    classProto.hideToolbar = function(){
+        var that = this;
+        if(that.isToolbarVisible){
+            that.isToolbarVisible = false;
+            // Prepare
+            that.nodes['toolbarContainer'].style.overflow = 'hidden';
+            // Animate
+            cm.transition(that.nodes['toolbarContainer'], {
+                'properties' : {'height' : '0px', 'opacity' : 0},
+                'duration' : that.params['duration'],
+                'easing' : 'ease-in-out'
+            });
+        }
+        return that;
     };
 
     /* *** PUBLIC *** */
@@ -9149,6 +9180,7 @@ function(params){
     
     that.components = {};
 
+    that.isDestructed = false;
     that.ajaxHandler = null;
     that.isOpen = false;
     that.isAjax = false;
@@ -9344,6 +9376,20 @@ function(params){
         }
     };
 
+    var setEvents = function(){
+        cm.addEvent(that.params['node'], 'input', requestHandler);
+        cm.addEvent(that.params['node'], 'keydown', inputHandler);
+        cm.addEvent(that.params['node'], 'blur', blurHandler);
+        cm.addEvent(that.params['node'], 'click', clickHandler);
+    };
+
+    var unsetEvents = function(){
+        cm.removeEvent(that.params['node'], 'input', requestHandler);
+        cm.removeEvent(that.params['node'], 'keydown', inputHandler);
+        cm.removeEvent(that.params['node'], 'blur', blurHandler);
+        cm.removeEvent(that.params['node'], 'click', clickHandler);
+    };
+
     /* ******* CALLBACKS ******* */
 
     /* *** AJAX *** */
@@ -9511,6 +9557,16 @@ function(params){
 
     /* ******* MAIN ******* */
 
+    that.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            unsetEvents();
+            that.removeFromStack();
+        }
+        return that;
+    };
+
     that.set = function(item, triggerEvents){
         triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
         that.previousValue = that.value;
@@ -9532,11 +9588,9 @@ function(params){
 
     that.setInput = function(node){
         if(cm.isNode(node)){
+            unsetEvents();
             that.params['node'] = node;
-            cm.addEvent(that.params['node'], 'input', requestHandler);
-            cm.addEvent(that.params['node'], 'keydown', inputHandler);
-            cm.addEvent(that.params['node'], 'blur', blurHandler);
-            cm.addEvent(that.params['node'], 'click', clickHandler);
+            setEvents();
         }
         return that;
     };
@@ -9606,6 +9660,11 @@ function(params){
         if(that.ajaxHandler && that.ajaxHandler.abort){
             that.ajaxHandler.abort();
         }
+        return that;
+    };
+
+    that.focus = function(){
+        that.params['node'].focus();
         return that;
     };
 
@@ -18948,12 +19007,13 @@ cm.define('Com.MultiField', {
         'renderStructure' : false,
         'embedStructure' : 'append',
         'embedStructureOnRender' : false,
-        'renderItems' : 0,
-        'max' : 0,                         // 0 - infinity
+        'sortable' : true,                      // Use drag and drop to sort items
+        'showControls' : true,
+        'renderItems' : 0,                      // Render count of fields by default
+        'max' : 0,                              // 0 - infinity
         'template' : null,                      // Html node or string with items template
         'templateAttributeReplace' : false,
         'templateAttribute' : 'name',           // Replace specified items attribute by pattern, example: data-attribute-name="test[%index%]", available variables: %index%
-        'sortable' : true,                      // Use drag and drop to sort items
         'duration' : 'cm._config.animDurationShort',
         'theme' : '',
         'langs' : {
@@ -18983,14 +19043,15 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         // Variables
         that.nodes = {
             'container' : cm.node('div'),
-            'content' : cm.node('ul'),
-            'toolbar' : cm.node('li'),
-            'add' : cm.node('div'),
+            'content' : cm.node('div'),
+            'toolbar' : {
+                'container' : cm.node('div'),
+                'add' : cm.node('div')
+            },
             'items' : []
         };
         that.components = {};
         that.items = [];
-        that.toolbarHeight = 0;
         that.isToolbarVisible = true;
         // Bind context to methods
         // Add events
@@ -19005,27 +19066,41 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         var that = this;
         that.triggerEvent('onRenderViewStart');
         that.nodes['container'] = cm.node('div', {'class' : 'com__multifield'},
-            that.nodes['content'] = cm.node('div', {'class' : 'com__multifield__content'}),
-            that.nodes['toolbar'] = cm.node('div', {'class' : 'com__multifield__toolbar'},
-                cm.node('div', {'class' : 'com__multifield__item'},
-                    that.nodes['add'] = cm.node('div', {'class' : that.params['icons']['add'], 'title' : that.lang('add')})
-                )
-            )
+            that.nodes['content'] = cm.node('div', {'class' : 'com__multifield__content'})
         );
+        // Toolbar
+        if(that.params['showControls']){
+            that.nodes['toolbarContainer'] = that.renderToolbarView();
+            cm.appendChild(that.nodes['toolbarContainer'], that.nodes['container']);
+        }
         that.triggerEvent('onRenderViewProcess');
         that.triggerEvent('onRenderViewEnd');
         return that;
+    };
+
+    classProto.renderToolbarView = function(){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'com__multifield__toolbar'},
+            nodes['content'] = cm.node('div', {'class' : 'com__multifield__item'},
+                nodes['add'] = cm.node('div', {'class' : that.params['icons']['add'], 'title' : that.lang('add')})
+            )
+        );
+        // Add button events
+        cm.addEvent(nodes['add'], 'click', function(e){
+            cm.preventDefault(e);
+            that.renderItem();
+        });
+        // Push
+        that.nodes['toolbarView'] = nodes;
+        return nodes['container'];
     };
 
     classProto.renderViewModel = function(){
         var that = this;
         // Call parent method - renderViewModel
         _inherit.prototype.renderViewModel.apply(that, arguments);
-        // Add button events
-        cm.addEvent(that.nodes['add'], 'click', function(e){
-            cm.preventDefault(e);
-            that.renderItem();
-        });
         // Init Sortable
         if(that.params['sortable']){
             cm.getConstructor('Com.Sortable', function(classConstructor, className){
@@ -19041,13 +19116,28 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
                 that.components['sortable'].addGroup(that.nodes['content']);
             });
         }
-        // Process rendered items
-        cm.forEach(that.nodes['items'], function(item){
-            that.processItem(item);
-        });
+        // Process collected view
+        if(!that.params['renderStructure']){
+            that.processCollectedView();
+        }
         // Render items
         cm.forEach(Math.max(that.params['renderItems'] - that.items.length, 0), function(){
             that.renderItem();
+        });
+        return that;
+    };
+
+    classProto.processCollectedView = function(){
+        var that = this;
+        // Toolbar
+        that.nodes['toolbarContainer'] = that.nodes['toolbar']['container'];
+        cm.addEvent(that.nodes['toolbar']['add'], 'click', function(e){
+            cm.preventDefault(e);
+            that.renderItem();
+        });
+        // Process rendered items
+        cm.forEach(that.nodes['items'], function(item){
+            that.processItem(item);
         });
         return that;
     };
@@ -19077,8 +19167,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
             }, params);
             // Structure
             item['container'] = cm.node('div', {'class' : 'com__multifield__item', 'data-node' : 'items:[]:container'},
-                item['content'] = item['field'] = cm.node('div', {'class' : 'field', 'data-node' : 'field'}),
-                item['remove'] = cm.node('div', {'class' : that.params['icons']['remove'], 'title' : that.lang('remove'), 'data-node' : 'remove'})
+                item['content'] = item['field'] = cm.node('div', {'class' : 'field', 'data-node' : 'field'})
             );
             // Template
             if(!cm.isEmpty(that.params['template'])){
@@ -19089,10 +19178,19 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
                 }
                 cm.appendNodes(nodes, item['field']);
             }
+            // Controls
+            if(that.params['showControls']){
+                item['remove'] = cm.node('div', {'class' : that.params['icons']['remove'], 'title' : that.lang('remove'), 'data-node' : 'remove'});
+                cm.appendChild(item['remove'], item['container']);
+            }
             // Sortable
             if(that.params['sortable']){
                 item['drag'] = cm.node('div', {'class' : that.params['icons']['drag'], 'data-node' : 'drag'});
-                cm.insertFirst(item['drag'], item['container']);
+                if(that.params['showControls']){
+                    cm.insertFirst(item['drag'], item['container']);
+                }else{
+                    cm.appendChild(item['drag'], item['container']);
+                }
             }
             // Embed
             cm.appendChild(item['container'], that.nodes['content']);
@@ -19113,11 +19211,15 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         }else{
             cm.remove(item['drag']);
         }
-        // Events
-        cm.addEvent(item['remove'], 'click', function(e){
-            cm.preventDefault(e);
-            that.deleteItem(item);
-        });
+        // Controls
+        if(that.params['showControls']){
+            cm.addEvent(item['remove'], 'click', function(e){
+                cm.preventDefault(e);
+                that.deleteItem(item);
+            });
+        }else{
+            cm.remove(item['remove']);
+        }
         // Push
         that.items.push(item);
         that.resetIndexes();
@@ -19186,34 +19288,55 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
 
     classProto.toggleToolbarVisibility = function(){
         var that = this;
-        if(!that.toolbarHeight){
-            that.toolbarHeight = that.nodes['toolbar'].offsetHeight;
-        }
-        if(that.params['max'] > 0 && that.items.length == that.params['max']){
-            if(that.isToolbarVisible){
-                that.isToolbarVisible = false;
-                that.nodes['toolbar'].style.overflow = 'hidden';
-                cm.transition(that.nodes['toolbar'], {
-                    'properties' : {'height' : '0px', 'opacity' : 0},
-                    'duration' : that.params['duration'],
-                    'easing' : 'ease-in-out'
-                });
-            }
-        }else{
-            if(!that.isToolbarVisible){
-                that.isToolbarVisible = true;
-                that.nodes['toolbar'].style.overflow = 'hidden';
-                cm.transition(that.nodes['toolbar'], {
-                    'properties' : {'height' : [that.toolbarHeight, 'px'].join(''), 'opacity' : 1},
-                    'duration' : that.params['duration'],
-                    'easing' : 'ease-in-out',
-                    'clear' : true,
-                    'onStop' : function(){
-                        that.nodes['toolbar'].style.overflow = '';
-                    }
-                });
+        if(that.params['showControls']){
+            if(that.params['max'] > 0 && that.items.length == that.params['max']){
+                that.hideToolbar();
+            }else{
+                that.showToolbar();
             }
         }
+        return that;
+    };
+
+    classProto.showToolbar = function(){
+        var that = this,
+            height = 0;
+        if(!that.isToolbarVisible){
+            that.isToolbarVisible = true;
+            // Prepare
+            that.nodes['toolbarContainer'].style.height = '';
+            height = that.nodes['toolbarContainer'].offsetHeight;
+            that.nodes['toolbarContainer'].style.height = '0px';
+            that.nodes['toolbarContainer'].style.overflow = 'hidden';
+            // Animate
+            cm.transition(that.nodes['toolbarContainer'], {
+                'properties' : {'height' : height + 'px', 'opacity' : 1},
+                'duration' : that.params['duration'],
+                'easing' : 'ease-in-out',
+                'clear' : true,
+                'onStop' : function(){
+                    that.nodes['toolbarContainer'].style.overflow = '';
+                    that.nodes['toolbarContainer'].style.height = '';
+                }
+            });
+        }
+        return that;
+    };
+
+    classProto.hideToolbar = function(){
+        var that = this;
+        if(that.isToolbarVisible){
+            that.isToolbarVisible = false;
+            // Prepare
+            that.nodes['toolbarContainer'].style.overflow = 'hidden';
+            // Animate
+            cm.transition(that.nodes['toolbarContainer'], {
+                'properties' : {'height' : '0px', 'opacity' : 0},
+                'duration' : that.params['duration'],
+                'easing' : 'ease-in-out'
+            });
+        }
+        return that;
     };
 
     classProto.toggleItemVisibility = function(item, callback){
@@ -19282,16 +19405,44 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         return that.items;
     };
 });
+cm.define('Com.MultipleAutocomplete', {
+    'extend' : 'Com.MultipleInput',
+    'params' : {
+        'embedStructure' : 'replace',
+        'className' : 'com__multiple-autocomplete',
+        'sortable' : false,
+        'showToolbar' : false,
+        'showControls' : true,
+        'focusInput' : true,
+        'inputConstructor' : 'Com.Autocomplete'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.MultipleInput.apply(that, arguments);
+});
+
+/* ****** FORM FIELD COMPONENT ******* */
+
+Com.FormFields.add('multi-autocomplete', {
+    'node' : cm.node('div'),
+    'constructor' : 'Com.MultipleAutocomplete'
+});
 cm.define('Com.MultipleFileInput', {
     'extend' : 'Com.MultipleInput',
     'params' : {
         'embedStructure' : 'replace',
         'className' : 'com__multiple-file-input',
-        'max' : 5,                                  // 0 - infinity
         'local' : true,
+        'sortable' : false,
+        'showToolbar' : true,
+        'showControls' : false,
+        'focusInput' : false,
         'buttonsAlign' : 'left',
         'inputConstructor' : 'Com.FileInput',
         'inputParams' : {
+            'embedStructure' : 'replace',
             'dropzone' : false
         },
         'fileManager' : false,
@@ -19320,7 +19471,6 @@ cm.define('Com.MultipleFileInput', {
 },
 function(params){
     var that = this;
-    that.myNodes = {};
     that.myComponents = {};
     that.dragInterval = null;
     that.isDropzoneShow = false;
@@ -19349,12 +19499,11 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
 
     classProto.clear = function(){
         var that = this;
-        cm.removeClass(that.myNodes['browseHolder'], 'is-hidden');
+        that.params['showToolbar'] && cm.removeClass(that.nodes['toolbar']['browseHolder'], 'is-hidden');
         // Call parent method
         _inherit.prototype.clear.apply(that, arguments);
         return that;
     };
-
 
     classProto.validateParamsEnd = function(){
         var that = this;
@@ -19405,11 +19554,11 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
             });
         }
         // Init File Manager
-        if(that.params['fileManager']){
+        if(that.params['showToolbar'] && that.params['fileManager']){
             cm.getConstructor(that.params['fileManagerConstructor'], function(classObject){
                 that.myComponents['fileManager'] = new classObject(
                     cm.merge(that.params['fileManagerParams'], {
-                        'node' : that.myNodes['browseFileManager']
+                        'node' : that.nodes['toolbar']['browseFileManager']
                     })
                 );
                 that.myComponents['fileManager'].addEvent('onComplete', function(my, data){
@@ -19418,11 +19567,11 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
             });
         }
         // Init File Uploader
-        if(that.params['fileUploader']){
+        if(that.params['showToolbar'] && that.params['fileUploader']){
             cm.getConstructor(that.params['fileUploaderConstructor'], function(classObject){
                 that.myComponents['fileUploader'] = new classObject(
                     cm.merge(that.params['fileUploaderParams'], {
-                        'node' : that.myNodes['browseFileUploader']
+                        'node' : that.nodes['toolbar']['browseFileUploader']
                     })
                 );
                 that.myComponents['fileUploader'].addEvent('onComplete', function(my, data){
@@ -19433,44 +19582,43 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
         return that;
     };
 
-    classProto.renderContent = function(){
-        var that = this;
-        that.triggerEvent('onRenderContentStart');
+    classProto.renderToolbarView = function(){
+        var that = this,
+            nodes = {};
         // Structure
-        that.myNodes['container'] = cm.node('div', {'class' : 'com__multiple-file-input__content'},
-            that.myNodes['content'] = cm.node('div', {'class' : 'pt__buttons'},
-                that.myNodes['contentInner'] = cm.node('div', {'class' : 'inner'})
+        nodes['container'] = cm.node('div', {'class' : 'com__multiple-input__toolbar'},
+            nodes['content'] = cm.node('div', {'class' : 'pt__buttons'},
+                nodes['contentInner'] = cm.node('div', {'class' : 'inner'})
             )
         );
-        cm.addClass(that.myNodes['content'], ['pull', that.params['buttonsAlign']].join('-'));
+        cm.addClass(nodes['content'], ['pull', that.params['buttonsAlign']].join('-'));
         // Render Browse Buttons
         if(that.params['local']){
-            that.myNodes['browseLocal'] = cm.node('div', {'class' : 'browse-button'},
+            nodes['browseLocal'] = cm.node('div', {'class' : 'browse-button'},
                 cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('_browse_local')),
                 cm.node('div', {'class' : 'inner'},
-                    that.myNodes['input'] = cm.node('input', {'type' : 'file'})
+                    nodes['input'] = cm.node('input', {'type' : 'file'})
                 )
             );
-            that.isMultiple && that.myNodes['input'].setAttribute('multiple', 'multiple');
-            cm.insertFirst(that.myNodes['browseLocal'], that.myNodes['contentInner']);
+            that.isMultiple && nodes['input'].setAttribute('multiple', 'multiple');
+            cm.insertFirst(nodes['browseLocal'], nodes['contentInner']);
         }
         if(that.params['fileManager']){
-            that.myNodes['browseFileManager'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
-            cm.insertFirst(that.myNodes['browseFileManager'], that.myNodes['contentInner']);
+            nodes['browseFileManager'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('_browse_filemanager'));
+            cm.insertFirst(nodes['browseFileManager'], nodes['contentInner']);
         }
         if(that.params['fileUploader']){
-            that.myNodes['browseFileUploader'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('browse'));
-            cm.insertFirst(that.myNodes['browseFileUploader'], that.myNodes['contentInner']);
+            nodes['browseFileUploader'] = cm.node('button', {'type' : 'button', 'class' : 'button button-primary'}, that.lang('browse'));
+            cm.insertFirst(nodes['browseFileUploader'], nodes['contentInner']);
         }
         if(!that.hasButtons){
-            cm.addClass(that.myNodes['container'], 'is-hidden');
+            cm.addClass(nodes['container'], 'is-hidden');
         }
         // Events
-        that.triggerEvent('onRenderContentProcess');
-        cm.addEvent(that.myNodes['input'], 'change', that.browseActionHandler);
-        that.triggerEvent('onRenderContentEnd');
+        cm.addEvent(nodes['input'], 'change', that.browseActionHandler);
         // Push
-        return that.myNodes['container'];
+        that.nodes['toolbar'] = nodes;
+        return nodes['container'];
     };
 
     classProto.itemAddProcess = function(my, item){
@@ -19587,9 +19735,9 @@ cm.getConstructor('Com.Notifications', function(classConstructor, className, cla
 
     classProto.clear = function(){
         var that = this;
-        cm.forEach(that.items, function(item){
-            that.remove(item);
-        });
+        while(that.items.length){
+            that.remove(that.items[0]);
+        }
         return that;
     };
 
@@ -27553,14 +27701,14 @@ function(params){
     // Call parent class construct
     Com.AbstractFileManagerContainer.apply(that, arguments);
 });
-/*! ************ QuickSilk-Application v3.14.2 (2016-08-26 17:42) ************ */
+/*! ************ QuickSilk-Application v3.14.4 (2016-08-30 21:06) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.14.2',
+    '_version' : '3.14.4',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
@@ -29179,8 +29327,8 @@ function(params){
         });
         cm.find('App.Sidebar', that.params['sidebarName'], null, function(classObject){
             that.components['sidebar'] = classObject
-                .addEvent('onExpand', sidebarExpandAction)
-                .addEvent('onCollapse', sidebarCollapseAction)
+                .addEvent('onExpandEnd', sidebarExpandAction)
+                .addEvent('onCollapseStart', sidebarCollapseAction)
                 .addEvent('onTabShow', function(sidebar, data){
                     setEditorType(data.item['id']);
                 });
@@ -29212,6 +29360,7 @@ function(params){
     var sidebarExpandAction = function(){
         if(typeof that.isExpanded !== 'boolean' || !that.isExpanded){
             that.isExpanded = true;
+            cm.replaceClass(cm.getDocumentHtml(), 'is-editor--collapsed', 'is-editor--expanded');
             cm.addClass(cm.getDocumentHtml(), 'is-editing');
             cm.forEach(that.zones, function(item){
                 item.enableEditing();
@@ -29230,6 +29379,7 @@ function(params){
     var sidebarCollapseAction = function(){
         if(typeof that.isExpanded !== 'boolean' || that.isExpanded){
             that.isExpanded = false;
+            cm.replaceClass(cm.getDocumentHtml(), 'is-editor--expanded', 'is-editor--collapsed');
             cm.removeClass(cm.getDocumentHtml(), 'is-editing');
             cm.forEach(that.zones, function(item){
                 item.disableEditing();
@@ -31853,6 +32003,16 @@ function(params){
         });
     };
 
+    var afterExpand = function(){
+        cm.replaceClass(that.params['target'], 'is-sidebar--collapsed is-sidebar--expanding', 'is-sidebar--expanded', true);
+        that.triggerEvent('onExpandEnd');
+    };
+
+    var afterCollapse = function(){
+        cm.replaceClass(that.params['target'], 'is-sidebar--expanded is-sidebar--collapsing', 'is-sidebar--collapsed', true);
+        that.triggerEvent('onCollapseEnd');
+    };
+
     /* ******* MAIN ******* */
 
     that.collapse = function(isImmediately, force){
@@ -31869,7 +32029,7 @@ function(params){
                 cm.addClass(that.params['target'], 'is-immediately');
             }
             cm.replaceClass(that.nodes['container'], 'is-expanded', 'is-collapsed', true);
-            cm.replaceClass(that.params['target'], 'is-sidebar--expanded', 'is-sidebar--collapsed', true);
+            cm.addClass(that.params['target'], 'is-sidebar--collapsing', true);
             // Trigger collapse event after change classes
             that.triggerEvent('onCollapse');
             // Unset active class to collapse buttons
@@ -31879,14 +32039,14 @@ function(params){
             // Remove immediately animation hack
             that.openInterval && clearTimeout(that.openInterval);
             if(isImmediately){
-                that.triggerEvent('onCollapseEnd');
+                afterCollapse();
                 that.openInterval = setTimeout(function(){
                     cm.removeClass(that.nodes['container'], 'is-immediately');
                     cm.removeClass(that.params['target'], 'is-immediately');
                 }, 5);
             }else{
                 that.openInterval = setTimeout(function(){
-                    that.triggerEvent('onCollapseEnd');
+                    afterCollapse();
                 }, that.params['duration'] + 5);
             }
         }
@@ -31907,7 +32067,7 @@ function(params){
                 cm.addClass(that.params['target'], 'is-immediately');
             }
             cm.replaceClass(that.nodes['container'], 'is-collapsed', 'is-expanded', true);
-            cm.replaceClass(that.params['target'], 'is-sidebar--collapsed', 'is-sidebar--expanded', true);
+            cm.addClass(that.params['target'], 'is-sidebar--expanding', true);
             // Trigger expand event after change classes
             that.triggerEvent('onExpand');
             // Set active class to collapse buttons
@@ -31917,14 +32077,14 @@ function(params){
             // Remove immediately animation hack
             that.openInterval && clearTimeout(that.openInterval);
             if(isImmediately){
-                that.triggerEvent('onExpandEnd');
+                afterExpand();
                 that.openInterval = setTimeout(function(){
                     cm.removeClass(that.nodes['container'], 'is-immediately');
                     cm.removeClass(that.params['target'], 'is-immediately');
                 }, 5);
             }else{
                 that.openInterval = setTimeout(function(){
-                    that.triggerEvent('onExpandEnd');
+                    afterExpand();
                 }, that.params['duration'] + 5);
             }
         }
@@ -33683,21 +33843,7 @@ function(params){
         var item = that.components['tabset'].getCurrentTab();
         if(item && (that.params['showEmptyTab'] || that.isEditing || item['tab']['inner'].childNodes.length)){
             // Set position
-            that.resizeInterval && clearInterval(that.resizeInterval);
-            switch(that.params['attachment']) {
-                case 'screen':
-                    if(that.isEditing){
-                        that.nodes['content'].style.width = 'auto';
-                        that.nodes['content'].style.minWidth = 'auto';
-                        that.nodes['content'].style.top = 'auto';
-                        that.nodes['content'].style.bottom = 'auto';
-                    }else{
-                        that.nodes['content'].style.width = that.params['width'];
-                        contentResizeHandler();
-                        that.resizeInterval = setInterval(contentResizeHandler, 5);
-                    }
-                    break;
-            }
+            that.redraw();
             // Show
             that.hideInterval && clearTimeout(that.hideInterval);
             cm.addClass(that.nodes['content'], 'is-show', true);
@@ -33758,7 +33904,7 @@ function(params){
     that.enableEditing = function(){
         if(!cm.isBoolean(that.isEditing) || !that.isEditing){
             that.isEditing = true;
-            cm.addClass(that.params['node'], 'is-editing is-editable');
+            cm.replaceClass(that.params['node'], 'is-not-editing', 'is-editing is-editable');
             that.components['tabset'].setByIndex(0);
             show();
             that.triggerEvent('enableEditing');
@@ -33770,7 +33916,7 @@ function(params){
     that.disableEditing = function(){
         if(!cm.isBoolean(that.isEditing) || that.isEditing){
             that.isEditing = false;
-            cm.removeClass(that.params['node'], 'is-editing is-editable');
+            cm.replaceClass(that.params['node'], 'is-editing is-editable', 'is-not-editing');
             hide();
             that.triggerEvent('disableEditing');
             that.triggerEvent('disableEditable');
@@ -33789,6 +33935,25 @@ function(params){
     };
 
     that.redraw = function(){
+        that.resizeInterval && clearInterval(that.resizeInterval);
+        switch(that.params['attachment']) {
+            case 'screen':
+                if(that.isEditing){
+                    that.previousPosition = null;
+                    that.currentPosition = null;
+                    that.nodes['content'].style.maxWidth = '';
+                    that.nodes['content'].style.minWidth = '';
+                    that.nodes['content'].style.top = '';
+                    that.nodes['content'].style.bottom = '';
+                }else{
+                    that.previousPosition = null;
+                    that.currentPosition = null;
+                    that.nodes['content'].style.maxWidth = that.params['width'];
+                    contentResizeHandler();
+                    that.resizeInterval = setInterval(contentResizeHandler, 5);
+                }
+                break;
+        }
         return that;
     };
 
@@ -34197,7 +34362,7 @@ cm.getConstructor('Dev.TBSC', function(classConstructor, className, classProto){
         return that;
     };
 });
-window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":14,"CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.16.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"250ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Open Sans, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"'Open Sans', arial, helvetica, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmInput-Padding":"6px","CmInput-DefaultBackground":"#ffffff","CmInput-HoverBackground":"#ffffff","CmInput-ActiveBackground":"#ffffff","CmInput-DisabledBackground":"#fafafa","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"28px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"150px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"250ms","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"28px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"6px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"6px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"24px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"28px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":26,"AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Default-Family":"Open Sans, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Open Sans, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Open Sans, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Open Sans, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Open Sans, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Open Sans, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Open Sans, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Open Sans, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppColor-QuickSilk":"#0060a0","AppColor-UI-Panel":"#000","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#000","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#000","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#000","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"28px","AppPanel-Dialog-ButtonsHeight":"52px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"28px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"28px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"28px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"28px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"28px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
+window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":14,"CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.16.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"250ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Open Sans, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"'Open Sans', arial, helvetica, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmInput-Padding":"6px","CmInput-DefaultBackground":"#ffffff","CmInput-HoverBackground":"#ffffff","CmInput-ActiveBackground":"#ffffff","CmInput-DisabledBackground":"#fafafa","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"28px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"150px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"250ms","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"28px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"6px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"6px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"24px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"28px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":26,"AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Default-Family":"Open Sans, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Open Sans, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Open Sans, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Open Sans, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Open Sans, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Open Sans, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Open Sans, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Open Sans, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppColor-QuickSilk":"#0060a0","AppColor-UI-Panel":"#000","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#000","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#000","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#000","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"28px","AppPanel-Dialog-ButtonsHeight":"52px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"28px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"28px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"28px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"28px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"28px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
 
 window.Collector = new Com.Collector({
         'autoInit' : true
