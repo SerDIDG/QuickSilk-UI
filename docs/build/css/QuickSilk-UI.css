@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.0 (2016-08-30 21:06) ************ */
+/*! ************ MagpieUI v3.22.1 (2016-08-31 20:22) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -8086,12 +8086,14 @@ button.is-hidden {
   border: 1px dashed #2985e0;
   border-radius: 3px;
   opacity: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .pt__editable.is-editable > .inner {
   width: 100%;
@@ -8123,6 +8125,8 @@ button.is-hidden {
   background-clip: border-box;
   -webkit-transition: all 250ms ease-in-out;
   transition: all 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .pt__editable.is-editable > .drag .icon {
   width: 34px;
@@ -8147,12 +8151,14 @@ button.is-hidden {
   z-index: 4;
   opacity: 0;
   cursor: pointer;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
   top: -12px;
   right: -12px;
   bottom: auto;
   left: auto;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .pt__editable.is-editable > .menu .icon {
   width: 24px;
@@ -8193,6 +8199,8 @@ button.is-hidden {
   right: 12px;
   bottom: auto;
   left: auto;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown li {
   position: relative;
@@ -8289,28 +8297,40 @@ button.is-hidden {
   bottom: auto;
   left: auto;
 }
-.pt__editable.is-editable > .menu:hover {
+.pt__editable.is-editable > .menu:hover,
+.pt__editable.is-editable > .menu:active,
+.pt__editable.is-editable > .menu.is-show {
   z-index: 14;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
-.pt__editable.is-editable > .menu:hover .icon {
+.pt__editable.is-editable > .menu:hover .icon,
+.pt__editable.is-editable > .menu:active .icon,
+.pt__editable.is-editable > .menu.is-show .icon {
   background-color: #f2f2f2;
 }
-.pt__editable.is-editable > .menu:hover .pt__menu-dropdown {
+.pt__editable.is-editable > .menu:hover .pt__menu-dropdown,
+.pt__editable.is-editable > .menu:active .pt__menu-dropdown,
+.pt__editable.is-editable > .menu.is-show .pt__menu-dropdown {
   visibility: visible;
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .pt__editable.is-active > .border,
 .pt__editable:hover > .border {
   opacity: 1;
   background: rgba(255, 255, 255, 0.5);
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
   top: -16px;
   right: -16px;
   bottom: -16px;
   left: -16px;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .pt__editable.is-active > .drag,
 .pt__editable:hover > .drag {
@@ -8318,6 +8338,8 @@ button.is-hidden {
   visibility: visible;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .pt__editable.is-active > .drag:not(.is-bottom),
 .pt__editable:hover > .drag:not(.is-bottom) {
@@ -8330,12 +8352,14 @@ button.is-hidden {
 .pt__editable.is-active > .menu,
 .pt__editable:hover > .menu {
   opacity: 1;
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
   top: -28px;
   right: -28px;
   bottom: auto;
   left: auto;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .pt__editable.is-active > .border {
   background: rgba(255, 255, 255, 0.5);
@@ -9405,6 +9429,41 @@ button.is-hidden {
   opacity: 1;
   -webkit-transition: top 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: top 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.pt__image__container {
+  margin-bottom: 24px;
+}
+.pt__image__container.bottom,
+.pt__image__container.is-last,
+.pt__image__container:last-child {
+  margin-bottom: 0;
+}
+.pt__image__container.pull-left {
+  margin: 0;
+  margin-bottom: 24px;
+}
+.pt__image__container.pull-left.bottom,
+.pt__image__container.pull-left.is-last,
+.pt__image__container.pull-left:last-child {
+  margin-bottom: 0;
+}
+.pt__image__container.pull-center {
+  margin: 0 auto;
+  margin-bottom: 24px;
+}
+.pt__image__container.pull-center.bottom,
+.pt__image__container.pull-center.is-last,
+.pt__image__container.pull-center:last-child {
+  margin-bottom: 0;
+}
+.pt__image__container.pull-right {
+  margin: 0 0 0 auto;
+  margin-bottom: 24px;
+}
+.pt__image__container.pull-right.bottom,
+.pt__image__container.pull-right.is-last,
+.pt__image__container.pull-right:last-child {
+  margin-bottom: 0;
 }
 /* ******* PARTS: INPUT ******* */
 .pt__input {
@@ -15442,6 +15501,8 @@ button.is-hidden {
   left: 0;
   -webkit-transition: all 250ms ease-in-out;
   transition: all 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .com__image-input__content .input__holder .input__label {
   display: -webkit-flex;
@@ -15502,6 +15563,18 @@ button.is-hidden {
   -webkit-justify-content: center;
   justify-content: center;
 }
+.com__image-input__content .input__holder .input__buttons .button-alike span,
+.com__image-input__content .input__holder .input__buttons .button span,
+.com__image-input__content .input__holder .input__buttons .browse-button span,
+.com__image-input__content .input__holder .input__buttons .cm__button-wrapper span,
+.com__image-input__content .input__holder .input__buttons .com__menu span,
+.com__image-input__content .input__holder .input__buttons .com__pagination__bar ul li a span,
+.com__image-input__content .input__holder .input__buttons input[type="button"] span,
+.com__image-input__content .input__holder .input__buttons input[type="submit"] span,
+.com__image-input__content .input__holder .input__buttons input[type="reset"] span,
+.com__image-input__content .input__holder .input__buttons button span {
+  margin: auto;
+}
 .com__image-input__content .input__holder .input__buttons .button-alike.is-hidden,
 .com__image-input__content .input__holder .input__buttons .button.is-hidden,
 .com__image-input__content .input__holder .input__buttons .browse-button.is-hidden,
@@ -15518,6 +15591,8 @@ button.is-hidden {
 .com__image-input__content .input__holder:active .input__cover {
   visibility: visible;
   opacity: 1;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .com__image-input__content .input__holder.is-hidden {
   opacity: 0;
@@ -18043,7 +18118,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.14.4 (2016-08-30 21:06) ************ */
+/*! ************ QuickSilk-Application v3.14.5 (2016-08-31 20:22) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?26');
@@ -19222,6 +19297,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin: 0 0 24px;
   -webkit-transition: z-index 250ms ease-in-out;
   transition: z-index 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .app__block-container > .app__block {
   width: 100%;
@@ -19241,11 +19318,15 @@ html:not(.is-editing).is-editor .app__module__controls {
   z-index: 10;
   -webkit-transition: z-index 100ms ease-in-out;
   transition: z-index 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-active {
   z-index: 10;
   -webkit-transition: z-index 100ms ease-in-out;
   transition: z-index 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container:not(.is-editing):not(.is-replacing):last-child {
   margin: 0;
@@ -19267,12 +19348,14 @@ html:not(.is-editing).is-editor .app__module__controls {
   border: 1px dashed #2985e0;
   border-radius: 3px;
   opacity: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .app__block-container.is-editable > .app__block > .inner {
   width: 100%;
@@ -19304,6 +19387,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   background-clip: border-box;
   -webkit-transition: all 250ms ease-in-out;
   transition: all 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .app__block-container.is-editable > .app__block > .drag .icon {
   width: 34px;
@@ -19328,12 +19413,14 @@ html:not(.is-editing).is-editor .app__module__controls {
   z-index: 4;
   opacity: 0;
   cursor: pointer;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
   top: -12px;
   right: -12px;
   bottom: auto;
   left: auto;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .app__block-container.is-editable > .app__block > .menu .icon {
   width: 24px;
@@ -19374,6 +19461,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   right: 12px;
   bottom: auto;
   left: auto;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li {
   position: relative;
@@ -19470,28 +19559,40 @@ html:not(.is-editing).is-editor .app__module__controls {
   bottom: auto;
   left: auto;
 }
-.app__block-container.is-editable > .app__block > .menu:hover {
+.app__block-container.is-editable > .app__block > .menu:hover,
+.app__block-container.is-editable > .app__block > .menu:active,
+.app__block-container.is-editable > .app__block > .menu.is-show {
   z-index: 14;
+  -webkit-transition-delay: 300ms;
+  transition-delay: 300ms;
 }
-.app__block-container.is-editable > .app__block > .menu:hover .icon {
+.app__block-container.is-editable > .app__block > .menu:hover .icon,
+.app__block-container.is-editable > .app__block > .menu:active .icon,
+.app__block-container.is-editable > .app__block > .menu.is-show .icon {
   background-color: #f2f2f2;
 }
-.app__block-container.is-editable > .app__block > .menu:hover .pt__menu-dropdown {
+.app__block-container.is-editable > .app__block > .menu:hover .pt__menu-dropdown,
+.app__block-container.is-editable > .app__block > .menu:active .pt__menu-dropdown,
+.app__block-container.is-editable > .app__block > .menu.is-show .pt__menu-dropdown {
   visibility: visible;
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-editable:hover > .app__block > .border,
 .app__block-container.is-editable:active > .app__block > .border {
   opacity: 1;
   background: rgba(255, 255, 255, 0.5);
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
   top: -16px;
   right: -16px;
   bottom: -16px;
   left: -16px;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-editable:hover > .app__block > .drag,
 .app__block-container.is-editable:active > .app__block > .drag {
@@ -19499,6 +19600,8 @@ html:not(.is-editing).is-editor .app__module__controls {
   visibility: visible;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-editable:hover > .app__block > .drag:not(.is-bottom),
 .app__block-container.is-editable:active > .app__block > .drag:not(.is-bottom) {
@@ -19511,12 +19614,14 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__block-container.is-editable:hover > .app__block > .menu,
 .app__block-container.is-editable:active > .app__block > .menu {
   opacity: 1;
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
   top: -28px;
   right: -28px;
   bottom: auto;
   left: auto;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-editable.is-active > .app__block {
   opacity: 0.7;
@@ -19526,18 +19631,22 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__block-container.is-editable.is-active > .app__block > .border {
   opacity: 1;
   background: rgba(255, 255, 255, 0.5);
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
   top: -16px;
   right: -16px;
   bottom: -16px;
   left: -16px;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-editable.is-active > .app__block > .drag {
   opacity: 1;
   visibility: visible;
   -webkit-transition: all 100ms ease-in-out;
   transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-editable.is-active > .app__block > .drag:not(.is-bottom) {
   top: -28px;
@@ -19547,12 +19656,14 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .app__block-container.is-editable.is-active > .app__block > .menu {
   opacity: 1;
-  -webkit-transition: all 100ms ease-in-out;
-  transition: all 100ms ease-in-out;
   top: -28px;
   right: -28px;
   bottom: auto;
   left: auto;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
 }
 .app__block-container.is-editable.is-active > .app__block > .border {
   background: rgba(255, 255, 255, 0.5);
@@ -21848,6 +21959,7 @@ html:not(.is-editing).is-editor .app__module__controls {
     z-index: 2;
   }
   html.is-adaptive .app__topmenu .menu > li > .pt__menu-dropdown {
+    min-width: 100%;
     border-top: none;
     border-radius: 0 0 3px 3px;
   }
