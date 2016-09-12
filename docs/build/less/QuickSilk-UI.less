@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.1 (2016-08-31 20:22) ************ */
+/*! ************ MagpieUI v3.22.6 (2016-09-12 20:18) ************ */
 @charset "UTF-8";
 
 /*!
@@ -8955,8 +8955,13 @@ button {
         }
 
         &.field-indent {
+            .cm__box;
             margin-bottom: @CmForm-FieldInnerIndent;
         }
+    }
+
+    &.is-hidden {
+        display: none;
     }
 
     &.align-center {
@@ -8966,6 +8971,34 @@ button {
     }
 }
 
+/* *** FIELD HINT *** */
+
+.pt__field__hint {
+    &:extend(.cm__inherit all);
+    .cm__font--hint-cursive;
+    text-transform: none;
+}
+
+ul.pt__field__hint {
+    margin: 0;
+    padding: 6px 0 2px;
+    display: block;
+    list-style: none;
+
+    li {
+        margin-top: 4px;
+        line-height: 13px;
+
+        &:first-child {
+            margin: 0;
+        }
+
+        &:before {
+            content: '-';
+            margin-right: 4px;
+        }
+    }
+}
 
 /* ******* PART: FIELD: ADAPTIVE ******* */
 
@@ -10331,14 +10364,6 @@ button {
 .pt__listing {
     .cm__box;
 
-    .cm__tags {
-        margin: 0;
-    }
-
-    .pt__box-editable {
-        margin: 0;
-    }
-
     .block {
         margin: @CmIndent-Medium 0 0 0;
 
@@ -10357,9 +10382,7 @@ button {
     }
 
     ul.list {
-        margin: 0;
-        padding: 0;
-        list-style: none;
+        .cm__list-clear;
 
         > li {
             margin: @CmIndent-XXSmall 0 0 0;
@@ -10380,6 +10403,26 @@ button {
         .cm__link {
             font-weight: @CmFont-Base-BoldWeight;
         }
+    }
+}
+
+.pt__listing__item {
+    .cm__box;
+}
+
+.pt__listing__field {
+    margin: @CmIndent-XXXSmall 0 0;
+
+    &:first-child {
+        margin: 0;
+    }
+
+    > dt {
+        font-weight: @CmFont-Base-BoldWeight;
+    }
+
+    > dd {
+        padding: 0;
     }
 }
 
@@ -13725,7 +13768,7 @@ button {
         display: inline-block;
         text-align: left;
         vertical-align: middle;
-        .mx__transform(scale(0.9));
+        //.mx__transform(scale(0.9)); - Not working position fixed inside this block
         .mx__transition(all, @ComDialog-Duration, @CmUI-MotionAsymmetric);
 
         > .icon {
@@ -13792,7 +13835,7 @@ button {
         opacity: 1;
 
         > .window {
-            .mx__transform(scale(1));
+            //.mx__transform(scale(1)); - Not working position fixed inside this block
         }
     }
 }
@@ -14161,6 +14204,24 @@ button {
 .com__file-manager {
     > .inner {
     }
+
+    &.is-fullsize {
+        height: 100%;
+
+        > .inner {
+            height: 100%;
+
+            .com__file-manager__holder {
+                height: 100%;
+
+                > .inner {
+                    height: 100%;
+                    position: absolute;
+                    .mx__position(0, 0, 0, 0);
+                }
+            }
+        }
+    }
 }
 
 .com__file-manager__content {
@@ -14243,6 +14304,17 @@ button {
         }
     }
 }
+
+.com__file-uploader__file-manager {
+    &.is-fullsize {
+        position: absolute;
+        .mx__position(0, 0, 0, 0);
+
+        .com__file-uploader__holder {
+            height: 100%;
+        }
+    }
+}
 /* ******* COMPONENTS: FORM ******* */
 
 .com__form {
@@ -14262,6 +14334,11 @@ button {
 .com__form__fields {
     .clearfix;
     position: relative;
+
+    > .inner {
+        .clearfix;
+        position: relative;
+    }
 }
 
 .com__form__buttons {
@@ -14962,7 +15039,7 @@ button {
 
 .com__image-input {
     &.size-default {
-        width: @ComImageInput-Height;
+        .com__image-input--size(@ComImageInput-Height, @ComImageInput-Height);
 
         .com__image-input__content {
             .com__image-input__content--default;
@@ -14992,6 +15069,7 @@ button {
                 }
             }
         }
+
         .input__cover {
             .display-flex;
             visibility: hidden;
@@ -15067,6 +15145,24 @@ button {
         .input__buttons {
             border-left: none;
             .mx__flex(1);
+        }
+    }
+}
+
+/* *** MIXINS *** */
+
+.com__image-input--size (@width, @height) {
+    max-width: @width;
+
+    .com__image-input__content {
+        .input__holder {
+            .pt__image {
+                > .inner {
+                    > .descr {
+                        height: @height;
+                    }
+                }
+            }
         }
     }
 }
@@ -17094,7 +17190,15 @@ button {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.14.5 (2016-08-31 20:22) ************ */
+
+.com__file-manager {
+    &.is-fullsize {
+        .ui-resizable-handle {
+            display:none !important;
+        }
+    }
+}
+/*! ************ QuickSilk-Application v3.14.8 (2016-09-12 20:18) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -22379,7 +22483,7 @@ html {
         }
     }
 
-    &.is-not-editing {
+    &:not(.is-editing) {
         &.expand-top {
             > .inner {
                 > .tabs__content {
@@ -22503,7 +22607,7 @@ html {
 html {
     &.is-editor--expanded {
         .app-mod__rollover-tabs {
-            &.is-not-editing {
+            &:not(.is-editing) {
                 &.attachment-screen {
                     > .inner {
                         > .tabs__content {
@@ -22517,7 +22621,7 @@ html {
 
     &.is-editor--collapsed {
         .app-mod__rollover-tabs {
-            &.is-not-editing {
+            &:not(.is-editing) {
                 &.attachment-screen {
                     > .inner {
                         > .tabs__content {

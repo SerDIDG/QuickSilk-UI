@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.1 (2016-08-31 20:22) ************ */
+/*! ************ MagpieUI v3.22.6 (2016-09-12 20:18) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -8435,10 +8435,43 @@ button.is-hidden {
   display: none;
 }
 .pt__field.is-box.field-indent {
+  margin-bottom: 24px;
   margin-bottom: 8px;
+}
+.pt__field.is-box.field-indent.bottom,
+.pt__field.is-box.field-indent.is-last,
+.pt__field.is-box.field-indent:last-child {
+  margin-bottom: 0;
+}
+.pt__field.is-hidden {
+  display: none;
 }
 .pt__field.align-center > dt {
   text-align: center;
+}
+/* *** FIELD HINT *** */
+.pt__field__hint {
+  font: 400 11px/18px Open Sans, sans-serif;
+  color: #999999;
+  font-style: italic;
+  text-transform: none;
+}
+ul.pt__field__hint {
+  margin: 0;
+  padding: 6px 0 2px;
+  display: block;
+  list-style: none;
+}
+ul.pt__field__hint li {
+  margin-top: 4px;
+  line-height: 13px;
+}
+ul.pt__field__hint li:first-child {
+  margin: 0;
+}
+ul.pt__field__hint li:before {
+  content: '-';
+  margin-right: 4px;
 }
 /* ******* PART: FIELD: ADAPTIVE ******* */
 @media only screen and (max-width: 640px) {
@@ -10755,23 +10788,6 @@ button.is-hidden {
 .pt__listing:last-child {
   margin-bottom: 0;
 }
-.pt__listing .cm__tags,
-.pt__listing h1,
-.pt__listing h2,
-.pt__listing h3,
-.pt__listing h4,
-.pt__listing h5,
-.pt__listing h6,
-.pt__listing p,
-.pt__listing dl,
-.pt__listing ul,
-.pt__listing ol,
-.pt__listing hr {
-  margin: 0;
-}
-.pt__listing .pt__box-editable {
-  margin: 0;
-}
 .pt__listing .block {
   margin: 24px 0 0 0;
 }
@@ -10789,6 +10805,10 @@ button.is-hidden {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.pt__listing ul.list > li {
+  margin: 0;
+  padding: 0;
 }
 .pt__listing ul.list > li {
   margin: 8px 0 0 0;
@@ -10809,6 +10829,26 @@ button.is-hidden {
 .pt__listing .list-title a,
 .pt__listing .list-title .com__glossary .com__glossary__title {
   font-weight: 600;
+}
+.pt__listing__item {
+  margin-bottom: 24px;
+}
+.pt__listing__item.bottom,
+.pt__listing__item.is-last,
+.pt__listing__item:last-child {
+  margin-bottom: 0;
+}
+.pt__listing__field {
+  margin: 4px 0 0;
+}
+.pt__listing__field:first-child {
+  margin: 0;
+}
+.pt__listing__field > dt {
+  font-weight: 600;
+}
+.pt__listing__field > dd {
+  padding: 0;
 }
 /* *** DEFAULT *** */
 .pt__listing-clear {
@@ -12818,6 +12858,7 @@ button.is-hidden {
 .com__togglebox > dt .pt__box-item .title,
 .com__togglebox > dt .pt__box-item .descr,
 .com__togglebox > dt .pt__box-item .author,
+.com__togglebox > dt .pt__field__hint,
 .com__togglebox > dt .com__glossary .com__glossary__title,
 .com__togglebox > dt .com__glossary .com__glossary__title {
   color: inherit;
@@ -14181,6 +14222,7 @@ button.is-hidden {
 .com__dialog .pt__box-item .title,
 .com__dialog .pt__box-item .descr,
 .com__dialog .pt__box-item .author,
+.com__dialog .pt__field__hint,
 .com__dialog .com__glossary .com__glossary__title,
 .com__dialog .com__glossary .com__glossary__title {
   color: #666666;
@@ -14211,9 +14253,6 @@ button.is-hidden {
   display: inline-block;
   text-align: left;
   vertical-align: middle;
-  -webkit-transform: scale(0.9);
-  -ms-transform: scale(0.9);
-  transform: scale(0.9);
   -webkit-transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
   transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1);
 }
@@ -14261,11 +14300,6 @@ button.is-hidden {
 .com__dialog.is-open {
   visibility: visible;
   opacity: 1;
-}
-.com__dialog.is-open > .window {
-  -webkit-transform: scale(1);
-  -ms-transform: scale(1);
-  transform: scale(1);
 }
 .com__dialog__inner {
   overflow: hidden;
@@ -14445,6 +14479,7 @@ button.is-hidden {
 .com__dialog.theme-black .pt__box-item .title,
 .com__dialog.theme-black .pt__box-item .descr,
 .com__dialog.theme-black .pt__box-item .author,
+.com__dialog.theme-black .pt__field__hint,
 .com__dialog.theme-black .com__glossary .com__glossary__title,
 .com__dialog.theme-black .com__glossary .com__glossary__title {
   color: #ffffff;
@@ -14539,6 +14574,7 @@ button.is-hidden {
 .com__dialog-font--theme-black .pt__box-item .title,
 .com__dialog-font--theme-black .pt__box-item .descr,
 .com__dialog-font--theme-black .pt__box-item .author,
+.com__dialog-font--theme-black .pt__field__hint,
 .com__dialog-font--theme-black .com__glossary .com__glossary__title,
 .com__dialog-font--theme-black .com__glossary .com__glossary__title {
   color: #ffffff;
@@ -14623,6 +14659,23 @@ button.is-hidden {
   opacity: 0;
 }
 /* ******* COMPONENTS: FILE MANAGER ******* */
+.com__file-manager.is-fullsize {
+  height: 100%;
+}
+.com__file-manager.is-fullsize > .inner {
+  height: 100%;
+}
+.com__file-manager.is-fullsize > .inner .com__file-manager__holder {
+  height: 100%;
+}
+.com__file-manager.is-fullsize > .inner .com__file-manager__holder > .inner {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
 .com__file-manager__content {
   margin-top: 24px;
 }
@@ -14693,6 +14746,16 @@ button.is-hidden {
 .com__file-uploader__local .com__file-uploader__dropzone:first-child {
   margin-top: 0;
 }
+.com__file-uploader__file-manager.is-fullsize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.com__file-uploader__file-manager.is-fullsize .com__file-uploader__holder {
+  height: 100%;
+}
 /* ******* COMPONENTS: FORM ******* */
 .com__form {
   margin-bottom: 24px;
@@ -14719,6 +14782,18 @@ button.is-hidden {
   position: relative;
 }
 .com__form__fields:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  font-size: 0;
+  height: 0;
+}
+.com__form__fields > .inner {
+  position: relative;
+}
+.com__form__fields > .inner:after {
   content: ".";
   display: block;
   clear: both;
@@ -15457,7 +15532,10 @@ button.is-hidden {
 }
 /* ******* COMPONENTS: IMAGE INPUT ******* */
 .com__image-input.size-default {
-  width: 128px;
+  max-width: 128px;
+}
+.com__image-input.size-default .com__image-input__content .input__holder .pt__image > .inner > .descr {
+  height: 128px;
 }
 .com__image-input.size-default .com__image-input__content .input__holder .input__label {
   display: none;
@@ -15606,6 +15684,7 @@ button.is-hidden {
   -ms-flex: 1;
   flex: 1;
 }
+/* *** MIXINS *** */
 /* ******* COMPONENTS: MENU ******* */
 .com__menu .button,
 .com__menu input[type="button"],
@@ -18118,7 +18197,10 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.14.5 (2016-08-31 20:22) ************ */
+.com__file-manager.is-fullsize .ui-resizable-handle {
+  display: none !important;
+}
+/*! ************ QuickSilk-Application v3.14.8 (2016-09-12 20:18) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?26');
@@ -18360,6 +18442,7 @@ body:before {
 .com__dialog-font .pt__box-item .title,
 .com__dialog-font .pt__box-item .descr,
 .com__dialog-font .pt__box-item .author,
+.com__dialog-font .pt__field__hint,
 .com__dialog-font .com__glossary .com__glossary__title,
 .com__dialog-font .com__glossary .com__glossary__title {
   color: #666666;
@@ -18413,6 +18496,7 @@ body:before {
 .app__helptour-font .pt__box-item .title,
 .app__helptour-font .pt__box-item .descr,
 .app__helptour-font .pt__box-item .author,
+.app__helptour-font .pt__field__hint,
 .app__helptour-font .com__glossary .com__glossary__title,
 .app__helptour-font .com__glossary .com__glossary__title {
   color: #666666;
@@ -20164,6 +20248,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__helptour__popup .pt__box-item .title,
 .app__helptour__popup .pt__box-item .descr,
 .app__helptour__popup .pt__box-item .author,
+.app__helptour__popup .pt__field__hint,
 .app__helptour__popup .com__glossary .com__glossary__title,
 .app__helptour__popup .com__glossary .com__glossary__title {
   color: #666666;
@@ -21493,6 +21578,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__sidebar .sidebar__content__text .pt__box-item .title,
 .app__sidebar .sidebar__content__text .pt__box-item .descr,
 .app__sidebar .sidebar__content__text .pt__box-item .author,
+.app__sidebar .sidebar__content__text .pt__field__hint,
 .app__sidebar .sidebar__content__text .com__glossary .com__glossary__title,
 .app__sidebar .sidebar__content__text .com__glossary .com__glossary__title {
   color: #ffffff;
@@ -24016,16 +24102,16 @@ html:not(.is-editing).is-editor .app__module__controls {
   -webkit-transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
   transition: opacity 100ms ease-in-out, visibility 100ms ease-in-out, height 100ms ease-in-out;
 }
-.app-mod__rollover-tabs.is-not-editing.expand-top > .inner > .tabs__content {
+.app-mod__rollover-tabs:not(.is-editing).expand-top > .inner > .tabs__content {
   bottom: 100%;
 }
-.app-mod__rollover-tabs.is-not-editing.expand-bottom > .inner > .tabs__content {
+.app-mod__rollover-tabs:not(.is-editing).expand-bottom > .inner > .tabs__content {
   top: 100%;
 }
-.app-mod__rollover-tabs.is-not-editing.attachment-container > .inner > .tabs__content {
+.app-mod__rollover-tabs:not(.is-editing).attachment-container > .inner > .tabs__content {
   position: absolute;
 }
-.app-mod__rollover-tabs.is-not-editing.attachment-screen > .inner > .tabs__content {
+.app-mod__rollover-tabs:not(.is-editing).attachment-screen > .inner > .tabs__content {
   position: fixed;
 }
 .app-mod__rollover-tabs.is-editing > .inner > .tabs__content {
@@ -24113,10 +24199,10 @@ html:not(.is-editing).is-editor .app__module__controls {
   height: 24px;
 }
 /* *** STATES *** */
-html.is-editor--expanded .app-mod__rollover-tabs.is-not-editing.attachment-screen > .inner > .tabs__content {
+html.is-editor--expanded .app-mod__rollover-tabs:not(.is-editing).attachment-screen > .inner > .tabs__content {
   left: 360px;
 }
-html.is-editor--collapsed .app-mod__rollover-tabs.is-not-editing.attachment-screen > .inner > .tabs__content {
+html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-screen > .inner > .tabs__content {
   left: 48px;
 }
 /* *** THEMES *** */
