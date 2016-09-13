@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.6 (2016-09-12 20:18) ************ */
+/*! ************ MagpieUI v3.22.7 (2016-09-13 20:08) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -8180,20 +8180,20 @@ button.is-hidden {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
   top: 100%;
   right: auto;
   left: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
   z-index: 1;
   top: 12px;
   right: 12px;
@@ -8230,24 +8230,6 @@ button.is-hidden {
 .pt__editable.is-editable > .menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
 }
-.pt__editable.is-editable > .menu .pt__menu-dropdown li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.pt__editable.is-editable > .menu .pt__menu-dropdown li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.pt__editable.is-editable > .menu .pt__menu-dropdown li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
-}
 .pt__editable.is-editable > .menu .pt__menu-dropdown li:before {
   display: block;
   height: 0;
@@ -8277,6 +8259,24 @@ button.is-hidden {
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown.pull-left {
   top: 100%;
@@ -11056,19 +11056,12 @@ ul.pt__field__hint li:before {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
-  top: 100%;
-  right: auto;
-  bottom: auto;
-  left: 0;
   -webkit-transition: all 250ms ease-in-out;
   transition: all 250ms ease-in-out;
 }
@@ -11100,24 +11093,6 @@ ul.pt__field__hint li:before {
 .pt__menu-dropdown--base li a:hover {
   text-decoration: none;
 }
-.pt__menu-dropdown--base li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.pt__menu-dropdown--base li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.pt__menu-dropdown--base li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
-}
 .pt__menu-dropdown--base li:before {
   display: block;
   height: 0;
@@ -11148,13 +11123,40 @@ ul.pt__field__hint li:before {
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
 }
-.pt__menu-dropdown--base.pull-left {
+.pt__menu-dropdown--position {
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
   top: 100%;
   right: auto;
   bottom: auto;
   left: 0;
 }
-.pt__menu-dropdown--base.pull-right {
+.pt__menu-dropdown--position li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.pt__menu-dropdown--position li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.pt__menu-dropdown--position li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
+}
+.pt__menu-dropdown--position.pull-left {
+  top: 100%;
+  right: auto;
+  bottom: auto;
+  left: 0;
+}
+.pt__menu-dropdown--position.pull-right {
   top: 100%;
   right: 0;
   bottom: auto;
@@ -11180,15 +11182,6 @@ ul.pt__field__hint li:before {
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
-}
-.pt__menu-dropdown--inside {
-  visibility: visible;
-  opacity: 1;
-  position: relative;
-  top: auto;
-  right: auto;
-  bottom: auto;
-  left: auto;
 }
 /* *** MENU *** */
 .pt__menu {
@@ -15719,21 +15712,21 @@ ul.pt__field__hint li:before {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
+  -webkit-transition: all 250ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  transition: all 250ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
   top: 100%;
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 250ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
-  transition: all 250ms ease-in-out, visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   visibility: visible;
   opacity: 1;
   position: static;
@@ -15766,24 +15759,6 @@ ul.pt__field__hint li:before {
 .com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
-}
 .com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li:before {
   display: block;
   height: 0;
@@ -15813,6 +15788,24 @@ ul.pt__field__hint li:before {
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
 }
 .com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown.pull-left {
   top: 100%;
@@ -17476,21 +17469,21 @@ html.ie9 .com__palette .b-range {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
   top: 100%;
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
 }
 .com__tabset__head-menu .pt__menu-dropdown li {
   position: relative;
@@ -17519,24 +17512,6 @@ html.ie9 .com__palette .b-range {
 }
 .com__tabset__head-menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
-}
-.com__tabset__head-menu .pt__menu-dropdown li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.com__tabset__head-menu .pt__menu-dropdown li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.com__tabset__head-menu .pt__menu-dropdown li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
 }
 .com__tabset__head-menu .pt__menu-dropdown li:before {
   display: block;
@@ -17567,6 +17542,24 @@ html.ie9 .com__palette .b-range {
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.com__tabset__head-menu .pt__menu-dropdown li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.com__tabset__head-menu .pt__menu-dropdown li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.com__tabset__head-menu .pt__menu-dropdown li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
 }
 .com__tabset__head-menu .pt__menu-dropdown.pull-left {
   top: 100%;
@@ -18200,7 +18193,7 @@ html.ie9 .com__timeselect > .inner > .sep {
 .com__file-manager.is-fullsize .ui-resizable-handle {
   display: none !important;
 }
-/*! ************ QuickSilk-Application v3.14.8 (2016-09-12 20:18) ************ */
+/*! ************ QuickSilk-Application v3.15.0 (2016-09-13 20:09) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?26');
@@ -19526,20 +19519,20 @@ html:not(.is-editing).is-editor .app__module__controls {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
   top: 100%;
   right: auto;
   left: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
   z-index: 1;
   top: 12px;
   right: 12px;
@@ -19576,24 +19569,6 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
 }
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
-}
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li:before {
   display: block;
   height: 0;
@@ -19623,6 +19598,24 @@ html:not(.is-editing).is-editor .app__module__controls {
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown.pull-left {
   top: 100%;
@@ -22097,21 +22090,21 @@ html:not(.is-editing).is-editor .app__module__controls {
     -moz-background-clip: padding-box;
     background-clip: padding-box;
     display: block;
-    visibility: hidden;
-    position: absolute;
     margin: 0;
     padding: 4px 0px;
     border-width: 1px;
     border-color: #cccccc;
     list-style: none;
-    opacity: 0;
     touch-action: none;
+    -webkit-transition: all 250ms ease-in-out;
+    transition: all 250ms ease-in-out;
+    visibility: hidden;
+    position: absolute;
+    opacity: 0;
     top: 100%;
     right: auto;
     bottom: auto;
     left: 0;
-    -webkit-transition: all 250ms ease-in-out;
-    transition: all 250ms ease-in-out;
     z-index: 1;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li {
@@ -22142,24 +22135,6 @@ html:not(.is-editing).is-editor .app__module__controls {
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li a:hover {
     text-decoration: none;
   }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li ul {
-    top: -5px;
-    right: auto;
-    bottom: auto;
-    left: calc(100% - 0px);
-  }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li ul.pull-left {
-    top: -5px;
-    right: auto;
-    bottom: auto;
-    left: calc(100% - 0px);
-  }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li ul.pull-right {
-    top: -5px;
-    right: calc(100% - 0px);
-    bottom: auto;
-    left: auto;
-  }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li:before {
     display: block;
     height: 0;
@@ -22189,6 +22164,24 @@ html:not(.is-editing).is-editor .app__module__controls {
     opacity: 1;
     -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
     transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li ul {
+    top: -5px;
+    right: auto;
+    bottom: auto;
+    left: calc(100% - 0px);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li ul.pull-left {
+    top: -5px;
+    right: auto;
+    bottom: auto;
+    left: calc(100% - 0px);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li ul.pull-right {
+    top: -5px;
+    right: calc(100% - 0px);
+    bottom: auto;
+    left: auto;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown.pull-left {
     top: 100%;
@@ -22774,7 +22767,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   transform: none;
 }
 /* ******* MODULES: MEMBER DIRECTORY WIDGET ******* */
-/* ******* MODULES: MENU ******* */
+/* ******* BASE ******* */
 .mod__menu .menu__menu,
 .mod__menu .menu__sub {
   -webkit-transition: all 250ms ease-in-out;
@@ -22850,7 +22843,6 @@ html:not(.is-editing).is-editor .app__module__controls {
   cursor: pointer;
   -webkit-transition: opacity 250ms ease-in-out;
   transition: opacity 250ms ease-in-out;
-  background-image: url("../img/MagpieUI/icons/medium/menu.png");
   width: 32px;
   position: absolute;
   z-index: 1;
@@ -22997,7 +22989,11 @@ html:not(.is-editing).is-editor .app__module__controls {
   transition: all 100ms ease-in-out;
 }
 /* ******* CUSTOM ******* */
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul {
+.mod__menu--custom {
+  /* *** DROPDOWN *** */
+  /* *** SELECT *** */
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul {
   padding: 4px;
   background: #ffffff;
   border: 1px solid #cccccc;
@@ -23007,32 +23003,20 @@ html:not(.is-editing).is-editor .app__module__controls {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
-  top: 100%;
-  left: 0;
   -webkit-transition: all 250ms ease-in-out;
   transition: all 250ms ease-in-out;
-  visibility: visible;
-  opacity: 1;
-  position: relative;
-  top: auto;
-  right: auto;
-  bottom: auto;
-  left: auto;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li {
+.mod__menu--custom.is-dropdown .menu__sub > ul li {
   position: relative;
   margin-top: 1px;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li a {
+.mod__menu--custom.is-dropdown .menu__sub > ul li a {
   font: 400 13px/18px Open Sans, sans-serif;
   outline: none;
   cursor: pointer;
@@ -23046,35 +23030,17 @@ html:not(.is-editing).is-editor .app__module__controls {
   white-space: nowrap;
   color: #666666;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li a:hover {
+.mod__menu--custom.is-dropdown .menu__sub > ul li a:hover {
   text-decoration: none;
   color: #1d73c9;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li a:active {
+.mod__menu--custom.is-dropdown .menu__sub > ul li a:active {
   color: #16599c;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li a:hover {
+.mod__menu--custom.is-dropdown .menu__sub > ul li a:hover {
   text-decoration: none;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
-}
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li:before {
+.mod__menu--custom.is-dropdown .menu__sub > ul li:before {
   display: block;
   height: 0;
   margin: 0 12px;
@@ -23089,70 +23055,125 @@ html:not(.is-editing).is-editor .app__module__controls {
   bottom: auto;
   left: 0;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li:first-child {
+.mod__menu--custom.is-dropdown .menu__sub > ul li:first-child {
   margin-top: 0;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li:first-child:before {
+.mod__menu--custom.is-dropdown .menu__sub > ul li:first-child:before {
   display: none;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li:hover {
+.mod__menu--custom.is-dropdown .menu__sub > ul li:hover {
   z-index: 2;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul li:hover > ul {
+.mod__menu--custom.is-dropdown .menu__sub > ul li:hover > ul {
   visibility: visible;
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul.pull-left {
+.mod__menu--custom.is-dropdown.is-horizontal .menu__sub {
   top: 100%;
   right: auto;
   bottom: auto;
   left: 0;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub > ul.pull-right {
+.mod__menu--custom.is-dropdown.is-horizontal .menu__sub.pull-left {
+  top: 100%;
+  right: auto;
+  bottom: auto;
+  left: 0;
+}
+.mod__menu--custom.is-dropdown.is-horizontal .menu__sub.pull-right {
   top: 100%;
   right: 0;
   bottom: auto;
   left: auto;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub {
-  top: 0px;
+.mod__menu--custom.is-dropdown.is-horizontal .menu__sub .menu__sub {
+  top: -5px;
   right: auto;
   bottom: auto;
-  left: calc(100% + 0px + 0px);
+  left: calc(100% + 0px + 1px);
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub.pull-left {
-  top: 0px;
+.mod__menu--custom.is-dropdown.is-horizontal .menu__sub .menu__sub.pull-left {
+  top: -5px;
   right: auto;
   bottom: auto;
-  left: calc(100% + 0px + 0px);
+  left: calc(100% + 0px + 1px);
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub.pull-right {
-  top: 0px;
-  right: calc(100% + 0px + 0px);
+.mod__menu--custom.is-dropdown.is-horizontal .menu__sub .menu__sub.pull-right {
+  top: -5px;
+  right: calc(100% + 0px + 1px);
   bottom: auto;
   left: auto;
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub .menu__sub {
-  top: 0px;
+.mod__menu--custom.is-dropdown.is-vertical .menu__sub {
+  top: -5px;
   right: auto;
   bottom: auto;
-  left: calc(100% + 0px + 0px);
+  left: calc(100%);
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub .menu__sub.pull-left {
-  top: 0px;
+.mod__menu--custom.is-dropdown.is-vertical .menu__sub.pull-left {
+  top: -5px;
   right: auto;
   bottom: auto;
-  left: calc(100% + 0px + 0px);
+  left: calc(100%);
 }
-.mod__menu--custom.is-vertical.is-dropdown .menu__sub .menu__sub.pull-right {
-  top: 0px;
-  right: calc(100% + 0px + 0px);
+.mod__menu--custom.is-dropdown.is-vertical .menu__sub.pull-right {
+  top: -5px;
+  right: calc(100%);
   bottom: auto;
   left: auto;
 }
-/* ******* MODULES: MENU: ADAPTIVE ******* */
+.mod__menu--custom.is-dropdown.is-vertical .menu__sub .menu__sub {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 0px + 1px);
+}
+.mod__menu--custom.is-dropdown.is-vertical .menu__sub .menu__sub.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 0px + 1px);
+}
+.mod__menu--custom.is-dropdown.is-vertical .menu__sub .menu__sub.pull-right {
+  top: -5px;
+  right: calc(100% + 0px + 1px);
+  bottom: auto;
+  left: auto;
+}
+.mod__menu--custom .menu__select .select__select {
+  height: 28px;
+  padding: 4px 32px 4px 4px;
+}
+.mod__menu--custom .menu__select .select__button {
+  width: 28px;
+  height: 28px;
+}
+.mod__menu--custom .menu__select .select__select {
+  font-size: 13px;
+  color: #666666;
+}
+.mod__menu--custom .menu__select .select__select option,
+.mod__menu--custom .menu__select .select__select optgroup {
+  font-size: 13px;
+  color: #666666;
+}
+.mod__menu--custom .menu__select {
+  background: #ffffff;
+}
+.mod__menu--custom .menu__select .select__select option,
+.mod__menu--custom .menu__select .select__select optgroup {
+  background: #ffffff;
+}
+.mod__menu--custom .menu__select .select__button {
+  background-image: url("../img/MagpieUI/icons/medium/menu.png");
+}
+/* ******* MIXINS ******* */
+/* *** ITEMS *** */
+/* *** SELECT *** */
+/* *** DROPDOWN *** */
+/* ******* ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .mod__menu.is-adaptive .menu__menu {
     display: none;
@@ -23161,7 +23182,7 @@ html:not(.is-editing).is-editor .app__module__controls {
     display: block;
   }
 }
-/* ******* MODULES: MENU: PRINT ******* */
+/* ******* PRINT ******* */
 @media print {
   .mod__menu {
     display: none !important;
@@ -23236,21 +23257,21 @@ html:not(.is-editing).is-editor .app__module__controls {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
   top: 100%;
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
 }
 .app-mod__menu .pt__menu-dropdown li {
   position: relative;
@@ -23279,24 +23300,6 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 .app-mod__menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
-}
-.app-mod__menu .pt__menu-dropdown li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.app-mod__menu .pt__menu-dropdown li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.app-mod__menu .pt__menu-dropdown li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
 }
 .app-mod__menu .pt__menu-dropdown li:before {
   display: block;
@@ -23327,6 +23330,24 @@ html:not(.is-editing).is-editor .app__module__controls {
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.app-mod__menu .pt__menu-dropdown li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.app-mod__menu .pt__menu-dropdown li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.app-mod__menu .pt__menu-dropdown li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
 }
 .app-mod__menu .pt__menu-dropdown.pull-left {
   top: 100%;
@@ -23945,20 +23966,20 @@ html:not(.is-editing).is-editor .app__module__controls {
   -moz-background-clip: padding-box;
   background-clip: padding-box;
   display: block;
-  visibility: hidden;
-  position: absolute;
   margin: 0;
   padding: 4px 0px;
   border-width: 1px;
   border-color: #cccccc;
   list-style: none;
-  opacity: 0;
   touch-action: none;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
   right: auto;
   bottom: auto;
   left: 0;
-  -webkit-transition: all 250ms ease-in-out;
-  transition: all 250ms ease-in-out;
   min-width: 100%;
   top: 100%;
 }
@@ -23990,24 +24011,6 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li a:hover {
   text-decoration: none;
 }
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li ul {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li ul.pull-left {
-  top: -5px;
-  right: auto;
-  bottom: auto;
-  left: calc(100% - 0px);
-}
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li ul.pull-right {
-  top: -5px;
-  right: calc(100% - 0px);
-  bottom: auto;
-  left: auto;
-}
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li:before {
   display: block;
   height: 0;
@@ -24037,6 +24040,24 @@ html:not(.is-editing).is-editor .app__module__controls {
   opacity: 1;
   -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
   transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown.pull-left {
   top: 100%;
@@ -24819,6 +24840,10 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   font-style: normal;
   text-decoration: none;
   color: inherit;
+}
+.mod__menu.mod__menu--default .menu__select .select__select option,
+.mod__menu.mod__menu--default .menu__select .select__select optgroup {
+  background: transparent;
 }
 .mod__menu.mod__menu--default.is-horizontal.pull-left .menu__menu > ul > li,
 .mod__menu.mod__menu--default.is-horizontal.pull-center .menu__menu > ul > li,

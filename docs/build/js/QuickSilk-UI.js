@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.6 (2016-09-12 20:18) ************ */
+/*! ************ MagpieUI v3.22.7 (2016-09-13 20:08) ************ */
 // TinyColor v1.3.0
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1427,7 +1427,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.22.6',
+        '_version' : '3.22.7',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
@@ -27761,14 +27761,14 @@ function(params){
     // Call parent class construct
     Com.AbstractFileManagerContainer.apply(that, arguments);
 });
-/*! ************ QuickSilk-Application v3.14.8 (2016-09-12 20:18) ************ */
+/*! ************ QuickSilk-Application v3.15.0 (2016-09-13 20:09) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.14.8',
+    '_version' : '3.15.0',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
