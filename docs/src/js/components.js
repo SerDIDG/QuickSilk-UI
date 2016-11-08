@@ -274,3 +274,11 @@ window.Collector = new Com.Collector({
 cm.onReady(function(){
     window.Collector.construct(document.body);
 });
+
+cm.onLoad(function () {
+    // Redraw components and modules after full page loading
+    cm.customEvent.trigger(document.body, 'redraw', {
+        'type' : 'child',
+        'self' : false
+    });
+});

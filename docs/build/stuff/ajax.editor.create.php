@@ -20,7 +20,19 @@ switch($_POST['keyword']){
 					 </div>';
 		break;
 	case 'spacer':
-		$module =   '<div class="app__module app-mod__spacer com__spacer is-chassis-visible" style="height:24px" data-element="spacer"></div>';
+		$module =   '<div class="app__module app-mod__spacer com__spacer is-chassis-visible" style="height:24px" data-element="spacer" data-config=\'{"height" : 24}\'></div>';
+		break;
+	case 'anchor2':
+		$module =   '<div class="app__module mod__anchor" data-element="Module.Anchor" data-config=\'{"name" : "123"}\'>
+						<a class="anchor__anchor" name="123"></a>
+						<div class="app__module__controls">Anchor #123</div>
+					</div>';
+		break;
+	case 'anchor':
+		$module =   '<div class="app__module mod__anchor" data-element="Module.Anchor" data-config=\'{"name" : "'.$config['positionId'].'"}\'>
+						<a class="anchor__anchor" name="'.$config['positionId'].'"></a>
+						<div class="app__module__controls">Anchor #'.$config['positionId'].'</div>
+					</div>';
 		break;
 	case 'column':
 		$module =   '<div class="app__module app-mod__columns com__columns is-chassis-visible is-adaptive indent-24px" data-element="columns">

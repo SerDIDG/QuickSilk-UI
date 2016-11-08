@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.7 (2016-09-13 20:08) ************ */
+/*! ************ MagpieUI v3.22.17 (2016-11-08 19:38) ************ */
 @charset "UTF-8";
 
 /*!
@@ -4135,7 +4135,8 @@ span.CodeMirror-selectedtext { background: none; }
 
 @CmForm-FieldHeight: 28px;
 @CmForm-FieldIndent: @CmIndent-Small;
-@CmForm-FieldTitleWidth: 150px;
+@CmForm-FieldTitleWidth: 156px;
+@CmForm-FieldTitleWidthSpaceless: 128px;
 @CmForm-FieldInnerIndent: @CmForm-FieldIndent / 2;
 @CmForm-FieldSmallWidth: 210px;
 @CmForm-ButtonsIndent: @CmIndent-XSmall;
@@ -4526,6 +4527,7 @@ span.CodeMirror-selectedtext { background: none; }
 
 @ComImageInput-Height: 128px;
 @ComImageInput-CoverBackground: @CmUI-Overlay-Dark;
+@ComImageInput-CoverDelay: @CmUI-Transition-Delay-Hide;
 @ComImageInput-ButtonsIndent: @CmIndent-XXXSmall;
 
 // /* ******* MULTIPLE FILE INPUT ******* */
@@ -5891,6 +5893,13 @@ span.CodeMirror-selectedtext { background: none; }
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
+    &:link,
+    &:visited,
+    &:hover,
+    &:active {
+        font-family: @CmIconVars-Family;
+    }
+
     &:hover {
         text-decoration: none;
     }
@@ -6105,6 +6114,7 @@ body {
     cursor: default;
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: subpixel-antialiased;
+    /*-moz-osx-font-smoothing: grayscale;*/
 }
 
 img {
@@ -6132,8 +6142,10 @@ header, main, aside, footer, section {
 
 /* *** SCROLLBAR *** */
 
+/*
 ::-webkit-scrollbar {
     width: @CmScrollBar-Size;
+    height: @CmScrollBar-Size;
 }
 ::-webkit-scrollbar-track {
     background-color: @CmScrollBar-TrackBackground;
@@ -6145,6 +6157,7 @@ header, main, aside, footer, section {
 ::-webkit-scrollbar-thumb:hover {
     background-color: @CmScrollBar-TrackColorHover;
 }
+*/
 
 /* *** CONTENT TAGS *** */
 
@@ -6469,7 +6482,8 @@ select {
             .button.button-primary--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-primary--hover;
         }
     }
@@ -6493,7 +6507,8 @@ select {
             .button.button-middle--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-middle--hover;
         }
     }
@@ -6517,7 +6532,8 @@ select {
             .button.button-secondary--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-secondary--hover;
         }
     }
@@ -6541,7 +6557,8 @@ select {
             .button.button-success--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-success--hover;
         }
     }
@@ -6565,7 +6582,8 @@ select {
             .button.button-danger--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-danger--hover;
         }
     }
@@ -6589,7 +6607,8 @@ select {
             .button.button-warning--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-warning--hover;
         }
     }
@@ -6616,7 +6635,8 @@ select {
             .button.button-transparent--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-transparent--hover;
         }
     }
@@ -6640,7 +6660,8 @@ select {
             .button.button-white--active;
         }
 
-        &:hover {
+        &:hover,
+        &.hover {
             .button.button-white--hover;
         }
     }
@@ -7180,6 +7201,15 @@ button {
     .label {
         margin-left: @CmForm-FieldInnerIndent;
     }
+
+    &.has-fields {
+        .display-flex;
+
+        > .fields {
+            margin: 0 0 0 @CmIndent-XSmall;
+            .mx__flex(1);
+        }
+    }
 }
 
 .check-line {
@@ -7199,6 +7229,10 @@ button {
         cursor: pointer;
 
         &:checked + label + .unveil {
+            display: block;
+        }
+
+        &:checked + .unveil {
             display: block;
         }
     }
@@ -7261,6 +7295,39 @@ button {
 
         dl:first-child {
             margin: 0;
+        }
+    }
+
+    &.has-fields {
+        .display-flex;
+
+        > .fields {
+            margin: 0 0 0 @CmIndent-XSmall;
+            .mx__flex(1);
+        }
+    }
+
+    &.has-field {
+        .display-flex;
+
+        > label {
+            width: @CmForm-FieldTitleWidth;
+            margin: 0 0 0 @CmIndent-XSmall;
+            padding: 0;
+            line-height: @CmForm-FieldHeight;
+        }
+
+        > .field {
+            margin: 0 0 0 @CmIndent-Small;
+            padding: 0;
+            line-height: @CmForm-FieldHeight;
+            .mx__flex(1);
+        }
+
+        &.is-spaceless {
+            > label {
+                width: @CmForm-FieldTitleWidthSpaceless;
+            }
         }
     }
 }
@@ -8369,6 +8436,7 @@ button {
 
     &.is-box {
         > .inner {
+            display: block;
             margin-left: 0;
             margin-right: 0;
         }
@@ -9844,6 +9912,14 @@ ul.pt__field__hint {
     }
 
     &.is-flexible {
+        > .inner {
+            > .descr {
+                .cm__image-flexible;
+            }
+        }
+    }
+
+    &.is-background {
         > .inner {
             > .descr {
                 .cm__image-flexible;
@@ -11853,12 +11929,17 @@ ul.pt__field__hint {
         margin: 0;
     }
 
-    .cm__tags--title {
-        margin: 0 0 @CmIndent-XXSmall;
-    }
-
     .title {
         font-weight: @CmFont-Base-BoldWeight;
+    }
+
+    .cm__tags--title,
+    .pt__line-info {
+        margin-bottom: @CmIndent-XXSmall;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
 }
 
@@ -13373,9 +13454,10 @@ ul.pt__field__hint {
     .display-flex;
     vertical-align: top;
     .mx__flex(1 1 auto);
-    .mx__flex-direction(column);
+    /*.mx__flex-direction(column);*/
 
     > .inner {
+        width: 100%;
         position: relative;
         border-radius: @CmBorder-Radius;
         .mx__box-sizing(border-box);
@@ -13385,7 +13467,7 @@ ul.pt__field__hint {
 
     .ie10 &,
     .ie11 & {
-        .mx__flex-direction(row);
+        /*.mx__flex-direction(row);*/
     }
 
     .ie8 &,
@@ -15047,6 +15129,17 @@ ul.pt__field__hint {
             .com__image-input__content--default;
         }
     }
+
+    &.size-full {
+        .com__image-input--size(@ComImageInput-Height, @ComImageInput-Height);
+        max-width: none;
+    }
+
+    &.size-custom {
+        .com__image-input__content {
+            .com__image-input__content--default;
+        }
+    }
 }
 
 .com__image-input__content {
@@ -15065,7 +15158,6 @@ ul.pt__field__hint {
         .pt__image {
             > .inner {
                 > .descr {
-                    height: @ComImageInput-Height;
                     border: @CmBorder-Default;
                     border-radius: @CmBorder-Radius;
                 }
@@ -15082,7 +15174,7 @@ ul.pt__field__hint {
             border-radius: @CmBorder-Radius;
             .mx__position(0, 0, 0 ,0);
             .mx__transition(all, @CmUI-Transition-Duration);
-            .mx__transition-delay(@CmUI-Transition-Delay-Hide);
+            .mx__transition-delay(@ComImageInput-CoverDelay);
         }
 
         .input__label {
@@ -15128,6 +15220,7 @@ ul.pt__field__hint {
             .input__cover {
                 visibility: visible;
                 opacity: 1;
+                .mx__transition(all, @CmUI-Transition-DurationReverse);
                 .mx__transition-delay(0ms);
             }
         }
@@ -17202,7 +17295,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.15.0 (2016-09-13 20:09) ************ */
+/*! ************ QuickSilk-Application v3.15.5 (2016-11-08 19:38) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -17399,6 +17492,23 @@ ul.pt__field__hint {
 @AppFont-A-Color: #1d73c9;
 @AppFont-A-Decoration: underline;
 @AppFont-A-Style: normal;
+
+@AppFont-AHover-Weight: 400;
+@AppFont-AHover-Color: #1d73c9;
+@AppFont-AHover-Decoration: underline;
+@AppFont-AHover-Style: normal;
+
+@AppFont-AActive-Weight: 400;
+@AppFont-AActive-Color: #1d73c9;
+@AppFont-AActive-Decoration: underline;
+@AppFont-AActive-Style: normal;
+
+@AppFont-Button-Family: Open Sans, sans-serif;
+@AppFont-Button-Size: 13px;
+@AppFont-Button-Weight: 400;
+@AppFont-Button-Color: #666666;
+@AppFont-Button-Decoration: none;
+@AppFont-Button-Style: normal;
 
 // /* ************************************************ */
 // /* ******* COMMON ******* */
@@ -17708,6 +17818,10 @@ ul.pt__field__hint {
 @CmFont-Base-LineHeight: @AppFont-P-LineHeight;
 @CmFont-Base-Size: @AppFont-P-Size;
 @CmFont-Base-Weight: @AppFont-P-Weight;
+
+// /* ******* COMPONENTS ******* */
+
+@ComImageInput-CoverDelay: @CmUI-Transition-Delay-Hide;
 
 
 // /* ************************************************ */
@@ -18039,6 +18153,13 @@ body {
 [class*=" app-i__"] {
     &:extend(.cm-i all);
     font-family: @AppIconVars-Family;
+
+    &:link,
+    &:visited,
+    &:hover,
+    &:active {
+        font-family: @AppIconVars-Family;
+    }
 }
 
 .app-i__quicksilk {
@@ -18434,6 +18555,45 @@ html {
 
             .app-pt__box-sign {
                 width: auto;
+            }
+        }
+    }
+
+}
+/* ******* PARTS: INVOICE ******* */
+
+.app-pt__invoice {
+    .app-pt__invoice__row-sep {
+        td {
+            padding: 0;
+            border-bottom: @CmBorder-Box;
+        }
+    }
+
+    .app-pt__invoice__row-total {
+        .app-pt__invoice__cell-product {
+            font-weight: bold;
+        }
+    }
+
+    .app-pt__invoice__cell-cost {
+        width: 80px;
+    }
+
+    .app-pt__invoice__cell-product {
+        text-align: right;
+    }
+}
+
+/* *** ADAPTIVE *** */
+
+
+@media only screen and (max-width: @CmUI-AdaptiveFrom) {
+
+    html.is-adaptive {
+        .app-pt__invoice {
+            .app-pt__invoice__cell-product {
+                text-align: left;
             }
         }
     }
@@ -21215,6 +21375,11 @@ html {
                 margin: 0;
             }
         }
+    }
+}
+.mod__anchor {
+    > .anchor__anchor {
+        display: none;
     }
 }
 /* ******* MODULES: BLOG WIDGET ******* */

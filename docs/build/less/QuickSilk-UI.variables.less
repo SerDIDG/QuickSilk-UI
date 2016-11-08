@@ -416,7 +416,8 @@
 
 @CmForm-FieldHeight: 28px;
 @CmForm-FieldIndent: @CmIndent-Small;
-@CmForm-FieldTitleWidth: 150px;
+@CmForm-FieldTitleWidth: 156px;
+@CmForm-FieldTitleWidthSpaceless: 128px;
 @CmForm-FieldInnerIndent: @CmForm-FieldIndent / 2;
 @CmForm-FieldSmallWidth: 210px;
 @CmForm-ButtonsIndent: @CmIndent-XSmall;
@@ -807,6 +808,7 @@
 
 @ComImageInput-Height: 128px;
 @ComImageInput-CoverBackground: @CmUI-Overlay-Dark;
+@ComImageInput-CoverDelay: @CmUI-Transition-Delay-Hide;
 @ComImageInput-ButtonsIndent: @CmIndent-XXXSmall;
 
 // /* ******* MULTIPLE FILE INPUT ******* */
@@ -1355,7 +1357,8 @@
 
 @CmForm-FieldHeight: 28px;
 @CmForm-FieldIndent: @CmIndent-Small;
-@CmForm-FieldTitleWidth: 150px;
+@CmForm-FieldTitleWidth: 156px;
+@CmForm-FieldTitleWidthSpaceless: 128px;
 @CmForm-FieldInnerIndent: @CmForm-FieldIndent / 2;
 @CmForm-FieldSmallWidth: 210px;
 @CmForm-ButtonsIndent: @CmIndent-XSmall;
@@ -1746,6 +1749,7 @@
 
 @ComImageInput-Height: 128px;
 @ComImageInput-CoverBackground: @CmUI-Overlay-Dark;
+@ComImageInput-CoverDelay: @CmUI-Transition-Delay-Hide;
 @ComImageInput-ButtonsIndent: @CmIndent-XXXSmall;
 
 // /* ******* MULTIPLE FILE INPUT ******* */
@@ -2073,6 +2077,23 @@
 @AppFont-A-Decoration: underline;
 @AppFont-A-Style: normal;
 
+@AppFont-AHover-Weight: 400;
+@AppFont-AHover-Color: #1d73c9;
+@AppFont-AHover-Decoration: underline;
+@AppFont-AHover-Style: normal;
+
+@AppFont-AActive-Weight: 400;
+@AppFont-AActive-Color: #1d73c9;
+@AppFont-AActive-Decoration: underline;
+@AppFont-AActive-Style: normal;
+
+@AppFont-Button-Family: Open Sans, sans-serif;
+@AppFont-Button-Size: 13px;
+@AppFont-Button-Weight: 400;
+@AppFont-Button-Color: #666666;
+@AppFont-Button-Decoration: none;
+@AppFont-Button-Style: normal;
+
 // /* ************************************************ */
 // /* ******* COMMON ******* */
 // /* ************************************************ */
@@ -2381,6 +2402,10 @@
 @CmFont-Base-LineHeight: @AppFont-P-LineHeight;
 @CmFont-Base-Size: @AppFont-P-Size;
 @CmFont-Base-Weight: @AppFont-P-Weight;
+
+// /* ******* COMPONENTS ******* */
+
+@ComImageInput-CoverDelay: @CmUI-Transition-Delay-Hide;
 
 // /* ************************************************ */
 // /* ******* PATH ******* */

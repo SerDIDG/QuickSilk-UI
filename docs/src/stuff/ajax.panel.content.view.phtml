@@ -109,7 +109,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                             <dl class="pt__field is-box align-center">
                                 <dt>Indent Between Items</dt>
                                 <dd>
-                                    <input type="number" min="0" max="999" value="0" data-element="Com.IndentInput" name="params[primary_items][inner-between]">
+                                    <input type="number" min="0" max="999" value="0" data-element="Com.IndentInput" name="params[primary_items][inner-between]" data-config='{"allowNegative" : true}'>
                                 </dd>
                             </dl>
                         </div>
@@ -178,7 +178,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                             <dl class="pt__field is-box align-center">
                                 <dt>Indent Between Items</dt>
                                 <dd>
-                                    <input type="number" min="0" max="999" value="0" data-element="Com.IndentInput" name="params[secondary_items][inner-between]">
+                                    <input type="number" min="0" max="999" value="0" data-element="Com.IndentInput" name="params[secondary_items][inner-between]" data-config='{"allowNegative" : true}'>
                                 </dd>
                             </dl>
                         </div>
