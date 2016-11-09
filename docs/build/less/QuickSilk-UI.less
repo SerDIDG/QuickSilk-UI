@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.17 (2016-11-08 19:38) ************ */
+/*! ************ MagpieUI v3.22.19 (2016-11-09 21:10) ************ */
 @charset "UTF-8";
 
 /*!
@@ -7329,6 +7329,12 @@ button {
                 width: @CmForm-FieldTitleWidthSpaceless;
             }
         }
+
+        &.is-half-space {
+            > label {
+                width: 50%;
+            }
+        }
     }
 }
 
@@ -13454,10 +13460,9 @@ ul.pt__field__hint {
     .display-flex;
     vertical-align: top;
     .mx__flex(1 1 auto);
-    /*.mx__flex-direction(column);*/
+    .mx__flex-direction(column);
 
     > .inner {
-        width: 100%;
         position: relative;
         border-radius: @CmBorder-Radius;
         .mx__box-sizing(border-box);
@@ -13467,7 +13472,7 @@ ul.pt__field__hint {
 
     .ie10 &,
     .ie11 & {
-        /*.mx__flex-direction(row);*/
+        .mx__flex-direction(row);
     }
 
     .ie8 &,
@@ -17295,7 +17300,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.15.5 (2016-11-08 19:38) ************ */
+/*! ************ QuickSilk-Application v3.15.6 (2016-11-09 21:10) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -18572,16 +18577,13 @@ html {
 
     .app-pt__invoice__row-total {
         .app-pt__invoice__cell-product {
+            text-align: right;
             font-weight: bold;
         }
     }
 
     .app-pt__invoice__cell-cost {
-        width: 80px;
-    }
-
-    .app-pt__invoice__cell-product {
-        text-align: right;
+        width: 128px;
     }
 }
 
@@ -21725,6 +21727,39 @@ html {
 
 .app-mod__member-directory-widget {
 
+}
+/* ******* MODULE: MEMBERSHIP CONFIRMATION ******* */
+
+.module__membership-confirmation__item {
+    display: flex;
+    margin: 0 0 @CmIndent-XXXSmall;
+
+    &:last-child {
+        margin: 0;
+    }
+
+    > .label {
+        .mx__flex(1);
+    }
+
+    > .cost {
+        width: 128px;
+        margin: 0 0 0 @CmIndent-XXSmall;
+    }
+}
+
+.module__membership-confirmation__list {
+    .cm__box;
+
+    .module__membership-confirmation__item {
+        > .label {
+            padding: 0 @CmIndent-XSmall;
+        }
+    }
+}
+
+.module__membership-confirmation__total {
+    .cm__box;
 }
 /* ******* BASE ******* */
 

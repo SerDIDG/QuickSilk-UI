@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.17 (2016-11-08 19:38) ************ */
+/*! ************ MagpieUI v3.22.19 (2016-11-09 21:10) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -6617,6 +6617,9 @@ button.is-hidden {
 }
 .check-line.has-field.is-spaceless > label {
   width: 128px;
+}
+.check-line.has-field.is-half-space > label {
+  width: 50%;
 }
 .form dd > input[type="checkbox"] {
   margin: 7px 0 7px 0;
@@ -13980,10 +13983,11 @@ ul.pt__field__hint li:before {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
-  /*.mx__flex-direction(column);*/
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 .com__column > .inner {
-  width: 100%;
   position: relative;
   border-radius: 3px;
   -moz-box-sizing: border-box;
@@ -13996,7 +14000,9 @@ ul.pt__field__hint li:before {
 }
 .ie10 .com__column,
 .ie11 .com__column {
-  /*.mx__flex-direction(row);*/
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 .ie8 .com__column,
 .ie9 .com__column {
@@ -18375,7 +18381,7 @@ html.ie9 .com__timeselect > .inner > .sep {
 .com__file-manager.is-fullsize .ui-resizable-handle {
   display: none !important;
 }
-/*! ************ QuickSilk-Application v3.15.5 (2016-11-08 19:38) ************ */
+/*! ************ QuickSilk-Application v3.15.6 (2016-11-09 21:10) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
   src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?26');
@@ -19143,13 +19149,11 @@ html:not(.is-editing).is-editor .app__module__controls {
   border-bottom: 2px solid #cccccc;
 }
 .app-pt__invoice .app-pt__invoice__row-total .app-pt__invoice__cell-product {
+  text-align: right;
   font-weight: bold;
 }
 .app-pt__invoice .app-pt__invoice__cell-cost {
-  width: 80px;
-}
-.app-pt__invoice .app-pt__invoice__cell-product {
-  text-align: right;
+  width: 128px;
 }
 /* *** ADAPTIVE *** */
 @media only screen and (max-width: 768px) {
@@ -22997,6 +23001,42 @@ html:not(.is-editing).is-editor .app__module__controls {
   transform: none;
 }
 /* ******* MODULES: MEMBER DIRECTORY WIDGET ******* */
+/* ******* MODULE: MEMBERSHIP CONFIRMATION ******* */
+.module__membership-confirmation__item {
+  display: flex;
+  margin: 0 0 4px;
+}
+.module__membership-confirmation__item:last-child {
+  margin: 0;
+}
+.module__membership-confirmation__item > .label {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+.module__membership-confirmation__item > .cost {
+  width: 128px;
+  margin: 0 0 0 8px;
+}
+.module__membership-confirmation__list {
+  margin-bottom: 24px;
+}
+.module__membership-confirmation__list.bottom,
+.module__membership-confirmation__list.is-last,
+.module__membership-confirmation__list:last-child {
+  margin-bottom: 0;
+}
+.module__membership-confirmation__list .module__membership-confirmation__item > .label {
+  padding: 0 12px;
+}
+.module__membership-confirmation__total {
+  margin-bottom: 24px;
+}
+.module__membership-confirmation__total.bottom,
+.module__membership-confirmation__total.is-last,
+.module__membership-confirmation__total:last-child {
+  margin-bottom: 0;
+}
 /* ******* BASE ******* */
 .mod__menu .menu__menu,
 .mod__menu .menu__sub {
