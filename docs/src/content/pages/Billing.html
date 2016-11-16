@@ -1,0 +1,226 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-docs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Pages: Billing</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body>
+
+<div class="app__page app-page__billing">
+
+    <div class="pt__box--clear">
+        <h2 class="app-pt__page-title">Billing profile</h2>
+        <p>Your current billing period started on <b>2015-10-15</b> and ends up on <b>2020-01-01</b>.</p>
+    </div>
+
+    <div class="pt__box--flat">
+        <h3>Your current plan</h3>
+        <div class="app-pt__plan is-active is-adaptive">
+            <div class="inner">
+                <div class="plan__title">
+                    <h3>Basic</h3>
+                    <p>$25 / month</p>
+                </div>
+                <div class="plan__info">
+                    <ul>
+                        <li>Billing Period: 30 Days</li>
+                    </ul>
+                </div>
+                <div class="plan__abstract">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tincidunt ipsum malesuada velit placerat fermentum. Curabitur congue ullamcorper ipsum, sed efficitur diam commodo ac.</p>
+                </div>
+                <div class="plan__controls">
+                    <div class="pt__buttons pull-justify">
+                        <div class="inner">
+                            <button>Renew</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pt__box--flat">
+        <h3>Sharing options</h3>
+        <form class="form">
+            <div class="pt__columns is-adaptive">
+                <div class="inner">
+                    <div class="column">
+                        <dl class="form-box">
+                            <dt>
+                                <label for="pushaddress">Push this billing profile:</label>
+                                <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container"><span class="icon default linked" data-node="button"></span><span class="com__help-bubble__content" data-node="content">Allows user to push billing profile to another user</span></span>
+                            </dt>
+                            <dd>
+                                <select name="pushaddress&#x5B;&#x5D;" data-element="select" multiple="multiple" title="Push&#x20;this&#x20;billing&#x20;profile&#x20;">
+                                    <option value="15">alex-new@soho.com</option>
+                                    <option value="16">alex333@soho.com</option>
+                                    <option value="2" selected="selected">alex@sohoportal.com</option>
+                                    <option value="14">alexqslmt333test@soho.com</option>
+                                    <option value="3">askorikmarcus@gmail.com</option>
+                                    <option value="12">nikolay@soho.com</option>
+                                </select>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="column">
+                        <dl class="form-box">
+                            <dt>
+                                <label for="shareaddress">Share this billing profile:</label>
+                                <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container"><span class="icon default linked" data-node="button"></span><span class="com__help-bubble__content" data-node="content">Allows multiple users to edit/manage billing profile under their user profile</span></span>
+                            </dt>
+                            <dd>
+                                <select name="shareaddress&#x5B;&#x5D;" data-element="select" multiple="multiple" title="Share&#x20;this&#x20;billing&#x20;profile">
+                                    <option value="15">alex-new@soho.com</option>
+                                    <option value="16">alex333@soho.com</option>
+                                    <option value="2" selected="selected">alex@sohoportal.com</option>
+                                    <option value="14">alexqslmt333test@soho.com</option>
+                                    <option value="3">askorikmarcus@gmail.com</option>
+                                    <option value="12">nikolay@soho.com</option>
+                                </select>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="column">
+                        <dl class="form-box">
+                            <dt>
+                                <label for="billingaddress">Email address for billing:</label>
+                            </dt>
+                            <dd>
+                                <select name="billingaddress&#x5B;&#x5D;" data-element="select" multiple="multiple" title="Email&#x20;address&#x20;for&#x20;billing">
+                                    <option value="15">alex-new@soho.com</option>
+                                    <option value="16">alex333@soho.com</option>
+                                    <option value="2" selected="selected">alex@sohoportal.com</option>
+                                    <option value="14">alexqslmt333test@soho.com</option>
+                                    <option value="3">askorikmarcus@gmail.com</option>
+                                    <option value="12">nikolay@soho.com</option>
+                                </select>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-wrap">
+                <button>Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="pt__box--flat">
+        <h3>Statements</h3>
+        <div class="pt__toolbar">
+            <div class="inner clear">
+                <div class="left">
+                    <ul class="group is-adaptive">
+                        <li class="is-field">
+                            <input type="text" data-element="Com.Datepicker" placeholder="From">
+                        </li>
+                    </ul>
+                    <ul class="group is-adaptive">
+                        <li class="is-field">
+                            <input type="text" data-element="Com.Datepicker" placeholder="To">
+                        </li>
+                    </ul>
+                    <ul class="group is-adaptive">
+                        <li>
+                            <input type="button" value="Search">
+                        </li>
+                        <li>
+                            <input type="button" value="Reset">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="pt__gridlist">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="cell-title">Plan Name</th>
+                        <th>Invoice No</th>
+                        <th>Price</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                        <th class="cell-actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Demo Trial</td>
+                        <td>
+                            <a>300</a>
+                        </td>
+                        <td>$0 (CAD)</td>
+                        <td>2015-10-15 12:04:58</td>
+                        <td>2015-10-15 12:04:58</td>
+                        <td>
+                            <div class="com__menu" data-element="Com.Menu" data-node="ComMenu:{}:button">
+                                <a>Actions</a>
+                                <span class="cm-i__chevron-down xx-small inline"></span>
+                                <div class="pt__menu" data-node="ComMenu.target">
+                                    <ul class="pt__menu-dropdown">
+                                        <li><a>Print</a></li>
+                                        <li><a>Save PDF</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pt__box--flat">
+        <h3>Additional</h3>
+        <form class="form">
+            <dl>
+                <dt>Products:</dt>
+                <dd>
+                    <div class="check-line has-field is-half-space">
+                        <input id="checkbox--field-1" name="checkbox--field" checked="" type="checkbox">
+                        <label for="checkbox--field-1">Environment</label>
+                        <div class="field">200%</div>
+                    </div>
+                    <div class="check-line has-field is-half-space">
+                        <input id="checkbox--field-2" name="checkbox--field" checked="" type="checkbox">
+                        <label for="checkbox--field-3">Sample label</label>
+                        <div class="field">200%</div>
+                    </div>
+                    <div class="check-line has-field is-half-space">
+                        <input id="checkbox--field-3" name="checkbox--field" checked="" type="checkbox">
+                        <label for="checkbox--field-3">Sample label</label>
+                        <div class="field">200%</div>
+                    </div>
+                    <div class="check-line has-field is-half-space">
+                        <input id="checkbox--field-4" name="checkbox--field" checked="" type="checkbox">
+                        <label for="checkbox--field-4">General</label>
+                        <div class="unveil field">
+                            <input type="text" value="325">
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Payment Method:</dt>
+                <dd>
+                    <select data-element="Com.Select">
+                        <option>Cheque</option>
+                    </select>
+                </dd>
+            </dl>
+            <div class="btn-wrap">
+                <button>Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+
+</html>
