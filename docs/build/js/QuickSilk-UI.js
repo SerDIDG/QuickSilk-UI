@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.22.20 (2016-11-16 21:31) ************ */
+/*! ************ MagpieUI v3.22.22 (2016-11-29 18:46) ************ */
 // TinyColor v1.3.0
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1428,12 +1428,13 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.22.20',
+        '_version' : '3.22.22',
         '_loadTime' : Date.now(),
         '_debug' : true,
         '_debugAlert' : false,
         '_deviceType' : 'desktop',
         '_deviceOrientation' : 'landscape',
+        '_adaptive' : false,
         '_baseUrl': [window.location.protocol, window.location.hostname].join('//'),
         '_assetsUrl' : null,
         '_scrollSize' : 0,
@@ -3130,6 +3131,10 @@ cm.splitNumber = function(str){
     return str.toString().replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ');
 };
 
+cm.getPercentage = function(num, total){
+    return num / total / 100;
+};
+
 cm.rand = function(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
@@ -3917,6 +3922,7 @@ cm.getBodyScrollTop = function(){
     return Math.max(
         document.documentElement.scrollTop,
         document.body.scrollTop,
+        window.pageYOffset,
         0
     );
 };
@@ -3925,6 +3931,7 @@ cm.getBodyScrollLeft = function(){
     return Math.max(
         document.documentElement.scrollLeft,
         document.body.scrollLeft,
+        window.pageXOffset,
         0
     );
 };
@@ -3935,6 +3942,10 @@ cm.getBodyScrollHeight = function(){
         document.body.scrollHeight,
         0
     );
+};
+
+cm.getBodyScrollMaxTop = function(){
+    return cm.getBodyScrollHeight() - cm._pageSize['winHeight'];
 };
 
 cm.getSupportedStyle = function(style){
@@ -5245,8 +5256,11 @@ Mod['Params'] = {
                     break;
 
                 default:
-                    if(/cm._config./i.test(item)){
+                    if(/^cm._config./i.test(item)){
                         that.params[key] = cm._config[item.replace('cm._config.', '')];
+                    }
+                    if(/^@LESS./i.test(item)){
+                        that.params[key] = window.LESS[item.replace('@LESS.', '')];
                     }
                     break;
             }
@@ -6243,6 +6257,11 @@ cm.init = function(){
             if(width <= cm._config['screenMobile']){
                 cm._deviceType = 'mobile';
             }
+            if(width <= cm._config['adaptiveFrom']){
+                cm._adaptive = true;
+            }else{
+                cm._adaptive = false;
+            }
 
             cm.addClass(html, ['is', cm._deviceType].join('-'));
             cm.addClass(html, ['is', cm._deviceOrientation].join('-'));
@@ -6339,6 +6358,7 @@ cm.define('Com.AbstractController', {
         'onDestructProcess',
         'onDestructEnd',
         'onRedraw',
+        'onScroll',
         'onSetEventsStart',
         'onSetEventsProcess',
         'onSetEventsEnd',
@@ -6360,9 +6380,11 @@ cm.define('Com.AbstractController', {
         'embedStructure' : 'append',
         'renderStructure' : true,
         'embedStructureOnRender' : true,
-        'customEvents' : true,
         'removeOnDestruct' : false,
         'className' : '',
+        'customEvents' : true,
+        'resizeEvent' : true,
+        'scrollEvent' : false,
         'collector' : null,
         'constructCollector' : false,
         'destructCollector' : false
@@ -6381,6 +6403,7 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         var that = this;
         // Bind context to methods
         that.redrawHandler = that.redraw.bind(that);
+        that.scrollHandler = that.scroll.bind(that);
         that.destructHandler = that.destruct.bind(that);
         that.constructCollectorHandler = that.constructCollector.bind(that);
         that.destructCollectorHandler = that.destructCollector.bind(that);
@@ -6427,6 +6450,14 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         var that = this;
         animFrame(function(){
             that.triggerEvent('onRedraw');
+        });
+        return that;
+    };
+
+    classProto.scroll = function(){
+        var that = this;
+        animFrame(function(){
+            that.triggerEvent('onScroll');
         });
         return that;
     };
@@ -6489,7 +6520,8 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         var that = this;
         that.triggerEvent('onSetEventsStart');
         // Windows events
-        cm.addEvent(window, 'resize', that.redrawHandler);
+        that.params['resizeEvent'] && cm.addEvent(window, 'resize', that.redrawHandler);
+        that.params['scrollEvent'] && cm.addEvent(window, 'scroll', that.scrollHandler);
         that.triggerEvent('onSetEventsProcess');
         // Add custom events
         if(that.params['customEvents']){
@@ -6505,7 +6537,8 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         var that = this;
         that.triggerEvent('onUnsetEventsStart');
         // Windows events
-        cm.removeEvent(window, 'resize', that.redrawHandler);
+        that.params['resizeEvent'] && cm.removeEvent(window, 'resize', that.redrawHandler);
+        that.params['scrollEvent'] && cm.removeEvent(window, 'scroll', that.scrollHandler);
         that.triggerEvent('onUnsetEventsProcess');
         // Remove custom events
         if(that.params['customEvents']){
@@ -13276,7 +13309,7 @@ function(params){
     };
 
     var setLogic = function(){
-        cm.addEvent(nodes['input'], 'keypress', inputKeypressHandler);
+        cm.addEvent(nodes['input'], 'keyup', inputKeypressHandler);
         // Clear Button
         if(that.params['showClearButton']){
             cm.addEvent(nodes['clearButton'], 'click', function(){
@@ -13370,9 +13403,10 @@ function(params){
             components['menu'].hide(false);
         }
         if(cm.isKey(e, 'delete')){
+            cm.log(value);
             if(cm.isEmpty(value)){
                 that.clear(true);
-                components['menu'].hide(false);
+                //components['menu'].hide(false);
             }
         }
     };
@@ -13504,7 +13538,8 @@ function(params){
         format = typeof format != 'undefined'? format : that.format;
         triggerEvents = typeof triggerEvents != 'undefined'? triggerEvents : true;
         // Get date
-        if(cm.isEmpty(str)){
+        var pattern = cm.dateFormat(false, format, that.lang());
+        if(cm.isEmpty(str) || str == pattern){
             that.clear();
             return that;
         }else if(cm.isDate(str)){
@@ -23910,6 +23945,7 @@ cm.define('Com.Slider', {
         'slideshow' : true,             // Turn on / off slideshow
         'direction' : 'forward',        // Slideshow direction: forward | backward | random
         'pauseOnHover' : true,
+        'pauseOnScroll' : true,
         'fadePrevious' : false,         // Fade out previous slide, needed when using transparency slides
         'buttons' : true,               // Display buttons, can hide exists buttons
         'numericButtons' : false,       // Render slide index on button
@@ -23962,6 +23998,7 @@ function(params){
 
     var init = function(){
         that.redrawHandler = that.redraw.bind(that);
+        that.scrollHandler = that.scroll.bind(that);
         that.destructHandler = that.destruct.bind(that);
         that.enableEditingHandler = that.enableEditing.bind(that);
         that.disableEditingHandler = that.disableEditing.bind(that);
@@ -24041,6 +24078,8 @@ function(params){
                 }
             });
         }
+        // Pause slider when in not in screen range
+        scrollPauseHandler();
         // Init animations
         that.anim['slides'] = new cm.Animation(that.nodes['slides']);
         that.anim['slidesInner'] = new cm.Animation(that.nodes['slidesInner']);
@@ -24049,6 +24088,7 @@ function(params){
     var setEvents = function(){
         // Resize events
         cm.addEvent(window, 'resize', that.redrawHandler);
+        cm.addEvent(window, 'scroll', that.scrollHandler);
         // Add custom event
         if(that.params['customEvents']){
             cm.customEvent.add(that.params['node'], 'redraw', that.redrawHandler);
@@ -24061,6 +24101,7 @@ function(params){
     var unsetEvents = function(){
         // Resize events
         cm.removeEvent(window, 'resize', that.redrawHandler);
+        cm.removeEvent(window, 'scroll', that.scrollHandler);
         // Add custom event
         if(that.params['customEvents']){
             cm.customEvent.remove(that.params['node'], 'redraw', that.redrawHandler);
@@ -24307,6 +24348,24 @@ function(params){
     var resizeHandler = function(){
         // Recalculate slider height dependence of height type
         calculateHeight();
+        // Pause slider when in not in screen range
+        scrollPauseHandler();
+    };
+
+    var scrollHandler = function(){
+        // Pause slider when in not in screen range
+        scrollPauseHandler();
+    };
+
+    var scrollPauseHandler = function(){
+        if(that.params['slideshow'] && that.params['pauseOnScroll']){
+            var rect = cm.getRect(that.nodes['container']);
+            if(cm.inRange(0, cm._pageSize['winHeight'], rect['top'], rect['bottom'])){
+                startSlideshow();
+            }else{
+                stopSlideshow();
+            }
+        }
     };
 
     var getDimension = function(value){
@@ -24349,7 +24408,12 @@ function(params){
     };
 
     that.redraw = function(){
-        resizeHandler();
+        animFrame(resizeHandler);
+        return that;
+    };
+
+    that.scroll = function(){
+        animFrame(scrollHandler);
         return that;
     };
 
@@ -28138,7 +28202,7 @@ function(params){
     // Call parent class construct
     Com.AbstractFileManagerContainer.apply(that, arguments);
 });
-/*! ************ QuickSilk-Application v3.15.8 (2016-11-16 21:31) ************ */
+/*! ************ QuickSilk-Application v3.15.8 (2016-11-29 18:46) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
