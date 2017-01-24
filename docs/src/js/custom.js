@@ -21,15 +21,8 @@ App.Template.prototype.setParams({
         'indent' : 24
     },
     'header' : {
-        'type' : 'box',
-        'width' : 1000,
-        'align' : 'center',
         'fixed' : false,
-        'overlapping' : false
-    },
-    'footer' : {
-        'type' : 'box',
-        'width' : 1000,
-        'align' : 'center'
+        'overlapping' : false,
+        'transformed' : true
     }
 });
