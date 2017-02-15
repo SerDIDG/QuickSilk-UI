@@ -28,7 +28,7 @@
                         <li data-node="tabs:[]:container" data-config='{"id" : "methods", "title" : "Visibility"}'></li>
 
                         <li data-node="tabs:[]:container" data-config='{"id" : "examples", "title" : "Styles"}'>
-                            <div class="form__styles">
+                            <div class="form__block-styles">
                                 <dl class="pt__field">
                                     <dt>Style:</dt>
                                     <dd>
@@ -48,84 +48,105 @@
                                         <input type="text" data-element="Com.ColorPicker" name="background-color" data-config='{"showClearButton" : true, "size" : "full"}'>
                                     </dd>
                                 </dl>
-                                <div class="pt__columns is-space-between is-adaptive">
-                                    <div class="inner">
-                                        <div class="column">
-                                            <dl class="pt__field is-box">
-                                                <dt>Background Image:</dt>
-                                                <dd>
-                                                    <input type="text" data-element="App.ImageInput" name="background-image">
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                        <div class="column">
-                                            <dl class="pt__field is-box field-indent">
-                                                <dt>Repeat:</dt>
-                                                <dd>
-                                                    <input type="text" data-element="Com.RepeatTools" name="background-repeat">
-                                                </dd>
-                                            </dl>
-                                            <dl class="pt__field is-box field-indent">
-                                                <dt>Scaling:</dt>
-                                                <dd>
-                                                    <input type="text" data-element="Com.ScaleTools" name="background-scaling">
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                        <div class="column">
-                                            <dl class="pt__field is-box field-indent">
-                                                <dt>Position:</dt>
-                                                <dd>
-                                                    <input type="text" data-element="Com.PositionTools" name="background-position">
-                                                </dd>
-                                            </dl>
-                                            <dl class="pt__field is-box field-indent">
-                                                <dd>
-                                                    <div class="check-line">
-                                                        <input type="checkbox" name="parallax">
-                                                        <label>Parallax</label>
-                                                    </div>
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr>
-                                <div class="pt__columns is-adaptive">
-                                    <div class="inner">
-                                        <div class="column">
-                                            <dl class="pt__field is-box field-indent align-center">
-                                                <dt>Outer Indent:</dt>
-                                                <dd>
-                                                    <input type="text" value="0" data-element="Com.BoxTools" data-config='{"justify" : "center", "allowNegative" : true}' name="outer-indent">
-                                                </dd>
-                                            </dl>
-                                            <dl class="pt__field is-box field-indent">
-                                                <dd>
-                                                    <div class="check-line pull-center">
-                                                        <input type="checkbox" name="outer-indent-auto" id="outer-indent-auto">
-                                                        <label for="outer-indent-auto">Auto</label>
-                                                    </div>
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                        <div class="column">
-                                            <dl class="pt__field is-box field-indent align-center">
-                                                <dt>Inner Indent:</dt>
-                                                <dd>
-                                                    <input type="text" value="0" data-element="Com.BoxTools" data-config='{"justify" : "center"}' name="inner-indent">
-                                                </dd>
-                                            </dl>
+                                <div class="form__styles" data-element="App.FormStyles" data-node="AppFormStyles:{}:container">
+                                    <div class="pt__columns is-adaptive">
+                                        <div class="inner">
+                                            <div class="column column--none">
+                                                <dl class="pt__field is-box">
+                                                    <dt>Background Image:</dt>
+                                                    <dd>
+                                                        <input type="text" data-element="App.ImageInput" name="background-image">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="column column--none">
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dt>Repeat:</dt>
+                                                    <dd>
+                                                        <input type="text" data-element="Com.RepeatTools" name="background-repeat">
+                                                    </dd>
+                                                </dl>
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dt>Scaling:</dt>
+                                                    <dd>
+                                                        <input type="text" data-element="Com.ScaleTools" name="background-scaling">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="column column--none">
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dt>Position:</dt>
+                                                    <dd>
+                                                        <input type="text" data-element="Com.PositionTools" name="background-position">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="column column--auto">
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dd class="margin-none">
+                                                        <div class="pt__check-line">
+                                                            <label>
+                                                                <input type="checkbox" name="background-position-custom" data-node="background-position-custom">
+                                                                <span class="label">Custom position:</span>
+                                                            </label>
+                                                        </div>
+                                                    </dd>
+                                                    <dd>
+                                                        <input type="text" name="background-position-value" data-node="background-position-value">
+                                                    </dd>
+                                                </dl>
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dd>
+                                                        <div class="pt__check-line">
+                                                            <label>
+                                                                <input type="checkbox" name="background-parallax">
+                                                                <span class="label">Parallax</span>
+                                                            </label>
+                                                        </div>
+                                                    </dd>
+                                                </dl>
+                                            </div>
                                         </div>
                                     </div>
+                                    <hr>
+                                    <div class="pt__columns is-adaptive is-space-between">
+                                        <div class="inner">
+                                            <div class="column">
+                                                <dl class="pt__field is-box field-indent align-center">
+                                                    <dt>Outer Indent:</dt>
+                                                    <dd>
+                                                        <input type="text" value="0 0 24px 0" data-element="Com.BoxTools" data-config='{"justify" : "center", "allowNegative" : true}' name="outer-indent">
+                                                    </dd>
+                                                </dl>
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dd>
+                                                        <div class="pt__check-line pull-center">
+                                                            <label>
+                                                                <input type="checkbox" name="outer-indent-auto" checked="checked" data-node="outer-indent-auto">
+                                                                <span class="label">Auto</span>
+                                                            </label>
+                                                        </div>
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="column">
+                                                <dl class="pt__field is-box field-indent align-center">
+                                                    <dt>Inner Indent:</dt>
+                                                    <dd>
+                                                        <input type="text" value="0" data-element="Com.BoxTools" data-config='{"justify" : "center"}' name="inner-indent">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <dl class="pt__field">
+                                        <dt>Minimum height:</dt>
+                                        <dd>
+                                            <input type="text" name="min-height" maxlength="4" data-element="Com.IndentInput">
+                                        </dd>
+                                    </dl>
                                 </div>
-                                <hr>
-                                <dl class="pt__field">
-                                    <dt>Minimum height:</dt>
-                                    <dd>
-                                        <input type="text" name="min-height" maxlength="4" data-element="Com.IndentInput">
-                                    </dd>
-                                </dl>
                             </div>
                         </li>
                     </ul>

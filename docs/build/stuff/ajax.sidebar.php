@@ -174,4 +174,6 @@ $response = json_encode(array(
 	'data' => $data
 ));
 
+sleep(1);
+
 echo $response;

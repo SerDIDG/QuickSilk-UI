@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.24.9 (2017-01-24 19:04) ************ */
+/*! ************ MagpieUI v3.24.12 (2017-02-15 19:56) ************ */
 @charset "UTF-8";
 
 /*!
@@ -3726,7 +3726,7 @@ span.CodeMirror-selectedtext { background: none; }
 
 @CmIconVars-Family: 'Magpie-UI-Glyphs';
 @CmIconVars-Color: @CmColor-Icon;
-@CmIconVars-Version: 14;
+@CmIconVars-Version: @CmVersion;
 
 @CmIcon-Magnify: '\e600';
 @CmIcon-Reduce: '\e601';
@@ -3752,7 +3752,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.24.9';
+@CmVersion: '3.24.12';
 
 // /* ******* PATH ******* */
 
@@ -3812,9 +3812,10 @@ span.CodeMirror-selectedtext { background: none; }
 @CmUI-Shadow-Right: 2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Left: -2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Overlay: @CmUI-Overlay-Light;
-@CmUI-Overlay-Dark: rgba(0, 0, 0, 0.7);
-@CmUI-Overlay-Light: rgba(255, 255, 255, 0.7);
-@CmUI-Overlay-Duration: @CmUI-Transition-Duration;
+@CmUI-Overlay-Fade: 0.7;
+@CmUI-Overlay-Dark: rgba(0, 0, 0, @CmUI-Overlay-Fade);
+@CmUI-Overlay-Light: rgba(255, 255, 255, @CmUI-Overlay-Fade);
+@CmUI-Overlay-Duration: @CmUI-Transition-DurationLong;
 @CmUI-AdaptiveFrom: @CmScreen-TabletPortrait;
 @CmUI-TooltipWidth: 320px;
 @CmUI-ColumnIndent: @CmIndent-Medium;
@@ -7268,51 +7269,6 @@ button {
 
 /* *** CHECKBOX / RADIO LINE *** */
 
-.form__check-line {
-    min-height: @CmForm-FieldHeight;
-    line-height: @CmForm-FieldHeight;
-
-    input[type="radio"],
-    input[type="checkbox"] {
-        @margin: floor((@CmForm-FieldHeight - 13px) / 2);
-
-        margin: @margin 0 @margin 0;
-        vertical-align: top;
-        padding: 0;
-        cursor: pointer;
-    }
-
-    label {
-        @padding: round((@CmForm-FieldHeight - @CmFont-Base-LineHeight) / 2);
-        padding: @padding 0 @padding 0;
-        margin-right: @CmIndent-Medium;
-        cursor: pointer;
-        vertical-align: baseline;
-        line-height: @CmFont-Base-LineHeight;
-
-        &:first-child {
-            margin-left: 0;
-        }
-
-        &:last-child {
-            margin-right: 0;
-        }
-    }
-
-    .label {
-        margin-left: @CmForm-FieldInnerIndent;
-    }
-
-    &.has-fields {
-        .display-flex;
-
-        > .fields {
-            margin: 0 0 0 @CmIndent-XSmall;
-            .mx__flex(1);
-        }
-    }
-}
-
 .check-line {
     min-height: @CmForm-FieldHeight;
     line-height: @CmForm-FieldHeight;
@@ -8592,6 +8548,54 @@ button {
     }
 
 }
+.pt__check-line {
+    min-height: @CmForm-FieldHeight;
+    line-height: @CmForm-FieldHeight;
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        @margin: floor((@CmForm-FieldHeight - 13px) / 2);
+
+        margin: @margin 0 @margin 0;
+        vertical-align: top;
+        padding: 0;
+        cursor: pointer;
+    }
+
+    label {
+        @padding: round((@CmForm-FieldHeight - @CmFont-Base-LineHeight) / 2);
+        padding: @padding 0 @padding 0;
+        margin-right: @CmIndent-Medium;
+        cursor: pointer;
+        vertical-align: baseline;
+        line-height: @CmFont-Base-LineHeight;
+
+        &:first-child {
+            margin-left: 0;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    .label {
+        margin-left: @CmForm-FieldInnerIndent;
+    }
+
+    &.has-fields {
+        .display-flex;
+
+        > .fields {
+            margin: 0 0 0 @CmIndent-XSmall;
+            .mx__flex(1);
+        }
+    }
+
+    &.pull-center {
+        text-align: center;
+    }
+}
 /* ******* PARTS: COLUMNS ******* */
 
 .pt__columns {
@@ -8604,6 +8608,14 @@ button {
             min-width: 0;
             position: relative;
             .mx__flex(1 1 0);
+
+            &.column--auto {
+                .mx__flex(1 1 auto);
+            }
+
+            &.column--none {
+                .mx__flex(none);
+            }
         }
     }
 
@@ -8611,6 +8623,14 @@ button {
         > .inner {
             > .column {
                 .mx__flex(none);
+
+                &.column--auto {
+                    .mx__flex(1 1 auto);
+                }
+
+                &.column--none {
+                    .mx__flex(none);
+                }
             }
         }
     }
@@ -8621,6 +8641,14 @@ button {
 
             > .column {
                 .mx__flex(1 1 auto);
+
+                &.column--auto {
+                    .mx__flex(1 1 auto);
+                }
+
+                &.column--none {
+                    .mx__flex(none);
+                }
             }
         }
     }
@@ -10295,6 +10323,17 @@ ul.pt__field__hint {
         }
     }
 
+    &.disabled {
+        .input {
+            cursor: default;
+        }
+
+        .icon {
+            cursor: default;
+            opacity: @CmUI-Opacity-Hover;
+        }
+    }
+
     .pt__input--size(@CmForm-FieldHeight, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
 
     &.size-large {
@@ -11135,7 +11174,7 @@ ul.pt__field__hint {
         height: 32px;
         margin: auto;
         z-index: 1;
-        background: url('@{CmPath-Images}/parts/ajax-loader.gif');
+        background: url('@{CmPath-Images}/animated/loader.png');
     }
 
     .overlay__content {
@@ -11156,6 +11195,10 @@ ul.pt__field__hint {
 
     &.theme-dark {
         background-color: @PtOverlay-Dark;
+
+        .overlay__spinner {
+            background-image: url('@{CmPath-Images}/animated/loader-white.png');
+        }
     }
 
     &.is-immediately {
@@ -13503,6 +13546,21 @@ ul.pt__field__hint {
     .b-link-container {
         margin: 0 @ComBoxTools-LinkIndent;
     }
+
+    &.disabled {
+        .b-link {
+            background-color: @CmColor-Secondary-LightHover;
+            cursor: default;
+
+            &.active {
+                background-color: @CmColor-Secondary-LightActiveHover;
+            }
+
+            .icon {
+                opacity: @CmUI-Opacity-Hover;
+            }
+        }
+    }
 }
 
 .com__box-tools--radius {
@@ -13728,14 +13786,15 @@ ul.pt__field__hint {
 
 .com__column {
     .display-flex;
+    min-width: 0;
     vertical-align: top;
     .mx__flex(1 1 auto);
-    .mx__flex-direction(column);
+    /* .mx__flex-direction(column); */
 
     > .inner {
+        min-width: 0;
         position: relative;
         border-radius: @CmBorder-Radius;
-        .mx__box-sizing(border-box);
         .mx__flex(1);
         .mx__transition(background-color, @CmUI-Transition-Duration);
     }
@@ -14351,6 +14410,12 @@ ul.pt__field__hint {
                 }
             }
         }
+
+        &.has-close-background {
+            > .bg {
+                cursor: url("@{CmPath-Images}/icons/medium/close-white.png"), auto;
+            }
+        }
     }
 
     // /* *** BLACK *** */
@@ -14389,6 +14454,12 @@ ul.pt__field__hint {
                         padding-top: @ComDialog-Indent
                     }
                 }
+            }
+        }
+
+        &.has-close-background {
+            > .bg {
+                cursor: url("@{CmPath-Images}/icons/medium/close.png"), auto;
             }
         }
 
@@ -16142,7 +16213,7 @@ ul.pt__field__hint {
             background-color: @CmColor-Secondary-LightActiveHover;
         }
 
-        &.is-active {
+        &.active {
             background-color: @CmColor-Primary-DarkDefault;
             box-shadow: @CmUI-ShadowInner;
 
@@ -16155,6 +16226,21 @@ ul.pt__field__hint {
             width: 100%;
             height: 100%;
             .mx__transition(all, @CmUI-Transition-Duration);
+        }
+    }
+
+    &.disabled {
+        .option__item {
+            background-color: @CmColor-Secondary-LightHover;
+            cursor: default;
+
+            &.active {
+                background-color: @CmColor-Secondary-LightActiveHover;
+            }
+
+            .icon {
+                opacity: @CmUI-Opacity-Hover;
+            }
         }
     }
 }
@@ -17571,7 +17657,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.15.14 (2017-01-24 19:04) ************ */
+/*! ************ QuickSilk-Application v3.15.16 (2017-02-15 19:56) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -17581,7 +17667,7 @@ ul.pt__field__hint {
 
 @AppIconVars-Family: 'QuickSilk-Glyphs';
 @AppIconVars-Color: @CmIconVars-Color;
-@AppIconVars-Version: 26;
+@AppIconVars-Version: @AppVersion;
 
 @AppIcon-QuickSilk: '\e600';
 @AppIcon-Plus: '\e601';
@@ -17687,6 +17773,8 @@ ul.pt__field__hint {
 // /* ************************************************ */
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
+
+@AppVersion: '3.15.16';
 
 // /* ******* PATH ******* */
 
@@ -19754,6 +19842,7 @@ html {
         .cm__transition-none;
     }
 }
+
 /* ******* COMPONENTS: HELP TOUR ******* */
 
 .app__helptour__popup {
@@ -20847,6 +20936,9 @@ html {
 }
 
 .app__sidebar__theme (@theme) when (@theme = Dark) {
+    @background: @AppSidebar-ThemeDark-Background;
+    @color: @AppSidebar-ThemeDark-Color;
+
     .pt__toolbar {
         .button {
             .button.button-white;
@@ -20857,19 +20949,25 @@ html {
         > ul {
             > li {
                 > a {
-                    color: ~"@{AppSidebar-Theme@{theme}-Color}";
+                    color: @color;
 
                     &:hover {
-                        color: ~"@{AppSidebar-Theme@{theme}-Background}";
+                        color: @background;
                     }
                 }
 
                 &.active {
                     > a {
-                        color: ~"@{AppSidebar-Theme@{theme}-Background}";
+                        color: @background;
                     }
                 }
             }
+        }
+    }
+
+    .pt__overlay {
+        &.theme-dark {
+            background-color: fade(@background, 70%);
         }
     }
 }
