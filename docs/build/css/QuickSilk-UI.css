@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.24.12 (2017-02-16 09:36) ************ */
+/*! ************ MagpieUI v3.24.14 (2017-02-16 23:21) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -3434,8 +3434,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.24.12');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.24.12') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.24.12') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.24.12') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.24.12#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.24.14');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.24.14') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.24.14') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.24.14') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.24.14#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -7981,8 +7981,13 @@ button.is-hidden {
   padding: 0;
   cursor: pointer;
 }
+.pt__check-line input[type="radio"]:checked + .unveil,
+.pt__check-line input[type="checkbox"]:checked + .unveil,
+.pt__check-line input[type="radio"]:checked + .label + .unveil,
+.pt__check-line input[type="checkbox"]:checked + .label + .unveil {
+  display: block;
+}
 .pt__check-line label {
-  padding: 5px 0 5px 0;
   margin-right: 24px;
   cursor: pointer;
   vertical-align: baseline;
@@ -7995,13 +8000,23 @@ button.is-hidden {
   margin-right: 0;
 }
 .pt__check-line .label {
+  display: inline-block;
   margin-left: 8px;
+}
+.pt__check-line > .fields.unveil {
+  display: none;
 }
 .pt__check-line.has-fields {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+}
+.pt__check-line.has-fields label {
+  margin-right: 0;
+}
+.pt__check-line.has-fields .label {
+  padding: 5px 0 5px 0;
 }
 .pt__check-line.has-fields > .fields {
   margin: 0 0 0 12px;
@@ -8043,6 +8058,28 @@ button.is-hidden {
   -webkit-flex: none;
   -ms-flex: none;
   flex: none;
+}
+.pt__columns.field-indent,
+.pt__columns.field-inner-indent {
+  margin-bottom: 24px;
+  margin-bottom: 8px;
+}
+.pt__columns.field-indent.bottom,
+.pt__columns.field-inner-indent.bottom,
+.pt__columns.field-indent.is-last,
+.pt__columns.field-inner-indent.is-last,
+.pt__columns.field-indent:last-child,
+.pt__columns.field-inner-indent:last-child {
+  margin-bottom: 0;
+}
+.pt__columns.field-outer-indent {
+  margin-bottom: 24px;
+  margin-bottom: 16px;
+}
+.pt__columns.field-outer-indent.bottom,
+.pt__columns.field-outer-indent.is-last,
+.pt__columns.field-outer-indent:last-child {
+  margin-bottom: 0;
 }
 .pt__columns.is-none > .inner > .column {
   -webkit-flex: none;
@@ -8858,13 +8895,26 @@ button.is-hidden {
 .pt__field.is-box.is-no-label > dt {
   display: none;
 }
-.pt__field.is-box.field-indent {
+.pt__field.is-box.field-indent,
+.pt__field.is-box.field-inner-indent {
   margin-bottom: 24px;
   margin-bottom: 8px;
 }
 .pt__field.is-box.field-indent.bottom,
+.pt__field.is-box.field-inner-indent.bottom,
 .pt__field.is-box.field-indent.is-last,
-.pt__field.is-box.field-indent:last-child {
+.pt__field.is-box.field-inner-indent.is-last,
+.pt__field.is-box.field-indent:last-child,
+.pt__field.is-box.field-inner-indent:last-child {
+  margin-bottom: 0;
+}
+.pt__field.is-box.field-outer-indent {
+  margin-bottom: 24px;
+  margin-bottom: 16px;
+}
+.pt__field.is-box.field-outer-indent.bottom,
+.pt__field.is-box.field-outer-indent.is-last,
+.pt__field.is-box.field-outer-indent:last-child {
   margin-bottom: 0;
 }
 .pt__field.is-hidden {
@@ -8872,6 +8922,12 @@ button.is-hidden {
 }
 .pt__field.align-center > dt {
   text-align: center;
+}
+.pt__field-label {
+  display: block;
+  margin: 0;
+  padding: 5px 0;
+  line-height: 18px;
 }
 /* *** FIELD HINT *** */
 .pt__field__hint {
@@ -17344,6 +17400,15 @@ html.ie9 .com__palette .b-range {
 .com__position-tools__content.disabled .option__item .icon {
   opacity: 0.7;
 }
+.com__position-tools__content.size-large > .inner {
+  width: 108px;
+  margin: -2px;
+}
+.com__position-tools__content.size-large .option__item {
+  width: 32px;
+  height: 32px;
+  margin: 2px;
+}
 /* ******* COMPONENTS: RANGE ******* */
 .com__range {
   margin-bottom: 24px;
@@ -17359,16 +17424,16 @@ html.ie9 .com__palette .b-range {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
-  width: 176px;
-  margin: -3px;
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
+  width: 168px;
+  margin: -2px;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
 }
 .com__repeat-tools__content .option__item {
   width: 38px;
   height: 38px;
-  margin: 3px;
+  margin: 2px;
   overflow: hidden;
   border: 1px solid #858585;
   border-radius: 3px;
@@ -17391,6 +17456,9 @@ html.ie9 .com__palette .b-range {
 .com__repeat-tools__content .option__item .icon {
   width: 100%;
   height: 100%;
+}
+.com__repeat-tools__content.style-block > .inner {
+  width: 84px;
 }
 /* ******* COMPONENTS: REQUEST ******* */
 .com__request {
@@ -17438,16 +17506,16 @@ html.ie9 .com__palette .b-range {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
-  width: 176px;
-  margin: -3px;
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
+  width: 168px;
+  margin: -2px;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
 }
 .com__scale-tools__content .option__item {
   width: 38px;
   height: 38px;
-  margin: 3px;
+  margin: 2px;
   overflow: hidden;
   border: 1px solid #858585;
   border-radius: 3px;
@@ -17470,6 +17538,9 @@ html.ie9 .com__palette .b-range {
 .com__scale-tools__content .option__item .icon {
   width: 100%;
   height: 100%;
+}
+.com__scale-tools__content.style-block > .inner {
+  width: 84px;
 }
 /* ******* COMPONENTS: SCROLL PAGINATION *** */
 .com__scroll-pagination {
@@ -18816,11 +18887,11 @@ html.ie9 .com__timeselect > .inner > .sep {
 .com__file-manager.is-fullsize .ui-resizable-handle {
   display: none !important;
 }
-/*! ************ QuickSilk-Application v3.15.17 (2017-02-16 09:37) ************ */
+/*! ************ QuickSilk-Application v3.15.18 (2017-02-16 23:21) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.15.17');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.15.17') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.15.17') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.15.17') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.15.17#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.15.18');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.15.18') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.15.18') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.15.18') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.15.18#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
