@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.24.14 (2017-02-16 23:21) ************ */
+/*! ************ MagpieUI v3.24.14 (2017-02-20 19:39) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -18887,11 +18887,11 @@ html.ie9 .com__timeselect > .inner > .sep {
 .com__file-manager.is-fullsize .ui-resizable-handle {
   display: none !important;
 }
-/*! ************ QuickSilk-Application v3.15.18 (2017-02-16 23:21) ************ */
+/*! ************ QuickSilk-Application v3.15.19 (2017-02-20 19:39) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.15.18');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.15.18') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.15.18') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.15.18') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.15.18#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.15.19');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.15.19') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.15.19') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.15.19') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.15.19#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -25639,6 +25639,15 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 }
 .app__additional-donations__row > .price {
   width: 50%;
+}
+.app__additional-donations__descr {
+  font: 400 11px/18px Open Sans, sans-serif;
+  color: #999999;
+  padding: 0 0 0 26px;
+  margin: 0 0 12px 0;
+}
+.app__additional-donations__descr:last-child {
+  margin: 0;
 }
 @media only screen and (max-width: 1024px) {
   html.is-adaptive .app__additional-donations__row > .select,
