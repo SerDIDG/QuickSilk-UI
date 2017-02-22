@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.24.14 (2017-02-20 19:39) ************ */
+/*! ************ MagpieUI v3.24.16 (2017-02-22 19:04) ************ */
 @charset "UTF-8";
 
 /*!
@@ -3752,7 +3752,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.24.14';
+@CmVersion: '3.24.16';
 
 // /* ******* PATH ******* */
 
@@ -9248,7 +9248,8 @@ button {
         }
     }
 
-    &.is-box {
+    &.is-box,
+    &.is-form-box {
         .cm__box;
 
         > dt {
@@ -9281,6 +9282,11 @@ button {
             .cm__box;
             margin-bottom: @CmForm-FieldIndent;
         }
+    }
+
+    &.is-form-box {
+        .cm__box;
+        margin-bottom: @CmForm-FieldIndent;
     }
 
     &.is-hidden {
@@ -17730,7 +17736,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.15.19 (2017-02-20 19:39) ************ */
+/*! ************ QuickSilk-Application v3.15.20 (2017-02-22 19:04) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -17847,7 +17853,7 @@ ul.pt__field__hint {
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.15.19';
+@AppVersion: '3.15.20';
 
 // /* ******* PATH ******* */
 
