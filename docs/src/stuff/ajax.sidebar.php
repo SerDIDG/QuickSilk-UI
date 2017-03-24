@@ -42,6 +42,14 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_wizard\", \"type\" : \"form-manager\"}'>
+                            <div class=\"app__block-dummy\" data-node=\"dummy\">
+                                <div class=\"inner\">
+                                    <div class=\"icon module-default\"></div>
+                                    <div class=\"caption\">Wizard</div>
+                                </div>
+                            </div>
+                        </div>
                     </dd>
                 </dl>
                 <dl class=\"com__togglebox app__blocks-category is-show\" data-element=\"Com.ToggleBox\" data-config='{\"remember\" : true, \"name\" : \"app__sidebar-form-element\"}' data-node=\"ComToggleBox.container\">
@@ -58,7 +66,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_text\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_input\"></div>
@@ -66,7 +74,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_password\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_password\"></div>
@@ -74,7 +82,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_hidden\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_hidden\"></div>
@@ -82,7 +90,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_select\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_select\"></div>
@@ -90,7 +98,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_datepicker\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_datepicker\"></div>
@@ -106,7 +114,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_checkbox\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_checkbox\"></div>
@@ -114,7 +122,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_multicheckbox\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_multicheckbox\"></div>
@@ -122,7 +130,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_radiobutton\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_radiobutton\"></div>
@@ -130,7 +138,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_textarea\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_textarea\"></div>
@@ -138,7 +146,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_wysiwyg\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_wysiwyg\"></div>
@@ -146,7 +154,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_captcha\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_captcha\"></div>
@@ -159,6 +167,14 @@ switch($_GET['tab']){
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_imagebrowser\"></div>
                                     <div class=\"caption\">Image browser</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_fileuploader\", \"type\" : \"form-manager\"}'>
+                            <div class=\"app__block-dummy\" data-node=\"dummy\">
+                                <div class=\"inner\">
+                                    <div class=\"icon module-element_fileuploader\"></div>
+                                    <div class=\"caption\">File Upload</div>
                                 </div>
                             </div>
                         </div>

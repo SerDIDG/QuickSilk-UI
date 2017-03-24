@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.25.0 (2017-03-07 20:52) ************ */
+/*! ************ MagpieUI v3.25.1 (2017-03-24 20:04) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -3434,8 +3434,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.25.0');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.25.0') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.25.0') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.25.0') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.25.0#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.25.1');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.25.1') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.25.1') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.25.1') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.25.1#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -6778,6 +6778,9 @@ button.is-hidden {
   color: #999999;
   font-style: italic;
   text-transform: none;
+}
+.form .hint.hidden {
+  display: none;
 }
 .form ul.hint {
   margin: 0;
@@ -10153,6 +10156,16 @@ ul.pt__field__hint li:before {
 }
 .pt__image.is-no-image > .inner {
   opacity: 0;
+}
+.pt__image.is-tools-hover > .pull {
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease-in-out;
+  transition: opacity 250ms ease-in-out;
+}
+.pt__image.is-tools-hover:hover > .pull {
+  opacity: 1;
+  -webkit-transition: opacity 100ms ease-in-out;
+  transition: opacity 100ms ease-in-out;
 }
 .pt__image.is-checkable {
   cursor: pointer;
@@ -17096,9 +17109,8 @@ ul.pt__field__hint li:before {
   -webkit-transition: background-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, outline 250ms ease-in-out;
   transition: background-color 250ms ease-in-out, color 250ms ease-in-out, box-shadow 250ms ease-in-out, outline 250ms ease-in-out;
   background-color: #2985e0;
-  color: #ffffff;
   font: 400 13px/18px Open Sans, sans-serif;
-  color: #666666;
+  color: #ffffff;
   font-style: normal;
   text-decoration: none;
   background-color: #fafafa;
@@ -19275,11 +19287,11 @@ html.ie9 .com__timeselect > .inner > .sep {
 .com__file-manager.is-fullsize .ui-resizable-handle {
   display: none !important;
 }
-/*! ************ QuickSilk-Application v3.15.21 (2017-03-07 20:52) ************ */
+/*! ************ QuickSilk-Application v3.16.0 (2017-03-24 20:04) ************ */
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.15.21');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.15.21') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.15.21') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.15.21') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.15.21#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.16.0');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.16.0') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.16.0') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.16.0') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.16.0#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -19493,7 +19505,7 @@ body:before {
 }
 .app__font--button {
   font: 400 13px/18px Open Sans, sans-serif;
-  color: #666666;
+  color: #ffffff;
   font-style: normal;
   text-decoration: none;
 }
@@ -19859,7 +19871,7 @@ input[type="submit"],
 input[type="reset"],
 button {
   font: 400 13px/18px Open Sans, sans-serif;
-  color: #666666;
+  color: #ffffff;
   font-style: normal;
   text-decoration: none;
 }
@@ -21359,6 +21371,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   background-position: 50% -4680px;
 }
 .app__block-dummy .icon.module-element_imagebrowser {
+  background-position: 50% -4770px;
+}
+.app__block-dummy .icon.module-element_fileuploader {
   background-position: 50% -4770px;
 }
 .app__block-dummy .icon.module-element_datepicker {
@@ -26066,6 +26081,434 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   width: 200px;
 }
 /* ******* MODULES: WEBEX PROFILE ******* */
+/* ******* MODULES: EVENTS WIDGET ******* */
+.mod__wizard {
+  z-index: 1;
+  -webkit-transition: z-index 250ms ease-in-out;
+  transition: z-index 250ms ease-in-out;
+}
+.mod__wizard > .inner {
+  position: relative;
+}
+.mod__wizard > .inner > .tabs__head {
+  position: relative;
+  z-index: 2;
+}
+.mod__wizard > .inner > .tabs__head ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  font-size: 0;
+}
+.mod__wizard > .inner > .tabs__head ul > li {
+  margin: 0;
+  padding: 0;
+}
+.mod__wizard > .inner > .tabs__head ul > li {
+  display: inline-block;
+  vertical-align: top;
+}
+.mod__wizard > .inner > .tabs__head ul.pull-left {
+  text-align: left;
+}
+.mod__wizard > .inner > .tabs__head ul.pull-center {
+  text-align: center;
+}
+.mod__wizard > .inner > .tabs__head ul.pull-right {
+  text-align: right;
+}
+.mod__wizard > .inner > .tabs__head ul > li {
+  position: relative;
+  z-index: 1;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  white-space: nowrap;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .image {
+  position: relative;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .image img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .title:first-child {
+  margin-left: 0;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .title:last-child {
+  margin-right: 0;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a:hover {
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+.mod__wizard > .inner > .tabs__head ul > li:hover {
+  z-index: 2;
+  -webkit-transition: all 100ms ease-in-out;
+  transition: all 100ms ease-in-out;
+}
+.mod__wizard > .inner > .tabs__menu {
+  display: none;
+  position: relative;
+  z-index: 3;
+}
+.mod__wizard > .inner > .tabs__menu > .inner {
+  position: relative;
+}
+.mod__wizard > .inner > .tabs__menu > .inner .label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mod__wizard > .inner > .tabs__menu > .inner .icon {
+  float: right;
+}
+.mod__wizard > .inner > .tabs__menu > .inner .icon.default {
+  background-image: url("../img/MagpieUI/icons/medium/menu.png");
+}
+.mod__wizard > .inner > .tabs__menu > .inner:hover .pt__menu-dropdown,
+.mod__wizard > .inner > .tabs__menu > .inner.active .pt__menu-dropdown {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown {
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 3px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding-box;
+  background-clip: padding-box;
+  display: block;
+  margin: 0;
+  padding: 4px 0px;
+  border-width: 1px;
+  border-color: #cccccc;
+  list-style: none;
+  touch-action: none;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  visibility: hidden;
+  position: absolute;
+  opacity: 0;
+  right: auto;
+  bottom: auto;
+  left: 0;
+  min-width: 100%;
+  top: 100%;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li {
+  position: relative;
+  margin-top: 1px;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a {
+  font: 400 13px/18px Open Sans, sans-serif;
+  outline: none;
+  cursor: pointer;
+  font-weight: 400;
+  color: #1d73c9;
+  font-style: normal;
+  text-decoration: underline;
+  display: block;
+  padding: 2px 12px;
+  text-decoration: none;
+  white-space: nowrap;
+  color: #666666;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a:hover {
+  text-decoration: none;
+  color: #1d73c9;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a:active {
+  color: #16599c;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a:hover {
+  font-weight: 400;
+  color: #1d73c9;
+  font-style: normal;
+  text-decoration: underline;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a:active {
+  font-weight: 400;
+  color: #1d73c9;
+  font-style: normal;
+  text-decoration: underline;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a:hover {
+  text-decoration: none;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid #cccccc;
+  border-width: 1px;
+  border-color: #cccccc;
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li:first-child {
+  margin-top: 0;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li:first-child:before {
+  display: none;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li:hover {
+  z-index: 2;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  -webkit-transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+  transition: visibility 100ms ease-in-out, opacity 100ms ease-in-out;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li ul {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li ul.pull-left {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: calc(100% - 0px);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li ul.pull-right {
+  top: -5px;
+  right: calc(100% - 0px);
+  bottom: auto;
+  left: auto;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown.pull-left {
+  top: 100%;
+  right: auto;
+  bottom: auto;
+  left: 0;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown.pull-right {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: auto;
+}
+.mod__wizard > .inner > .tabs__content {
+  z-index: 1;
+}
+.mod__wizard > .inner > .tabs__content > .inner > ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  margin-bottom: 24px;
+  position: relative;
+  -webkit-transition: height 250ms ease-in-out;
+  transition: height 250ms ease-in-out;
+}
+.mod__wizard > .inner > .tabs__content > .inner > ul > li {
+  margin: 0;
+  padding: 0;
+}
+.mod__wizard > .inner > .tabs__content > .inner > ul.bottom,
+.mod__wizard > .inner > .tabs__content > .inner > ul.is-last,
+.mod__wizard > .inner > .tabs__content > .inner > ul:last-child {
+  margin-bottom: 0;
+}
+.mod__wizard > .inner > .tabs__content > .inner > ul > li {
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+  opacity: 0;
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.mod__wizard > .inner > .tabs__content > .inner > ul > li.active {
+  position: relative;
+  z-index: 2;
+  visibility: visible;
+  opacity: 1;
+  overflow: visible;
+}
+.mod__wizard.pull-left > .inner > .tabs__head ul {
+  text-align: left;
+}
+.mod__wizard.pull-center > .inner > .tabs__head ul {
+  text-align: center;
+}
+.mod__wizard.pull-right > .inner > .tabs__head ul {
+  text-align: right;
+}
+.mod__wizard.pull-justify > .inner > .tabs__head ul {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  text-align: center;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
+}
+.mod__wizard.pull-justify > .inner > .tabs__head ul > li {
+  max-width: 100%;
+  -webkit-flex: 1 1 0;
+  -ms-flex: 1 1 0;
+  flex: 1 1 0;
+}
+.mod__wizard.pull-justify > .inner > .tabs__head ul > li > a {
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+.mod__wizard.pull-justify > .inner > .tabs__head ul > li > a .title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mod__wizard:hover {
+  z-index: 10;
+}
+.mod__wizard > .inner > .tabs__head ul {
+  margin: -2px;
+}
+.mod__wizard > .inner > .tabs__head ul > li {
+  margin: 2px;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .title {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .title:first-child {
+  margin-left: 0;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .title:last-child {
+  margin-right: 0;
+}
+.mod__wizard > .inner > .tabs__content {
+  margin: 4px 0;
+}
+.mod__wizard > .inner > .tabs__content:first-child {
+  margin-top: 0;
+}
+.mod__wizard > .inner > .tabs__content:last-child {
+  margin-bottom: 0;
+}
+.mod__wizard > .inner > .tabs__head ul > li > a .image {
+  width: 24px;
+  height: 24px;
+}
+.mod__wizard > .inner > .tabs__head .pt__image {
+  width: 24px;
+  height: 24px;
+}
+/* *** THEMES *** */
+.mod__wizard.theme-initial > .inner > .tabs__head > .inner ul > li,
+.mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li {
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+.mod__wizard.theme-initial > .inner > .tabs__head > .inner ul > li > a,
+.mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li > a {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  text-decoration: none;
+}
+.mod__wizard.theme-initial > .inner > .tabs__menu > .inner,
+.mod__wizard.theme-default > .inner > .tabs__menu > .inner {
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+.mod__wizard.theme-initial > .inner > .tabs__menu > .inner .label,
+.mod__wizard.theme-default > .inner > .tabs__menu > .inner .label {
+  font: 400 13px/18px Open Sans, sans-serif;
+  color: #666666;
+  min-height: 28px;
+  line-height: 28px;
+  padding: 0 12px;
+}
+.mod__wizard.theme-initial > .inner > .tabs__menu > .inner .icon,
+.mod__wizard.theme-default > .inner > .tabs__menu > .inner .icon {
+  width: 28px;
+  height: 28px;
+}
+.mod__wizard.theme-initial > .inner > .tabs__content > .inner,
+.mod__wizard.theme-default > .inner > .tabs__content > .inner {
+  padding: 24px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+.mod__wizard.theme-initial > .inner > .tabs__head > .inner ul > li > a,
+.mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li > a {
+  padding: 0 12px;
+}
+.mod__wizard.theme-initial > .inner > .tabs__head > .inner ul > li > a,
+.mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li > a {
+  height: 28px;
+  line-height: 28px;
+}
+.mod__wizard.theme-light > .inner > .tabs__head > .inner ul > li,
+.mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li {
+  background: #e8e8e8;
+  border-color: #cccccc;
+}
+.mod__wizard.theme-light > .inner > .tabs__head > .inner ul > li:hover,
+.mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li:hover {
+  background: #f2f2f2;
+}
+.mod__wizard.theme-light > .inner > .tabs__head > .inner ul > li.active,
+.mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li.active {
+  background: #ffffff;
+}
+.mod__wizard.theme-light > .inner > .tabs__menu > .inner,
+.mod__wizard.theme-default > .inner > .tabs__menu > .inner {
+  background: #ffffff;
+  border-color: #cccccc;
+}
+.mod__wizard.theme-light > .inner > .tabs__content > .inner,
+.mod__wizard.theme-default > .inner > .tabs__content > .inner {
+  background-color: #ffffff;
+  border-color: #cccccc;
+}
+/* ******* COMPONENTS: TABSET: ADAPTIVE ******* */
+@media only screen and (max-width: 768px) {
+  html.is-adaptive .mod__wizard > .inner > .tabs__head {
+    display: none;
+  }
+  html.is-adaptive .mod__wizard > .inner > .tabs__menu {
+    display: block;
+  }
+}
 /* ******* MODULES: WORKING AREA ******* */
 .app-mod__area.pull-left > .inner {
   margin: 0;
