@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.25.1 (2017-03-24 20:04) ************ */
+/*! ************ MagpieUI v3.26.0 (2017-04-18 17:58) ************ */
 @charset "UTF-8";
 
 /*!
@@ -3752,7 +3752,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.25.1';
+@CmVersion: '3.26.0';
 
 // /* ******* PATH ******* */
 
@@ -4352,6 +4352,10 @@ span.CodeMirror-selectedtext { background: none; }
 @PtOverlay-Light: @CmUI-Overlay-Light;
 @PtOverlay-Dark: @CmUI-Overlay-Dark;
 @PtOverlay-Duration: @CmUI-Overlay-Duration;
+@PtOverlay-Spinner-Size: @CmSize-Large;
+@PtOverlay-Spinner-BorderSize: 3px;
+@PtOverlay-Spinner-DefaultBackground: @CmColor-Secondary-LightActive;
+@PtOverlay-Spinner-ActiveBackground: @CmColor-Primary-DarkDefault;
 
 // /* ************************************************ */
 // /* ******* LAYOUTS ******* */
@@ -8108,6 +8112,10 @@ button {
 
     &.animated {
         visibility: visible;
+
+        &.spin {
+            animation: spin 2s linear infinite;
+        }
     }
 }
 
@@ -8125,6 +8133,12 @@ button {
     }
 }
 
+/* *** ANIMATIONS *** */
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 /* ******* PART: BOX ******* */
 
 .pt__box {
@@ -9328,6 +9342,36 @@ button {
 
         &:first-child {
             margin: 0;
+        }
+    }
+
+    &.error,
+    &.danger {
+        > dt {
+            color: @CmColor-Danger-DarkDefault;
+        }
+
+        .pt__field__error {
+            color: @CmColor-Danger-DarkDefault;
+        }
+
+        .input {
+            border: 1px solid @CmColor-Danger-DarkDefault;
+        }
+    }
+
+    &.ok,
+    &.success {
+        > dt {
+            color: @CmColor-Success-DarkDefault;
+        }
+
+        .pt__field__error {
+            color: @CmColor-Success-DarkDefault;
+        }
+
+        .input {
+            border: 1px solid @CmColor-Success-DarkDefault;
         }
     }
 
@@ -11335,11 +11379,14 @@ ul.pt__field__hint {
     }
 
     .overlay__spinner {
-        width: 32px;
-        height: 32px;
+        .cm-animate.animated.spin;
+        width: @PtOverlay-Spinner-Size;
+        height: @PtOverlay-Spinner-Size;
         margin: auto;
         z-index: 1;
-        background: url('@{CmPath-Images}/animated/loader.png');
+        border: @PtOverlay-Spinner-BorderSize solid @PtOverlay-Spinner-DefaultBackground;
+        border-top-color: @PtOverlay-Spinner-ActiveBackground;
+        border-radius: 50%;
     }
 
     .overlay__content {
@@ -11360,10 +11407,6 @@ ul.pt__field__hint {
 
     &.theme-dark {
         background-color: @PtOverlay-Dark;
-
-        .overlay__spinner {
-            background-image: url('@{CmPath-Images}/animated/loader-white.png');
-        }
     }
 
     &.is-immediately {
@@ -15941,44 +15984,23 @@ ul.pt__field__hint {
                 margin: 0;
             }
 
-            &.ok,
-            &.success {
-                background: #f3fded;
-                border-color: #9ec589;
-                color: #5a714e;
-
-                .close {
-                    border-color: #9ec589;
-                }
-            }
-
-            &.error,
-            &.danger {
-                background: #ffe4e4;
-                border-color: #df3e3e;
-                color: #bf0a0a;
-
-                .close {
-                    border-color: #df3e3e;
-                }
-            }
-
-            &.notice,
-            &.warning {
-                background: #f8f1d4;
-                border-color: #d2a323;
-                color: #906901;
-
-                .close {
-                    border-color: #d2a323;
-                }
-            }
-
-            .descr {
+            > .descr {
                 overflow: hidden;
+
+                > .more {
+                    margin: 0 0 0 @CmIndent-XXSmall;
+                    font-size: 11px;
+                    color: #666666;
+                    text-decoration: underline;
+                    cursor: pointer;
+
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
             }
 
-            .close {
+            > .close {
                 float: right;
                 margin-left: 12px;
                 padding-left: 12px;
@@ -15990,6 +16012,51 @@ ul.pt__field__hint {
 
                 &:hover {
                     text-decoration: none;
+                }
+            }
+
+            > .messages {
+                height: 0;
+                overflow: hidden;
+                clear: both;
+
+                > ul {
+                    .cm__list;
+                    .cm__font--hint-cursive;
+                    padding-top: @CmIndent-XXSmall;
+                }
+            }
+
+            &.ok,
+            &.success {
+                background: #f3fded;
+                border-color: #9ec589;
+                color: #5a714e;
+
+                > .close {
+                    border-color: #9ec589;
+                }
+            }
+
+            &.error,
+            &.danger {
+                background: #ffe4e4;
+                border-color: #df3e3e;
+                color: #bf0a0a;
+
+                > .close {
+                    border-color: #df3e3e;
+                }
+            }
+
+            &.notice,
+            &.warning {
+                background: #f8f1d4;
+                border-color: #d2a323;
+                color: #906901;
+
+                > .close {
+                    border-color: #d2a323;
                 }
             }
         }
@@ -17849,7 +17916,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.16.0 (2017-03-24 20:04) ************ */
+/*! ************ QuickSilk-Application v3.17.0 (2017-04-18 17:58) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -17967,7 +18034,7 @@ ul.pt__field__hint {
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.16.0';
+@AppVersion: '3.17.0';
 
 // /* ******* PATH ******* */
 
@@ -21217,7 +21284,7 @@ html {
         }
     }
 
-    .pt__overlay {
+    .sidebar__overlay {
         &.theme-dark {
             background-color: fade(@background, 70%);
         }
@@ -24508,6 +24575,30 @@ html {
                             visibility: visible;
                             opacity: 1;
                             overflow: visible;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    > .tabs__input {
+        display: none;
+    }
+
+    &.is-editing {
+        > .inner {
+            > .tabs__content {
+                position: relative;
+
+                > .inner {
+                    > ul {
+                        > li {
+                            display: none;
+
+                            &.active {
+                                display: block;
+                            }
                         }
                     }
                 }

@@ -106,7 +106,7 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
-                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"breadcrumbs\", \"type\" : \"form-manager\"}'>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_timepicker\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_timepicker\"></div>

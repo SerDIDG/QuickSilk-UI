@@ -17,9 +17,9 @@ if(!empty($_POST['instanceId']) && $_POST['instanceId'] != 'false'){
 $module = '';
 switch($_POST['keyword']){
 	case 'form_builder':
-		$module =   '<div class="app__module app-mod__default">
+		$module =   '<div class="app__module app-mod__default" data-element="Mod.Form" data-node="ModForm:{}:container" data-config=\'{"remember" : true, "name" : "form"}\'>
 						<div class="form"> 
-							<div data-element="App.Zone" data-config=\'{"instanceId" : 1, "zone" : "content", "parentId" : "0", "type" : "form-manager", "link" : {"parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'", "type" : "'.$config['type'].'"}}\'></div>
+							<div data-element="App.Zone" data-config=\'{"instanceId" : 1, "zone" : "content", "parentId" : "0", "positionId" : "content", "type" : "form-manager", "link" : {"parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'", "type" : "'.$config['type'].'"}}\'></div>
 						</div>
 					 </div>';
 		break;
