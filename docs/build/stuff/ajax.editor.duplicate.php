@@ -14,7 +14,7 @@ $config = array(
 );
 
 $response = json_encode(array(
-	'data' =>  '<div class="app__block-container" data-element="app-block" data-config=\''.json_encode($config).'\' data-node="AppBlock:{}:container">
+	'data' =>  '<div class="app__block-container is-indent-auto" data-element="app-block" data-config=\''.json_encode($config).'\' data-node="AppBlock:{}:container">
 					<div class="app__block" data-node="block:{}:container">
 						<div class="border"></div>
 						<div class="drag" data-node="drag:[]:container">

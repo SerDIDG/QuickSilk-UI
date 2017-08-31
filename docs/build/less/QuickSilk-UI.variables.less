@@ -33,7 +33,7 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.26.0';
+@CmVersion: '3.30.0';
 
 // /* ******* PATH ******* */
 
@@ -92,8 +92,12 @@
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-Right: 2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Left: -2px 0 5px rgba(0,0,0,0.15);
+@CmUI-Shadow-Card: 0 1px 2px rgba(0,0,0,0.25);
 @CmUI-Overlay: @CmUI-Overlay-Light;
 @CmUI-Overlay-Fade: 0.7;
+@CmUI-Overlay-FadeMedium: 0.3;
+@CmUI-Overlay-FadeP: 70%;
+@CmUI-Overlay-FadeMediumP: 30%;
 @CmUI-Overlay-Dark: rgba(0, 0, 0, @CmUI-Overlay-Fade);
 @CmUI-Overlay-Light: rgba(255, 255, 255, @CmUI-Overlay-Fade);
 @CmUI-Overlay-Duration: @CmUI-Transition-DurationLong;
@@ -229,6 +233,19 @@
 @CmColor-Success-DarkActive: hsl(@CmColor-Success, @CmColor-Success-DarkSaturation, @CmColor-Success-DarkActive-Lightness + @CmColor-Success-DarkLighten);
 @CmColor-Success-DarkActiveHover: hsl(@CmColor-Success, @CmColor-Success-DarkSaturation, @CmColor-Success-DarkActiveHover-Lightness + @CmColor-Success-DarkLighten);
 
+// /* Middle Tone Key */
+
+@CmColor-Success-MiddleSaturation: 65%;
+@CmColor-Success-MiddleLighten: 0%;
+@CmColor-Success-MiddleDefault-Lightness: @CmVar-Color-MiddleDefault-Lightness;
+@CmColor-Success-MiddleHover-Lightness: @CmVar-Color-MiddleHover-Lightness;
+@CmColor-Success-MiddleActive-Lightness: @CmVar-Color-MiddleActive-Lightness;
+@CmColor-Success-MiddleActiveHover-Lightness: @CmVar-Color-MiddleActiveHover-Lightness;
+@CmColor-Success-MiddleDefault: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleDefault-Lightness + @CmColor-Success-MiddleLighten);
+@CmColor-Success-MiddleHover: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleHover-Lightness + @CmColor-Success-MiddleLighten);
+@CmColor-Success-MiddleActive: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleActive-Lightness + @CmColor-Success-MiddleLighten);
+@CmColor-Success-MiddleActiveHover: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleActiveHover-Lightness + @CmColor-Success-MiddleLighten);
+
 // /* Light Key */
 
 @CmColor-Success-LightSaturation: 60%;
@@ -260,6 +277,19 @@
 @CmColor-Danger-DarkActive: hsl(@CmColor-Danger, @CmColor-Danger-DarkSaturation, @CmColor-Danger-DarkActive-Lightness + @CmColor-Danger-DarkLighten);
 @CmColor-Danger-DarkActiveHover: hsl(@CmColor-Danger, @CmColor-Danger-DarkSaturation, @CmColor-Danger-DarkActiveHover-Lightness + @CmColor-Danger-DarkLighten);
 
+// /* Middle Tone Key */
+
+@CmColor-Danger-MiddleSaturation: 65%;
+@CmColor-Danger-MiddleLighten: 0%;
+@CmColor-Danger-MiddleDefault-Lightness: @CmVar-Color-MiddleDefault-Lightness;
+@CmColor-Danger-MiddleHover-Lightness: @CmVar-Color-MiddleHover-Lightness;
+@CmColor-Danger-MiddleActive-Lightness: @CmVar-Color-MiddleActive-Lightness;
+@CmColor-Danger-MiddleActiveHover-Lightness: @CmVar-Color-MiddleActiveHover-Lightness;
+@CmColor-Danger-MiddleDefault: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleDefault-Lightness + @CmColor-Danger-MiddleLighten);
+@CmColor-Danger-MiddleHover: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleHover-Lightness + @CmColor-Danger-MiddleLighten);
+@CmColor-Danger-MiddleActive: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleActive-Lightness + @CmColor-Danger-MiddleLighten);
+@CmColor-Danger-MiddleActiveHover: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleActiveHover-Lightness + @CmColor-Danger-MiddleLighten);
+
 // /* Light Key */
 
 @CmColor-Danger-LightSaturation: 65%;
@@ -290,6 +320,19 @@
 @CmColor-Warning-DarkHover: hsl(@CmColor-Warning, @CmColor-Warning-DarkSaturation, @CmColor-Warning-DarkHover-Lightness + @CmColor-Warning-DarkLighten);
 @CmColor-Warning-DarkActive: hsl(@CmColor-Warning, @CmColor-Warning-DarkSaturation, @CmColor-Warning-DarkActive-Lightness + @CmColor-Warning-DarkLighten);
 @CmColor-Warning-DarkActiveHover: hsl(@CmColor-Warning, @CmColor-Warning-DarkSaturation, @CmColor-Warning-DarkActiveHover-Lightness + @CmColor-Warning-DarkLighten);
+
+// /* Middle Tone Key */
+
+@CmColor-Warning-MiddleSaturation: 70%;
+@CmColor-Warning-MiddleLighten: 0%;
+@CmColor-Warning-MiddleDefault-Lightness: @CmVar-Color-MiddleDefault-Lightness;
+@CmColor-Warning-MiddleHover-Lightness: @CmVar-Color-MiddleHover-Lightness;
+@CmColor-Warning-MiddleActive-Lightness: @CmVar-Color-MiddleActive-Lightness;
+@CmColor-Warning-MiddleActiveHover-Lightness: @CmVar-Color-MiddleActiveHover-Lightness;
+@CmColor-Warning-MiddleDefault: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleDefault-Lightness + @CmColor-Warning-MiddleLighten);
+@CmColor-Warning-MiddleHover: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleHover-Lightness + @CmColor-Warning-MiddleLighten);
+@CmColor-Warning-MiddleActive: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleActive-Lightness + @CmColor-Warning-MiddleLighten);
+@CmColor-Warning-MiddleActiveHover: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleActiveHover-Lightness + @CmColor-Warning-MiddleLighten);
 
 // /* Light Key */
 
@@ -380,15 +423,16 @@
 
 @CmBorder-Radius: 3px;
 @CmBorder-Width: 1px;
+@CmBorder-Style: solid;
 @CmBorder-BoxWidth: 2px;
 @CmBorder-TemporaryWidth: @CmBorder-BoxWidth;
-@CmBorder-Default: @CmBorder-Width solid @CmColor-Border;
+@CmBorder-Default: @CmBorder-Width @CmBorder-Style @CmColor-Border;
 @CmBorder-Separator: @CmBorder-Width dotted @CmColor-Border;
 @CmBorder-Editable: @CmBorder-Width dashed @CmColor-BorderActive;
-@CmBorder-Box: @CmBorder-BoxWidth solid @CmColor-Border;
-@CmBorder-BoxHover: @CmBorder-BoxWidth solid @CmColor-BorderHover;
-@CmBorder-BoxActive: @CmBorder-BoxWidth solid @CmColor-BorderActive;
-@CmBorder-BoxSelected: @CmBorder-BoxWidth solid @CmColor-BorderSelected;
+@CmBorder-Box: @CmBorder-BoxWidth @CmBorder-Style @CmColor-Border;
+@CmBorder-BoxHover: @CmBorder-BoxWidth @CmBorder-Style @CmColor-BorderHover;
+@CmBorder-BoxActive: @CmBorder-BoxWidth @CmBorder-Style @CmColor-BorderActive;
+@CmBorder-BoxSelected: @CmBorder-BoxWidth @CmBorder-Style @CmColor-BorderSelected;
 @CmBorder-Temporary: @CmBorder-TemporaryWidth dashed @CmColor-Border;
 @CmBorder-TemporaryHover: @CmBorder-TemporaryWidth dashed @CmColor-BorderHover;
 @CmBorder-TemporaryActive: @CmBorder-TemporaryWidth dashed @CmColor-BorderActive;
@@ -403,10 +447,16 @@
 // /* ******* INPUTS ******* */
 
 @CmInput-Padding: 6px;
+@CmInput-BorderWidth: @CmBorder-Width;
+@CmInput-BorderStyle: @CmBorder-Style;
 @CmInput-DefaultBackground: @CmColor-Background;
+@CmInput-DefaultBorder: @CmColor-Border;
 @CmInput-HoverBackground: @CmInput-DefaultBackground;
+@CmInput-HoverBorder: @CmColor-BorderHover;
 @CmInput-ActiveBackground: @CmInput-DefaultBackground;
+@CmInput-ActiveBorder: @CmColor-BorderActive;
 @CmInput-DisabledBackground: @CmColor-Secondary-LightHighlight;
+@CmInput-DisableBorder: @CmColor-BorderDisabled;
 @CmTextarea-Height: 100px;
 @CmSelect-Size: 7;
 
@@ -419,7 +469,7 @@
 
 // /* ******* FORM ******* */
 
-@CmForm-FieldHeight: 28px;
+@CmForm-FieldHeight: 32px;
 @CmForm-FieldIndent: @CmIndent-Small;
 @CmForm-FieldTitleWidth: 156px;
 @CmForm-FieldTitleWidthSpaceless: 128px;
@@ -485,12 +535,19 @@
 @PtRange-Height: 200px;
 @PtRange-Drag-Color: #000000;
 
+// /* ******* LIST ******* */
+
+@PtList-PaddingY: 2px;
+@PtList-PaddingX: 4px;
+@PtList-Indent: 1px;
+@PtList-ImageIndent: @CmIndent-XXSmall;
+
 // /* ******* LISTING ITEMS ******* */
 
 @PtListingItems-Count: 10;
-@PtListingItems-PaddingY: 2px;
-@PtListingItems-PaddingX: 4px;
-@PtListingItems-Indent: 1px;
+@PtListingItems-PaddingY: @PtList-PaddingY;
+@PtListingItems-PaddingX: @PtList-PaddingX;
+@PtListingItems-Indent: @PtList-Indent;
 
 // /* ******* LISTING COUNTERS ******* */
 
@@ -800,7 +857,7 @@
 // /* ******* TIME SELECT ******* */
 
 @ComTimeSelect-Width: @CmForm-FieldSmallWidth;
-@ComTimeSelect-Indent: @CmIndent-Medium;
+@ComTimeSelect-Indent: @CmIndent-XSmall;
 
 // /* ******* COLOR PALETTE ******* */
 
@@ -916,6 +973,7 @@
 
 @ComSelect-ListCount: 7;
 @ComSelect-MultiListCount: 5;
+@ComSelect-MaxHeight: @ComSelect-MultiListCount * (@CmFont-Base-LineHeight + @PtListingItems-Indent + @PtListingItems-PaddingY * 2) - @PtListingItems-Indent;
 
 // /* ******* AUTOCOMPLETE ******* */
 
@@ -986,7 +1044,7 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.26.0';
+@CmVersion: '3.30.0';
 
 // /* ******* PATH ******* */
 
@@ -1045,8 +1103,12 @@
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-Right: 2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Left: -2px 0 5px rgba(0,0,0,0.15);
+@CmUI-Shadow-Card: 0 1px 2px rgba(0,0,0,0.25);
 @CmUI-Overlay: @CmUI-Overlay-Light;
 @CmUI-Overlay-Fade: 0.7;
+@CmUI-Overlay-FadeMedium: 0.3;
+@CmUI-Overlay-FadeP: 70%;
+@CmUI-Overlay-FadeMediumP: 30%;
 @CmUI-Overlay-Dark: rgba(0, 0, 0, @CmUI-Overlay-Fade);
 @CmUI-Overlay-Light: rgba(255, 255, 255, @CmUI-Overlay-Fade);
 @CmUI-Overlay-Duration: @CmUI-Transition-DurationLong;
@@ -1182,6 +1244,19 @@
 @CmColor-Success-DarkActive: hsl(@CmColor-Success, @CmColor-Success-DarkSaturation, @CmColor-Success-DarkActive-Lightness + @CmColor-Success-DarkLighten);
 @CmColor-Success-DarkActiveHover: hsl(@CmColor-Success, @CmColor-Success-DarkSaturation, @CmColor-Success-DarkActiveHover-Lightness + @CmColor-Success-DarkLighten);
 
+// /* Middle Tone Key */
+
+@CmColor-Success-MiddleSaturation: 65%;
+@CmColor-Success-MiddleLighten: 0%;
+@CmColor-Success-MiddleDefault-Lightness: @CmVar-Color-MiddleDefault-Lightness;
+@CmColor-Success-MiddleHover-Lightness: @CmVar-Color-MiddleHover-Lightness;
+@CmColor-Success-MiddleActive-Lightness: @CmVar-Color-MiddleActive-Lightness;
+@CmColor-Success-MiddleActiveHover-Lightness: @CmVar-Color-MiddleActiveHover-Lightness;
+@CmColor-Success-MiddleDefault: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleDefault-Lightness + @CmColor-Success-MiddleLighten);
+@CmColor-Success-MiddleHover: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleHover-Lightness + @CmColor-Success-MiddleLighten);
+@CmColor-Success-MiddleActive: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleActive-Lightness + @CmColor-Success-MiddleLighten);
+@CmColor-Success-MiddleActiveHover: hsl(@CmColor-Success, @CmColor-Success-MiddleSaturation, @CmColor-Success-MiddleActiveHover-Lightness + @CmColor-Success-MiddleLighten);
+
 // /* Light Key */
 
 @CmColor-Success-LightSaturation: 60%;
@@ -1213,6 +1288,19 @@
 @CmColor-Danger-DarkActive: hsl(@CmColor-Danger, @CmColor-Danger-DarkSaturation, @CmColor-Danger-DarkActive-Lightness + @CmColor-Danger-DarkLighten);
 @CmColor-Danger-DarkActiveHover: hsl(@CmColor-Danger, @CmColor-Danger-DarkSaturation, @CmColor-Danger-DarkActiveHover-Lightness + @CmColor-Danger-DarkLighten);
 
+// /* Middle Tone Key */
+
+@CmColor-Danger-MiddleSaturation: 65%;
+@CmColor-Danger-MiddleLighten: 0%;
+@CmColor-Danger-MiddleDefault-Lightness: @CmVar-Color-MiddleDefault-Lightness;
+@CmColor-Danger-MiddleHover-Lightness: @CmVar-Color-MiddleHover-Lightness;
+@CmColor-Danger-MiddleActive-Lightness: @CmVar-Color-MiddleActive-Lightness;
+@CmColor-Danger-MiddleActiveHover-Lightness: @CmVar-Color-MiddleActiveHover-Lightness;
+@CmColor-Danger-MiddleDefault: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleDefault-Lightness + @CmColor-Danger-MiddleLighten);
+@CmColor-Danger-MiddleHover: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleHover-Lightness + @CmColor-Danger-MiddleLighten);
+@CmColor-Danger-MiddleActive: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleActive-Lightness + @CmColor-Danger-MiddleLighten);
+@CmColor-Danger-MiddleActiveHover: hsl(@CmColor-Danger, @CmColor-Danger-MiddleSaturation, @CmColor-Danger-MiddleActiveHover-Lightness + @CmColor-Danger-MiddleLighten);
+
 // /* Light Key */
 
 @CmColor-Danger-LightSaturation: 65%;
@@ -1243,6 +1331,19 @@
 @CmColor-Warning-DarkHover: hsl(@CmColor-Warning, @CmColor-Warning-DarkSaturation, @CmColor-Warning-DarkHover-Lightness + @CmColor-Warning-DarkLighten);
 @CmColor-Warning-DarkActive: hsl(@CmColor-Warning, @CmColor-Warning-DarkSaturation, @CmColor-Warning-DarkActive-Lightness + @CmColor-Warning-DarkLighten);
 @CmColor-Warning-DarkActiveHover: hsl(@CmColor-Warning, @CmColor-Warning-DarkSaturation, @CmColor-Warning-DarkActiveHover-Lightness + @CmColor-Warning-DarkLighten);
+
+// /* Middle Tone Key */
+
+@CmColor-Warning-MiddleSaturation: 70%;
+@CmColor-Warning-MiddleLighten: 0%;
+@CmColor-Warning-MiddleDefault-Lightness: @CmVar-Color-MiddleDefault-Lightness;
+@CmColor-Warning-MiddleHover-Lightness: @CmVar-Color-MiddleHover-Lightness;
+@CmColor-Warning-MiddleActive-Lightness: @CmVar-Color-MiddleActive-Lightness;
+@CmColor-Warning-MiddleActiveHover-Lightness: @CmVar-Color-MiddleActiveHover-Lightness;
+@CmColor-Warning-MiddleDefault: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleDefault-Lightness + @CmColor-Warning-MiddleLighten);
+@CmColor-Warning-MiddleHover: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleHover-Lightness + @CmColor-Warning-MiddleLighten);
+@CmColor-Warning-MiddleActive: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleActive-Lightness + @CmColor-Warning-MiddleLighten);
+@CmColor-Warning-MiddleActiveHover: hsl(@CmColor-Warning, @CmColor-Warning-MiddleSaturation, @CmColor-Warning-MiddleActiveHover-Lightness + @CmColor-Warning-MiddleLighten);
 
 // /* Light Key */
 
@@ -1333,15 +1434,16 @@
 
 @CmBorder-Radius: 3px;
 @CmBorder-Width: 1px;
+@CmBorder-Style: solid;
 @CmBorder-BoxWidth: 2px;
 @CmBorder-TemporaryWidth: @CmBorder-BoxWidth;
-@CmBorder-Default: @CmBorder-Width solid @CmColor-Border;
+@CmBorder-Default: @CmBorder-Width @CmBorder-Style @CmColor-Border;
 @CmBorder-Separator: @CmBorder-Width dotted @CmColor-Border;
 @CmBorder-Editable: @CmBorder-Width dashed @CmColor-BorderActive;
-@CmBorder-Box: @CmBorder-BoxWidth solid @CmColor-Border;
-@CmBorder-BoxHover: @CmBorder-BoxWidth solid @CmColor-BorderHover;
-@CmBorder-BoxActive: @CmBorder-BoxWidth solid @CmColor-BorderActive;
-@CmBorder-BoxSelected: @CmBorder-BoxWidth solid @CmColor-BorderSelected;
+@CmBorder-Box: @CmBorder-BoxWidth @CmBorder-Style @CmColor-Border;
+@CmBorder-BoxHover: @CmBorder-BoxWidth @CmBorder-Style @CmColor-BorderHover;
+@CmBorder-BoxActive: @CmBorder-BoxWidth @CmBorder-Style @CmColor-BorderActive;
+@CmBorder-BoxSelected: @CmBorder-BoxWidth @CmBorder-Style @CmColor-BorderSelected;
 @CmBorder-Temporary: @CmBorder-TemporaryWidth dashed @CmColor-Border;
 @CmBorder-TemporaryHover: @CmBorder-TemporaryWidth dashed @CmColor-BorderHover;
 @CmBorder-TemporaryActive: @CmBorder-TemporaryWidth dashed @CmColor-BorderActive;
@@ -1356,10 +1458,16 @@
 // /* ******* INPUTS ******* */
 
 @CmInput-Padding: 6px;
+@CmInput-BorderWidth: @CmBorder-Width;
+@CmInput-BorderStyle: @CmBorder-Style;
 @CmInput-DefaultBackground: @CmColor-Background;
+@CmInput-DefaultBorder: @CmColor-Border;
 @CmInput-HoverBackground: @CmInput-DefaultBackground;
+@CmInput-HoverBorder: @CmColor-BorderHover;
 @CmInput-ActiveBackground: @CmInput-DefaultBackground;
+@CmInput-ActiveBorder: @CmColor-BorderActive;
 @CmInput-DisabledBackground: @CmColor-Secondary-LightHighlight;
+@CmInput-DisableBorder: @CmColor-BorderDisabled;
 @CmTextarea-Height: 100px;
 @CmSelect-Size: 7;
 
@@ -1372,7 +1480,7 @@
 
 // /* ******* FORM ******* */
 
-@CmForm-FieldHeight: 28px;
+@CmForm-FieldHeight: 32px;
 @CmForm-FieldIndent: @CmIndent-Small;
 @CmForm-FieldTitleWidth: 156px;
 @CmForm-FieldTitleWidthSpaceless: 128px;
@@ -1438,12 +1546,19 @@
 @PtRange-Height: 200px;
 @PtRange-Drag-Color: #000000;
 
+// /* ******* LIST ******* */
+
+@PtList-PaddingY: 2px;
+@PtList-PaddingX: 4px;
+@PtList-Indent: 1px;
+@PtList-ImageIndent: @CmIndent-XXSmall;
+
 // /* ******* LISTING ITEMS ******* */
 
 @PtListingItems-Count: 10;
-@PtListingItems-PaddingY: 2px;
-@PtListingItems-PaddingX: 4px;
-@PtListingItems-Indent: 1px;
+@PtListingItems-PaddingY: @PtList-PaddingY;
+@PtListingItems-PaddingX: @PtList-PaddingX;
+@PtListingItems-Indent: @PtList-Indent;
 
 // /* ******* LISTING COUNTERS ******* */
 
@@ -1753,7 +1868,7 @@
 // /* ******* TIME SELECT ******* */
 
 @ComTimeSelect-Width: @CmForm-FieldSmallWidth;
-@ComTimeSelect-Indent: @CmIndent-Medium;
+@ComTimeSelect-Indent: @CmIndent-XSmall;
 
 // /* ******* COLOR PALETTE ******* */
 
@@ -1869,6 +1984,7 @@
 
 @ComSelect-ListCount: 7;
 @ComSelect-MultiListCount: 5;
+@ComSelect-MaxHeight: @ComSelect-MultiListCount * (@CmFont-Base-LineHeight + @PtListingItems-Indent + @PtListingItems-PaddingY * 2) - @PtListingItems-Indent;
 
 // /* ******* AUTOCOMPLETE ******* */
 
@@ -2021,7 +2137,7 @@
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.17.0';
+@AppVersion: '3.18.0';
 
 // /* ******* PATH ******* */
 
@@ -2127,8 +2243,8 @@
 
 // /* ******* COLORS ******* */
 
-@AppColor-QuickSilk: #0060a0;
-@AppColor-UI-Panel: #000;
+@AppColor-QuickSilk: #21b573;
+@AppColor-UI-Panel: #1f2630;
 @AppColor-UI-PanelBlock: @CmColor-Primary-DarkActiveHover;
 
 // /* ******* AREA ******* */
@@ -2198,6 +2314,11 @@
 @AppSidebar-ThemeDark-Background: @CmColor-Primary-DarkDefault;
 @AppSidebar-ThemeLight-Color: @CmColor-Font;
 @AppSidebar-ThemeLight-Background: #ffffff;
+
+// /* ******* NOTIFICATION ******* */
+
+@AppNotification-Height: @AppTopMenu-Height;
+@AppNotification-Fade: 95%;
 
 // /* ******* ZONE ******* */
 
