@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.30.0 (2017-08-31 21:11) ************ */
+/*! ************ MagpieUI v3.30.2 (2017-09-06 19:46) ************ */
 @charset "UTF-8";
 
 /*!
@@ -3752,7 +3752,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.30.0';
+@CmVersion: '3.30.2';
 
 // /* ******* PATH ******* */
 
@@ -6542,7 +6542,7 @@ tbody, thead, td, th, tr {
 }
 
 .input--size-helper (@height, @padding, @border, @lineHeight) {
-    @padding_calc: max(ceil((@height - @lineHeight - @border * 2) / 2), 0);
+    @padding_calc: max(ceil((@height - @lineHeight - @border * 2) / 2), 0px);
     @padding_x: max(ceil((@height - @lineHeight - @border * 2) / 2), @padding);
 
     height: @height;
@@ -18047,11 +18047,10 @@ ul.pt__field__hint {
         padding: 0;
 
         .tags {
-            .clearfix;
             padding: 0 @CmIndent-XXXSmall 0;
 
             .item {
-                max-width: 33.33%;
+                max-width: 50%;
                 padding: @CmIndent-XXSmall @CmIndent-XXXSmall 0 @CmIndent-XXXSmall;
                 float: left;
 
@@ -18089,6 +18088,7 @@ ul.pt__field__hint {
             .input.is-borderless;
             .input.input-transparent;
             margin: -@CmInput-BorderWidth;
+            clear: both;
         }
     }
 
@@ -18269,7 +18269,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.18.1 (2017-08-31 21:12) ************ */
+/*! ************ QuickSilk-Application v3.18.4 (2017-09-06 19:46) ************ */
 .svg__app__logo { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%2321b573%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E"); }
 .svg__app__menu-dropdown { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22menu-dropdown.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%227%22%20viewBox%3D%220%200%2012%207%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M12%2C0L6%2C4.787%2C0%2C0V2.212L6%2C7l6-4.79V0Z%22%2F%3E%3C%2Fsvg%3E"); }
 
@@ -18389,7 +18389,7 @@ ul.pt__field__hint {
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.18.1';
+@AppVersion: '3.18.4';
 
 // /* ******* PATH ******* */
 
@@ -20134,13 +20134,16 @@ html {
 .app__block-container {
     position: relative;
     z-index: 1;
+    margin: 0 0 @AppBlock-Indent;
     .mx__transition(z-index, @CmUI-Transition-Duration);
     .mx__transition-delay(@CmUI-Transition-Delay-Hide);
 
-    // /* Inner */
-
     > .app__block {
         .pt__editable__bundle > .normal;
+        margin: 0;
+    }
+
+    &:last-child {
         margin: 0;
     }
 
@@ -20218,16 +20221,6 @@ html {
 
     &.is-visible {
         display: block;
-    }
-
-    &.is-indent-auto {
-        margin: 0 0 @AppBlock-Indent;
-
-        &:not(.is-editing):not(.is-replacing) {
-            &:last-child {
-                margin: 0;
-            }
-        }
     }
 
     &.is-immediately {
@@ -21003,16 +20996,11 @@ html {
             position: absolute;
             z-index: 2;
             .mx__position(@top, @top, auto, auto);
-
-            &.default {
-                .icon.medium.close-white;
-            }
         }
 
         > .text {
             position: relative;
             z-index: 1;
-            color: @CmColor-Font-Opposite;
             line-height: @heightInner;
             text-align: center;
 
@@ -21027,6 +21015,50 @@ html {
 
                 &:last-child {
                     margin-right: 0;
+                }
+            }
+        }
+    }
+
+    &.is-secondary,
+    &.is-success,
+    &.is-warning,
+    &.is-danger,
+    &.is-quicksilk {
+        > .inner {
+            > .icon {
+                &.default {
+                    .icon.medium.close-white;
+                }
+            }
+
+            > .text {
+                color: @CmColor-Font-Opposite;
+
+                .cm__tags,
+                .cm__link {
+                    color: @CmColor-Font-Opposite;
+                }
+
+                .cm__link {
+                    text-decoration: underline;
+
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
+            }
+        }
+    }
+
+    &.is-success--light,
+    &.is-warning--light,
+    &.is-danger--light,
+    &.is-white {
+        > .inner {
+            > .icon {
+                &.default {
+                    .icon.medium.close;
                 }
             }
         }
@@ -21053,6 +21085,30 @@ html {
     &.is-quicksilk {
         > .inner {
             background: fade(@AppColor-QuickSilk, @AppNotification-Fade);
+        }
+    }
+
+    &.is-white {
+        > .inner {
+            background: fade(@CmColor-Background, @AppNotification-Fade);
+        }
+    }
+
+    &.is-success--light {
+        > .inner {
+            background: fade(@CmColor-Success-LightActive, @AppNotification-Fade);
+        }
+    }
+
+    &.is-warning--light {
+        > .inner {
+            background: fade(@CmColor-Warning-LightActive, @AppNotification-Fade);
+        }
+    }
+
+    &.is-danger--light {
+        > .inner {
+            background: fade(@CmColor-Danger-LightActive, @AppNotification-Fade);
         }
     }
 
@@ -22907,6 +22963,13 @@ html {
 
 }
 
+/* ******* MODULE: KLIPFOLIO KLIP ******* */
+
+.app-mod__klipfolio-klip {
+    img {
+        .cm__image-adaptive;
+    }
+}
 /* ******* MODULES: KNOWLEDGE CENTRE ******* */
 
 .app-mod__knowledge-centre {
