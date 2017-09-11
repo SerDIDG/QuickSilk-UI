@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-docs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Pages: Sign Up</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body>
+
+<div class="app__page page__sign-up">
+    <div class="pt__box-editable">
+        <div class="r">
+            <h3>Step 2 of 3</h3>
+        </div>
+        <div class="l">
+            <h1>Sign Up</h1>
+        </div>
+    </div>
+
+    <div class="pt__box-content indent-24px">
+        <div class="form">
+            <dl>
+                <dt>Membership Type: <span class="required">*</span></dt>
+                <dd>
+                    <div class="check-line">
+                        <input type="radio" name="type" value="trial" id="membership-trial" checked>
+                        <label for="membership-trial">Free Trial</label>
+                    </div>
+                    <div class="check-line">
+                        <input type="radio" name="type" value="join" id="membership-join">
+                        <label for="membership-join">Join Now</label>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt></dt>
+                <dd>
+                    <div class="check-line">
+                        <input type="checkbox" name="accept" id="accept">
+                        <label for="accept">I accept the Terms of Service</label>
+                    </div>
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="pt__box-content indent-24px">
+        <h2>Payment Details:</h2>
+
+        <div class="form">
+            <dl>
+                <dt>Card Type: <span class="required">*</span></dt>
+                <dd>
+                    <select data-element="select">
+                        <option value="0">- Please Select -</option>
+                        <option value="Mastercard">MasterCard</option>
+                        <option value="Visa">Visa</option>
+                        <option value="Discover">Discover Card</option>
+                        <option value="American_Express">American Express</option>
+                    </select>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Card Number: <span class="required">*</span></dt>
+                <dd>
+                    <div class="pt__grid col-4 indent-16px bottom">
+                        <ul>
+                            <li>
+                                <input type="text" maxlength="4">
+                            </li>
+                            <li>
+                                <input type="text" maxlength="4">
+                            </li>
+                            <li>
+                                <input type="text" maxlength="4">
+                            </li>
+                            <li>
+                                <input type="text" maxlength="4">
+                            </li>
+                        </ul>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Expiry Date: <span class="required">*</span></dt>
+                <dd>
+                    <div class="pt__grid col-4 indent-16px bottom">
+                        <ul>
+                            <li>
+                                <input type="text" maxlength="2" placeholder="MM">
+                            </li>
+                            <li>
+                                <input type="text" maxlength="2" placeholder="YY">
+                            </li>
+                        </ul>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>CVV: <span class="required">*</span></dt>
+                <dd>
+                    <div class="pt__grid col-4 indent-16px bottom">
+                        <ul>
+                            <li>
+                                <input type="text" maxlength="4">
+                            </li>
+                        </ul>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Street Address 1: <span class="required">*</span></dt>
+                <dd>
+                    <input type="text">
+                </dd>
+            </dl>
+            <dl>
+                <dt>Street Address 2:</dt>
+                <dd>
+                    <input type="text">
+                    <div class="hint">(Optional)</div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>City: <span class="required">*</span></dt>
+                <dd>
+                    <input type="text">
+                </dd>
+            </dl>
+            <dl>
+                <dt>Country: <span class="required">*</span></dt>
+                <dd>
+                    <select data-element="select">
+                        <option>- Please Select -</option>
+                        <option>United States</option>
+                        <option>Canada</option>
+                    </select>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Province / State: <span class="required">*</span></dt>
+                <dd>
+                    <input type="text">
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="pt__box-content indent-24px">
+        <h2>Domain Name:</h2>
+        <p>Do you wish to add a domain name now? If you have a domain name, enter it in the field below. If you don’t want to enter a domain name at this time, simply leave the field below blank and we’ll automatically create a temporary domain alias for you. You’ll be able to add or modify this information later on if needed.</p>
+
+        <div class="form">
+            <dl>
+                <dt>Domain Name:</dt>
+                <dd>
+                    <input type="text">
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="btn-wrap">
+        <input type="submit" value="Proceed to Step 3">
+        <input type="submit" class="left" value="Back to Step 1">
+    </div>
+</div>
+
+</body>
+
+</html>

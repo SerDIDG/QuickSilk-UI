@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.30.2 (2017-09-06 19:46) ************ */
+/*! ************ MagpieUI v3.30.2 (2017-09-11 17:27) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -6260,12 +6260,17 @@ input[type="reset"].has-icon .label:not(:last-child),
 button.has-icon .label:not(:last-child) {
   margin-right: 8px;
 }
-.button.has-icon-medium .icon,
-input[type="button"].has-icon-medium .icon,
-input[type="submit"].has-icon-medium .icon,
-input[type="reset"].has-icon-medium .icon,
-button.has-icon-medium .icon {
-  margin-top: -3px;
+.button.has-icon.valign-middle .icon,
+.button.has-icon.valign-middle .label,
+input[type="button"].has-icon.valign-middle .icon,
+input[type="button"].has-icon.valign-middle .label,
+input[type="submit"].has-icon.valign-middle .icon,
+input[type="submit"].has-icon.valign-middle .label,
+input[type="reset"].has-icon.valign-middle .icon,
+input[type="reset"].has-icon.valign-middle .label,
+button.has-icon.valign-middle .icon,
+button.has-icon.valign-middle .label {
+  vertical-align: middle;
 }
 .button.has-icon-small .icon,
 input[type="button"].has-icon-small .icon,
@@ -6273,6 +6278,23 @@ input[type="submit"].has-icon-small .icon,
 input[type="reset"].has-icon-small .icon,
 button.has-icon-small .icon {
   margin-top: 1px;
+  margin-bottom: 1px;
+}
+.button.has-icon-medium .icon,
+input[type="button"].has-icon-medium .icon,
+input[type="submit"].has-icon-medium .icon,
+input[type="reset"].has-icon-medium .icon,
+button.has-icon-medium .icon {
+  margin-top: -3px;
+  margin-bottom: -3px;
+}
+.button.has-icon-large .icon,
+input[type="button"].has-icon-large .icon,
+input[type="submit"].has-icon-large .icon,
+input[type="reset"].has-icon-large .icon,
+button.has-icon-large .icon {
+  margin-top: -7px;
+  margin-bottom: -7px;
 }
 input[type="button"]::-moz-focus-inner,
 input[type="submit"]::-moz-focus-inner,
@@ -17935,11 +17957,21 @@ ul.pt__field__hint li:before {
 .com__pagination__bar ul li a.has-icon .label:not(:last-child) {
   margin-right: 8px;
 }
-.com__pagination__bar ul li a.has-icon-medium .icon {
-  margin-top: -3px;
+.com__pagination__bar ul li a.has-icon.valign-middle .icon,
+.com__pagination__bar ul li a.has-icon.valign-middle .label {
+  vertical-align: middle;
 }
 .com__pagination__bar ul li a.has-icon-small .icon {
   margin-top: 1px;
+  margin-bottom: 1px;
+}
+.com__pagination__bar ul li a.has-icon-medium .icon {
+  margin-top: -3px;
+  margin-bottom: -3px;
+}
+.com__pagination__bar ul li a.has-icon-large .icon {
+  margin-top: -7px;
+  margin-bottom: -7px;
 }
 .com__pagination__bar ul li a:hover,
 .com__pagination__bar ul li a:active {
@@ -19901,7 +19933,7 @@ html.ie9 .com__timeselect > .inner > .sep {
 .com__file-manager.is-fullsize .ui-resizable-handle {
   display: none !important;
 }
-/*! ************ QuickSilk-Application v3.18.4 (2017-09-06 19:46) ************ */
+/*! ************ QuickSilk-Application v3.18.5 (2017-09-11 17:27) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%2321b573%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -19910,8 +19942,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.18.4');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.18.4') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.18.4') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.18.4') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.18.4#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.18.5');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.18.5') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.18.5') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.18.5') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.18.5#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -26935,6 +26967,118 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 .app-mod__sign-links ol,
 .app-mod__sign-links hr {
   margin: 0;
+}
+/* ******* MODULES: SIGN UP ******* */
+.mod__signup__title .cm__tags,
+.mod__signup__title h1,
+.mod__signup__title h2,
+.mod__signup__title h3,
+.mod__signup__title h4,
+.mod__signup__title h5,
+.mod__signup__title h6,
+.mod__signup__title p,
+.mod__signup__title dl,
+.mod__signup__title ul,
+.mod__signup__title ol,
+.mod__signup__title hr {
+  text-align: center;
+}
+.mod__signup__block {
+  margin: 48px 0;
+}
+.mod__signup__columns {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+}
+.mod__signup__columns > .column--form {
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+}
+.mod__signup__columns > .column--social {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-align-content: center;
+  align-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-flex: 0 1 30%;
+  -ms-flex: 0 1 30%;
+  flex: 0 1 30%;
+}
+.mod__signup__columns > .column--social .button,
+.mod__signup__columns > .column--social input[type="button"],
+.mod__signup__columns > .column--social input[type="submit"],
+.mod__signup__columns > .column--social input[type="reset"],
+.mod__signup__columns > .column--social button {
+  text-align: left;
+}
+.mod__signup__columns > .separator {
+  width: 32px;
+  margin: 0 24px;
+  position: relative;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+}
+.mod__signup__columns > .separator:before {
+  width: 0;
+  display: block;
+  position: absolute;
+  margin: auto;
+  z-index: 1;
+  border-left: 1px solid #cccccc;
+  content: '';
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.mod__signup__columns > .separator .label {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  margin: auto;
+  z-index: 2;
+  border: 1px solid #cccccc;
+  border-radius: 100%;
+  background: #ffffff;
+  text-align: center;
+  line-height: 32px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.mod__signup__disclaimer {
+  margin: 24px 0 0 0;
+}
+/* ******* MODULES: SIGN UP: Adaptive ******* */
+@media only screen and (max-width: 768px) {
+  html.is-adaptive .mod__signup__columns {
+    display: block;
+  }
+  html.is-adaptive .mod__signup__columns > .separator {
+    width: auto;
+    height: 32px;
+    margin: 24px 0;
+  }
+  html.is-adaptive .mod__signup__columns > .separator:before {
+    width: auto;
+    height: 0;
+    border-left: none;
+    border-top: 1px solid #cccccc;
+  }
+  html.is-adaptive .mod__signup__columns > .column--social {
+    width: auto;
+    display: block;
+  }
 }
 /* ******* MODULES: SITEMAP ******* */
 .app-mod__sitemap > .inner {
