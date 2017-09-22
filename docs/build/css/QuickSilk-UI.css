@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.30.2 (2017-09-11 17:27) ************ */
+/*! ************ MagpieUI v3.30.6 (2017-09-22 20:21) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -8,7 +8,7 @@
  *
  * Copyright (c) 2016 Daniel Eden
  */
-@import url(//fonts.googleapis.com/css?family=Open+Sans:100,300,400,600,700,800);
+@import url('//fonts.googleapis.com/css?family=Quicksand:300, 400, 500, 700');
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -3434,8 +3434,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.30.2');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.30.2') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.30.2') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.30.2') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.30.2#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.30.6');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.30.6') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.30.6') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.30.6') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.30.6#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -3630,7 +3630,7 @@ span.CodeMirror-selectedtext {
 }
 /* *** EMPTY *** */
 .cm__empty {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: italic;
   padding: 12px;
@@ -3783,20 +3783,20 @@ span.CodeMirror-selectedtext {
 /* ******* COMMON: FONT ******* */
 /* *** BASE *** */
 .cm__font {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .cm__font--small {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .cm__font--cursive {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: italic;
 }
 .cm__font--small-cursive {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: italic;
 }
@@ -3814,11 +3814,11 @@ span.CodeMirror-selectedtext {
   color: #16599c;
 }
 .cm__font--hint {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
 }
 .cm__font--hint-cursive {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   font-style: italic;
 }
@@ -3831,29 +3831,29 @@ span.CodeMirror-selectedtext {
 }
 /* *** UI *** */
 .cm__font--ui {
-  font: 400 13px/18px 'Open Sans', arial, helvetica, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .cm__font--ui-small {
-  font: 400 11px/18px 'Open Sans', arial, helvetica, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .cm__font--ui-cursive {
-  font: 400 13px/18px 'Open Sans', arial, helvetica, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: italic;
 }
 .cm__font--ui-small-cursive {
-  font: 400 11px/18px 'Open Sans', arial, helvetica, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: italic;
 }
 .cm__font--ui-h1 {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
 }
 .cm__font--ui-h4 {
-  font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 16px/24px Quicksand, sans-serif;
   color: #666666;
 }
 /* ******* COMMON: SIZE ******* */
@@ -4866,7 +4866,7 @@ span.CodeMirror-selectedtext {
   box-sizing: border-box;
 }
 body {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   margin: 0;
   padding: 0;
@@ -5371,7 +5371,7 @@ input,
 select,
 textarea,
 button {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   margin: 0;
   outline: none;
@@ -6423,7 +6423,7 @@ button.is-hidden {
   text-align: right;
 }
 .cm__list-inline--base > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .cm__list-flex {
@@ -6864,7 +6864,7 @@ button.is-hidden {
 }
 /* *** HINT ***  */
 .form .hint {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   font-style: italic;
   text-transform: none;
@@ -7400,7 +7400,7 @@ button.is-hidden {
   margin: 0;
 }
 .cm__form__icons-inside .text {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   display: inline-block;
   vertical-align: middle;
@@ -7979,7 +7979,7 @@ button.is-hidden {
   margin-bottom: 0;
 }
 .pt__box-item .hint {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   font-style: italic;
 }
@@ -8128,7 +8128,7 @@ button.is-hidden {
   text-align: right;
 }
 .pt__breadcrumbs ul li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   margin: 0 8px 8px 0;
 }
@@ -9000,7 +9000,7 @@ button.is-hidden {
   margin-top: 1px;
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -9385,7 +9385,7 @@ button.is-hidden {
 }
 /* *** FIELD HINT *** */
 .pt__field__hint {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   font-style: italic;
   text-transform: none;
@@ -9517,7 +9517,7 @@ ul.pt__field__hint li:before {
   text-align: right;
 }
 .pt__grid > ul > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   width: 100%;
   overflow: hidden;
@@ -10254,7 +10254,7 @@ ul.pt__field__hint li:before {
   left: 0;
 }
 .pt__image > .inner > .title .inner {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -11859,7 +11859,7 @@ ul.pt__field__hint li:before {
 }
 .pt__line-share .label,
 .pt__line-share .count {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #666666;
   display: inline-block;
   vertical-align: top;
@@ -12026,7 +12026,7 @@ ul.pt__field__hint li:before {
   margin-top: 1px;
 }
 .pt__list__item > .inner > .content .hint {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
 }
 .pt__list__item.is-nowrap > .inner > .content .title,
@@ -12101,7 +12101,7 @@ ul.pt__field__hint li:before {
   margin: 0;
 }
 .pt__listing .list-info {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
 }
 .pt__listing .list-title {
@@ -12373,7 +12373,7 @@ ul.pt__field__hint li:before {
   margin-top: 1px;
 }
 .pt__menu-dropdown--base li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -12665,7 +12665,7 @@ ul.pt__field__hint li:before {
   border-style: solid;
 }
 .pt__range.theme--arrows .drag .counter {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   color: #ffffff;
   text-shadow: 0 0 1px #000000, 0 0 2px #000000;
@@ -12783,7 +12783,7 @@ ul.pt__field__hint li:before {
   background: #2985e0;
 }
 .pt__ruler.is-small .counter {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .pt__ruler.is-horizontal {
@@ -12913,7 +12913,7 @@ ul.pt__field__hint li:before {
   text-align: right;
 }
 .pt__toolbar .group > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .pt__toolbar .group:last-child {
@@ -13323,7 +13323,7 @@ ul.pt__field__hint li:before {
   position: absolute;
 }
 .lt__collapsible > .sidebar > .inner > .title {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   padding: 6px 12px;
   position: absolute;
@@ -13491,7 +13491,7 @@ ul.pt__field__hint li:before {
   margin: 0;
 }
 .lt__comment .comment-info {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   line-height: 14px;
 }
@@ -13522,7 +13522,7 @@ ul.pt__field__hint li:before {
   display: block;
 }
 .lt__comment .comment-actions {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   line-height: 12px;
 }
@@ -13825,12 +13825,12 @@ ul.pt__field__hint li:before {
   vertical-align: top;
 }
 .lt__forum-post > .inner > .r .date {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   color: #666666;
 }
 .lt__forum-post > .inner > .r .pt__box-editable {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   margin: 0;
   color: #666666;
@@ -13885,7 +13885,7 @@ ul.pt__field__hint li:before {
 }
 .lt__post .post-info,
 .lt__post .post-tags {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
 }
 .lt__post .post-info .pt__line-info {
@@ -14139,7 +14139,7 @@ ul.pt__field__hint li:before {
   transition: -webkit-transform 250ms ease-in-out, -ms-transform 250ms ease-in-out, transform 250ms ease-in-out;
 }
 .com__togglebox > dt .title {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -14318,7 +14318,7 @@ ul.pt__field__hint li:before {
   height: 24px;
 }
 .com__togglebox.is-medium > dt .title {
-  font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 16px/24px Quicksand, sans-serif;
   color: #666666;
   padding: 0px 0;
 }
@@ -14332,7 +14332,7 @@ ul.pt__field__hint li:before {
   overflow: visible;
   white-space: normal;
   text-overflow: clip;
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-weight: 600;
   padding: 3px 0;
@@ -14345,7 +14345,7 @@ ul.pt__field__hint li:before {
   height: 24px;
 }
 .com__togglebox.is-ui > dt .title {
-  font: 400 13px/18px 'Open Sans', arial, helvetica, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-weight: 600;
   padding: 3px 0;
@@ -14627,7 +14627,7 @@ ul.pt__field__hint li:before {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   padding: 0 4px;
   line-height: 18px;
@@ -14769,7 +14769,7 @@ ul.pt__field__hint li:before {
   padding: 4px;
 }
 .com__calendar-week .calendar__type .label {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   text-align: center;
 }
@@ -14850,7 +14850,7 @@ ul.pt__field__hint li:before {
   height: 20px;
 }
 .com__calendar-month .calendar__dayname > .label {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   line-height: 20px;
   text-align: right;
@@ -14867,7 +14867,7 @@ ul.pt__field__hint li:before {
   margin-top: 1px;
 }
 .com__calendar-month .calendar__more > .label {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   overflow: hidden;
   white-space: nowrap;
@@ -15507,7 +15507,7 @@ ul.pt__field__hint li:before {
 }
 /* ******* COMPONENTS: DIALOG ******* */
 .com__dialog {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -15715,7 +15715,7 @@ ul.pt__field__hint li:before {
 .com__dialog.theme-default > .window > .inner > .title,
 .com__dialog.theme-black > .window > .inner > .title,
 .com__dialog.theme-light > .window > .inner > .title {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
 }
 .com__dialog.theme-default > .window > .inner > .descr > .scroll > .inner,
@@ -15955,7 +15955,7 @@ ul.pt__field__hint li:before {
   transition: all 100ms ease-in-out;
 }
 .com__file-dropzone > .inner > .title {
-  font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 16px/24px Quicksand, sans-serif;
   color: #666666;
   text-align: center;
   -webkit-transition: all 100ms ease-in-out;
@@ -16061,7 +16061,7 @@ ul.pt__field__hint li:before {
   position: relative;
 }
 .com__file-uploader__title {
-  font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 16px/24px Quicksand, sans-serif;
   color: #666666;
   text-align: center;
 }
@@ -17105,7 +17105,7 @@ ul.pt__field__hint li:before {
   margin-top: 1px;
 }
 .com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -17367,7 +17367,7 @@ ul.pt__field__hint li:before {
 .com__notifications > ul > li > .messages > ul {
   margin-bottom: 24px;
   list-style: disc;
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   font-style: italic;
   padding-top: 8px;
@@ -17557,7 +17557,7 @@ ul.pt__field__hint li:before {
   text-align: right;
 }
 .com__pagination__bar ul > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .com__pagination__bar ul li {
@@ -18149,7 +18149,7 @@ html.ie9 .com__palette .b-range {
   left: 0;
 }
 .com__palette .b-preview-color .b-title {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   text-align: center;
 }
@@ -19057,7 +19057,7 @@ html.ie9 .com__palette .b-range {
   margin-top: 1px;
 }
 .com__tabset__head-menu .pt__menu-dropdown li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -19187,7 +19187,7 @@ html.ie9 .com__palette .b-range {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   padding: 0 12px;
   line-height: 32px;
   font-size: 13px;
@@ -19733,7 +19733,7 @@ html.ie9 .com__palette .b-range {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   color: #ffffff;
   line-height: 24px;
@@ -19785,7 +19785,7 @@ html.ie9 .com__palette .b-range {
   flex: 1 1;
 }
 .com__timeselect > .inner > .sep {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   width: 12px;
   text-align: center;
@@ -19933,7 +19933,7 @@ html.ie9 .com__timeselect > .inner > .sep {
 .com__file-manager.is-fullsize .ui-resizable-handle {
   display: none !important;
 }
-/*! ************ QuickSilk-Application v3.18.5 (2017-09-11 17:27) ************ */
+/*! ************ QuickSilk-Application v3.18.11 (2017-09-22 20:22) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%2321b573%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -19942,8 +19942,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.18.5');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.18.5') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.18.5') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.18.5') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.18.5#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.18.11');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.18.11') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.18.11') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.18.11') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.18.11#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -20093,43 +20093,43 @@ body:before {
 }
 /* ******* COMMON: FONT ******* */
 .app__font--h1 {
-  font: 100 48px/64px Open Sans, sans-serif;
+  font: 100 48px/64px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h2 {
-  font: 400 32px/42px Open Sans, sans-serif;
+  font: 400 32px/42px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h3 {
-  font: 400 24px/32px Open Sans, sans-serif;
+  font: 400 24px/32px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h4 {
-  font: 400 18px/24px Open Sans, sans-serif;
+  font: 400 18px/24px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h5 {
-  font: 400 16px/24px Open Sans, sans-serif;
+  font: 400 16px/24px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--h6 {
-  font: 600 12px/18px Open Sans, sans-serif;
+  font: 600 12px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__font--p {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -20153,7 +20153,13 @@ body:before {
   text-decoration: underline;
 }
 .app__font--default {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
+  color: #666666;
+  font-style: normal;
+  text-decoration: none;
+}
+.app__font--admin {
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -20166,7 +20172,7 @@ body:before {
 }
 /* *** COMPONENTS *** */
 .com__dialog-font {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -20208,19 +20214,19 @@ body:before {
   color: #666666;
 }
 .app__topmenu-font {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__sidebar-font {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 .app__helptour-font {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -20426,43 +20432,43 @@ body:before {
 }
 /* ******* COMMON: TAGS ******* */
 body {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 h1 {
-  font: 100 48px/64px Open Sans, sans-serif;
+  font: 100 48px/64px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 h2 {
-  font: 400 32px/42px Open Sans, sans-serif;
+  font: 400 32px/42px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 h3 {
-  font: 400 24px/32px Open Sans, sans-serif;
+  font: 400 24px/32px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 h4 {
-  font: 400 18px/24px Open Sans, sans-serif;
+  font: 400 18px/24px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 h5 {
-  font: 400 16px/24px Open Sans, sans-serif;
+  font: 400 16px/24px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
 }
 h6 {
-  font: 600 12px/18px Open Sans, sans-serif;
+  font: 600 12px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -20769,7 +20775,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-align: right;
 }
 .app-pt__box-login .links ul > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .app-pt__box-login .links ul li {
@@ -21233,7 +21239,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin-bottom: 0;
 }
 .app-lt__plan .plan-price {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   text-align: center;
 }
@@ -21377,7 +21383,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   left: 0;
 }
 .app-lt__templates__item .info .title {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   position: absolute;
   padding: 12px;
@@ -21616,7 +21622,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin-top: 1px;
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -21904,7 +21910,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   padding: 2px;
 }
 .app__block-dummy .caption {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #666666;
   padding: 4px 0;
   overflow: hidden;
@@ -22271,7 +22277,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 /* ******* COMPONENTS: HELP TOUR ******* */
 .app__helptour__popup {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -22703,7 +22709,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__live-preview__content .device .device__blues ul,
 .app__live-preview__content .device .device__blues ol,
 .app__live-preview__content .device .device__blues hr {
-  font: 400 13px/18px 'Open Sans', arial, helvetica, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   color: #ffffff;
   word-wrap: break-word;
@@ -22852,7 +22858,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__notification > .inner > .text .text-line {
   display: inline-block;
   vertical-align: top;
-  margin: 0 4px;
+  margin: 0 2px;
 }
 .app__notification > .inner > .text .text-line:first-child {
   margin-left: 0;
@@ -23248,7 +23254,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   user-select: none;
 }
 .app__panel__dialog > .inner > .title > .label {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -23391,7 +23397,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   justify-content: space-between;
 }
 .app__panel__preview > .inner > .title > .label {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -23485,7 +23491,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 /* *** COMPONENTS *** */
 .app__panel__label {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -23523,7 +23529,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 /* ******* COMPONENTS: SIDEBAR ******* */
 .app__sidebar {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -23761,7 +23767,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   padding: 0 48px 0 12px;
   position: absolute;
@@ -24243,7 +24249,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   opacity: 0.7;
 }
 .app__topmenu .menu__title {
-  font: 300 24px/32px 'Open Sans', arial, helvetica, sans-serif;
+  font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
   overflow: hidden;
   white-space: nowrap;
@@ -24359,7 +24365,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   padding: 0;
 }
 .app__topmenu .menu li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   font-style: normal;
   text-decoration: none;
@@ -24523,7 +24529,7 @@ html:not(.is-editing).is-editor .app__module__controls {
     margin-top: 1px;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li a {
-    font: 400 13px/18px Open Sans, sans-serif;
+    font: 400 13px/18px Quicksand, sans-serif;
     outline: none;
     cursor: pointer;
     font-weight: 400;
@@ -24661,7 +24667,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 /* *** TABLET VIEW *** */
 @media only screen and (min-width: 769px) and (max-width: 1024px) {
   html.is-adaptive .app__topmenu .menu__title {
-    font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+    font: 300 16px/24px Quicksand, sans-serif;
     color: #666666;
     line-height: 48px;
     color: #ffffff;
@@ -24681,7 +24687,7 @@ html:not(.is-editing).is-editor .app__module__controls {
     left: 0;
   }
   html.is-adaptive .app__topmenu .menu__title {
-    font: 300 16px/24px 'Open Sans', arial, helvetica, sans-serif;
+    font: 300 16px/24px Quicksand, sans-serif;
     color: #666666;
     margin-left: 48px;
     margin-right: 48px;
@@ -25171,7 +25177,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-align: right;
 }
 .app-mod__lang-switch ul > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .app-mod__lang-switch ul li {
@@ -25239,7 +25245,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-align: right;
 }
 .app-mod__loginlink ul li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   margin: 0 0 0 12px;
 }
@@ -25474,7 +25480,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-align: right;
 }
 .mod__menu.is-horizontal .menu__menu > ul > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .mod__menu.is-horizontal .menu__menu > ul > li > a {
@@ -25577,7 +25583,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin-top: 1px;
 }
 .mod__menu--custom.is-dropdown .menu__sub > ul li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -25786,7 +25792,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-align: right;
 }
 .app-mod__menu > ul > li {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
 .app-mod__menu > ul > li {
@@ -25850,7 +25856,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin-top: 1px;
 }
 .app-mod__menu .pt__menu-dropdown li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -26533,7 +26539,6 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-mod__rollover-tabs > .inner > .tabs__menu > .inner .icon.default {
   background-image: url("../img/MagpieUI/icons/medium/menu.png");
 }
-.app-mod__rollover-tabs > .inner > .tabs__menu > .inner:hover .pt__menu-dropdown,
 .app-mod__rollover-tabs > .inner > .tabs__menu > .inner.active .pt__menu-dropdown {
   visibility: visible;
   opacity: 1;
@@ -26572,7 +26577,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   margin-top: 1px;
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -26830,7 +26835,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 }
 .app-mod__rollover-tabs.theme-initial > .inner > .tabs__head > .inner ul > li > a,
 .app-mod__rollover-tabs.theme-default > .inner > .tabs__head > .inner ul > li > a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   text-decoration: none;
 }
@@ -26841,7 +26846,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 }
 .app-mod__rollover-tabs.theme-initial > .inner > .tabs__menu > .inner .label,
 .app-mod__rollover-tabs.theme-default > .inner > .tabs__menu > .inner .label {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   min-height: 32px;
   line-height: 32px;
@@ -27357,7 +27362,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   margin-top: 1px;
 }
 .mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -27583,7 +27588,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 }
 .mod__wizard.theme-initial > .inner > .tabs__head > .inner ul > li > a,
 .mod__wizard.theme-default > .inner > .tabs__head > .inner ul > li > a {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   text-decoration: none;
 }
@@ -27594,7 +27599,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 }
 .mod__wizard.theme-initial > .inner > .tabs__menu > .inner .label,
 .mod__wizard.theme-default > .inner > .tabs__menu > .inner .label {
-  font: 400 13px/18px Open Sans, sans-serif;
+  font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   min-height: 32px;
   line-height: 32px;
@@ -27727,7 +27732,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   width: 50%;
 }
 .app__additional-donations__descr {
-  font: 400 11px/18px Open Sans, sans-serif;
+  font: 400 11px/18px Quicksand, sans-serif;
   color: #999999;
   padding: 0 0 0 26px;
   margin: 0 0 12px 0;
