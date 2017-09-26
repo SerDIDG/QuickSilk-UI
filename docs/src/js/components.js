@@ -166,8 +166,8 @@ window.Collector = new Com.Collector({
 
     /* *** TEST STUFF *** */
 
-    .add('big-calendar', function(node){
-        new Com.BigCalendar({
+    .add('module__calendar', function(node){
+        new Module.Calendar({
             'node' : node,
             'events' : {
                 'onProcessEnd' : function(calendar, node){

@@ -3,10 +3,10 @@
 $data = '';
 switch($_GET['view']){
 	case 'agenda':
-		$data = '<div class="com__calendar-agenda" data-element="Com.CalendarAgenda" data-node="ComCalendarAgenda:{}:container" data-config=\'{"name" : "positionId"}\'>
+		$data = '<div class="module__calendar-agenda" data-element="Module.CalendarAgenda" data-node="ModuleCalendarAgenda:{}:container" data-config=\'{"name" : "positionId"}\'>
 	                <div class="calendar__templates" data-node="templates:{}">
 	                    <div data-node="event:{}">
-	                        <div class="com__calendar-event-tooltip__content" data-node="container">
+	                        <div class="module__calendar-event-tooltip__content" data-node="container">
 	                            <div class="lt__post">
 	                                <h4 class="post-title" data-node="title"></h4>
 	                                <div class="post-info">
@@ -99,7 +99,7 @@ switch($_GET['view']){
 	                                </td>
 	                                <td class="table__events">
 	                                    <div class="calendar__events-holder" data-node="events-holder">
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">All day</div>
 	                                                <div class="title">
@@ -110,7 +110,7 @@ switch($_GET['view']){
 	                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ultrices ante sit amet porta. Proin felis risus, malesuada et dapibus eget, condimentum in arcu. Nunc sollicitudin euismod pharetra. Vivamus pharetra sem felis, nec commodo arcu iaculis a. Maecenas imperdiet sollicitudin dapibus. In ac justo vel ante ultricies convallis. Pellentesque tristique consectetur metus, in blandit arcu ornare in. </p>
 	                                            </div>
 	                                        </div>
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">All day</div>
 	                                                <div class="title">
@@ -121,7 +121,7 @@ switch($_GET['view']){
 	                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ultrices ante sit amet porta. Proin felis risus, malesuada et dapibus eget, condimentum in arcu. Nunc sollicitudin euismod pharetra. Vivamus pharetra sem felis, nec commodo arcu iaculis a. Maecenas imperdiet sollicitudin dapibus. In ac justo vel ante ultricies convallis. Pellentesque tristique consectetur metus, in blandit arcu ornare in. </p>
 	                                            </div>
 	                                        </div>
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">12:45</div>
 	                                                <div class="title">
@@ -132,7 +132,7 @@ switch($_GET['view']){
 	                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ultrices ante sit amet porta. Proin felis risus, malesuada et dapibus eget, condimentum in arcu. Nunc sollicitudin euismod pharetra. Vivamus pharetra sem felis, nec commodo arcu iaculis a. Maecenas imperdiet sollicitudin dapibus. In ac justo vel ante ultricies convallis. Pellentesque tristique consectetur metus, in blandit arcu ornare in. </p>
 	                                            </div>
 	                                        </div>
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">20:00</div>
 	                                                <div class="title">
@@ -154,7 +154,7 @@ switch($_GET['view']){
 	                                </td>
 	                                <td class="table__events">
 	                                    <div class="calendar__events-holder" data-node="events-holder">
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">All day</div>
 	                                                <div class="title">
@@ -165,7 +165,7 @@ switch($_GET['view']){
 	                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ultrices ante sit amet porta. Proin felis risus, malesuada et dapibus eget, condimentum in arcu. Nunc sollicitudin euismod pharetra. Vivamus pharetra sem felis, nec commodo arcu iaculis a. Maecenas imperdiet sollicitudin dapibus. In ac justo vel ante ultricies convallis. Pellentesque tristique consectetur metus, in blandit arcu ornare in. </p>
 	                                            </div>
 	                                        </div>
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">All day</div>
 	                                                <div class="title">
@@ -176,7 +176,7 @@ switch($_GET['view']){
 	                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ultrices ante sit amet porta. Proin felis risus, malesuada et dapibus eget, condimentum in arcu. Nunc sollicitudin euismod pharetra. Vivamus pharetra sem felis, nec commodo arcu iaculis a. Maecenas imperdiet sollicitudin dapibus. In ac justo vel ante ultricies convallis. Pellentesque tristique consectetur metus, in blandit arcu ornare in. </p>
 	                                            </div>
 	                                        </div>
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">12:45</div>
 	                                                <div class="title">
@@ -187,7 +187,7 @@ switch($_GET['view']){
 	                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ultrices ante sit amet porta. Proin felis risus, malesuada et dapibus eget, condimentum in arcu. Nunc sollicitudin euismod pharetra. Vivamus pharetra sem felis, nec commodo arcu iaculis a. Maecenas imperdiet sollicitudin dapibus. In ac justo vel ante ultricies convallis. Pellentesque tristique consectetur metus, in blandit arcu ornare in. </p>
 	                                            </div>
 	                                        </div>
-	                                        <div class="com__calendar-event is-long">
+	                                        <div class="module__calendar-event is-long">
 	                                            <div class="label">
 	                                                <div class="time">20:00</div>
 	                                                <div class="title">
@@ -208,10 +208,10 @@ switch($_GET['view']){
 		break;
 
 	case 'week':
-		$data = '<div class="com__calendar-week" data-element="Com.CalendarWeek" data-node="ComCalendarWeek:{}:container" data-config=\'{"name" : "positionId"}\'>
+		$data = '<div class="module__calendar-week" data-element="Module.CalendarWeek" data-node="ModuleCalendarWeek:{}:container" data-config=\'{"name" : "positionId"}\'>
 	                <div class="calendar__templates" data-node="templates:{}">
 	                    <div data-node="event:{}">
-	                        <div class="com__calendar-event-tooltip__content" data-node="container">
+	                        <div class="module__calendar-event-tooltip__content" data-node="container">
 	                            <div class="lt__post">
 	                                <h4 class="post-title" data-node="title"></h4>
 	                                <div class="post-info">
@@ -313,10 +313,10 @@ switch($_GET['view']){
 	                                    <div class="calendar__day" data-node="day">
 	                                        <div class="inner" data-node="inner">
 	                                            <div class="calendar__events-holder" data-node="events-holder">
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis suscipit commodo porttitor. Vestibulum pulvinar mollis urna non dignissim.", "url" : "http://quicksilk.com"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis suscipit commodo porttitor. Vestibulum pulvinar mollis urna non dignissim.", "url" : "http://quicksilk.com"}}\'>
 	                                                    <div class="label">Some event text</div>
 	                                                </div>
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">Some event text</div>
 	                                                </div>
 	                                            </div>
@@ -350,13 +350,13 @@ switch($_GET['view']){
 	                                    <div class="calendar__day" data-node="day">
 	                                        <div class="inner" data-node="inner">
 	                                            <div class="calendar__events-holder" data-node="events-holder">
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">
 	                                                        <div class="time">12:45</div>
 	                                                        <div class="title">Some event text</div>
 	                                                    </div>
 	                                                </div>
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">
 	                                                        <div class="time">13:00</div>
 	                                                        <div class="title">Some event very long text description</div>
@@ -389,10 +389,10 @@ switch($_GET['view']){
 		break;
 
 	case 'month':
-		$data = '<div class="com__calendar-month" data-element="Com.CalendarMonth" data-node="ComCalendarMonth:{}:container" data-config=\'{"name" : "positionId"}\'>
+		$data = '<div class="module__calendar-month" data-element="Module.CalendarMonth" data-node="ModuleCalendarMonth:{}:container" data-config=\'{"name" : "positionId"}\'>
 	                <div class="calendar__templates" data-node="templates:{}">
 	                    <div data-node="event:{}">
-	                        <div class="com__calendar-event-tooltip__content" data-node="container">
+	                        <div class="module__calendar-event-tooltip__content" data-node="container">
 	                            <div class="lt__post">
 	                                <h4 class="post-title" data-node="title"></h4>
 	                                <div class="post-info">
@@ -497,7 +497,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">31</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -507,7 +507,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">1</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -517,7 +517,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">2</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -528,13 +528,13 @@ switch($_GET['view']){
 	                                                <div class="label">3</div>
 	                                            </div>
 	                                            <div class="calendar__events-holder" data-node="events-holder">
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 3, 2016 20:00", "title" : "Some event text", "description" : "Some very long event text description, that displays in tooltip popup.", "url" : "http://quicksilk.com"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 3, 2016 20:00", "title" : "Some event text", "description" : "Some very long event text description, that displays in tooltip popup.", "url" : "http://quicksilk.com"}}\'>
 	                                                    <div class="label">Some event text</div>
 	                                                </div>
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">Some event text</div>
 	                                                </div>
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">Some event text</div>
 	                                                </div>
 	                                            </div>
@@ -545,40 +545,40 @@ switch($_GET['view']){
 	                                            </div>
 	                                            <div class="calendar__more-holder" data-node="more-holder">
 	                                                <div class="inner">
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">Some event text</div>
 	                                                    </div>
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">Some event text</div>
 	                                                    </div>
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">Some event text</div>
 	                                                    </div>
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">
 	                                                            <div class="time">12:45</div>
 	                                                            <div class="title">Some event text</div>
 	                                                        </div>
 	                                                    </div>
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">
 	                                                            <div class="time">13:00</div>
 	                                                            <div class="title">Some event very long text description</div>
 	                                                        </div>
 	                                                    </div>
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">
 	                                                            <div class="time">14:45</div>
 	                                                            <div class="title">Some event text</div>
 	                                                        </div>
 	                                                    </div>
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">
 	                                                            <div class="time">15:00</div>
 	                                                            <div class="title">Some event very long text description</div>
 	                                                        </div>
 	                                                    </div>
-	                                                    <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                    <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                        <div class="label">
 	                                                            <div class="time">17:30</div>
 	                                                            <div class="title">Some event very long text description</div>
@@ -595,7 +595,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">4</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -606,19 +606,19 @@ switch($_GET['view']){
 	                                                <div class="label">5</div>
 	                                            </div>
 	                                            <div class="calendar__events-holder" data-node="events-holder">
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">Some event text</div>
 	                                                </div>
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">Some event text</div>
 	                                                </div>
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">
 	                                                        <div class="time">12:45</div>
 	                                                        <div class="title">Some event text</div>
 	                                                    </div>
 	                                                </div>
-	                                                <div class="com__calendar-event is-short" data-element="Com.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
+	                                                <div class="module__calendar-event is-short" data-element="Module.CalendarEvent" data-config=\'{"data" : {"date" : "February 5, 2016 20:00", "title" : "Some event text", "description" : "Some event text"}}\'>
 	                                                    <div class="label">
 	                                                        <div class="time">13:00</div>
 	                                                        <div class="title">Some event very long text description</div>
@@ -634,7 +634,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">6</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -646,7 +646,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">7</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -656,7 +656,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">8</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -666,7 +666,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">9</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -676,7 +676,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">10</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -686,7 +686,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">11</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -696,7 +696,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">12</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -706,7 +706,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">13</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -718,7 +718,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">14</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -728,7 +728,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">15</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -738,7 +738,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">16</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -747,7 +747,7 @@ switch($_GET['view']){
 	                                        <div class="calendar__dayname">
 	                                            <div class="label">17</div>
 	                                        </div>
-	                                        <div class="com__calendar-events"></div>
+	                                        <div class="module__calendar-events"></div>
 	                                    </div>
 	                                </td>
 	                                 <td class="default" data-node="days:[]:container">
@@ -756,7 +756,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">18</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -766,7 +766,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">19</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -776,7 +776,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">20</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -788,7 +788,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">21</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -798,7 +798,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">22</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -808,7 +808,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">23</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -818,7 +818,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">24</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -828,7 +828,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">25</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -838,7 +838,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">26</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -848,7 +848,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">27</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -860,7 +860,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">28</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -870,7 +870,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">29</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -880,7 +880,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">1</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -890,7 +890,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">2</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -900,7 +900,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">3</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -910,7 +910,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">4</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -920,7 +920,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">5</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -932,7 +932,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">6</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -942,7 +942,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">7</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -952,7 +952,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">8</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -962,7 +962,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">9</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -972,7 +972,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">10</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -982,7 +982,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">11</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>
@@ -992,7 +992,7 @@ switch($_GET['view']){
 	                                            <div class="calendar__dayname">
 	                                                <div class="label">12</div>
 	                                            </div>
-	                                            <div class="com__calendar-events"></div>
+	                                            <div class="module__calendar-events"></div>
 	                                        </div>
 	                                    </div>
 	                                </td>

@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.30.6 (2017-09-22 20:21) ************ */
+/*! ************ MagpieUI v3.30.7 (2017-09-26 16:28) ************ */
 // TinyColor v1.3.0
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1507,7 +1507,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.30.6',
+        '_version' : '3.30.7',
         '_loadTime' : Date.now(),
         '_isDocumentReady' : false,
         '_isDocumentLoad' : false,
@@ -2492,8 +2492,8 @@ cm.addScript = function(src, async, callback){
     };
     // Config
     src = cm.isArray(src) ? cm.objectReplace(src, vars) : cm.strReplace(src, vars);
-    async = typeof async != 'undefined' ? async : false;
-    callback = typeof callback != 'undefined' ? callback : function(){};
+    async = !cm.isUndefined(async) ? async : false;
+    callback = !cm.isUndefined(callback) ? callback : function(){};
     // Configure Stack Item
     if(cm._addScriptStack[src]){
         item = cm._addScriptStack[src];
@@ -9664,864 +9664,6 @@ Com.FormFields.add('buttons', {
         }
     }
 });
-/* ******* COMPONENTS: BIG CALENDAR ******* */
-
-cm.define('Com.BigCalendar', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'DataConfig',
-        'DataNodes',
-        'Callbacks',
-        'Stack'
-    ],
-    'events' : [
-        'onRenderStart',
-        'onRender',
-        'onError',
-        'onAbort',
-        'onSuccess',
-        'onSendStart',
-        'onSendEnd',
-        'onProcessEnd'
-    ],
-    'params' : {
-        'node' : cm.node('div'),
-        'name' : '',
-        'defaultView' : 'agenda',                                   // agenda | week | month
-        'isViewPreloaded' : false,
-        'animateDuration' : 'cm._config.animDuration',
-        'showLoader' : true,
-        'loaderDelay' : 'cm._config.loadDelay',
-        'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
-        'responseHTML' : true,                                      // If true, html will append automatically
-        'ajax' : {
-            'type' : 'json',
-            'method' : 'get',
-            'url' : '',                                             // Request URL. Variables: %baseUrl%, %view%, %year%, %month%, %week%, %callback% for JSONP.
-            'params' : {                                            // Params object. %baseUrl%, %view%, %year%, %month%, %week%, %callback% for JSONP.
-                'view' : '%view%',
-                'week' : '%week%',
-                'month' : '%month%',
-                'year' : '%year%',
-                'query' : '%query%'
-            }
-        },
-        'Com.Overlay' : {
-            'position' : 'absolute',
-            'autoOpen' : false,
-            'removeOnClose' : true,
-            'appendMode' : 'insertFirst'
-        }
-    },
-    'strings' : {
-        'server_error' : 'An unexpected error has occurred. Please try again later.'
-    }
-},
-function(params){
-    var that = this,
-        viewDetailsPattern = {
-            'view' : null,
-            'week' : null,
-            'month' : null,
-            'year' : null,
-            'query' : null
-        };
-
-    that.nodes = {
-        'container' : cm.node('div'),
-        'buttons' : {
-            'views' : {
-                'agenda' : cm.node('div'),
-                'week' : cm.node('div'),
-                'month' : cm.node('div')
-            }
-        },
-        'holder' : {
-            'container' : cm.node('div'),
-            'inner' : cm.node('div')
-        }
-    };
-    that.components = {};
-    that.animations = {};
-
-    that.ajaxHandler = null;
-    that.isProcess = false;
-    that.isRendering = false;
-    that.loaderDelay = null;
-    that.viewDetails = cm.clone(viewDetailsPattern);
-
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        validateParams();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRenderStart');
-        render();
-        that.addToStack(that.nodes['container']);
-        that.triggerEvent('onRender');
-    };
-
-    var validateParams = function(){
-        that.params['defaultView'] = cm.inArray(['agenda', 'week', 'month'], that.params['defaultView']) ? that.params['defaultView'] : 'month';
-        that.params['Com.Overlay']['container'] = that.nodes['container'];
-    };
-
-    var render = function(){
-        // Overlay
-        cm.getConstructor('Com.Overlay', function(classConstructor, className){
-            that.components['loader'] = new classConstructor(that.params[className]);
-        });
-        // Animations
-        that.animations['response'] = new cm.Animation(that.nodes['holder']['container']);
-        // View Buttons
-        cm.forEach(that.nodes['buttons']['views'], function(node, key){
-            cm.addEvent(node, 'click', function(e){
-                cm.preventDefault(e);
-                setView({
-                    'view' : key
-                });
-            });
-        });
-        // View Finder
-        new cm.Finder('Com.CalendarAgenda', that.params['name'], that.nodes['holder']['inner'], function(classObject){
-            classObject.addEvent('onRequestView', function(calendar, data){
-                setView(data);
-            });
-        }, {'multiple' : true});
-        new cm.Finder('Com.CalendarWeek', that.params['name'], that.nodes['holder']['inner'], function(classObject){
-            classObject.addEvent('onRequestView', function(calendar, data){
-                setView(data);
-            });
-        }, {'multiple' : true});
-        new cm.Finder('Com.CalendarMonth', that.params['name'], that.nodes['holder']['inner'], function(classObject){
-            classObject.addEvent('onRequestView', function(calendar, data){
-                setView(data);
-            });
-        }, {'multiple' : true});
-        // Render View
-        !that.params['isViewPreloaded'] && setView({
-            'view' : that.params['defaultView']
-        });
-    };
-
-    var setViewDetails = function(data){
-        that.viewDetails = cm.merge(viewDetailsPattern, data);
-    };
-
-    var setView = function(data){
-        if(that.isProcess){
-            that.abort();
-        }
-        if(!that.isProcess && !that.isRendering){
-            setViewDetails(data);
-            cm.forEach(that.nodes['buttons']['views'], function(node, key){
-                if(key === that.viewDetails['view']){
-                    cm.replaceClass(node, 'button-secondary', 'button-primary');
-                }else{
-                    cm.replaceClass(node, 'button-primary', 'button-secondary');
-                }
-            });
-            that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params['ajax']));
-        }
-    };
-
-    /* ******* CALLBACKS ******* */
-
-    /* *** AJAX *** */
-
-    that.callbacks.prepare = function(that, config){
-        config = that.callbacks.beforePrepare(that, config);
-        config['url'] = cm.strReplace(config['url'], {
-            '%baseUrl%' : cm._baseUrl,
-            '%view%' : that.viewDetails['view'],
-            '%year%' : that.viewDetails['year'],
-            '%month%' : that.viewDetails['month'],
-            '%week%' : that.viewDetails['week'],
-            '%query%' : that.viewDetails['query']
-        });
-        config['params'] = cm.objectReplace(config['params'], {
-            '%baseUrl%' : cm._baseUrl,
-            '%view%' : that.viewDetails['view'],
-            '%year%' : that.viewDetails['year'],
-            '%month%' : that.viewDetails['month'],
-            '%week%' : that.viewDetails['week'],
-            '%query%' : that.viewDetails['query']
-        });
-        config = that.callbacks.afterPrepare(that, config);
-        return config;
-    };
-
-    that.callbacks.beforePrepare = function(that, config){
-        return config;
-    };
-
-    that.callbacks.afterPrepare = function(that, config){
-        return config;
-    };
-
-    that.callbacks.request = function(that, config){
-        config = that.callbacks.prepare(that, config);
-        // Return ajax handler (XMLHttpRequest) to providing abort method.
-        return cm.ajax(
-            cm.merge(config, {
-                'onStart' : function(){
-                    that.callbacks.start(that);
-                },
-                'onSuccess' : function(response){
-                    that.callbacks.response(that, config, response);
-                },
-                'onError' : function(){
-                    that.callbacks.error(that, config);
-                },
-                'onAbort' : function(){
-                    that.callbacks.abort(that, config);
-                },
-                'onEnd' : function(){
-                    that.callbacks.end(that);
-                }
-            })
-        );
-    };
-
-    that.callbacks.filter = function(that, config, response){
-        var data,
-            dataItem = cm.objectSelector(that.params['responseKey'], response);
-        if(dataItem && !cm.isEmpty(dataItem)){
-            data = dataItem;
-        }
-        return data;
-    };
-
-    that.callbacks.start = function(that, config){
-        that.isProcess = true;
-        // Show Loader
-        if(that.params['showLoader']){
-            that.loaderDelay = setTimeout(function(){
-                if(that.components['loader'] && !that.components['loader'].isOpen){
-                    that.components['loader'].open();
-                }
-            }, that.params['loaderDelay']);
-        }
-        that.triggerEvent('onSendStart');
-    };
-
-    that.callbacks.end = function(that, config){
-        that.isProcess = false;
-        // Hide Loader
-        if(that.params['showLoader']){
-            that.loaderDelay && clearTimeout(that.loaderDelay);
-            if(that.components['loader'] && that.components['loader'].isOpen){
-                that.components['loader'].close();
-            }
-        }
-        that.triggerEvent('onSendEnd');
-        that.triggerEvent('onProcessEnd', that.nodes['holder']['inner']);
-    };
-
-    that.callbacks.response = function(that, config, response){
-        if(!cm.isEmpty(response)){
-            response = that.callbacks.filter(that, config, response);
-        }
-        if(!cm.isEmpty(response)){
-            that.callbacks.success(that, response);
-        }else{
-            that.callbacks.error(that, config);
-        }
-    };
-
-    that.callbacks.error = function(that, config){
-        that.callbacks.renderError(that, config);
-        that.triggerEvent('onError');
-    };
-
-    that.callbacks.success = function(that, response){
-        that.callbacks.render(that, response);
-        that.triggerEvent('onSuccess', response);
-    };
-
-    that.callbacks.abort = function(that, config){
-        that.triggerEvent('onAbort');
-    };
-
-    /* *** RENDER *** */
-
-    that.callbacks.renderTemporary = function(that){
-        return cm.node('div', {'class' : 'calendar__temporary'});
-    };
-
-    that.callbacks.render = function(that, data){
-        var nodes, temporary;
-        if(that.params['responseHTML']){
-            that.isRendering = true;
-            temporary = that.callbacks.renderTemporary(that);
-            nodes = cm.strToHTML(data);
-            if(!cm.isEmpty(nodes)){
-                if(cm.isNode(nodes)){
-                    temporary.appendChild(nodes);
-                }else{
-                    while(nodes.length){
-                        if(cm.isNode(nodes[0])){
-                            temporary.appendChild(nodes[0]);
-                        }else{
-                            cm.remove(nodes[0]);
-                        }
-                    }
-                }
-            }
-            that.callbacks.append(that, temporary);
-        }
-    };
-
-    that.callbacks.renderError = function(that, config){
-        if(that.params['responseHTML']){
-            that.isRendering = true;
-            var temporary = that.callbacks.renderTemporary(that);
-            temporary.appendChild(
-                cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'))
-            );
-            that.callbacks.append(that, temporary);
-        }
-    };
-
-    that.callbacks.append = function(that, temporary){
-        var height;
-        // Wrap old content
-        if(!that.nodes['holder']['temporary']){
-            that.nodes['holder']['temporary'] = that.callbacks.renderTemporary(that);
-            cm.appendNodes(that.nodes['holder']['inner'].childNodes, that.nodes['holder']['temporary']);
-            cm.appendChild(that.nodes['holder']['temporary'], that.nodes['holder']['inner']);
-        }
-        cm.removeClass(that.nodes['holder']['temporary'], 'is-show', true);
-        // Append temporary
-        cm.appendChild(temporary, that.nodes['holder']['inner']);
-        cm.addClass(temporary, 'is-show', true);
-        // Animate
-        cm.removeClass(that.nodes['holder']['container'], 'is-loaded', true);
-        cm.addClass(that.nodes['holder']['container'], 'is-show', true);
-        height = temporary.offsetHeight;
-        that.animations['response'].go({
-            'style' : {'height' : [height, 'px'].join('')},
-            'duration' : that.params['animateDuration'],
-            'anim' : 'smooth',
-            'onStop' : function(){
-                that.nodes['holder']['container'].style.height = '';
-                cm.remove(that.nodes['holder']['temporary']);
-                cm.addClass(that.nodes['holder']['container'], 'is-loaded', true);
-                that.nodes['holder']['temporary'] = temporary;
-                that.isRendering = false;
-            }
-        });
-    };
-
-    /* ******* PUBLIC ******* */
-
-    that.refresh = function(){
-        setView(that.viewDetails);
-        return that;
-    };
-
-    that.abort = function(){
-        if(that.ajaxHandler && that.ajaxHandler.abort){
-            that.ajaxHandler.abort();
-        }
-        return that;
-    };
-
-    that.setAction = function(o, mode, update){
-        mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
-        switch(mode){
-            case 'raw':
-                that.params['ajax'] = cm.merge(that._raw.params['ajax'], o);
-                break;
-            case 'current':
-                that.params['ajax'] = cm.merge(that.params['ajax'], o);
-                break;
-            case 'update':
-                that.params['ajax'] = cm.merge(that._update.params['ajax'], o);
-                break;
-        }
-        if(update){
-            that._update.params['ajax'] = cm.clone(that.params['ajax']);
-        }
-        return that;
-    };
-
-    init();
-});
-
-/* *** CALENDAR EVENT *** */
-
-cm.define('Com.CalendarEvent', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'DataConfig',
-        'DataNodes',
-        'Stack'
-    ],
-    'events' : [
-        'onRenderStart',
-        'onRender'
-    ],
-    'params' : {
-        'node' : cm.Node('div'),
-        'name' : '',
-        'data' : {
-            'title' : null,
-            'date' : null,
-            'description' : null
-        },
-        'Com.Tooltip' : {
-            'delay' : 'cm._config.hideDelayLong',
-            'className' : 'com__calendar-event-tooltip',
-            'minWidth' : 250
-        }
-    }
-},
-function(params){
-    var that = this;
-
-    that.nodes = {
-        'template' : null
-    };
-    that.components = {};
-    that.template = null;
-
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRenderStart');
-        render();
-        that.triggerEvent('onRender');
-    };
-
-    var render = function(){
-        // Render tooltip
-        cm.getConstructor('Com.Tooltip', function(classConstructor, className){
-            that.components['tooltip'] = new classConstructor(
-                cm.merge(that.params[className],{
-                    'target' : that.params['node']
-                })
-            );
-        });
-    };
-
-    var renderContent = function(template){
-        if(!cm.isEmpty(that.params['data']['title'])){
-            template['title'].innerHTML = that.params['data']['title'];
-        }
-        if(!cm.isEmpty(that.params['data']['date'])){
-            template['date'].innerHTML = that.params['data']['date'];
-        }
-        if(!cm.isEmpty(that.params['data']['description'])){
-            template['description'].innerHTML = that.params['data']['description'];
-        }else{
-            cm.remove(template['description-container']);
-        }
-        if(!cm.isEmpty(that.params['data']['url'])){
-            template['button'].setAttribute('href', that.params['data']['url']);
-        }else{
-            cm.remove(template['button-container']);
-        }
-    };
-
-    /* ******* PUBLIC ******* */
-
-    that.setTemplate = function(node){
-        that.nodes['template'] = cm.getNodes(node);
-        if(that.nodes['template']){
-            renderContent(that.nodes['template']);
-            that.components['tooltip'] && that.components['tooltip'].setContent(that.nodes['template']['container']);
-        }
-        return that;
-    };
-
-    that.setTooltipParams = function(o){
-        that.params['Com.Tooltip'] = cm.merge(that.params['Com.Tooltip'], o);
-        that.components['tooltip'] && that.components['tooltip'].setParams(that.params['Com.Tooltip']);
-        return that;
-    };
-
-    init();
-});
-
-/* *** CALENDAR VIEW ABSTRACT *** */
-
-cm.define('Com.AbstractCalendarView', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'DataConfig',
-        'DataNodes',
-        'Stack'
-    ],
-    'events' : [
-        'onRenderStart',
-        'onRender',
-        'onRequestView'
-    ],
-    'params' : {
-        'node' : cm.Node('div'),
-        'name' : '',
-        'viewName' : '',
-        'itemShortIndent' : 1,
-        'itemShortHeight' : 24,
-        'dayIndent' : 4,
-        'Com.Tooltip' : {}
-    }
-},
-function(params){
-    var that = this;
-
-    that.nodes = {
-        'container' : cm.node('div'),
-        'buttons' : {
-            'container' : cm.node('div'),
-            'prev' : cm.node('div'),
-            'next' : cm.node('div'),
-            'search-button' : cm.node('div'),
-            'search-input' : cm.node('input'),
-            'views' : {
-                'agenda' : cm.node('div'),
-                'week' : cm.node('div'),
-                'month' : cm.node('div')
-            }
-        },
-        'templates' : {
-            'event' : {}
-        }
-    };
-    that.components = {};
-    that.days = [];
-
-    var init = function(){
-        that.getLESSVariables();
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        that.validateParams();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRenderStart');
-        that.renderToolbar();
-        that.render();
-        that.triggerEvent('onRender');
-    };
-
-    /* ******* PUBLIC ******* */
-
-    init();
-});
-
-cm.getConstructor('Com.AbstractCalendarView', function(classConstructor, className, classProto){
-    classProto.getLESSVariables = function(){
-        var that = this;
-        that.params['itemShortIndent'] = cm.getLESSVariable('ComCalendarEvent-Short-Indent', that.params['itemShortIndent'], true);
-        that.params['itemShortHeight'] = cm.getLESSVariable('ComCalendarEvent-Short-Height', that.params['itemShortHeight'], true);
-        return that;
-    };
-
-    classProto.validateParams = function(){
-        var that = this;
-        if(that.params['Com.Tooltip']['width'] != 'auto'){
-            that.params['Com.Tooltip']['width'] = cm.strReplace(that.params['Com.Tooltip']['width'], {
-                '%itemShortIndent%' : that.params['itemShortIndent'],
-                '%itemShortHeight%' : that.params['itemShortHeight'],
-                '%dayIndent%' : that.params['dayIndent']
-            });
-        }
-        that.params['Com.Tooltip']['top'] = cm.strReplace(that.params['Com.Tooltip']['top'], {
-            '%itemShortIndent%' : that.params['itemShortIndent'],
-            '%itemShortHeight%' : that.params['itemShortHeight'],
-            '%dayIndent%' : that.params['dayIndent']
-        });
-        that.params['Com.Tooltip']['left'] = cm.strReplace(that.params['Com.Tooltip']['left'], {
-            '%itemShortIndent%' : that.params['itemShortIndent'],
-            '%itemShortHeight%' : that.params['itemShortHeight'],
-            '%dayIndent%' : that.params['dayIndent']
-        });
-        return that;
-    };
-
-    classProto.render = function(){
-        var that = this;
-        // Find events and set template and tooltip config
-        new cm.Finder('Com.CalendarEvent', null, that.params['node'], function(classObject){
-            // Clone template
-            var template = cm.clone(that.nodes['templates']['event']['container'], true);
-            // Set Node
-            classObject
-                .setTooltipParams(that.params['Com.Tooltip'])
-                .setTemplate(template);
-        }, {'multiple' : true});
-        return that;
-    };
-
-    classProto.renderToolbar = function(){
-        var that = this;
-        // Toolbar Controls
-        new cm.Finder('Com.Select', 'week', that.nodes['buttons']['container'], function(classObject){
-            that.components['week'] = classObject
-                .addEvent('onChange', that.updateView.bind(that));
-        });
-        new cm.Finder('Com.Select', 'month', that.nodes['buttons']['container'], function(classObject){
-            that.components['month'] = classObject
-                .addEvent('onChange',  that.updateView.bind(that));
-        });
-        new cm.Finder('Com.Select', 'year', that.nodes['buttons']['container'], function(classObject){
-            that.components['year'] = classObject
-                .addEvent('onChange', that.updateView.bind(that));
-        });
-        // Search
-        cm.addEvent(that.nodes['buttons']['search-input'], 'keypress', function(e){
-            if(e.keyCode == 13){
-                cm.preventDefault(e);
-                that.updateView();
-            }
-        });
-        cm.addEvent(that.nodes['buttons']['search-button'], 'click', function(e){
-            cm.preventDefault(e);
-            that.updateView();
-        });
-        // View Buttons
-        cm.forEach(that.nodes['buttons']['views'], function(node, key){
-            if(key === that.params['viewName']){
-                cm.replaceClass(node, 'button-secondary', 'button-primary');
-            }else{
-                cm.replaceClass(node, 'button-primary', 'button-secondary');
-            }
-            cm.addEvent(node, 'click', function(e){
-                cm.preventDefault(e);
-                that.requestView({
-                    'view' : key
-                });
-            });
-        });
-        // Prev / Next Buttons
-        cm.addEvent(that.nodes['buttons']['prev'], 'click', function(e){
-            cm.preventDefault(e);
-            that.prev();
-        });
-        cm.addEvent(that.nodes['buttons']['next'], 'click', function(e){
-            cm.preventDefault(e);
-            that.next();
-        });
-        return that;
-    };
-
-    classProto.searchQuery = function(str){
-        var that = this;
-        var data = that.getData();
-        data.query = str;
-        that.requestView(data);
-        return that;
-    };
-
-    classProto.requestView = function(data){
-        var that = this;
-        that.triggerEvent('onRequestView', data);
-        return that;
-    };
-
-    classProto.getData = function(){
-        var that = this;
-        return {
-            'query' : that.nodes['buttons']['search-input'].value,
-            'view' : that.params['viewName'],
-            'year' : that.components['year'] ? that.components['year'].get() : null,
-            'month' : that.components['month'] ? that.components['month'].get() : null,
-            'week' : that.components['week'] ? that.components['week'].get() : null
-        };
-    };
-
-    classProto.updateView = function(){
-        var that = this;
-        that.triggerEvent('onRequestView', that.getData());
-        return that;
-    };
-
-    classProto.prev = function(){
-        var that = this;
-        var data = that.getData();
-        if(data['week'] !== null){
-            if(data['week'] == 1){
-                data['year']--;
-                data['week'] = cm.getWeeksInYear(data['year']);
-            }else{
-                data['week']--;
-            }
-        }else if(data['month'] !== null){
-            if(data['month'] == 0){
-                data['year']--;
-                data['month'] = 11;
-            }else{
-                data['month']--;
-            }
-        }else{
-            data['year']--;
-        }
-        that.requestView(data);
-        return that;
-    };
-
-    classProto.next = function(){
-        var that = this;
-        var data = that.getData();
-        if(data['week'] !== null){
-            if(data['week'] == cm.getWeeksInYear(data['year'])){
-                data['year']++;
-                data['week'] = 1;
-            }else{
-                data['week']++;
-            }
-        }else if(data['month'] !== null){
-            if(data['month'] == 11){
-                data['year']++;
-                data['month'] = 0;
-            }else{
-                data['month']++;
-            }
-        }else {
-            data['year']++;
-        }
-        that.requestView(data);
-        return that;
-    };
-});
-
-/* *** CALENDAR MONTH VIEW *** */
-
-cm.define('Com.CalendarMonth', {
-    'extend' : 'Com.AbstractCalendarView',
-    'params' : {
-        'viewName' : 'month',
-        'Com.Tooltip' : {
-            'width' : '(targetWidth + %dayIndent%) * 2 - targetHeight * 2',
-            'top' : 'targetHeight + %itemShortIndent%',
-            'left' : '-(selfWidth - targetWidth) - targetHeight'
-        }
-    }
-},
-function(params){
-    var that = this;
-    Com.AbstractCalendarView.apply(that, arguments);
-});
-
-cm.getConstructor('Com.CalendarMonth', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.processDay = function(nodes){
-        var that = this;
-        var item = {
-            'isShow' : false,
-            'nodes' : nodes
-        };
-        // Show all events on more button click
-        cm.addEvent(item.nodes['more-button'], 'click', function(){
-            that.showMoreEvents(item);
-        });
-        // Prevent document scrolling while scroll all events block
-        cm.addIsolateScrolling(item.nodes['more-holder']);
-        // Push
-        that.days.push(item);
-    };
-
-    classProto.showMoreEvents = function(item){
-        var that = this;
-        item.delay && clearTimeout(item.delay);
-        if(!item.isShow){
-            item.isShow = true;
-            cm.setScrollTop(item.nodes['more-holder'], 0);
-            cm.addClass(item.nodes['more-holder'], 'is-show');
-        }
-    };
-
-    classProto.hideMoreEvents = function(item, isImmediately){
-        var that = this;
-        item.delay && clearTimeout(item.delay);
-        if(item.isShow){
-            if(isImmediately){
-                item.isShow = false;
-                cm.removeClass(item.nodes['more-holder'], 'is-show');
-            }else{
-                item.delay = setTimeout(function(){
-                    item.isShow = false;
-                    cm.removeClass(item.nodes['more-holder'], 'is-show');
-                }, that.params['delay']);
-            }
-        }
-    };
-
-    classProto.getLESSVariables = function(){
-        var that = this;
-        _inherit.prototype.getLESSVariables.call(that);
-        that.params['dayIndent'] = cm.getLESSVariable('ComCalendarMonth-Day-Indent', that.params['dayIndent'], true);
-        return that;
-    };
-
-    classProto.render = function(){
-        var that = this;
-        _inherit.prototype.render.call(that);
-        cm.forEach(that.nodes['days'], that.processDay.bind(that));
-        return that;
-    };
-});
-
-/* *** CALENDAR WEEK VIEW *** */
-
-cm.define('Com.CalendarWeek', {
-    'extend' : 'Com.AbstractCalendarView',
-    'params' : {
-        'viewName' : 'week',
-        'Com.Tooltip' : {
-            'width' : '(targetWidth + %dayIndent%) * 2 - targetHeight * 2',
-            'top' : 'targetHeight + %itemShortIndent%',
-            'left' : 'targetHeight'
-        }
-    }
-},
-function(params){
-    var that = this;
-    Com.AbstractCalendarView.apply(that, arguments);
-});
-
-cm.getConstructor('Com.CalendarWeek', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.getLESSVariables = function(){
-        var that = this;
-        _inherit.prototype.getLESSVariables.call(that);
-        that.params['dayIndent'] = cm.getLESSVariable('ComCalendarWeek-Day-Indent', that.params['dayIndent'], true);
-        return that;
-    };
-});
-
-/* *** CALENDAR AGENDA VIEW *** */
-
-cm.define('Com.CalendarAgenda', {
-    'extend' : 'Com.AbstractCalendarView',
-    'params' : {
-        'viewName' : 'agenda',
-        'Com.Tooltip' : {
-            'width' : 'targetWidth - %itemShortHeight% * 2',
-            'top' : 'targetHeight + %itemShortIndent%',
-            'left' : 'targetHeight'
-        }
-    }
-},
-function(params){
-    var that = this;
-    Com.AbstractCalendarView.apply(that, arguments);
-});
 cm.define('Com.Calendar', {
     'modules' : [
         'Params',
@@ -10847,7 +9989,7 @@ cm.define('Com.CalendarEvents', {
         'startWeekDay' : 0,
         'target' : '_blank',
         'Com.Tooltip' : {
-            'className' : 'com__calendar-events__tooltip'
+            'className' : 'module__calendar-events__tooltip'
         }
     },
     'strings' : {
@@ -10873,7 +10015,7 @@ function(params){
 
     var render = function(){
         // Structure
-        that.nodes['container'] = cm.node('div', {'class' : 'com__calendar-events'});
+        that.nodes['container'] = cm.node('div', {'class' : 'module__calendar-events'});
         // Render calendar
         that.components['calendar'] = new Com.Calendar({
             'node' : that.nodes['container'],
@@ -10914,7 +10056,7 @@ function(params){
 
         if((data = that.params['data'][params['year']]) && (data = data[(params['month'] + 1)]) && (data = data[params['day']])){
             // Structure
-            myNodes['content'] = cm.node('div', {'class' : 'pt__listing com__calendar-events-listing'},
+            myNodes['content'] = cm.node('div', {'class' : 'pt__listing module__calendar-events-listing'},
                 myNodes['list'] = cm.node('ul', {'class' : 'list'})
             );
             // Foreach events
@@ -14348,7 +13490,7 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
 
     classProto.read = function(file, callback){
         var that = this;
-        callback = typeof callback == 'function' ? callback : function(){};
+        callback = cm.isFunction(callback) ? callback : function(){};
         if(cm.isFileReader && cm.isFile(file)){
             that.triggerEvent('onReadStart', file);
             // Config
@@ -14484,614 +13626,6 @@ cm.getConstructor('Com.FileStats', function(classConstructor, className, classPr
                 );
             });
         }
-        return that;
-    };
-});
-cm.define('Com.FileUploader', {
-    'extend' : 'Com.AbstractController',
-    'events' : [
-        'onSelect',
-        'onComplete',
-        'onGet'
-    ],
-    'params' : {
-        'max' : 0,
-        'showStats' : true,
-        'completeOnSelect' : false,
-        'local' : true,
-        'localConstructor' : 'Com.FileUploaderLocal',
-        'localParams' : {
-            'embedStructure' : 'append'
-        },
-        'fileManagerLazy' : true,
-        'fileManager' : true,
-        'fileManagerConstructor' : 'Com.AbstractFileManager',
-        'fileManagerParams' : {
-            'embedStructure' : 'append',
-            'showStats' : false,
-            'fullSize' : true
-        },
-        'Com.Tabset' : {
-            'embedStructure' : 'append',
-            'toggleOnHashChange' : false,
-            'calculateMaxHeight' : true
-        },
-        'Com.FileStats' : {
-            'embedStructure' : 'append',
-            'toggleBox' : false,
-            'inline' : true
-        }
-    },
-    'strings' : {
-        'tab_local' : 'Select From PC',
-        'tab_filemanager' : 'File Manager',
-        'browse_local_single' : 'Choose file',
-        'browse_local_multiple' : 'Choose files',
-        'or' : 'or',
-        'browse' : 'Browse'
-    }
-},
-function(params){
-    var that = this;
-    that.nodes = {};
-    that.components = {};
-    that.items = [];
-    that.activeTab = null;
-    // Call parent class construct
-    Com.AbstractController.apply(that, arguments);
-});
-
-cm.getConstructor('Com.FileUploader', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.construct = function(){
-        var that = this;
-        // Bind context to methods
-        that.completeHandler = that.complete.bind(that);
-        // Add events
-        // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
-    };
-
-    classProto.get = function(){
-        var that = this,
-            data;
-        if(that.activeTab){
-            switch(that.activeTab['id']){
-                case 'local':
-                    data = that.components['local'].get();
-                    that.afterGet(data);
-                    break;
-                case 'fileManager':
-                    that.components['fileManager'].get();
-                    break;
-            }
-        }
-        return that;
-    };
-
-    classProto.complete = function(){
-        var that = this,
-            data;
-        if(that.activeTab){
-            switch(that.activeTab['id']){
-                case 'local':
-                    data = that.components['local'].get();
-                    that.afterComplete(data);
-                    break;
-                case 'fileManager':
-                    that.components['fileManager'].complete();
-                    break;
-            }
-        }
-        return that;
-    };
-
-    classProto.validateParams = function(){
-        var that = this;
-        // Components parameters
-        that.params['localParams']['max'] = that.params['max'];
-        that.params['fileManagerParams']['max'] = that.params['max'];
-        that.params['fileManagerParams']['lazy'] = that.params['fileManagerLazy'];
-        return that;
-    };
-
-    classProto.renderView = function(){
-        var that = this;
-        that.triggerEvent('onRenderViewStart');
-        // Structure
-        that.nodes['container'] = cm.node('div', {'class' : 'com__file-uploader'},
-            that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
-                that.nodes['content'] = cm.node('div', {'class' : 'com__file-uploader__content'})
-            )
-        );
-        // Local
-        if(that.params['local']){
-            that.nodes['local'] = that.renderLocal();
-        }
-        // File Manager
-        if(that.params['fileManager']){
-            that.nodes['fileManager'] = that.renderFileManager();
-        }
-        // Events
-        that.triggerEvent('onRenderViewProcess');
-        that.triggerEvent('onRenderViewEnd');
-        return that;
-    };
-
-    classProto.renderViewModel = function(){
-        var that = this;
-        // Init Files Input
-        if(that.params['local']){
-            cm.getConstructor(that.params['localConstructor'], function(classObject){
-                that.components['local'] = new classObject(
-                    cm.merge(that.params['localParams'], {
-                        'node' : that.nodes['local']['holder']
-                    })
-                );
-                if(that.params['completeOnSelect']){
-                    that.components['local'].addEvent('onSelect', function(my, data){
-                        that.afterComplete(data);
-                    });
-                }
-            });
-        }
-        // Init File Manager
-        if(that.params['fileManager']){
-            cm.getConstructor(that.params['fileManagerConstructor'], function(classObject){
-                that.components['fileManager'] = new classObject(
-                    cm.merge(that.params['fileManagerParams'], {
-                        'node' : that.nodes['fileManager']['holder']
-                    })
-                );
-                that.components['fileManager'].addEvent('onGet', function(my, data){
-                    that.afterGet(data);
-                });
-                that.components['fileManager'].addEvent('onComplete', function(my, data){
-                    that.afterComplete(data);
-                });
-            });
-        }
-        // Init Tabset
-        that.renderTabset();
-        // Init Stats
-        if(that.params['showStats']){
-            cm.getConstructor('Com.FileStats', function(classObject, className){
-                that.components['stats'] = new classObject(
-                    cm.merge(that.params[className], {
-                        'container' : that.nodes['content']
-                    })
-                );
-            });
-        }
-        return that;
-    };
-
-    classProto.renderTabset = function(){
-        var that = this;
-        cm.getConstructor('Com.Tabset', function(classObject, className){
-            that.components['tabset'] = new classObject(
-                cm.merge(that.params[className], {
-                    'container' : that.nodes['content']
-                })
-            );
-            that.components['tabset'].addEvent('onTabShow', function(my, data){
-                that.activeTab = data;
-                if(that.activeTab['id'] == 'fileManager'){
-                    that.components['fileManager'] && that.components['fileManager'].load();
-                }
-            });
-            if(that.params['local']){
-                that.components['tabset'].addTab({
-                    'id' : 'local',
-                    'title' : that.lang('tab_local'),
-                    'content' : that.nodes['local']['li']
-                });
-            }
-            if(that.params['fileManager']){
-                that.components['tabset'].addTab({
-                    'id' : 'fileManager',
-                    'title' : that.lang('tab_filemanager'),
-                    'content' : that.nodes['fileManager']['li']
-                });
-            }
-            that.components['tabset'].set(that.params['local'] ? 'local' : 'fileManager');
-        });
-        return that;
-    };
-
-    classProto.renderLocal = function(){
-        var that = this,
-            nodes = {};
-        // Structure
-        nodes['li'] = cm.node('li',
-            nodes['container'] = cm.node('div', {'class' : 'com__file-uploader__local-container'},
-                nodes['holder'] = cm.node('div', {'class' : 'com__file-uploader__holder'})
-            )
-        );
-        return nodes;
-    };
-
-    classProto.renderFileManager = function(){
-        var that = this,
-            nodes = {};
-        // Structure
-        nodes['li'] = cm.node('li',
-            nodes['container'] = cm.node('div', {'class' : 'com__file-uploader__file-manager is-fullsize'},
-                nodes['holder'] = cm.node('div', {'class' : 'com__file-uploader__holder'})
-            )
-        );
-        return nodes;
-    };
-
-    /* *** AFTER EVENTS *** */
-
-    classProto.afterGet = function(data){
-        var that = this;
-        that.items = data;
-        that.triggerEvent('onGet', that.items);
-        return that;
-    };
-
-    classProto.afterComplete = function(data){
-        var that = this;
-        that.items = data;
-        that.triggerEvent('onComplete', that.items);
-        return that;
-    };
-});
-cm.define('Com.FileUploaderContainer', {
-    'extend' : 'Com.AbstractContainer',
-    'events' : [
-        'onComplete',
-        'onGet'
-    ],
-    'params' : {
-        'constructor' : 'Com.FileUploader',
-        'placeholder' : true,
-        'placeholderConstructor' : 'Com.DialogContainer',
-        'placeholderParams' : {
-            'renderButtons' : true,
-            'params' : {
-                'width' : 900
-            }
-        }
-    },
-    'strings' : {
-        'title_single' : 'Please select file',
-        'title_multiple' : 'Please select files',
-        'close' : 'Cancel',
-        'save' : 'Select'
-    }
-},
-function(params){
-    var that = this;
-    // Call parent class construct
-    Com.AbstractContainer.apply(that, arguments);
-});
-
-cm.getConstructor('Com.FileUploaderContainer', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.construct = function(){
-        var that = this;
-        // Bind context to methods
-        that.getHandler = that.get.bind(that);
-        that.completeHandler = that.complete.bind(that);
-        that.afterCompleteHandler = that.afterComplete.bind(that);
-        // Add events
-        // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
-    };
-
-    classProto.validateParams = function(){
-        var that = this;
-        // Call parent method
-        _inherit.prototype.validateParams.apply(that, arguments);
-        // Validate Language Strings
-        that.setLangs({
-            'title' : !that.params['params']['max'] || that.params['params']['max'] > 1 ? that.lang('title_multiple') : that.lang('title_single')
-        });
-    };
-
-    classProto.get = function(e){
-        e && cm.preventDefault(e);
-        var that = this;
-        that.components['controller'] && that.components['controller'].get && that.components['controller'].get();
-        return that;
-    };
-
-    classProto.complete = function(e){
-        e && cm.preventDefault(e);
-        var that = this;
-        that.components['controller'] && that.components['controller'].complete && that.components['controller'].complete();
-        return that;
-    };
-
-    /* *** SYSTEM *** */
-
-    classProto.renderControllerEvents = function(){
-        var that = this;
-        // Call parent method
-        _inherit.prototype.renderControllerEvents.apply(that, arguments);
-        // Add specific events
-        that.components['controller'].addEvent('onGet', function(my, data){
-            that.afterGet(data);
-        });
-        that.components['controller'].addEvent('onComplete', function(my, data){
-            that.afterComplete(data);
-        });
-        return that;
-    };
-
-    classProto.renderPlaceholderButtons = function(){
-        var that = this;
-        that.components['placeholder'].addButton({
-            'name' : 'close',
-            'label' : that.lang('close'),
-            'style' : 'button-transparent',
-            'callback' : that.closeHandler
-        });
-        that.components['placeholder'].addButton({
-            'name' : 'save',
-            'label' : that.lang('save'),
-            'style' : 'button-primary',
-            'callback' : that.completeHandler
-        });
-        return that;
-    };
-
-    /* *** AFTER EVENTS *** */
-
-    classProto.afterGet = function(data){
-        var that = this;
-        that.triggerEvent('onGet', data);
-        return that;
-    };
-
-    classProto.afterComplete = function(data){
-        var that = this;
-        that.triggerEvent('onComplete', data);
-        that.close();
-        return that;
-    };
-});
-cm.define('Com.FileUploaderLocal', {
-    'extend' : 'Com.AbstractController',
-    'events' : [
-        'onSelect'
-    ],
-    'params' : {
-        'max' : 0,
-        'fileList' : true,
-        'fileListConstructor' : 'Com.MultipleFileInput',
-        'fileListParams' : {
-            'local' : false,
-            'dropzone' : false,
-            'fileManager' : false,
-            'fileUploader' : false,
-            'embedStructure' : 'append'
-        },
-        'dropzone' : true,
-        'dropzoneConstructor' : 'Com.FileDropzone',
-        'dropzoneParams' : {
-            'embedStructure' : 'append',
-            'rollover' : false,
-            'height' : 256
-        },
-        'showOverlay' : true,
-        'overlayDelay' : 'cm._config.loadDelay',
-        'Com.Overlay' : {
-            'autoOpen' : false,
-            'removeOnClose' : true,
-            'showSpinner' : true,
-            'showContent' : false,
-            'position' : 'absolute',
-            'theme' : 'light'
-        },
-        'Com.FileReader' : {}
-    },
-    'strings' : {
-        'browse_local_single' : 'Choose file',
-        'browse_local_multiple' : 'Choose files',
-        'or' : 'or',
-        'browse' : 'Browse'
-    }
-},
-function(params){
-    var that = this;
-    // Call parent class construct
-    Com.AbstractController.apply(that, arguments);
-});
-
-cm.getConstructor('Com.FileUploaderLocal', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.construct = function(){
-        var that = this;
-        // Variables
-        that.nodes = {};
-        that.components = {};
-        that.items = [];
-        that.isMultiple = false;
-        that.isProccesing = false;
-        that.overlayDelay = null;
-        // Bind context to methods
-        that.browseActionHandler = that.browseAction.bind(that);
-        that.processFilesHandler = that.processFiles.bind(that);
-        // Add events
-        // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
-    };
-
-    classProto.get = function(){
-        var that = this;
-        return that.items;
-    };
-
-    classProto.validateParams = function(){
-        var that = this;
-        that.isMultiple = !that.params['max'] || that.params['max'] > 1;
-        // Validate Language Strings
-        that.setLangs({
-            'browse_local' : !that.params['max'] || that.params['max'] > 1 ? that.lang('browse_local_multiple') : that.lang('browse_local_single')
-        });
-        // Components parameters
-        that.params['fileListParams']['max'] = that.params['max'];
-        that.params['dropzoneParams']['max'] = that.params['max'];
-        return that;
-    };
-
-    classProto.renderView = function(){
-        var that = this;
-        that.triggerEvent('onRenderViewStart');
-        // Structure
-        that.nodes['container'] = cm.node('div', {'class' : 'com__file-uploader__local'},
-            that.nodes['holder'] = cm.node('div', {'class' : 'com__file-uploader__holder'},
-                cm.node('div', {'class' : 'pt__buttons pull-center'},
-                    cm.node('div', {'class' : 'inner'},
-                        cm.node('div', {'class' : 'browse-button'},
-                            cm.node('button', {'type' : 'button','class' : 'button button-primary button--xlarge'}, that.lang('browse_local')),
-                            cm.node('div', {'class' : 'inner'},
-                                that.nodes['input'] = cm.node('input', {'type' : 'file'})
-                            )
-                        )
-                    )
-                )
-            )
-        );
-        if(that.params['dropzone']){
-            that.nodes['dropzoneHolder'] = cm.node('div', {'class' : 'com__file-uploader__holder'},
-                cm.node('div', {'class' : 'com__file-uploader__title'}, that.lang('or')),
-                that.nodes['dropzone'] = cm.node('div', {'class' : 'com__file-uploader__dropzone'})
-            );
-            cm.appendChild(that.nodes['dropzoneHolder'], that.nodes['container']);
-        }
-        if(that.params['fileList']){
-            that.nodes['files'] = cm.node('div', {'class' : 'com__file-uploader__files is-hidden'});
-            cm.appendChild(that.nodes['files'], that.nodes['container']);
-        }
-        that.isMultiple && that.nodes['input'].setAttribute('multiple', 'multiple');
-        // Events
-        that.triggerEvent('onRenderViewProcess');
-        cm.addEvent(that.nodes['input'], 'change', that.browseActionHandler);
-        that.triggerEvent('onRenderViewEnd');
-        return that;
-    };
-
-    classProto.renderViewModel = function(){
-        var that = this;
-        // Init Overlay
-        cm.getConstructor('Com.Overlay', function(classConstructor, className){
-            that.components['overlay'] = new classConstructor(
-                cm.merge(that.params[className], {
-                    'container' : that.nodes['container']
-                })
-            );
-        });
-        // Init FilerReader
-        cm.getConstructor('Com.FileReader', function(classObject, className){
-            that.components['reader'] = new classObject(that.params[className]);
-        });
-        // Init Dropzone
-        if(that.params['dropzone']){
-            cm.getConstructor(that.params['dropzoneConstructor'], function(classObject){
-                that.components['dropzone'] = new classObject(
-                    cm.merge(that.params['dropzoneParams'], {
-                        'container' : that.nodes['dropzone']
-                    })
-                );
-                that.components['dropzone'].addEvent('onSelect', function(my, data){
-                    that.processFiles(data);
-                });
-            });
-        }
-        // Init Files Input
-        if(that.params['fileList']){
-            cm.getConstructor(that.params['fileListConstructor'], function(classObject){
-                that.components['fileList'] = new classObject(
-                    cm.merge(that.params['fileListParams'], {
-                        'node' : that.nodes['files']
-                    })
-                );
-                that.components['fileList'].addEvent('onItemAddEnd', function(){
-                    if(that.components['fileList'].get().length){
-                        cm.removeClass(that.nodes['files'], 'is-hidden');
-                    }
-                });
-                that.components['fileList'].addEvent('onItemRemoveEnd', function(){
-                    if(!that.components['fileList'].get().length){
-                        cm.addClass(that.nodes['files'], 'is-hidden');
-                    }
-                });
-            });
-        }
-        return that;
-    };
-
-    /* *** PROCESS FILES *** */
-
-    classProto.browseAction = function(e){
-        var that = this,
-            length = that.params['max'] ? Math.min(e.target.files.length, (that.params['max'] - that.items.length)) : e.target.files.length,
-            data = [];
-        cm.preventDefault(e);
-        cm.forEach(length, function(i){
-            data.push(e.target.files[i]);
-        });
-        that.processFiles(data);
-        return that;
-    };
-
-    classProto.processFiles = function(data){
-        var that = this,
-            length = data.length;
-        // Show Overlay
-        if(that.params['showOverlay']){
-            that.overlayDelay = setTimeout(function(){
-                if(that.components['overlay'] && !that.components['overlay'].isOpen){
-                    that.components['overlay'].open();
-                }
-            }, that.params['overlayDelay']);
-        }
-        // Process
-        cm.forEach(data, function(file, i){
-            that.components['reader'].read(file, function(item){
-                that.items[i] = item;
-                if(cm.getLength(that.items) === length){
-                    that.finalizeFiles();
-                }
-            });
-        });
-        return that;
-    };
-
-    classProto.finalizeFiles = function(){
-        var that = this;
-        // Render Files List
-        if(that.components['fileList']){
-            that.renderFileList();
-        }
-        // Hide Overlay
-        if(that.params['showOverlay']){
-            that.overlayDelay && clearTimeout(that.overlayDelay);
-            if(that.components['overlay'] && that.components['overlay'].isOpen){
-                that.components['overlay'].close();
-            }
-        }
-        // Trigger events
-        that.triggerEvent('onSelect', that.items);
-        return that;
-    };
-
-    classProto.renderFileList = function(){
-        var that = this;
-        cm.forEach(that.items, function(item){
-            that.components['fileList'].addItem({'value' : item}, true);
-        });
         return that;
     };
 });
@@ -24651,155 +23185,6 @@ function(params){
 
     init();
 });
-cm.define('Com.elFinderFileManager', {
-    'extend' : 'Com.AbstractFileManager',
-    'params' : {
-        'lazy' : false,
-        'config' : {
-            url : '',
-            lang : {},
-            dotFiles : false,
-            useBrowserHistory : false,
-            resizable : false,
-            width : 'auto',
-            height : 'auto',
-            commandsOptions : {
-                getfile : {
-                    folders : false,
-                    multiple : false
-                }
-            }
-        }
-    }
-},
-function(params){
-    var that = this;
-    that.getFilesProcessType = null;
-    that.isLoaded = false;
-    // Call parent class construct
-    Com.AbstractFileManager.apply(that, arguments);
-});
-
-cm.getConstructor('Com.elFinderFileManager', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.construct = function(){
-        var that = this;
-        // Bind context to methods
-        that.getFilesEventHandler = that.getFilesEvent.bind(that);
-        // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
-    };
-
-    classProto.get = function(){
-        var that = this;
-        that.getFilesProcessType = 'get';
-        if(that.components['controller']){
-            that.components['controller'].exec('getfile');
-        }else{
-            _inherit.prototype.get.apply(that, arguments);
-        }
-        return that;
-    };
-
-    classProto.complete = function(){
-        var that = this;
-        that.getFilesProcessType = 'complete';
-        if(that.components['controller']){
-            that.components['controller'].exec('getfile');
-        }else{
-            _inherit.prototype.complete.apply(that, arguments);
-        }
-        return that;
-    };
-
-    classProto.redraw = function(){
-        var that = this;
-        if(that.components['controller']){
-            that.components['controller'].resize('auto', 'auto');
-        }
-        that.triggerEvent('onRedraw');
-        return that;
-    };
-
-    classProto.renderController = function(){
-        var that = this;
-        // Init elFinder
-        if(!that.components['controller']){
-            if(typeof elFinder != 'undefined'){
-                that.isLoaded = true;
-                that.components['controller'] = new elFinder(that.nodes['holder']['inner'],
-                    cm.merge(that.params['config'], {
-                        commandsOptions : {
-                            getfile : {
-                                multiple: that.isMultiple
-                            }
-                        },
-                        getFileCallback : that.getFilesEventHandler
-                    })
-                );
-                // Show
-                cm.removeClass(that.nodes['holder']['container'], 'is-hidden', true);
-                that.components['controller'].show();
-                that.components['controller'].resize('auto', 'auto');
-            }else{
-                cm.errorLog({
-                    'name' : that._name['full'],
-                    'message' : ['elFinder does not exists.'].join(' ')
-                });
-            }
-        }
-        return that;
-    };
-
-    /* *** PROCESS FILES *** */
-
-    classProto.getFilesEvent = function(data){
-        var that = this;
-        // Read files and convert to file format
-        that.processFiles(data);
-        // Callbacks
-        switch(that.getFilesProcessType){
-            case 'get':
-                _inherit.prototype.get.call(that);
-                break;
-            case 'complete':
-                _inherit.prototype.complete.call(that);
-                break;
-            default:
-                _inherit.prototype.complete.call(that);
-                break;
-
-        }
-        that.getFilesProcessType = null;
-        return that;
-    };
-
-    classProto.convertFile = function(data){
-        if(!data || data['mime'] == 'directory'){
-            return false;
-        }
-        return {
-            'value' : data['url'],
-            'name' : data['name'],
-            'mime' : data['mime'],
-            'size' : data['size'],
-            'url' : data['url']
-        }
-    };
-});
-cm.define('Com.elFinderFileManagerContainer', {
-    'extend' : 'Com.AbstractFileManagerContainer',
-    'params' : {
-        'constructor' : 'Com.elFinderFileManager'
-    }
-},
-function(params){
-    var that = this;
-    // Call parent class construct
-    Com.AbstractFileManagerContainer.apply(that, arguments);
-});
 cm.define('Com.MultipleInput', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -30700,14 +29085,14 @@ cm.getConstructor('Com.TwoSideMultiSelect', function(classConstructor, className
         });
     };
 });
-/*! ************ QuickSilk-Application v3.18.11 (2017-09-22 20:22) ************ */
+/*! ************ QuickSilk-Application v3.18.13 (2017-09-26 16:28) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.18.11',
+    '_version' : '3.18.13',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
@@ -32832,35 +31217,289 @@ function(params){
     Com.FileInput.apply(that, arguments);
 });
 cm.define('App.FileUploader', {
-    'extend' : 'Com.FileUploader',
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onSelect',
+        'onComplete',
+        'onGet'
+    ],
     'params' : {
+        'max' : 0,
+        'showStats' : true,
         'completeOnSelect' : true,
         'local' : true,
         'localConstructor' : 'App.FileUploaderLocal',
         'localParams' : {
+            'embedStructure' : 'append',
             'fileList' : false
         },
         'fileManagerLazy' : true,
         'fileManager' : true,
-        'fileManagerConstructor' : 'App.elFinderFileManager'
+        'fileManagerConstructor' : 'App.elFinderFileManager',
+        'fileManagerParams' : {
+            'embedStructure' : 'append',
+            'showStats' : false,
+            'fullSize' : true
+        },
+        'Com.Tabset' : {
+            'embedStructure' : 'append',
+            'toggleOnHashChange' : false,
+            'calculateMaxHeight' : true
+        },
+        'Com.FileStats' : {
+            'embedStructure' : 'append',
+            'toggleBox' : false,
+            'inline' : true
+        }
+    },
+    'strings' : {
+        'tab_local' : 'Select From PC',
+        'tab_filemanager' : 'File Manager',
+        'browse_local_single' : 'Choose file',
+        'browse_local_multiple' : 'Choose files',
+        'or' : 'or',
+        'browse' : 'Browse'
     }
 },
 function(params){
     var that = this;
+    that.nodes = {};
+    that.components = {};
+    that.items = [];
+    that.activeTab = null;
     // Call parent class construct
-    Com.FileUploader.apply(that, arguments);
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('App.FileUploader', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.completeHandler = that.complete.bind(that);
+        // Add events
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this,
+            data;
+        if(that.activeTab){
+            switch(that.activeTab['id']){
+                case 'local':
+                    data = that.components['local'].get();
+                    that.afterGet(data);
+                    break;
+                case 'fileManager':
+                    that.components['fileManager'].get();
+                    break;
+            }
+        }
+        return that;
+    };
+
+    classProto.complete = function(){
+        var that = this,
+            data;
+        if(that.activeTab){
+            switch(that.activeTab['id']){
+                case 'local':
+                    data = that.components['local'].get();
+                    that.afterComplete(data);
+                    break;
+                case 'fileManager':
+                    that.components['fileManager'].complete();
+                    break;
+            }
+        }
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        // Components parameters
+        that.params['localParams']['max'] = that.params['max'];
+        that.params['fileManagerParams']['max'] = that.params['max'];
+        that.params['fileManagerParams']['lazy'] = that.params['fileManagerLazy'];
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderViewStart');
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'app__file-uploader'},
+            that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
+                that.nodes['content'] = cm.node('div', {'class' : 'app__file-uploader__content'})
+            )
+        );
+        // Local
+        if(that.params['local']){
+            that.nodes['local'] = that.renderLocal();
+        }
+        // File Manager
+        if(that.params['fileManager']){
+            that.nodes['fileManager'] = that.renderFileManager();
+        }
+        // Events
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Init Files Input
+        if(that.params['local']){
+            cm.getConstructor(that.params['localConstructor'], function(classObject){
+                that.components['local'] = new classObject(
+                    cm.merge(that.params['localParams'], {
+                        'node' : that.nodes['local']['holder']
+                    })
+                );
+                if(that.params['completeOnSelect']){
+                    that.components['local'].addEvent('onSelect', function(my, data){
+                        that.afterComplete(data);
+                    });
+                }
+            });
+        }
+        // Init File Manager
+        if(that.params['fileManager']){
+            cm.getConstructor(that.params['fileManagerConstructor'], function(classObject){
+                that.components['fileManager'] = new classObject(
+                    cm.merge(that.params['fileManagerParams'], {
+                        'node' : that.nodes['fileManager']['holder']
+                    })
+                );
+                that.components['fileManager'].addEvent('onGet', function(my, data){
+                    that.afterGet(data);
+                });
+                that.components['fileManager'].addEvent('onComplete', function(my, data){
+                    that.afterComplete(data);
+                });
+            });
+        }
+        // Init Tabset
+        that.renderTabset();
+        // Init Stats
+        if(that.params['showStats']){
+            cm.getConstructor('Com.FileStats', function(classObject, className){
+                that.components['stats'] = new classObject(
+                    cm.merge(that.params[className], {
+                        'container' : that.nodes['content']
+                    })
+                );
+            });
+        }
+        return that;
+    };
+
+    classProto.renderTabset = function(){
+        var that = this;
+        cm.getConstructor('Com.Tabset', function(classObject, className){
+            that.components['tabset'] = new classObject(
+                cm.merge(that.params[className], {
+                    'container' : that.nodes['content']
+                })
+            );
+            that.components['tabset'].addEvent('onTabShow', function(my, data){
+                that.activeTab = data;
+                if(that.activeTab['id'] == 'fileManager'){
+                    that.components['fileManager'] && that.components['fileManager'].load();
+                }
+            });
+            if(that.params['local']){
+                that.components['tabset'].addTab({
+                    'id' : 'local',
+                    'title' : that.lang('tab_local'),
+                    'content' : that.nodes['local']['li']
+                });
+            }
+            if(that.params['fileManager']){
+                that.components['tabset'].addTab({
+                    'id' : 'fileManager',
+                    'title' : that.lang('tab_filemanager'),
+                    'content' : that.nodes['fileManager']['li']
+                });
+            }
+            that.components['tabset'].set(that.params['local'] ? 'local' : 'fileManager');
+        });
+        return that;
+    };
+
+    classProto.renderLocal = function(){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['li'] = cm.node('li',
+            nodes['container'] = cm.node('div', {'class' : 'app__file-uploader__local-container'},
+                nodes['holder'] = cm.node('div', {'class' : 'app__file-uploader__holder'})
+            )
+        );
+        return nodes;
+    };
+
+    classProto.renderFileManager = function(){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['li'] = cm.node('li',
+            nodes['container'] = cm.node('div', {'class' : 'app__file-uploader__file-manager is-fullsize'},
+                nodes['holder'] = cm.node('div', {'class' : 'app__file-uploader__holder'})
+            )
+        );
+        return nodes;
+    };
+
+    /* *** AFTER EVENTS *** */
+
+    classProto.afterGet = function(data){
+        var that = this;
+        that.items = data;
+        that.triggerEvent('onGet', that.items);
+        return that;
+    };
+
+    classProto.afterComplete = function(data){
+        var that = this;
+        that.items = data;
+        that.triggerEvent('onComplete', that.items);
+        return that;
+    };
 });
 cm.define('App.FileUploaderContainer', {
-    'extend' : 'Com.FileUploaderContainer',
+    'extend' : 'Com.AbstractContainer',
+    'events' : [
+        'onComplete',
+        'onGet'
+    ],
     'params' : {
+        'constructor' : 'App.FileUploader',
         'action' : '',
-        'constructor' : 'App.FileUploader'
+        'placeholder' : true,
+        'placeholderConstructor' : 'Com.DialogContainer',
+        'placeholderParams' : {
+            'renderButtons' : true,
+            'params' : {
+                'width' : 900
+            }
+        }
+    },
+    'strings' : {
+        'title_single' : 'Please select file',
+        'title_multiple' : 'Please select files',
+        'close' : 'Cancel',
+        'save' : 'Select'
     }
 },
 function(params){
     var that = this;
     // Call parent class construct
-    Com.FileUploaderContainer.apply(that, arguments);
+    Com.AbstractContainer.apply(that, arguments);
 });
 
 
@@ -32871,6 +31510,11 @@ cm.getConstructor('App.FileUploaderContainer', function(classConstructor, classN
         var that = this;
         // Variables
         that.isRequest = false;
+        // Bind context to methods
+        that.getHandler = that.get.bind(that);
+        that.completeHandler = that.complete.bind(that);
+        that.afterCompleteHandler = that.afterComplete.bind(that);
+        // Add events
         // Call parent method
         _inherit.prototype.construct.apply(that, arguments);
         return that;
@@ -32882,12 +31526,39 @@ cm.getConstructor('App.FileUploaderContainer', function(classConstructor, classN
         _inherit.prototype.validateParams.apply(that, arguments);
         // Validate Request
         that.isRequest = !cm.isEmpty(that.params['action']) && window.Request && window.Request.send;
+        // Validate Language Strings
+        that.setLangs({
+            'title' : !that.params['params']['max'] || that.params['params']['max'] > 1 ? that.lang('title_multiple') : that.lang('title_single')
+        });
     };
+
+    classProto.get = function(e){
+        e && cm.preventDefault(e);
+        var that = this;
+        that.components['controller'] && that.components['controller'].get && that.components['controller'].get();
+        return that;
+    };
+
+    classProto.complete = function(e){
+        e && cm.preventDefault(e);
+        var that = this;
+        that.components['controller'] && that.components['controller'].complete && that.components['controller'].complete();
+        return that;
+    };
+
+    /* *** SYSTEM *** */
 
     classProto.renderControllerEvents = function(){
         var that = this;
         // Call parent method
         _inherit.prototype.renderControllerEvents.apply(that, arguments);
+        // Add specific events
+        that.components['controller'].addEvent('onGet', function(my, data){
+            that.afterGet(data);
+        });
+        that.components['controller'].addEvent('onComplete', function(my, data){
+            that.afterComplete(data);
+        });
         // Add Request Event
         if(that.isRequest){
             that.components['controller'].addEvent('onComplete', function(my, data){
@@ -32899,17 +31570,275 @@ cm.getConstructor('App.FileUploaderContainer', function(classConstructor, classN
         }
         return that;
     };
+
+    classProto.renderPlaceholderButtons = function(){
+        var that = this;
+        that.components['placeholder'].addButton({
+            'name' : 'close',
+            'label' : that.lang('close'),
+            'style' : 'button-transparent',
+            'callback' : that.closeHandler
+        });
+        that.components['placeholder'].addButton({
+            'name' : 'save',
+            'label' : that.lang('save'),
+            'style' : 'button-primary',
+            'callback' : that.completeHandler
+        });
+        return that;
+    };
+
+    /* *** AFTER EVENTS *** */
+
+    classProto.afterGet = function(data){
+        var that = this;
+        that.triggerEvent('onGet', data);
+        return that;
+    };
+
+    classProto.afterComplete = function(data){
+        var that = this;
+        that.triggerEvent('onComplete', data);
+        that.close();
+        return that;
+    };
 });
 cm.define('App.FileUploaderLocal', {
-    'extend' : 'Com.FileUploaderLocal',
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onSelect'
+    ],
     'params' : {
-        'fileListConstructor' : 'App.MultipleFileInput'
+        'max' : 0,
+        'fileList' : true,
+        'fileListConstructor' : 'App.MultipleFileInput',
+        'fileListParams' : {
+            'local' : false,
+            'dropzone' : false,
+            'fileManager' : false,
+            'fileUploader' : false,
+            'embedStructure' : 'append'
+        },
+        'dropzone' : true,
+        'dropzoneConstructor' : 'Com.FileDropzone',
+        'dropzoneParams' : {
+            'embedStructure' : 'append',
+            'rollover' : false,
+            'height' : 256
+        },
+        'showOverlay' : true,
+        'overlayDelay' : 'cm._config.loadDelay',
+        'Com.Overlay' : {
+            'autoOpen' : false,
+            'removeOnClose' : true,
+            'showSpinner' : true,
+            'showContent' : false,
+            'position' : 'absolute',
+            'theme' : 'light'
+        },
+        'Com.FileReader' : {}
+    },
+    'strings' : {
+        'browse_local_single' : 'Choose file',
+        'browse_local_multiple' : 'Choose files',
+        'or' : 'or',
+        'browse' : 'Browse'
     }
 },
 function(params){
     var that = this;
     // Call parent class construct
-    Com.FileUploaderLocal.apply(that, arguments);
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('App.FileUploaderLocal', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Variables
+        that.nodes = {};
+        that.components = {};
+        that.items = [];
+        that.isMultiple = false;
+        that.isProccesing = false;
+        that.overlayDelay = null;
+        // Bind context to methods
+        that.browseActionHandler = that.browseAction.bind(that);
+        that.processFilesHandler = that.processFiles.bind(that);
+        // Add events
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this;
+        return that.items;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        that.isMultiple = !that.params['max'] || that.params['max'] > 1;
+        // Validate Language Strings
+        that.setLangs({
+            'browse_local' : !that.params['max'] || that.params['max'] > 1 ? that.lang('browse_local_multiple') : that.lang('browse_local_single')
+        });
+        // Components parameters
+        that.params['fileListParams']['max'] = that.params['max'];
+        that.params['dropzoneParams']['max'] = that.params['max'];
+        return that;
+    };
+
+    classProto.renderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderViewStart');
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'com__file-uploader__local'},
+            that.nodes['holder'] = cm.node('div', {'class' : 'com__file-uploader__holder'},
+                cm.node('div', {'class' : 'pt__buttons pull-center'},
+                    cm.node('div', {'class' : 'inner'},
+                        cm.node('div', {'class' : 'browse-button'},
+                            cm.node('button', {'type' : 'button','class' : 'button button-primary button--xlarge'}, that.lang('browse_local')),
+                            cm.node('div', {'class' : 'inner'},
+                                that.nodes['input'] = cm.node('input', {'type' : 'file'})
+                            )
+                        )
+                    )
+                )
+            )
+        );
+        if(that.params['dropzone']){
+            that.nodes['dropzoneHolder'] = cm.node('div', {'class' : 'com__file-uploader__holder'},
+                cm.node('div', {'class' : 'com__file-uploader__title'}, that.lang('or')),
+                that.nodes['dropzone'] = cm.node('div', {'class' : 'com__file-uploader__dropzone'})
+            );
+            cm.appendChild(that.nodes['dropzoneHolder'], that.nodes['container']);
+        }
+        if(that.params['fileList']){
+            that.nodes['files'] = cm.node('div', {'class' : 'com__file-uploader__files is-hidden'});
+            cm.appendChild(that.nodes['files'], that.nodes['container']);
+        }
+        that.isMultiple && that.nodes['input'].setAttribute('multiple', 'multiple');
+        // Events
+        that.triggerEvent('onRenderViewProcess');
+        cm.addEvent(that.nodes['input'], 'change', that.browseActionHandler);
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Init Overlay
+        cm.getConstructor('Com.Overlay', function(classConstructor, className){
+            that.components['overlay'] = new classConstructor(
+                cm.merge(that.params[className], {
+                    'container' : that.nodes['container']
+                })
+            );
+        });
+        // Init FilerReader
+        cm.getConstructor('Com.FileReader', function(classObject, className){
+            that.components['reader'] = new classObject(that.params[className]);
+        });
+        // Init Dropzone
+        if(that.params['dropzone']){
+            cm.getConstructor(that.params['dropzoneConstructor'], function(classObject){
+                that.components['dropzone'] = new classObject(
+                    cm.merge(that.params['dropzoneParams'], {
+                        'container' : that.nodes['dropzone']
+                    })
+                );
+                that.components['dropzone'].addEvent('onSelect', function(my, data){
+                    that.processFiles(data);
+                });
+            });
+        }
+        // Init Files Input
+        if(that.params['fileList']){
+            cm.getConstructor(that.params['fileListConstructor'], function(classObject){
+                that.components['fileList'] = new classObject(
+                    cm.merge(that.params['fileListParams'], {
+                        'node' : that.nodes['files']
+                    })
+                );
+                that.components['fileList'].addEvent('onItemAddEnd', function(){
+                    if(that.components['fileList'].get().length){
+                        cm.removeClass(that.nodes['files'], 'is-hidden');
+                    }
+                });
+                that.components['fileList'].addEvent('onItemRemoveEnd', function(){
+                    if(!that.components['fileList'].get().length){
+                        cm.addClass(that.nodes['files'], 'is-hidden');
+                    }
+                });
+            });
+        }
+        return that;
+    };
+
+    /* *** PROCESS FILES *** */
+
+    classProto.browseAction = function(e){
+        var that = this,
+            length = that.params['max'] ? Math.min(e.target.files.length, (that.params['max'] - that.items.length)) : e.target.files.length,
+            data = [];
+        cm.preventDefault(e);
+        cm.forEach(length, function(i){
+            data.push(e.target.files[i]);
+        });
+        that.processFiles(data);
+        return that;
+    };
+
+    classProto.processFiles = function(data){
+        var that = this,
+            length = data.length;
+        // Show Overlay
+        if(that.params['showOverlay']){
+            that.overlayDelay = setTimeout(function(){
+                if(that.components['overlay'] && !that.components['overlay'].isOpen){
+                    that.components['overlay'].open();
+                }
+            }, that.params['overlayDelay']);
+        }
+        // Process
+        cm.forEach(data, function(file, i){
+            that.components['reader'].read(file, function(item){
+                that.items[i] = item;
+                if(cm.getLength(that.items) === length){
+                    that.finalizeFiles();
+                }
+            });
+        });
+        return that;
+    };
+
+    classProto.finalizeFiles = function(){
+        var that = this;
+        // Render Files List
+        if(that.components['fileList']){
+            that.renderFileList();
+        }
+        // Hide Overlay
+        if(that.params['showOverlay']){
+            that.overlayDelay && clearTimeout(that.overlayDelay);
+            if(that.components['overlay'] && that.components['overlay'].isOpen){
+                that.components['overlay'].close();
+            }
+        }
+        // Trigger events
+        that.triggerEvent('onSelect', that.items);
+        return that;
+    };
+
+    classProto.renderFileList = function(){
+        var that = this;
+        cm.forEach(that.items, function(item){
+            that.components['fileList'].addItem({'value' : item}, true);
+        });
+        return that;
+    };
 });
 cm.define('App.FontInput', {
     'extend' : 'Com.AbstractInput',
@@ -33038,7 +31967,7 @@ cm.getConstructor('App.FontInput', function(classConstructor, className, classPr
     classProto.validateItemConfig = function(config){
         var that = this;
         if(config['line-height']){
-            if(config['line-height'] != 'normal'){
+            if(config['line-height'] !== 'normal'){
                 config['line-height'] = parseInt(config['line-height']);
             }
         }
@@ -33081,9 +32010,9 @@ cm.getConstructor('App.FontInput', function(classConstructor, className, classPr
             return a - b;
         });
         that.params['styles']['line-height'].sort(function(a, b){
-            if(a == 'normal'){
+            if(a === 'normal'){
                 return -1;
-            }else if(b == 'normal'){
+            }else if(b === 'normal'){
                 return 1;
             }
             return a - b;
@@ -33276,7 +32205,7 @@ cm.getConstructor('App.FontInput', function(classConstructor, className, classPr
             )
         );
         cm.addEvent(that.nodes['tooltip']['font-style-button'], 'click', function(){
-            that.set(cm.merge(that.value, {'font-style' : (that.value['font-style'] == 'italic'? 'normal' : 'italic')}), true);
+            that.set(cm.merge(that.value, {'font-style' : (that.value['font-style'] === 'italic'? 'normal' : 'italic')}), true);
         });
         return that;
     };
@@ -33290,7 +32219,7 @@ cm.getConstructor('App.FontInput', function(classConstructor, className, classPr
             )
         );
         cm.addEvent(that.nodes['tooltip']['text-decoration-button'], 'click', function(){
-            that.set(cm.merge(that.value, {'text-decoration' : (that.value['text-decoration'] == 'underline'? 'none' : 'underline')}), true);
+            that.set(cm.merge(that.value, {'text-decoration' : (that.value['text-decoration'] === 'underline'? 'none' : 'underline')}), true);
         });
     };
 
@@ -33332,7 +32261,7 @@ cm.getConstructor('App.FontInput', function(classConstructor, className, classPr
         );
         cm.forEach(that.params['styles']['line-height'], function(item){
             that.nodes['tooltip']['line-height'].appendChild(
-                cm.node('option', {'value' : item}, (item == 'normal'? that.lang('auto') : item))
+                cm.node('option', {'value' : item}, (item === 'normal'? that.lang('auto') : item))
             );
         });
         // Component
@@ -33468,14 +32397,14 @@ cm.getConstructor('App.FontInput', function(classConstructor, className, classPr
                     }
                     break;
                 case 'text-decoration':
-                    if(value == 'underline'){
+                    if(value === 'underline'){
                         cm.addClass(that.nodes['tooltip']['text-decoration-button'], 'active');
                     }else{
                         cm.removeClass(that.nodes['tooltip']['text-decoration-button'], 'active');
                     }
                     break;
                 case 'font-style':
-                    if(value == 'italic'){
+                    if(value === 'italic'){
                         cm.addClass(that.nodes['tooltip']['font-style-button'], 'active');
                     }else{
                         cm.removeClass(that.nodes['tooltip']['font-style-button'], 'active');
@@ -33492,8 +32421,8 @@ cm.getConstructor('App.FontInput', function(classConstructor, className, classPr
 
     classProto.changeAction = function(triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
-        var isChanged = JSON.stringify(that.value) != JSON.stringify(that.previousValue);
+        triggerEvents = cm.isUndefined(triggerEvents)? true : triggerEvents;
+        var isChanged = JSON.stringify(that.value) !== JSON.stringify(that.previousValue);
         if(triggerEvents && isChanged){
             that.triggerEvent('onChange', that.value);
         }
@@ -36086,504 +35015,6 @@ function(params){
 
     init();
 });
-cm.define('App.Stylizer', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'DataConfig',
-        'DataNodes',
-        'Stack'
-    ],
-    'events' : [
-        'onRender',
-        'onSelect',
-        'onChange'
-    ],
-    'params' : {
-        'node' : cm.node('div'),
-        'name' : '',
-        'customEvents' : true,
-        'active' : {},
-        'default' : {},
-        'styles' : {
-            'font-family' : [
-                "Arial, Helvetica, sans-serif",
-                "Arial Black, Gadget, sans-serif",
-                "Courier New, Courier, monospace",
-                "Georgia, serif",
-                "Impact, Charcoal, sans-serif",
-                "Lucida Console, Monaco, monospace",
-                "Lucida Sans Unicode, Lucida Grande, sans-serif",
-                "Palatino Linotype, Book Antiqua, Palatino, serif",
-                "Tahoma, Geneva, sans-serif",
-                "Times New Roman, Times, serif",
-                "Trebuchet MS, Helvetica, sans-serif",
-                "Verdana, Geneva, sans-serif"
-            ],
-            'line-height' : [8, 10, 12, 16, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 88, 96, 108, 120],
-            'font-size' : [8, 9, 10, 11, 12, 13, 14, 18, 20, 22, 24, 28, 32, 36, 42, 48, 54, 60, 72, 96],
-            'font-weight' : [100, 300, 400, 600, 700, 900],
-            'font-style' : ['normal', 'italic'],
-            'text-decoration' : ['none', 'underline']
-        },
-        'styleBinds' : {
-            'font-weight' : {
-                'normal' : 400,
-                'bold' : 700
-            }
-        },
-        'controls' : {
-            'font-family' : true,
-            'line-height' : true,
-            'font-size' : true,
-            'font-weight' : true,
-            'font-style' : true,
-            'text-decoration' : true,
-            'color' : true
-        },
-        'showResetButtons' : true,
-        'overrideControls' : true,
-        'Com.Tooltip' : {
-            'targetEvent' : 'click',
-            'hideOnReClick' : true,
-            'top' : 'targetHeight + 6',
-            'left' : '-6',
-            'className' : 'app__stylizer-tooltip'
-        },
-        'Com.Select' : {
-            'renderInBody' : false
-        },
-        'Com.ColorPicker' : {
-            'renderInBody' : false
-        }
-    },
-    'strings' : {
-        '100' : 'Thin',
-        '200' : 'Extra Light',
-        '300' : 'Light',
-        '400' : 'Regular',
-        '500' : 'Medium',
-        '600' : 'Semi Bold',
-        '700' : 'Bold',
-        '800' : 'Extra Bold',
-        '900' : 'Black'
-    }
-},
-function(params){
-    var that = this;
-
-    that.nodes = {
-        'container' : cm.node('div'),
-        'input' : cm.node('input', {'type' : 'hidden'}),
-        'preview' : cm.node('div'),
-        'tooltip' : {}
-    };
-    that.components = {};
-    that.value = null;
-    that.previousValue = null;
-    that.safeValue = null;
-    that.isDestructed = null;
-
-    var init = function(){
-        that.destructHandler = that.destruct.bind(that);
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        validateParams();
-        // Render editor toolbar
-        renderTooltip();
-        setEvents();
-        // Add to stack
-        that.addToStack(that.nodes['container']);
-        // Set
-        set(cm.merge(that.params['default'], that.params['active']), false);
-        // Trigger events
-        that.triggerEvent('onRender', that.value);
-    };
-
-    var validateParams = function(){
-        if(cm.isNode(that.nodes['input'])){
-            that.params['name'] = that.nodes['input'].getAttribute('name') || that.params['name'];
-        }
-        // Get config
-        that.params['default'] = cm.merge(
-            that.params['default'],
-            that.getNodeDataConfig(that.nodes['input'], 'data-default')
-        );
-        that.params['active'] = cm.merge(
-            cm.merge(that.params['default'], that.params['active']),
-            that.getNodeDataConfig(that.nodes['input'], 'value')
-        );
-        // Validate config
-        validateItemConfig(that.params['active']);
-        validateItemConfig(that.params['default']);
-        // Extend global styles config
-        extendGlobalConfig(that.params['active']);
-        extendGlobalConfig(that.params['default']);
-        sortGlobalConfig();
-        // Override controls
-        if(that.params['overrideControls']){
-            cm.forEach(that.params['controls'], function(item, key){
-                that.params['controls'][key] = !!(that.params['default'][key] || that.params['active'][key]);
-            });
-        }
-    };
-
-    var validateItemConfig = function(config){
-        if(config['line-height']){
-            if(config['line-height'] != 'normal'){
-                config['line-height'] = parseInt(config['line-height']);
-            }
-        }
-        if(config['font-size']){
-            config['font-size'] = parseInt(config['font-size']);
-        }
-        if(config['font-weight']){
-            if(that.params['styleBinds']['font-weight'][config['font-weight']]){
-                config['font-weight'] = that.params['styleBinds']['font-weight'][config['font-weight']];
-            }
-            config['font-weight'] = parseInt(config['font-weight']);
-            config['font-weight'] = cm.inArray(that.params['styles']['font-weight'], config['font-weight'])? config['font-weight'] : 400;
-        }
-        if(config['font-style']){
-            config['font-style'] = cm.inArray(that.params['styles']['font-style'], config['font-style'])? config['font-style'] : 'normal';
-        }
-        if(config['text-decoration']){
-            config['text-decoration'] = cm.inArray(that.params['styles']['text-decoration'], config['text-decoration'])? config['text-decoration'] : 'none';
-        }
-        return config;
-    };
-
-    var extendGlobalConfig = function(config){
-        if(config['font-size'] && !cm.inArray(that.params['styles']['font-size'], config['font-size'])){
-            that.params['styles']['font-size'].push(config['font-size']);
-        }
-        if(config['line-height'] && !cm.inArray(that.params['styles']['line-height'], config['line-height'])){
-            that.params['styles']['line-height'].push(config['line-height']);
-        }
-        if(config['font-family'] && !cm.inArray(that.params['styles']['font-family'], config['font-family'])){
-            that.params['styles']['font-family'].push(config['font-family']);
-        }
-    };
-
-    var sortGlobalConfig = function(){
-        that.params['styles']['font-size'].sort(function(a, b){
-            return a - b;
-        });
-        that.params['styles']['line-height'].sort(function(a, b){
-            if(a == 'normal'){
-                return -1;
-            }else if(b == 'normal'){
-                return 1;
-            }
-            return a - b;
-        });
-        that.params['styles']['font-family'].sort(function(a, b){
-            var t1 = a.toLowerCase().replace(/["']/g, ''),
-                t2 = b.toLowerCase().replace(/["']/g, '');
-            return (t1 < t2)? -1 : ((t1 > t2)? 1 : 0);
-        });
-    };
-
-    var renderTooltip = function(){
-        // Structure
-        that.nodes['tooltip']['container'] = cm.node('div', {'class' : 'pt__toolbar'},
-            that.nodes['tooltip']['inner'] = cm.node('div', {'class' : 'inner'},
-                that.nodes['tooltip']['group1'] = cm.node('ul', {'class' : 'group'}),
-                that.nodes['tooltip']['group2'] = cm.node('ul', {'class' : 'group'}),
-                that.nodes['tooltip']['group3'] = cm.node('ul', {'class' : 'group'}),
-                that.nodes['tooltip']['group4'] = cm.node('ul', {'class' : 'group'})
-            )
-        );
-        // Font-Family
-        if(that.params['controls']['font-family']){
-            that.nodes['tooltip']['group2'].appendChild(
-                cm.node('li', {'class' : 'is-select medium'},
-                    that.nodes['tooltip']['font-family'] = cm.node('select', {'title' : that.lang('Font')})
-                )
-            );
-            cm.forEach(that.params['styles']['font-family'], function(item){
-                that.nodes['tooltip']['font-family'].appendChild(
-                    cm.node('option', {'value' : item, 'style' : {'font-family' : item}}, item.replace(/["']/g, '').split(',')[0])
-                );
-            });
-            that.components['font-family'] = new Com.Select(
-                cm.merge(that.params['Com.Select'], {
-                    'select' : that.nodes['tooltip']['font-family'],
-                    'events' : {
-                        'onChange' : function(my, value){
-                            set(cm.merge(that.value, {'font-family' : value}), true);
-                        }
-                    }
-                })
-            );
-        }
-        // Font-Weight
-        if(that.params['controls']['font-weight']){
-            // Button
-            that.nodes['tooltip']['group1'].appendChild(
-                that.nodes['tooltip']['font-weight-button'] = cm.node('li', {'class' : 'button button-secondary is-icon'},
-                    cm.node('span', {'class' : 'icon toolbar bold'})
-                )
-            );
-            cm.addEvent(that.nodes['tooltip']['font-weight-button'], 'click', function(){
-                set(cm.merge(that.value, {'font-weight' : (that.value['font-weight'] > 400? 400 : 700)}), true);
-            });
-            // Select
-            that.nodes['tooltip']['group2'].appendChild(
-                cm.node('li', {'class' : 'is-select medium'},
-                    that.nodes['tooltip']['font-weight'] = cm.node('select', {'title' : that.lang('Weight')})
-                )
-            );
-            cm.forEach(that.params['styles']['font-weight'], function(item){
-                that.nodes['tooltip']['font-weight'].appendChild(
-                    cm.node('option', {'value' : item}, that.lang(item))
-                );
-            });
-            that.components['font-weight'] = new Com.Select(
-                cm.merge(that.params['Com.Select'], {
-                    'select' : that.nodes['tooltip']['font-weight'],
-                    'events' : {
-                        'onChange' : function(my, value){
-                            set(cm.merge(that.value, {'font-weight' : value}), true);
-                        }
-                    }
-                })
-            );
-        }
-        // Font-Style
-        if(that.params['controls']['font-style']){
-            // Button
-            that.nodes['tooltip']['group1'].appendChild(
-                that.nodes['tooltip']['font-style-button'] = cm.node('li', {'class' : 'button button-secondary is-icon'},
-                    cm.node('span', {'class' : 'icon toolbar italic'})
-                )
-            );
-            cm.addEvent(that.nodes['tooltip']['font-style-button'], 'click', function(){
-                set(cm.merge(that.value, {'font-style' : (that.value['font-style'] == 'italic'? 'normal' : 'italic')}), true);
-            });
-        }
-        // Text-Decoration
-        if(that.params['controls']['text-decoration']){
-            // Button
-            that.nodes['tooltip']['group1'].appendChild(
-                that.nodes['tooltip']['text-decoration-button'] = cm.node('li', {'class' : 'button button-secondary is-icon'},
-                    cm.node('span', {'class' : 'icon toolbar underline'})
-                )
-            );
-            cm.addEvent(that.nodes['tooltip']['text-decoration-button'], 'click', function(){
-                set(cm.merge(that.value, {'text-decoration' : (that.value['text-decoration'] == 'underline'? 'none' : 'underline')}), true);
-            });
-        }
-        // Font-Size
-        if(that.params['controls']['font-size']){
-            // Select
-            that.nodes['tooltip']['group2'].appendChild(
-                cm.node('li', {'class' : 'is-select x-small'},
-                    that.nodes['tooltip']['font-size'] = cm.node('select', {'title' : that.lang('Size')})
-                )
-            );
-            cm.forEach(that.params['styles']['font-size'], function(item){
-                that.nodes['tooltip']['font-size'].appendChild(
-                    cm.node('option', {'value' : item}, item)
-                );
-            });
-            that.components['font-size'] = new Com.Select(
-                cm.merge(that.params['Com.Select'], {
-                    'select' : that.nodes['tooltip']['font-size'],
-                    'events' : {
-                        'onChange' : function(my, value){
-                            set(cm.merge(that.value, {'font-size' : value}), true);
-                        }
-                    }
-                })
-            );
-        }
-        // Line-Height
-        if(that.params['controls']['line-height']){
-            // Select
-            that.nodes['tooltip']['group2'].appendChild(
-                cm.node('li', {'class' : 'is-select x-small'},
-                    that.nodes['tooltip']['line-height'] = cm.node('select', {'title' : that.lang('Leading')})
-                )
-            );
-            cm.forEach(that.params['styles']['line-height'], function(item){
-                that.nodes['tooltip']['line-height'].appendChild(
-                    cm.node('option', {'value' : item}, (item == 'normal'? that.lang('auto') : item))
-                );
-            });
-            that.components['line-height'] = new Com.Select(
-                cm.merge(that.params['Com.Select'], {
-                    'select' : that.nodes['tooltip']['line-height'],
-                    'events' : {
-                        'onChange' : function(my, value){
-                            set(cm.merge(that.value, {'line-height' : value}), true);
-                        }
-                    }
-                })
-            );
-        }
-        // Color
-        if(that.params['controls']['color']){
-            that.nodes['tooltip']['group3'].appendChild(
-                cm.node('li', {'class' : 'is-select medium'},
-                    that.nodes['tooltip']['color'] = cm.node('input', {'type' : 'text', 'title' : that.lang('Color')})
-                )
-            );
-            that.components['color'] = new Com.ColorPicker(
-                cm.merge(that.params['Com.ColorPicker'], {
-                    'input' : that.nodes['tooltip']['color'],
-                    'defaultValue' : that.params['default']['color'],
-                    'events' : {
-                        'onChange' : function(my, value){
-                            set(cm.merge(that.value, {'color' : value}), true);
-                        }
-                    }
-                })
-            );
-        }
-        // Reset
-        if(that.params['showResetButtons']){
-            // Button
-            that.nodes['tooltip']['group4'].appendChild(
-                cm.node('li',
-                    that.nodes['tooltip']['reset-default-button'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('Reset to default'))
-                )
-            );
-            that.nodes['tooltip']['group4'].appendChild(
-                cm.node('li',
-                    that.nodes['tooltip']['reset-current-button'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('Reset to current'))
-                )
-            );
-            cm.addEvent(that.nodes['tooltip']['reset-default-button'], 'click', function(){
-                set(cm.clone(that.params['default']), true);
-            });
-            cm.addEvent(that.nodes['tooltip']['reset-current-button'], 'click', function(){
-                set(cm.clone(that.params['active']), true);
-            });
-        }else{
-            cm.remove(that.nodes['tooltip']['group4']);
-        }
-        // Render tooltip
-        that.components['tooltip'] = new Com.Tooltip(
-            cm.merge(that.params['Com.Tooltip'], {
-                'content' : that.nodes['tooltip']['container'],
-                'target' : that.nodes['container'],
-                'events' : {
-                    'onShowStart' : function(){
-                        cm.addClass(that.nodes['container'], 'active')
-                    },
-                    'onHideStart' : function(){
-                        cm.removeClass(that.nodes['container'], 'active')
-                    }
-                }
-            })
-        );
-    };
-
-    var setEvents = function(){
-        // Add custom event
-        if(that.params['customEvents']){
-            cm.customEvent.add(that.nodes['container'], 'destruct', that.destructHandler);
-        }
-    };
-
-    var unsetEvents = function(){
-        // Add custom event
-        if(that.params['customEvents']){
-            cm.customEvent.remove(that.nodes['container'], 'destruct', that.destructHandler);
-        }
-    };
-
-    var set = function(styles, triggerEvents){
-        that.previousValue = cm.clone(that.value);
-        that.value = cm.clone(styles);
-        that.value['_type'] = 'font';
-        that.safeValue = cm.clone(that.value);
-        // Set components
-        cm.forEach(styles, function(value, key){
-            if(that.components[key]){
-                that.components[key].set(value, false);
-            }
-            // Set buttons
-            switch(key){
-                case 'font-weight':
-                    if(value > 400){
-                        cm.addClass(that.nodes['tooltip']['font-weight-button'], 'active');
-                    }else{
-                        cm.removeClass(that.nodes['tooltip']['font-weight-button'], 'active');
-                    }
-                    break;
-                case 'text-decoration':
-                    if(value == 'underline'){
-                        cm.addClass(that.nodes['tooltip']['text-decoration-button'], 'active');
-                    }else{
-                        cm.removeClass(that.nodes['tooltip']['text-decoration-button'], 'active');
-                    }
-                    break;
-                case 'font-style':
-                    if(value == 'italic'){
-                        cm.addClass(that.nodes['tooltip']['font-style-button'], 'active');
-                    }else{
-                        cm.removeClass(that.nodes['tooltip']['font-style-button'], 'active');
-                    }
-                    break;
-                case 'font-size':
-                    that.safeValue[key] = cm.isNumber(value) || /^\d+$/.test(value) ? (value + 'px') : value;
-                    break;
-                case 'line-height':
-                    that.safeValue[key] = cm.isNumber(value) || /^\d+$/.test(value) ? (value + 'px') : value;
-                    break;
-            }
-            // Set preview
-            that.nodes['preview'].style[cm.styleStrToKey(key)] = that.safeValue[key];
-        });
-        // Set hidden input data
-        that.nodes['input'].value = JSON.stringify(that.safeValue);
-        // Trigger events
-        if(triggerEvents){
-            that.triggerEvent('onSelect', that.safeValue);
-            eventOnChange();
-        }
-    };
-
-    var eventOnChange = function(){
-        if(JSON.stringify(that.value) != JSON.stringify(that.previousValue)){
-            that.triggerEvent('onChange', that.safeValue);
-        }
-    };
-
-    /* ******* MAIN ******* */
-
-    that.destruct = function(){
-        var that = this;
-        if(!that.isDestructed){
-            that.isDestructed = true;
-            cm.customEvent.trigger(that.nodes['tooltip']['container'], 'destruct', {
-                'type' : 'child',
-                'self' : false
-            });
-            unsetEvents();
-            that.removeFromStack();
-        }
-        return that;
-    };
-
-    that.set = function(styles, triggerEvents){
-        triggerEvents = typeof triggerEvents != 'undefined'? triggerEvents : true;
-        styles = cm.isObject(styles)? validateItemConfig(styles) : that.params['default'];
-        set(styles, triggerEvents);
-        return that;
-    };
-
-    that.get = function(){
-        return that.safeValue;
-    };
-
-    init();
-});
 cm.define('App.Template', {
     'modules' : [
         'Params',
@@ -37208,16 +35639,145 @@ function(params){
     init();
 });
 cm.define('App.elFinderFileManager', {
-    'extend' : 'Com.elFinderFileManager',
-    'params' : {}
+    'extend' : 'Com.AbstractFileManager',
+    'params' : {
+        'lazy' : false,
+        'config' : {
+            url : '',
+            lang : {},
+            dotFiles : false,
+            useBrowserHistory : false,
+            resizable : false,
+            width : 'auto',
+            height : 'auto',
+            commandsOptions : {
+                getfile : {
+                    folders : false,
+                    multiple : false
+                }
+            }
+        }
+    }
 },
 function(params){
     var that = this;
+    that.getFilesProcessType = null;
+    that.isLoaded = false;
     // Call parent class construct
-    Com.elFinderFileManager.apply(that, arguments);
+    Com.AbstractFileManager.apply(that, arguments);
+});
+
+cm.getConstructor('App.elFinderFileManager', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind context to methods
+        that.getFilesEventHandler = that.getFilesEvent.bind(that);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this;
+        that.getFilesProcessType = 'get';
+        if(that.components['controller']){
+            that.components['controller'].exec('getfile');
+        }else{
+            _inherit.prototype.get.apply(that, arguments);
+        }
+        return that;
+    };
+
+    classProto.complete = function(){
+        var that = this;
+        that.getFilesProcessType = 'complete';
+        if(that.components['controller']){
+            that.components['controller'].exec('getfile');
+        }else{
+            _inherit.prototype.complete.apply(that, arguments);
+        }
+        return that;
+    };
+
+    classProto.redraw = function(){
+        var that = this;
+        if(that.components['controller']){
+            that.components['controller'].resize('auto', 'auto');
+        }
+        that.triggerEvent('onRedraw');
+        return that;
+    };
+
+    classProto.renderController = function(){
+        var that = this;
+        // Init elFinder
+        if(!that.components['controller']){
+            if(!cm.isUndefined(elFinder)){
+                that.isLoaded = true;
+                that.components['controller'] = new elFinder(that.nodes['holder']['inner'],
+                    cm.merge(that.params['config'], {
+                        commandsOptions : {
+                            getfile : {
+                                multiple: that.isMultiple
+                            }
+                        },
+                        getFileCallback : that.getFilesEventHandler
+                    })
+                );
+                // Show
+                cm.removeClass(that.nodes['holder']['container'], 'is-hidden', true);
+                that.components['controller'].show();
+                that.components['controller'].resize('auto', 'auto');
+            }else{
+                cm.errorLog({
+                    'name' : that._name['full'],
+                    'message' : ['elFinder does not exists.'].join(' ')
+                });
+            }
+        }
+        return that;
+    };
+
+    /* *** PROCESS FILES *** */
+
+    classProto.getFilesEvent = function(data){
+        var that = this;
+        // Read files and convert to file format
+        that.processFiles(data);
+        // Callbacks
+        switch(that.getFilesProcessType){
+            case 'get':
+                _inherit.prototype.get.call(that);
+                break;
+            case 'complete':
+                _inherit.prototype.complete.call(that);
+                break;
+            default:
+                _inherit.prototype.complete.call(that);
+                break;
+
+        }
+        that.getFilesProcessType = null;
+        return that;
+    };
+
+    classProto.convertFile = function(data){
+        if(!data || data['mime'] === 'directory'){
+            return false;
+        }
+        return {
+            'value' : data['url'],
+            'name' : data['name'],
+            'mime' : data['mime'],
+            'size' : data['size'],
+            'url' : data['url']
+        }
+    };
 });
 cm.define('App.elFinderFileManagerContainer', {
-    'extend' : 'Com.elFinderFileManagerContainer',
+    'extend' : 'Com.AbstractFileManagerContainer',
     'params' : {
         'constructor' : 'App.elFinderFileManager'
     }
@@ -37225,7 +35785,7 @@ cm.define('App.elFinderFileManagerContainer', {
 function(params){
     var that = this;
     // Call parent class construct
-    Com.elFinderFileManagerContainer.apply(that, arguments);
+    Com.AbstractFileManagerContainer.apply(that, arguments);
 });
 cm.define('Module.Anchor', {
     'extend' : 'App.AbstractModule',
@@ -37424,7 +35984,864 @@ cm.getConstructor('Module.Anchor', function(classConstructor, className, classPr
         return that.params['name'] === hash;
     };
 });
+/* ******* COMPONENTS: CALENDAR ******* */
 
+cm.define('Module.Calendar', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Callbacks',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onError',
+        'onAbort',
+        'onSuccess',
+        'onSendStart',
+        'onSendEnd',
+        'onProcessEnd'
+    ],
+    'params' : {
+        'node' : cm.node('div'),
+        'name' : '',
+        'defaultView' : 'agenda',                                   // agenda | week | month
+        'isViewPreloaded' : false,
+        'animateDuration' : 'cm._config.animDuration',
+        'showLoader' : true,
+        'loaderDelay' : 'cm._config.loadDelay',
+        'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
+        'responseHTML' : true,                                      // If true, html will append automatically
+        'ajax' : {
+            'type' : 'json',
+            'method' : 'get',
+            'url' : '',                                             // Request URL. Variables: %baseUrl%, %view%, %year%, %month%, %week%, %callback% for JSONP.
+            'params' : {                                            // Params object. %baseUrl%, %view%, %year%, %month%, %week%, %callback% for JSONP.
+                'view' : '%view%',
+                'week' : '%week%',
+                'month' : '%month%',
+                'year' : '%year%',
+                'query' : '%query%'
+            }
+        },
+        'Com.Overlay' : {
+            'position' : 'absolute',
+            'autoOpen' : false,
+            'removeOnClose' : true,
+            'appendMode' : 'insertFirst'
+        }
+    },
+    'strings' : {
+        'server_error' : 'An unexpected error has occurred. Please try again later.'
+    }
+},
+function(params){
+    var that = this,
+        viewDetailsPattern = {
+            'view' : null,
+            'week' : null,
+            'month' : null,
+            'year' : null,
+            'query' : null
+        };
+
+    that.nodes = {
+        'container' : cm.node('div'),
+        'buttons' : {
+            'views' : {
+                'agenda' : cm.node('div'),
+                'week' : cm.node('div'),
+                'month' : cm.node('div')
+            }
+        },
+        'holder' : {
+            'container' : cm.node('div'),
+            'inner' : cm.node('div')
+        }
+    };
+    that.components = {};
+    that.animations = {};
+
+    that.ajaxHandler = null;
+    that.isProcess = false;
+    that.isRendering = false;
+    that.loaderDelay = null;
+    that.viewDetails = cm.clone(viewDetailsPattern);
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.addToStack(that.nodes['container']);
+        that.triggerEvent('onRender');
+    };
+
+    var validateParams = function(){
+        that.params['defaultView'] = cm.inArray(['agenda', 'week', 'month'], that.params['defaultView']) ? that.params['defaultView'] : 'month';
+        that.params['Com.Overlay']['container'] = that.nodes['container'];
+    };
+
+    var render = function(){
+        // Overlay
+        cm.getConstructor('Com.Overlay', function(classConstructor, className){
+            that.components['loader'] = new classConstructor(that.params[className]);
+        });
+        // Animations
+        that.animations['response'] = new cm.Animation(that.nodes['holder']['container']);
+        // View Buttons
+        cm.forEach(that.nodes['buttons']['views'], function(node, key){
+            cm.addEvent(node, 'click', function(e){
+                cm.preventDefault(e);
+                setView({
+                    'view' : key
+                });
+            });
+        });
+        // View Finder
+        new cm.Finder('Module.CalendarAgenda', that.params['name'], that.nodes['holder']['inner'], function(classObject){
+            classObject.addEvent('onRequestView', function(calendar, data){
+                setView(data);
+            });
+        }, {'multiple' : true});
+        new cm.Finder('Module.CalendarWeek', that.params['name'], that.nodes['holder']['inner'], function(classObject){
+            classObject.addEvent('onRequestView', function(calendar, data){
+                setView(data);
+            });
+        }, {'multiple' : true});
+        new cm.Finder('Module.CalendarMonth', that.params['name'], that.nodes['holder']['inner'], function(classObject){
+            classObject.addEvent('onRequestView', function(calendar, data){
+                setView(data);
+            });
+        }, {'multiple' : true});
+        // Render View
+        !that.params['isViewPreloaded'] && setView({
+            'view' : that.params['defaultView']
+        });
+    };
+
+    var setViewDetails = function(data){
+        that.viewDetails = cm.merge(viewDetailsPattern, data);
+    };
+
+    var setView = function(data){
+        if(that.isProcess){
+            that.abort();
+        }
+        if(!that.isProcess && !that.isRendering){
+            setViewDetails(data);
+            cm.forEach(that.nodes['buttons']['views'], function(node, key){
+                if(key === that.viewDetails['view']){
+                    cm.replaceClass(node, 'button-secondary', 'button-primary');
+                }else{
+                    cm.replaceClass(node, 'button-primary', 'button-secondary');
+                }
+            });
+            that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params['ajax']));
+        }
+    };
+
+    /* ******* CALLBACKS ******* */
+
+    /* *** AJAX *** */
+
+    that.callbacks.prepare = function(that, config){
+        config = that.callbacks.beforePrepare(that, config);
+        config['url'] = cm.strReplace(config['url'], {
+            '%baseUrl%' : cm._baseUrl,
+            '%view%' : that.viewDetails['view'],
+            '%year%' : that.viewDetails['year'],
+            '%month%' : that.viewDetails['month'],
+            '%week%' : that.viewDetails['week'],
+            '%query%' : that.viewDetails['query']
+        });
+        config['params'] = cm.objectReplace(config['params'], {
+            '%baseUrl%' : cm._baseUrl,
+            '%view%' : that.viewDetails['view'],
+            '%year%' : that.viewDetails['year'],
+            '%month%' : that.viewDetails['month'],
+            '%week%' : that.viewDetails['week'],
+            '%query%' : that.viewDetails['query']
+        });
+        config = that.callbacks.afterPrepare(that, config);
+        return config;
+    };
+
+    that.callbacks.beforePrepare = function(that, config){
+        return config;
+    };
+
+    that.callbacks.afterPrepare = function(that, config){
+        return config;
+    };
+
+    that.callbacks.request = function(that, config){
+        config = that.callbacks.prepare(that, config);
+        // Return ajax handler (XMLHttpRequest) to providing abort method.
+        return cm.ajax(
+            cm.merge(config, {
+                'onStart' : function(){
+                    that.callbacks.start(that);
+                },
+                'onSuccess' : function(response){
+                    that.callbacks.response(that, config, response);
+                },
+                'onError' : function(){
+                    that.callbacks.error(that, config);
+                },
+                'onAbort' : function(){
+                    that.callbacks.abort(that, config);
+                },
+                'onEnd' : function(){
+                    that.callbacks.end(that);
+                }
+            })
+        );
+    };
+
+    that.callbacks.filter = function(that, config, response){
+        var data,
+            dataItem = cm.objectSelector(that.params['responseKey'], response);
+        if(dataItem && !cm.isEmpty(dataItem)){
+            data = dataItem;
+        }
+        return data;
+    };
+
+    that.callbacks.start = function(that, config){
+        that.isProcess = true;
+        // Show Loader
+        if(that.params['showLoader']){
+            that.loaderDelay = setTimeout(function(){
+                if(that.components['loader'] && !that.components['loader'].isOpen){
+                    that.components['loader'].open();
+                }
+            }, that.params['loaderDelay']);
+        }
+        that.triggerEvent('onSendStart');
+    };
+
+    that.callbacks.end = function(that, config){
+        that.isProcess = false;
+        // Hide Loader
+        if(that.params['showLoader']){
+            that.loaderDelay && clearTimeout(that.loaderDelay);
+            if(that.components['loader'] && that.components['loader'].isOpen){
+                that.components['loader'].close();
+            }
+        }
+        that.triggerEvent('onSendEnd');
+        that.triggerEvent('onProcessEnd', that.nodes['holder']['inner']);
+    };
+
+    that.callbacks.response = function(that, config, response){
+        if(!cm.isEmpty(response)){
+            response = that.callbacks.filter(that, config, response);
+        }
+        if(!cm.isEmpty(response)){
+            that.callbacks.success(that, response);
+        }else{
+            that.callbacks.error(that, config);
+        }
+    };
+
+    that.callbacks.error = function(that, config){
+        that.callbacks.renderError(that, config);
+        that.triggerEvent('onError');
+    };
+
+    that.callbacks.success = function(that, response){
+        that.callbacks.render(that, response);
+        that.triggerEvent('onSuccess', response);
+    };
+
+    that.callbacks.abort = function(that, config){
+        that.triggerEvent('onAbort');
+    };
+
+    /* *** RENDER *** */
+
+    that.callbacks.renderTemporary = function(that){
+        return cm.node('div', {'class' : 'calendar__temporary'});
+    };
+
+    that.callbacks.render = function(that, data){
+        var nodes, temporary;
+        if(that.params['responseHTML']){
+            that.isRendering = true;
+            temporary = that.callbacks.renderTemporary(that);
+            nodes = cm.strToHTML(data);
+            if(!cm.isEmpty(nodes)){
+                if(cm.isNode(nodes)){
+                    temporary.appendChild(nodes);
+                }else{
+                    while(nodes.length){
+                        if(cm.isNode(nodes[0])){
+                            temporary.appendChild(nodes[0]);
+                        }else{
+                            cm.remove(nodes[0]);
+                        }
+                    }
+                }
+            }
+            that.callbacks.append(that, temporary);
+        }
+    };
+
+    that.callbacks.renderError = function(that, config){
+        if(that.params['responseHTML']){
+            that.isRendering = true;
+            var temporary = that.callbacks.renderTemporary(that);
+            temporary.appendChild(
+                cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'))
+            );
+            that.callbacks.append(that, temporary);
+        }
+    };
+
+    that.callbacks.append = function(that, temporary){
+        var height;
+        // Wrap old content
+        if(!that.nodes['holder']['temporary']){
+            that.nodes['holder']['temporary'] = that.callbacks.renderTemporary(that);
+            cm.appendNodes(that.nodes['holder']['inner'].childNodes, that.nodes['holder']['temporary']);
+            cm.appendChild(that.nodes['holder']['temporary'], that.nodes['holder']['inner']);
+        }
+        cm.removeClass(that.nodes['holder']['temporary'], 'is-show', true);
+        // Append temporary
+        cm.appendChild(temporary, that.nodes['holder']['inner']);
+        cm.addClass(temporary, 'is-show', true);
+        // Animate
+        cm.removeClass(that.nodes['holder']['container'], 'is-loaded', true);
+        cm.addClass(that.nodes['holder']['container'], 'is-show', true);
+        height = temporary.offsetHeight;
+        that.animations['response'].go({
+            'style' : {'height' : [height, 'px'].join('')},
+            'duration' : that.params['animateDuration'],
+            'anim' : 'smooth',
+            'onStop' : function(){
+                that.nodes['holder']['container'].style.height = '';
+                cm.remove(that.nodes['holder']['temporary']);
+                cm.addClass(that.nodes['holder']['container'], 'is-loaded', true);
+                that.nodes['holder']['temporary'] = temporary;
+                that.isRendering = false;
+            }
+        });
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.refresh = function(){
+        setView(that.viewDetails);
+        return that;
+    };
+
+    that.abort = function(){
+        if(that.ajaxHandler && that.ajaxHandler.abort){
+            that.ajaxHandler.abort();
+        }
+        return that;
+    };
+
+    that.setAction = function(o, mode, update){
+        mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
+        switch(mode){
+            case 'raw':
+                that.params['ajax'] = cm.merge(that._raw.params['ajax'], o);
+                break;
+            case 'current':
+                that.params['ajax'] = cm.merge(that.params['ajax'], o);
+                break;
+            case 'update':
+                that.params['ajax'] = cm.merge(that._update.params['ajax'], o);
+                break;
+        }
+        if(update){
+            that._update.params['ajax'] = cm.clone(that.params['ajax']);
+        }
+        return that;
+    };
+
+    init();
+});
+
+/* *** CALENDAR EVENT *** */
+
+cm.define('Module.CalendarEvent', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'data' : {
+            'title' : null,
+            'date' : null,
+            'description' : null
+        },
+        'Com.Tooltip' : {
+            'delay' : 'cm._config.hideDelayLong',
+            'className' : 'module__calendar-event-tooltip',
+            'minWidth' : 250
+        }
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'template' : null
+    };
+    that.components = {};
+    that.template = null;
+
+    var init = function(){
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        render();
+        that.triggerEvent('onRender');
+    };
+
+    var render = function(){
+        // Render tooltip
+        cm.getConstructor('Com.Tooltip', function(classConstructor, className){
+            that.components['tooltip'] = new classConstructor(
+                cm.merge(that.params[className],{
+                    'target' : that.params['node']
+                })
+            );
+        });
+    };
+
+    var renderContent = function(template){
+        if(!cm.isEmpty(that.params['data']['title'])){
+            template['title'].innerHTML = that.params['data']['title'];
+        }
+        if(!cm.isEmpty(that.params['data']['date'])){
+            template['date'].innerHTML = that.params['data']['date'];
+        }
+        if(!cm.isEmpty(that.params['data']['description'])){
+            template['description'].innerHTML = that.params['data']['description'];
+        }else{
+            cm.remove(template['description-container']);
+        }
+        if(!cm.isEmpty(that.params['data']['url'])){
+            template['button'].setAttribute('href', that.params['data']['url']);
+        }else{
+            cm.remove(template['button-container']);
+        }
+    };
+
+    /* ******* PUBLIC ******* */
+
+    that.setTemplate = function(node){
+        that.nodes['template'] = cm.getNodes(node);
+        if(that.nodes['template']){
+            renderContent(that.nodes['template']);
+            that.components['tooltip'] && that.components['tooltip'].setContent(that.nodes['template']['container']);
+        }
+        return that;
+    };
+
+    that.setTooltipParams = function(o){
+        that.params['Com.Tooltip'] = cm.merge(that.params['Com.Tooltip'], o);
+        that.components['tooltip'] && that.components['tooltip'].setParams(that.params['Com.Tooltip']);
+        return that;
+    };
+
+    init();
+});
+
+/* *** CALENDAR VIEW ABSTRACT *** */
+
+cm.define('Module.AbstractCalendarView', {
+    'modules' : [
+        'Params',
+        'Events',
+        'Langs',
+        'DataConfig',
+        'DataNodes',
+        'Stack'
+    ],
+    'events' : [
+        'onRenderStart',
+        'onRender',
+        'onRequestView'
+    ],
+    'params' : {
+        'node' : cm.Node('div'),
+        'name' : '',
+        'viewName' : '',
+        'itemShortIndent' : 1,
+        'itemShortHeight' : 24,
+        'dayIndent' : 4,
+        'Com.Tooltip' : {}
+    }
+},
+function(params){
+    var that = this;
+
+    that.nodes = {
+        'container' : cm.node('div'),
+        'buttons' : {
+            'container' : cm.node('div'),
+            'prev' : cm.node('div'),
+            'next' : cm.node('div'),
+            'search-button' : cm.node('div'),
+            'search-input' : cm.node('input'),
+            'views' : {
+                'agenda' : cm.node('div'),
+                'week' : cm.node('div'),
+                'month' : cm.node('div')
+            }
+        },
+        'templates' : {
+            'event' : {}
+        }
+    };
+    that.components = {};
+    that.days = [];
+
+    var init = function(){
+        that.getLESSVariables();
+        that.setParams(params);
+        that.convertEvents(that.params['events']);
+        that.getDataNodes(that.params['node']);
+        that.getDataConfig(that.params['node']);
+        that.validateParams();
+        that.addToStack(that.params['node']);
+        that.triggerEvent('onRenderStart');
+        that.renderToolbar();
+        that.render();
+        that.triggerEvent('onRender');
+    };
+
+    /* ******* PUBLIC ******* */
+
+    init();
+});
+
+cm.getConstructor('Module.AbstractCalendarView', function(classConstructor, className, classProto){
+    classProto.getLESSVariables = function(){
+        var that = this;
+        that.params['itemShortIndent'] = cm.getLESSVariable('ComCalendarEvent-Short-Indent', that.params['itemShortIndent'], true);
+        that.params['itemShortHeight'] = cm.getLESSVariable('ComCalendarEvent-Short-Height', that.params['itemShortHeight'], true);
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        if(that.params['Com.Tooltip']['width'] !== 'auto'){
+            that.params['Com.Tooltip']['width'] = cm.strReplace(that.params['Com.Tooltip']['width'], {
+                '%itemShortIndent%' : that.params['itemShortIndent'],
+                '%itemShortHeight%' : that.params['itemShortHeight'],
+                '%dayIndent%' : that.params['dayIndent']
+            });
+        }
+        that.params['Com.Tooltip']['top'] = cm.strReplace(that.params['Com.Tooltip']['top'], {
+            '%itemShortIndent%' : that.params['itemShortIndent'],
+            '%itemShortHeight%' : that.params['itemShortHeight'],
+            '%dayIndent%' : that.params['dayIndent']
+        });
+        that.params['Com.Tooltip']['left'] = cm.strReplace(that.params['Com.Tooltip']['left'], {
+            '%itemShortIndent%' : that.params['itemShortIndent'],
+            '%itemShortHeight%' : that.params['itemShortHeight'],
+            '%dayIndent%' : that.params['dayIndent']
+        });
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        // Find events and set template and tooltip config
+        new cm.Finder('Module.CalendarEvent', null, that.params['node'], function(classObject){
+            // Clone template
+            var template = cm.clone(that.nodes['templates']['event']['container'], true);
+            // Set Node
+            classObject
+                .setTooltipParams(that.params['Com.Tooltip'])
+                .setTemplate(template);
+        }, {'multiple' : true});
+        return that;
+    };
+
+    classProto.renderToolbar = function(){
+        var that = this;
+        // Toolbar Controls
+        new cm.Finder('Com.Select', 'week', that.nodes['buttons']['container'], function(classObject){
+            that.components['week'] = classObject
+                .addEvent('onChange', that.updateView.bind(that));
+        });
+        new cm.Finder('Com.Select', 'month', that.nodes['buttons']['container'], function(classObject){
+            that.components['month'] = classObject
+                .addEvent('onChange',  that.updateView.bind(that));
+        });
+        new cm.Finder('Com.Select', 'year', that.nodes['buttons']['container'], function(classObject){
+            that.components['year'] = classObject
+                .addEvent('onChange', that.updateView.bind(that));
+        });
+        // Search
+        cm.addEvent(that.nodes['buttons']['search-input'], 'keypress', function(e){
+            if(e.keyCode == 13){
+                cm.preventDefault(e);
+                that.updateView();
+            }
+        });
+        cm.addEvent(that.nodes['buttons']['search-button'], 'click', function(e){
+            cm.preventDefault(e);
+            that.updateView();
+        });
+        // View Buttons
+        cm.forEach(that.nodes['buttons']['views'], function(node, key){
+            if(key === that.params['viewName']){
+                cm.replaceClass(node, 'button-secondary', 'button-primary');
+            }else{
+                cm.replaceClass(node, 'button-primary', 'button-secondary');
+            }
+            cm.addEvent(node, 'click', function(e){
+                cm.preventDefault(e);
+                that.requestView({
+                    'view' : key
+                });
+            });
+        });
+        // Prev / Next Buttons
+        cm.addEvent(that.nodes['buttons']['prev'], 'click', function(e){
+            cm.preventDefault(e);
+            that.prev();
+        });
+        cm.addEvent(that.nodes['buttons']['next'], 'click', function(e){
+            cm.preventDefault(e);
+            that.next();
+        });
+        return that;
+    };
+
+    classProto.searchQuery = function(str){
+        var that = this;
+        var data = that.getData();
+        data.query = str;
+        that.requestView(data);
+        return that;
+    };
+
+    classProto.requestView = function(data){
+        var that = this;
+        that.triggerEvent('onRequestView', data);
+        return that;
+    };
+
+    classProto.getData = function(){
+        var that = this;
+        return {
+            'query' : that.nodes['buttons']['search-input'].value,
+            'view' : that.params['viewName'],
+            'year' : that.components['year'] ? that.components['year'].get() : null,
+            'month' : that.components['month'] ? that.components['month'].get() : null,
+            'week' : that.components['week'] ? that.components['week'].get() : null
+        };
+    };
+
+    classProto.updateView = function(){
+        var that = this;
+        that.triggerEvent('onRequestView', that.getData());
+        return that;
+    };
+
+    classProto.prev = function(){
+        var that = this;
+        var data = that.getData();
+        if(data['week'] !== null){
+            if(data['week'] == 1){
+                data['year']--;
+                data['week'] = cm.getWeeksInYear(data['year']);
+            }else{
+                data['week']--;
+            }
+        }else if(data['month'] !== null){
+            if(data['month'] == 0){
+                data['year']--;
+                data['month'] = 11;
+            }else{
+                data['month']--;
+            }
+        }else{
+            data['year']--;
+        }
+        that.requestView(data);
+        return that;
+    };
+
+    classProto.next = function(){
+        var that = this;
+        var data = that.getData();
+        if(data['week'] !== null){
+            if(data['week'] == cm.getWeeksInYear(data['year'])){
+                data['year']++;
+                data['week'] = 1;
+            }else{
+                data['week']++;
+            }
+        }else if(data['month'] !== null){
+            if(data['month'] == 11){
+                data['year']++;
+                data['month'] = 0;
+            }else{
+                data['month']++;
+            }
+        }else {
+            data['year']++;
+        }
+        that.requestView(data);
+        return that;
+    };
+});
+
+/* *** CALENDAR MONTH VIEW *** */
+
+cm.define('Module.CalendarMonth', {
+    'extend' : 'Module.AbstractCalendarView',
+    'params' : {
+        'viewName' : 'month',
+        'Com.Tooltip' : {
+            'width' : '(targetWidth + %dayIndent%) * 2 - targetHeight * 2',
+            'top' : 'targetHeight + %itemShortIndent%',
+            'left' : '-(selfWidth - targetWidth) - targetHeight'
+        }
+    }
+},
+function(params){
+    var that = this;
+    Module.AbstractCalendarView.apply(that, arguments);
+});
+
+cm.getConstructor('Module.CalendarMonth', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.processDay = function(nodes){
+        var that = this;
+        var item = {
+            'isShow' : false,
+            'nodes' : nodes
+        };
+        // Show all events on more button click
+        cm.addEvent(item.nodes['more-button'], 'click', function(){
+            that.showMoreEvents(item);
+        });
+        // Prevent document scrolling while scroll all events block
+        cm.addIsolateScrolling(item.nodes['more-holder']);
+        // Push
+        that.days.push(item);
+    };
+
+    classProto.showMoreEvents = function(item){
+        var that = this;
+        item.delay && clearTimeout(item.delay);
+        if(!item.isShow){
+            item.isShow = true;
+            cm.setScrollTop(item.nodes['more-holder'], 0);
+            cm.addClass(item.nodes['more-holder'], 'is-show');
+        }
+    };
+
+    classProto.hideMoreEvents = function(item, isImmediately){
+        var that = this;
+        item.delay && clearTimeout(item.delay);
+        if(item.isShow){
+            if(isImmediately){
+                item.isShow = false;
+                cm.removeClass(item.nodes['more-holder'], 'is-show');
+            }else{
+                item.delay = setTimeout(function(){
+                    item.isShow = false;
+                    cm.removeClass(item.nodes['more-holder'], 'is-show');
+                }, that.params['delay']);
+            }
+        }
+    };
+
+    classProto.getLESSVariables = function(){
+        var that = this;
+        _inherit.prototype.getLESSVariables.call(that);
+        that.params['dayIndent'] = cm.getLESSVariable('ComCalendarMonth-Day-Indent', that.params['dayIndent'], true);
+        return that;
+    };
+
+    classProto.render = function(){
+        var that = this;
+        _inherit.prototype.render.call(that);
+        cm.forEach(that.nodes['days'], that.processDay.bind(that));
+        return that;
+    };
+});
+
+/* *** CALENDAR WEEK VIEW *** */
+
+cm.define('Module.CalendarWeek', {
+    'extend' : 'Module.AbstractCalendarView',
+    'params' : {
+        'viewName' : 'week',
+        'Com.Tooltip' : {
+            'width' : '(targetWidth + %dayIndent%) * 2 - targetHeight * 2',
+            'top' : 'targetHeight + %itemShortIndent%',
+            'left' : 'targetHeight'
+        }
+    }
+},
+function(params){
+    var that = this;
+    Module.AbstractCalendarView.apply(that, arguments);
+});
+
+cm.getConstructor('Module.CalendarWeek', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.getLESSVariables = function(){
+        var that = this;
+        _inherit.prototype.getLESSVariables.call(that);
+        that.params['dayIndent'] = cm.getLESSVariable('ComCalendarWeek-Day-Indent', that.params['dayIndent'], true);
+        return that;
+    };
+});
+
+/* *** CALENDAR AGENDA VIEW *** */
+
+cm.define('Module.CalendarAgenda', {
+    'extend' : 'Module.AbstractCalendarView',
+    'params' : {
+        'viewName' : 'agenda',
+        'Com.Tooltip' : {
+            'width' : 'targetWidth - %itemShortHeight% * 2',
+            'top' : 'targetHeight + %itemShortIndent%',
+            'left' : 'targetHeight'
+        }
+    }
+},
+function(params){
+    var that = this;
+    Module.AbstractCalendarView.apply(that, arguments);
+});
 cm.define('Mod.ElementCaptcha', {
     'extend' : 'App.AbstractModuleElement',
     'params' : {
@@ -39193,7 +38610,7 @@ cm.getConstructor('Dev.TBSC', function(classConstructor, className, classProto){
         return that;
     };
 });
-window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.30.6","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.30.6","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","PtOverlay-Spinner-BorderSize":"3px","PtOverlay-Spinner-DefaultBackground":"#e8e8e8","PtOverlay-Spinner-ActiveBackground":"#2985e0","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComBigCalendar-BorderWidth":"1px","ComBigCalendar-BorderColor":"#cccccc","ComBigCalendar-Border":["1px","solid","#cccccc"],"ComBigCalendar-Background":"#ffffff","ComCalendarEvent-TooltipWidth":"320px","ComCalendarEvent-Padding":"4px","ComCalendarEvent-LineHeight":"18px","ComCalendarEvent-Short-Indent":"1px","ComCalendarEvent-Short-Height":"20px","ComCalendarEvent-Long-Indent":"12px","ComCalendarTable-Border":["1px","solid","#cccccc"],"ComCalendarTable-Default-Background":"#ffffff","ComCalendarTable-Default-BackgroundHover":"#f2f2f2","ComCalendarTable-Inactive-Background":"#ffffff","ComCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ComCalendarTable-Weekend-Background":"#e8e8e8","ComCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ComCalendarTable-Today-Background":"#f6fafd","ComCalendarTable-Today-BackgroundHover":"#e9f2fb","ComCalendarTable-Active-Background":"#d8e8f8","ComCalendarTable-Active-BackgroundHover":"#c2dbf4","ComCalendarAgenda-Day-Indent":"24px","ComCalendarAgenda-Day-Padding":"12px","ComCalendarAgenda-Day-Width":"72px","ComCalendarWeek-Day-Indent":"4px","ComCalendarWeek-Item-Height":"20px","ComCalendarMonth-Item-Count":3,"ComCalendarMonth-Item-LineHeight":"18px","ComCalendarMonth-Item-Height":"20px","ComCalendarMonth-Item-Indent":"1px","ComCalendarMonth-Day-Indent":"4px","ComCalendarMonth-Day-Items":5,"ComCalendarMonth-Day-Height":"104px","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.18.11","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","fileuploader","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-fileuploader":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppVersion":"3.18.11","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
+window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.30.7","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.30.7","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","PtOverlay-Spinner-BorderSize":"3px","PtOverlay-Spinner-DefaultBackground":"#e8e8e8","PtOverlay-Spinner-ActiveBackground":"#2985e0","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.18.13","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","fileuploader","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-fileuploader":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppVersion":"3.18.13","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","ModCalendar-BorderWidth":"1px","ModCalendar-BorderColor":"#cccccc","ModCalendar-Border":["1px","solid","#cccccc"],"ModCalendar-Background":"#ffffff","ModCalendarEvent-TooltipWidth":"320px","ModCalendarEvent-Padding":"4px","ModCalendarEvent-LineHeight":"18px","ModCalendarEvent-Short-Indent":"1px","ModCalendarEvent-Short-Height":"20px","ModCalendarEvent-Long-Indent":"12px","ModCalendarTable-Border":["1px","solid","#cccccc"],"ModCalendarTable-Default-Background":"#ffffff","ModCalendarTable-Default-BackgroundHover":"#f2f2f2","ModCalendarTable-Inactive-Background":"#ffffff","ModCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ModCalendarTable-Weekend-Background":"#e8e8e8","ModCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ModCalendarTable-Today-Background":"#f6fafd","ModCalendarTable-Today-BackgroundHover":"#e9f2fb","ModCalendarTable-Active-Background":"#d8e8f8","ModCalendarTable-Active-BackgroundHover":"#c2dbf4","ModCalendarAgenda-Day-Indent":"24px","ModCalendarAgenda-Day-Padding":"12px","ModCalendarAgenda-Day-Width":"72px","ModCalendarWeek-Day-Indent":"4px","ModCalendarWeek-Item-Height":"20px","ModCalendarMonth-Item-Count":3,"ModCalendarMonth-Item-LineHeight":"18px","ModCalendarMonth-Item-Height":"20px","ModCalendarMonth-Item-Indent":"1px","ModCalendarMonth-Day-Indent":"4px","ModCalendarMonth-Day-Items":5,"ModCalendarMonth-Day-Height":"104px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
 
 window.Collector = new Com.Collector({
         'autoInit' : true
@@ -39362,8 +38779,8 @@ window.Collector = new Com.Collector({
 
     /* *** TEST STUFF *** */
 
-    .add('big-calendar', function(node){
-        new Com.BigCalendar({
+    .add('module__calendar', function(node){
+        new Module.Calendar({
             'node' : node,
             'events' : {
                 'onProcessEnd' : function(calendar, node){
