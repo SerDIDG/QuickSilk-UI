@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.30.11 (2017-10-03 19:38) ************ */
+/*! ************ MagpieUI v3.30.13 (2017-10-18 21:18) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -3437,8 +3437,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.30.11');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.30.11') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.30.11') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.30.11') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.30.11#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.30.13');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.30.13') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.30.13') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.30.13') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.30.13#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -9031,8 +9031,10 @@ button.is-hidden {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown li a:hover {
@@ -9116,6 +9118,12 @@ button.is-hidden {
   right: 0;
   bottom: auto;
   left: auto;
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown.pull-left,
 .pt__editable.is-editable > .menu .pt__menu-dropdown.pull-right {
@@ -12407,8 +12415,10 @@ ul.pt__field__hint li:before {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .pt__menu-dropdown--base li a:hover {
@@ -12501,6 +12511,12 @@ ul.pt__field__hint li:before {
   right: 0;
   bottom: auto;
   left: auto;
+}
+.pt__menu-dropdown--position.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 .pt__menu-dropdown--clear {
   margin-bottom: 24px;
@@ -13288,11 +13304,11 @@ ul.pt__field__hint li:before {
     margin-left: 0;
     margin-right: 0;
   }
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive .button,
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="button"],
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="submit"],
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="reset"],
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive button {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive .button:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="button"]:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="submit"]:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive input[type="reset"]:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive) .group.is-adaptive button:not(.icon) {
     width: 100%;
     display: block;
   }
@@ -13309,11 +13325,11 @@ ul.pt__field__hint li:before {
   html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive > .inner > .right {
     display: block;
   }
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive .button,
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="button"],
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="submit"],
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="reset"],
-  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive button {
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive .button:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="button"]:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="submit"]:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive input[type="reset"]:not(.icon),
+  html.is-adaptive .pt__toolbar:not(.is-not-adaptive).is-adaptive button:not(.icon) {
     width: 100%;
     display: block;
   }
@@ -16732,8 +16748,10 @@ ul.pt__field__hint li:before {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown li a:hover {
@@ -16817,6 +16835,12 @@ ul.pt__field__hint li:before {
   right: 0;
   bottom: auto;
   left: auto;
+}
+.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 /* ******* COMPONENTS: MULTI FIELD  ******* */
 .com__multifield__content {
@@ -18691,8 +18715,10 @@ html.ie9 .com__palette .b-range {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .com__tabset__head-menu .pt__menu-dropdown li a:hover {
@@ -18776,6 +18802,12 @@ html.ie9 .com__palette .b-range {
   right: 0;
   bottom: auto;
   left: auto;
+}
+.com__tabset__head-menu .pt__menu-dropdown.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 .com__tabset__head-menu .pt__menu-dropdown.pull-left,
 .com__tabset__head-menu .pt__menu-dropdown.pull-right {
@@ -19555,7 +19587,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.18.15 (2017-10-03 19:38) ************ */
+/*! ************ QuickSilk-Application v3.18.16 (2017-10-18 21:19) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%2321b573%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -19564,8 +19596,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.18.15');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.18.15') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.18.15') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.18.15') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.18.15#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.18.16');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.18.16') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.18.16') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.18.16') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.18.16#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -21284,8 +21316,10 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown li a:hover {
@@ -21369,6 +21403,12 @@ html:not(.is-editing).is-editor .app__module__controls {
   right: 0;
   bottom: auto;
   left: auto;
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown.pull-left,
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown.pull-right {
@@ -24232,8 +24272,10 @@ html:not(.is-editing).is-editor .app__module__controls {
     text-decoration: underline;
     display: block;
     padding: 2px 12px;
-    text-decoration: none;
+    overflow: hidden;
     white-space: nowrap;
+    text-overflow: ellipsis;
+    text-decoration: none;
     color: #666666;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown li a:hover {
@@ -24317,6 +24359,12 @@ html:not(.is-editing).is-editor .app__module__controls {
     right: 0;
     bottom: auto;
     left: auto;
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown.pull-justify {
+    top: 100%;
+    right: 0;
+    bottom: auto;
+    left: 0;
   }
 }
 /* *** DESKTOP > 5x4 *** */
@@ -25760,8 +25808,10 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .mod__menu--custom.is-dropdown .menu__sub > ul li a:hover {
@@ -26033,8 +26083,10 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .app-mod__menu .pt__menu-dropdown li a:hover {
@@ -26118,6 +26170,12 @@ html:not(.is-editing).is-editor .app__module__controls {
   right: 0;
   bottom: auto;
   left: auto;
+}
+.app-mod__menu .pt__menu-dropdown.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 .app-mod__menu .menu-select {
   display: none;
@@ -26735,9 +26793,9 @@ html:not(.is-editing).is-editor .app__module__controls {
   position: absolute;
   opacity: 0;
   right: auto;
+  right: 0;
   bottom: auto;
   left: 0;
-  min-width: 100%;
   top: 100%;
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li {
@@ -26754,8 +26812,10 @@ html:not(.is-editing).is-editor .app__module__controls {
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown li a:hover {
@@ -26839,6 +26899,12 @@ html:not(.is-editing).is-editor .app__module__controls {
   right: 0;
   bottom: auto;
   left: auto;
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 .app-mod__rollover-tabs > .inner > .tabs__content {
   max-width: 100%;
@@ -27230,7 +27296,16 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   left: 0;
 }
 .mod__signup__disclaimer {
-  margin: 24px 0 0 0;
+  margin: 12px 0 0 0;
+}
+.mod__signup__controls {
+  padding: 16px 0;
+}
+.mod__signup__controls .pt__buttons {
+  margin: 0;
+}
+.mod__signup__menu ul li a {
+  line-height: 32px;
 }
 /* ******* MODULES: SIGN UP: Adaptive ******* */
 @media only screen and (max-width: 768px) {
@@ -27539,8 +27614,10 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   text-decoration: underline;
   display: block;
   padding: 2px 12px;
-  text-decoration: none;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: #666666;
 }
 .mod__wizard > .inner > .tabs__menu .pt__menu-dropdown li a:hover {
@@ -27624,6 +27701,12 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   right: 0;
   bottom: auto;
   left: auto;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown.pull-justify {
+  top: 100%;
+  right: 0;
+  bottom: auto;
+  left: 0;
 }
 .mod__wizard > .inner > .tabs__content {
   z-index: 1;

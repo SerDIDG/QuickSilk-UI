@@ -21,17 +21,32 @@
             <div class="inner clear">
                 <div class="left">
                     <ul class="group is-adaptive">
-                        <li class="label">Category:</li>
-                        <li class="is-field large">
-                            <select data-element="select">
-                                <option>All categories</option>
-                                <option>Custom Templates</option>
-                                <option>Business</option>
-                                <option>Health</option>
-                                <option>Technology</option>
-                                <option>Construction</option>
-                                <option>Finance</option>
-                            </select>
+                        <li>
+                            <div class="app__module app-mod__menu default mod__signup__menu pull-left" data-element="Com.TabsetHelper" data-node="ComTabsetHelper:{}:container" data-config='{"active" : "1"}'>
+                                <ul>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "all"}'><a data-node="link" title="All Category">All Category</a></li>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "health_and_wellness"}'><a data-node="link" title="Health &amp; Wellness">Health &amp; Wellness</a></li>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "lifestyle_and_inspiration"}'><a data-node="link" title="Lifestyle &amp; Inspiration">Lifestyle &amp; Inspiration</a></li>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "creative"}'><a data-node="link" title="Creative">Creative</a></li>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "other"}'><a data-node="link" title="Other">Other</a></li>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "professional_and_services"}'><a data-node="link" title="Professional Services">Professional Services</a></li>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "bare"}'><a data-node="link" title="Bare">Bare</a></li>
+                                    <li data-node="labels:[]:container" data-config='{"id" : "events"}'><a data-node="link" title="Events">Events</a></li>
+                                </ul>
+                                <div class="menu-select">
+                                    <div class="menu-button"></div>
+                                    <select data-node="select">
+                                        <option value="all">All Categories</option>
+                                        <option value="health_and_wellness">Health &amp; Wellness</option>
+                                        <option value="lifestyle_and_inspiration">Lifestyle &amp; Inspiration</option>
+                                        <option value="creative">Creative</option>
+                                        <option value="other">Other</option>
+                                        <option value="professional_and_services">Professional Services</option>
+                                        <option value="bare">Bare</option>
+                                        <option value="events">Events</option>
+                                    </select>
+                                </div>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -39,7 +54,7 @@
                     <ul class="group is-adaptive">
                         <li class="is-field large">
                             <div class="pt__input">
-                                <input type="text" name="q" placeholder="Search">
+                                <input type="text" name="q" placeholder="Search by keyword">
                                 <button type="button" class="icon small search" data-node="submit"></button>
                             </div>
                         </li>
@@ -298,25 +313,23 @@
         </div>
     </div>
 
-    <div class="pt__buttons pull-center">
-        <div class="inner">
-            <button type="submit">Sign Up</button>
-        </div>
-    </div>
-
-    <div class="mod__signup__disclaimer">
-        <p class="align-center">By proceeding, you agree to QuickSilk's Terms of Service + Privacy Policy</p>
-    </div>
-
-    <!--
     <div class="app__notification pull-bottom is-white is-show">
         <div class="inner">
             <div class="text">
-                <button type="submit">Sign Up</button>
+                <div class="mod__signup__controls">
+                    <div class="pt__buttons pull-center">
+                        <div class="inner">
+                            <button type="submit">Sign Up</button>
+                        </div>
+                    </div>
+
+                    <div class="mod__signup__disclaimer">
+                        <p class="align-center">By proceeding, you agree to <a target="_blank">QuickSilk's Terms of Service + Privacy Policy.</a></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    -->
 </div>
 
 </body>
