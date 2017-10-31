@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.30.14 (2017-10-31 18:17) ************ */
+/*! ************ MagpieUI v3.30.14 (2017-10-31 20:09) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.5.0
@@ -19591,7 +19591,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.19.0 (2017-10-31 18:18) ************ */
+/*! ************ QuickSilk-Application v3.19.0 (2017-10-31 20:29) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%2321b573%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -23967,6 +23967,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__topmenu .menu__icon {
   display: inline-block;
   vertical-align: top;
+  position: relative;
   color: #ffffff;
   line-height: 32px;
   font-size: 32px;
@@ -23975,6 +23976,21 @@ html:not(.is-editing).is-editor .app__module__controls {
   line-height: 48px;
   -webkit-transition: all 250ms ease-in-out;
   transition: all 250ms ease-in-out;
+}
+.app__topmenu .menu__icon .mark {
+  width: 12px;
+  height: 12px;
+  display: block;
+  position: absolute;
+  background: #a6ccf2;
+  border: 2px solid #1f2630;
+  border-radius: 100%;
+  -webkit-transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  top: auto;
+  right: 6px;
+  bottom: 6px;
+  left: auto;
 }
 .app__topmenu .menu__logo {
   position: relative;
@@ -24257,6 +24273,12 @@ html:not(.is-editing).is-editor .app__module__controls {
   html.is-adaptive .app__topmenu .menu > li:active > a .menu__icon {
     color: #ffffff;
   }
+  html.is-adaptive .app__topmenu .menu > li:hover > a .menu__icon .mark,
+  html.is-adaptive .app__topmenu .menu > li:active > a .menu__icon .mark {
+    border-color: #2985e0;
+    -webkit-transition: all 100ms ease-in-out;
+    transition: all 100ms ease-in-out;
+  }
   html.is-adaptive .app__topmenu .menu > li.active > a {
     background-color: #ffffff;
     color: #1f2630;
@@ -24265,6 +24287,11 @@ html:not(.is-editing).is-editor .app__module__controls {
   }
   html.is-adaptive .app__topmenu .menu > li.active > a .menu__icon {
     color: #1f2630;
+  }
+  html.is-adaptive .app__topmenu .menu > li.active > a .menu__icon .mark {
+    border-color: #ffffff;
+    -webkit-transition: all 100ms ease-in-out;
+    transition: all 100ms ease-in-out;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown {
     padding: 4px;
