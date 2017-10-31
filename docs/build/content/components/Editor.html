@@ -25,7 +25,7 @@
             <div class="inner" data-node="items:{}">
                 <div class="menu__right">
                     <ul class="menu">
-                        <li class="pt__menu has-dropdown has-icon" data-node="user:{}:container">
+                        <li class="pt__menu has-dropdown has-icon item--user" data-node="user:{}:container">
                             <a title="User Userberg">
                                 <i class="menu__icon icon app-i__circle-user"></i>User Userberg
                             </a>
@@ -38,7 +38,28 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="has-icon" data-node="help:{}:container">
+                        <li class="pt__menu has-dropdown has-icon is-no-label item--note" data-node="note:{}:container">
+                            <a title="Notifications">
+                                <i class="menu__icon icon app-i__circle-note"></i>Notifications
+                            </a>
+                            <ul class="pt__menu-dropdown" data-node="dropdown">
+                                <li>
+                                    <div class="menu__notifications">
+                                        <div class="label">Release Updates</div>
+                                        <ul>
+                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
+                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
+                                        </ul>
+                                        <div class="label">Important Messages</div>
+                                        <ul>
+                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
+                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="has-icon is-no-label item--help" data-node="help:{}:container">
                             <a title="Help" data-element="app-helptour">
                                 <i class="menu__icon icon app-i__circle-help"></i>Help
                             </a>
@@ -49,11 +70,11 @@
                 <div class="menu__center">
                     <div class="inner">
                         <ul class="menu">
-                            <li class="pt__menu has-dropdown has-icon">
+                            <li class="pt__menu has-dropdown has-icon item--shortcuts" data-node="shortcuts:{}:container">
                                 <a title="Page Shortcuts">
                                     <i class="menu__icon icon app-i__circle-actions"></i>Page Shortcuts
                                 </a>
-                                <ul class="pt__menu-dropdown">
+                                <ul class="pt__menu-dropdown" data-node="dropdown">
                                     <li>
                                         <a data-element="App.PanelContainer" data-config='{"params" : {"get" : {"url" : "%baseUrl%/stuff/ajax.panel.php"},"post" : {"url" : "%baseUrl%/stuff/ajax.panel.php"}}}'>Menu Constructor</a>
                                     </li>
@@ -77,13 +98,13 @@
 
                 <div class="menu__left">
                     <ul class="menu">
-                        <li data-node="dashboard:{}:container">
+                        <li class="item--dashboard" data-node="dashboard:{}:container">
                             <a>Dashboard</a>
                         </li>
-                        <li data-node="user_manager:{}:container">
+                        <li class="item--user_manager" data-node="user_manager:{}:container">
                             <a>User Manager</a>
                         </li>
-                        <li class="pt__menu has-dropdown" data-node="modules:{}:container">
+                        <li class="pt__menu has-dropdown item--modules" data-node="modules:{}:container">
                             <a href="http://google.com" target="_blank">Modules</a>
                             <ul class="pt__menu-dropdown" data-node="dropdown">
                                 <li>
@@ -226,10 +247,10 @@
                                 </li>
                             </ul>
                         </li>
-                        <li data-node="settings:{}:container">
+                        <li class="item--settings" data-node="settings:{}:container">
                             <a>Settings</a>
                         </li>
-                        <li data-node="support:{}:container">
+                        <li class="item--support" data-node="support:{}:container">
                             <a>Support</a>
                         </li>
                     </ul>
