@@ -1,19 +1,18 @@
-/*! ************ QuickSilk-UI v3.7.0 ************ */
-/*! ************ MagpieUI v3.30.14 (2017-10-31 18:17) ************ */
-// TinyColor v1.3.0
+/*! ************ QuickSilk-UI v3.8.0 ************ */
+/*! ************ MagpieUI v3.33.0 (2018-05-22 20:59) ************ */
+// TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
 
-(function() {
+(function(Math) {
 
 var trimLeft = /^\s+/,
     trimRight = /\s+$/,
     tinyCounter = 0,
-    math = Math,
-    mathRound = math.round,
-    mathMin = math.min,
-    mathMax = math.max,
-    mathRandom = math.random;
+    mathRound = Math.round,
+    mathMin = Math.min,
+    mathMax = Math.max,
+    mathRandom = Math.random;
 
 function tinycolor (color, opts) {
 
@@ -121,11 +120,11 @@ tinycolor.prototype = {
     toHexString: function(allow3Char) {
         return '#' + this.toHex(allow3Char);
     },
-    toHex8: function() {
-        return rgbaToHex(this._r, this._g, this._b, this._a);
+    toHex8: function(allow4Char) {
+        return rgbaToHex(this._r, this._g, this._b, this._a, allow4Char);
     },
-    toHex8String: function() {
-        return '#' + this.toHex8();
+    toHex8String: function(allow4Char) {
+        return '#' + this.toHex8(allow4Char);
     },
     toRgb: function() {
         return { r: mathRound(this._r), g: mathRound(this._g), b: mathRound(this._b), a: this._a };
@@ -155,13 +154,13 @@ tinycolor.prototype = {
         return hexNames[rgbToHex(this._r, this._g, this._b, true)] || false;
     },
     toFilter: function(secondColor) {
-        var hex8String = '#' + rgbaToHex(this._r, this._g, this._b, this._a);
+        var hex8String = '#' + rgbaToArgbHex(this._r, this._g, this._b, this._a);
         var secondHex8String = hex8String;
         var gradientType = this._gradientType ? "GradientType = 1, " : "";
 
         if (secondColor) {
             var s = tinycolor(secondColor);
-            secondHex8String = s.toHex8String();
+            secondHex8String = '#' + rgbaToArgbHex(s._r, s._g, s._b, s._a);
         }
 
         return "progid:DXImageTransform.Microsoft.gradient("+gradientType+"startColorstr="+hex8String+",endColorstr="+secondHex8String+")";
@@ -172,7 +171,7 @@ tinycolor.prototype = {
 
         var formattedString = false;
         var hasAlpha = this._a < 1 && this._a >= 0;
-        var needsAlphaFormat = !formatSet && hasAlpha && (format === "hex" || format === "hex6" || format === "hex3" || format === "name");
+        var needsAlphaFormat = !formatSet && hasAlpha && (format === "hex" || format === "hex6" || format === "hex3" || format === "hex4" || format === "hex8" || format === "name");
 
         if (needsAlphaFormat) {
             // Special case for "transparent", all other non-alpha formats
@@ -193,6 +192,9 @@ tinycolor.prototype = {
         }
         if (format === "hex3") {
             formattedString = this.toHexString(true);
+        }
+        if (format === "hex4") {
+            formattedString = this.toHex8String(true);
         }
         if (format === "hex8") {
             formattedString = this.toHex8String();
@@ -306,6 +308,9 @@ function inputToRGB(color) {
 
     var rgb = { r: 0, g: 0, b: 0 };
     var a = 1;
+    var s = null;
+    var v = null;
+    var l = null;
     var ok = false;
     var format = false;
 
@@ -314,22 +319,22 @@ function inputToRGB(color) {
     }
 
     if (typeof color == "object") {
-        if (color.hasOwnProperty("r") && color.hasOwnProperty("g") && color.hasOwnProperty("b")) {
+        if (isValidCSSUnit(color.r) && isValidCSSUnit(color.g) && isValidCSSUnit(color.b)) {
             rgb = rgbToRgb(color.r, color.g, color.b);
             ok = true;
             format = String(color.r).substr(-1) === "%" ? "prgb" : "rgb";
         }
-        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
-            color.s = convertToPercentage(color.s);
-            color.v = convertToPercentage(color.v);
-            rgb = hsvToRgb(color.h, color.s, color.v);
+        else if (isValidCSSUnit(color.h) && isValidCSSUnit(color.s) && isValidCSSUnit(color.v)) {
+            s = convertToPercentage(color.s);
+            v = convertToPercentage(color.v);
+            rgb = hsvToRgb(color.h, s, v);
             ok = true;
             format = "hsv";
         }
-        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("l")) {
-            color.s = convertToPercentage(color.s);
-            color.l = convertToPercentage(color.l);
-            rgb = hslToRgb(color.h, color.s, color.l);
+        else if (isValidCSSUnit(color.h) && isValidCSSUnit(color.s) && isValidCSSUnit(color.l)) {
+            s = convertToPercentage(color.s);
+            l = convertToPercentage(color.l);
+            rgb = hslToRgb(color.h, s, l);
             ok = true;
             format = "hsl";
         }
@@ -476,7 +481,7 @@ function rgbToHsv(r, g, b) {
     s = bound01(s, 100);
     v = bound01(v, 100);
 
-    var i = math.floor(h),
+    var i = Math.floor(h),
         f = h - i,
         p = v * (1 - s),
         q = v * (1 - f * s),
@@ -511,9 +516,29 @@ function rgbToHex(r, g, b, allow3Char) {
 
 // `rgbaToHex`
 // Converts an RGBA color plus alpha transparency to hex
-// Assumes r, g, b and a are contained in the set [0, 255]
-// Returns an 8 character hex
-function rgbaToHex(r, g, b, a) {
+// Assumes r, g, b are contained in the set [0, 255] and
+// a in [0, 1]. Returns a 4 or 8 character rgba hex
+function rgbaToHex(r, g, b, a, allow4Char) {
+
+    var hex = [
+        pad2(mathRound(r).toString(16)),
+        pad2(mathRound(g).toString(16)),
+        pad2(mathRound(b).toString(16)),
+        pad2(convertDecimalToHex(a))
+    ];
+
+    // Return a 4 character hex if possible
+    if (allow4Char && hex[0].charAt(0) == hex[0].charAt(1) && hex[1].charAt(0) == hex[1].charAt(1) && hex[2].charAt(0) == hex[2].charAt(1) && hex[3].charAt(0) == hex[3].charAt(1)) {
+        return hex[0].charAt(0) + hex[1].charAt(0) + hex[2].charAt(0) + hex[3].charAt(0);
+    }
+
+    return hex.join("");
+}
+
+// `rgbaToArgbHex`
+// Converts an RGBA color to an ARGB Hex8 string
+// Rarely used, but required for "toFilter()"
+function rgbaToArgbHex(r, g, b, a) {
 
     var hex = [
         pad2(convertDecimalToHex(a)),
@@ -595,7 +620,7 @@ function darken (color, amount) {
 // Values outside of this range will be wrapped into this range.
 function spin(color, amount) {
     var hsl = tinycolor(color).toHsl();
-    var hue = (mathRound(hsl.h) + amount) % 360;
+    var hue = (hsl.h + amount) % 360;
     hsl.h = hue < 0 ? 360 + hue : hue;
     return tinycolor(hsl);
 }
@@ -682,26 +707,12 @@ tinycolor.mix = function(color1, color2, amount) {
     var rgb2 = tinycolor(color2).toRgb();
 
     var p = amount / 100;
-    var w = p * 2 - 1;
-    var a = rgb2.a - rgb1.a;
-
-    var w1;
-
-    if (w * a == -1) {
-        w1 = w;
-    } else {
-        w1 = (w + a) / (1 + w * a);
-    }
-
-    w1 = (w1 + 1) / 2;
-
-    var w2 = 1 - w1;
 
     var rgba = {
-        r: rgb2.r * w1 + rgb1.r * w2,
-        g: rgb2.g * w1 + rgb1.g * w2,
-        b: rgb2.b * w1 + rgb1.b * w2,
-        a: rgb2.a * p  + rgb1.a * (1 - p)
+        r: ((rgb2.r - rgb1.r) * p) + rgb1.r,
+        g: ((rgb2.g - rgb1.g) * p) + rgb1.g,
+        b: ((rgb2.b - rgb1.b) * p) + rgb1.b,
+        a: ((rgb2.a - rgb1.a) * p) + rgb1.a
     };
 
     return tinycolor(rgba);
@@ -987,7 +998,7 @@ function bound01(n, max) {
     }
 
     // Handle floating point rounding errors
-    if ((math.abs(n - max) < 0.000001)) {
+    if ((Math.abs(n - max) < 0.000001)) {
         return 1;
     }
 
@@ -1057,6 +1068,7 @@ var matchers = (function() {
     var PERMISSIVE_MATCH4 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?";
 
     return {
+        CSS_UNIT: new RegExp(CSS_UNIT),
         rgb: new RegExp("rgb" + PERMISSIVE_MATCH3),
         rgba: new RegExp("rgba" + PERMISSIVE_MATCH4),
         hsl: new RegExp("hsl" + PERMISSIVE_MATCH3),
@@ -1065,9 +1077,17 @@ var matchers = (function() {
         hsva: new RegExp("hsva" + PERMISSIVE_MATCH4),
         hex3: /^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,
         hex6: /^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/,
+        hex4: /^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,
         hex8: /^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
     };
 })();
+
+// `isValidCSSUnit`
+// Take in a single string / number and check to see if it looks like a CSS unit
+// (see `matchers` above for definition).
+function isValidCSSUnit(color) {
+    return !!matchers.CSS_UNIT.exec(color);
+}
 
 // `stringInputToObject`
 // Permissive string parsing.  Take in a number of formats, and output an object
@@ -1109,10 +1129,10 @@ function stringInputToObject(color) {
     }
     if ((match = matchers.hex8.exec(color))) {
         return {
-            a: convertHexToDecimal(match[1]),
-            r: parseIntFromHex(match[2]),
-            g: parseIntFromHex(match[3]),
-            b: parseIntFromHex(match[4]),
+            r: parseIntFromHex(match[1]),
+            g: parseIntFromHex(match[2]),
+            b: parseIntFromHex(match[3]),
+            a: convertHexToDecimal(match[4]),
             format: named ? "name" : "hex8"
         };
     }
@@ -1122,6 +1142,15 @@ function stringInputToObject(color) {
             g: parseIntFromHex(match[2]),
             b: parseIntFromHex(match[3]),
             format: named ? "name" : "hex"
+        };
+    }
+    if ((match = matchers.hex4.exec(color))) {
+        return {
+            r: parseIntFromHex(match[1] + '' + match[1]),
+            g: parseIntFromHex(match[2] + '' + match[2]),
+            b: parseIntFromHex(match[3] + '' + match[3]),
+            a: convertHexToDecimal(match[4] + '' + match[4]),
+            format: named ? "name" : "hex8"
         };
     }
     if ((match = matchers.hex3.exec(color))) {
@@ -1165,7 +1194,7 @@ else {
     window.tinycolor = tinycolor;
 }
 
-})();
+})(Math);
 
 /*
 
@@ -1349,6 +1378,58 @@ if ( 'function' !== typeof Array.prototype.reduceRight ) {
         }
         return value;
     };
+}
+
+// https://tc39.github.io/ecma262/#sec-array.prototype.includes
+if (!Array.prototype.includes) {
+    Object.defineProperty(Array.prototype, 'includes', {
+        value: function(searchElement, fromIndex) {
+
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+
+            // 1. Let O be ? ToObject(this value).
+            var o = Object(this);
+
+            // 2. Let len be ? ToLength(? Get(O, "length")).
+            var len = o.length >>> 0;
+
+            // 3. If len is 0, return false.
+            if (len === 0) {
+                return false;
+            }
+
+            // 4. Let n be ? ToInteger(fromIndex).
+            //    (If fromIndex is undefined, this step produces the value 0.)
+            var n = fromIndex | 0;
+
+            // 5. If n ≥ 0, then
+            //  a. Let k be n.
+            // 6. Else n < 0,
+            //  a. Let k be len + n.
+            //  b. If k < 0, let k be 0.
+            var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+
+            function sameValueZero(x, y) {
+                return x === y || (typeof x === 'number' && typeof y === 'number' && isNaN(x) && isNaN(y));
+            }
+
+            // 7. Repeat, while k < len
+            while (k < len) {
+                // a. Let elementK be the result of ? Get(O, ! ToString(k)).
+                // b. If SameValueZero(searchElement, elementK) is true, return true.
+                if (sameValueZero(o[k], searchElement)) {
+                    return true;
+                }
+                // c. Increase k by 1.
+                k++;
+            }
+
+            // 8. Return false
+            return false;
+        }
+    });
 }
 
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
@@ -1549,7 +1630,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.30.14',
+        '_version' : '3.33.0',
         '_loadTime' : Date.now(),
         '_isDocumentReady' : false,
         '_isDocumentLoad' : false,
@@ -1559,6 +1640,7 @@ var cm = {
         '_deviceOrientation' : 'landscape',
         '_adaptive' : false,
         '_baseUrl': [window.location.protocol, window.location.hostname].join('//'),
+        '_pathUrl' : '',
         '_assetsUrl' : null,
         '_scrollSize' : 0,
         '_pageSize' : {},
@@ -1583,6 +1665,10 @@ var cm = {
             'displayDateFormat' : '%F %j, %Y',
             'displayDateTimeFormat' : '%F %j, %Y, %H:%i',
             'tooltipTop' : 'targetHeight + 4'
+        },
+        '_strings' : {
+            'months' : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            'days' : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
         }
     },
     Mod = {},
@@ -1596,6 +1682,7 @@ var cm = {
 cm.isFileReader = (function(){return 'FileReader' in window;})();
 cm.isHistoryAPI = !!(window.history && history.pushState);
 cm.isLocalStorage = (function(){try{return 'localStorage' in window && window.localStorage !== null;}catch(e){return false;}})();
+cm.isSessionStorage = (function(){try{return 'sessionStorage' in window && window.sessionStorage !== null;}catch(e){return false;}})();
 cm.isCanvas = !!document.createElement("canvas").getContext;
 cm.hasBeacon = !!(navigator.sendBeacon);
 
@@ -1896,6 +1983,11 @@ cm.clone = function(o, cloneNode){
 };
 
 cm.getLength = function(o){
+    // Array
+    if(cm.isArray(o)){
+        return o.length;
+    }
+    // Object
     var i = 0;
     cm.forEach(o, function(){
         i++;
@@ -1904,9 +1996,10 @@ cm.getLength = function(o){
 };
 
 cm.inArray = function(a, item){
-    if(typeof a == 'string'){
+    if(typeof a === 'string'){  //TODO: WFT?
         return a === item;
-    }else if(cm.isArray(a)){
+    }
+    if(cm.isArray(a)){
         return a.indexOf(item) > -1;
     }
     return false
@@ -1917,17 +2010,48 @@ cm.arrayRemove = function(a, item){
     return a;
 };
 
+cm.arrayAdd = function(a, item){
+    if(!cm.inArray(a, item)){
+        a.push(item);
+    }
+    return a;
+};
+
 cm.arrayIndex = function(a, item){
     return Array.prototype.indexOf.call(a, item);
 };
 
+cm.arraySort = function(a, key, dir){
+    if(!cm.isArray(a)){
+        return a;
+    }
+    var newA = cm.clone(a);
+    dir = cm.isUndefined(dir) ? 'asc' : dir.toLowerCase();
+    dir = cm.inArray(['asc', 'desc'], dir) ? dir : 'asc';
+    switch(dir){
+        case 'asc':
+            newA.sort(function(a, b){
+                return (a[key] < b[key]) ? 1 : ((a[key] > b[key]) ? -1 : 0);
+            });
+            break;
+        case 'desc' :
+            newA.sort(function(a, b){
+                return (a[key] < b[key]) ? -1 : ((a[key] > b[key]) ? 1 : 0);
+            });
+            break;
+    }
+    return newA;
+};
+
 cm.objectToArray = function(o){
-    if(typeof(o) != 'object'){
+    if(!cm.isObject(o)){
         return [o];
     }
     var a = [];
     cm.forEach(o, function(item){
-        a.push(item);
+        if(!cm.isEmpty(item)){
+            a.push(item);
+        }
     });
     return a;
 };
@@ -1935,7 +2059,7 @@ cm.objectToArray = function(o){
 cm.arrayToObject = function(a){
     var o = {};
     a.forEach(function(item, i){
-        if(typeof item == 'object'){
+        if(typeof item === 'object'){
             o[i] = item;
         }else{
             o[item] = item;
@@ -1954,20 +2078,6 @@ cm.objectReplace = function(o, vars){
         }
     });
     return newO;
-};
-
-cm.isEmptyOld = function(el){
-    if(!el){
-        return true;
-    }else if(typeof el == 'string' || cm.isArray(el)){
-        return el.length === 0;
-    }else if(cm.isObject(el)){
-        return cm.getLength(el) === 0;
-    }else if(typeof el == 'number'){
-        return el === 0;
-    }else{
-        return false;
-    }
 };
 
 cm.isEmpty = function(value){
@@ -1991,11 +2101,12 @@ cm.isUndefined = function(value){
 };
 
 cm.objectPath = function(name, obj){
-    obj = typeof obj == 'undefined'? window : obj;
+    if(cm.isUndefined(obj) || cm.isUndefined(name)){
+        return obj;
+    }
     name = name.toString().split('.');
-    var findObj = obj,
-        length = name.length;
-    cm.forEach(name, function(item, key){
+    var findObj = obj;
+    cm.forEach(name, function(item){
         if(findObj){
             findObj = findObj[item];
         }
@@ -2004,7 +2115,9 @@ cm.objectPath = function(name, obj){
 };
 
 cm.objectSelector = function(name, obj, apply){
-    obj = typeof obj == 'undefined'? window : obj;
+    if(cm.isUndefined(obj) || cm.isUndefined(name)){
+        return obj;
+    }
     name = name.toString().split('.');
     var findObj = obj,
         length = name.length;
@@ -2012,7 +2125,7 @@ cm.objectSelector = function(name, obj, apply){
         if(!findObj[item]){
             findObj[item] = {};
         }
-        if(apply && key == length -1){
+        if(apply && key === length -1){
             findObj[item] = apply;
         }
         findObj = findObj[item];
@@ -2038,7 +2151,7 @@ cm.sort = function(o){
 cm.replaceDeep = function(o, from, to){
     var newO = cm.clone(o);
     cm.forEach(newO, function(value, key){
-        if(typeof value == 'object'){
+        if(typeof value === 'object'){
             newO[key] = cm.replaceDeep(value, from, to);
         }else{
             newO[key] = value.replace(from, to);
@@ -2139,28 +2252,20 @@ cm.getElementAbove = function(e){
 cm.addEvent = function(el, type, handler, useCapture){
     if(el){
         useCapture = cm.isUndefined(useCapture)? false : useCapture;
-        try{
-            el.addEventListener(type, handler, useCapture);
-        }catch(e){
-            el.attachEvent('on' + type, handler);
-        }
+        el.addEventListener(type, handler, useCapture);
     }
     return el;
 };
 
 cm.removeEvent = function(el, type, handler, useCapture){
     if(el){
-        useCapture = typeof useCapture == 'undefined' ? false : useCapture;
-        try{
-            el.removeEventListener(type, handler, useCapture);
-        }catch(e){
-            el.detachEvent('on' + type, handler);
-        }
+        useCapture = cm.isUndefined(useCapture) ? false : useCapture;
+        el.removeEventListener(type, handler, useCapture);
     }
     return el;
 };
 
-cm.triggerEvent = function(el, type, params){
+cm.triggerEvent = function(el, type){
     var event;
     if(document.createEvent){
         event = document.createEvent('Event');
@@ -2178,89 +2283,6 @@ cm.triggerEvent = function(el, type, params){
     return el;
 };
 
-cm.customEventsStack = [
-    /* {'el' : node, 'type' : 'customEventType', 'handler' : function, 'misc' : {'eventType' : [function]}} */
-];
-
-cm.addCustomEvent = function(el, type, handler, useCapture, preventDefault){
-    useCapture = typeof(useCapture) == 'undefined' ? true : useCapture;
-    preventDefault = typeof(preventDefault) == 'undefined' ? false : preventDefault;
-
-    var events = {
-        'tap' : function(){
-            var x = 0,
-                fault = 4,
-                y = 0;
-            // Generate events
-            return {
-                'click' : [
-                    function(e){
-                        if(preventDefault){
-                            e.preventDefault();
-                        }
-                    }
-                ],
-                'touchstart' : [
-                    function(e){
-                        x = e.changedTouches[0].screenX;
-                        y = e.changedTouches[0].screenY;
-                        if(preventDefault){
-                            e.preventDefault();
-                        }
-                    }
-                ],
-                'touchend' : [
-                    function(e){
-                        if(
-                            Math.abs(e.changedTouches[0].screenX - x) > fault ||
-                            Math.abs(e.changedTouches[0].screenY - y) > fault
-                        ){
-                            return;
-                        }
-                        if(preventDefault){
-                            e.preventDefault();
-                        }
-                        handler(e);
-                    }
-                ]
-            };
-        }
-    };
-    // Process custom event
-    if(events[type]){
-        var miscEvents = events[type]();
-        // Push generated events to stack
-        cm.customEventsStack.push({
-            'el' : el,
-            'type' : type,
-            'handler' : handler,
-            'misc' : miscEvents
-        });
-        // Bind generated events
-        cm.forEach(miscEvents, function(miscFunctions, eventType){
-            cm.forEach(miscFunctions, function(miscFunction){
-                el.addEventListener(eventType, miscFunction, useCapture);
-            });
-        });
-    }
-    return el;
-};
-
-cm.removeCustomEvent = function(el, type, handler, useCapture){
-    cm.customEventsStack = cm.customEventsStack.filter(function(item){
-        if(item['el'] === el && item['type'] == type && item['handler'] === handler){
-            cm.forEach(item['misc'], function(miscFunctions, eventType){
-                cm.forEach(miscFunctions, function(miscFunction){
-                    el.removeEventListener(eventType, miscFunction, useCapture);
-                });
-            });
-            return false;
-        }
-        return true;
-    });
-    return el;
-};
-
 cm.customEvent = (function(){
     var _stack = {};
 
@@ -2272,7 +2294,7 @@ cm.customEvent = (function(){
             _stack[type].push({
                 'node' : node,
                 'type' : type,
-                'handler' : typeof handler == 'function' ? handler : function(){}
+                'handler' : cm.isFunction(handler) ? handler : function(){}
             });
             return node;
         },
@@ -2281,7 +2303,7 @@ cm.customEvent = (function(){
                 _stack[type] = [];
             }
             _stack[type] = _stack[type].filter(function(item){
-                return item['node'] != node && item['handler'] != handler;
+                return item['node'] !== node && item['handler'] !== handler;
             });
             return node;
         },
@@ -2297,7 +2319,7 @@ cm.customEvent = (function(){
             }, params);
             if(_stack[type]){
                 _stack[type].sort(function(a, b){
-                    if(params['type'] == 'parent'){
+                    if(params['type'] === 'parent'){
                         return cm.getNodeOffsetIndex(b['node']) > cm.getNodeOffsetIndex(a['node']);
                     }
                     return cm.getNodeOffsetIndex(a['node']) - cm.getNodeOffsetIndex(b['node']);
@@ -2333,7 +2355,7 @@ cm.customEvent = (function(){
 })();
 
 cm.onLoad = function(handler, isMessage){
-    isMessage = typeof isMessage == 'undefined'? true : isMessage;
+    isMessage = cm.isUndefined(isMessage) ? true : isMessage;
     var called = false;
     var execute = function(){
         if(called){
@@ -2355,7 +2377,7 @@ cm.onLoad = function(handler, isMessage){
 };
 
 cm.onReady = function(handler, isMessage){
-    isMessage = typeof isMessage == 'undefined'? true : isMessage;
+    isMessage = cm.isUndefined(isMessage) ? true : isMessage;
     var called = false;
     var execute = function(){
         if(called){
@@ -2378,7 +2400,7 @@ cm.onReady = function(handler, isMessage){
 };
 
 cm.addScrollEvent = function(node, callback, useCapture){
-    useCapture = typeof useCapture == 'undefined' ? false : useCapture;
+    useCapture = cm.isUndefined(useCapture) ? false : useCapture;
     if(cm.isWindow(node)){
         cm.addEvent(node, 'scroll', callback, useCapture);
     }else if(cm.isNode(node)){
@@ -2392,7 +2414,7 @@ cm.addScrollEvent = function(node, callback, useCapture){
 };
 
 cm.removeScrollEvent = function(node, callback, useCapture){
-    useCapture = typeof useCapture == 'undefined' ? false : useCapture;
+    useCapture = cm.isUndefined(useCapture) ? false : useCapture;
     if(cm.isWindow(node)){
         cm.removeEvent(node, 'scroll', callback, useCapture);
     }if(cm.isNode(node)){
@@ -2432,7 +2454,7 @@ cm.removeIsolateScrolling = function(node){
 };
 
 cm.isCenterButton = function(e){
-    return e.button == ((cm.is('IE') && cm.isVersion() < 9) ? 4 : 1);
+    return e.button === 1;
 };
 
 cm.debounce = function(func, wait, immediate){
@@ -2539,12 +2561,18 @@ cm.addScript = function(src, async, callback){
     // Configure Stack Item
     if(cm._addScriptStack[src]){
         item = cm._addScriptStack[src];
-        item['callbacks'].push(callback);
+        if(!item['loaded']){
+            item['callbacks'].push(callback);
+        }else{
+            callback();
+        }
     }else{
         item = {
             'src' : src,
             'async' : async,
+            'loaded' : false,
             'callback' : function(e){
+                item['loaded'] = true;
                 while(item['callbacks'].length){
                     item['callbacks'][0](e);
                     cm.arrayRemove(item['callbacks'], item['callbacks'][0]);
@@ -2571,12 +2599,12 @@ cm.loadScript = function(o){
         'async' : true,
         'callback' : function(){}
     }, o);
-    var path = cm.objectSelector(o['path'], window);
+    var path = cm.objectPath(o['path'], window);
     if(!cm.isEmpty(path)){
         o['callback'](path);
     }else{
         cm.addScript(o['src'], o['async'], function(){
-            path = cm.objectSelector(o['path'], window);
+            path = cm.objectPath(o['path'], window);
             if(!cm.isEmpty(path)){
                 o['callback'](path);
             }else{
@@ -2597,54 +2625,29 @@ cm.getEl = function(str){
 
 cm.getByClass = function(str, node){
     node = node || document;
-    if(node.getElementsByClassName){
-        return node.getElementsByClassName(str);
-    }
-    var els = node.getElementsByTagName('*'),
-        arr = [];
-    for(var i = 0, l = els.length; i < l; i++){
-        cm.isClass(els[i], str) && arr.push(els[i]);
-    }
-    return arr;
+    return node.getElementsByClassName(str);
 };
 
 cm.getByAttr = function(attr, value, element){
     var p = element || document;
-    if(p.querySelectorAll){
-        return p.querySelectorAll("[" + attr + "='" + value + "']");
-    }
-    var elements = p.getElementsByTagName('*');
-    var stack = [];
-    for(var i = 0, ln = elements.length; i < ln; i++){
-        if(elements[i].getAttribute(attr) == value){
-            stack.push(elements[i]);
-        }
-    }
-    return stack;
+    return p.querySelectorAll('[' + attr + '="' + value + '"]');
 };
 
 cm.getByName = function(name, node){
-    if(node){
-        var arr = [],
-            els = node.getElementsByTagName('*');
-        for(var i = 0, l = els.length; i < l; i++){
-            if(els[i].name == name){
-                arr.push(els[i]);
-            }
-        }
-        return arr;
+    if(cm.isNode(node)){
+        return node.querySelectorAll('[name="' + name + '"]');
     }else{
         return document.getElementsByName(name);
     }
 };
 
 cm.getParentByTagName = function(tagName, node){
-    if(!tagName || !node || !node.parentNode){
+    if(!cm.isEmpty(tagName) || !cm.hasParentNode(node)){
         return null;
     }
     var el = node.parentNode;
     do{
-        if(el.tagName && el.tagName.toLowerCase() == tagName.toLowerCase()){
+        if(el.tagName && el.tagName.toLowerCase() === tagName.toLowerCase()){
             return el;
         }
     }while(el = el.parentNode);
@@ -2685,14 +2688,19 @@ cm.node = cm.Node = function(){
             if(cm.isObject(value)){
                 value = JSON.stringify(value);
             }
-            if(key == 'style'){
-                el.style.cssText = value;
-            }else if(key == 'class'){
-                el.className = value;
-            }else if(key == 'innerHTML'){
-                el.innerHTML = value;
-            }else{
-                el.setAttribute(key, value);
+            switch(key){
+                case 'style':
+                    el.style.cssText = value;
+                    break;
+                case 'class':
+                    el.className = value;
+                    break;
+                case 'innerHTML':
+                    el.innerHTML = value;
+                    break;
+                default:
+                    el.setAttribute(key, value);
+                    break;
             }
         });
         i = 2;
@@ -2700,8 +2708,8 @@ cm.node = cm.Node = function(){
         i = 1;
     }
     for(var ln = args.length; i < ln; i++){
-        if(typeof args[i] != 'undefined'){
-            if(typeof args[i] == 'string' || typeof args[i] == 'number'){
+        if(typeof args[i] !== 'undefined'){
+            if(typeof args[i] === 'string' || typeof args[i] === 'number'){
                 cm.appendChild(cm.textNode(args[i]), el);
             }else{
                 cm.appendChild(args[i], el);
@@ -2726,40 +2734,30 @@ cm.wrap = function(target, node){
     return target;
 };
 
-cm.inDOM = function(o){
-    if(o){
-        var el = o.parentNode;
-        while(el){
-            if(el == document){
-                return true;
-            }
-            el = el.parentNode;
-        }
-    }
-    return false;
+cm.inDOM = function(node){
+    return node === document.body || document.body.contains(node);
 };
 
 cm.hasParentNode = function(o){
-    if(o){
-        return !!o.parentNode;
+    if(!cm.isNode(o)){
+        return false;
     }
-    return false;
+    return !!o.parentNode;
 };
 
-cm.isParent = function(p, o, flag){
-    if(cm.isNode(o) && o.parentNode){
-        if(cm.isWindow(p) && cm.inDOM(o)){
+cm.isParent = function(p, node, flag){
+    if(flag && p === node){
+        return true;
+    }
+    if(cm.isNode(node)){
+        if(cm.isWindow(p) && cm.inDOM(node)){
             return true;
         }
-
-        var el = o.parentNode;
-        do{
-            if(el == p){
-                return true;
-            }
-        }while(el = el.parentNode);
+        if(p.contains(node) && p !== node){
+            return true
+        }
     }
-    return (flag) ? p === o : false;
+    return false;
 };
 
 cm.isParentByClass = function(parentClass, o){
@@ -2786,7 +2784,7 @@ cm.getData = function(node, name){
 };
 
 cm.getTextValue = cm.getTxtVal = function(o){
-    return o.nodeType == 1 && o.firstChild ? o.firstChild.nodeValue : '';
+    return o.nodeType === 1 && o.firstChild ? o.firstChild.nodeValue : '';
 };
 
 cm.getTextNodesStr = function(node){
@@ -2800,7 +2798,7 @@ cm.getTextNodesStr = function(node){
         }else if(cm.isNode(node)){
             childs = node.childNodes;
             cm.forEach(childs, function(child){
-                if(child.nodeType == 1){
+                if(child.nodeType === 1){
                     str += cm.getTextNodesStr(child);
                 }else{
                     str += child.nodeValue;
@@ -2828,7 +2826,7 @@ cm.clearNode = function(node){
 
 cm.prevEl = function(node){
     node = node.previousSibling;
-    if(node && node.nodeType && node.nodeType != 1){
+    if(node && node.nodeType && node.nodeType !== 1){
         node = cm.prevEl(node);
     }
     return node;
@@ -2836,7 +2834,7 @@ cm.prevEl = function(node){
 
 cm.nextEl = function(node){
     node = node.nextSibling;
-    if(node && node.nodeType && node.nodeType != 1){
+    if(node && node.nodeType && node.nodeType !== 1){
         node = cm.nextEl(node);
     }
     return node;
@@ -2847,7 +2845,7 @@ cm.firstEl = function(node){
         return null;
     }
     node = node.firstChild;
-    if(node.nodeType != 1){
+    if(node.nodeType !== 1){
         node = cm.nextEl(node);
     }
     return node;
@@ -2954,7 +2952,7 @@ cm.strToHTML = function(str){
     }
     var node = cm.Node('div');
     node.insertAdjacentHTML('beforeend', str);
-    return node.childNodes.length == 1? node.firstChild : node.childNodes;
+    return node.childNodes.length === 1? node.firstChild : node.childNodes;
 };
 
 cm.getNodes = function(container, marker){
@@ -2970,7 +2968,7 @@ cm.getNodes = function(container, marker){
 
         cm.forEach(separators, function(separator){
             altProcessedObj = [];
-            if(separator.indexOf('.') == -1){
+            if(separator.indexOf('.') === -1){
                 process(node, separator, obj, altProcessedObj);
             }else{
                 pathway(node, separator, altProcessedObj);
@@ -2987,7 +2985,7 @@ cm.getNodes = function(container, marker){
         cm.forEach(separators, function(separator, i){
             if(i === 0 && cm.isEmpty(separator)){
                 obj = nodes;
-            }else if((i + 1) == separators.length){
+            }else if((i + 1) === separators.length){
                 process(node, separator, obj, processedObj);
             }else{
                 if(!obj[separator]){
@@ -3001,10 +2999,10 @@ cm.getNodes = function(container, marker){
     var process = function(node, attr, obj, processedObj){
         var separators = attr? attr.split(':') : [],
             arr;
-        if(separators.length == 1){
+        if(separators.length === 1){
             obj[separators[0]] = node;
-        }else if(separators.length == 2 || separators.length == 3){
-            if(separators[1] == '[]'){
+        }else if(separators.length === 2 || separators.length === 3){
+            if(separators[1] === '[]'){
                 if(!obj[separators[0]]){
                     obj[separators[0]] = [];
                 }
@@ -3014,7 +3012,7 @@ cm.getNodes = function(container, marker){
                 }
                 find(node, arr, processedObj);
                 obj[separators[0]].push(arr);
-            }else if(separators[1] == '{}'){
+            }else if(separators[1] === '{}'){
                 if(!obj[separators[0]]){
                     obj[separators[0]] = {};
                 }
@@ -3043,7 +3041,7 @@ cm.getNodes = function(container, marker){
 };
 
 cm.processDataAttributes = function(node, name, vars){
-    vars = typeof vars != 'undefined' ? vars : {};
+    vars = !cm.isUndefined(vars) ? vars : {};
     var marker = ['data-attributes', name].join('-'),
         nodes = node.querySelectorAll('[' + marker + ']'),
         value;
@@ -3078,7 +3076,7 @@ cm.setFDO = function(o, form){
                     break;
 
                 default:
-                    if(el[i].tagName.toLowerCase() == 'select'){
+                    if(cm.isTagName(el[i], 'select')){
                         cm.setSelect(el[i], item);
                     }else{
                         el[i].value = item;
@@ -3114,7 +3112,7 @@ cm.getFDO = function(o, chbx){
             name = name.replace(/\[.*\]$/, '');
             data[name] = (function(i, obj){
                 var index = indexes[i];
-                var next = typeof(indexes[i + 1]) != 'undefined';
+                var next = !cm.isUndefined(indexes[i + 1]);
                 if(index === ''){
                     if(obj && obj instanceof Array){
                         obj.push(next ? arguments.callee(i + 1, obj) : value);
@@ -3152,7 +3150,7 @@ cm.getFDO = function(o, chbx){
                         case 'checkbox':
                             if(elements[d][i].checked){
                                 setValue(elements[d][i].name, elements[d][i].value || 1);
-                            }else if(typeof(chbx) != 'undefined' && chbx !== false){
+                            }else if(!cm.isUndefined(chbx) && chbx !== false){
                                 setValue(elements[d][i].name, chbx);
                             }
                             break;
@@ -3188,15 +3186,15 @@ cm.getFDO = function(o, chbx){
 cm.clearForm = function(o){
     var formEls = cm.getByClass('formData', o);
     for(var i = 0, ln = formEls.length; i < ln; i++){
-        if(formEls[i].tagName.toLowerCase() == 'input'){
-            if(formEls[i].type.toLowerCase() == 'checkbox' || formEls[i].type.toLowerCase() == 'radio'){
+        if(cm.isTagName(formEls[i], 'input')){
+            if(formEls[i].type.toLowerCase() === 'checkbox' || formEls[i].type.toLowerCase() === 'radio'){
                 formEls[i].checked = false;
             }else{
                 formEls[i].value = '';
             }
-        }else if(formEls[i].tagName.toLowerCase() == 'textarea'){
+        }else if(cm.isTagName(formEls[i], 'textarea')){
             formEls[i].value = '';
-        }else if(formEls[i].tagName.toLowerCase() == 'select'){
+        }else if(cm.isTagName(formEls[i], 'select')){
             var opts = formEls[i].getElementsByTagName('option');
             for(var d = 0, lnd = opts.length; d < lnd; d++){
                 opts[d].selected = false;
@@ -3273,6 +3271,22 @@ cm.setInputMaxLength = function(input, maxlength, max, min){
     return input;
 };
 
+cm.constraintsPattern = function(pattern, match, message){
+    var test;
+    return function(value){
+        if(cm.isRegExp(pattern)){
+            if(cm.isEmpty(value)){
+                test = true;
+            }else{
+                test = pattern.test(value);
+            }
+        }else{
+            test = pattern === value;
+        }
+        return match? test : !test;
+    }
+};
+
 /* ******* STRINGS ******* */
 
 cm.toFixed = function(n, x){
@@ -3339,12 +3353,31 @@ cm.strReplace = function(str, vars){
 };
 
 cm.reduceText = function(str, length, points){
-    points = typeof points == 'undefined' ? false : points;
+    points = cm.isUndefined(points) ? false : points;
     if(str.length > length){
-        return str.slice(0, length) + ((points) ? '...' : '');
+        return str.slice(0, length) + ((points) ? '…' : '');
     }else{
         return str;
     }
+};
+
+cm.reduceTextSmart = function(str, length, points){
+    if(str.length <= length){
+        return str;
+    }
+    var split = str.split(/[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+/),
+        newStr = '',
+        testStr = '',
+        i = 0;
+    while(split[i] && testStr.length <= length){
+        newStr = testStr;
+        testStr += ' ' + split[i];
+        i++;
+    }
+    if(!cm.isUndefined(points)){
+        newStr += '…';
+    }
+    return newStr;
 };
 
 cm.removeDanger = function(str){
@@ -3380,7 +3413,7 @@ cm.addLeadZero = function(x){
     return x < 10 ? '0' + x : x;
 };
 
-cm.getNumberDeclension = function(number, titles){
+cm.plural = cm.getNumberDeclension = function(number, titles /* ['найдена', 'найдено', 'найдены'] */){
     var cases = [2, 0, 1, 1, 1, 2];
     return titles[
         (number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]
@@ -3408,15 +3441,18 @@ cm.getCurrentDate = function(format){
 
 cm.dateFormat = function(date, format, langs){
     //date = !date ? new Date() : new Date(+date);
-    date = date ? new Date(+date) : null;
+    if(cm.isDate(date)){
+        date = new Date(+date);
+    }else if(cm.isString(date)){
+        date = new Date(date);
+    }
+    if(isNaN(date)){
+        date = null;
+    }
     format = cm.isString(format) ? format : cm._config.dateTimeFormat;
     langs = cm.merge({
-        'months' : [
-            'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
-        ],
-        'days' : [
-            'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
-        ]
+        'months' : cm._strings.months,
+        'days' : cm._strings.days
     }, langs);
     var convertFormats = {
         '%Y%' : '%Y',
@@ -3510,17 +3546,17 @@ cm.parseDate = function(str, format){
         },
         formats = {
             'YYYY' : function(value){
-                if(value != '0000'){
+                if(value !== '0000'){
                     date.setFullYear(value);
                 }
             },
             'mm' : function(value){
-                if(value != '00'){
+                if(value !== '00'){
                     date.setMonth(value - 1);
                 }
             },
             'dd' : function(value){
-                if(value != '00'){
+                if(value !== '00'){
                     date.setDate(value);
                 }
             },
@@ -3539,7 +3575,7 @@ cm.parseDate = function(str, format){
     format = cm.strReplace(format, convertFormats);
     cm.forEach(formats, function(item, key){
         fromIndex = format.indexOf(key);
-        while(fromIndex != -1){
+        while(fromIndex !== -1){
             item(str.substr(fromIndex, key.length));
             fromIndex = format.indexOf(key, fromIndex + 1);
         }
@@ -3551,16 +3587,14 @@ cm.parseFormatDate = function(str, format, displayFormat, langs){
     format = format || cm._config['dateFormat'];
     displayFormat = displayFormat || cm._config['displayDateFormat'];
     var date = cm.parseDate(str, format);
-    var formated = cm.dateFormat(date, displayFormat, langs);
-    return formated;
+    return cm.dateFormat(date, displayFormat, langs);
 };
 
 cm.parseFormatDateTime = function(str, format, displayFormat, langs){
     format = format || cm._config['dateTimeFormat'];
     displayFormat = displayFormat || cm._config['displayDateTimeFormat'];
     var date = cm.parseDate(str, format);
-    var formated = cm.dateFormat(date, displayFormat, langs);
-    return formated;
+    return cm.dateFormat(date, displayFormat, langs);
 };
 
 cm.getWeek = function(date){
@@ -3575,7 +3609,7 @@ cm.getWeeksInYear = function(year){
     year = !year ? new Date().getFullYear() : year;
     var date = new Date(year, 11, 31),
         week = cm.getWeek(date);
-    return week == 1 ? cm.getWeek(date.setDate(24)) : week;
+    return week === 1 ? cm.getWeek(date.setDate(24)) : week;
 };
 
 /* ******* STYLES ******* */
@@ -3587,18 +3621,11 @@ cm.addClass = function(node, str, useHack){
     if(useHack){
         useHack = node.clientHeight;
     }
-    if(node.classList){
-        cm.forEach(str.toString().split(/\s+/), function(item){
-            if(!cm.isEmpty(item)){
-                node.classList.add(item);
-            }
-        });
-    }else{
-        var add = cm.arrayToObject(typeof(str) == 'object' ? str : str.split(/\s+/)),
-            current = cm.arrayToObject(node && node.className ? node.className.split(/\s+/) : []);
-        current = cm.merge(current, add);
-        node.className = cm.objectToArray(current).join(' ');
-    }
+    cm.forEach(str.toString().split(/\s+/), function(item){
+        if(!cm.isEmpty(item)){
+            node.classList.add(item);
+        }
+    });
     return node;
 };
 
@@ -3609,23 +3636,11 @@ cm.removeClass = function(node, str, useHack){
     if(useHack){
         useHack = node.clientHeight;
     }
-    if(node.classList){
-        cm.forEach(str.toString().split(/\s+/), function(item){
-            if(!cm.isEmpty(item)){
-                node.classList.remove(item);
-            }
-        });
-    }else{
-        var remove = cm.arrayToObject(typeof(str) == 'object' ? str : str.split(/\s+/)),
-            current = node && node.className ? node.className.split(/\s+/) : [],
-            ready = [];
-        current.forEach(function(item){
-            if(!remove[item]){
-                ready.push(item);
-            }
-        });
-        node.className = ready.join(' ');
-    }
+    cm.forEach(str.toString().split(/\s+/), function(item){
+        if(!cm.isEmpty(item)){
+            node.classList.remove(item);
+        }
+    });
     return node;
 };
 
@@ -3637,7 +3652,7 @@ cm.replaceClass = function(node, oldClass, newClass, useHack){
 };
 
 cm.hasClass = cm.isClass = function(node, cssClass){
-    var hasClass, classes;
+    var classes;
     if(!cm.isNode(node)){
         return false;
     }
@@ -3645,13 +3660,7 @@ cm.hasClass = cm.isClass = function(node, cssClass){
         return node.classList.contains(cssClass);
     }else{
         classes = node.className ? node.className.split(/\s+/) : [];
-        hasClass = false;
-        cm.forEach(classes, function(item){
-            if(item == cssClass){
-                hasClass = true;
-            }
-        });
-        return hasClass;
+        return cm.inArray(classes, cssClass);
     }
 };
 
@@ -3690,22 +3699,19 @@ cm.getScrollBarSize = (function(){
 })();
 
 cm.setOpacity = function(node, value){
-    if(node){
-        if(cm.is('ie') && cm.isVersion() < 9){
-            node.style.filter = "alpha(opacity=" + (Math.floor(value * 100)) + ")";
-        }else{
-            node.style.opacity = value;
-        }
+    if(cm.isNode(node)){
+        node.style.opacity = value;
     }
     return node;
 };
 
 cm.getX = function(o){
-    var x = 0, p = o;
+    var x = 0,
+        p = o;
     try{
         while(p){
             x += p.offsetLeft;
-            if(p != o){
+            if(p !== o){
                 x += cm.getStyle(p, 'borderLeftWidth', true) || 0;
             }
             p = p.offsetParent;
@@ -3717,11 +3723,12 @@ cm.getX = function(o){
 };
 
 cm.getY = function(o){
-    var y = 0, p = o;
+    var y = 0,
+        p = o;
     try{
         while(p){
             y += p.offsetTop;
-            if(p != o){
+            if(p !== o){
                 y += cm.getStyle(p, 'borderTopWidth', true) || 0;
             }
             p = p.offsetParent;
@@ -3767,8 +3774,8 @@ cm.getRect = function(node){
             'bottom' : Math.round(o['bottom']),
             'left' : Math.round(o['left'])
         };
-        rect['width'] = typeof o['width'] != 'undefined' ? Math.round(o['width']) : o['right'] - o['left'];
-        rect['height'] = typeof o['height'] != 'undefined' ? Math.round(o['height']) : o['bottom'] - o['top'];
+        rect['width'] = !cm.isUndefined(o['width']) ? Math.round(o['width']) : o['right'] - o['left'];
+        rect['height'] = !cm.isUndefined(o['height']) ? Math.round(o['height']) : o['bottom'] - o['top'];
         return rect;
     }
     return {
@@ -3786,7 +3793,7 @@ cm.getFullRect = function(node, styleObject){
         return null;
     }
     var dimensions = {};
-    styleObject = typeof styleObject == 'undefined' ? cm.getStyleObject(node) : styleObject;
+    styleObject = cm.isUndefined(styleObject) ? cm.getStyleObject(node) : styleObject;
     // Get size and position
     dimensions['width'] = node.offsetWidth;
     dimensions['height'] = node.offsetHeight;
@@ -3827,7 +3834,7 @@ cm.getNodeIndents = function(node, styleObject){
     if(!cm.isNode(node)){
         return null;
     }
-    styleObject = typeof styleObject == 'undefined' ? cm.getStyleObject(node) : styleObject;
+    styleObject = cm.isUndefined(styleObject) ? cm.getStyleObject(node) : styleObject;
     // Get size and position
     var o = {};
     o['margin'] = {
@@ -3849,8 +3856,8 @@ cm.getNodeOffset = function(node, styleObject, o, offsets){
     if(!cm.isNode(node)){
         return null;
     }
-    styleObject = typeof styleObject == 'undefined' ? cm.getStyleObject(node) : styleObject;
-    o = !o || typeof o == 'undefined' ? cm.getNodeIndents(node, styleObject) : o;
+    styleObject = cm.isUndefined(styleObject) ? cm.getStyleObject(node) : styleObject;
+    o = cm.isUndefined(o) ? cm.getNodeIndents(node, styleObject) : o;
     // Get size and position
     o['offset'] = cm.getRect(node);
     if(offsets){
@@ -3884,7 +3891,7 @@ cm.getRealWidth = function(node, applyWidth){
     nodeWidth = node.offsetWidth;
     node.style.width = 'auto';
     width = node.offsetWidth;
-    node.style.width = typeof applyWidth == 'undefined' ? [nodeWidth, 'px'].join('') : applyWidth;
+    node.style.width = cm.isUndefined(applyWidth) ? [nodeWidth, 'px'].join('') : applyWidth;
     return width;
 };
 
@@ -3898,8 +3905,8 @@ cm.getRealHeight = function(node, type, applyType){
         return 0;
     }
     styleObject = cm.getStyleObject(node);
-    type = typeof type == 'undefined' || !cm.inArray(types, type)? 'offset' : type;
-    applyType = typeof applyType == 'undefined' || !cm.inArray(types, applyType) ? false : applyType;
+    type = cm.isUndefined(type) || !cm.inArray(types, type)? 'offset' : type;
+    applyType = cm.isUndefined(applyType) || !cm.inArray(types, applyType) ? false : applyType;
     cm.forEach(types, function(type){
         height[type] = 0;
     });
@@ -3961,7 +3968,7 @@ cm.addStyles = function(node, str){
             style = item.split(':');
             // Add style to element
             style[2] = cm.styleStrToKey(style[0]);
-            if(style[0] == 'float'){
+            if(style[0] === 'float'){
                 node.style[style[2][0]] = style[1];
                 node.style[style[2][1]] = style[1];
             }else{
@@ -4011,21 +4018,21 @@ cm.getCurrentStyle = function(obj, name, dimension){
         case 'top':
         case 'left':
             var Name = name.charAt(0).toUpperCase() + name.substr(1, name.length - 1);
-            if(dimension == '%' && !obj.style[name].match(/%/)){
+            if(dimension === '%' && !obj.style[name].match(/%/)){
                 var el = (/body/i.test(obj.parentNode.tagName) || /top|left/i.test(Name)) ? 'client' : 'offset';
                 var pv = (/width|left/i.test(Name)) ? obj.parentNode[el + 'Width'] : obj.parentNode[el + 'Height'];
                 return 100 * ( obj['offset' + Name] / pv );
-            }else if(dimension == '%' && /%/.test(obj.style[name])){
+            }else if(dimension === '%' && /%/.test(obj.style[name])){
                 var display = obj.style.display;
                 obj.style.display = 'none';
                 var style = cm.getCSSStyle(obj, name, true) || 0;
                 obj.style.display = display;
                 return style;
-            }else if(dimension == 'px' && /px/.test(obj.style[name])){
+            }else if(dimension === 'px' && /px/.test(obj.style[name])){
                 return cm.getCSSStyle(obj, name, true) || 0;
             }
             return obj['offset' + Name];
-            break;
+
         case 'opacity':
             if(cm.is('ie') && cm.isVersion() < 9){
                 var reg = /alpha\(opacity=(.*)\)/;
@@ -4035,7 +4042,7 @@ cm.getCurrentStyle = function(obj, name, dimension){
                 var val = parseFloat(obj.style.opacity || cm.getCSSStyle(obj, 'opacity'));
                 return (!isNaN(val)) ? val : 1;
             }
-            break;
+
         case 'color':
         case 'backgroundColor':
         case 'borderColor':
@@ -4044,20 +4051,20 @@ cm.getCurrentStyle = function(obj, name, dimension){
                 return val = val.match(/\d+/g), [parseInt(val[0]), parseInt(val[1]), parseInt(val[2])];
             }
             return cm.hex2rgb(val.match(/[\w\d]+/)[0]);
-            break;
+
         case 'docScrollTop':
             return cm.getBodyScrollTop();
-            break;
+
         case 'scrollLeft':
         case 'scrollTop':
             return obj[name];
-            break;
+
         case 'x1':
         case 'x2':
         case 'y1':
         case 'y2':
             return parseInt(obj.getAttribute(name));
-            break;
+
         default:
             return cm.getCSSStyle(obj, name, true) || 0;
     }
@@ -4086,7 +4093,7 @@ cm.rgb2hex = function(r, g, b){
         rgb[i] = Number(rgb[i]).toString(16);
         if(rgb[i] == '0'){
             rgb[i] = '00';
-        }else if(rgb[i].length == 1){
+        }else if(rgb[i].length === 1){
             rgb[i] = '0' + rgb[i];
         }
     }
@@ -4095,7 +4102,7 @@ cm.rgb2hex = function(r, g, b){
 
 cm.styleStrToKey = function(line){
     line = line.replace(/\s/g, '');
-    if(line == 'float'){
+    if(line === 'float'){
         line = ['cssFloat', 'styleFloat'];
     }else if(line.match('-')){
         var st = line.split('-');
@@ -4209,23 +4216,27 @@ cm.getBodyScrollMaxTop = function(){
     return cm.getBodyScrollHeight() - cm._pageSize['winHeight'];
 };
 
-cm.getSupportedStyle = function(style){
-    var upper = cm.styleStrToKey(style).replace(style.charAt(0), style.charAt(0).toUpperCase()),
-        styles = [
-            cm.styleStrToKey(style),
-            ['Webkit', upper].join(''),
-            ['Moz', upper].join(''),
-            ['O', upper].join(''),
-            ['ms', upper].join('')
-        ];
-    style = false;
-    cm.forEach(styles, function(item){
-        if(typeof document.createElement('div').style[item] != 'undefined' && !style){
-            style = item;
-        }
-    });
-    return style;
-};
+cm.getSupportedStyle = (function(){
+    var node = document.createElement('div');
+
+    return function(style){
+        var upper = cm.styleStrToKey(style).replace(style.charAt(0), style.charAt(0).toUpperCase()),
+            styles = [
+                cm.styleStrToKey(style),
+                ['Webkit', upper].join(''),
+                ['Moz', upper].join(''),
+                ['O', upper].join(''),
+                ['ms', upper].join('')
+            ];
+        style = false;
+        cm.forEach(styles, function(item){
+            if(!cm.isUndefined(node.style[item]) && !style){
+                style = item;
+            }
+        });
+        return style;
+    }
+})();
 
 cm.getTransitionDurationFromRule = function(rule){
     var openDurationRule = cm.getCSSRule(rule)[0],
@@ -4283,7 +4294,7 @@ cm.getCSSRule = function(ruleName){
                 cssRules = styleSheet.rules;
             }
             cm.forEach(cssRules, function(cssRule){
-                if(cssRule.selectorText == ruleName){
+                if(cssRule.selectorText === ruleName){
                     matchedRules.push(cssRule);
                 }
             });
@@ -4294,9 +4305,9 @@ cm.getCSSRule = function(ruleName){
 
 cm.addCSSRule = function(sheet, selector, rules, index){
     if(document.styleSheets){
-        sheet = typeof sheet == 'undefined' || !sheet ? document.styleSheets[0] : sheet;
-        rules = typeof rules == 'undefined' || !rules ? '' : rules;
-        index = typeof index == 'undefined' || !index ? -1 : index;
+        sheet = cm.isUndefined(sheet) || !sheet ? document.styleSheets[0] : sheet;
+        rules = cm.isUndefined(rules) || !rules ? '' : rules;
+        index = cm.isUndefined(index) || !index ? -1 : index;
         if('insertRule' in sheet){
             sheet.insertRule(selector + '{' + rules + '}', index);
         }else if('addRule' in sheet){
@@ -4315,7 +4326,7 @@ cm.removeCSSRule = function(ruleName){
                 cssRules = styleSheet.rules;
             }
             cm.forEachReverse(cssRules, function(cssRule, i){
-                if(cssRule.selectorText == ruleName){
+                if(cssRule.selectorText === ruleName){
                     if(styleSheet.cssRules){
                         styleSheet.deleteRule(i);
                     }else{
@@ -4331,17 +4342,17 @@ cm.setCSSTranslate = (function(){
     var transform = cm.getSupportedStyle('transform');
     if(transform){
         return function(node, x, y, z, additional){
-            x = typeof x != 'undefined' && x != 'auto' ? x : 0;
-            y = typeof y != 'undefined' && y != 'auto' ? y : 0;
-            z = typeof z != 'undefined' && z != 'auto' ? z : 0;
-            additional = typeof additional != 'undefined' ? additional : '';
+            x = !cm.isUndefined(x) && x !== 'auto' ? x : 0;
+            y = !cm.isUndefined(y) && y !== 'auto' ? y : 0;
+            z = !cm.isUndefined(z) && z !== 'auto' ? z : 0;
+            additional = !cm.isUndefined(additional) ? additional : '';
             node.style[transform] = ['translate3d(', x, ',', y, ',', z,')', additional].join(' ');
             return node;
         };
     }else{
         return function(node, x, y, z, additional){
-            x = typeof x != 'undefined' ? x : 0;
-            y = typeof y != 'undefined' ? y : 0;
+            x = !cm.isUndefined(x) ? x : 0;
+            y = !cm.isUndefined(y) ? y : 0;
             node.style.left = x;
             node.style.top = y;
             return node;
@@ -4408,12 +4419,12 @@ cm.CSSValuesToArray = function(value){
 };
 
 cm.arrayToCSSValues = function(a, units){
-    units = typeof units != 'undefined' ? units : 'px';
+    units = !cm.isUndefined(units) ? units : 'px';
     cm.forEach(a, function(item, key){
         a[key] = cm.isEmpty(item) ? 0 : parseFloat(item);
     });
     return a.reduce(function(prev, next, index, a){
-        return [prev + units, next + ((index == a.length - 1) ? units : '')].join(' ');
+        return [prev + units, next + ((index === a.length - 1) ? units : '')].join(' ');
     });
 };
 
@@ -4449,7 +4460,7 @@ cm.isKeyCode = function(code, rules){
         rules = rules.split(/\s+/);
     }
     cm.forEach(rules, function(rule){
-        if(cm.keyCodeTable[code] == rule){
+        if(cm.keyCodeTable[code] === rule){
             isMath = true;
         }
     });
@@ -4466,6 +4477,12 @@ cm.isInputFocused = function(){
     var el = document.activeElement,
         tagName = el.tagName.toLowerCase();
     return tagName === 'textarea' || (tagName === 'input' &&  !/button|file/.test(el.type));
+};
+
+cm.isFormInputFocused = function(){
+    var el = document.activeElement,
+        tagName = el.tagName.toLowerCase();
+    return tagName === 'input' &&  !/button|file/.test(el.type);
 };
 
 cm.allowKeyCode = function(code, rules){
@@ -4500,7 +4517,7 @@ cm.allowOnlyDigitInputEvent = function(input, callback){
         isMaxlength = !cm.isEmpty(input.maxlength) && input.maxlength > 0;
         isMax = !cm.isEmpty(input.max) && input.max > 0;
         if(isMaxlength || isMax){
-            if(input.type == 'number'){
+            if(input.type === 'number'){
                 input.value = Math.min(parseFloat(value), parseFloat(input.max));
             }else{
                 input.value = cm.reduceText(value, parseInt(input.maxlength));
@@ -4520,7 +4537,7 @@ cm.allowOnlyNumbersInputEvent = function(input, callback){
         isMaxlength = !cm.isEmpty(input.maxlength) && input.maxlength > 0;
         isMax = !cm.isEmpty(input.max) && input.max > 0;
         if(isMaxlength || isMax){
-            if(input.type == 'number'){
+            if(input.type === 'number'){
                 input.value = Math.min(parseFloat(value), parseFloat(input.max));
             }else{
                 input.value = cm.reduceText(value, parseInt(input.maxlength));
@@ -4575,7 +4592,7 @@ cm.Animation = function(o){
             properties.forEach(function(item){
                 var val = item['old'] + (item['new'] - item['old']) * delta(progress);
 
-                if(item['name'] == 'opacity'){
+                if(item['name'] === 'opacity'){
                     cm.setOpacity(obj, val);
                 }else if(/color/i.test(item['name'])){
                     var r = parseInt((item['new'][0] - item['old'][0]) * delta(progress) + item['old'][0]);
@@ -4586,7 +4603,7 @@ cm.Animation = function(o){
                     obj[item['name']] = val;
                 }else if(/x1|x2|y1|y2/.test(item['name'])){
                     obj.setAttribute(item['name'], Math.round(val));
-                }else if(item['name'] == 'docScrollTop'){
+                }else if(item['name'] === 'docScrollTop'){
                     cm.setBodyScrollTop(val);
                 }else{
                     obj.style[item['name']] = Math.round(val) + item['dimension'];
@@ -4595,7 +4612,7 @@ cm.Animation = function(o){
             return false;
         }
         properties.forEach(function(item){
-            if(item['name'] == 'opacity'){
+            if(item['name'] === 'opacity'){
                 cm.setOpacity(obj, item['new']);
             }else if(/color/i.test(item['name'])){
                 obj.style[item['name']] = cm.rgb2hex(item['new'][0], item['new'][1], item['new'][2]);
@@ -4603,7 +4620,7 @@ cm.Animation = function(o){
                 obj[item['name']] = item['new'];
             }else if(/x1|x2|y1|y2/.test(item['name'])){
                 obj.setAttribute(item['name'], item['new']);
-            }else if(item['name'] == 'docScrollTop'){
+            }else if(item['name'] === 'docScrollTop'){
                 cm.setBodyScrollTop(item['new']);
             }else{
                 obj.style[item['name']] = item['new'] + item['dimension'];
@@ -4765,9 +4782,31 @@ cm.storageGet = function(key, cookie){
 cm.storageRemove = function(key, cookie){
     cookie = cookie !== false;
     if(cm.isLocalStorage){
-        localStorage.removeItem(key);
+        window.localStorage.removeItem(key);
     }else if(cookie){
         cm.cookieRemove(key);
+    }
+};
+
+cm.sessionStorageSet = function(key, value){
+    if(cm.isSessionStorage){
+        try{
+            window.sessionStorage.setItem(key, value);
+        }catch(e){
+        }
+    }
+};
+
+cm.sessionStorageGet = function(key){
+    if(cm.isSessionStorage){
+        return window.sessionStorage.getItem(key);
+    }
+    return null;
+};
+
+cm.sessionStorageRemove = function(key){
+    if(cm.isSessionStorage){
+        window.sessionStorage.removeItem(key);
     }
 };
 
@@ -4783,10 +4822,10 @@ cm.cookieGet = function(name){
     var end = 0;
     if(cookie.length > 0){
         offset = cookie.indexOf(search);
-        if(offset != -1){
+        if(offset !== -1){
             offset += search.length;
             end = cookie.indexOf(";", offset);
-            if(end == -1){
+            if(end === -1){
                 end = cookie.length;
             }
             setStr = encodeURI(cookie.substring(offset, end));
@@ -4801,8 +4840,8 @@ cm.cookieRemove = function(name){
     document.cookie = encodeURI(name) + '=;expires=' + date;
 };
 
-cm.cookieDate = function(num){
-    return 'expires=' + (new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * num)).toUTCString() + ';';
+cm.cookieDate = function(days){
+    return 'expires=' + (new Date(Date.now() + 1000 * 60 * 60 * 24 * days)).toUTCString() + ';';
 };
 
 /* ******* AJAX ******* */
@@ -4812,6 +4851,7 @@ cm.ajax = function(o){
             'debug' : true,
             'type' : 'json',                                         // text | xml | json | jsonp
             'method' : 'post',                                       // post | get | put | delete
+            'paramsType' : 'uri',                                    // uri | json
             'params' : '',
             'url' : '',
             'modifier' : '',
@@ -4841,7 +4881,7 @@ cm.ajax = function(o){
 
     var init = function(){
         validate();
-        if(config['type'] == 'jsonp'){
+        if(config['type'] === 'jsonp'){
             returnObject = {
                 'abort' : abortJSONP
             };
@@ -4867,9 +4907,15 @@ cm.ajax = function(o){
             config['params'] = cm.objectReplace(config['params'], {
                 '%version%' : cm._version,
                 '%baseUrl%' : cm._baseUrl,
-                '%assetsUrl%' : cm._assetsUrl
+                '%assetsUrl%' : cm._assetsUrl || cm._baseUrl,
+                '%pathUrl%' : cm._pathUrl
             });
-            config['params'] = cm.obj2URI(config['params']);
+            if(config['paramsType'] === 'json'){
+                config['headers']['Content-Type'] = 'application/json';
+                config['params'] = cm.stringifyJSON(config['params']);
+            }else{
+                config['params'] = cm.obj2URI(config['params']);
+            }
         }
         // Build request link
         if(!cm.isEmpty(config['modifier']) && !cm.isEmpty(config['modifierParams'])){
@@ -4881,7 +4927,8 @@ cm.ajax = function(o){
         config['url'] = cm.strReplace(config['url'], {
             '%version%' : cm._version,
             '%baseUrl%' : cm._baseUrl,
-            '%assetsUrl%' : cm._assetsUrl
+            '%assetsUrl%' : cm._assetsUrl || cm._baseUrl,
+            '%pathUrl%' : cm._pathUrl
         });
         if(!/post|put/.test(config['method'])){
             if(!cm.isEmpty(config['params'])){
@@ -4915,12 +4962,12 @@ cm.ajax = function(o){
     };
 
     var loadHandler = function(e){
-        if(config['httpRequestObject'].readyState == 4){
+        if(config['httpRequestObject'].readyState === 4){
             response = config['httpRequestObject'][responseType];
-            if(config['type'] == 'json'){
+            if(config['type'] === 'json'){
                 response = cm.parseJSON(response);
             }
-            if(config['httpRequestObject'].status == 200){
+            if(config['httpRequestObject'].status === 200){
                 config['onSuccess'](response, e);
             }else{
                 config['onError'](e);
@@ -4949,7 +4996,7 @@ cm.ajax = function(o){
     };
 
     var deprecatedHandler = function(){
-        if(typeof config['handler'] == 'function'){
+        if(cm.isFunction(config['handler'])){
             cm.errorLog({'type' : 'attention', 'name' : 'cm.ajax', 'message' : 'Parameter "handler" is deprecated. Use "onSuccess", "onError" or "onAbort" callbacks instead.'});
             config['handler'].apply(config['handler'], arguments);
         }
@@ -5030,13 +5077,29 @@ cm.stringifyJSON = function(o){
 };
 
 cm.obj2URI = function(obj, prefix){
-    var str = [];
+    var str = [],
+        keyPrefix;
     cm.forEach(obj, function(item, key){
-        var k = prefix ? prefix + "[" + key + "]" : key,
-            v = item;
-        str.push(typeof v == "object" ? cm.obj2URI(v, k) : k + "=" + encodeURIComponent(v));
+        keyPrefix = !cm.isEmpty(prefix) ? prefix + "[" + key + "]" : key;
+        str.push(typeof item === 'object' ? cm.obj2URI(item, keyPrefix) : keyPrefix + '=' + encodeURIComponent(item));
     });
-    return str.join("&");
+    return str.join('&');
+};
+
+cm.obj2Filter = function(obj, prefix, skipEmpty){
+    var data = {},
+        keyPrefix;
+    cm.forEach(obj, function(item, key){
+        if(!skipEmpty || !cm.isEmpty(item)){
+            keyPrefix = !cm.isEmpty(prefix) ? prefix + '=' + key : key;
+            if(cm.isObject(item)){
+                data = cm.merge(data, cm.obj2Filter(item, keyPrefix, skipEmpty))
+            }else{
+                data[keyPrefix] = item;
+            }
+        }
+    });
+    return data;
 };
 
 cm.obj2FormData = function(o){
@@ -5063,8 +5126,8 @@ cm.formData2URI = function(fd){
 };
 
 cm.xml2arr = function(o){
-    o = o.nodeType == 9 ? cm.firstEl(o) : o;
-    if(o.nodeType == 3 || o.nodeType == 4){
+    o = o.nodeType === 9 ? cm.firstEl(o) : o;
+    if(o.nodeType === 3 || o.nodeType === 4){
         //Need to be change
         var n = cm.nextEl(o);
         if(!n){
@@ -5072,13 +5135,13 @@ cm.xml2arr = function(o){
         }
         o = n;
     }
-    if(o.nodeType == 1){
+    if(o.nodeType === 1){
         var res = {};
         res[o.tagName] = {};
         var els = o.childNodes;
         for(var i = 0, ln = els.length; i < ln; i++){
             var childs = arguments.callee(els[i]);
-            if(typeof(childs) == 'object'){
+            if(typeof(childs) === 'object'){
                 for(var key in childs){
                     if(!res[o.tagName][key]){
                         res[o.tagName][key] = childs[key];
@@ -5105,13 +5168,13 @@ cm.responseInArray = function(xmldoc){
     var data = [];
     var els = response.childNodes;
     for(var i = 0; els.length > i; i++){
-        if(els[i].nodeType != 1){
+        if(els[i].nodeType !== 1){
             continue;
         }
         var kids = els[i].childNodes;
         var tmp = [];
         for(var k = 0; kids.length > k; k++){
-            if(kids[k].nodeType == 1){
+            if(kids[k].nodeType === 1){
                 tmp[kids[k].tagName] = kids[k].firstChild ? kids[k].firstChild.nodeValue : '';
             }
         }
@@ -5255,10 +5318,10 @@ cm.define = (function(){
 
 cm.getConstructor = function(className, callback){
     var classConstructor;
-    callback = typeof callback != 'undefined' ? callback : function(){};
-    if(!className || className == '*'){
+    callback = cm.isFunction(callback) ? callback : function(){};
+    if(!className || className === '*'){
         cm.forEach(cm._defineStack, function(classConstructor){
-            callback(classConstructor, className, classConstructor.prototype);
+            callback(classConstructor, className, classConstructor.prototype, classConstructor.prototype._inherit);
         });
         return cm._defineStack;
     }else{
@@ -5273,7 +5336,7 @@ cm.getConstructor = function(className, callback){
             }
             return false;
         }else{
-            callback(classConstructor, className, classConstructor.prototype);
+            callback(classConstructor, className, classConstructor.prototype, classConstructor.prototype._inherit);
             return classConstructor;
         }
     }
@@ -5283,12 +5346,12 @@ cm.find = function(className, name, parentNode, callback, params){
     var items = [],
         processed = {};
     // Config
-    callback = typeof callback == 'function' ? callback : function(){};
+    callback = cm.isFunction(callback) ? callback : function(){};
     params = cm.merge({
         'childs' : false
     }, params);
     // Process
-    if(!className || className == '*'){
+    if(!className || className === '*'){
         cm.forEach(cm._defineStack, function(classConstructor){
             if(classConstructor.prototype.findInStack){
                 items = cm.extend(items, classConstructor.prototype.findInStack(name, parentNode, callback));
@@ -5331,7 +5394,7 @@ cm.Finder = function(className, name, parentNode, callback, params){
         var finder;
         // Merge params
         parentNode = parentNode || document.body;
-        callback = typeof callback == 'function' ? callback : function(){};
+        callback = cm.isFunction(callback) ? callback : function(){};
         params = cm.merge({
             'event' : 'onRender',
             'multiple' : false,
@@ -5371,6 +5434,12 @@ cm.Finder = function(className, name, parentNode, callback, params){
 
     init();
 };
+
+cm.setStrings = function(className, strings){
+    cm.getConstructor(className, function(classConstructor, className, classProto){
+        classProto.setLangs(strings);
+    });
+};
 /* ******* EXTEND ******* */
 
 Mod['Extend'] = {
@@ -5378,9 +5447,7 @@ Mod['Extend'] = {
         'extend' : true,
         'predefine' : true
     },
-    '_construct' : function(){
-        var that = this;
-    },
+    '_construct' : function(){},
     '_extend' : function(name, o){
         var that = this;
         if(!that.build._modules[name]){
@@ -5405,7 +5472,7 @@ Mod['Extend'] = {
                 });
             }
             // Construct module
-            if(typeof o._construct == 'function'){
+            if(cm.isFunction(o._construct)){
                 // Construct
                 o._construct.call(that);
             }else{
@@ -5499,7 +5566,7 @@ Mod['Component'] = {
     },
     'cloneComponent' : function(params){
         var that = this,
-            component;
+            component = null;
         cm.getConstructor(that._className, function(classConstructor){
             component = new classConstructor(
                 cm.merge(that.params, params)
@@ -5781,7 +5848,7 @@ Mod['DataConfig'] = {
     },
     '_construct' : function(){
         var that = this;
-        if(typeof that.build['params']['configDataMarker'] == 'undefined'){
+        if(cm.isUndefined(that.build['params']['configDataMarker'])){
             that.build['params']['configDataMarker'] = 'data-config';
         }
     },
@@ -5880,9 +5947,10 @@ Mod['Storage'] = {
             that.build['params']['name'] = '';
         }
     },
-    'storageRead' : function(key){
+    'storageRead' : function(key, session){
         var that = this,
-            storage = JSON.parse(cm.storageGet(that._className)) || {};
+            method = session ? 'sessionStorageGet' : 'storageGet',
+            storage = JSON.parse(cm[method](that._className)) || {};
         if(cm.isEmpty(that.params['name'])){
             cm.errorLog({
                 'type' : 'error',
@@ -5891,7 +5959,7 @@ Mod['Storage'] = {
             });
             return null;
         }
-        if(!storage[that.params['name']] || typeof storage[that.params['name']][key] == 'undefined'){
+        if(!storage[that.params['name']] || cm.isUndefined(storage[that.params['name']][key])){
             cm.errorLog({
                 'type' : 'attention',
                 'name' : that._className,
@@ -5901,9 +5969,10 @@ Mod['Storage'] = {
         }
         return storage[that.params['name']][key];
     },
-    'storageReadAll' : function(){
+    'storageReadAll' : function(session){
         var that = this,
-            storage = JSON.parse(cm.storageGet(that._className)) || {};
+            method = session ? 'sessionStorageGet' : 'storageGet',
+            storage = JSON.parse(cm[method](that._className)) || {};
         if(cm.isEmpty(that.params['name'])){
             cm.errorLog({
                 'type' : 'error',
@@ -5922,9 +5991,10 @@ Mod['Storage'] = {
         }
         return storage[that.params['name']];
     },
-    'storageWrite' : function(key, value){
+    'storageWrite' : function(key, value, session){
         var that = this,
-            storage = JSON.parse(cm.storageGet(that._className)) || {};
+            method = session ? 'sessionStorageGet' : 'storageGet',
+            storage = JSON.parse(cm[method](that._className)) || {};
         if(cm.isEmpty(that.params['name'])){
             cm.errorLog({
                 'type' : 'error',
@@ -5937,12 +6007,14 @@ Mod['Storage'] = {
             storage[that.params['name']] = {};
         }
         storage[that.params['name']][key] = value;
-        cm.storageSet(that._className, JSON.stringify(storage));
+        method = session ? 'sessionStorageSet' : 'storageSet';
+        cm[method](that._className, JSON.stringify(storage));
         return storage[that.params['name']];
     },
-    'storageWriteAll' : function(data){
+    'storageWriteAll' : function(data, session){
         var that = this,
-            storage = JSON.parse(cm.storageGet(that._className)) || {};
+            method = session ? 'sessionStorageGet' : 'storageGet',
+            storage = JSON.parse(cm[method](that._className)) || {};
         if(cm.isEmpty(that.params['name'])){
             cm.errorLog({
                 'type' : 'error',
@@ -5952,12 +6024,14 @@ Mod['Storage'] = {
             return {};
         }
         storage[that.params['name']] = data;
-        cm.storageSet(that._className, JSON.stringify(storage));
+        method = session ? 'sessionStorageSet' : 'storageSet';
+        cm[method](that._className, JSON.stringify(storage));
         return storage[that.params['name']];
     },
-    'storageClear' : function(key){
+    'storageClear' : function(key, session){
         var that = this,
-            storage = JSON.parse(cm.storageGet(that._className)) || {};
+            method = session ? 'sessionStorageGet' : 'storageGet',
+            storage = JSON.parse(cm[method](that._className)) || {};
         if(cm.isEmpty(that.params['name'])){
             cm.errorLog({
                 'type' : 'error',
@@ -5970,7 +6044,8 @@ Mod['Storage'] = {
             storage[that.params['name']] = {};
         }
         delete storage[that.params['name']][key];
-        cm.storageSet(that._className, JSON.stringify(storage));
+        method = session ? 'sessionStorageSet' : 'storageSet';
+        cm[method](that._className, JSON.stringify(storage));
         return storage[that.params['name']];
     }
 };
@@ -6064,7 +6139,8 @@ Mod['Stack'] = {
     'isAppropriateToStack' : function(name, parent, callback){
         var that = this,
             item = that._stackItem;
-        if((cm.isEmpty(name) || item['name'] == name) && cm.isParent(parent, item['node'], true)){
+        callback = cm.isFunction(callback) ? callback : function(){};
+        if((cm.isEmpty(name) || item['name'] === name) && cm.isParent(parent, item['node'], true)){
             callback(item['class'], item, name);
             return true;
         }
@@ -6073,9 +6149,9 @@ Mod['Stack'] = {
     'findInStack' : function(name, parent, callback){
         var that = this,
             items = [];
-        callback = typeof callback == 'function' ? callback : function(){};
+        callback = cm.isFunction(callback) ? callback : function(){};
         cm.forEach(that._stack, function(item){
-            if((cm.isEmpty(name) || item['name'] == name) && (cm.isEmpty(parent) || cm.isParent(parent, item['node'], true))){
+            if((cm.isEmpty(name) || item['name'] === name) && (cm.isEmpty(parent) || cm.isParent(parent, item['node'], true))){
                 items.push(item);
                 callback(item['class'], item, name);
             }
@@ -6098,10 +6174,10 @@ Mod['Structure'] = {
     },
     '_construct' : function(){
         var that = this;
-        if(typeof that.build['params']['renderStructure'] == 'undefined'){
+        if(cm.isUndefined(that.build['params']['renderStructure'])){
             that.build['params']['renderStructure'] = true;
         }
-        if(typeof that.build['params']['embedStructure'] == 'undefined'){
+        if(cm.isUndefined(that.build['params']['embedStructure'])){
             that.build['params']['embedStructure'] = 'append';
         }
     },
@@ -6138,180 +6214,6 @@ Mod['Structure'] = {
             cm.insertBefore(node, that.params['node']);
         }
         cm.remove(that.params['node']);
-        return that;
-    }
-};
-
-/* ******* CONTROLLER ******* */
-
-Mod['__Controller__'] = {
-    '_config' : {
-        'extend' : true,
-        'predefine' : false,
-        'require' : ['Extend']
-    },
-    '_construct' : function(){
-        var that = this;
-        if(typeof that.build['params']['removeOnDestruct'] == 'undefined'){
-            that.build['params']['removeOnDestruct'] = true;
-        }
-        if(that.build['params']['customEvents'] !== false){
-            that.build['params']['customEvents'] = cm.merge({
-                'destruct' : true,
-                'redraw' : true,
-                'refresh' : true,
-                'resume' : true,
-                'suspend' : true
-            }, that.build['params']['customEvents']);
-        }
-        if(that.build['params']['triggerCustomEvents'] !== false){
-            that.build['params']['triggerCustomEvents'] = cm.merge({
-                'destruct' : true,
-                'redraw' : true,
-                'refresh' : true,
-                'resume' : true,
-                'suspend' : true
-            }, that.build['params']['triggerCustomEvents']);
-        }
-        that.build._isConstructed = false;
-        that.build._isDestructed = false;
-        that.build._isSuspended = false;
-    },
-    'construct' : function(){
-        var that = this;
-        var node = that._modules['Stack'] ? that.getStackNode() : that.params['node'];
-        if(!that._isConstructed){
-            that._isConstructed = true;
-            that._isDestructed = false;
-            that._isSuspended = false;
-            if(that.params['customEvents']){
-                if(that.params['customEvents'] === true){
-                    cm.customEvent.add(node, 'destruct', that.destruct);
-                    cm.customEvent.add(node, 'redraw', that.redraw);
-                    cm.customEvent.add(node, 'refresh', that.refresh);
-                    cm.customEvent.add(node, 'resume', that.resume);
-                    cm.customEvent.add(node, 'suspend', that.suspend);
-                }else{
-                    cm.forEach(that.params['customEvents'], function(bool, key){
-                        bool && cm.customEvent.add(node, 'destruct', that[key]);
-                    });
-                }
-            }
-            that.constructHook(node);
-        }
-        return that;
-    },
-    'destruct' : function(){
-        var that = this;
-        if(that._isConstructed && !that._isDestructed){
-            var node = that._modules['Stack'] ? that.getStackNode() : that.params['node'];
-            that._isConstructed = false;
-            that._isDestructed = true;
-            that.destructHook(node);
-            if(that.params['triggerCustomEvents'] && (that.params['triggerCustomEvents'] === true || that.params['triggerCustomEvents']['destruct'])){
-                cm.customEvent.trigger(node, 'destruct', {
-                    'type' : 'child',
-                    'self' : false
-                });
-            }
-            if(that.params['customEvents']){
-                if(that.params['customEvents'] === true){
-                    cm.customEvent.remove(node, 'destruct', that.destruct);
-                    cm.customEvent.remove(node, 'redraw', that.redraw);
-                    cm.customEvent.remove(node, 'refresh', that.refresh);
-                    cm.customEvent.remove(node, 'resume', that.resume);
-                    cm.customEvent.remove(node, 'suspend', that.suspend);
-                }else{
-                    cm.forEach(that.params['customEvents'], function(bool, key){
-                        bool && cm.customEvent.remove(node, 'destruct', that[key]);
-                    });
-                }
-            }
-            that._modules['Stack'] && that.removeFromStack();
-            that.params['removeOnDestruct'] && cm.remove(node);
-        }
-        return that;
-    },
-    'resume' : function(){
-        var that = this;
-        if(that._isSuspended){
-            var node = that._modules['Stack'] ? that.getStackNode() : that.params['node'];
-            that._isSuspended = false;
-            that.resumeHook(node);
-            if(that.params['triggerCustomEvents'] && (that.params['triggerCustomEvents'] === true || that.params['triggerCustomEvents']['resume'])){
-                cm.customEvent.trigger(node, 'resume', {
-                    'type' : 'child',
-                    'self' : false
-                });
-            }
-        }
-        return that;
-    },
-    'suspend' : function(){
-        var that = this;
-        if(!that._isSuspended){
-            var node = that._modules['Stack'] ? that.getStackNode() : that.params['node'];
-            that._isSuspended = true;
-            that.suspendHook(node);
-            if(that.params['triggerCustomEvents'] && (that.params['triggerCustomEvents'] === true || that.params['triggerCustomEvents']['suspend'])){
-                cm.customEvent.trigger(node, 'suspend', {
-                    'type' : 'child',
-                    'self' : false
-                });
-            }
-        }
-        return that;
-    },
-    'refresh' : function(){
-        var that = this;
-        if(!that._isSuspended){
-            var node = that._modules['Stack'] ? that.getStackNode() : that.params['node'];
-            that.refreshHook(node);
-            if(that.params['triggerCustomEvents'] && (that.params['triggerCustomEvents'] === true || that.params['triggerCustomEvents']['refresh'])){
-                cm.customEvent.trigger(node, 'refresh', {
-                    'type' : 'child',
-                    'self' : false
-                });
-            }
-        }
-        return that;
-    },
-    'redraw' : function(){
-        var that = this;
-        if(!that._isSuspended){
-            var node = that._modules['Stack'] ? that.getStackNode() : that.params['node'];
-            that.redrawHook(node);
-            if(that.params['triggerCustomEvents'] && (that.params['triggerCustomEvents'] === true || that.params['triggerCustomEvents']['redraw'])){
-                cm.customEvent.trigger(node, 'redraw', {
-                    'type' : 'child',
-                    'self' : false
-                });
-            }
-        }
-        return that;
-    },
-    'constructHook' : function(node){
-        var that = this;
-        return that;
-    },
-    'destructHook' : function(node){
-        var that = this;
-        return that;
-    },
-    'resumeHook' : function(node){
-        var that = this;
-        return that;
-    },
-    'suspendHook' : function(node){
-        var that = this;
-        return that;
-    },
-    'refreshHook' : function(node){
-        var that = this;
-        return that;
-    },
-    'redrawHook' : function(node){
-        var that = this;
         return that;
     }
 };
@@ -6628,6 +6530,7 @@ cm.define('Com.AbstractController', {
         'onConstructEnd',
         'onInitComponentsStart',
         'onInitComponentsEnd',
+        'onGetLESSVariables',
         'onGetLESSVariablesStart',
         'onGetLESSVariablesProcess',
         'onGetLESSVariablesEnd',
@@ -6675,7 +6578,9 @@ cm.define('Com.AbstractController', {
         'controllerEvents' : false,
         'customEvents' : true,
         'resizeEvent' : true,
+        'resizeNode' : window,
         'scrollEvent' : false,
+        'scrollNode' : window,
         'collector' : null,
         'constructCollector' : false,
         'destructCollector' : false
@@ -6689,7 +6594,7 @@ function(params){
     that.construct(params);
 });
 
-cm.getConstructor('Com.AbstractController', function(classConstructor, className, classProto){
+cm.getConstructor('Com.AbstractController', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(params){
         var that = this;
         // Bind context to methods
@@ -6716,9 +6621,9 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         that.triggerEvent('onBeforeRender');
         that.render();
         that.triggerEvent('onAfterRender');
-        that.setEvents();
         that.triggerEvent('onConstructProcess');
         that.addToStack(that.nodes['container']);
+        that.setEvents();
         that.triggerEvent('onRender');
         that.triggerEvent('onRenderEnd');
         that.triggerEvent('onConstructEnd');
@@ -6784,6 +6689,7 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
     classProto.getLESSVariables = function(){
         var that = this;
         that.triggerEvent('onGetLESSVariablesStart');
+        that.triggerEvent('onGetLESSVariables');
         that.triggerEvent('onGetLESSVariablesProcess');
         that.triggerEvent('onGetLESSVariablesEnd');
         return that;
@@ -6834,8 +6740,8 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         var that = this;
         that.triggerEvent('onSetEventsStart');
         // Windows events
-        that.params['resizeEvent'] && cm.addEvent(window, 'resize', that.redrawHandler);
-        that.params['scrollEvent'] && cm.addEvent(window, 'scroll', that.scrollHandler);
+        that.params['resizeEvent'] && cm.addEvent(that.params['resizeNode'], 'resize', that.redrawHandler);
+        that.params['scrollEvent'] && cm.addEvent(that.params['scrollNode'], 'scroll', that.scrollHandler);
         that.triggerEvent('onSetEvents');
         that.triggerEvent('onSetEventsProcess');
         // Add custom events
@@ -6852,8 +6758,8 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         var that = this;
         that.triggerEvent('onUnsetEventsStart');
         // Windows events
-        that.params['resizeEvent'] && cm.removeEvent(window, 'resize', that.redrawHandler);
-        that.params['scrollEvent'] && cm.removeEvent(window, 'scroll', that.scrollHandler);
+        that.params['resizeEvent'] && cm.removeEvent(that.params['resizeNode'], 'resize', that.redrawHandler);
+        that.params['scrollEvent'] && cm.removeEvent(that.params['scrollNode'], 'scroll', that.scrollHandler);
         that.triggerEvent('onUnsetEvents');
         that.triggerEvent('onUnsetEventsProcess');
         // Remove custom events
@@ -7244,6 +7150,7 @@ cm.define('Com.AbstractInput', {
         'placeholder' : '',
         'disabled' : false,
         'className' : '',
+        'contentClassName' : '',
         'ui' : true,
         'size' : 'full',                // default | full
         'justify' : 'left',
@@ -7257,9 +7164,7 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.AbstractInput', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.AbstractInput', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(params){
         var that = this;
         // Variables
@@ -7283,7 +7188,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         // Add events
         that.addEvent('onAfterRender', that.afterRenderHandler);
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
+        classInherit.prototype.construct.apply(that, arguments);
         return that;
     };
 
@@ -7389,9 +7294,9 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         that.triggerEvent('onRenderViewStart');
         that.nodes['container'] = cm.node('div', {'class' : 'com__input'});
         // Hidden input holder
+        that.nodes['hiddenContainer'] = that.renderHiddenContent();
+        that.nodes['hidden'] = that.nodes['hiddenContent']['input'];
         if(that.params['renderHiddenContent']){
-            that.nodes['hiddenContainer'] = that.renderHiddenContent();
-            that.nodes['hidden'] = that.nodes['hiddenContent']['input'];
             cm.appendChild(that.nodes['hiddenContainer'], that.nodes['container']);
         }
         // Component content
@@ -7410,7 +7315,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
             nodes = {};
         that.nodes['hiddenContent'] = nodes;
         // Structure
-        nodes['container'] = nodes['input'] = cm.node('input', {'type' : 'hidden'})
+        nodes['container'] = nodes['input'] = cm.node('input', {'type' : 'hidden'});
         // Export
         return nodes['container'];
     };
@@ -7432,19 +7337,17 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
     classProto.setAttributes = function(){
         var that = this;
         // Call parent method
-        _inherit.prototype.setAttributes.apply(that, arguments);
+        classInherit.prototype.setAttributes.apply(that, arguments);
+        // Hidden
+        that.setHiddenAttributes();
         // Data attributes
         cm.forEach(that.params['node'].attributes, function(item){
             if(/^data-(?!node|element|config)/.test(item.name)){
-                that.nodes['hidden'].setAttribute(item.name, item.value);
                 that.nodes['container'].setAttribute(item.name, item.value);
             }
         });
         if(that.params['title']){
             that.nodes['container'].setAttribute('title', that.lang(that.params['title']));
-        }
-        if(that.params['name']){
-            that.nodes['hidden'].setAttribute('name', that.params['name']);
         }
         // Classes
         if(!cm.isEmpty(that.params['size'])){
@@ -7453,7 +7356,21 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         if(!cm.isEmpty(that.params['justify'])){
             cm.addClass(that.nodes['container'], ['pull', that.params['justify']].join('-'));
         }
+        cm.addClass(that.nodes['content']['container'], that.params['contentClassName']);
         return that;
+    };
+
+    classProto.setHiddenAttributes = function(){
+        var that = this;
+        // Data attributes
+        cm.forEach(that.params['node'].attributes, function(item){
+            if(/^data-(?!node|element|config)/.test(item.name)){
+                that.nodes['hidden'].setAttribute(item.name, item.value);
+            }
+        });
+        if(!cm.isEmpty(that.params['name'])){
+            that.nodes['hidden'].setAttribute('name', that.params['name']);
+        }
     };
 
     /* *** DATA VALUE *** */
@@ -7857,9 +7774,15 @@ cm.define('Com.AbstractFormField', {
         'type' : false,
         'label' : '',
         'help' : null,
+        'icon' : false,
         'placeholder' : '',
         'visible' : true,
         'options' : [],
+        'constraints' : [
+            /* cm.constraintsPattern(/^\s*$/g, false, message), */
+            /* cm.constraintsPattern(10, false, message) */
+        ],
+        'required' : false,
         'constructor' : false,
         'constructorParams' : {
             'formData' : true
@@ -7873,6 +7796,10 @@ cm.define('Com.AbstractFormField', {
         'Com.HelpBubble' : {
             'renderStructure' : true
         }
+    },
+    'strings' : {
+        'required' : 'This field is required.',
+        '*' : '*'
     }
 },
 function(params){
@@ -7917,6 +7844,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         that.params['constructorParams']['value'] = !cm.isEmpty(that.params['dataValue']) ? that.params['dataValue'] : that.params['value'];
         that.params['constructorParams']['defaultValue'] = that.params['defaultValue'];
         that.params['constructorParams']['maxlength'] = that.params['maxlength'];
+        that.params['constructorParams']['placeholder'] = that.params['placeholder'];
         that.params['constructorParams']['ajax'] = that.params['ajax'];
         that.params['Com.HelpBubble']['content'] = that.params['help'];
         that.params['Com.HelpBubble']['name'] = that.params['name'];
@@ -7953,11 +7881,19 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
     classProto.renderFiled = function(){
         var that = this;
         that.nodes['container'] = cm.node('dl', {'class' : 'pt__field'},
-            that.nodes['label'] = cm.node('dt',
-                cm.node('label', that.params['label'])
-            ),
+            that.nodes['label'] = cm.node('dt'),
             that.nodes['value'] = cm.node('dd')
         );
+        // Label
+        if(!cm.isEmpty(that.params['label'])){
+            that.nodes['labelText'] = cm.node('label', that.params['label']);
+            cm.appendChild(that.nodes['labelText'], that.nodes['label']);
+        }
+        // Required
+        if(that.params['required']){
+            that.nodes['required'] = cm.node('span', {'class' : 'required'}, that.lang('*'));
+            cm.appendChild(that.nodes['required'], that.nodes['label']);
+        }
     };
 
     classProto.renderContent = function(){
@@ -7968,6 +7904,17 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         nodes['container'] = cm.node('div', {'class' : 'pt__field__content'},
             nodes['input'] = that.params['node']
         );
+        // Icon
+        if(that.params['icon']){
+            nodes['field'] = cm.node('div', {'class' : 'pt__input'},
+                nodes['input'],
+                nodes['icon'] = cm.node('div', {'class' : that.params['icon']})
+            );
+            cm.addEvent(nodes['icon'], 'click', function(){
+                that.focus();
+            });
+            cm.appendChild(nodes['field'], nodes['container']);
+        }
         // Options
         if(!cm.isEmpty(that.params['options'])){
             that.renderOptions(that.params['options']);
@@ -7977,14 +7924,13 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
     };
 
     classProto.renderOptions = function(options){
-        var that = this;
+        var that = this,
+            option;
         switch(that.nodeTagName){
             case 'select' :
                 cm.forEach(options, function(item){
-                    cm.appendChild(
-                        cm.node('option', {'value' : item['value'], 'innerHTML' : item['text']}),
-                        that.nodes['content']['input']
-                    );
+                    option = cm.node('option', {'value' : item['value'], 'innerHTML' : item['text']});
+                    cm.appendChild(option, that.nodes['content']['input']);
                 });
                 cm.setSelect(that.nodes['content']['input'], that.params['value']);
                 break;
@@ -8107,6 +8053,52 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
     classProto.disable = function(){
         var that = this;
         return that.components['controller'] && cm.isFunction(that.components['controller'].disable) ? that.components['controller'].disable() : null;
+    };
+
+    classProto.focus = function(){
+        var that = this;
+        return that.components['controller'] && cm.isFunction(that.components['controller'].focus) ? that.components['controller'].focus() : null;
+    };
+
+    classProto.validateValue = function(){
+        var that = this,
+            isValid = true,
+            value = that.get();
+        if(that.params['required']){
+            if(that.components['controller'] && cm.isFunction(that.components['controller'].validate)){
+                isValid = that.components['controller'].validate();
+            }else{
+                isValid = !cm.isEmpty(value);
+            }
+        }
+        /*
+        var test;
+        if(!cm.isEmpty(that.params['constraints'])){
+            if(that.components['controller'] && cm.isFunction(that.components['controller'].validate)){
+                isValid = that.components['controller'].validate(that.params['constraints']);
+            }else{
+                cm.forEach(that.params['constraints'], function(item){
+                    test = item(value);
+                    if(!test){
+                        isValid = false;
+                    }
+                });
+            }
+        }
+        */
+        return isValid;
+    };
+
+    classProto.validate = function(){
+        var that = this,
+            message = that.lang('required'),
+            isValid = that.validateValue();
+        if(isValid){
+            that.clearError();
+        }else{
+            that.renderError(message);
+        }
+        return isValid;
     };
 
     /******* MESSAGES *******/
@@ -8650,7 +8642,9 @@ cm.define('Com.Form', {
         'onAbort',
         'onSuccess',
         'onSendStart',
-        'onSendEnd'
+        'onSend',
+        'onSendEnd',
+        'onChange'
     ],
     'params' : {
         'node' : cm.node('div'),
@@ -8667,6 +8661,7 @@ cm.define('Com.Form', {
         'showNotifications' : true,
         'responseErrorsKey': 'errors',
         'responseKey': 'data',
+        'validate' : false,
         'data' : {},
         'ajax' : {
             'type' : 'json',
@@ -8733,33 +8728,33 @@ function(params){
             // Buttons
             that.nodes['buttonsSeparator'] = cm.node('hr');
             that.nodes['buttonsContainer'] = cm.node('div', {'class' : 'com__form__buttons'},
-                that.nodes['buttons'] = cm.node('div', {'class' : 'btn-wrap'})
+                that.nodes['buttons'] = cm.node('div', {'class' : 'pt__buttons'},
+                    that.nodes['buttonsHolder'] = cm.node('div', {'class' : 'inner'})
+                )
             );
             cm.addClass(that.nodes['buttons'], ['pull', that.params['buttonsAlign']].join('-'));
             // Embed
             that.params['renderButtonsSeparator'] && cm.insertFirst(that.nodes['buttonsSeparator'], that.nodes['buttonsContainer']);
             that.params['renderButtons'] && cm.appendChild(that.nodes['buttonsContainer'], that.nodes['container']);
-            that.params['showNotifications'] && cm.insertFirst(that.nodes['notifications'], that.nodes['container']);
+            cm.insertFirst(that.nodes['notifications'], that.nodes['container']);
             that.embedStructure(that.nodes['container']);
         }
         // Notifications
-        if(that.params['showNotifications']){
-            cm.getConstructor('Com.Notifications', function(classConstructor, className){
-                that.components['notifications'] = new classConstructor(
-                    cm.merge(that.params[className], {
-                        'container' : that.nodes['notifications']
-                    })
-                );
-                that.components['notifications'].addEvent('onAdd', function(my){
-                    cm.addClass(that.nodes['notifications'], 'is-show', true);
-                });
-                that.components['notifications'].addEvent('onRemove', function(my){
-                    if(that.components['notifications'].getLength() === 0){
-                        cm.removeClass(that.nodes['notifications'], 'is-show', true);
-                    }
-                });
+        cm.getConstructor('Com.Notifications', function(classConstructor, className){
+            that.components['notifications'] = new classConstructor(
+                cm.merge(that.params[className], {
+                    'container' : that.nodes['notifications']
+                })
+            );
+            that.components['notifications'].addEvent('onAdd', function(my){
+                cm.addClass(that.nodes['notifications'], 'is-show', true);
             });
-        }
+            that.components['notifications'].addEvent('onRemove', function(my){
+                if(that.components['notifications'].getLength() === 0){
+                    cm.removeClass(that.nodes['notifications'], 'is-show', true);
+                }
+            });
+        });
         // Overlay Loader
         if(that.params['showLoader']){
             cm.getConstructor('Com.Overlay', function(classConstructor, className){
@@ -8801,6 +8796,9 @@ function(params){
         if(field && !that.fields[params['name']]){
             cm.getConstructor(params['fieldConstructor'], function(classConstructor){
                 params['controller'] = new classConstructor(params);
+                params['controller'].addEvent('onChange', function(){
+                    that.triggerEvent('onChange');
+                });
                 // Save
                 that.fields[params['name']] = params;
             });
@@ -8862,7 +8860,7 @@ function(params){
                     });
                     break;
             }
-            cm.appendChild(params['node'], that.nodes['buttons']);
+            cm.appendChild(params['node'], that.nodes['buttonsHolder']);
         }
     };
 
@@ -8965,6 +8963,11 @@ function(params){
 
     /* *** RENDER *** */
 
+    that.callbacks.renderNotification = function(that, o){
+        cm.addClass(that.nodes['notifications'], 'is-show', true);
+        that.components['notifications'].add(o);
+    };
+
     that.callbacks.renderError = function(that, errors){
         var field, messages = [];
         // Clear old errors messages
@@ -8979,8 +8982,7 @@ function(params){
                 }
             });
             if(that.params['showNotifications']){
-                cm.addClass(that.nodes['notifications'], 'is-show', true);
-                that.components['notifications'].add({
+                that.callbacks.renderNotification({
                     'label' : that.lang('form_error'),
                     'type' : 'danger',
                     'messages' : messages,
@@ -8989,8 +8991,7 @@ function(params){
             }
         }else{
             if(that.params['showNotifications']){
-                cm.addClass(that.nodes['notifications'], 'is-show', true);
-                that.components['notifications'].add({
+                that.callbacks.renderNotification({
                     'label' : that.lang('server_error'),
                     'type' : 'danger'
                 });
@@ -8999,11 +9000,10 @@ function(params){
     };
 
     that.callbacks.clearError = function(that){
-        var field;
-        if(that.params['showNotifications']){
-            cm.removeClass(that.nodes['notifications'], 'is-show', true);
-            that.components['notifications'].clear();
-        }
+        // Clear notification
+        cm.removeClass(that.nodes['notifications'], 'is-show', true);
+        that.components['notifications'].clear();
+        // Clear field errors
         cm.forEach(that.fields, function(field){
             field['controller'].clearError();
         });
@@ -9113,7 +9113,7 @@ function(params){
             cm.remove(button.node);
         });
         that.buttons = {};
-        cm.clearNode(that.nodes['buttons']);
+        cm.clearNode(that.nodes['buttonsHolder']);
         that.clearError();
         return that;
     };
@@ -9127,7 +9127,21 @@ function(params){
     };
 
     that.send = function(){
-        that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params['ajax']));
+        var isValid = true;
+        // Validate
+        if(that.params['validate']){
+            cm.forEach(that.fields, function(field, name){
+                if(field['field'] && !field['system']){
+                    if(field['controller'].validate && !field['controller'].validate()){
+                        isValid = false;
+                    }
+                }
+            });
+        }
+        // Send
+        if(isValid){
+            that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params['ajax']));
+        }
         return that;
     };
 
@@ -9154,6 +9168,11 @@ function(params){
         if(update){
             that._update.params['ajax'] = cm.clone(that.params['ajax']);
         }
+        return that;
+    };
+
+    that.renderNotification = function(o){
+        that.callbacks.renderNotification(that, o);
         return that;
     };
 
@@ -9396,132 +9415,6 @@ function(params){
 
 /* ******* COMPONENT: FORM FIELD: DECORATORS ******* */
 
-Com.FormFields.add('input', {
-    'node' : cm.node('input', {'type' : 'text'}),
-    'callbacks' : {
-        'controller' : function(that){
-            that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-            that.set(that.params['value'], false);
-        },
-        'set' : function(that, value){
-            if(!cm.isEmpty(value)){
-                that.params['node'].value = value;
-            }else{
-                that.params['node'].value = '';
-            }
-            return value;
-        },
-        'get' : function(that){
-            return that.params['node'].value;
-        },
-        'reset' : function(that){
-            var value = !cm.isEmpty(that.params['defaultValue']) ? that.params['defaultValue'] : '';
-            that.params['node'].value = value;
-        }
-    }
-});
-
-Com.FormFields.add('email', {
-    'node' : cm.node('input', {'type' : 'email'}),
-    'callbacks' : {
-        'controller' : function(that){
-            that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-            that.set(that.params['value'], false);
-        },
-        'set' : function(that, value){
-            if(!cm.isEmpty(value)){
-                that.params['node'].value = value;
-            }else{
-                that.params['node'].value = '';
-            }
-            return value;
-        },
-        'get' : function(that){
-            return that.params['node'].value;
-        },
-        'reset' : function(that){
-            var value = !cm.isEmpty(that.params['defaultValue']) ? that.params['defaultValue'] : '';
-            that.params['node'].value = value;
-        }
-    }
-});
-
-Com.FormFields.add('password', {
-    'node' : cm.node('input', {'type' : 'password'}),
-    'callbacks' : {
-        'controller' : function(that){
-            that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-            that.set(that.params['value'], false);
-        },
-        'set' : function(that, value){
-            if(!cm.isEmpty(value)){
-                that.params['node'].value = value;
-            }else{
-                that.params['node'].value = '';
-            }
-            return value;
-        },
-        'get' : function(that){
-            return that.params['node'].value;
-        },
-        'reset' : function(that){
-            var value = !cm.isEmpty(that.params['defaultValue']) ? that.params['defaultValue'] : '';
-            that.params['node'].value = value;
-        }
-    }
-});
-
-Com.FormFields.add('hidden', {
-    'node' : cm.node('input', {'type' : 'hidden'}),
-    'visible' : false,
-    'callbacks' : {
-        'controller' : function(that){
-            that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-            that.set(that.params['value'], false);
-        },
-        'set' : function(that, value){
-            if(!cm.isEmpty(value)){
-                that.params['node'].value = value;
-            }else{
-                that.params['node'].value = '';
-            }
-            return value;
-        },
-        'get' : function(that){
-            return that.params['node'].value;
-        },
-        'reset' : function(that){
-            var value = !cm.isEmpty(that.params['defaultValue']) ? that.params['defaultValue'] : '';
-            that.params['node'].value = value;
-        }
-    }
-});
-
-Com.FormFields.add('textarea', {
-    'node' : cm.node('textarea'),
-    'callbacks' : {
-        'controller' : function(that){
-            that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-            that.set(that.params['value'], false);
-        },
-        'set' : function(that, value){
-            if(!cm.isEmpty(value)){
-                that.params['node'].value = value;
-            }else{
-                that.params['node'].value = '';
-            }
-            return value;
-        },
-        'get' : function(that){
-            return that.params['node'].value;
-        },
-        'reset' : function(that){
-            var value = !cm.isEmpty(that.params['defaultValue']) ? that.params['defaultValue'] : '';
-            that.params['node'].value = value;
-        }
-    }
-});
-
 Com.FormFields.add('select', {
     'node' : cm.node('select'),
     'callbacks' : {
@@ -9549,135 +9442,16 @@ Com.FormFields.add('select', {
     }
 });
 
-Com.FormFields.add('checkbox', {
-    'node' : cm.node('div', {'class' : 'pt__check-line'}),
-    'callbacks' : {
-        'controller' : function(that){
-            var nodes = {};
-            var value = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-            var checked = !(cm.isEmpty(value) || value === 0 || value === '0' || value === false);
-            nodes['container'] = cm.node('label',
-                nodes['input'] = cm.node('input', {'type' : 'checkbox', 'name' : that.params['name']}),
-                nodes['label'] = cm.node('span', {'class' : 'label'}, that.params['placeholder'])
-            );
-            nodes['input'].checked = checked;
-            that.params['node'].appendChild(nodes['container']);
-            return nodes;
-        }, 
-        'set' : function(that, value){
-            var checked = !(cm.isEmpty(value) || value === 0 || value === '0' || value === false);
-            that.controller['input'].checked = checked;
-            return value;
-        },
-        'get' : function(that){
-            return that.controller['input'].checked ? 1 : 0;
-        },
-        'reset' : function(that){
-            var value = that.params['defaultValue'];
-            var checked = !(cm.isEmpty(value) || value === 0 || value === '0' || value === false);
-            that.controller['input'].checked = checked;
-        }
-    }
-});
-
-Com.FormFields.add('radio', {
-    'node' : cm.node('div', {'class' : 'pt__check-line'}),
-    'callbacks' : {
-        'controller' : function(that){
-            var items = [],
-                value = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'],
-                item;
-            cm.forEach(that.params['options'], function(option){
-                item = {
-                    'config' : option,
-                    'nodes' : {}
-                };
-                item.nodes['container'] = cm.node('label',
-                    item.nodes['input'] = cm.node('input', {'type' : 'radio', 'name' : that.params['name'], 'value' : option['value']}),
-                    item.nodes['label'] = cm.node('span', {'class' : 'label'}, option['text'])
-                );
-                item.nodes['input'].checked = item.config['value'] == value;
-                that.params['node'].appendChild(item.nodes['container']);
-                items.push(item);
-            });
-            return items;
-        },
-        'set' : function(that, value){
-            cm.forEach(that.controller, function(item){
-                item.nodes['input'].checked = item.config['value'] == value;
-            });
-            return value;
-        },
-        'get' : function(that){
-            var value = null;
-            cm.forEach(that.controller, function(item){
-                if(item.nodes['input'].checked){
-                    value = item.config['value'];
-                }
-            });
-            return value;
-        },
-        'reset' : function(that){
-            cm.forEach(that.controller, function(item){
-                item.nodes['input'].checked = item.config['value'] == that.params['defaultValue'];
-            });
-        }
-    }
-});
-
-Com.FormFields.add('check', {
-    'node' : cm.node('div', {'class' : 'pt__check-line'}),
-    'callbacks' : {
-        'controller' : function(that){
-            var items = [],
-                item;
-            that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-            cm.forEach(that.params['options'], function(option){
-                item = {
-                    'config' : option,
-                    'nodes' : {}
-                };
-                item.nodes['container'] = cm.node('label',
-                    item.nodes['input'] = cm.node('input', {'type' : 'checkbox', 'name' : that.params['name'], 'value' : option['value']}),
-                    item.nodes['label'] = cm.node('span', {'class' : 'label'}, option['text'])
-                );
-                item.nodes['input'].checked = cm.inArray(that.params['value'], item.config['value']);
-                that.params['node'].appendChild(item.nodes['container']);
-                items.push(item);
-            });
-            return items;
-        },
-        'set' : function(that, value){
-            cm.forEach(that.controller, function(item){
-                item.nodes['input'].checked = cm.inArray(value, item.config['value']);
-            });
-            return value;
-        },
-        'get' : function(that){
-            var value = [];
-            cm.forEach(that.controller, function(item){
-                if(item.nodes['input'].checked){
-                    value.push(item.config['value']);
-                }
-            });
-            return value;
-        },
-        'reset' : function(that){
-            cm.forEach(that.controller, function(item){
-                item.nodes['input'].checked = false;
-            });
-        }
-    }
-});
-
 Com.FormFields.add('buttons', {
-    'node' : cm.node('div', {'class' : 'btn-wrap'}),
+    'node' : cm.node('div', {'class' : 'pt__buttons pull-right'}),
     'field' : false,
     'system' : true,
     'callbacks' : {
         'render' : function(that){
             var nodes = {};
             nodes['container'] = that.params['node'];
+            nodes['inner'] = cm.node('div', {'class' : 'inner'});
+            cm.appendChild(nodes['inner'], nodes['container']);
             return nodes;
         },
         'controller' : function(that){
@@ -9721,6 +9495,666 @@ Com.FormFields.add('buttons', {
             return buttons;
         }
     }
+});
+cm.define('Com.TabsetHelper', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onTabShowStart',
+        'onTabShow',
+        'onTabShowProcess',
+        'onTabShowEnd',
+        'onTabHideStart',
+        'onTabHide',
+        'onTabHideProcess',
+        'onTabHideEnd',
+        'onTabRemoveStart',
+        'onTabRemove',
+        'onTabRemoveEnd',
+        'onLabelTarget',
+        'onRequestStart',
+        'onRequestEnd',
+        'onRequestError',
+        'onRequestSuccess',
+        'onRequestAbort',
+        'onContentRenderStart',
+        'onContentRender',
+        'onContentRenderEnd'
+    ],
+    'params' : {
+        'renderStructure' : false,
+        'embedStructureOnRender' : false,
+        'controllerEvents' : true,
+        'renderTabView' : false,
+        'setInitialTab' : false,                                    // Set possible initial tab even if "active" is not defined
+        'setInitialTabImmediately' : true,                          // Set initial tab without animation
+        'active' : null,
+        'items' : [],
+        'targetEvent' : 'click',                                    // click | hover | none
+        'toggleOnHashChange' : false,                               // URL hash change handler
+        'showLoader' : true,
+        'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
+        'responseHTML' : true,                                      // If true, html will append automatically
+        'cache' : false,                                            // Cache ajax tab content
+        'ajax' : {
+            'type' : 'json',
+            'method' : 'get',
+            'url' : '',                                             // Request URL. Variables: %baseUrl%, %tab%, %callback% for JSONP.
+            'params' : ''                                           // Params object. %tab%, %baseUrl%, %callback% for JSONP.
+        },
+        'overlayConstructor' : 'Com.Overlay',
+        'overlayParams' : {
+            'position' : 'absolute',
+            'lazy' : true,
+            'autoOpen' : false,
+            'removeOnClose' : true
+        }
+    },
+    'strings' : {
+        'server_error' : 'An unexpected error has occurred. Please try again later.'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    /*** SYSTEM ***/
+
+    classProto.construct = function(){
+        var that = this;
+        // Variables
+        that.nodes = {
+            'container': cm.node('div'),
+            'labels' : [],
+            'tabs' : [],
+            'select' : cm.node('select')
+        };
+        that.ajaxHandler = null;
+        that.isAjax = false;
+        that.isProcess = false;
+        that.targetEvent = null;
+        that.current = false;
+        that.previous = false;
+        that.items = {};
+        that.itemsList = [];
+        // Binds
+        that.hashChangeHandler = that.hashChange.bind(that);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        that.triggerEvent('onValidateParamsStart');
+        // Ajax
+        if(!cm.isEmpty(that.params['ajax']['url'])){
+            that.isAjax = true;
+        }
+        // Target Event
+        switch(that.params['targetEvent']){
+            case 'hover':
+                that.targetEvent = 'mouseover';
+                break;
+            case 'click':
+            default:
+                that.targetEvent = 'click';
+                break;
+        }
+        that.triggerEvent('onValidateParams');
+        that.triggerEvent('onValidateParamsProcess');
+        that.triggerEvent('onValidateParamsEnd');
+    };
+
+    classProto.onSetEvents = function(){
+        var that = this;
+        that.params['toggleOnHashChange'] && cm.addEvent(window, 'hashchange', that.hashChangeHandler);
+        return that;
+    };
+
+    classProto.onUnsetEvents = function(){
+        var that = this;
+        that.params['toggleOnHashChange'] && cm.removeEvent(window, 'hashchange', that.hashChangeHandler);
+        return that;
+    };
+
+    classProto.onConstructEnd = function(){
+        var that = this;
+        that.setInitialTab();
+    };
+
+    /******* VIEW MODEL *******/
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Process tabs
+        that.processTabs(that.nodes['tabs'], that.nodes['labels']);
+        // Process tabs in parameters
+        cm.forEach(that.params['items'], function(item){
+            that.renderTab(item);
+        });
+        // Process select
+        that.processSelect(that.nodes['select']);
+        // Overlay
+        cm.getConstructor(that.params['overlayConstructor'], function(classConstructor){
+            that.components['loader'] = new classConstructor(that.params['overlayParams']);
+        });
+        return that;
+    };
+    
+    /******* TABS *******/
+
+    classProto.processTab = function(tab, label){
+        var that = this,
+            config = cm.merge(that.getNodeDataConfig(tab['container']), that.getNodeDataConfig(label['container'])),
+            item = cm.merge(config, {
+                'tab' : tab,
+                'label' : label
+            });
+        that.addTab(item);
+    };
+
+    classProto.processTabs = function(tabs, labels){
+        var that = this,
+            itemsToProcess = tabs.length ?  tabs : labels,
+            items = [],
+            label,
+            config,
+            item;
+        cm.forEach(itemsToProcess, function(tab, key){
+            label = labels[key];
+            config = cm.merge(that.getNodeDataConfig(tab['container']), that.getNodeDataConfig(label['container']));
+            item = cm.merge(config, {
+                'tab' : tab,
+                'label' : label
+            });
+            items.push(item);
+        });
+        that.addTabs(items);
+        return that;
+    };
+
+    classProto.renderTab = function(item){
+        var that = this;
+        // Merge tab configuration
+        item = cm.merge({
+            'index' : that.itemsList.length,
+            'id' : '',
+            'title' : '',
+            'content' : null,
+            'tab' : {
+                'container' : cm.node('li'),
+                'inner' : cm.node('div')
+            },
+            'label' : {
+                'container' : cm.node('li'),
+                'link' : cm.node('a')
+            },
+            'menu' : {
+                'container' : cm.node('li'),
+                'link' : cm.node('a')
+            },
+            'constructor' : false,
+            'constructorParams' : {},
+            'className' : '',
+            'isHidden' : false,
+            'isShow' : false,
+            'isAjax' : false,
+            'isCached' : false,
+            'ajax' : {}
+        }, item);
+        // Render tab view
+        if(that.params['renderTabView']){
+            that.renderTabView(item);
+        }
+        // Check for ajax
+        if(!cm.isEmpty(item['ajax']['url'])){
+            item.isAjax = true;
+        }
+        // Class name
+        if(!cm.isEmpty(item['className'])){
+            cm.addClass(item['label']['container'], item['className']);
+            cm.addClass(item['menu']['container'], item['className']);
+            cm.addClass(item['tab']['container'], item['className']);
+        }
+        // Push
+        if(!cm.isEmpty(item['id']) && !that.items[item['id']]){
+            that.itemsList.push(item);
+            that.items[item['id']] = item;
+            // Hide nodes
+            if(item.isHidden){
+                cm.addClass(item['label']['container'], 'hidden');
+                cm.addClass(item['menu']['container'], 'hidden');
+                cm.addClass(item['tab']['container'], 'hidden');
+            }
+            // Target events
+            that.renderTabTarget(item, item['label']['container']);
+            that.renderTabTarget(item, item['menu']['container']);
+        }
+        return that;
+    };
+
+    classProto.renderTabTarget = function(item, node){
+        var that = this;
+        if(that.targetEvent){
+            cm.addEvent(node, that.targetEvent, function(){
+                that.triggerEvent('onLabelTarget', item);
+                // Set
+                if(that.params['toggleOnHashChange']){
+                    window.location.href = [window.location.href.split('#')[0], item['id']].join('#');
+                }else{
+                    that.setTab(item['id']);
+                }
+            });
+        }
+    };
+
+    classProto.renderTabView = function(item){
+        var that = this;
+    };
+
+    classProto.removeTab = function(id){
+        var that = this,
+            item = that.items[id];
+        if(item){
+            that.triggerEvent('onTabRemove', item);
+            // Set new active tab, if current active is nominated for remove
+            if(item['id'] === that.current){
+                that.setByIndex(0);
+            }
+            // Remove tab from list and array
+            cm.remove(item['tab']['container']);
+            cm.remove(item['label']['container']);
+            that.itemsList = cm.arrayRemove(that.itemsList, item);
+            delete that.items[item['id']];
+            that.triggerEvent('onTabRemove', item);
+            that.triggerEvent('onTabRemoveEnd', item);
+        }
+        return that;
+    };
+    
+    /*** SET / UNSET ***/
+
+    classProto.setTab = function(id){
+        var that = this,
+            item = that.items[id];
+        if(item && that.current !== id){
+            that.triggerEvent('onTabShowStart', item);
+            // Hide previous tab
+            that.unsetTab(that.current);
+            // Show new tab
+            that.previous = that.current;
+            that.current = id;
+            item.isShow = true;
+            that.triggerEvent('onTabShowProcess', item);
+            if(!that.previous && that.params['setInitialTabImmediately']){
+                cm.addClass(item['tab']['container'], 'is-immediately');
+                cm.addClass(item['label']['container'], 'is-immediately');
+                setTimeout(function(){
+                    cm.removeClass(item['tab']['container'], 'is-immediately');
+                    cm.removeClass(item['label']['container'], 'is-immediately');
+                }, 5);
+            }
+            cm.addClass(item['tab']['container'], 'active', true);
+            cm.addClass(item['label']['container'], 'active', true);
+            // Set select menu
+            cm.setSelect(that.nodes['select'], that.current);
+            // Trigger events
+            if(item['constructor']){
+                // Controller
+                if(item['controller']){
+                    item['controller'].refresh && item['controller'].refresh();
+                }else{
+                    cm.getConstructor(item['constructor'], function(classConstructor){
+                        item['controller'] = new classConstructor(
+                            cm.merge(item['controllerParams'], {
+                                'container' : item['tab']['inner'],
+                                'events' : {
+                                    'onLoadEnd' : function(){
+                                        that.tabShowEnd(item, {});
+                                    }
+                                }
+                            })
+                        );
+                    });
+                }
+            }else if(item.isAjax && (!that.params['cache'] || (that.params['cache'] && !item.isCached))){
+                that.ajaxHandler = classProto.callbacks.request(that, {
+                    'config' : cm.merge(that.params['ajax'], item['ajax'])
+                }, item);
+            }else{
+                that.tabShowEnd(item, {});
+            }
+        }
+        return that;
+    };
+
+    classProto.unsetTab = function(id){
+        var that = this,
+            item = that.items[id];
+        if(item){
+            if(that.isProcess){
+                that.abort();
+            }
+            that.triggerEvent('onTabHideStart', item);
+            item.isShow = false;
+            that.triggerEvent('onTabHideProcess', item);
+            cm.removeClass(item['tab']['container'], 'active');
+            cm.removeClass(item['label']['container'], 'active');
+            that.triggerEvent('onTabHide', item);
+            that.triggerEvent('onTabHideEnd', item);
+        }
+        return that;
+    };
+
+    classProto.unsetHead = function(){
+        var that = this,
+            item = that.items[that.current];
+        if(item){
+            cm.removeClass(item['label']['container'], 'active');
+        }
+        return that;
+    };
+
+    classProto.getInitialTab = function(){
+        var that = this;
+        var id;
+        if(cm.isEmpty(that.itemsList) || cm.isEmpty(that.items)){
+            return null;
+        }
+        // Get tab from hash is exists
+        if(that.params['toggleOnHashChange']){
+            id = window.location.hash.slice(1);
+            if(that.isValidTab(id)){
+                return id;
+            }
+        }
+        // Get tab from parameters if exists
+        id = that.params['active'];
+        if(that.isValidTab(id)){
+            return id;
+        }
+        // Get first tab in list
+        return that.itemsList[0]['id'];
+    };
+
+    classProto.setInitialTab = function(){
+        var that = this,
+            id;
+        // Set default active tab
+        if(that.params['setInitialTab']){
+            id = that.getInitialTab();
+        }else{
+            id = that.params['active']
+        }
+        if(that.isValidTab(id)){
+            that.setTab(id);
+        }
+    };
+
+    classProto.isValidTab = function(id){
+        var that = this;
+        return !!that.getTab(id);
+    };
+
+    /*** SHOW / HIDE ***/
+
+    classProto.tabShowEnd = function(item, params){
+        var that = this;
+        cm.customEvent.trigger(item['tab']['container'], 'redraw', {
+            'type' : 'child',
+            'self' : false
+        });
+        that.triggerEvent('onTabShow', item, params);
+        that.triggerEvent('onTabShowEnd', item, params);
+    };
+
+    /******* SELECT *******/
+
+    classProto.processSelect = function(container){
+        var that = this;
+        cm.addEvent(container, 'change', function(){
+            that.setTab(container.value);
+        })
+    };
+
+    /******* URL HASH HANDLING *******/
+
+    classProto.hashChange = function(){
+        var that = this,
+            id = decodeURIComponent(window.location.hash.slice(1));
+        if(that.isValidTab(id)){
+            that.setTab(id);
+        }
+    };
+
+    /******* CALLBACKS *******/
+
+    /*** AJAX ***/
+
+    classProto.callbacks.prepare = function(that, params, item){
+        params['config'] = that.callbacks.beforePrepare(that, params, item);
+        params['config']['url'] = cm.strReplace(params['config']['url'], {
+            '%tab%' : item['id'],
+            '%baseUrl%' : cm._baseUrl
+        });
+        params['config']['params'] = cm.objectReplace(params['config']['params'], {
+            '%tab%' : item['id'],
+            '%baseUrl%' : cm._baseUrl
+        });
+        params['config'] = that.callbacks.afterPrepare(that, params, item);
+        return params['config'];
+    };
+
+    classProto.callbacks.beforePrepare = function(that, params, item){
+        return params['config'];
+    };
+
+    classProto.callbacks.afterPrepare = function(that, params, item){
+        return params['config'];
+    };
+
+    classProto.callbacks.request = function(that, params, item){
+        params = cm.merge({
+            'response' : null,
+            'config' : null,
+            'data' : null
+        }, params);
+        // Validate config
+        params['config'] = that.callbacks.prepare(that, params, item);
+        // Return ajax handler (XMLHttpRequest) to providing abort method.
+        return cm.ajax(
+            cm.merge(params['config'], {
+                'onStart' : function(){
+                    classProto.callbacks.start(that, params, item);
+                },
+                'onSuccess' : function(response){
+                    params['response'] = response;
+                    classProto.callbacks.response(that, params, item);
+                },
+                'onError' : function(){
+                    classProto.callbacks.error(that, params, item);
+                },
+                'onAbort' : function(){
+                    classProto.callbacks.abort(that, params, item);
+                },
+                'onEnd' : function(){
+                    classProto.callbacks.end(that, params, item);
+                }
+            })
+        );
+    };
+
+    classProto.callbacks.start = function(that, params, item){
+        that.isProcess = true;
+        // Show Loader
+        if(that.params['showLoader']){
+            that.components['loader']
+                .embed(item['tab']['container'])
+                .open();
+        }
+        that.triggerEvent('onRequestStart', item, params);
+    };
+
+    classProto.callbacks.end = function(that, params, item){
+        that.isProcess = false;
+        // Hide Loader
+        if(that.params['showLoader']){
+            that.components['loader'].close();
+        }
+        that.triggerEvent('onRequestEnd', item, params);
+    };
+
+    classProto.callbacks.filter = function(that, params, item){
+        var data,
+            dataItem = cm.objectSelector(that.params['responseKey'], params['response']);
+        if(dataItem && !cm.isEmpty(dataItem)){
+            data = dataItem;
+        }
+        return data;
+    };
+
+    classProto.callbacks.response = function(that, params, item){
+        if(!cm.isEmpty(params['response'])){
+            params['data'] = classProto.callbacks.filter(that, params, item);
+        }
+        if(!cm.isEmpty(params['data'])){
+            classProto.callbacks.success(that, params, item);
+        }else{
+            classProto.callbacks.error(that, params, item);
+        }
+    };
+
+    classProto.callbacks.error = function(that, params, item){
+        classProto.callbacks.renderError(that, params, item);
+        that.triggerEvent('onRequestError', item, params);
+    };
+
+    classProto.callbacks.success = function(that, params, item){
+        classProto.callbacks.render(that, params, item);
+        that.triggerEvent('onRequestSuccess', item, params);
+    };
+
+    classProto.callbacks.abort = function(that, params, item){
+        that.triggerEvent('onRequestAbort', item, params);
+    };
+
+    /*** RENDER ***/
+
+    classProto.callbacks.render = function(that, params, item){
+        item['data'] = params['data'];
+        item.isCached = true;
+        // Render
+        that.triggerEvent('onContentRenderStart', item, params);
+        classProto.callbacks.renderContent(that, params, item);
+        that.triggerEvent('onContentRender', item, params);
+        that.triggerEvent('onContentRenderEnd', item, params);
+        // Show tab
+        that.tabShowEnd(item, params);
+    };
+
+    classProto.callbacks.renderContent = function(that, params, item){
+        var nodes;
+        if(that.params['responseHTML']){
+            nodes = cm.strToHTML(params['data']);
+            cm.clearNode(item['tab']['inner']);
+            cm.appendNodes(nodes, item['tab']['inner']);
+        }
+    };
+
+    classProto.callbacks.renderError = function(that, params, item){
+        if(that.params['responseHTML']){
+            cm.clearNode(item['tab']['inner']);
+            item['tab']['inner'].appendChild(
+                cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'))
+            );
+        }
+    };
+
+    /******* PUBLIC *******/
+
+    classProto.set = function(id){
+        var that = this,
+            item = that.items[id];
+        item && that.setTab(id);
+        return that;
+    };
+
+    classProto.setByIndex = function(index){
+        var that = this,
+            item = that.itemsList[index];
+        item && that.setTab(item['id']);
+        return that;
+    };
+
+    classProto.unset = function(){
+        var that = this;
+        that.unsetTab(that.current);
+        that.current = null;
+        that.previous = null;
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this;
+        return that.current;
+    };
+
+    classProto.addTab = function(item){
+        var that = this;
+        that.renderTab(item);
+        return that;
+    };
+
+    classProto.addTabs = function(items){
+        var that = this;
+        cm.forEach(items, function(item){
+            that.renderTab(item);
+        });
+        return that;
+    };
+
+    classProto.getTab = function(id){
+        var that = this;
+        if(id && that.items[id]){
+            return that.items[id];
+        }
+        return null;
+    };
+
+    classProto.getTabs = function(){
+        var that = this;
+        return that.items;
+    };
+
+    classProto.getCurrentTab = function(){
+        var that = this;
+        return that.items[that.current];
+    };
+
+    classProto.getTabsCount = function(){
+        var that = this;
+        return that.itemsList.length;
+    };
+
+    classProto.isTabEmpty = function(id){
+        var that = this;
+        var item = that.getTab(id);
+        return !(item && item['tab']['inner'].childNodes.length);
+    };
+
+    classProto.abort = function(){
+        var that = this;
+        if(that.ajaxHandler && that.ajaxHandler.abort){
+            that.ajaxHandler.abort();
+        }
+        return that;
+    };
 });
 cm.define('Com.Calendar', {
     'modules' : [
@@ -10364,7 +10798,7 @@ function(params){
     var findNodes = function(parentNode, name){
         var nodes = [];
         // Find element in specified node
-        if(parentNode.getAttribute(that.params['attribute']) == name){
+        if(parentNode.getAttribute(that.params['attribute']) === name){
             nodes.push(parentNode);
         }
         // Search for nodes in specified node
@@ -10493,7 +10927,7 @@ function(params){
                 'construct' : construct,
                 'destruct' : destruct
             };
-            if(typeof priority != 'undefined' && cm.isNumber(priority)){
+            if(!cm.isUndefined(priority) && cm.isNumber(priority)){
                 that.stackList.splice(priority, 0, item);
             }else{
                 that.stackList.push(item);
@@ -10506,7 +10940,7 @@ function(params){
 
     that.remove = function(name, construct, destruct){
         if(name){
-            if(typeof construct == 'undefined'){
+            if(cm.isUndefined(construct)){
                 that.stackList = that.stackList.filter(function(item){
                     return !(item['name'] === name);
                 });
@@ -10977,7 +11411,7 @@ function(params){
     /* ******* PUBLIC ******* */
 
     that.enableEditing = function(){
-        if(typeof that.isEditing !== 'boolean' || !that.isEditing){
+        if(!cm.isBoolean(that.isEditing) || !that.isEditing){
             that.isEditing = true;
             cm.addClass(nodes['container'], 'is-editing is-editable');
             that.redraw();
@@ -10988,7 +11422,7 @@ function(params){
     };
 
     that.disableEditing = function(){
-        if(typeof that.isEditing !== 'boolean' || that.isEditing){
+        if(!cm.isBoolean(that.isEditing) || that.isEditing){
             that.isEditing = false;
             cm.removeClass(nodes['container'], 'is-editing is-editable');
             that.triggerEvent('disableEditing');
@@ -11004,7 +11438,7 @@ function(params){
 
     that.setColumnsCount = function(count){
         var itemsLength = that.items.length;
-        if(!count || itemsLength == count){
+        if(!count || itemsLength === count){
             return that;
         }
         if(itemsLength < count){
@@ -11409,13 +11843,13 @@ cm.define('Com.Dialog', {
         'theme' : 'theme-light',        // theme css class name, default: theme-default | theme-black | theme-light
         'className' : '',               // custom css class name
         'content' : cm.node('div'),
+        'showTitle' : true,
         'title' : '',
         'buttons' : false,
         'titleOverflow' : false,
         'titleReserve': true,
         'closeButtonOutside' : false,
         'closeButton' : true,
-        'closeTitle' : true,
         'closeOnBackground' : false,
         'openTime' : null,
         'duration' : 'cm._config.animDuration',
@@ -11467,7 +11901,7 @@ function(params){
     };
     
     var validateParams = function(){
-        if(that.params['size'] == 'fullscreen'){
+        if(/full|fullscreen/.test(that.params['size'])){
             that.params['width'] = '100%';
             that.params['height'] = '100%';
             that.params['indentX'] = 0;
@@ -11475,6 +11909,9 @@ function(params){
         }
         if(that.params['openTime'] !== undefined && that.params['openTime'] !== null){
             that.params['duration'] = that.params['openTime'];
+        }
+        if(!that.params['showTitle']){
+            that.params['titleReserve'] = false;
         }
     };
 
@@ -11495,8 +11932,11 @@ function(params){
         // Add CSS Classes
         !cm.isEmpty(that.params['theme']) && cm.addClass(nodes['container'], that.params['theme']);
         !cm.isEmpty(that.params['className']) && cm.addClass(nodes['container'], that.params['className']);
-        if(that.params['size'] == 'fullscreen'){
+        if(that.params['size'] === 'fullscreen'){
             cm.addClass(nodes['container'], 'is-fullscreen');
+        }
+        if(that.params['size'] === 'full'){
+            cm.addClass(nodes['container'], 'is-full');
         }
         if(that.params['titleReserve']){
             cm.addClass(nodes['container'], 'is-title-reserve');
@@ -11504,29 +11944,21 @@ function(params){
         // Render close button
         if(that.params['closeButtonOutside']){
             nodes['bg'].appendChild(
-                nodes['closeOutside'] = cm.Node('div', {'class' : that.params['icons']['closeOutside']}, that.lang('close'))
+                nodes['closeOutside'] = cm.Node('div', {'class' : that.params['icons']['closeOutside'], 'title' : that.lang('closeTitle')}, that.lang('close'))
             );
-            if(that.params['closeTitle']){
-                nodes['closeOutside'].title = that.lang('closeTitle');
-            }
             cm.addEvent(nodes['closeOutside'], 'click', close);
         }
         if(that.params['closeButton']){
             cm.addClass(nodes['container'], 'has-close-inside');
             nodes['window'].appendChild(
-                nodes['closeInside'] = cm.Node('div', {'class' : that.params['icons']['closeInside']}, that.lang('close'))
+                nodes['closeInside'] = cm.Node('div', {'class' : that.params['icons']['closeInside'], 'title' : that.lang('closeTitle')}, that.lang('close'))
             );
-            if(that.params['closeTitle']){
-                nodes['closeInside'].title = that.lang('closeTitle');
-            }
             cm.addEvent(nodes['closeInside'], 'click', close);
         }
         if(that.params['closeOnBackground']){
             cm.addClass(nodes['container'], 'has-close-background');
             cm.addEvent(nodes['bg'], 'click', close);
-            if(that.params['closeTitle']){
-                nodes['bg'].title = that.lang('closeTitle');
-            }
+            nodes['bg'].title = that.lang('closeTitle');
         }
         // Set title
         renderTitle(that.params['title']);
@@ -11552,14 +11984,21 @@ function(params){
     };
 
     var renderTitle = function(title){
-        if(!cm.isEmpty(title)){
+        if(that.params['showTitle']){
             cm.removeClass(nodes['container'], 'has-no-title');
             // Remove old nodes
             cm.remove(nodes['title']);
             // Render new nodes
-            nodes['title'] = cm.Node('div', {'class' : 'title'}, title);
-            if(that.params['titleOverflow']){
-                cm.addClass(nodes['title'], 'cm__text-overflow');
+            nodes['title'] = cm.Node('div', {'class' : 'title'});
+            if(!cm.isEmpty(title)){
+                if(cm.isNode(title)){
+                    cm.appendChild(title, nodes['title']);
+                }else{
+                    cm.appendChild(cm.textNode(title), nodes['title']);
+                }
+                if(that.params['titleOverflow']){
+                    cm.addClass(nodes['title'], 'cm__text-overflow');
+                }
             }
             cm.insertFirst(nodes['title'], nodes['windowInner']);
         }else{
@@ -11607,8 +12046,9 @@ function(params){
     };
 
     var resize = function(){
-        var winHeight = nodes['container'].offsetHeight - (that.params['indentY'] * 2),
-            winWidth = nodes['container'].offsetWidth - (that.params['indentX'] * 2),
+        var winOffset = cm.getNodeOffset(nodes['container']),
+            winHeight = winOffset['inner']['height'] - (that.params['indentY'] * 2),
+            winWidth = winOffset['inner']['width'] - (that.params['indentX'] * 2),
             windowHeight = nodes['window'].offsetHeight,
             windowWidth = nodes['window'].offsetWidth,
             insetHeight = nodes['inner'].offsetHeight,
@@ -11630,7 +12070,7 @@ function(params){
         NAHeight = winHeight - AHeight;
         AWidth = winWidth;
         // Calculate min / max height
-        if(that.params['maxHeight'] == 'auto'){
+        if(that.params['maxHeight'] === 'auto'){
             maxHeight = AHeight;
         }else if(/%/.test(that.params['maxHeight'])){
             maxHeight = ((winHeight / 100) * parseFloat(that.params['maxHeight'])) - NAHeight;
@@ -11640,7 +12080,7 @@ function(params){
             }
             maxHeight = that.params['maxHeight'] - NAHeight;
         }
-        if(that.params['minHeight'] == 'auto'){
+        if(that.params['minHeight'] === 'auto'){
             minHeight = 0;
         }else if(/%/.test(that.params['minHeight'])){
             minHeight = ((winHeight / 100) * parseFloat(that.params['minHeight'])) - NAHeight;
@@ -11651,7 +12091,7 @@ function(params){
             minHeight = that.params['minHeight'] - NAHeight;
         }
         // Calculate height
-        if(that.params['height'] == 'auto'){
+        if(that.params['height'] === 'auto'){
             if(insetHeight < minHeight){
                 setHeight = minHeight;
             }else if(insetHeight > maxHeight){
@@ -11773,9 +12213,8 @@ function(params){
     };
 
     var windowClickEvent = function(e){
-        e = cm.getEvent(e);
         // ESC key
-        if(e.keyCode == 27){
+        if(cm.isKey(e, 'escape')){
             that.isFocus && close();
         }
     };
@@ -11883,6 +12322,7 @@ cm.define('Com.DialogContainer', {
         'constructor' : 'Com.Dialog',
         'container' : 'document.body',
         'renderButtons' : false,
+        'renderTitle' : true,
         'justifyButtons' : 'right',
         'params' : {
             'destructOnRemove' : false,
@@ -11913,6 +12353,7 @@ cm.getConstructor('Com.DialogContainer', function(classConstructor, className, c
             that.params['params']['content'] = that.params['content']['content'] || that.params['params']['content'];
             that.params['params']['buttons'] = that.params['content']['buttons'] || that.params['params']['buttons'];
         }
+        that.params['params']['showTitle'] = that.params['renderTitle'];
         return that;
     };
 
@@ -13286,11 +13727,10 @@ cm.define('Com.FileDropzone', {
     'params' : {
         'embedStructure' : 'append',
         'target' : null,
-        'height' : 128,
-        'animated' : true,
         'rollover' : true,
         'max' : 0,                                  // 0 - infinity
-        'duration' : 'cm._config.animDuration',
+        '_height' : 128,
+        '_duration' : 'cm._config.animDuration',
         'Com.FileReader' : {}
     },
     'strings' : {
@@ -13300,10 +13740,6 @@ cm.define('Com.FileDropzone', {
 },
 function(params){
     var that = this;
-    that.nodes = {};
-    that.components = {};
-    that.dragInterval = null;
-    that.isDropzoneShow = false;
     // Call parent class construct
     Com.AbstractController.apply(that, arguments);
 });
@@ -13313,6 +13749,9 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
 
     classProto.construct = function(){
         var that = this;
+        that.dragInterval = null;
+        that.isShow = true;
+        that.isHighlighted = false;
         // Bind context to methods
         that.dragOverHandler = that.dragOver.bind(that);
         that.dragDropHandler = that.dragDrop.bind(that);
@@ -13341,8 +13780,12 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
 
     classProto.onGetLESSVariablesProcess = function(){
         var that = this;
-        that.params['height'] = cm.getLESSVariable('ComFileDropzone-Height', that.params['height'], true);
-        that.params['duration'] = cm.getTransitionDurationFromLESS('ComFileDropzone-Duration', that.params['duration']);
+        if(!that.params['height']){
+            that.params['height'] = cm.getLESSVariable('ComFileDropzone-Height', that.params['_height'], true);
+        }
+        if(!that.params['duration']){
+            that.params['duration'] = cm.getTransitionDurationFromLESS('ComFileDropzone-Duration', that.params['_duration']);
+        }
         return that;
     };
 
@@ -13384,7 +13827,9 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
             that.components['animation'] = new cm.Animation(that.params['container']);
         }else{
             cm.removeClass(that.nodes['container'], 'is-hidden');
-            that.params['container'].style.height = that.params['height'] + 'px';
+            if(that.params['height']){
+                that.params['container'].style.height = that.params['height'] + 'px';
+            }
         }
         return that;
     };
@@ -13396,6 +13841,7 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
             target = cm.getEventTarget(e);
         cm.preventDefault(e);
         // Show dropzone
+        that.show();
         that.showDropzone();
         // Hide dropzone if event not triggering inside the current document window (hax)
         that.dragInterval && clearTimeout(that.dragInterval);
@@ -13413,18 +13859,19 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
         var that = this,
             target = cm.getEventTarget(e),
             data = [],
-            length = 0;
+            files = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length ? e.dataTransfer.files : [],
+            length = that.params['max'] ? Math.min(files.length, that.params['max']) : files.length;
         cm.preventDefault(e);
         // Hide dropzone and reset his state
         that.dragInterval && clearTimeout(that.dragInterval);
+        that.hide();
         that.hideDropzone();
         // Process file
         if(cm.isParent(that.nodes['container'], target, true)){
-            if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
-                length = that.params['max'] ? Math.min(e.dataTransfer.files.length, that.params['max']) : e.dataTransfer.files.length;
+            if(length){
                 cm.forEach(length, function(i){
-                    data.push(e.dataTransfer.files[i]);
-                    that.triggerEvent('onDrop', e.dataTransfer.files[i]);
+                    data.push(files[i]);
+                    that.triggerEvent('onDrop', files[i]);
                 });
                 that.triggerEvent('onSelect', data);
             }
@@ -13432,13 +13879,29 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
         return that;
     };
 
+    classProto.show = function(){
+        var that = this;
+        if(!that.isShow){
+            that.isShow = true;
+            cm.replaceClass(that.nodes['container'], 'is-hidden', 'is-show');
+        }
+    };
+
+    classProto.hide = function(){
+        var that = this;
+        if(that.isShow){
+            that.isShow = false;
+            cm.replaceClass(that.nodes['container'], 'is-show', 'is-hidden');
+        }
+    };
+
     classProto.showDropzone = function(){
         var that = this,
             height;
-        if(!that.isDropzoneShow){
-            that.isDropzoneShow = true;
+        if(!that.isHighlighted){
+            that.isHighlighted = true;
             // Set classes
-            cm.removeClass(that.nodes['container'], 'is-highlight');
+            cm.addClass(that.nodes['container'], 'is-highlight');
             // Animate
             if(that.params['rollover']){
                 // Set classes
@@ -13460,8 +13923,8 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
     classProto.hideDropzone = function(){
         var that = this,
             height;
-        if(that.isDropzoneShow){
-            that.isDropzoneShow = false;
+        if(that.isHighlighted){
+            that.isHighlighted = false;
             // Set classes
             cm.removeClass(that.nodes['container'], 'is-highlight');
             // Animate
@@ -14119,7 +14582,7 @@ function(params){
         item = cm.merge({
             'index' : items.length,
             'isLoad' : false,
-            'type' : 'image',        // image | iframe
+            'type' : null,        // image | iframe
             'nodes' : {},
             'src' : '',
             'title' : '',
@@ -14130,6 +14593,7 @@ function(params){
             /(\.jpg|\.png|\.gif|\.jpeg|\.bmp|\.tga)$/gi.test(item['src'])
             || /^data:image/gi.test(item['src'])
             || /^image/gi.test(item['mime'])
+            || item['type'] === 'image'
         ){
             item['type'] = 'image';
         }else{
@@ -14143,7 +14607,7 @@ function(params){
             item['nodes']['inner'] = cm.Node('div', {'class' : 'inner'})
         );
         // Render by type
-        if(item['type'] == 'image'){
+        if(item['type'] === 'image'){
             item['nodes']['inner'].appendChild(
                 item['nodes']['content'] = cm.Node('img', {'class' : 'descr', 'alt' : item['title'], 'title' : item['title']})
             );
@@ -14153,7 +14617,7 @@ function(params){
             );
         }
         // Caption
-        if(that.params['showCaption'] && !cm.isEmpty(item['title'] && item['type'] == 'image')){
+        if(that.params['showCaption'] && !cm.isEmpty(item['title'] && item['type'] === 'image')){
             item['nodes']['inner'].appendChild(
                 cm.Node('div', {'class' : 'title'},
                     cm.Node('div', {'class' : 'inner'}, item['title'])
@@ -14185,14 +14649,14 @@ function(params){
                 'previous' : itemOld
             });
             // If current active item not equal new item - process with new item, else redraw window alignment and dimensions
-            if(i != that.current){
+            if(i !== that.current){
                 // API onSet
                 that.triggerEvent('onChange', {
                     'current' : item,
                     'previous' : itemOld
                 });
                 // Check type
-                if(item['type'] == 'image'){
+                if(item['type'] === 'image'){
                     setItemImage(i, item, itemOld);
                 }else{
                     setItemIframe(i, item, itemOld);
@@ -14256,7 +14720,7 @@ function(params){
             itemOld['nodes']['container'].style.zIndex = 1;
             item['nodes']['container'].style.zIndex = 2;
         }
-        if(item['type'] == 'image'){
+        if(item['type'] === 'image'){
             that.nodes['holder'].appendChild(item['nodes']['container']);
         }
         // Animate Slide
@@ -14273,11 +14737,11 @@ function(params){
     };
 
     var next = function(){
-        set((that.current == items.length - 1)? 0 : that.current + 1);
+        set((that.current === items.length - 1)? 0 : that.current + 1);
     };
 
     var prev = function(){
-        set((that.current == 0)? items.length - 1 : that.current - 1);
+        set((that.current === 0)? items.length - 1 : that.current - 1);
     };
 
     var zoom = function(){
@@ -14315,7 +14779,7 @@ function(params){
     };
 
     that.clear = function(){
-        if(that.current && items[that.current]){
+        if(!cm.isEmpty(that.current) && items[that.current]){
             cm.remove(items[that.current]['nodes']['container']);
         }
         that.current = null;
@@ -14475,6 +14939,7 @@ cm.define('Com.GalleryPopup', {
         'theme' : 'theme-black',
         'showCounter' : true,
         'showTitle' : true,
+        'showZoom' : true,
         'data' : [],
         'openOnSelfClick' : false,
         'Com.Dialog' : {
@@ -14507,9 +14972,10 @@ function(params){
     };
 
     var validateParams = function(){
+        that.params['Com.Gallery']['zoom'] = that.params['showZoom'];
         that.params['Com.Dialog']['theme'] = that.params['theme'];
         that.params['Com.Dialog']['size'] = that.params['size'];
-        if(that.params['size'] == 'fullscreen'){
+        if(that.params['size'] === 'fullscreen'){
             that.params['Com.Dialog']['documentScroll'] = false;
         }
     };
@@ -14520,7 +14986,7 @@ function(params){
             nodes['galleryContainer'] = cm.Node('div', {'class' : 'inner'})
         );
         // Set aspect ration
-        if(that.params['aspectRatio'] != 'auto'){
+        if(that.params['aspectRatio'] !== 'auto'){
             cm.addClass(nodes['container'], ['cm__aspect', that.params['aspectRatio']].join('-'));
         }
     };
@@ -14638,6 +15104,201 @@ function(params){
 
     init();
 });
+cm.define('Com.GalleryPopupContainer', {
+    'extend' : 'Com.AbstractContainer',
+    'params' : {
+        'constructor' : 'Com.GalleryPopup',
+        'data' : {},
+        'params' : {}
+    }
+},
+function(params){
+    var that = this;
+    that.buttons = {};
+    // Call parent class construct
+    Com.AbstractContainer.apply(that, arguments);
+});
+
+cm.getConstructor('Com.GalleryPopupContainer', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.validateParams = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.validateParams.apply(that, arguments);
+        // Set Data
+        that.params['params']['data'] = that.params['data'];
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.validateParams.apply(that, arguments);
+        return that;
+    };
+
+    classProto.constructController = function(classObject){
+        var that = this;
+        return new classObject(
+            cm.merge(that.params['params'], {
+                'data' : [that.params['data']]
+            })
+        );
+    };
+
+    classProto.set = function(data){
+        var that = this;
+        that.params['data'] = data;
+        if(that.components['controller']){
+            that.components['controller'].clear();
+            that.components['controller'].add(data);
+            that.components['controller'].set(0);
+        }
+        return that;
+    };
+});
+cm.define('Com.Geocoder', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onLoad'
+    ],
+    'params' : {
+        'controllerEvents' : true,
+        'renderStructure' : false,
+        'embedStructureOnRender' : false,
+        'apiKey' : '',
+        'apiLink' : 'https://maps.googleapis.com/maps/api/js?key=%key%'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.Geocoder', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.onConstructStart = function(){
+        var that = this;
+        // Binds
+        that.loadScriptEndHanlder = that.loadScriptEnd.bind(that);
+    };
+
+    classProto.onValidateParams = function(){
+        var that = this;
+        that.apiLink = cm.strReplace(that.params['apiLink'], {'%key%' : that.params['apiKey']});
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Load Google Maps Script
+        cm.loadScript({
+            'path' : 'google.maps.Geocoder',
+            'src' : that.apiLink,
+            'callback' : that.loadScriptEndHanlder
+        });
+        return that;
+    };
+
+    classProto.loadScriptEnd = function(handler){
+        var that = this;
+        that.components['geocoder'] = new handler();
+        that.triggerEvent('onLoad');
+    };
+
+    classProto.get = function(data, error, success){
+        var that = this,
+            args = arguments;
+        if(that.components['geocoder']){
+            that.process.apply(that, args);
+        }else{
+            cm.loadScript({
+                'path' : 'google.maps.Geocoder',
+                'src' : that.apiLink,
+                'callback' : function(){
+                    that.process.apply(that, args);
+                }
+            });
+        }
+    };
+
+    classProto.process = function(data, success, error){
+        var that = this;
+        that.components['geocoder'].geocode(data, function(results, status) {
+            if(status === 'OK'){
+                cm.isFunction(success) && success(results, status);
+            }else{
+                cm.isFunction(error) && error(status);
+            }
+        });
+    };
+});
+cm.define('Com.Geolocation', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onRequest',
+        'onSuccess',
+        'onError'
+    ],
+    'params' : {
+        'controllerEvents' : true,
+        'renderStructure' : false,
+        'embedStructureOnRender' : false,
+        'autoRequest' : true,
+        'default' : {                       // New York
+            'lat' : 40.7127837,
+            'lng' : -74.0059413
+        },
+        'options' : {
+            'enableHighAccuracy' : false,
+            'maximumAge' : 30000,
+            'timeout' : 27000
+        }
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.Geolocation', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Get use location
+        that.params['autoRequest'] && that.request();
+        return that;
+    };
+
+    classProto.request = function(){
+        var that = this,
+            position;
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(function(position){
+                position = {
+                    'lat' : position.coords.latitude,
+                    'lng' : position.coords.longitude
+                };
+                that.triggerEvent('onRequest', position);
+                that.triggerEvent('onSuccess', position);
+            }, function(){
+                that.triggerEvent('onRequest', that.params['defaultPosition']);
+                that.triggerEvent('onError', that.params['defaultPosition']);
+            }, that.params['options']);
+        }else{
+            that.triggerEvent('onRequest', that.params['defaultPosition']);
+            that.triggerEvent('onError', that.params['defaultPosition']);
+        }
+    };
+});
 cm.define('Com.Glossary', {
     'modules' : [
         'Params',
@@ -14712,6 +15373,7 @@ cm.define('Com.Gridlist', {
         'onUnCheck',
         'onRenderStart',
         'onRenderEnd',
+        'onLoadEnd',
         'onColumnsChange',
         'onColumnsResize'
     ],
@@ -15009,6 +15671,7 @@ function(params){
                         },
                         'onPageRenderEnd' : function(pagination, data){
                             that.redraw();
+                            that.triggerEvent('onLoadEnd');
                         },
                         'onSetCount' : function(pagination, count){
                             that.params['showCounter'] && renderCounter(count);
@@ -15162,7 +15825,7 @@ function(params){
                     );
                     item['nodes']['checkbox'].checked = that.isCheckedAll;
                     cm.addEvent(item['nodes']['checkbox'], 'click', function(){
-                        if(that.isCheckedAll == true){
+                        if(that.isCheckedAll){
                             that.unCheckAll();
                         }else{
                             that.checkAll();
@@ -15180,14 +15843,14 @@ function(params){
             // Render sort arrow and set function on click to th
             if(item['sort'] && !/icon|empty|actions|links|checkbox/.test(item['type'])){
                 cm.addClass(item['nodes']['container'], 'sort');
-                if(item['key'] == that.sortBy){
+                if(item['key'] === that.sortBy){
                     item['nodes']['inner'].appendChild(
                         cm.node('div', {'class' : that.params['icons']['arrow'][that.orderBy.toLowerCase()]})
                     );
                 }
                 cm.addEvent(item['nodes']['inner'], 'click', function(){
                     that.sortBy = item['key'];
-                    that.orderBy = that.orderBy == 'ASC' ? 'DESC' : 'ASC';
+                    that.orderBy = that.orderBy === 'ASC' ? 'DESC' : 'ASC';
                     if(!that.isAjax){
                         arraySort();
                     }
@@ -15652,6 +16315,11 @@ function(params){
         return that.components['pagination'] && that.components['pagination'].getCurrentAction() || {};
     };
 
+    that.abort = function(){
+        that.components['pagination'] && that.components['pagination'].abort();
+        return that;
+    };
+
     that.check = function(id){
         cm.forEach(that.rows, function(row){
             if(row['index'] == id){
@@ -15753,6 +16421,159 @@ function(params){
     };
 
     init();
+});
+cm.define('Com.GridlistFilter', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onRenderContentStart',
+        'onRenderContent',
+        'onRenderContentProcess',
+        'onRenderContentEnd'
+    ],
+    'params' : {
+        'controllerEvents' : true,
+        'renderStructure' : true,
+        'renderStructureContent' : true,
+        'embedStructureOnRender' : true,
+        'embedStructure' : 'append',
+        'controller' : null,
+        'minLength' : 0,
+        'delay' : 'cm._config.requestDelay',
+        'action' : {}                             // Params object. Variables: %query%
+    },
+    'strings' : {
+        'placeholder' : 'Type query...'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.GridlistFilter', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Variables
+        that.requestDelay = null;
+        // Binds
+        that.inputEventHandler = that.inputEvent.bind(that);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    /******* VIEW MODEL *******/
+
+    classProto.renderView = function(){
+        var that = this;
+        that.triggerEvent('onRenderViewStart');
+        that.nodes['container'] = cm.node('div', {'class' : 'com__gridlist__filter'});
+        // Component content
+        cm.appendChild(that.nodes['contentContainer'], that.nodes['container']);
+        if(that.params['renderStructureContent']){
+            that.nodes['contentContainer'] = that.renderContent();
+            cm.appendChild(that.nodes['contentContainer'], that.nodes['container']);
+        }
+        that.triggerEvent('onRenderViewProcess');
+        that.triggerEvent('onRenderViewEnd');
+        return that;
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Find Gridlist
+        if(that.params['controller']){
+            that.components['controller'] = that.params['controller'];
+        }
+        return that;
+    };
+
+    /******* FILTER *******/
+
+    classProto.renderContent = function(){
+        var that = this,
+            nodes = {};
+        that.nodes['content'] = nodes;
+        // Structure
+        that.triggerEvent('onRenderContentStart');
+        nodes['container'] = cm.node('div', {'class' : 'pt__input'},
+            nodes['input'] = cm.node('input', {'type' : 'search', 'autocomplete' : 'off', 'placeholder' : that.lang('placeholder')}),
+            nodes['icon'] = cm.node('div', {'class' : 'icon icon svg__search'})
+        );
+        that.triggerEvent('onRenderContent');
+        that.triggerEvent('onRenderContentProcess');
+        cm.addEvent(nodes['input'], 'input', that.inputEventHandler);
+        that.triggerEvent('onRenderContentEnd');
+        // Export
+        return nodes['container'];
+    };
+
+    classProto.inputEvent = function(){
+        var that = this,
+            query = that.nodes['content']['input'].value,
+            config = cm.clone(that.params['action']);
+        // Clear previous request
+        that.requestDelay && clearTimeout(that.requestDelay);
+        that.components['controller'] && that.components['controller'].abort();
+        // Request
+        if(query.length >= that.params['minLength']){
+            that.requestDelay = setTimeout(function(){
+                that.callbacks.request(that, {
+                    'config' : config,
+                    'query' : query
+                });
+            }, that.params['delay']);
+        }
+    };
+
+    /******* CALLBACKS *******/
+
+    classProto.callbacks.prepare = function(that, params){
+        params['config'] = that.callbacks.beforePrepare(that, params);
+        params['config'] = cm.objectReplace(params['config'], {
+            '%query%' : params['query']
+        });
+        params['config'] = that.callbacks.afterPrepare(that, params);
+        return params['config'];
+    };
+
+    classProto.callbacks.beforePrepare = function(that, params){
+        return params['config'];
+    };
+
+    classProto.callbacks.afterPrepare = function(that, params){
+        return params['config'];
+    };
+
+    classProto.callbacks.request = function(that, params){
+        params = cm.merge({
+            'response' : null,
+            'data' : null,
+            'config' : null,
+            'query' : ''
+        }, params);
+        // Validate config
+        params['config'] = that.callbacks.prepare(that, params);
+        // Set new action to Gridlist
+        that.components['controller'] && that.components['controller'].setAction({
+            'params' : params['config']
+        });
+    };
+
+    /******* PUBLIC *******/
+
+    classProto.reset = function(){
+        var that = this;
+        that.nodes['content']['input'].value = '';
+        that.inputEvent();
+        return that;
+    };
+
 });
 cm.define('Com.GridlistHelper', {
     'modules' : [
@@ -16264,6 +17085,7 @@ cm.define('Com.MultiField', {
         'embedStructureOnRender' : false,
         'sortable' : true,                      // Use drag and drop to sort items
         'showControls' : true,
+        'showList' : true,
         'renderItems' : 0,                      // Render count of fields by default
         'max' : 0,                              // 0 - infinity
         'template' : null,                      // Html node or string with items template
@@ -16321,9 +17143,12 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
     classProto.renderView = function(){
         var that = this;
         that.triggerEvent('onRenderViewStart');
-        that.nodes['container'] = cm.node('div', {'class' : 'com__multifield'},
-            that.nodes['content'] = cm.node('div', {'class' : 'com__multifield__content'})
-        );
+        that.nodes['container'] = cm.node('div', {'class' : 'com__multifield'});
+        that.nodes['content'] = cm.node('div', {'class' : 'com__multifield__content'});
+        // List
+        if(that.params['showList']){
+            cm.appendChild(that.nodes['content'], that.nodes['container']);
+        }
         // Toolbar
         if(that.params['showControls']){
             that.nodes['toolbarContainer'] = that.renderToolbarView();
@@ -16410,9 +17235,8 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
     /* *** ITEMS *** */
 
     classProto.renderItem = function(item, params){
-        var that = this,
-            nodes;
-        if(that.params['max'] == 0 || that.items.length < that.params['max']){
+        var that = this;
+        if(that.params['max'] === 0 || that.items.length < that.params['max']){
             // Config
             item = cm.merge({
                 'isVisible' : false
@@ -16426,14 +17250,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
                 item['content'] = item['field'] = cm.node('div', {'class' : 'field', 'data-node' : 'field'})
             );
             // Template
-            if(!cm.isEmpty(that.params['template'])){
-                if(cm.isString(that.params['template'])){
-                    nodes = cm.strToHTML(that.params['template']);
-                }else{
-                    nodes = cm.clone(that.params['template'], true);
-                }
-                cm.appendNodes(nodes, item['field']);
-            }
+            that.renderItemTemplate(that.params['template'], item);
             // Controls
             if(that.params['showControls']){
                 item['remove'] = cm.node('div', {'class' : that.params['icons']['remove'], 'title' : that.lang('remove'), 'data-node' : 'remove'});
@@ -16456,6 +17273,19 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
             params['callback'](item);
             // Trigger event
             params['triggerEvents'] && that.triggerEvent('onItemAdd', item);
+        }
+    };
+
+    classProto.renderItemTemplate = function(data, item){
+        var that = this,
+            nodes;
+        if(!cm.isEmpty(data)){
+            if(cm.isString(data)){
+                nodes = cm.strToHTML(data);
+            }else{
+                nodes = cm.clone(data, true);
+            }
+            cm.appendNodes(nodes, item['field']);
         }
     };
 
@@ -16526,7 +17356,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
     classProto.resetIndexes = function(){
         var that = this;
         cm.forEach(that.items, function(item, index){
-            if(item['index'] != index){
+            if(item['index'] !== index){
                 // Set index
                 item['previousIndex'] = item['index'];
                 item['index'] = index;
@@ -16545,7 +17375,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
     classProto.toggleToolbarVisibility = function(){
         var that = this;
         if(that.params['showControls']){
-            if(that.params['max'] > 0 && that.items.length == that.params['max']){
+            if(that.params['max'] > 0 && that.items.length === that.params['max']){
                 that.hideToolbar();
             }else{
                 that.showToolbar();
@@ -16597,11 +17427,11 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
 
     classProto.toggleItemVisibility = function(item, callback){
         var that = this;
-        callback = typeof callback == 'function' ? callback : function(){};
+        callback = cm.isFunction(callback) ? callback : function(){};
         if(!item['height']){
             item['height'] = item['container'].offsetHeight;
         }
-        if(typeof item['isVisible'] == 'undefined'){
+        if(cm.isUndefined(item['isVisible'])){
             item['isVisible'] = true;
         }else if(item['isVisible']){
             item['isVisible'] = false;
@@ -16630,7 +17460,23 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         }
     };
 
+    /* ******* TEMPLATE ******* */
+
+    classProto.setTemplate = function(data){
+        var that = this;
+        that.params['template'] = data;
+        return that;
+    };
+
     /* ******* PUBLIC ******* */
+
+    classProto.clear = function(){
+        var that = this;
+        cm.forEach(that.items, function(item){
+            that.deleteItem(item);
+        });
+        return that;
+    };
 
     classProto.addItem = function(item, params){
         var that = this;
@@ -16640,7 +17486,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
 
     classProto.removeItem = function(item, params){
         var that = this;
-        if(typeof item == 'number' && that.items[item]){
+        if(cm.isNumber(item) && that.items[item]){
             that.deleteItem(that.items[item], params);
         }else if(cm.inArray(that.items, item)){
             that.deleteItem(item, params);
@@ -17052,6 +17898,7 @@ function(params){
     };
 
     that.close = function(isImmediately){
+        that.openInterval && clearTimeout(that.openInterval);
         that.delayInterval && clearTimeout(that.delayInterval);
         if(that.isOpen){
             closeProcess(isImmediately);
@@ -17085,7 +17932,7 @@ function(params){
         if(cm.inArray(themes, theme)){
             cm.addClass(that.nodes['container'], ['theme', theme].join('-'));
             cm.forEach(themes, function(item){
-                if(item != theme){
+                if(item !== theme){
                     cm.removeClass(that.nodes['container'], ['theme', item].join('-'));
                 }
             });
@@ -17127,7 +17974,7 @@ function(params){
     that.embed = function(node){
         if(cm.isNode(node)){
             that.params['container'] = node;
-            node.appendChild(that.nodes['container']);
+            //cm[that.params['appendMode']](that.nodes['container'], that.params['container']);
         }
         return that;
     };
@@ -17204,9 +18051,10 @@ cm.define('Com.Pagination', {
             'type' : 'json',
             'method' : 'get',
             'url' : '',                                             // Request URL. Variables: %baseUrl%, %page%, %offset%, %token%, %perPage%, %limit%, %callback% for JSONP.
-            'params' : ''                                           // Params object. %baseUrl%, %page%, %offset%, %token%, %perPage%, %limit%, %callback% for JSONP.
+            'params' : ''                                           // Params object. Variables: %baseUrl%, %page%, %offset%, %token%, %perPage%, %limit%, %callback% for JSONP.
         },
         'Com.Overlay' : {
+            'lazy' : true,
             'position' : 'absolute',
             'autoOpen' : false,
             'removeOnClose' : true
@@ -17232,7 +18080,6 @@ function(params){
     that.animations = {};
     that.pages = {};
     that.ajaxHandler = null;
-    that.loaderDelay = null;
     that.currentAction = null;
 
     that.isAjax = false;
@@ -17737,12 +18584,9 @@ function(params){
         that.isProcess = true;
         // Show Loader
         if(that.params['showLoader']){
-            that.loaderDelay = setTimeout(function(){
-                if(that.components['loader'] && !that.components['loader'].isOpen){
-                    that.components['loader'].open();
-                }
-            }, that.params['loaderDelay']);
+            that.components['loader'] && that.components['loader'].open();
         }
+        cm.addClass(that.nodes['container'], 'is-loading');
         that.triggerEvent('onStart');
     };
 
@@ -17750,11 +18594,9 @@ function(params){
         that.isProcess = false;
         // Hide Loader
         if(that.params['showLoader']){
-            that.loaderDelay && clearTimeout(that.loaderDelay);
-            if(that.components['loader'] && that.components['loader'].isOpen){
-                that.components['loader'].close();
-            }
+            that.components['loader'] && that.components['loader'].close();
         }
+        cm.removeClass(that.nodes['container'], 'is-loading');
         that.triggerEvent('onEnd');
     };
 
@@ -17803,7 +18645,7 @@ function(params){
     };
 
     that.setCount = function(count){
-        if(typeof count != 'undefined'){
+        if(!cm.isUndefined(count)){
             count = parseInt(count.toString());
         }
         if(cm.isNumber(count) && count != that.params['count']){
@@ -18284,6 +19126,7 @@ cm.define('Com.Request', {
         'className' : '',
         'autoSend' : false,
         'responseKey' : 'data',
+        'responseErrorsKey' : 'errors',
         'responseHTML' : true,
         'responseHTMLKey' : 'data',
         'responseStatusKey' : 'data.success',
@@ -18298,9 +19141,9 @@ cm.define('Com.Request', {
         'variables' : {},
         'showOverlay' : true,
         'overlayContainer' : 'document.body',
-        'overlayDelay' : 'cm._config.loadDelay',
         'animateDuration' : 'cm._config.animDuration',
         'Com.Overlay' : {
+            'lazy' : true,
             'autoOpen' : false,
             'removeOnClose' : true,
             'showSpinner' : true,
@@ -18323,7 +19166,6 @@ function(params){
     that.responceDataFiltered = null;
     that.responceDataHTML = null;
     that.responceDataStatus = null;
-    that.overlayDelay = null;
     that.isProcess = false;
     that.isError = false;
     that.isRendering = false;
@@ -18343,7 +19185,7 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         that.render();
         that.addToStack(that.nodes['container']);
         that.triggerEvent('onRender');
-        that.params['autoSend'] && that.set();
+        that.params['autoSend'] && that.send();
         return that;
     };
 
@@ -18508,11 +19350,7 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         that.isProcess = true;
         // Show Overlay
         if(that.params['showOverlay']){
-            that.overlayDelay = setTimeout(function(){
-                if(that.components['overlay'] && !that.components['overlay'].isOpen){
-                    that.components['overlay'].open();
-                }
-            }, that.params['overlayDelay']);
+            that.components['overlay'] && that.components['overlay'].open();
         }
         that.triggerEvent('onStart');
         return that;
@@ -18523,10 +19361,7 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         that.isProcess = false;
         // Hide Overlay
         if(that.params['showOverlay']){
-            that.overlayDelay && clearTimeout(that.overlayDelay);
-            if(that.components['overlay'] && that.components['overlay'].isOpen){
-                that.components['overlay'].close();
-            }
+            that.components['overlay'] && that.components['overlay'].close();
         }
         that.triggerEvent('onEnd');
         return that;
@@ -18534,17 +19369,20 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
 
     classProto.filter = function(){
         var that = this,
-            dataFiltered = cm.objectSelector(that.params['responseKey'], that.responceData),
-            dataStatus = cm.objectSelector(that.params['responseStatusKey'], that.responceData),
+            errorsItem = cm.objectPath(that.params['responseErrorsKey'], that.responceData),
+            dataFiltered = cm.objectPath(that.params['responseKey'], that.responceData),
+            dataStatus = cm.objectPath(that.params['responseStatusKey'], that.responceData),
             dataHTML;
-        if(cm.isEmpty(that.params['responseHTMLKey'])){
-            dataHTML = cm.objectSelector(that.params['responseKey'], that.responceData);
-        }else{
-            dataHTML = cm.objectSelector(that.params['responseHTMLKey'], that.responceData);
+        if(cm.isEmpty(errorsItem)){
+            if(cm.isEmpty(that.params['responseHTMLKey'])){
+                dataHTML = cm.objectPath(that.params['responseKey'], that.responceData);
+            }else{
+                dataHTML = cm.objectPath(that.params['responseHTMLKey'], that.responceData);
+            }
+            that.responceDataFiltered = !cm.isEmpty(dataFiltered) ? dataFiltered : [];
+            that.responceDataHTML = !cm.isEmpty(dataHTML) ? dataHTML : '';
+            that.responceDataStatus = !cm.isEmpty(dataStatus) ? dataStatus : false;
         }
-        that.responceDataFiltered = !cm.isEmpty(dataFiltered) ? dataFiltered : [];
-        that.responceDataHTML = !cm.isEmpty(dataHTML) ? dataHTML : '';
-        that.responceDataStatus = !cm.isEmpty(dataStatus) ? dataStatus : false;
     };
 
     classProto.response = function(){
@@ -18744,21 +19582,20 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.Router', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.Router', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Variables
         that.routes = {};
+        that.routesBinds = {};
+        that.dataStorage = {};
         that.current = null;
         that.previous = null;
         // Bind
         that.windowClickEventHandler = that.windowClickEvent.bind(that);
         that.popstateEventHandler = that.popstateEvent.bind(that);
         // Call parent method - construct
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.renderViewModel = function(){
@@ -18766,71 +19603,111 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         // Init location handlers
         cm.addEvent(window, 'click', that.windowClickEventHandler);
         cm.addEvent(window, 'popstate', that.popstateEventHandler);
-        return that;
     };
 
     classProto.windowClickEvent = function(e){
         var that = this,
-            target = cm.getEventTarget(e);
+            target;
+        // Process route only on LMB without pressed ctrl or meta keys
+        if(e.button || e.metaKey || e.ctrlKey){
+            return;
+        }
+        // Get event target
+        target = cm.getEventTarget(e);
+        // Process route only on inner link
         if(cm.isTagName(target, 'a')){
             cm.preventDefault(e);
             that.processLink(target);
         }
-        return that;
     };
 
     classProto.popstateEvent = function(e){
-        var that = this;
-        var state = e.state;
-        state && that.processRoute(state['route']);
-        return that;
+        var that = this,
+            state = e.state;
+        if(state){
+            that.processRoute(state);
+        }else{
+            //that.start();
+        }
     };
 
     classProto.processLink = function(el){
-        var that = this;
-        var route = el.getAttribute('href');
-        route && that.pushRoute(route);
-        return that;
+        var that = this,
+            href = el.getAttribute('href');
+        if(!cm.isEmpty(href)){
+            href = that.prepareRoute(href);
+            that.pushRoute(href[0], href[1]);
+        }
     };
 
     classProto.pushRoute = function(route, hash){
-        var that = this;
-        var state = {
-            'route' : route
-        };
-        var location = !cm.isEmpty(hash) ? [route, hash].join('#') : route;
+        var that = this,
+            state = {
+                'route' : route,
+                'hash' : hash,
+                'location' : that.prepareHref(route)
+            };
+        // Check data storage
+        if(that.dataStorage[state['route']]){
+            state['data'] = that.dataStorage[state['route']];
+        }
+        that.dataStorage = {};
+        // Check hash
+        if(!cm.isEmpty(state['hash'])){
+            state['href'] = state['location'] + '#' + state['hash'];
+        }
+        // Set scroll
+        cm.setBodyScrollTop(0);
         // Set Window URL
-        window.history.pushState(state, '', location);
+        window.history.pushState(state, '', state['location']);
         // Process route
-        that.processRoute(route);
-        return that;
+        that.processRoute(state);
+        // Process hash
+        if(!cm.isEmpty(state['href'])){
+            // TODO fix empty state object after changing hash
+            window.location.hash = '#' + state['hash'];
+            // window.history.pushState(state, '', state['href']);
+        }
     };
 
-    classProto.processRoute = function(route){
-        var that = this;
+    classProto.processRoute = function(state){
+        var that = this,
+            match,
+            matchItem,
+            matchCaptures,
+            route;
         // Destruct old route
         that.destructRoute(that.current);
-        // Construct new route
-        if(that.routes[route]){
-            that.constructRoute(route)
-        }else if(that.routes['/404']){
-            that.constructRoute('/404')
+        // Match route
+        cm.forEach(that.routes, function(rTtem){
+            if(match = state['route'].match(rTtem['regexp'])){
+                matchCaptures = match;
+                matchItem = rTtem;
+            }
+        });
+        if(!matchItem){
+            matchItem = that.get('/404');
         }
-        return that;
+        route = cm.merge(matchItem, state);
+        // Get captures
+        if(matchCaptures){
+            route['captures'] = that.mapCaptures(route['map'], matchCaptures);
+        }
+        // Construct route
+        that.constructRoute(route);
     };
 
     classProto.destructRoute = function(route){
         var that = this;
-        var item = that.routes[route];
         // Export
         that.previous = route;
         // Callbacks
-        if(item){
-            if(item['constructor']){
-                item['controller'] && item['controller'].destruct && item['controller'].destruct();
+        if(route){
+            if(route['constructor']){
+                route['controller'] && route['controller'].destruct && route['controller'].destruct();
             }else{
-                item['onDestruct'](item);
-                item['callback'](item);
+                route['onDestruct'](route);
+                route['callback'](route);
             }
         }
         return that;
@@ -18838,64 +19715,195 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
 
     classProto.constructRoute = function(route){
         var that = this;
-        var item = that.routes[route];
         // Export
         that.current = route;
         // Callbacks
-        if(item){
-            if(item['constructor']){
-                cm.getConstructor(item['constructor'], function(classConstructor){
-                    item['controller'] = new classConstructor(
-                        cm.merge(item['constructorParams'], {
-                            'container' : that.params['container']
-                        })
-                    );
-                });
-            }else{
-                item['onConstruct'](item);
-                item['callback'](item);
+        if(route['constructor']){
+            cm.getConstructor(route['constructor'], function(classConstructor){
+                route['controller'] = new classConstructor(
+                    cm.merge(route['constructorParams'], {
+                        'container' : that.params['container'],
+                        'route' : route
+                    })
+                );
+            });
+        }else{
+            route['onConstruct'](route);
+            route['callback'](route);
+        }
+        that.triggerEvent('onChange', route);
+        return that;
+    };
+
+    /* *** HELPERS *** */
+
+    classProto.prepareRoute = function(route){
+        var that = this;
+        route = route
+            .replace(new RegExp('^' + window.location.protocol), '')
+            .replace(new RegExp('^//www.'), '//')
+            .replace(new RegExp('^' + cm._baseUrl), '')
+            .split('#');
+        return route;
+    };
+
+    classProto.prepareHref = function(route){
+        var that = this,
+            baseUrl = cm._baseUrl,
+            hasWWW = new RegExp('^www.').test(window.location.host);
+        if(hasWWW){
+            baseUrl = baseUrl.replace(new RegExp('^//'), '//www.');
+        }
+        return window.location.protocol + baseUrl + route;
+    };
+
+    classProto.getMap = function(route){
+        var machRX = /({(\w+)})/g,
+            map = {},
+            count = 0,
+            match;
+        while(match = machRX.exec(route)){
+            count++;
+            if(match[2]){
+                map[count] = match[2];
             }
         }
-        that.triggerEvent('onChange', item);
-        return that;
+        return map;
+    };
+
+    classProto.mapCaptures = function(map, captures) {
+        var result = {};
+        cm.forEach(map, function(id, key){
+            result[id] = captures[key];
+        });
+        return result;
     };
 
     /* *** PUBLIC *** */
 
-    classProto.add = function(route, params){
+    classProto.embed = function(node){
         var that = this;
-        var item = cm.merge({
-            'route' : route,
-            'constructor' : false,
-            'constructorParams' : {},
-            'callback' : function(){},
-            'onConstruct' : function(){},
-            'onDestruct' : function(){}
-        }, params);
+        that.params['container'] = node;
+    };
+
+    classProto.add = function(route, params){
+        var that = this,
+            item = cm.merge({
+                'route' : route,
+                'originRoute' : route,
+                'name' : null,
+                'regexp' : null,
+                'map' : [],
+                'captures' : {},
+                'constructor' : false,
+                'constructorParams' : {},
+                'callback' : function(){},
+                'onConstruct' : function(){},
+                'onDestruct' : function(){}
+            }, params);
+        // RegExp
+        item['regexp'] = new RegExp('^' + route.replace(/({\w+})/g, '([\\s\\S]+?)') + '$');
+        item['map'] = that.getMap(route);
+        // Binds
+        if(cm.isString(item['name'])){
+            that.routesBinds[item['name']] = route;
+        }else if(cm.isArray(item['name'])){
+            cm.forEach(item['name'], function(name){
+                that.routesBinds[name] = route;
+            });
+        }
         // Export
         that.routes[route] = item;
         return that;
     };
+    
+    classProto.get = function(route){
+        var that = this;
+        if(that.routesBinds[route]){
+            route = that.routesBinds[route];
+        }
+        return that.routes[route];
+    };
+
+    classProto.getURL = function(route, hash, params, data){
+        var that = this,
+            item;
+        if(item = that.get(route)){
+            route = item['route'];
+        }
+        if(cm.isObject(params)){
+            route = route.replace(/{(\w+)}/g, function(math, p1){
+                return params[p1] || '';
+            });
+        }
+        if(!/^\//.test(route)){
+            route = '/' + route;
+        }
+        // Save into data storage
+        that.dataStorage[route] = data;
+        // Add hash
+        if(!cm.isEmpty(hash)){
+            route = route + '#' + hash;
+        }
+        return route;
+    };
+
+    classProto.getFullURL = function(route, hash, params, data){
+        var that = this;
+        return that.prepareHref(that.getURL(route, hash, params, data));
+    };
+
+    classProto.set = function(route, hash){
+        var that = this;
+        if(that.routesBinds[route]){
+            route = that.routesBinds[route];
+        }
+        that.trigger(route, hash);
+        return that;
+    };
+
+    classProto.summon = function(route, hash){
+        var that = this,
+            item;
+        if(that.routesBinds[route]){
+            route = that.routesBinds[route];
+        }
+        if(item = that.routes[route]){
+            that.destructRoute(that.current);
+            that.constructRoute(item);
+        }
+        return that;
+    };
 
     classProto.remove = function(route){
-        var that = this;
-        if(that.routes[route]){
+        var that = this,
+            item;
+        if(that.routesBinds[route]){
+            route = that.routesBinds[route];
+        }
+        if(item = that.routes[route]){
+            if(cm.isString(item['name'])){
+                delete that.routesBinds[item['name']];
+            }else if(cm.isArray(item['name'])){
+                cm.forEach(item['name'], function(name){
+                    delete that.routesBinds[name];
+                })
+            }
             delete that.routes[route];
         }
         return that;
     };
 
-    classProto.trigger = function(route){
+    classProto.trigger = function(route, hash){
         var that = this;
-        that.pushRoute(route);
+        that.pushRoute(route, hash);
         return that;
     };
 
     classProto.start = function(){
-        var that = this;
-        var route = window.location.pathname;
-        var hash = window.location.hash.slice(1);
-        that.pushRoute(route, hash);
+        var that = this,
+            href = that.prepareRoute(window.location.href);
+        that.trigger(href[0], href[1]);
         return that;
     };
 });
@@ -19063,18 +20071,8 @@ Com['Scroll'] = function(o){
     init();
 };
 cm.define('Com.ScrollPagination', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'Structure',
-        'DataConfig',
-        'DataNodes',
-        'Callbacks',
-        'Stack'
-    ],
+    'extend' : 'Com.AbstractController',
     'events' : [
-        'onRender',
         'onRebuild',
         'onStart',
         'onAbort',
@@ -19085,24 +20083,29 @@ cm.define('Com.ScrollPagination', {
         'onPageHide',
         'onEnd',
         'onFinalize',
-        'onSetCount'
+        'onSetCount',
+        'onButtonShow',
+        'onButtonHide'
     ],
     'params' : {
-        'node' : cm.node('div'),
-        'container' : null,
-        'name' : '',
+        'controllerEvents' : true,
         'renderStructure' : false,                                  // Render wrapper nodes if not exists in html
+        'embedStructureOnRender' : false,
         'embedStructure' : 'append',
+        'resizeEvent' : true,
+        'scrollEvent' : true,
         'scrollNode' : window,
         'scrollIndent' : 'Math.min(%scrollHeight% / 2, 600)',       // Variables: %blockHeight%.
+        'disabled' : false,
         'data' : [],                                                // Static data
         'count' : 0,
         'perPage' : 0,                                              // 0 - render all data in one page
         'startPage' : 1,                                            // Start page
         'startPageToken' : '',
         'useToken' : false,
+        'autoSend' : true,
         'pageCount' : 0,                                            // Render only count of pages. 0 - infinity
-        'showButton' : true,                                        // true - always | once - show once after first loaded page
+        'showButton' : true,                                        // true - always | once - show once after first loaded page | none - don't show and don't scroll
         'showLoader' : true,
         'loaderDelay' : 'cm._config.loadDelay',
         'stopOnESC' : true,
@@ -19113,6 +20116,7 @@ cm.define('Com.ScrollPagination', {
         'responseCountKey' : 'count',                               // Take items count from response
         'responseTokenKey' : 'token',                               // Token key name
         'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
+        'responseErrorsKey': 'errors',
         'responseHTML' : false,                                     // If true, html will append automatically
         'ajax' : {
             'type' : 'json',
@@ -19128,49 +20132,62 @@ cm.define('Com.ScrollPagination', {
 },
 function(params){
     var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
 
-    that.nodes = {
-        'container' : cm.Node('div'),
-        'scroll' : null,
-        'bar' : cm.Node('div'),
-        'content' : cm.Node('div'),
-        'pages' : cm.Node('div'),
-        'button' : cm.Node('div'),
-        'loader' : cm.Node('div')
+
+cm.getConstructor('Com.ScrollPagination', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // variables
+        that.nodes = {
+            'container' : cm.node('div'),
+            'scroll' : null,
+            'bar' : cm.node('div'),
+            'barHolder' : cm.node('div'),
+            'content' : cm.node('div'),
+            'pages' : cm.node('div'),
+            'button' : cm.node('div'),
+            'loader' : cm.node('div')
+        };
+
+        that.pages = {};
+        that.ajaxHandler = null;
+        that.loaderDelay = null;
+        that.currentAction = null;
+
+        that.isAjax = false;
+        that.isProcess = false;
+        that.isFinalize = false;
+        that.isButton = false;
+        that.isDisabled = false;
+
+        that.page = null;
+        that.pageToken = null;
+        that.currentPage = null;
+        that.previousPage = null;
+        that.nextPage = null;
+        that.pageCount = 0;
+        // Binds
+        that.keyDownEventHandler = that.keyDownEvent.bind(that);
+        // Call parent method - renderViewModel
+        _inherit.prototype.construct.apply(that, arguments);
     };
 
-    that.components = {};
-    that.pages = {};
-    that.ajaxHandler = null;
-    that.loaderDelay = null;
-    that.currentAction = null;
-
-    that.isAjax = false;
-    that.isProcess = false;
-    that.isFinalize = false;
-    that.isButton = false;
-
-    that.page = null;
-    that.pageToken = null;
-    that.currentPage = null;
-    that.previousPage = null;
-    that.nextPage = null;
-    that.pageCount = 0;
-
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        that.callbacksProcess();
-        validateParams();
-        render();
-        that.addToStack(that.nodes['container']);
-        that.triggerEvent('onRender');
-        set();
+    classProto.onConstructEnd = function(){
+        var that = this;
+        that.params['autoSend'] && that.set();
     };
 
-    var validateParams = function(){
+    classProto.validateParams = function(){
+        var that = this;
+        that.triggerEvent('onValidateParamsStart');
+        that.triggerEvent('onValidateParams');
+        that.triggerEvent('onValidateParamsProcess');
+        that.isDisabled = that.params['disabled'];
         // Set Scroll Node
         if(that.nodes['scroll']){
             that.params['scrollNode'] = that.nodes['scroll'];
@@ -19181,7 +20198,7 @@ function(params){
         }else{
             that.params['showLoader'] = false;
         }
-        if(that.params['pageCount'] == 0 && that.params['perPage'] && that.params['count']){
+        if(that.params['pageCount'] === 0 && that.params['perPage'] && that.params['count']){
             that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
         }else{
             that.pageCount = that.params['pageCount'];
@@ -19190,79 +20207,24 @@ function(params){
         that.setToken(that.params['startPage'], that.params['startPageToken']);
         // Set next page token
         that.nextPage = that.params['startPage'];
+        that.triggerEvent('onValidateParamsEnd');
     };
 
-    var render = function(){
-        // Render Structure
-        if(that.params['renderStructure']){
-            that.nodes['container'] = cm.Node('div', {'class' : 'com__scroll-pagination'},
-                that.nodes['content'] = cm.Node('div', {'class' : 'com__scroll-pagination__content'},
-                    that.nodes['pages'] = cm.Node('div', {'class' : 'com__scroll-pagination__pages'})
-                ),
-                that.nodes['bar'] = cm.Node('div', {'class' : 'com__scroll-pagination__bar'},
-                    that.nodes['button'] = cm.Node('div', {'class' : 'button button-primary'}, that.lang('load_more')),
-                    that.nodes['loader'] = cm.Node('div', {'class' : 'button button-clear has-icon has-icon has-icon-small'},
-                        cm.Node('div', {'class' : 'icon small loader'})
-                    )
-                )
-            );
-            // Append
-            that.embedStructure(that.nodes['container']);
-        }
-        // Reset styles and variables
-        reset();
-        // Events
-        cm.addEvent(that.nodes['button'], 'click', function(e){
-            e = cm.getEvent(e);
-            cm.preventDefault(e);
-            set();
-        });
-        if(that.params['stopOnESC']){
-            cm.addEvent(window, 'keydown', ESCHandler);
-        }
-        cm.addScrollEvent(that.params['scrollNode'], scrollHandler);
-        cm.addEvent(window, 'resize', resizeHandler);
-    };
-
-    var reset = function(){
-        // Clear render pages
-        cm.clearNode(that.nodes['pages']);
-        // Load More Button
-        if(!that.params['showButton']){
-            that.callbacks.hideButton(that);
-        }else{
-            that.callbacks.showButton(that);
-        }
-        // Hide Loader
-        cm.addClass(that.nodes['loader'], 'is-hidden');
-    };
-
-    var set = function(){
-        var config;
-        if(!that.isProcess && !that.isFinalize){
-            // Preset next page and page token
-            that.page = that.nextPage;
-            that.pageToken = that.pages[that.page]? that.pages[that.page]['token'] : '';
-            // Request
-            if(that.isAjax){
-                config = cm.clone(that.params['ajax']);
-                that.ajaxHandler = that.callbacks.request(that, config);
-            }else{
-                that.callbacks.data(that, that.params['data']);
-            }
-        }
-    };
-
-    var scrollHandler = function(){
-        var scrollRect = cm.getRect(that.params['scrollNode']),
+    classProto.onScroll = function(){
+        var that = this,
+            scrollRect = cm.getRect(that.params['scrollNode']),
             pagesRect = cm.getRect(that.nodes['pages']),
             scrollIndent;
-        if((!that.params['showButton'] || (that.params['showButton'] == 'once' && that.params['startPage'] != that.currentPage)) && !cm.isProcess && !that.isFinalize && !that.isButton){
+        if(
+            !that.isDisabled &&
+            (!that.params['showButton'] || that.params['showButton'] !== 'none' || (that.params['showButton'] === 'once' && that.params['startPage'] !== that.currentPage)) &&
+            !cm.isProcess && !that.isFinalize && !that.isButton
+        ){
             scrollIndent = eval(cm.strReplace(that.params['scrollIndent'], {
                 '%scrollHeight%' : scrollRect['bottom'] - scrollRect['top']
             }));
             if(pagesRect['bottom'] - scrollRect['bottom'] <= scrollIndent){
-                set();
+                that.set();
             }
         }
         // Show / Hide non visible pages
@@ -19271,28 +20233,76 @@ function(params){
         });
     };
 
-    var ESCHandler = function(e){
-        e = cm.getEvent(e);
-
-        if(e.keyCode == 27){
-            if(!cm.isProcess && !cm.isFinalize){
-                that.callbacks.showButton(that);
-            }
-        }
-    };
-
-    var resizeHandler = function(){
-        // Show / Hide non visible pages
+    classProto.onRedraw = function(){
+        var that = this;
         cm.forEach(that.pages, function(page){
             that.isPageVisible(page);
         });
     };
 
-    /* ******* CALLBACKS ******* */
+    /******* VIEW - MODEL *******/
 
-    /* *** AJAX *** */
+    classProto.renderView = function(){
+        var that = this;
+        that.nodes['container'] = cm.node('div', {'class' : 'com__scroll-pagination'},
+            that.nodes['content'] = cm.node('div', {'class' : 'com__scroll-pagination__content'},
+                that.nodes['pages'] = cm.node('div', {'class' : 'com__scroll-pagination__pages'})
+            ),
+            that.nodes['bar'] = cm.node('div', {'class' : 'com__scroll-pagination__bar'},
+                that.nodes['button'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('load_more')),
+                that.nodes['loader'] = cm.node('div', {'class' : 'button button-clear has-icon has-icon has-icon-small'},
+                    cm.node('div', {'class' : 'icon small loader'})
+                )
+            )
+        );
+    };
 
-    that.callbacks.prepare = function(that, config){
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Reset styles and variables
+        that.resetStyles();
+        // Events
+        cm.addEvent(that.nodes['button'], 'click', function(e){
+            e = cm.getEvent(e);
+            cm.preventDefault(e);
+            that.set();
+        });
+        if(that.params['stopOnESC']){
+            cm.addEvent(window, 'keydown', that.keyDownEventHandler);
+        }
+        return that;
+    };
+
+    /******* HELPERS *******/
+
+    classProto.resetStyles = function(){
+        var that = this;
+        // Load More Button
+        if(!that.params['showButton'] || that.params['showButton'] === 'none'){
+            that.callbacks.hideButton(that);
+        }else{
+            that.callbacks.showButton(that);
+        }
+        // Hide Loader
+        cm.addClass(that.nodes['loader'], 'is-hidden');
+    };
+
+    classProto.keyDownEvent = function(e){
+        var that = this;
+        cm.handleKey(e, 'escape', function(){
+            if(!cm.isProcess && !cm.isFinalize && that.params['showButton'] !== 'none'){
+                that.callbacks.showButton(that);
+            }
+        });
+    };
+
+    /******* CALLBACKS *******/
+
+    /*** AJAX ***/
+
+    classProto.callbacks.prepare = function(that, config){
         config = that.callbacks.beforePrepare(that, config);
         config['url'] = cm.strReplace(config['url'], {
             '%perPage%' : that.params['perPage'],
@@ -19314,15 +20324,15 @@ function(params){
         return config;
     };
 
-    that.callbacks.beforePrepare = function(that, config){
+    classProto.callbacks.beforePrepare = function(that, config){
         return config;
     };
 
-    that.callbacks.afterPrepare = function(that, config){
+    classProto.callbacks.afterPrepare = function(that, config){
         return config;
     };
 
-    that.callbacks.request = function(that, config){
+    classProto.callbacks.request = function(that, config){
         config = that.callbacks.prepare(that, config);
         that.currentAction = config;
         // Return ajax handler (XMLHttpRequest) to providing abort method.
@@ -19347,31 +20357,34 @@ function(params){
         );
     };
 
-    that.callbacks.filter = function(that, config, response){
+    classProto.callbacks.filter = function(that, config, response){
         var data = [],
+            errorsItem = cm.objectPath(that.params['responseErrorsKey'], response),
             dataItem = cm.objectPath(that.params['responseKey'], response),
             countItem = cm.objectPath(that.params['responseCountKey'], response),
             tokenItem = cm.objectPath(that.params['responseTokenKey'], response);
-        if(!cm.isEmpty(dataItem)){
-            if(!that.params['responseHTML'] && that.params['perPage']){
-                data = dataItem.slice(0, that.params['perPage']);
-            }else{
-                data = dataItem;
+        if(cm.isEmpty(errorsItem)){
+            if(!cm.isEmpty(dataItem)){
+                if(!that.params['responseHTML'] && that.params['perPage']){
+                    data = dataItem.slice(0, that.params['perPage']);
+                }else{
+                    data = dataItem;
+                }
             }
-        }
-        if(countItem){
-            that.setCount(countItem);
-        }
-        if(tokenItem){
-            that.setToken(that.nextPage, tokenItem);
-        }
-        if(that.params['useToken'] && !tokenItem){
-            that.callbacks.finalize(that);
+            if(countItem){
+                that.setCount(countItem);
+            }
+            if(tokenItem){
+                that.setToken(that.nextPage, tokenItem);
+            }
+            if(that.params['useToken'] && !tokenItem){
+                that.callbacks.finalize(that);
+            }
         }
         return data;
     };
 
-    that.callbacks.response = function(that, config, response){
+    classProto.callbacks.response = function(that, config, response){
         // Set next page
         that.setPage();
         // Response
@@ -19385,24 +20398,24 @@ function(params){
         }
     };
 
-    that.callbacks.error = function(that, config){
+    classProto.callbacks.error = function(that, config){
         that.callbacks.finalize(that);
         that.triggerEvent('onError');
     };
 
-    that.callbacks.abort = function(that, config){
+    classProto.callbacks.abort = function(that, config){
         that.triggerEvent('onAbort');
     };
 
     /* *** STATIC *** */
 
-    that.callbacks.data = function(that, data){
+    classProto.callbacks.data = function(that, data){
         var length, start, end, pageData;
         that.callbacks.start(that);
         that.setPage();
         if(!cm.isEmpty(data)){
             // Get page data and render
-            if(that.params['perPage'] == 0){
+            if(that.params['perPage'] === 0){
                 that.callbacks.render(that, data);
                 that.callbacks.finalize(that);
             }else if(that.params['perPage'] > 0){
@@ -19427,55 +20440,49 @@ function(params){
 
     /* *** RENDER *** */
 
-    that.callbacks.renderContainer = function(that, page){
-        return cm.Node(that.params['pageTag'], that.params['pageAttributes']);
+    classProto.callbacks.renderContainer = function(that, page){
+        return cm.node(that.params['pageTag'], that.params['pageAttributes']);
     };
 
-    that.callbacks.render = function(that, data){
+    classProto.callbacks.render = function(that, data){
         var scrollTop = cm.getScrollTop(that.params['scrollNode']),
             page = {
                 'page' : that.page,
                 'token' : that.pageToken,
                 'pages' : that.nodes['pages'],
-                'container' : cm.Node(that.params['pageTag']),
+                'container' : cm.node(that.params['pageTag']),
                 'data' : data,
                 'isVisible' : false
             };
+        // Clear container
+        if(that.page === that.params['startPage']){
+            cm.clearNode(that.nodes['pages']);
+        }
+        // Render page
         page['container'] = that.callbacks.renderContainer(that, page);
         that.pages[that.page] = page;
         that.triggerEvent('onPageRender', page);
         that.callbacks.renderPage(that, page);
         // Embed
-        that.nodes['pages'].appendChild(page['container']);
+        cm.appendChild(page['container'], that.nodes['pages']);
+        cm.addClass(page['container'], 'is-loaded', true);
         // Restore scroll position
         cm.setScrollTop(that.params['scrollNode'], scrollTop);
         that.triggerEvent('onPageRenderEnd', page);
         that.isPageVisible(page);
     };
 
-    that.callbacks.renderPage = function(that, page){
+    classProto.callbacks.renderPage = function(that, page){
         var nodes;
         if(that.params['responseHTML']){
             nodes = cm.strToHTML(page['data']);
-            if(!cm.isEmpty(nodes)){
-                if(cm.isNode(nodes)){
-                    page['container'].appendChild(nodes);
-                }else{
-                    while(nodes.length){
-                        if(cm.isNode(nodes[0])){
-                            page['container'].appendChild(nodes[0]);
-                        }else{
-                            cm.remove(nodes[0]);
-                        }
-                    }
-                }
-            }
+            cm.appendNodes(nodes, page['container']);
         }
     };
 
     /* *** HELPERS *** */
 
-    that.callbacks.start = function(that){
+    classProto.callbacks.start = function(that){
         that.isProcess = true;
         // Show Loader
         if(that.params['showLoader']){
@@ -19492,13 +20499,13 @@ function(params){
         that.triggerEvent('onStart');
     };
 
-    that.callbacks.end = function(that){
+    classProto.callbacks.end = function(that){
         that.isProcess = false;
         // Hide Loader
         that.loaderDelay && clearTimeout(that.loaderDelay);
         cm.addClass(that.nodes['loader'], 'is-hidden');
         // Check pages count
-        if(that.pageCount > 0 && that.pageCount == that.currentPage){
+        if(that.pageCount > 0 && that.pageCount === that.currentPage){
             that.callbacks.finalize(that);
         }
         // Show / Hide Load More Button
@@ -19506,7 +20513,7 @@ function(params){
         that.triggerEvent('onEnd');
     };
 
-    that.callbacks.finalize = function(that){
+    classProto.callbacks.finalize = function(that){
         if(!that.isFinalize){
             that.isFinalize = true;
             that.callbacks.hideButton(that);
@@ -19514,54 +20521,81 @@ function(params){
         }
     };
 
-    that.callbacks.toggleButton = function(that){
-        if(!that.isFinalize && (that.params['showButton'] === true || (that.params['showButton'] == 'once' && that.params['startPage'] == that.page))){
+    classProto.callbacks.toggleButton = function(that){
+        if(
+            !that.isFinalize && 
+            (that.params['showButton'] === true || (that.params['showButton'] === 'once' && that.params['startPage'] === that.page))
+        ){
             that.callbacks.showButton(that);
         }else{
             that.callbacks.hideButton(that);
         }
     };
 
-    that.callbacks.showButton = function(that){
+    classProto.callbacks.showButton = function(that){
         that.isButton = true;
         cm.removeClass(that.nodes['button'], 'is-hidden');
         cm.removeClass(that.nodes['bar'], 'is-hidden');
+        cm.removeClass(that.nodes['barHolder'], 'is-hidden');
+        that.triggerEvent('onButtonShow');
     };
 
-    that.callbacks.hideButton = function(that){
+    classProto.callbacks.hideButton = function(that){
         that.isButton = false;
         cm.addClass(that.nodes['button'], 'is-hidden');
         cm.addClass(that.nodes['bar'], 'is-hidden');
+        cm.addClass(that.nodes['barHolder'], 'is-hidden');
+        that.triggerEvent('onButtonHide');
     };
 
     /* ******* PUBLIC ******* */
 
-    that.rebuild = function(params){
+    classProto.rebuild = function(params){
+        var that = this;
         // Cleanup
         if(that.isProcess){
             that.abort();
         }
         that.pages = {};
+        that.page = null;
+        that.pageToken = null;
         that.currentPage = null;
         that.previousPage = null;
+        that.nextPage = null;
+        that.pageCount = 0;
+        that.isFinalize = false;
         // Set new parameters
         if(!cm.isEmpty(params)){
             that.setParams(params);
-            validateParams();
         }
+        that.validateParams();
         // Reset styles and variables
-        reset();
+        that.resetStyles();
         that.triggerEvent('onRebuild');
         // Render new pge
-        set();
+        that.set();
     };
 
-    that.set = function(){
-        set();
+    classProto.set = function(){
+        var that = this,
+            config;
+        if(!that.isProcess && !that.isFinalize){
+            // Preset next page and page token
+            that.page = that.nextPage;
+            that.pageToken = that.pages[that.page]? that.pages[that.page]['token'] : '';
+            // Request
+            if(that.isAjax){
+                config = cm.clone(that.params['ajax']);
+                that.ajaxHandler = that.callbacks.request(that, config);
+            }else{
+                that.callbacks.data(that, that.params['data']);
+            }
+        }
         return that;
     };
 
-    that.setToken = function(page, token){
+    classProto.setToken = function(page, token){
+        var that = this;
         if(!that.pages[page]){
             that.pages[page] = {};
         }
@@ -19569,15 +20603,16 @@ function(params){
         return that;
     };
 
-    that.setCount = function(count){
-        if(count && (count = parseInt(count.toString())) && count != that.params['count']){
+    classProto.setCount = function(count){
+        var that = this;
+        if(count && (count = parseInt(count.toString())) && count !== that.params['count']){
             that.params['count'] = count;
-            if(that.params['pageCount'] == 0 && that.params['count'] && that.params['perPage']){
+            if(that.params['pageCount'] === 0 && that.params['count'] && that.params['perPage']){
                 that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
             }else{
                 that.pageCount = that.params['pageCount'];
             }
-            if(that.pageCount > 0 && that.pageCount == that.currentPage){
+            if(that.pageCount > 0 && that.pageCount === that.currentPage){
                 that.callbacks.finalize(that);
             }
             that.triggerEvent('onSetCount', count);
@@ -19585,7 +20620,8 @@ function(params){
         return that;
     };
 
-    that.setAction = function(o, mode, update){
+    classProto.setAction = function(o, mode, update){
+        var that = this;
         mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
         switch(mode){
             case 'raw':
@@ -19605,24 +20641,28 @@ function(params){
         return that;
     };
 
-    that.getAction = function(){
+    classProto.getAction = function(){
+        var that = this;
         return that.params['ajax'];
     };
 
-    that.getCurrentAction = function(){
+    classProto.getCurrentAction = function(){
+        var that = this;
         return that.currentAction;
     };
 
-    that.setPage = function(){
+    classProto.setPage = function(){
+        var that = this;
         that.previousPage = that.currentPage;
         that.currentPage = that.nextPage;
         that.nextPage++;
         return that;
     };
 
-    that.isPageVisible = function(page, scrollRect){
+    classProto.isPageVisible = function(page, scrollRect){
+        var that = this;
         if(page['container']){
-            scrollRect = typeof scrollRect == 'undefined' ? cm.getRect(that.params['scrollNode']) : scrollRect;
+            scrollRect = cm.isUndefined(scrollRect) ? cm.getRect(that.params['scrollNode']) : scrollRect;
             var pageRect = cm.getRect(page['container']);
 
             if(cm.inRange(pageRect['top'], pageRect['bottom'], scrollRect['top'], scrollRect['bottom'])){
@@ -19643,18 +20683,36 @@ function(params){
         return false;
     };
 
-    that.abort = function(){
+    classProto.abort = function(){
+        var that = this;
         if(that.ajaxHandler && that.ajaxHandler.abort){
             that.ajaxHandler.abort();
         }
         return that;
     };
 
-    that.isParent = function(node, flag){
-        return cm.isParent(that.nodes['container'], node, flag);
+    classProto.disable = function(){
+        var that = this;
+        that.isDisabled = true;
+        return that;
     };
 
-    init();
+    classProto.enable = function(){
+        var that = this;
+        that.isDisabled = false;
+        return that;
+    };
+
+    classProto.embedButton = function(node){
+        var that = this;
+        that.nodes['barHolder'] = node;
+        cm.appendChild(that.nodes['bar'], node);
+    };
+
+    classProto.isParent = function(node, flag){
+        var that = this;
+        return cm.isParent(that.nodes['container'], node, flag);
+    };
 });
 cm.define('Com.Slider', {
     'modules' : [
@@ -19679,6 +20737,7 @@ cm.define('Com.Slider', {
         'node' : cm.Node('div'),
         'name' : '',
         'customEvents' : true,
+        'renderStructure' : false,
         'isEditing' : false,
         'time' : 500,                   // Fade time
         'delay' : 4000,                 // Delay before slide will be changed
@@ -19778,6 +20837,10 @@ function(params){
 
     var renderSlider = function(){
         var transitionRule = cm.getSupportedStyle('transition');
+        // Render Structure
+        if(that.params['renderStructure']){
+            renderView();
+        }
         // Collect items
         cm.forEach(that.nodes['items'], collectItem);
         // Arrows
@@ -19823,6 +20886,10 @@ function(params){
         // Init animations
         that.anim['slides'] = new cm.Animation(that.nodes['slides']);
         that.anim['slidesInner'] = new cm.Animation(that.nodes['slidesInner']);
+    };
+
+    var renderView = function(){
+
     };
 
     var setEvents = function(){
@@ -19882,12 +20949,12 @@ function(params){
                 height = Math.max(height, cm.getRealHeight(item.nodes['inner'], 'offsetRelative'));
             }
         });
-        if(minHeightDimension == '%'){
+        if(minHeightDimension === '%'){
             height = Math.max(height, (that.nodes['inner'].offsetWidth / 100 * that.params['minHeight']));
         }else{
             height = Math.max(height, that.params['minHeight']);
         }
-        if(height != that.nodes['inner'].offsetHeight){
+        if(height !== that.nodes['inner'].offsetHeight){
             that.nodes['inner'].style.height = [height, 'px'].join('');
         }
     };
@@ -19902,12 +20969,12 @@ function(params){
                 height = Math.max(height, cm.getRealHeight(item.nodes['inner'], 'offsetRelative'));
             }
         }
-        if(minHeightDimension == '%'){
+        if(minHeightDimension === '%'){
             height = Math.max(height, (that.nodes['inner'].offsetWidth / 100 * that.params['minHeight']));
         }else{
             height = Math.max(height, that.params['minHeight']);
         }
-        if(height != that.nodes['inner'].offsetHeight){
+        if(height !== that.nodes['inner'].offsetHeight){
             that.nodes['inner'].style.height = [height, 'px'].join('');
         }
     };
@@ -20035,7 +21102,7 @@ function(params){
         }
         cm.addClass(current['bar']['container'], 'active');
         // Move bar
-        if(that.params['barDirection'] == 'vertical'){
+        if(that.params['barDirection'] === 'vertical'){
             top = current['bar']['container'].offsetTop - (that.nodes['layout-inner'].offsetHeight / 2) + (current['bar']['container'].offsetHeight / 2);
             components['scroll'].scrollY(top);
         }else{
@@ -20170,14 +21237,14 @@ function(params){
 
     that.next = function(){
         that.direction = 'next';
-        var i = ((that.current + 1) == that.items.length) ? 0 : (that.current + 1);
+        var i = ((that.current + 1) === that.items.length) ? 0 : (that.current + 1);
         set(i);
         return that;
     };
 
     that.prev = function(){
         that.direction = 'prev';
-        var i = (that.current == 0) ? (that.items.length - 1) : (that.current - 1);
+        var i = (that.current === 0) ? (that.items.length - 1) : (that.current - 1);
         set(i);
         return that;
     };
@@ -20324,7 +21391,7 @@ Com.SliderEffects['push'] = function(slider, current, previous, callback){
 Com.SliderEffects['pull'] = function(slider, current, previous, callback){
     if(slider.itemsLength > 1 && previous && current != previous){
         // Hide previous slide
-        var style = slider.direction == 'next' ? '-100%' : '100%';
+        var style = slider.direction === 'next' ? '-100%' : '100%';
         previous['nodes']['container'].style.zIndex = 1;
         previous['anim'].go({'style' : {'left' : style}, 'duration' : slider.params['time'], 'anim' : slider.params['transition'], 'onStop' : function(){
             previous['nodes']['container'].style.display = 'none';
@@ -20333,9 +21400,9 @@ Com.SliderEffects['pull'] = function(slider, current, previous, callback){
         // Set visible new slide and animate it
         current['nodes']['container'].style.zIndex = 2;
         current['nodes']['container'].style.display = 'block';
-        if(slider.direction == 'next'){
+        if(slider.direction === 'next'){
             current['nodes']['container'].style.left = '100%';
-        }else if(slider.direction == 'prev'){
+        }else if(slider.direction === 'prev'){
             current['nodes']['container'].style.left = '-100%';
         }
         current['anim'].go({'style' : {'left' : '0%'}, 'duration' : slider.params['time'], 'anim' : slider.params['transition'], 'onStop' : callback});
@@ -20357,9 +21424,9 @@ Com.SliderEffects['pull-overlap'] = function(slider, current, previous, callback
         // Set visible new slide and animate it
         current['nodes']['container'].style.zIndex = 2;
         current['nodes']['container'].style.display = 'block';
-        if(slider.direction == 'next'){
+        if(slider.direction === 'next'){
             current['nodes']['container'].style.left = '100%';
-        }else if(slider.direction == 'prev'){
+        }else if(slider.direction === 'prev'){
             current['nodes']['container'].style.left = '-100%';
         }
         current['anim'].go({'style' : {'left' : '0%'}, 'duration' : slider.params['time'], 'anim' : slider.params['transition'], 'onStop' : callback});
@@ -20373,7 +21440,7 @@ Com.SliderEffects['pull-overlap'] = function(slider, current, previous, callback
 Com.SliderEffects['pull-parallax'] = function(slider, current, previous, callback){
     if(slider.itemsLength > 1 && previous && current != previous){
         // Hide previous slide
-        var style = slider.direction == 'next' ? '-50%' : '50%';
+        var style = slider.direction === 'next' ? '-50%' : '50%';
         previous['nodes']['container'].style.zIndex = 1;
         previous['anim'].go({'style' : {'left' : style}, 'duration' : slider.params['time'], 'anim' : slider.params['transition'], 'onStop' : function(){
             previous['nodes']['container'].style.display = 'none';
@@ -20382,12 +21449,47 @@ Com.SliderEffects['pull-parallax'] = function(slider, current, previous, callbac
         // Set visible new slide and animate it
         current['nodes']['container'].style.zIndex = 2;
         current['nodes']['container'].style.display = 'block';
-        if(slider.direction == 'next'){
+        if(slider.direction === 'next'){
             current['nodes']['container'].style.left = '100%';
-        }else if(slider.direction == 'prev'){
+        }else if(slider.direction === 'prev'){
             current['nodes']['container'].style.left = '-100%';
         }
         current['anim'].go({'style' : {'left' : '0%'}, 'duration' : slider.params['time'], 'anim' : slider.params['transition'], 'onStop' : callback});
+    }else{
+        callback();
+    }
+};
+
+Com.SliderEffects['pull-parallax-css'] = function(slider, current, previous, callback){
+    if(slider.itemsLength > 1 && previous && current != previous){
+        // Hide previous slide
+        var style = slider.direction === 'next' ? '-50%' : '50%';
+        previous['nodes']['container'].style.zIndex = 1;
+        cm.transition(previous['nodes']['container'], {
+            'properties' : {
+                'transform' : 'translateX('+style+')'
+            },
+            'duration' : slider.params['time'],
+            'onStop' : function(){
+                previous['nodes']['container'].style.display = 'none';
+                cm.setCSSTranslate(previous['nodes']['container'], '100%', 0, 0);
+            }
+        });
+        // Set visible new slide and animate it
+        current['nodes']['container'].style.zIndex = 2;
+        current['nodes']['container'].style.display = 'block';
+        if(slider.direction === 'next'){
+            cm.setCSSTranslate(current['nodes']['container'], '100%', 0, 0);
+        }else if(slider.direction === 'prev'){
+            cm.setCSSTranslate(current['nodes']['container'], '-100%', 0, 0);
+        }
+        cm.transition(current['nodes']['container'], {
+            'properties' : {
+                'transform' : 'translateX(0%)'
+            },
+            'duration' : slider.params['time'],
+            'onStop' : callback
+        });
     }else{
         callback();
     }
@@ -20743,6 +21845,7 @@ cm.define('Com.Tabset', {
         'customEvents' : true,
         'active' : null,
         'className' : '',
+        'tabsAlign' : 'left',           // left | center | right | justify
         'tabsPosition' : 'top',         // top | right | bottom | left
         'tabsFlexible' : false,
         'tabsWidth' : 256,              // Only for tabsPosition left or right
@@ -20796,7 +21899,10 @@ function(params){
         if(!cm.inArray(['top', 'right', 'bottom', 'left'], that.params['tabsPosition'])){
             that.params['tabsPosition'] = 'top';
         }
-        if(typeof that.params['tabsWidth'] == 'number'){
+        if(!cm.inArray(['left', 'center', 'right', 'justify'], that.params['tabsAlign'])){
+            that.params['tabsAlign'] = 'left';
+        }
+        if(cm.isNumber(that.params['tabsWidth'])){
             that.params['tabsWidth'] = [that.params['tabsWidth'], 'px'].join('');
         }
     };
@@ -20812,7 +21918,7 @@ function(params){
 
     var renderView = function(){
         /* *** STRUCTURE *** */
-        that.nodes['container'] = cm.Node('div', {'class' : 'com__tabset'},
+        that.nodes['container'] = cm.Node('div', {'class' : 'com__tabset is-adaptive'},
             that.nodes['content'] = cm.Node('div', {'class' : 'com__tabset__content'},
                 that.nodes['contentUL'] = cm.Node('ul')
             )
@@ -20858,6 +21964,9 @@ function(params){
         /* *** ATTRIBUTES *** */
         // CSS
         cm.addClass(that.nodes['container'], ['is-tabs', that.params['tabsPosition']].join('-'));
+        if(/top|bottom/.test(that.params['tabsPosition'])){
+            cm.addClass(that.nodes['container'], ['is-tabs-pull', that.params['tabsAlign']].join('-'));
+        }
         if(that.params['tabsFlexible']){
             cm.addClass(that.nodes['container'], 'is-tabs-flexible');
         }
@@ -20947,7 +22056,7 @@ function(params){
             cm.addEvent(item['a'], 'click', function(e){
                 e = cm.getEvent(e);
                 cm.preventDefault(e);
-                if(that.active != tab['id']){
+                if(that.active !== tab['id']){
                     window.location.href = [window.location.href.split('#')[0], tab['id']].join('#');
                 }
             });
@@ -20970,9 +22079,7 @@ function(params){
         cm.remove(item['tab']['container']);
         cm.remove(item['menu']['container']);
         cm.remove(item['content']);
-        that.tabsListing = that.tabsListing.filter(function(tab){
-            return item['id'] != tab['id'];
-        });
+        that.tabsListing = cm.arrayRemove(that.tabsListing, item);
         delete that.tabs[item['id']];
     };
 
@@ -20985,27 +22092,13 @@ function(params){
 
     var set = function(id){
         var item, previous;
-        if(!that.isProcess && id != that.active){
+        if(!that.isProcess && id !== that.active){
             that.isProcess = true;
             // Hide Previous Tab
             if(that.active && that.tabs[that.active]){
                 that.previous = that.active;
                 previous = that.tabs[that.previous];
                 previous['isHide'] = true;
-                // Hide Start Event
-                previous['onHideStart'](that, previous);
-                that.triggerEvent('onTabHideStart', previous);
-                // Controller
-                if(previous['controllerObject']){
-                    previous['controllerObject'].suspend();
-                }
-                // Hide
-                cm.removeClass(previous['tab']['container'], 'active');
-                cm.removeClass(previous['menu']['container'], 'active');
-                cm.removeClass(previous['content'], 'active');
-                // Hide End Event
-                previous['onHide'](that, previous);
-                that.triggerEvent('onTabHide', previous);
             }
             // Show New Tab
             that.active = id;
@@ -21029,25 +22122,41 @@ function(params){
                 }
             }
             // Show
-            item['content'].style.display = 'block';
-            cm.addClass(item['tab']['container'], 'active');
-            cm.addClass(item['menu']['container'], 'active');
-            cm.addClass(item['content'], 'active', true);
-            that.nodes['headerTitleText'].innerHTML = item['title'];
-            // Animate
-            if(!that.params['switchManually']){
-                if(that.previous && that.params['animateSwitch'] && !that.params['calculateMaxHeight']){
-                    animateSwitch();
-                }else{
-                    if(that.params['calculateMaxHeight']){
-                        calculateMaxHeight();
-                    }
-                    if(that.previous){
-                        that.tabs[that.previous]['content'].style.display = 'none';
-                    }
-                    switchTab();
-                }
+            switchTabHandler(item, previous);
+        }
+    };
+
+    var switchTabHandler = function(item, previous){
+        // Hide previous tab
+        if(previous){
+            // Hide Start Event
+            previous['onHideStart'](that, previous);
+            that.triggerEvent('onTabHideStart', previous);
+            // Hide
+            cm.removeClass(previous['tab']['container'], 'active');
+            cm.removeClass(previous['menu']['container'], 'active');
+            cm.removeClass(previous['content'], 'active');
+            // Hide End Event
+            previous['onHide'](that, previous);
+            that.triggerEvent('onTabHide', previous);
+        }
+        // Show active tab
+        item['content'].style.display = 'block';
+        cm.addClass(item['tab']['container'], 'active');
+        cm.addClass(item['menu']['container'], 'active');
+        cm.addClass(item['content'], 'active', true);
+        that.nodes['headerTitleText'].innerHTML = item['title'];
+        // Animate
+        if(that.previous && that.params['animateSwitch'] && !that.params['calculateMaxHeight']){
+            animateSwitch();
+        }else{
+            if(that.params['calculateMaxHeight']){
+                calculateMaxHeight();
             }
+            if(that.previous){
+                that.tabs[that.previous]['content'].style.display = 'none';
+            }
+            switchTab();
         }
     };
 
@@ -21259,497 +22368,254 @@ function(params){
 
     init();
 });
-cm.define('Com.TabsetHelper', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'Callbacks',
-        'DataNodes',
-        'DataConfig',
-        'Stack'
-    ],
-    'events' : [
-        'onRender',
-        'onTabShowStart',
-        'onTabShow',
-        'onTabHideStart',
-        'onTabHide',
-        'onLabelTarget',
-        'onRequestStart',
-        'onRequestEnd',
-        'onRequestError',
-        'onRequestSuccess',
-        'onRequestAbort',
-        'onContentRenderStart',
-        'onContentRender'
-    ],
+/* ******* COMPONENTS: TABSET ******* */
+
+cm.define('Com.Tabset2', {
+    'extend' : 'Com.TabsetHelper',
     'params' : {
-        'node' : cm.Node('div'),
-        'name' : '',
-        'active' : null,
-        'items' : [],
+        'controllerEvents' : true,
+        'renderStructure' : true,
+        'embedStructureOnRender' : true,
+        'embedStructure' : 'replace',
+        'renderTabView' : true,
+        //'renderOnInit' : true,
+        'removeOnDestruct' : true,
+        'toggleOnHashChange' : true,                                // URL hash change handler
         'targetEvent' : 'click',                                    // click | hover | none
-        'setFirstTabImmediately' : true,
+
+        /* TABS */
+
+        'items' : [],
+        'active' : null,
+        'setInitialTab' : true,                                     // Set possible initial tab even if "active" is not defined
+        'setInitialTabImmediately' : true,                          // Set initial tab without animation
+        'tabsAlign' : 'left',                                       // left | center | right | justify
+        'tabsPosition' : 'top',                                     // top | right | bottom | left
+        'tabsFlexible' : false,
+        'tabsWidth' : 256,                                          // Only for tabsPosition left or right
+        'showTabs' : true,
+        'showTabsTitle' : true,                                     // Show title tooltip
+        'showContent' : true,
+        'switchManually' : false,                                   // Change tab manually, not implemented yet
+        'animateSwitch' : true,
+        'animateDuration' : 300,
+        'calculateMaxHeight' : false,
+
+        /* AJAX */
+
         'showLoader' : true,
-        'loaderDelay' : 'cm._config.loadDelay',                     // in ms
         'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
         'responseHTML' : true,                                      // If true, html will append automatically
-        'cache' : false,
+        'cache' : false,                                            // Cache ajax tab content
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
             'url' : '',                                             // Request URL. Variables: %baseUrl%, %tab%, %callback% for JSONP.
             'params' : ''                                           // Params object. %tab%, %baseUrl%, %callback% for JSONP.
         },
-        'Com.Overlay' : {
+
+        /* STYLES */
+
+        'adaptive' : true,
+        'className' : '',
+        'icons' : {
+            'menu' : 'icon default linked'
+        },
+
+        /* CONSTRUCTORS */
+
+        'overlayConstructor' : 'Com.Overlay',
+        'overlayParams' : {
             'position' : 'absolute',
+            'lazy' : true,
             'autoOpen' : false,
             'removeOnClose' : true
         }
-    },
-    'strings' : {
-        'server_error' : 'An unexpected error has occurred. Please try again later.'
     }
 },
 function(params){
     var that = this;
+    // Call parent class construct
+    Com.TabsetHelper.apply(that, arguments);
+});
 
-    that.components = {};
-    that.nodes = {
-        'container': cm.node('div'),
-        'labels' : [],
-        'tabs' : [],
-        'select' : cm.node('select')
+cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.onGetLESSVariablesProcess = function(){
+        var that = this;
+        that.params['animateDuration'] = cm.getTransitionDurationFromLESS('ComTabset-Duration', that.params['animateDuration']);
+        that.params['tabsWidth'] = cm.getLESSVariable('ComTabset-Column-Width', that.params['tabsWidth'], true);
     };
 
-    that.ajaxHandler = null;
-    that.isAjax = false;
-    that.isProcess = false;
-    that.loaderDelay = null;
-    that.targetEvent = null;
-
-    that.current = false;
-    that.previous = false;
-    that.items = {};
-    that.itemsList = [];
-
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        that.callbacksProcess();
-        validateParams();
-        render();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRender');
-        // Set active tab
-        if(that.params['active'] && that.items[that.params['active']]){
-            set(that.params['active']);
+    classProto.onValidateParams = function(){
+        var that = this;
+        // Get tabs from nodes
+        if(cm.isNode(that.params['node'])){
+            that.collectTabs();
         }
+        return that;
     };
 
-    var validateParams = function(){
-        // Ajax
-        if(!cm.isEmpty(that.params['ajax']['url'])){
-            that.isAjax = true;
-        }
-        // Target Event
-        switch(that.params['targetEvent']){
-            case 'hover':
-                that.targetEvent = 'mouseover';
-                break;
-            case 'click':
-                that.targetEvent = 'click';
-                break;
-        }
-    };
-
-    var render = function(){
-        // Process tabs
-        that.processTabs(that.nodes['tabs'], that.nodes['labels']);
-        // Process tabs in parameters
-        cm.forEach(that.params['items'], function(item){
-            renderTab(item);
-        });
-        // Process select
-        that.processSelect(that.nodes['select']);
-        // Overlay
-        cm.getConstructor('Com.Overlay', function(classConstructor){
-            that.components['loader'] = new classConstructor(that.params['Com.Overlay']);
-        });
-    };
-
-    var renderTab = function(item){
-        item = cm.merge({
-            'index' : that.itemsList.length,
-            'id' : '',
-            'title' : '',
-            'tab' : {
-                'container' : cm.node('li'),
-                'inner' : cm.node('div')
-            },
-            'label' : {
-                'container' : cm.node('li'),
-                'link' : cm.node('a')
-            },
-            'isHidden' : false,
-            'isShow' : false,
-            'isAjax' : false,
-            'isCached' : false,
-            'ajax' : {}
-        }, item);
-        if(!cm.isEmpty(item['ajax']['url'])){
-            item.isAjax = true;
-        }
-        if(!cm.isEmpty(item['id']) && !that.items[item['id']]){
-            that.itemsList.push(item);
-            that.items[item['id']] = item;
-            if(item.isHidden){
-                cm.addClass(item['label']['container'], 'hidden');
-                cm.addClass(item['tab']['container'], 'hidden');
-            }
-            if(that.targetEvent){
-                cm.addEvent(item['label']['container'], that.targetEvent, function(){
-                    that.triggerEvent('onLabelTarget', {
-                        'item' : item
-                    });
-                    set(item['id']);
-                });
-            }
-        }
-    };
-
-    var set = function(id){
-        var item = that.items[id];
-        if(item && that.current != id){
-            that.triggerEvent('onTabShowStart', {
-                'item' : item
-            });
-            // Hide previous tab
-            unset();
-            // Show new tab
-            that.current = id;
-            item.isShow = true;
-            if(!that.previous && that.params['setFirstTabImmediately']){
-                cm.addClass(item['tab']['container'], 'is-immediately');
-                cm.addClass(item['label']['container'], 'is-immediately');
-                setTimeout(function(){
-                    cm.removeClass(item['tab']['container'], 'is-immediately');
-                    cm.removeClass(item['label']['container'], 'is-immediately');
-                }, 5);
-            }
-            cm.addClass(item['tab']['container'], 'active');
-            cm.addClass(item['label']['container'], 'active');
-            // Set select menu
-            cm.setSelect(that.nodes['select'], that.current);
-            // Trigger events
-            if(item.isAjax && (!that.params['cache'] || (that.params['cache'] && !item.isCached))){
-                that.ajaxHandler = that.callbacks.request(that, item, cm.merge(that.params['ajax'], item['ajax']));
-            }else{
-                that.triggerEvent('onTabShow', {
-                    'item' : item
-                });
-            }
-        }
-    };
-
-    var unset = function(){
-        var item;
-        if(that.current && that.items[that.current]){
-            item = that.items[that.current];
-            if(that.isProcess){
-                that.abort();
-            }
-            that.previous = that.current;
-            item.isShow = false;
-            that.triggerEvent('onTabHideStart', {
-                'item' : item
-            });
-            cm.removeClass(item['tab']['container'], 'active');
-            cm.removeClass(item['label']['container'], 'active');
-            that.triggerEvent('onTabHide', {
-                'item' : item
-            });
-            that.current = null;
-        }
-    };
-
-    var unsetHead = function(){
-        var item;
-        if(that.current && that.items[that.current]){
-            item = that.items[that.current];
-            cm.removeClass(item['label']['container'], 'active');
-        }
-    };
-
-    /* ******* CALLBACKS ******* */
-
-    /* *** AJAX *** */
-
-    that.callbacks.prepare = function(that, item, config){
-        // Prepare
-        config['url'] = cm.strReplace(config['url'], {
-            '%tab%' : item['id'],
-            '%baseUrl%' : cm._baseUrl
-        });
-        config['params'] = cm.objectReplace(config['params'], {
-            '%tab%' : item['id'],
-            '%baseUrl%' : cm._baseUrl
-        });
-        return config;
-    };
-
-    that.callbacks.request = function(that, item, config){
-        config = that.callbacks.prepare(that, item, config);
-        // Return ajax handler (XMLHttpRequest) to providing abort method.
-        return cm.ajax(
-            cm.merge(config, {
-                'onStart' : function(){
-                    that.callbacks.start(that, item, config);
-                },
-                'onSuccess' : function(response){
-                    that.callbacks.response(that, item, config, response);
-                },
-                'onError' : function(){
-                    that.callbacks.error(that, item, config);
-                },
-                'onAbort' : function(){
-                    that.callbacks.abort(that, item, config);
-                },
-                'onEnd' : function(){
-                    that.callbacks.end(that, item,  config);
-                }
-            })
+    classProto.renderView = function(){
+        var that = this;
+        // Structure
+        that.triggerEvent('onRenderViewStart');
+        that.nodes['container'] = that.nodes['inner'] = cm.node('div', {'class' : 'com__tabset'});
+        that.nodes['content'] = cm.node('div', {'class' : 'com__tabset__content'},
+            that.nodes['contentUL'] = cm.node('ul')
         );
-    };
-
-    that.callbacks.start = function(that, item, config){
-        that.isProcess = true;
-        // Show Loader
-        if(that.params['showLoader']){
-            that.loaderDelay = setTimeout(function(){
-                if(that.components['loader'] && !that.components['loader'].isOpen){
-                    that.components['loader']
-                        .embed(item['tab']['container'])
-                        .open();
-                }
-            }, that.params['loaderDelay']);
+        that.nodes['headerTitle'] = cm.node('div', {'class' : 'com__tabset__head-title'},
+            that.nodes['headerTitleText'] = cm.node('div', {'class' : 'com__tabset__head-text'}),
+            cm.node('div', {'class' : 'com__tabset__head-menu pt__menu'},
+                cm.node('div', {'class' : that.params['icons']['menu']}),
+                that.nodes['headerMenuUL'] = cm.node('ul', {'class' : 'pt__menu-dropdown'})
+            )
+        );
+        that.nodes['headerTabs'] = cm.node('div', {'class' : 'com__tabset__head-tabs'},
+            that.nodes['headerUL'] = cm.node('ul')
+        );
+        that.triggerEvent('onRenderViewProcess');
+        // Adaptive
+        if(that.params['adaptive']){
+            cm.addClass(that.nodes['container'], 'is-adaptive');
         }
-        that.triggerEvent('onRequestStart', {
-            'item' : item
-        });
-    };
-
-    that.callbacks.end = function(that, item, config){
-        that.isProcess = false;
-        // Hide Loader
-        if(that.params['showLoader']){
-            that.loaderDelay && clearTimeout(that.loaderDelay);
-            if(that.components['loader'] && that.components['loader'].isOpen){
-                that.components['loader'].close();
-            }
+        // Set Tabs Width
+        if(/left|right/.test(that.params['tabsPosition'])){
+            that.nodes['headerTabs'].style.width = that.params['tabsWidth'];
+            that.nodes['content'].style.width = ['calc(100% - ', that.params['tabsWidth'], ')'].join('');
         }
-        that.triggerEvent('onRequestEnd', {
-            'item' : item
-        });
-    };
-
-    that.callbacks.filter = function(that, item, config, response){
-        var data,
-            dataItem = cm.objectSelector(that.params['responseKey'], response);
-        if(dataItem && !cm.isEmpty(dataItem)){
-            data = dataItem;
+        // Tabs positions
+        cm.addClass(that.nodes['container'], ['is-tabs', that.params['tabsPosition']].join('-'));
+        if(/top|bottom/.test(that.params['tabsPosition'])){
+            cm.addClass(that.nodes['container'], ['is-tabs-pull', that.params['tabsAlign']].join('-'));
         }
-        return data;
-    };
-
-    that.callbacks.response = function(that, item, config, response){
-        if(!cm.isEmpty(response)){
-            response = that.callbacks.filter(that, item, config, response);
+        if(that.params['tabsFlexible']){
+            cm.addClass(that.nodes['container'], 'is-tabs-flexible');
         }
-        if(!cm.isEmpty(response)){
-            that.callbacks.success(that, item, response);
-        }else{
-            that.callbacks.error(that, item, config);
+        // Animate
+        if(that.params['animateSwitch']){
+            cm.addClass(that.nodes['content'], 'is-animated');
         }
-    };
-
-    that.callbacks.error = function(that, item, config){
-        that.callbacks.renderError(that, item, config);
-        that.triggerEvent('onRequestError', {
-            'item' : item
-        });
-    };
-
-    that.callbacks.success = function(that, item, response){
-        that.callbacks.render(that, item, response);
-        that.triggerEvent('onRequestSuccess', {
-            'tab' : item,
-            'response' : response
-        });
-    };
-
-    that.callbacks.abort = function(that, item, config){
-        that.triggerEvent('onRequestAbort', {
-            'item' : item
-        });
-    };
-
-    /* *** RENDER *** */
-
-    that.callbacks.render = function(that, item, data){
-        item['data'] = data;
-        item.isCached = true;
-        // Render
-        that.triggerEvent('onContentRenderStart', {
-            'item' : item,
-            'data' : data
-        });
-        that.callbacks.renderContent(that, item, data);
-        that.triggerEvent('onContentRender', {
-            'item' : item,
-            'data' : data
-        });
-        that.triggerEvent('onTabShow', {
-            'item' : item,
-            'data' : data
-        });
-    };
-
-    that.callbacks.renderContent = function(that, item, data){
-        var nodes;
-        if(that.params['responseHTML']){
-            cm.clearNode(item['tab']['inner']);
-            nodes = cm.strToHTML(data);
-            if(!cm.isEmpty(nodes)){
-                if(cm.isNode(nodes)){
-                    item['tab']['inner'].appendChild(nodes);
+        // Embed Content
+        if(that.params['showContent']){
+            cm.appendChild(that.nodes['content'], that.nodes['inner']);
+        }
+        // Embed Tabs
+        if(that.params['showTabs']){
+            if(that.params['showContent']){
+                cm.insertBefore(that.nodes['headerTitle'], that.nodes['content']);
+                if(/bottom|right/.test(that.params['tabsPosition'])){
+                    cm.insertAfter(that.nodes['headerTabs'], that.nodes['content']);
                 }else{
-                    while(nodes.length){
-                        if(cm.isNode(nodes[0])){
-                            item['tab']['inner'].appendChild(nodes[0]);
-                        }else{
-                            cm.remove(nodes[0]);
-                        }
-                    }
+                    cm.insertBefore(that.nodes['headerTabs'], that.nodes['content']);
                 }
+            }else{
+                cm.appendChild(that.nodes['headerTitle'], that.nodes['inner']);
+                cm.appendChild(that.nodes['headerTabs'], that.nodes['inner']);
+            }
+        }
+        that.triggerEvent('onRenderViewEnd');
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+    };
+
+    /******* TABS *******/
+
+    classProto.collectTabs = function(){
+        var that = this;
+        cm.forEach(that.nodes['tabs'], function(item){
+            if(cm.isNode(item['container'])){
+                cm.removeClass(item['content'], 'active');
+                that.params['items'].push(
+                    cm.merge({'content' : item['container']}, that.getNodeDataConfig(item['container']))
+                )
+            }
+        });
+    };
+
+    classProto.renderTabView = function(item){
+        var that = this;
+        // Render structure
+        item['label'] = that.renderTabLink(item, 'label');
+        item['menu'] = that.renderTabLink(item, 'menu');
+        item['tab'] = that.renderTabContent(item);
+        // Embed
+        cm.appendChild(item['label']['container'], that.nodes['headerUL']);
+        cm.appendChild(item['menu']['container'], that.nodes['headerMenuUL']);
+        cm.appendChild(item['tab']['container'], that.nodes['contentUL']);
+    };
+
+    classProto.renderTabContent = function(item){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['container'] = cm.Node('li',
+            nodes['inner'] = cm.Node('div', item['content'])
+        );
+        return nodes;
+    };
+
+    classProto.renderTabLink = function(item, type){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['container'] = cm.Node('li',
+            nodes['link'] = cm.Node('a',
+                cm.node('div', {'class' : 'title'}, item['title'])
+            )
+        );
+        // Image
+        if(type === 'label'){
+            if(cm.isNode(item['image'])){
+                nodes['image'] = item['image'];
+            }else if(!cm.isEmpty(item['image'])){
+                nodes['image'] = cm.node('div', {'class' : 'image'},
+                    cm.node('img', {'src' : item['image'], 'alt' : ''})
+                );
+            }
+            if(nodes['image']){
+                cm.insertFirst(nodes['image'], nodes['link']);
+            }
+            if(that.params['showTabsTitle']){
+                nodes['link'].setAttribute('title', item['title']);
+            }
+        }
+        return nodes;
+    };
+
+    /*** TOGGLE ***/
+
+    classProto.onTabShowProcess = function(that, item){
+        clearTimeout(item['switchInt']);
+        item['tab']['container'].style.display = 'block';
+    };
+
+    classProto.onTabShowEnd = function(that, item){
+        var previous = that.previous;
+        var previousItem = that.items[previous];
+        if(previous && previous !== item){
+            if(that.params['animateSwitch']){
+                previousItem['switchInt'] = setTimeout(function(){
+                    previousItem['tab']['container'].style.display = 'none';
+                }, that.params['animateDuration']);
+            }else{
+                previousItem['tab']['container'].style.display = 'none';
             }
         }
     };
 
-    that.callbacks.renderError = function(that, item, config){
-        if(that.params['responseHTML']){
-            cm.clearNode(item['tab']['inner']);
-            item['tab']['inner'].appendChild(
-                cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'))
-            );
-        }
-    };
+    /******* PUBLIC *******/
 
-    /* ******* PUBLIC ******* */
-
-    that.set = function(id){
-        if(id && that.items[id]){
-            set(id);
-        }
+    classProto.reset = function(){
+        var that = this;
+        that.setInitialTab();
         return that;
     };
-
-    that.setByIndex = function(index){
-        var item;
-        if(item = that.itemsList[index]){
-            set(item['id']);
-        }
-        return that;
-    };
-
-    that.unset = function(){
-        unset();
-        that.previous = null;
-        return that;
-    };
-
-    that.unsetHead = function(){
-        unsetHead();
-        return that;
-
-    };
-
-    that.get = function(){
-        return that.current;
-    };
-
-    that.addTab = function(item){
-        renderTab(item);
-        return that;
-    };
-
-    that.addTabs = function(items){
-        cm.forEach(items, function(item){
-            renderTab(item);
-        });
-        return that;
-    };
-
-    that.processTabs = function(tabs, labels){
-        var itemsToProcess = tabs.length ?  tabs : labels,
-            items = [],
-            label,
-            config,
-            item;
-        cm.forEach(itemsToProcess, function(tab, key){
-            label = labels[key];
-            config = cm.merge(that.getNodeDataConfig(tab['container']), that.getNodeDataConfig(label['container']));
-            item = cm.merge(config, {
-                'tab' : tab,
-                'label' : label
-            });
-            items.push(item);
-        });
-        that.addTabs(items);
-        return that;
-    };
-
-    that.processSelect = function(container){
-        cm.addEvent(container, 'change', function(){
-            that.set(container.value);
-        })
-    };
-
-    that.getTab = function(id){
-        if(id && that.items[id]){
-            return that.items[id];
-        }
-        return null;
-    };
-
-    that.getTabs = function(){
-        return that.items;
-    };
-
-    that.getCurrentTab = function(){
-        return that.items[that.current];
-    };
-
-    that.getTabsCount = function(){
-        return that.itemsList.length;
-    };
-
-    that.isTabEmpty = function(id){
-        var item = that.getTab(id);
-        return !(item && item['tab']['inner'].childNodes.length);
-    };
-
-    that.abort = function(){
-        if(that.ajaxHandler && that.ajaxHandler.abort){
-            that.ajaxHandler.abort();
-        }
-        return that;
-    };
-
-    init();
 });
 cm.define('Com.Timer', {
     'modules' : [
@@ -22368,16 +23234,22 @@ cm.define('Com.Tooltip', {
         'onHide'
     ],
     'params' : {
-        'target' : cm.Node('div'),
+        'target' : cm.node('div'),
         'targetEvent' : 'hover',                        // hover | click | none
         'hideOnReClick' : false,                        // Hide tooltip when re-clicking on the target, requires setting value 'targetEvent' : 'click'
         'hideOnOut' : true,
         'hold' : false,
+        'holdTarget' : false,
         'preventClickEvent' : false,                    // Prevent default click event on the target, requires setting value 'targetEvent' : 'click'
+        'positionTarget' : false,                       // Override target node for calculation position and dimensions
         'top' : 0,                                      // Supported properties: targetHeight, selfHeight, number
         'left' : 0,                                     // Supported properties: targetWidth, selfWidth, number
+        'adaptiveFrom' : null,
+        'adaptiveTop' : null,
+        'adaptiveLeft' : null,
         'width' : 'auto',                               // Supported properties: targetWidth, auto, number
         'minWidth' : 0,
+        'scroll' : 'auto',                              // auto, scroll, visible
         'duration' : 'cm._config.animDurationShort',
         'delay' : 0,
         'resizeInterval' : 5,
@@ -22435,6 +23307,7 @@ function(params){
                 that.nodes['content'] = cm.Node('div', {'class' : 'scroll'})
             )
         );
+        cm.isString(that.params['scroll']) && cm.addClass(that.nodes['content'], ['is', that.params['scroll']].join('-'));
         // Add position style
         that.nodes['container'].style.position = that.params['position'];
         // Add theme css class
@@ -22484,7 +23357,7 @@ function(params){
 
     var targetEvent = function(){
         if(!that.disabled){
-            if(that.isShow && that.params['targetEvent'] == 'click' && that.params['hideOnReClick']){
+            if(that.isShow && that.params['targetEvent'] === 'click' && that.params['hideOnReClick']){
                 hide();
             }else{
                 show();
@@ -22495,7 +23368,8 @@ function(params){
     var setTargetEvent = function(){
         // Hold
         if(that.params['hold']){
-            cm.appendChild(that.nodes['container'], that.params['target']);
+            var holdTarget = that.params['holdTarget'] || that.params['target'];
+            cm.appendChild(that.nodes['container'], holdTarget);
         }
         // Event
         switch(that.params['targetEvent']){
@@ -22597,7 +23471,8 @@ function(params){
         removeWindowEvent();
         that.nodes['container'].style.display = 'none';
         if(that.params['hold']){
-            cm.appendChild(that.nodes['container'], that.params['target']);
+            var holdTarget = that.params['holdTarget'] || that.params['target'];
+            cm.appendChild(that.nodes['container'], holdTarget);
         }else{
             cm.remove(that.nodes['container']);
         }
@@ -22614,13 +23489,21 @@ function(params){
     };
 
     var resize = function(){
-        var targetWidth =  that.params['target'].offsetWidth,
-            targetHeight = that.params['target'].offsetHeight,
+        var target = that.params['positionTarget'] || that.params['target'],
+            targetWidth =  target.offsetWidth,
+            targetHeight = target.offsetHeight,
             selfHeight = that.nodes['container'].offsetHeight,
             selfWidth = that.nodes['container'].offsetWidth,
             pageSize = cm.getPageSize(),
             scrollTop = cm.getScrollTop(window),
-            scrollLeft = cm.getScrollLeft(window);
+            scrollLeft = cm.getScrollLeft(window),
+            paramsTop = that.params['top'],
+            paramsLeft = that.params['left'];
+        // Validate
+        if(!cm.isEmpty(that.params['adaptiveFrom']) && that.params['adaptiveFrom'] >= pageSize['winWidth']){
+            paramsTop = !cm.isEmpty(that.params['adaptiveTop']) ? that.params['adaptiveTop'] : paramsTop;
+            paramsLeft = !cm.isEmpty(that.params['adaptiveLeft']) ? that.params['adaptiveLeft'] : paramsLeft;
+        }
         // Calculate size
         (function(){
             var width = 0,
@@ -22632,6 +23515,7 @@ function(params){
                         .replace('targetWidth', targetWidth)
                         .replace('selfWidth', selfWidth)
                 );
+                minWidth = Math.min(pageSize['winWidth'], minWidth);
                 that.nodes['container'].style.minWidth =  [minWidth, 'px'].join('');
             }
             if(that.params['width'] !== 'auto'){
@@ -22642,6 +23526,7 @@ function(params){
                         .replace('selfWidth', selfWidth)
                 );
                 width = Math.max(minWidth, width);
+                width = Math.min(pageSize['winWidth'], width);
                 if(width !== selfWidth){
                     that.nodes['container'].style.width =  [width, 'px'].join('');
                     selfWidth = that.nodes['container'].offsetWidth;
@@ -22651,17 +23536,15 @@ function(params){
         })();
         // Calculate position
         (function(){
-            var top = cm.getRealY(that.params['target']),
+            var top = cm.getRealY(target),
                 topAdd = eval(
-                    that.params['top']
-                        .toString()
+                    paramsTop.toString()
                         .replace('targetHeight', targetHeight)
                         .replace('selfHeight', selfHeight)
                 ),
-                left =  cm.getRealX(that.params['target']),
+                left =  cm.getRealX(target),
                 leftAdd = eval(
-                    that.params['left']
-                        .toString()
+                    paramsLeft.toString()
                         .replace('targetWidth', targetWidth)
                         .replace('selfWidth', selfWidth)
                 ),
@@ -22672,8 +23555,8 @@ function(params){
                 positionTop = Math.max(
                     Math.min(
                         ((top + topAdd + selfHeight > pageSize['winHeight'])
-                                ? (top - topAdd - selfHeight + targetHeight)
-                                : (top + topAdd)
+                            ? (top - topAdd - selfHeight + targetHeight)
+                            : (top + topAdd)
                         ),
                         (pageSize['winHeight'] - selfHeight)
                     ),
@@ -22687,8 +23570,8 @@ function(params){
                 positionLeft = Math.max(
                     Math.min(
                         ((left + leftAdd + selfWidth > pageSize['winWidth'])
-                                ? (left - leftAdd - selfWidth + targetWidth)
-                                : (left + leftAdd)
+                            ? (left - leftAdd - selfWidth + targetWidth)
+                            : (left + leftAdd)
                         ),
                         (pageSize['winWidth'] - selfWidth)
                     ),
@@ -22698,8 +23581,8 @@ function(params){
                 positionLeft = left + leftAdd;
             }
             // Fix scroll position for absolute
-            if(that.params['position'] == 'absolute'){
-                if(that.params['container'] == document.body){
+            if(that.params['position'] === 'absolute'){
+                if(that.params['container'] === document.body){
                     positionTop += scrollTop;
                     positionLeft += scrollLeft;
                 }else{
@@ -22710,10 +23593,10 @@ function(params){
             positionTop = Math.round(positionTop);
             positionLeft = Math.round(positionLeft);
             // Apply styles
-            if(positionTop != that.nodes['container'].offsetTop){
+            if(positionTop !== that.nodes['container'].offsetTop){
                 that.nodes['container'].style.top =  [positionTop, 'px'].join('');
             }
-            if(positionLeft != that.nodes['container'].offsetLeft){
+            if(positionLeft !== that.nodes['container'].offsetLeft){
                 that.nodes['container'].style.left = [positionLeft, 'px'].join('');
             }
         })();
@@ -22782,8 +23665,15 @@ function(params){
 
     that.setTarget = function(node){
         removeTargetEvent();
-        that.params['target'] = node || cm.Node('div');
+        that.params['target'] = node || cm.node('div');
         setTargetEvent();
+        return that;
+    };
+
+    that.setContainer = function(node){
+        if(cm.isNode(node)){
+            that.params['container'] = node;
+        }
         return that;
     };
 
@@ -23265,9 +24155,11 @@ cm.define('Com.MultipleInput', {
         'onItemAddStart',
         'onItemAddProcess',
         'onItemAddEnd',
+        'onItemAdd',
         'onItemRemoveStart',
         'onItemRemoveProcess',
         'onItemRemoveEnd',
+        'onItemRemove',
         'onItemSortStart',
         'onItemSortProcess',
         'onItemSortEnd'
@@ -23281,6 +24173,7 @@ cm.define('Com.MultipleInput', {
         'sortable' : false,
         'showControls' : true,
         'showToolbar' : false,
+        'showList' : true,
         'focusInput' : false,
         'duration' : 'cm._config.animDurationShort',
         'inputConstructor' : 'Com.AbstractInput',
@@ -23350,6 +24243,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         that.params['multiFieldParams']['max'] = that.params['max'];
         that.params['multiFieldParams']['sortable'] = that.params['sortable'];
         that.params['multiFieldParams']['showControls'] = that.params['showControls'];
+        that.params['multiFieldParams']['showList'] = that.params['showList'];
         return that;
     };
 
@@ -23432,7 +24326,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
 
     classProto.addItem = function(item, triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents = cm.isUndefined(triggerEvents) ? true : triggerEvents;
         if(!that.params['max'] || that.items.length < that.params['max']){
             // Render Fields
             that.components['multiField'].addItem({}, {
@@ -23447,7 +24341,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
 
     classProto.addItemProcess = function(item, field, triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents = cm.isUndefined(triggerEvents) ? true : triggerEvents;
         // Merge config
         item = cm.merge({
             'input' : null,
@@ -23488,12 +24382,13 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         that.toggleToolbarVisibility();
         // Complete event
         that.triggerEvent('onItemAddEnd', item);
+        that.triggerEvent('onItemAdd', item);
         return item;
     };
 
     classProto.removeItem = function(item, triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents = cm.isUndefined(triggerEvents) ? true : triggerEvents;
         // Remove Field
         that.components['multiField'].removeItem(item['field'], {
             'triggerEvents' : false,
@@ -23506,12 +24401,13 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
 
     classProto.removeItemProcess = function(item, field, triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents = cm.isUndefined(triggerEvents) ? true : triggerEvents;
         that.triggerEvent('onItemRemoveStart', item);
         that.items = cm.arrayRemove(that.items, item);
         that.triggerEvent('onItemRemoveProcess', item);
         item['controller'] && item['controller'].destruct();
         that.triggerEvent('onItemRemoveEnd', item);
+        that.triggerEvent('onItemRemove', item);
         // Toggle toolbar visibility
         that.toggleToolbarVisibility();
         // Trigger set events
@@ -23538,7 +24434,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
     classProto.toggleToolbarVisibility = function(){
         var that = this;
         if(that.params['showToolbar']){
-            if(that.params['max'] > 0 && that.items.length == that.params['max']){
+            if(that.params['max'] > 0 && that.items.length === that.params['max']){
                 that.hideToolbar();
             }else{
                 that.showToolbar();
@@ -23592,7 +24488,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
 
     classProto.set = function(value, triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents = cm.isUndefined(triggerEvents) ? true : triggerEvents;
         cm.forEach(that.items, function(item){
             that.removeItem(item, false);
         });
@@ -23619,7 +24515,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
 
     classProto.clear = function(triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents = cm.isUndefined(triggerEvents) ? true : triggerEvents;
         triggerEvents && that.triggerEvent('onClear');
         that.set(that.params['defaultValue'], triggerEvents);
         return that;
@@ -23919,9 +24815,10 @@ cm.define('Com.Autocomplete', {
         'input' : null,                                             // Deprecated, use 'node' parameter instead.
         'node' : cm.node('input', {'type' : 'text'}),               // Html input node to decorate.
         'target' : false,                                           // HTML node.
-        'container' : 'document.body',
+        'container' : 'document.body',                              // 'document.body', 'targetParent'
         'name' : '',
         'minLength' : 3,
+        'direction' : 'auto',                                       // auto | start
         'className' : '',
         'delay' : 'cm._config.requestDelay',
         'clearOnEmpty' : true,                                      // Clear input and value if item didn't selected from tooltip
@@ -23929,7 +24826,9 @@ cm.define('Com.Autocomplete', {
         'listItemNowrap' : false,
         'showLoader' : true,                                        // Show ajax spinner in tooltip, for ajax mode only.
         'data' : [],                                                // Examples: [{'value' : 'foo', 'text' : 'Bar'}] or ['Foo', 'Bar'].
+        'options' : [],
         'value' : {},
+        'defaultValue' : '',
         'showSuggestion' : false,                                   // Show suggestion option when search query was empty
         'suggestionConstructor' : 'Com.AbstractContainer',
         'suggestionParams' : {},
@@ -23944,6 +24843,9 @@ cm.define('Com.Autocomplete', {
         'classes' : {
             'list' : 'pt__list',
             'listItem' : 'pt__list__item'
+        },
+        'icons' : {
+            'search' : 'icon default linked'
         },
         'Com.Tooltip' : {
             'hideOnOut' : true,
@@ -24003,8 +24905,10 @@ function(params){
         // If URL parameter exists, use ajax data
         that.isAjax = !cm.isEmpty(that.params['ajax']['url']);
         // Prepare data
+        that.params['data'] = cm.merge(that.params['data'], that.params['options']);
         that.params['data'] = that.callbacks.convert(that, that.params['data']);
-        that.params['value'] = that.callbacks.convertItem(that, that.params['value']);
+        // Value
+        that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
         // Tooltip
         that.params['Com.Tooltip']['className'] = [
             'com__ac-tooltip',
@@ -24134,14 +25038,16 @@ function(params){
     };
 
     var clear = function(){
-        var item;
+        var item,
+            value;
         // Kill timeout interval and ajax request
         that.requestDelay && clearTimeout(that.requestDelay);
         that.abort();
         // Clear input
         if(that.params['clearOnEmpty']){
             item = getSavedItemData(that.value);
-            if(!item || item['text'] != that.params['node'].value){
+            value = that.params['node'].value;
+            if(!item || item['text'] != value){
                 that.clear();
             }
         }
@@ -24160,7 +25066,7 @@ function(params){
     };
 
     var onChange = function(){
-        if(that.value != that.previousValue){
+        if(that.value !== that.previousValue){
             that.triggerEvent('onChange', that.value);
         }
     };
@@ -24288,11 +25194,23 @@ function(params){
     that.callbacks.query = function(that, params){
         var filteredItems = [];
         cm.forEach(params['data'], function(item){
-            if(item && item['text'].toLowerCase().indexOf(params['query'].toLowerCase()) > -1){
+            if(that.callbacks.isContain(that, item['text'], params['query'])){
                 filteredItems.push(item);
             }
         });
         return filteredItems;
+    };
+
+    that.callbacks.isContain = function(that, text, query){
+        text = text.toLowerCase();
+        query = query.toLowerCase();
+        // Direction
+        switch(that.params['direction']){
+            case 'start':
+                return new RegExp('^' + query, 'i').test(text);
+            default:
+                return text.indexOf(query) > -1;
+        }
     };
 
     that.callbacks.render = function(that, params){
@@ -24355,9 +25273,15 @@ function(params){
     };
 
     that.setInput = function(node){
+        var tooltipContainer = that.params['container'];
         if(cm.isNode(node)){
             unsetEvents();
             that.params['node'] = node;
+            // Set tooltip container
+            if(tooltipContainer === 'targetParent'){
+                tooltipContainer = that.params['node'].parentNode;
+            }
+            that.components['tooltip'].setContainer(tooltipContainer);
             setEvents();
         }
         return that;
@@ -24455,9 +25379,13 @@ cm.getConstructor('Com.Autocomplete', function(classConstructor, className, clas
     /*** DATA ***/
 
     classProto.callbacks.convert = function(that, data){
-        return data.map(function(item){
-            return that.callbacks.convertItem(that, item);
-        });
+        if(cm.isObject(data)){
+            return that.callbacks.convertObject(that, data);
+        }else{
+            return data.map(function(item){
+                return that.callbacks.convertItem(that, item);
+            });
+        }
     };
 
     classProto.callbacks.convertItem = function(that, item){
@@ -24471,6 +25399,14 @@ cm.getConstructor('Com.Autocomplete', function(classConstructor, className, clas
             }
             return item;
         }
+    };
+
+    classProto.callbacks.convertObject = function(that, data){
+        var a = [];
+        cm.forEach(data, function(text, value){
+            a.push({'text' : text, 'value' : value});
+        });
+        return a;
     };
 
     /*** LIST ***/
@@ -24541,7 +25477,7 @@ cm.getConstructor('Com.Autocomplete', function(classConstructor, className, clas
         nodes['container'] = cm.node('li', {'class' : that.params['classes']['listItem']},
             cm.node('div', {'class' : 'inner'},
                 cm.node('div', {'class' : 'content'},
-                    cm.node('span', {'class' : 'icon small loader-circle'}),
+                    cm.node('span', {'class' : 'icon small cm-ia__spinner'}),
                     cm.node('span', {'innerHTML' : that.lang('loader', {'%query%' : params['query']})})
                 )
             )
@@ -24646,6 +25582,129 @@ Com.FormFields.add('autocomplete', {
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.Autocomplete'
 });
+cm.define('Com.AutocompleteField', {
+    'extend' : 'Com.AbstractInput',
+    'params' : {
+        'controllerEvents' : true,
+        'type' : 'text',
+        'autocompleteConstructor' : 'Com.Autocomplete',
+        'autocompleteParams' : {
+            'minLength' : 1,
+            'direction' : 'start'
+        }
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractInput.apply(that, arguments);
+});
+
+cm.getConstructor('Com.AutocompleteField', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        that.options = [];
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        // Call parent method
+        _inherit.prototype.validateParams.apply(that, arguments);
+        // Collect Options
+        var options = that.params['node'].options;
+        cm.forEach(options, function(node){
+            that.options.push({
+                'value' : node.value,
+                'text' : node.innerHTML
+            });
+        });
+    };
+
+    classProto.validateParamsValue = function(){
+        var that = this,
+            value;
+        if(cm.isNode(that.params['node'])){
+            value = cm.getSelectValue(that.params['node']);
+            that.params['value'] = !cm.isEmpty(value) ?  value : that.params['value'];
+        }
+        that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
+    };
+
+    /*** VIEW MODEL ***/
+
+    classProto.renderContent = function(){
+        var that = this,
+            nodes = {};
+        that.nodes['content'] = nodes;
+        that.triggerEvent('onRenderContentStart');
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'pt__input'},
+            nodes['input'] = cm.node('input', {'type' : that.params['type']})
+        );
+        // Attributes
+        if(!cm.isEmpty(that.params['placeholder'])){
+            nodes['input'].placeholder = that.params['placeholder'];
+        }
+        // Events
+        that.triggerEvent('onRenderContentProcess');
+        that.triggerEvent('onRenderContentEnd');
+        // Push
+        return nodes['container'];
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Init Autocomplete
+        cm.getConstructor(that.params['autocompleteConstructor'], function(classConstructor){
+            that.components['autocomplete'] = new classConstructor(
+                cm.merge(that.params['autocompleteParams'], {
+                    'node' : that.nodes['content']['input'],
+                    'data' : that.options
+                })
+            );
+            that.components['autocomplete'].addEvent('onChange', function(autocomplete, value){
+                that.set(value, true);
+            })
+        })
+    };
+
+    /* *** DATA VALUE *** */
+
+    classProto.setData = function(){
+        var that = this,
+            value = that.value,
+            item = that.getOption(that.value);
+        if(item){
+            value = !cm.isEmpty(item['text']) ? item['text'] : item['value'];
+        }
+        that.nodes['content']['input'].value = value;
+        return that;
+    };
+
+    classProto.getOption = function(value){
+        var that = this,
+            item;
+        cm.forEach(that.options, function(option){
+            if(option['value'] === value){
+                item = option;
+            }
+        });
+        return item;
+    };
+});
+
+Com.FormFields.add('autocomplete-field', {
+    'node' : cm.node('select'),
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.AutocompleteField'
+});
 cm.define('Com.BoxRadiusTools', {
     'extend' : 'Com.BoxTools',
     'params' : {
@@ -24697,6 +25756,236 @@ cm.getConstructor('Com.BoxRadiusTools', function(classConstructor, className, cl
         // Push
         return nodes['container'];
     };
+});
+cm.define('Com.Check', {
+    'extend' : 'Com.AbstractInput',
+    'params' : {
+        'controllerEvents' : true,
+        'type' : 'checkbox',
+        'multiple' : false,
+        'inline' : false
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractInput.apply(that, arguments);
+});
+
+cm.getConstructor('Com.Check', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.onConstructStart = function(){
+        var that = this;
+        // Variables
+        that.inputs = [];
+        that.hidden = [];
+        // Bind context to methods
+        that.setValueHandler = that.setValue.bind(that);
+    };
+
+    classProto.onValidateParamsProcess = function(){
+        var that = this;
+        that.params['multiple'] = !cm.isEmpty(that.params['options']) && that.params['type'] === 'checkbox';
+    };
+
+    /*** VIEW MODEL ***/
+
+    classProto.renderHiddenContent = function(){
+        var that = this,
+            nodes = {},
+            inputContainer;
+        that.nodes['hiddenContent'] = nodes;
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'display-none'});
+        // Render inputs
+        if(!cm.isEmpty(that.params['options'])){
+            cm.forEach(that.params['options'], function(option){
+                inputContainer = that.renderHiddenInput(option);
+                cm.appendChild(inputContainer, nodes['container']);
+            });
+        }else{
+            inputContainer = that.renderHiddenInput();
+            cm.appendChild(inputContainer, nodes['container']);
+        }
+        // Export
+        return nodes['container'];
+    };
+
+    classProto.renderHiddenInput = function(item){
+        var that = this,
+            nodes = {};
+        item = cm.merge({
+            'nodes' : nodes,
+            'value' : null
+        }, item);
+        // Structure
+        nodes['container'] = nodes['input'] = cm.node('input', {'type' : that.params['type']});
+        item['input'] = nodes['input'];
+        // Attributes
+        if(!cm.isEmpty(item['value'])){
+            item['input'] .value = item['value'];
+        }
+        if(!cm.isEmpty(that.params['name'])){
+            item['input'].setAttribute('name', that.params['name']);
+        }
+        // Push
+        that.hidden.push(item);
+        return nodes['container'];
+    };
+
+    classProto.renderContent = function(){
+        var that = this,
+            nodes = {},
+            inputContainer;
+        that.nodes['content'] = nodes;
+        that.triggerEvent('onRenderContentStart');
+        // Structure
+        nodes['container'] = cm.node('div', {'class' : 'pt__check-line'});
+        if(that.params['inline']){
+            cm.addClass(nodes['container'], 'is-line');
+        }else{
+            cm.addClass(nodes['container'], 'is-box');
+        }
+        // Render inputs
+        that.triggerEvent('onRenderContentProcess');
+        if(!cm.isEmpty(that.params['options'])){
+            cm.forEach(that.params['options'], function(option){
+                inputContainer = that.renderInput(option);
+                cm.appendChild(inputContainer, nodes['container']);
+            });
+        }else{
+            inputContainer = that.renderInput({'text' : that.params['placeholder']});
+            cm.appendChild(inputContainer, nodes['container']);
+        }
+        that.triggerEvent('onRenderContentEnd');
+        // Push
+        return nodes['container'];
+    };
+
+    classProto.renderInput = function(item){
+        var that = this,
+            nodes = {};
+        item = cm.merge({
+            'nodes' : nodes,
+            'text' : '',
+            'value' : null
+        },item);
+        // Structure
+        nodes['container'] = cm.node('label',
+            nodes['input'] = cm.node('input', {'type' : that.params['type']}),
+            nodes['label'] = cm.node('span', {'class' : 'label', 'innerHTML' : item['text']})
+        );
+        item['input'] = nodes['input'];
+        // Attributes
+        if(!cm.isEmpty(item['value'])){
+            nodes['input'].value = item['value'];
+        }
+        // Events
+        cm.addEvent(item['input'], 'click', function(e){
+            that.setValue(item, true);
+        });
+        // Push
+        that.inputs.push(item);
+        return nodes['container'];
+    };
+
+    /* *** DATA VALUE *** */
+
+    classProto.setHiddenAttributes = function(){
+        var that = this;
+    };
+
+    classProto.validateValue = function(value){
+        var that = this;
+        return value;
+    };
+
+    classProto.setValue = function(item, triggerEvents){
+        var that = this,
+            value = null;
+        triggerEvents = cm.isUndefined(triggerEvents)? true : triggerEvents;
+        // Get value
+        if(!cm.isEmpty(that.params['options'])){
+            if(that.params['multiple']){
+                value = [];
+                cm.forEach(that.inputs, function(item){
+                    item['input'].checked && value.push(item['value']);
+                });
+            }else{
+                value = item['value'];
+            }
+        }else{
+            value = item['input'].checked;
+        }
+        that.set(value, triggerEvents);
+        return that;
+    };
+
+    classProto.saveHiddenValue = function(value){
+        var that = this;
+        if(!cm.isEmpty(that.params['options'])){
+            if(that.params['multiple']){
+                cm.forEach(that.hidden, function(item){
+                    item['input'].checked = cm.inArray(value, item['value']);
+                });
+            }else{
+                cm.forEach(that.hidden, function(item){
+                    item['input'].checked = value === item['value'];
+                });
+            }
+        }else{
+            that.hidden[0]['input'].checked = !(cm.isEmpty(value) || value === 0 || value === '0' || value === false);
+        }
+    };
+
+    classProto.setData = function(value){
+        var that = this;
+        if(!cm.isEmpty(that.params['options'])){
+            if(that.params['multiple']){
+                cm.forEach(that.inputs, function(item){
+                    item['input'].checked = cm.inArray(value, item['value']);
+                });
+            }else{
+                cm.forEach(that.inputs, function(item){
+                    item['input'].checked = value === item['value'];
+                });
+            }
+        }else{
+            that.inputs[0]['input'].checked = !(cm.isEmpty(value) || value === 0 || value === '0' || value === false);
+        }
+    };
+});
+
+/* ****** FORM FIELD COMPONENT ******* */
+
+Com.FormFields.add('checkbox', {
+    'node' : cm.node('div', {'class' : 'pt__check-line'}),
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Check',
+    'constructorParams' : {
+        'type' : 'checkbox'
+    }
+});
+
+Com.FormFields.add('radio', {
+    'node' : cm.node('div', {'class' : 'pt__check-line'}),
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Check',
+    'constructorParams' : {
+        'type' : 'radio',
+        'inline' : true
+    }
+});
+
+Com.FormFields.add('check', {
+    'node' : cm.node('div', {'class' : 'pt__check-line'}),
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Check',
+    'constructorParams' : {
+        'type' : 'checkbox',
+        'inline' : true
+    }
 });
 cm.define('Com.CheckTrigger', {
     'extend' : 'Com.AbstractController',
@@ -25229,7 +26518,12 @@ cm.define('Com.DateSelect', {
         'format' : 'cm._config.dateFormat',
         'startYear' : 1950,                             // number | current
         'endYear' : 'current + 10',                     // number | current
-        'renderSelectsInBody' : true
+        'renderSelectsInBody' : true,
+        'fieldSizes' : {
+            'year' : 'small',
+            'month' : 'medium',
+            'day' : 'x-small'
+        }
     },
     'strings' : {
         'Day' : 'Day',
@@ -25274,7 +26568,7 @@ function(params){
         if(cm.isNode(that.params['node'])){
             that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
         }
-        if(that.params['value'] == 'now'){
+        if(that.params['value'] === 'now'){
             that.params['value'] = new Date();
         }
         if(/current/.test(that.params['startYear'])){
@@ -25322,7 +26616,8 @@ function(params){
 
     var renderYearField = function(){
         // Structure
-        nodes['year'] = cm.Node('li', {'class' : 'is-field small'});
+        nodes['year'] = cm.Node('li', {'class' : 'is-field'});
+        cm.addClass(nodes['year'], that.params['fieldSizes']['year']);
         cm.appendChild(nodes['year'], nodes['fields']);
         // Render component
         var data = [
@@ -25347,7 +26642,8 @@ function(params){
 
     var renderMonthField = function(){
         // Structure
-        nodes['month'] = cm.Node('li', {'class' : 'is-field medium'});
+        nodes['month'] = cm.Node('li', {'class' : 'is-field'});
+        cm.addClass(nodes['month'], that.params['fieldSizes']['month']);
         cm.appendChild(nodes['month'], nodes['fields']);
         // Render component
         var data = [
@@ -25372,7 +26668,8 @@ function(params){
 
     var renderDayField = function(){
         // Structure
-        nodes['day'] = cm.Node('li', {'class' : 'is-field x-small'});
+        nodes['day'] = cm.Node('li', {'class' : 'is-field'});
+        cm.addClass(nodes['day'], that.params['fieldSizes']['day']);
         cm.appendChild(nodes['day'], nodes['fields']);
         // Render component
         var data = [
@@ -26268,6 +27565,16 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
         }
         return that;
     };
+
+    /* *** PUBLIC *** */
+
+    classProto.browse = function(){
+        var that = this;
+        if(that.params['local']){
+            that.nodes['content']['input'].click();
+        }
+        return that;
+    };
 });
 
 /* ****** FORM FIELD COMPONENT ******* */
@@ -26542,7 +27849,6 @@ cm.getConstructor('Com.IndentInput', function(classConstructor, className, class
                 nodes['input'].blur();
             }
         });
-
         if(that.params['allowNegative']){
             cm.allowOnlyNumbersInputEvent(nodes['input'], function(e, value){
                 that.selectAction(that.validateValue(value), true);
@@ -26569,7 +27875,7 @@ cm.getConstructor('Com.IndentInput', function(classConstructor, className, class
 
     classProto.setValue = function(triggerEvents){
         var that = this;
-        triggerEvents = typeof triggerEvents == 'undefined'? true : triggerEvents;
+        triggerEvents = cm.isUndefined(triggerEvents)? true : triggerEvents;
         that.set(that.rawValue, triggerEvents);
         return that;
     };
@@ -26587,6 +27893,188 @@ Com.FormFields.add('indent', {
     'node' : cm.node('input', {'type' : 'text'}),
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.IndentInput'
+});
+cm.define('Com.Input', {
+    'extend' : 'Com.AbstractInput',
+    'params' : {
+        'controllerEvents' : true,
+        'maxlength' : 0,
+        'max' : 0,
+        'type' : 'text',
+        'lazy' : false,
+        'delay' : 'cm._config.requestDelay'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractInput.apply(that, arguments);
+});
+
+cm.getConstructor('Com.Input', function(classConstructor, className, classProto, classInherit){
+    classProto.construct = function(){
+        var that = this;
+        // Variables
+        that.lazyDelay = null;
+        // Bind context to methods
+        that.setValueHandler = that.setValue.bind(that);
+        that.lazyValueHandler = that.lazyValue.bind(that);
+        // Call parent method
+        classInherit.prototype.construct.apply(that, arguments);
+        return that;
+    };
+
+    /*** VIEW MODEL ***/
+
+    classProto.renderContent = function(){
+        var that = this,
+            nodes = {};
+        that.nodes['content'] = nodes;
+        that.triggerEvent('onRenderContentStart');
+        // Structure
+        if(that.params['type'] === 'textarea'){
+            nodes['container'] = nodes['input'] = cm.node('textarea');
+        }else{
+            nodes['container'] = cm.node('div', {'class' : 'pt__input'},
+                nodes['input'] = cm.node('input', {'type' : that.params['type']})
+            );
+        }
+        // Attributes
+        cm.setInputMaxLength(nodes['input'], that.params['maxlength'], that.params['max']);
+        if(!cm.isEmpty(that.params['placeholder'])){
+            nodes['input'].placeholder = that.params['placeholder'];
+        }
+        // Events
+        that.triggerEvent('onRenderContentProcess');
+        that.renderContentEvents();
+        that.triggerEvent('onRenderContentEnd');
+        // Push
+        return nodes['container'];
+    };
+
+    classProto.renderContentEvents = function(){
+        var that = this;
+        that.params['lazy'] && cm.addEvent(that.nodes['content']['input'], 'input', that.lazyValueHandler);
+        cm.addEvent(that.nodes['content']['input'], 'blur', that.setValueHandler);
+        cm.addEvent(that.nodes['content']['input'], 'change', that.setValueHandler);
+        cm.addEvent(that.nodes['content']['input'], 'keypress', function(e){
+            if(cm.isKeyCode(e.keyCode, 'enter')){
+                cm.preventDefault(e);
+                that.setValue();
+                that.nodes['content']['input'].blur();
+            }
+        });
+    };
+
+    /* *** DATA VALUE *** */
+
+    classProto.lazyValue = function(){
+        var that = this;
+        that.lazyDelay && clearTimeout(that.lazyDelay);
+        that.lazyDelay = setTimeout(function(){
+            that.setValue(true);
+        }, that.params['delay']);
+    };
+
+    classProto.setValue = function(triggerEvents){
+        var that = this,
+            value = that.nodes['content']['input'].value;
+        triggerEvents = cm.isUndefined(triggerEvents)? true : triggerEvents;
+        that.set(value, triggerEvents);
+        return that;
+    };
+
+    classProto.setData = function(){
+        var that = this;
+        that.nodes['content']['input'].value = that.value;
+        return that;
+    };
+
+    classProto.focus = function(){
+        var that = this;
+        that.nodes['content']['input'].focus();
+        return that;
+    };
+});
+
+/* ****** FORM FIELD COMPONENT ******* */
+
+Com.FormFields.add('input', {
+    'node' : cm.node('input', {'type' : 'text'}),
+    'value' : '',
+    'defaultValue' : '',
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Input',
+    'constructorParams' : {
+        'type' : 'text'
+    }
+});
+
+Com.FormFields.add('textarea', {
+    'node' : cm.node('textarea'),
+    'value' : '',
+    'defaultValue' : '',
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Input',
+    'constructorParams' : {
+        'type' : 'textarea'
+    }
+});
+
+Com.FormFields.add('password', {
+    'node' : cm.node('input', {'type' : 'password'}),
+    'value' : '',
+    'defaultValue' : '',
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Input',
+    'constructorParams' : {
+        'type' : 'password'
+    }
+});
+
+Com.FormFields.add('email', {
+    'node' : cm.node('input', {'type' : 'email'}),
+    'value' : '',
+    'defaultValue' : '',
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Input',
+    'constructorParams' : {
+        'type' : 'email'
+    }
+});
+
+Com.FormFields.add('phone', {
+    'node' : cm.node('input', {'type' : 'phone'}),
+    'value' : '',
+    'defaultValue' : '',
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Input',
+    'constructorParams' : {
+        'type' : 'phone'
+    }
+});
+
+Com.FormFields.add('number', {
+    'node' : cm.node('input', {'type' : 'number'}),
+    'value' : '',
+    'defaultValue' : '',
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Input',
+    'constructorParams' : {
+        'type' : 'number'
+    }
+});
+
+Com.FormFields.add('hidden', {
+    'node' : cm.node('input', {'type' : 'hidden'}),
+    'visible' : false,
+    'value' : '',
+    'defaultValue' : '',
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Input',
+    'constructorParams' : {
+        'type' : 'hidden'
+    }
 });
 cm.define('Com.InputTrigger', {
     'extend' : 'Com.AbstractController',
@@ -26805,6 +28293,7 @@ cm.define('Com.MultipleFileInput', {
         'sortable' : false,
         'showToolbar' : true,
         'showControls' : false,
+        'showList' : true,
         'focusInput' : false,
         'buttonsAlign' : 'left',
         'inputConstructor' : 'Com.FileInput',
@@ -27017,6 +28506,16 @@ cm.getConstructor('Com.MultipleFileInput', function(classConstructor, className,
             })
         }else if(!cm.isEmpty(data)){
             that.addItem({'value' : data}, true);
+        }
+        return that;
+    };
+
+    /* *** PUBLIC *** */
+
+    classProto.browse = function(){
+        var that = this;
+        if(that.params['local']){
+            that.nodes['toolbar']['input'].click();
         }
         return that;
     };
@@ -28136,6 +29635,7 @@ cm.define('Com.SelectFieldTrigger', {
         'embedStructureOnRender' : true,
         'controllerEvents' : true,
         'triggerName' : null,
+        'triggerFieldSize' : null,
         'options' : [],
         'Com.Toolbar' : {
             'embedStructure' : 'append'
@@ -28257,7 +29757,8 @@ cm.getConstructor('Com.SelectFieldTrigger', function(classConstructor, className
                 .addField({
                     'group' : 'trigger',
                     'name' : 'trigger',
-                    'node' : that.components['trigger'].getContainer()
+                    'node' : that.components['trigger'].getContainer(),
+                    'size' : that.params['triggerFieldSize']
                 })
         });
         // Fields
@@ -28402,6 +29903,13 @@ function(params){
         if(that.params['name']){
             nodes['hidden'].setAttribute('name', that.params['name']);
         }
+        // Events
+        cm.addEvent(nodes['container'], 'click', function(e){
+            var target = cm.getEventTarget(e);
+            if(!cm.isParent(nodes['tags'], target, true)){
+                nodes['input'].focus();
+            }
+        });
         // Append
         that.embedStructure(nodes['container']);
 
@@ -29164,14 +30672,14 @@ cm.getConstructor('Com.TwoSideMultiSelect', function(classConstructor, className
         });
     };
 });
-/*! ************ QuickSilk-Application v3.19.0 (2017-10-31 18:18) ************ */
+/*! ************ QuickSilk-Application v3.21.1 (2018-05-22 21:00) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.19.0',
+    '_version' : '3.21.1',
     'Elements': {},
     'Nodes' : {},
     'Test' : []
@@ -29184,7 +30692,9 @@ cm.define('App.AbstractModule', {
         'enableEditing',
         'disableEditing',
         'enableEditable',
-        'disableEditable'
+        'disableEditable',
+        'onEnableEditing',
+        'onDisableEditing'
     ],
     'params' : {
         'renderStructure' : false,
@@ -29234,6 +30744,7 @@ cm.getConstructor('App.AbstractModule', function(classConstructor, className, cl
             cm.replaceClass(that.params['node'], 'is-not-editing', 'is-editing is-editable');
             that.triggerEvent('enableEditing');
             that.triggerEvent('enableEditable');
+            that.triggerEvent('onEnableEditing');
         }
         return that;
     };
@@ -29245,6 +30756,7 @@ cm.getConstructor('App.AbstractModule', function(classConstructor, className, cl
             cm.replaceClass(that.params['node'], 'is-editing is-editable', 'is-not-editing');
             that.triggerEvent('disableEditing');
             that.triggerEvent('disableEditable');
+            that.triggerEvent('onDisableEditing');
         }
         return that;
     };
@@ -29270,6 +30782,7 @@ cm.define('App.AbstractModuleElement', {
         'match' : false,
         'targetController' : false,
         'memorable' : true,
+        'remember' : false,
         'inputEvent' : 'input'
     }
 },
@@ -29281,6 +30794,20 @@ function(params){
 
 cm.getConstructor('App.AbstractModuleElement', function(classConstructor, className, classProto){
     var _inherit = classProto._inherit;
+
+    classProto.construct = function(){
+        var that = this;
+        // Bind
+        that.changeEventHandler = that.changeEvent.bind(that);
+        // Call parent method
+        _inherit.prototype.construct.apply(that, arguments);
+    };
+
+    classProto.onConstructEnd = function(){
+        var that = this;
+        // Restore value from local storage
+        that.restoreLocalValue();
+    };
 
     classProto.renderViewModel = function(){
         var that = this;
@@ -29300,10 +30827,7 @@ cm.getConstructor('App.AbstractModuleElement', function(classConstructor, classN
         var that = this;
         cm.find(that.params['targetController'], that.params['name'], that.nodes['field'], function(classObject){
             that.components['controller'] = classObject;
-            that.components['controller'].addEvent('onChange', function(my, data){
-                var value = that.get();
-                that.triggerEvent('onChange', value);
-            });
+            that.components['controller'].addEvent('onChange', that.changeEventHandler);
         });
     };
 
@@ -29316,10 +30840,34 @@ cm.getConstructor('App.AbstractModuleElement', function(classConstructor, classN
 
     classProto.renderInput = function(node){
         var that = this;
-        cm.addEvent(node, that.params['inputEvent'], function(){
+        cm.addEvent(node, that.params['inputEvent'], that.changeEventHandler);
+    };
+
+    /*** EVENTS ***/
+
+    classProto.changeEvent = function(){
+        var that = this;
+        var value = that.get();
+        that.saveLocalValue();
+        that.triggerEvent('onChange', value);
+    };
+
+    /*** DATA ***/
+
+    classProto.saveLocalValue = function(){
+        var that = this;
+        if(that.params['memorable'] && that.params['remember']){
             var value = that.get();
-            that.triggerEvent('onChange', value);
-        });
+            that.storageWrite('value', value);
+        }
+    };
+
+    classProto.restoreLocalValue = function(){
+        var that = this;
+        if(that.params['memorable'] && that.params['remember']){
+            var value = that.storageRead('value');
+            that.set(value);
+        }
     };
 
     classProto.setMultiple = function(values){
@@ -29399,6 +30947,311 @@ cm.getConstructor('App.AbstractModuleElement', function(classConstructor, classN
         return isValid;
     };
 });
+App.FlowScenario = [{
+    'title' : 'Edit Header and Footer',
+    'order' : 2,
+    'type' : 'flow',
+    /*'flow' : 'compliant'*/
+    'flow' : 'forced',
+    'data' : [{
+        'position' : 'template:left-top',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'transparent',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Click on Layouts</h3>'
+    },{
+        'position' : 'template:left-top',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'transparent',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : 'layouts',
+        'topMenu' : false,
+        'content' : '<h3>Click on Inner Page Layout</h3>'
+    },{
+        'position' : 'template:center',
+        'arrow' : false,
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'light'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'url' : 'admin/template/layout/content/',
+        'content' : '<h3>You\'re in the right place!</h3><p>Your header and footer can be edited in "Inner Page Layout". These changes will be applied to all pages using this layout.</p>'
+    }]
+},{
+    'title' : 'How to change or edit templates',
+    'order' : 3,
+    'type' : 'flow',
+    'flow' : 'forced',
+    'data' : [{
+        'position' : 'topMenuItem:modules:container:right',
+        'arrow' : 'top',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'transparent',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Hover over Modules > Create</h3>'
+    },{
+        'position' : 'topMenuItem:modules:dropdown:right',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'transparent',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : 'modules',
+        'content' : '<h3>Click on Templates</h3>'
+    },{
+        'position' : 'template:top',
+        'arrow' : 'bottom',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'transparent'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'url' : 'admin/template-library',
+        'content' : '<h3>Here are your existing templates</h3><p>You can customize any of these</p>'
+    },{
+        'position' : 'template:top',
+        'arrow' : 'bottom',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'transparent'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Click Template Library</h3><p>To browse new templates</p>'
+    },{
+        'position' : 'template:center',
+        'arrow' : false,
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'light'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Here you can download new templates</h3><p>By hovering over the template and clicking "Install"</p>'
+    }]
+},{
+    'title' : 'How to edit styles',
+    'order' : 4,
+    'type' : 'flow',
+    'flow' : 'forced',
+    'data' : [{
+        'position' : 'topMenuItem:modules:container:right',
+        'arrow' : 'top',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'transparent',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Hover over Modules > Create</h3>'
+    },{
+        'position' : 'topMenuItem:modules:dropdown:right',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'transparent',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : 'modules',
+        'content' : '<h3>Click on Templates</h3>'
+    },{
+        'position' : 'template:top',
+        'arrow' : 'bottom',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'transparent'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'url' : 'admin/template-library',
+        'content' : '<h3>Hover over any of your existing templates</h3><p>And select "Customize"</p>'
+    },{
+        'position' : 'template:top',
+        'arrow' : 'bottom',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'transparent'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'url' : 'admin/template/editor/edit/',
+        'content' : '<h3>Click on Template Default Styles</h3>'
+    },{
+        'position' : 'template:center',
+        'arrow' : false,
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'light'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Select any text style</h3><p>To edit the font, colours, etc.</p>'
+    }]
+},{
+    'title' : 'Help Tour',
+    'order' : 1,
+    'type' : 'tour',
+    'data' : [{
+        'position' : 'window:center',
+        'arrow' : false,
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>QuickSilk Online Tour!</h3><p>Welcome to QuickSilk! Use the buttons at the bottom of each help bubble to quickly discover how to navigate and use the QuickSilk software. This online tour automatically appears the first time you login. Anytime after this, simply click on the help tour menu item for a quick refresher.</p>'
+    },{
+        'position' : 'topMenuItem:user:dropdown:left',
+        'arrow' : 'right',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'transparent',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : 'user',
+        'content' : '<h3>User Menu</h3><p>Click on your name to view the admin panel (future), your profile, or to logout. The View Profile link provides the ability to manage your subscription and billing, password, forum settings, working groups and public profile.</p>'
+    },{
+        'position' : 'topMenuItem:modules:dropdown:right',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'transparent',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : 'modules',
+        'content' : '<h3>Modules</h3><p>The Module manager allows you to work on your modules from the administration panel. Simply mouse over the Modules menu and then scroll down and click on the module you wish to work with. </p>'
+    },{
+        'position' : 'template:left-top',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'transparent',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Left Panel Slider</h3><p>The left slider widget provides you with quick access to the modules, pages, layouts and template features. Simply click on the icon for the tab you wish to use.</p>'
+    },{
+        'position' : 'template:left-top',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'transparent',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : 'template-manager',
+        'topMenu' : false,
+        'content' : '<h3>Installed Modules</h3><p>The modules tab provides quick access to the modules that you\'ve subscribed to. Once you\'ve opened a page or a template, open the modules tab to drag and drop the modules you wish to include.</p>'
+    },{
+        'position' : 'template:left-top',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'transparent',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : 'pages',
+        'topMenu' : false,
+        'content' : '<h3>Site Pages</h3><p>The site pages tab allows you to quickly open, modify and manage your website pages. Simply open the tab and click on the web page you wish to work on.</p>'
+    },{
+        'position' : 'template:left-top',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'transparent',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : 'layouts',
+        'topMenu' : false,
+        'content' : '<h3>Page Layouts</h3><p>Use the page layout tab to open, modify and manage the layouts of your various web page templates. A page layout will consist of the common elements you have on every page.</p>'
+    },{
+        'position' : 'template:left-top',
+        'arrow' : 'left',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'transparent',
+            'topMenu' : 'dark',
+            'template' : 'dark'
+        },
+        'sidebar' : 'templates',
+        'topMenu' : false,
+        'content' : '<h3>Templates</h3><p>The templates tab displays the different custom or predesigned templates that you\'ve installed and are immediately available for use on your website. If you want to view or install other templates, you\'ll do so from the template gallery.</p>'
+    },{
+        'position' : 'template:center',
+        'arrow' : false,
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'dark',
+            'template' : 'light'
+        },
+        'sidebar' : false,
+        'topMenu' : false,
+        'content' : '<h3>Drop Area</h3><p>The drop area is where you drag and drop the modules. To move a module onto a page or template place your mouse on the desired module icon, hold down the left button on your mouse, and drag the module to the highlighted area of the page you wish to drop it, then let go of the mouse button.</p>'
+    },{
+        'position' : 'topMenuItem:support:container:right',
+        'arrow' : 'top',
+        'overlays' : {
+            'main' : 'transparent',
+            'sidebar' : 'dark',
+            'topMenu' : 'transparent',
+            'template' : 'dark'
+        },
+        'sidebar' : false,
+        'topMenu' : 'support',
+        'content' : '<h3>Need Help?</h3><p>Are you stuck, experiencing an issue, found a bug or have a suggestion? Simply click on this link and send us a message. FYI, to assist in the troubleshooting process we automatically collect information on the operating system, browser and browser version you are using. Our goal is to respond to your message within 1 business day.</p>'
+    }]
+}];
 cm.define('App.Block', {
     'modules' : [
         'Params',
@@ -29692,7 +31545,7 @@ cm.define('App.Dashboard', {
         'moveDuration' : 200,
         'highlightZones' : true,                     // highlight zones on drag start
         'highlightPlaceholders' : true,
-        'placeholderHeight' : 48,
+        'placeholderHeight' : 0,
         'Com.Overlay' : {
             'container' : 'document.body',
             'duration' : 0,
@@ -31001,8 +32854,8 @@ function(params){
             that.components['sidebar'] = classObject
                 .addEvent('onExpandEnd', sidebarExpandAction)
                 .addEvent('onCollapseStart', sidebarCollapseAction)
-                .addEvent('onTabShow', function(sidebar, data){
-                    setEditorType(data.item['id']);
+                .addEvent('onTabShow', function(sidebar, item){
+                    setEditorType(item['id']);
                 });
         });
         cm.find('App.Template', that.params['templateName'], null, function(classObject){
@@ -31919,6 +33772,687 @@ cm.getConstructor('App.FileUploaderLocal', function(classConstructor, className,
         return that;
     };
 });
+cm.define('App.Flow', {
+    'extend' : 'Com.AbstractController',
+    'params' : {
+        'renderStructure' : true,
+        'embedStructureOnRender' : true,
+        'controllerEvents' : true,
+        'scenario' : App.FlowScenario,
+        'directorConstructor' : 'App.FlowDirector',
+        'directorParams' : {
+            'autoStart' : false
+        }
+    },
+    'strings' : {
+        'description' : 'Choose a course:'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('App.Flow', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.onConstructStart = function(){
+        var that = this;
+        // Variables
+        that.items = [];
+        // Binds
+        that.renderListItemHandler = that.renderListItem.bind(that);
+    };
+
+    classProto.onValidateParams = function(){
+        var that = this;
+        // Validate Scenario
+        if(cm.isString(that.params['scenario'])){
+            that.params['scenario'] = cm.parseJSON(that.params['scenario']);
+        }
+        // Sort scenario by order
+        that.params['scenario'] = cm.arraySort(that.params['scenario'], 'order', 'desc');
+    };
+
+    classProto.onDestructProcess = function(){
+        var that = this;
+        that.components['director'] && !that.components['director'].isRunning && that.components['director'].destruct();
+    };
+
+    /******* VIEW MODEL *******/
+
+    classProto.renderView = function(){
+        var that = this;
+        // Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'app__flow__list'},
+            cm.node('h4', that.lang('description')),
+            cm.node('div', {'class' : 'pt__listing-items'},
+                that.nodes['items'] = cm.node('ul')
+            )
+        );
+        // Items
+        cm.forEach(that.params['scenario'], that.renderListItemHandler);
+    };
+
+    classProto.renderListItem = function(item){
+        var that = this,
+            nodes =  {};
+        // Validate scenario
+        item['nodes'] = nodes;
+        // Structure
+        nodes['container'] = cm.node('li',
+            nodes['link'] = cm.node('a', item['title'])
+        );
+        // Events
+        cm.addEvent(nodes['link'], 'click', function(e){
+            cm.preventDefault(e);
+            that.components['director']
+                .setScenario(item['data'])
+                .setTarget(nodes['link'])
+                .start();
+        });
+        // Embed
+        cm.appendChild(nodes['container'], that.nodes['items']);
+        that.items.push(item);
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Init Director
+        cm.getConstructor(that.params['directorConstructor'], function(classObject){
+            that.components['director'] = new classObject(that.params['directorParams']);
+        });
+    };
+});
+cm.define('App.FlowContainer', {
+    'extend' : 'Com.AbstractContainer',
+    'params' : {
+        'constructor' : 'App.Flow',
+        'placeholder' : true,
+        'placeholderConstructor' : 'Com.DialogContainer',
+        'placeholderParams' : {
+            'params' : {
+                'width' : 500,
+                'className' : 'app__flow__dialog',
+                'documentScroll' : true
+            }
+        }
+    },
+    'strings' : {
+        'title' : 'QuickSilk Flow'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractContainer.apply(that, arguments);
+});
+
+
+cm.getConstructor('App.FlowContainer', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+});
+cm.define('App.FlowDirector', {
+    'extend' : 'Com.AbstractController',
+    'params' : {
+        'renderStructure' : false,
+        'embedStructureOnRender' : false,
+        'controllerEvents' : true,
+        'destructOnStop' : true,
+        'container' : 'document.body',
+        'name' : 'app-helptour',
+        'sidebarName' : 'app-sidebar',
+        'topMenuName' : 'app-topmenu',
+        'templateName' : 'app-template',
+        'notificationName' : 'app-notification',
+        'duration' : 500,
+        'adaptiveFrom' : 768,
+        'popupIndent' : 24,
+        'overlayConstructor' : 'Com.Overlay',
+        'overlayParams' : {
+            'container' : 'document.body',
+            'autoOpen' : false,
+            'removeOnClose' : true,
+            'showSpinner' : false,
+            'showContent' : false,
+            'name' : '',
+            'theme' : 'transparent',
+            'position' : 'absolute'
+        }
+    },
+    'strings' : {
+        'next' : 'Next',
+        'back' : 'Back',
+        'close' : 'Close',
+        'cancel' : 'Cancel',
+        'finish' : 'Finish'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('App.FlowDirector', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+    
+    classProto.onConstructStart = function(){
+        var that = this;
+        // Variables
+        that.isRunning = false;
+        that.scenario = App.HelpTourScenario;
+        that.dimensions = {
+            'sidebarCollapsed' : 0,
+            'sidebarExpanded' : 0,
+            'topMenu' : 0,
+            'popupHeight' : 0,
+            'popupSelfHeight' : 0,
+            'popupContentHeight' : 0
+        };
+        that.startOptions = {
+            'sidebarExpanded' : false,
+            'sidebarTab' : 'modules',
+            'notificationShow' : false
+        };
+        that.startX = 0;
+        that.startY = 0;
+        that.components = {
+            'overlays' : {}
+        };
+        that.currentStage = -1;         // Scene ID
+        that.currentScene = null;       // Scene Object
+        that.currentSceneNode = null;
+        that.previousStage = null;
+        that.previousScene = null;
+        that.previousSceneNode = null;
+        that.sceneIntervals = {};
+        // Binds
+        that.startHandler = that.start.bind(that);
+        that.stopHandler = that.stop.bind(that);
+        that.nextHandler = that.next.bind(that);
+        that.prevHandler = that.prev.bind(that);
+        that.prepareHandler = that.prepare.bind(that);
+        that.keyDownEventHandler = that.keyDownEvent.bind(that);
+    };
+    
+    classProto.onValidateParamsProcess = function(){
+        var that = this;
+        // Overlay
+        that.params['overlayParams']['container'] = that.params['container'];
+        that.params['overlayParams']['name'] = [that.params['name'], 'overlay'].join('-')
+    };
+
+    classProto.onGetLESSVariablesProcess = function(){
+        var that = this;
+        that.params['duration'] = cm.getTransitionDurationFromLESS('AppHelpTour-Duration', that.params['duration']);
+        that.params['adaptiveFrom'] = cm.getLESSVariable('AppHelpTour-AdaptiveFrom', that.params['adaptiveFrom'], true);
+    };
+    
+    classProto.onSetEvents = function(){
+        var that = this;
+        cm.addEvent(window, 'keydown', that.keyDownEventHandler);
+    };
+
+    classProto.onUnsetEvents = function(){
+        var that = this;
+        cm.removeEvent(window, 'keydown', that.keyDownEventHandler);
+    };
+
+    classProto.onRedraw = function(){
+        var that = this;
+        that.isRunning && that.setPopupPosition();
+    };
+    
+    /******* VIEW MODEL *******/
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        _inherit.prototype.renderViewModel.apply(that, arguments);
+        // Init Overlay
+        cm.getConstructor(that.params['overlayConstructor'], function(classConstructor){
+            that.components['overlays']['main'] = new classConstructor(
+                cm.merge(that.params['overlayParams'], {
+                    'position' : 'fixed'
+                })
+            );
+            that.components['overlays']['sidebar'] = new classConstructor(that.params['overlayParams']);
+            that.components['overlays']['topMenu'] = new classConstructor(that.params['overlayParams']);
+            that.components['overlays']['template'] = new classConstructor(
+                cm.merge(that.params['overlayParams'], {
+                    'position' : 'fixed'
+                })
+            );
+        });
+        return that;
+    };
+
+    /******* CONTROLS *******/
+
+    classProto.prepare = function(){
+        var that = this;
+        // Get Sidebar
+        cm.find('App.Sidebar', that.params['sidebarName'], null, function(classObject){
+            that.components['sidebar'] = classObject;
+            that.components['overlays']['sidebar'].embed(that.components['sidebar'].getNodes('inner'));
+        });
+        // Get TopMenu
+        cm.find('App.TopMenu', that.params['topMenuName'], null, function(classObject){
+            that.components['topMenu'] = classObject;
+            that.components['overlays']['topMenu'].embed(that.components['topMenu'].getNodes('inner'));
+        });
+        // Get Template
+        cm.find('App.Template', that.params['templateName'], null, function(classObject){
+            that.components['template'] = classObject;
+            that.components['overlays']['template'].embed(that.components['template'].getNodes('container'));
+        });
+        // Get Notification
+        cm.find('App.Notification', that.params['notificationName'], null, function(classObject){
+            that.components['notification'] = classObject;
+        });
+        // Start
+        if(that.components['sidebar'] && that.components['topMenu'] && that.components['template']){
+            return true;
+        }else{
+            cm.errorLog({
+                'type' : 'error',
+                'name' : that._name['full'],
+                'message' : ['Required components does not constructed.'].join(' ')
+            });
+            return false;
+        }
+    };
+
+    classProto.start = function(){
+        var that = this,
+            isPrepare = that.prepare();
+        if(!that.isRunning && isPrepare){
+            that.isRunning = true;
+            // Close Containers
+            cm.find('Com.AbstractContainer', null, null, function(classObject){
+                classObject.close();
+            }, {'childs' : true});
+            // Render Popup
+            that.renderPopup();
+            // Save Sidebar State
+            that.startOptions['sidebarExpanded'] = that.components['sidebar'].isExpanded;
+            if(that.components['sidebar'].isExpanded){
+                that.components['sidebar'].collapse();
+            }
+            that.startOptions['sidebarTab'] = that.components['sidebar'].getTab();
+            that.components['sidebar'].unsetTab();
+            // Save Notification State
+            if(that.components['notification']){
+                that.startOptions['notificationShow'] = that.components['notification'].isShow;
+                if(that.components['notification'].isShow){
+                    that.components['notification'].hide();
+                }
+            }
+            // Collapse menu (mobile)
+            that.components['topMenu'].collapse();
+            // Show overlays
+            cm.forEach(that.components['overlays'], function(item){
+                item.open();
+            });
+            // Start scenario
+            that.setStage(0);
+        }
+    };
+
+    classProto.stop = function(){
+        var that = this;
+        if(that.isRunning){
+            that.isRunning = false;
+            // Remove Popup
+            that.removePopup();
+            // Restore Sidebar State
+            if(that.startOptions['sidebarExpanded'] && !that.components['sidebar'].isExpanded){
+                that.components['sidebar'].expand();
+            }else if(!that.startOptions['sidebarExpanded'] && that.components['sidebar'].isExpanded){
+                that.components['sidebar'].collapse();
+            }
+            that.components['sidebar'].setTab(that.startOptions['sidebarTab']);
+            // Restore Notification State
+            if(that.components['notification']){
+                if(that.startOptions['notificationShow'] && !that.components['notification'].isShow){
+                    that.components['notification'].show();
+                }else if(!that.startOptions['notificationShow'] && that.components['notification'].isShow){
+                    that.components['notification'].hide();
+                }
+            }
+            // Hide overlays
+            cm.forEach(that.components['overlays'], function(item){
+                item.close();
+            });
+            // Stop scenario
+            that.unsetStage();
+            // Destruct
+            that.params['destructOnStop'] && that.destruct();
+        }
+        return that;
+    };
+
+    classProto.next = function(){
+        var that = this;
+        if(that.currentStage >= 0){
+            if(that.scenario[that.currentStage + 1]){
+                that.setStage(that.currentStage + 1);
+            }else{
+                that.stop();
+            }
+        }
+        return that;
+    };
+
+    classProto.prev = function(){
+        var that = this;
+        if(that.currentStage >= 0){
+            if(that.scenario[that.currentStage - 1]){
+                that.setStage(that.currentStage - 1);
+            }else{
+                that.stop();
+            }
+        }
+        return that;
+    };
+
+    /******* SCREENPLAY *******/
+
+    classProto.setScenario = function(scenario){
+        var that = this;
+        that.scenario = scenario;
+        return that;
+    };
+
+    classProto.setStage = function(stage){
+        var that = this;
+        if(that.scenario[stage]){
+            // Destruct Previous Scene
+            that.unsetStage();
+            // Construct New Scene
+            that.currentStage = stage;
+            that.currentScene = that.scenario[stage];
+            // Set Overlays
+            cm.forEach(that.currentScene['overlays'], function(item, key){
+                that.components['overlays'][key].setTheme(item);
+            });
+            // Set Sidebar
+            if(!that.currentScene['sidebar']){
+                that.components['sidebar']
+                    .unsetTab()
+                    .collapse();
+            }else{
+                that.components['sidebar']
+                    .setTab(that.currentScene['sidebar'])
+                    .expand();
+            }
+            // Set Top Menu
+            that.components['topMenu'].setActiveItem(that.currentScene['topMenu']);
+            // Set Popup Arrow
+            if(that.currentScene['arrow']){
+                cm.addClass(that.nodes['popupArrows'][that.currentScene['arrow']], 'is-show');
+            }
+            // Set Popup Buttons
+            if(that.currentStage === 0){
+                that.nodes['back'].innerHTML = that.lang('close');
+                that.nodes['next'].innerHTML = that.lang('next');
+            }else if(that.currentStage === that.scenario.length - 1){
+                that.nodes['back'].innerHTML = that.lang('back');
+                that.nodes['next'].innerHTML = that.lang('finish');
+            }else{
+                that.nodes['back'].innerHTML = that.lang('back');
+                that.nodes['next'].innerHTML = that.lang('next');
+            }
+            // Set Popup Content
+            if(!that.previousStage){
+                cm.addClass(that.nodes['popupContent'], 'is-immediately', true);
+            }
+            that.currentSceneNode = cm.node('div', {'class' : 'popup__content__item', 'innerHTML' : that.currentScene['content']});
+            cm.appendChild(that.currentSceneNode, that.nodes['popupContent']);
+            cm.addClass(that.currentSceneNode, 'is-show', true);
+            // Set Popup Position
+            that.setPopupPosition();
+            // Construct
+            that.currentScene['construct'] && that.currentScene['construct'].call(that);
+        }
+    };
+
+    classProto.unsetStage = function(){
+        var that = this;
+        if(that.currentStage >= 0){
+            that.previousStage = that.currentStage;
+            that.previousScene = that.currentScene;
+            that.previousSceneNode = that.currentSceneNode;
+            // Top Menu
+            that.components['topMenu'].unsetActiveItem(that.previousScene['topMenu']);
+            // Clear Popup Arrow
+            if(that.previousScene['arrow']){
+                cm.removeClass(that.nodes['popupArrows'][that.previousScene['arrow']], 'is-show');
+            }
+            // Clear Scene Intervals
+            cm.forEach(that.sceneIntervals, function(item){
+                clearInterval(item);
+            });
+            // Remove Popup Node
+            (function(node){
+                setTimeout(function(){
+                    cm.remove(node);
+                }, that.params['duration']);
+            })(that.previousSceneNode);
+            // Remove immediately fix
+            setTimeout(function(){
+                cm.removeClass(that.nodes['popupContent'], 'is-immediately', true);
+            }, 5);
+            // Destruct
+            that.previousScene['destruct'] && that.previousScene['destruct'].call(that);
+        }
+        that.currentStage = -1;
+    };
+
+    /******* POPUP *******/
+
+    classProto.renderPopup = function(){
+        var that = this;
+        that.nodes['popupArrows'] = {};
+        that.nodes['popup'] = cm.node('div', {'class' : 'app__helptour__popup'},
+            that.nodes['popupArrows']['top'] = cm.node('div', {'class' : 'popup__arrow popup__arrow--top'}),
+            that.nodes['popupArrows']['right'] = cm.node('div', {'class' : 'popup__arrow popup__arrow--right'}),
+            that.nodes['popupArrows']['bottom'] = cm.node('div', {'class' : 'popup__arrow popup__arrow--bottom'}),
+            that.nodes['popupArrows']['left'] = cm.node('div', {'class' : 'popup__arrow popup__arrow--left'}),
+            that.nodes['popupClose'] = cm.node('div', {'class' : 'popup__close', 'title' : that.lang('close')}),
+            that.nodes['popupContent'] = cm.node('div', {'class' : 'popup__content'}),
+            that.nodes['popupButtons'] = cm.node('div', {'class' : 'popup__buttons'},
+                cm.node('div', {'class' : 'btn-wrap pull-center'},
+                    that.nodes['back'] = cm.node('button', that.lang('back')),
+                    that.nodes['next'] = cm.node('button', that.lang('next'))
+                )
+            )
+        );
+        that.setPopupStartPosition();
+        // Append
+        cm.appendChild(that.nodes['popup'], that.params['container']);
+        cm.addClass(that.nodes['popup'], 'is-show', true);
+        // Events
+        cm.addEvent(that.nodes['popupClose'], 'click', that.stopHandler);
+        cm.addEvent(that.nodes['next'], 'click', that.nextHandler);
+        cm.addEvent(that.nodes['back'], 'click', that.prevHandler);
+    };
+
+    classProto.removePopup = function(){
+        var that = this;
+        // Set end position
+        that.setPopupStartPosition();
+        cm.removeClass(that.nodes['popup'], 'is-show');
+        // Remove node
+        setTimeout(function(){
+            cm.remove(that.nodes['popup']);
+        }, that.params['duration']);
+    };
+
+    classProto.setPopupStartPosition = function(){
+        var that = this;
+        if(!that.startX){
+            that.startX = [Math.round(cm.getX(that.params['node']) + that.params['node'].offsetWidth / 2), 'px'].join('');
+        }
+        if(!that.startY){
+            that.startY = [Math.round(cm.getY(that.params['node']) + that.params['node'].offsetHeight / 2), 'px'].join('');
+        }
+        cm.setCSSTranslate(that.nodes['popup'], that.startX, that.startY, 0, 'scale(0)');
+    };
+
+    classProto.setPopupPosition = function(){
+        var that = this,
+            position, pageSize, top, left, conentHeight, topMenuItem;
+        if(that.currentScene){
+            pageSize = cm.getPageSize();
+            // Desktop or mobile view
+            if(pageSize['winWidth'] > that.params['adaptiveFrom']){
+                that.getDimensions();
+                position = that.currentScene['position'].split(':');
+                conentHeight = that.dimensions['popupContentHeight'];
+                // Set position
+                switch(position[0]){
+                    // Window related position
+                    case 'window':
+                        switch(position[1]){
+                            case 'top':
+                                left = Math.round((pageSize['winWidth'] - that.nodes['popup'].offsetWidth) / 2);
+                                top = that.params['popupIndent'];
+                                break;
+                            case 'bottom':
+                                left = Math.round((pageSize['winWidth'] - that.nodes['popup'].offsetWidth) / 2);
+                                top = pageSize['winHeight'] - that.dimensions['popupHeight'] - that.params['popupIndent'];
+                                break;
+                            case 'center':
+                            default:
+                                left = Math.round((pageSize['winWidth'] - that.nodes['popup'].offsetWidth) / 2);
+                                top = Math.round((pageSize['winHeight'] - that.dimensions['popupHeight']) / 2);
+                                break;
+                        }
+                        break;
+                    // Top Menu related position
+                    case 'topMenu':
+                        switch(position[1]){
+                            case 'center':
+                            default:
+                                left = Math.round((pageSize['winWidth'] - that.nodes['popup'].offsetWidth) / 2);
+                                top = that.dimensions['topMenu'] + that.params['popupIndent'];
+                                break;
+                        }
+                        break;
+                    // Top Menu Item related position
+                    case 'topMenuItem':
+                        topMenuItem = that.components['topMenu'].getItem(position[1]);
+                        if(!topMenuItem){
+                            left = Math.round((pageSize['winWidth'] - that.nodes['popup'].offsetWidth) / 2);
+                        }else if(position[2] && position[2] === 'dropdown' && topMenuItem['dropdown']){
+                            if(position[3] && position[3] === 'left'){
+                                left = cm.getX(topMenuItem['dropdown']) - that.nodes['popup'].offsetWidth - that.params['popupIndent'];
+                            }else{
+                                left = cm.getX(topMenuItem['dropdown']) + topMenuItem['dropdown'].offsetWidth + that.params['popupIndent'];
+                            }
+                        }else if(topMenuItem['container']){
+                            if(position[3] && position[3] === 'left'){
+                                left = cm.getX(topMenuItem['container']) + topMenuItem['container'].offsetWidth - that.nodes['popup'].offsetWidth;
+                            }else{
+                                left = cm.getX(topMenuItem['container']);
+                            }
+                        }else{
+                            left = Math.round((pageSize['winWidth'] - that.nodes['popup'].offsetWidth) / 2);
+                        }
+                        top = that.dimensions['topMenu'] + that.params['popupIndent'];
+                        break;
+                    // Template related position
+                    case 'template':
+                        switch(position[1]){
+                            case 'top':
+                                left = (that.components['sidebar'].isExpanded ? that.dimensions['sidebarExpanded'] : that.dimensions['sidebarCollapsed']);
+                                left = Math.round((pageSize['winWidth'] + left - that.nodes['popup'].offsetWidth) / 2);
+                                top = that.dimensions['topMenu'] + that.params['popupIndent'];
+                                break;
+                            case 'bottom':
+                                left = (that.components['sidebar'].isExpanded ? that.dimensions['sidebarExpanded'] : that.dimensions['sidebarCollapsed']);
+                                left = Math.round((pageSize['winWidth'] + left - that.nodes['popup'].offsetWidth) / 2);
+                                top = pageSize['winHeight'] - that.dimensions['popupHeight'] - that.params['popupIndent'];
+                                break;
+                            case 'left':
+                                left = (that.components['sidebar'].isExpanded ? that.dimensions['sidebarExpanded'] : that.dimensions['sidebarCollapsed']) + that.params['popupIndent'];
+                                top = Math.round((pageSize['winHeight'] - that.dimensions['popupHeight']) / 2);
+                                break;
+                            case 'left-top':
+                                left = (that.components['sidebar'].isExpanded ? that.dimensions['sidebarExpanded'] : that.dimensions['sidebarCollapsed']) + that.params['popupIndent'];
+                                top = that.dimensions['topMenu'] + that.params['popupIndent'];
+                                break;
+                            case 'center':
+                            default:
+                                left = (that.components['sidebar'].isExpanded ? that.dimensions['sidebarExpanded'] : that.dimensions['sidebarCollapsed']);
+                                left = Math.round((pageSize['winWidth'] + left - that.nodes['popup'].offsetWidth) / 2);
+                                top = Math.round((pageSize['winHeight'] +  that.dimensions['topMenu'] - that.dimensions['popupHeight']) / 2);
+                                break;
+                        }
+                        break;
+                    // Default position
+                    default:
+                        left = Math.round((pageSize['winWidth'] - that.nodes['popup'].offsetWidth) / 2);
+                        top = Math.round((pageSize['winHeight'] - that.dimensions['popupHeight']) / 2);
+                        break;
+                }
+            }else{
+                left = 0;
+                top = 0;
+                conentHeight = 'auto';
+            }
+            that.nodes['popupContent'].style.height = conentHeight === 'auto' ? conentHeight : [conentHeight, 'px'].join('');
+            cm.setCSSTranslate(that.nodes['popup'], [left, 'px'].join(''), [top, 'px'].join(''), 0, 'scale(1)');
+        }
+    };
+
+    /******* HELPERS *******/
+
+    classProto.getDimensions = function(){
+        var that = this;
+        that.dimensions['sidebarCollapsed'] = cm.getLESSVariable('AppSidebar-WidthCollapsed', 0, true);
+        that.dimensions['sidebarExpanded'] = cm.getLESSVariable('AppSidebar-WidthExpanded', 0, true);
+        that.dimensions['topMenu'] = cm.getLESSVariable('AppTopMenu-Height', 0, true);
+        if(!that.dimensions['popupSelfHeight']){
+            that.dimensions['popupSelfHeight'] = that.nodes['popup'].offsetHeight;
+        }
+        if(that.currentSceneNode){
+            that.dimensions['popupContentHeight'] = that.currentSceneNode.offsetHeight;
+        }
+        that.dimensions['popupHeight'] = that.dimensions['popupSelfHeight'] + that.dimensions['popupContentHeight'];
+    };
+
+    classProto.keyDownEvent = function(e){
+        var that = this;
+        if(that.isRunning){
+            cm.preventDefault(e);
+            switch(e.keyCode){
+                case 27:
+                    that.stop();
+                    break;
+                case 37:
+                    that.prev();
+                    break;
+                case 39:
+                    that.next();
+                    break;
+            }
+        }
+    };
+
+    classProto.setTarget = function(node){
+        var that = this;
+        if(cm.isNode(node)){
+            that.params['node'] = node;
+        }
+        return that;
+    };
+});
 cm.define('App.FontInput', {
     'extend' : 'Com.AbstractInput',
     'params' : {
@@ -32524,7 +35058,6 @@ function(params){
 
 cm.getConstructor('App.FormStyles', function(classConstructor, className, classProto){
     var _inherit = classProto._inherit;
-
 });
 cm.define('App.HelpTour', {
     'modules' : [
@@ -33907,7 +36440,9 @@ cm.define('App.Notification', {
         'renderStructure' : false,
         'embedStructureOnRender' : false,
         'controllerEvents' : true,
-        'remember' : true
+        'show' : 'inherit',                           // true | false | inherit
+        'remember' : true,
+        'rememberTime' : false
     }
 },
 function(params){
@@ -33923,20 +36458,27 @@ cm.getConstructor('App.Notification', function(classConstructor, className, clas
         var that = this;
         // Variables
         that.isShow = null;
-        that.isShowStorage = false;
         // Binds
         that.showHandler = that.show.bind(that);
         that.hideHandler = that.hide.bind(that);
     };
 
     classProto.onConstructEnd = function(){
-        var that = this;
-        // State
-        that.isShow = cm.isClass(that.nodes['container'], 'is-show');
+        var that = this,
+            isShowStorage,
+            storageDate,
+            isExpiredStorage;
+        // Check inherit state
+        that.isShow = that.params['show'] === 'inherit' ? cm.isClass(that.nodes['container'], 'is-show') : that.params['show'];
         // Check storage
         if(that.params['remember']){
-            that.isShowStorage = that.storageRead('isShow');
-            that.isShow = that.isShowStorage !== null ? that.isShowStorage : that.isShow;
+            isShowStorage = that.storageRead('isShow');
+            storageDate = that.storageRead('date');
+            // Check state
+            if(!cm.isUndefined(isShowStorage) && !cm.isUndefined(storageDate)){
+                isExpiredStorage = that.params['rememberTime']? (Date.now() - parseInt(that.params['rememberTime']) > parseInt(storageDate)) : false;
+                that.isShow = isExpiredStorage ? that.isShow : isShowStorage;
+            }
         }
         // Trigger events
         if(that.isShow){
@@ -33962,17 +36504,20 @@ cm.getConstructor('App.Notification', function(classConstructor, className, clas
             // Write storage
             if(that.params['remember']){
                 that.storageWrite('isShow', true);
+                that.storageWrite('date', Date.now());
             }
             // Immediately animate
             if(isImmediately){
-                cm.addClass(that.nodes['container'], 'is-immediately');
+                cm.addClass(that.nodes['container'], 'is-immediately', true);
             }
             // Show
             that.isShow = true;
             cm.replaceClass(that.nodes['container'], 'is-hide', 'is-show');
             // Immediately animate
             if(isImmediately){
-                cm.removeClass(that.nodes['container'], 'is-immediately');
+                setTimeout(function(){
+                    cm.removeClass(that.nodes['container'], 'is-immediately');
+                }, 5);
             }
         }
         return that;
@@ -33984,6 +36529,7 @@ cm.getConstructor('App.Notification', function(classConstructor, className, clas
             // Write storage
             if(that.params['remember']){
                 that.storageWrite('isShow', false);
+                that.storageWrite('date', Date.now());
             }
             // Immediately animate
             if(isImmediately){
@@ -33994,7 +36540,9 @@ cm.getConstructor('App.Notification', function(classConstructor, className, clas
             cm.replaceClass(that.nodes['container'], 'is-show', 'is-hide');
             // Immediately animate
             if(isImmediately){
-                cm.removeClass(that.nodes['container'], 'is-immediately');
+                setTimeout(function(){
+                    cm.removeClass(that.nodes['container'], 'is-immediately');
+                }, 5);
             }
         }
         return that;
@@ -34900,10 +37448,11 @@ function(params){
 
     var validateParams = function(){
         that.params['Com.Overlay']['theme'] = that.params['theme'];
+        that.params['Com.Overlay']['name'] = that.params['name'];
         that.params['Com.TabsetHelper']['node'] = that.nodes['inner'];
         that.params['Com.TabsetHelper']['name'] = [that.params['name'], 'tabset'].join('-');
         that.params['Com.TabsetHelper']['ajax'] = that.params['ajax'];
-        that.params['Com.TabsetHelper']['Com.Overlay'] = that.params['Com.Overlay']
+        that.params['Com.TabsetHelper']['overlayParams'] = that.params['Com.Overlay']
     };
 
     var render = function(){
@@ -34935,16 +37484,16 @@ function(params){
     var processTabset = function(){
         cm.getConstructor('Com.TabsetHelper', function(classConstructor){
             that.components['tabset'] = new classConstructor(that.params['Com.TabsetHelper'])
-                .addEvent('onLabelTarget', function(tabset, data){
-                    if(!that.isExpanded || tabset.get() == data['item']['id']){
+                .addEvent('onLabelTarget', function(tabset, item){
+                    if(!that.isExpanded || tabset.get() === item['id']){
                         that.toggle();
                     }
                 })
-                .addEvent('onTabHide', function(tabset, data){
-                    that.triggerEvent('onTabHide', data);
+                .addEvent('onTabHide', function(tabset, item){
+                    that.triggerEvent('onTabHide', item);
                 })
-                .addEvent('onTabShow', function(tabset, data){
-                    that.triggerEvent('onTabShow', data);
+                .addEvent('onTabShow', function(tabset, item){
+                    that.triggerEvent('onTabShow', item);
                 })
                 .processTabs(that.nodes['tabs'], that.nodes['labels'])
                 .set(that.params['active']);
@@ -36978,7 +39527,8 @@ function(params){
 cm.define('Mod.ElementFileUploader', {
     'extend' : 'App.AbstractModuleElement',
     'params' : {
-        'targetController' : 'App.FileInput'
+        'targetController' : 'App.FileInput',
+        'memorable' : false
     }
 },
 function(params){
@@ -37018,6 +39568,40 @@ cm.getConstructor('Mod.ElementMultiCheckbox', function(classConstructor, classNa
             cm.forEach(that.nodes['inputs'], function(nodes){
                 nodes['input'].checked = cm.inArray(values, nodes['input'].value);
             });
+        }
+    };
+});
+cm.define('Mod.ElementMultiField', {
+    'extend' : 'App.AbstractModuleElement',
+    'params' : {
+        'targetController' : 'Com.MultiField',
+        'memorable' : false
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    App.AbstractModuleElement.apply(that, arguments);
+});
+
+cm.getConstructor('Mod.ElementMultiField', function(classConstructor, className, classProto){
+    var _inherit = classProto._inherit;
+
+    classProto.onEnableEditing = function(){
+        var that = this;
+        if(that.components['controller']){
+            that.components['controller']
+                .clear();
+        }
+    };
+
+    classProto.onDisableEditing = function(){
+        var that = this;
+        cm.log(that.components['controller']);
+        if(that.components['controller']){
+            that.components['controller']
+                .clear()
+                .setTemplate(that.nodes['content']['templateInner']);
         }
     };
 });
@@ -37147,6 +39731,7 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         // Bind
         that.prevTabHandler = that.prevTab.bind(that);
         that.nextTabHandler = that.nextTab.bind(that);
+        that.doneTabHandler = that.doneTab.bind(that);
     };
 
     classProto.onConstructEnd = function(){
@@ -37183,10 +39768,10 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         var that = this;
         cm.getConstructor('Com.TabsetHelper', function(classConstructor, className){
             that.components['tabset'] = new classConstructor(that.params[className])
-                .addEvent('onTabHide', function(tabset, data){
-                    that.triggerEvent('onTabHide', data['item']);
+                .addEvent('onTabHide', function(tabset, item){
+                    that.triggerEvent('onTabHide', item);
                 })
-                .addEvent('onTabShowStart', function(tabset, data){
+                .addEvent('onTabShowStart', function(tabset, item){
                     if(!that.isProcessing){
                         that.nodes['content-list'].style.overflow = 'hidden';
                         that.nodes['content-list'].style.height = that.nodes['content-list'].offsetHeight + 'px';
@@ -37199,14 +39784,14 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
                         that.nodes['content-list'].style.overflow = 'visible';
                     }, that.params['duration']);
                 })
-                .addEvent('onTabShow', function(tabset, data){
-                    that.currentTab = data['item'];
-                    that.nodes['content-list'].style.height = data['item']['tab']['container'].offsetHeight + 'px';
+                .addEvent('onTabShow', function(tabset, item){
+                    that.currentTab = item;
+                    that.nodes['content-list'].style.height = item['tab']['container'].offsetHeight + 'px';
                     that.setMenu();
                     that.setButtons();
                     that.setInput();
-                    that.triggerEvent('onTabShow', data['item']);
-                    that.triggerEvent('onTabChange', data['item']);
+                    that.triggerEvent('onTabShow', item);
+                    that.triggerEvent('onTabChange', item);
                 })
                 .processTabs(that.nodes['tabs'], that.nodes['labels']);
         });
@@ -37218,7 +39803,7 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         that.tabsCount = that.components['tabset'].getTabsCount();
         cm.forEach(that.tabs, function(item){
             cm.addEvent(item['label']['container'], 'click', function(){
-                if(that.validateTab() && that.currentTab['id'] != item['id']){
+                if(that.validateTab() && that.currentTab['id'] !== item['id']){
                     that.setTab(item['id']);
                 }
             });
@@ -37234,7 +39819,7 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
             }, that.getNodeDataConfig(nodes['container']));
             // Click Events
             cm.addEvent(nodes['container'], 'click', function(){
-                if(that.validateTab() && that.currentTab['id'] != item['id']){
+                if(that.validateTab() && that.currentTab['id'] !== item['id']){
                     that.setTab(item['id']);
                 }
             });
@@ -37252,6 +39837,7 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         var that = this;
         cm.addEvent(that.nodes['buttonPrev'], 'click', that.prevTabHandler);
         cm.addEvent(that.nodes['buttonNext'], 'click', that.nextTabHandler);
+        cm.addEvent(that.nodes['buttonDone'], 'click', that.doneTabHandler);
     };
 
     classProto.setButtons = function(){
@@ -37303,19 +39889,28 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         return isValid;
     };
 
-    classProto.prevTab = function(){
+    classProto.prevTab = function(e){
         var that = this;
+        cm.preventDefault(e);
         if(that.validateTab() && that.currentTab['index'] > 0){
             var index = that.currentTab['index'] - 1;
             that.setTabByIndex(index);
         }
     };
 
-    classProto.nextTab = function(){
+    classProto.nextTab = function(e){
         var that = this;
+        cm.preventDefault(e);
         if(that.validateTab() && that.currentTab['index'] < that.tabsCount - 1){
             var index = that.currentTab['index'] + 1;
             that.setTabByIndex(index);
+        }
+    };
+
+    classProto.doneTab = function(e){
+        var that = this;
+        if(!that.validateTab()){
+            cm.preventDefault(e);
         }
     };
 
@@ -37346,8 +39941,15 @@ function(params){
 });
 cm.define('Mod.Form', {
     'extend' : 'App.AbstractModule',
+    'events' : [
+        'onSubmit',
+        'onReset'
+    ],
     'params' : {
         'remember' : false,
+        'local' : false,
+        'unload' : false,
+        'action' : null,
         'ajax' : {
             'method' : 'POST',
             'async' : false,
@@ -37368,30 +39970,51 @@ cm.getConstructor('Mod.Form', function(classConstructor, className, classProto){
     classProto.onConstructStart = function(){
         var that = this;
         // Variables
+        that.isAjax = false;
+        that.isUnload = false;
         that.items = {};
         that.values = {};
+        that.nodes = {
+            'form' : cm.node('form')
+        };
         // Binds
         that.processItemHandler = that.processItem.bind(that);
         that.processWizardHandler = that.processWizard.bind(that);
         that.unloadEventHanlder = that.unloadEvent.bind(that);
+        that.submitEventHandler = that.submitEvent.bind(that);
+        that.resetEventHandler = that.resetEvent.bind(that);
+        that.keypressEventHandler = that.keypressEvent.bind(that);
     };
 
     classProto.onDestruct = function(){
         var that = this;
         that.components['finder'] && that.components['finder'].remove();
         that.components['finderWizard'] && that.components['finderWizard'].remove();
-        cm.removeEvent(window, 'unload', that.unloadEventHanlder);
+        that.isUnload && cm.removeEvent(window, 'unload', that.unloadEventHanlder);
+    };
+
+    classProto.onValidateParams = function(){
+        var that = this;
+        // If URL parameter exists, use ajax data
+        if(!cm.isEmpty(that.params['ajax']['url'])){
+            that.isAjax = true;
+        }
+        that.isUnload = that.params['unload'] && that.isAjax;
+        // Get form action
+        that.params['action'] = that.nodes['form'].getAttribute('action') || that.params['action'];
     };
 
     classProto.renderViewModel = function(){
         var that = this;
+        // Call parent method
+        _inherit.prototype.renderViewModel.apply(that, arguments);
         // Init form saving
         if(that.params['remember']){
             // Page unload event
-            cm.addEvent(window, 'unload', that.unloadEventHanlder);
+            that.isUnload && cm.addEvent(window, 'unload', that.unloadEventHanlder);
             // Local saving
             if(that.params['local']){
-                that.values = that.storageRead('items');
+                that.values = that.storageRead('items') || {};
                 that.components['finder'] = new cm.Finder('App.AbstractModuleElement', null, that.nodes['container'], that.processItemHandler, {
                     'multiple' : true,
                     'childs' : true
@@ -37401,6 +40024,10 @@ cm.getConstructor('Mod.Form', function(classConstructor, className, classProto){
                 });
             }
         }
+        // Form events
+        cm.addEvent(that.nodes['form'], 'keypress', that.keypressEventHandler);
+        cm.addEvent(that.nodes['form'], 'submit', that.submitEventHandler);
+        cm.addEvent(that.nodes['form'], 'reset', that.resetEventHandler);
         return that;
     };
 
@@ -37449,13 +40076,13 @@ cm.getConstructor('Mod.Form', function(classConstructor, className, classProto){
         // Set value
         item['controller'].setTab(item['value']);
         // Events
-        item['controller'].addEvent('onTabChange', function(my, data){
+        item['controller'].addEvent('onTabChange', function(){
             item['tab'] = item['controller'].getCurrentTab();
             item['value'] = item['tab']['id'];
             that.values[item['name']] = item['value'];
             that.processSave();
         });
-        item['controller'].addEvent('onDestruct', function(my){
+        item['controller'].addEvent('onDestruct', function(){
             delete that.values[item['name']];
             delete that.items[item['name']];
             that.processSave();
@@ -37469,6 +40096,8 @@ cm.getConstructor('Mod.Form', function(classConstructor, className, classProto){
         var that = this;
         that.storageWrite('items', that.values);
     };
+
+    /*** EVENTS ***/
 
     classProto.unloadEvent = function(){
         var that = this,
@@ -37485,6 +40114,39 @@ cm.getConstructor('Mod.Form', function(classConstructor, className, classProto){
                 'params' : data
             })
         );
+    };
+
+    classProto.keypressEvent = function(e){
+        var that = this;
+        if(cm.isFormInputFocused() && cm.isKey(e, 'enter')){
+            cm.preventDefault(e);
+        }
+    };
+
+    classProto.submitEvent = function(e){
+        var that = this,
+            data;
+        cm.preventDefault(e);
+        // Submit
+        data = new FormData(that.nodes['form']);
+        that.triggerEvent('onSubmit', {
+            'form' : that.nodes['form'],
+            'data' : data,
+            'action' : that.params['action']
+        });
+        that.clear();
+    };
+
+    classProto.resetEvent = function(e){
+        var that = this;
+        var data = new FormData(that.nodes['form']);
+        cm.preventDefault(e);
+        that.triggerEvent('onReset', {
+            'form' : that.nodes['form'],
+            'data' : data,
+            'action' : that.params['action']
+        });
+        that.clear();
     };
 
     /******* PUBLIC *******/
@@ -38004,15 +40666,15 @@ function(params){
         // Process Tabset
         cm.getConstructor('Com.TabsetHelper', function(classConstructor, className){
             that.components['tabset'] = new classConstructor(that.params[className])
-                .addEvent('onTabHide', function(tabset, data){
-                    that.triggerEvent('onTabHide', data);
+                .addEvent('onTabHide', function(tabset, item){
+                    that.triggerEvent('onTabHide', item);
                 })
-                .addEvent('onTabShowStart', function(tabset, data){
+                .addEvent('onTabShowStart', function(tabset, item){
                     // If not in editing and tab does not contains any blocks, do not show it
-                    if(!that.params['showEmptyTab'] && !that.isEditing && that.components['tabset'].isTabEmpty(data.item['id'])){
-                        hide(data.item);
+                    if(!that.params['showEmptyTab'] && !that.isEditing && that.components['tabset'].isTabEmpty(item['id'])){
+                        hide(item);
                     }else{
-                        show(data.item);
+                        show(item);
                     }
                     // Container
                     if(!that.isProcessing){
@@ -38027,10 +40689,10 @@ function(params){
                         that.nodes['content-list'].style.overflow = 'visible';
                     }, that.params['duration']);
                 })
-                .addEvent('onTabShow', function(tabset, data){
-                    that.nodes['content-list'].style.height = data['item']['tab']['container'].offsetHeight + 'px';
-                    that.nodes['menu-label'].innerHTML = data['item']['title'];
-                    that.triggerEvent('onTabShow', data);
+                .addEvent('onTabShow', function(tabset, item){
+                    that.nodes['content-list'].style.height = item['tab']['container'].offsetHeight + 'px';
+                    that.nodes['menu-label'].innerHTML = item['title'];
+                    that.triggerEvent('onTabShow', item);
                 })
                 .processTabs(that.nodes['tabs'], that.nodes['labels']);
         });
@@ -38069,7 +40731,7 @@ function(params){
             cm.addEvent(item['label']['link'], 'click', function(e){
                 if(
                     that.isEditing
-                    || (that.params['event'] == 'click' && that.components['tabset'].get() != item['id'])
+                    || (that.params['event'] === 'click' && that.components['tabset'].get() !== item['id'])
                 ){
                     cm.preventDefault(e);
                 }
@@ -38092,7 +40754,7 @@ function(params){
                 'nodes' : nodes
             }, that.getNodeDataConfig(nodes['container']));
         cm.addEvent(nodes['container'], 'click', function(e){
-            if(that.components['tabset'].get() != item['id']){
+            if(that.components['tabset'].get() !== item['id']){
                 cm.preventDefault(e);
                 that.components['tabset'].set(item['id']);
                 hideMenu();
@@ -38193,9 +40855,9 @@ function(params){
         that.previousPosition = cm.clone(that.currentPosition);
         that.currentPosition = cm.getRect(that.nodes['container']);
         // Variables
-        var isSameTop = that.previousPosition && that.previousPosition['top'] == that.currentPosition['top'];
-        var isSameBottom = that.previousPosition && that.previousPosition['bottom'] == that.currentPosition['bottom'];
-        var isSameWidth = that.previousPosition && that.previousPosition['width'] == that.currentPosition['width'];
+        var isSameTop = that.previousPosition && that.previousPosition['top'] === that.currentPosition['top'];
+        var isSameBottom = that.previousPosition && that.previousPosition['bottom'] === that.currentPosition['bottom'];
+        var isSameWidth = that.previousPosition && that.previousPosition['width'] === that.currentPosition['width'];
         // Set Content Min Width
         if(!isSameWidth){
             switch(that.params['attachment']){
@@ -38410,286 +41072,7 @@ function(params){
 
     init();
 });
-cm.define('Dev.Parallax', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'Structure',
-        'DataConfig',
-        'DataNodes',
-        'Storage',
-        'Stack'
-    ],
-    'events' : [
-        'onRenderStart',
-        'onRender'
-    ],
-    'params' : {
-        'node' : cm.node('div'),
-        'name' : '',
-        'speed' : 1
-    }
-},
-function(params){
-    var that = this;
-    that.nodes = {};
-    that.components = {};
-    that.construct(params);
-});
-
-cm.getConstructor('Dev.Parallax', function(classConstructor, className, classProto){
-    classProto.construct = function(params){
-        var that = this;
-        that.setHandler = that.set.bind(that);
-        that.refreshHandler = that.refresh.bind(that);
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        that.validateParams();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRenderStart');
-        that.render();
-        that.addToStack(that.nodes['container']);
-        that.triggerEvent('onRender');
-        return that;
-    };
-
-    classProto.validateParams = function(){
-        var that = this;
-        return that;
-    };
-
-    classProto.render = function(){
-        var that = this;
-        // Refresh Layout
-        that.refresh();
-        // Set Events
-        cm.addEvent(window, 'scroll', that.setHandler);
-        cm.addEvent(window, 'resize', that.refreshHandler);
-        return that;
-    };
-
-    classProto.refresh = function(){
-        var that = this;
-        that.posY = cm.getY(that.nodes['container']);
-        that.selfHeight = that.nodes['container'].offsetHeight;
-        that.posY2 = that.posY + that.selfHeight;
-        that.winHeight = cm.getPageSize('winHeight');
-        that.halfY = (that.winHeight - that.selfHeight) / 2;
-        that.set();
-        return that;
-    };
-
-    classProto.set = function(){
-        var that = this;
-        var scrollTop = cm.getBodyScrollTop();
-        if(cm.inRange(scrollTop, scrollTop + that.winHeight, that.posY, that.posY2)){
-            var posY = scrollTop + that.halfY - that.posY;
-            var transY = posY - (posY * that.params['speed']);
-            cm.setCSSTranslate(that.nodes['backgroundInner'], '0px', (transY + 'px'))
-        }
-    };
-});
-cm.define('Dev.TBSC', {
-    'modules' : [
-        'Params',
-        'Events',
-        'Langs',
-        'Structure',
-        'DataConfig',
-        'DataNodes',
-        'Storage',
-        'Stack'
-    ],
-    'events' : [
-        'onRenderStart',
-        'onRender'
-    ],
-    'params' : {
-        'node' : cm.node('div'),
-        'name' : '',
-        'customEvents' : true,
-        'ipadSpeed' : 0.12,
-        'characterSpeed' : 0.4,
-        'character2Speed' : 0.288,
-        'raysSpeed' : 0.342
-    }
-},
-function(params){
-    var that = this;
-    that.nodes = {};
-    that.components = {};
-    that.isEditing = null;
-    that.isDestructed = false;
-    that.construct(params);
-});
-
-cm.getConstructor('Dev.TBSC', function(classConstructor, className, classProto){
-    classProto.construct = function(params){
-        var that = this;
-        that.resizeHandler = that.resize.bind(that);
-        that.scrollHandler = that.scroll.bind(that);
-        that.setHandler = that.set.bind(that);
-        that.redrawHandler = that.redraw.bind(that);
-        that.enableEditingHandler = that.enableEditing.bind(that);
-        that.disableEditingHandler = that.disableEditing.bind(that);
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRenderStart');
-        that.render();
-        that.addToStack(that.nodes['container']);
-        that.triggerEvent('onRender');
-        return that;
-    };
-
-    classProto.destruct = function(){
-        var that = this;
-        if(!that.isDestructed){
-            that.isDestructed = true;
-            cm.removeEvent(window, 'scroll', that.scrollHandler);
-            cm.removeEvent(window, 'resize', that.resizeHandler);
-            that.removeFromStack();
-        }
-        return that;
-    };
-
-    classProto.render = function(){
-        var that = this;
-        // Refresh Layout
-        that.redraw();
-        // Set Events
-        cm.addEvent(window, 'scroll', that.scrollHandler);
-        cm.addEvent(window, 'resize', that.resizeHandler);
-        // Add custom event
-        if(that.params['customEvents']){
-            cm.customEvent.add(that.params['node'], 'destruct', function(){
-                that.destruct();
-            });
-            cm.customEvent.add(that.params['node'], 'redraw', function(){
-                that.redraw();
-            });
-            cm.customEvent.add(that.params['node'], 'enableEditable', function(){
-                that.enableEditing();
-            });
-            cm.customEvent.add(that.params['node'], 'disableEditable', function(){
-                that.disableEditing();
-            });
-        }
-        return that;
-    };
-
-    classProto.resize = function(){
-        var that = this;
-        that.redraw();
-        return that;
-    };
-
-    classProto.scroll = function(){
-        var that = this;
-        if(!that.isEditing){
-            that.set();
-        }
-        return that;
-    };
-
-    classProto.redraw = function(){
-        var that = this;
-        if(!that.isEditing){
-            cm.addClass(that.nodes['line']['container'], 'is-start');
-            cm.removeClass(that.nodes['height'], 'is-hidden');
-            // Position
-            that.winWidth = cm.getPageSize('winWidth');
-            that.posX = cm.getX(that.nodes['container']);
-            that.posY = cm.getY(that.nodes['container']);
-            // iPad
-            that.ipadStartY = 70;
-            that.ipadEndY = 0;
-            // Character
-            that.characterStartY = -210;
-            that.characterEndY = 0;
-            // Character 2
-            that.character2StartY = -150;
-            that.character2EndY = 0;
-            // Rays
-            that.raysStartY = -180;
-            that.raysEndY = 0;
-            // Set
-            that.set();
-        }else {
-            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', '0px');
-            cm.setCSSTranslate(that.nodes['line']['character'], '0px', '0px');
-            cm.setCSSTranslate(that.nodes['line']['character2'], '0px', '0px');
-            cm.setCSSTranslate(that.nodes['line']['rays'], '0px', '0px');
-        }
-        return that;
-    };
-
-    classProto.set = function(){
-        var that = this,
-            scrollTop = cm.getBodyScrollTop(),
-            scrollOffset = scrollTop,
-            ipadTrans = that.ipadStartY - (scrollOffset * that.params['ipadSpeed']),
-            characterTrans = that.characterStartY + (scrollOffset * that.params['characterSpeed']),
-            character2Trans = that.character2StartY + (scrollOffset * that.params['character2Speed']),
-            raysTransTrans = that.raysStartY + (scrollOffset * that.params['raysSpeed']);
-        // Ipad
-        if(ipadTrans >= that.ipadStartY){
-            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', (that.ipadStartY + 'px'));
-        }else if(ipadTrans >= that.ipadEndY){
-            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', (ipadTrans + 'px'));
-        }else{
-            cm.setCSSTranslate(that.nodes['line']['ipad'], '0px', (that.ipadEndY + 'px'));
-        }
-        // Character
-        if(characterTrans <= that.characterStartY){
-            cm.setCSSTranslate(that.nodes['line']['character'], (that.characterStartY + 'px'), '0px');
-        }else if(characterTrans <= that.characterEndY){
-            cm.setCSSTranslate(that.nodes['line']['character'], (characterTrans + 'px'), '0px');
-        }else{
-            cm.setCSSTranslate(that.nodes['line']['character'], (that.characterEndY + 'px'), '0px');
-        }
-        // Character 2
-        if(character2Trans <= that.character2StartY){
-            cm.setCSSTranslate(that.nodes['line']['character2'], (that.character2StartY + 'px'), '0px');
-        }else if(character2Trans <= that.character2EndY){
-            cm.setCSSTranslate(that.nodes['line']['character2'], (character2Trans + 'px'), '0px');
-        }else{
-            cm.setCSSTranslate(that.nodes['line']['character2'], (that.character2EndY + 'px'), '0px');
-        }
-        // Rays
-        if(raysTransTrans <= that.raysStartY){
-            cm.setCSSTranslate(that.nodes['line']['rays'], (that.raysStartY + 'px'), '0px');
-        }else if(raysTransTrans <= that.raysEndY){
-            cm.setCSSTranslate(that.nodes['line']['rays'], (raysTransTrans + 'px'), '0px');
-        }else{
-            cm.setCSSTranslate(that.nodes['line']['rays'], (that.raysEndY + 'px'), '0px');
-        }
-    };
-
-    classProto.enableEditing = function(){
-        var that = this;
-        if(!cm.isBoolean(that.isEditing) || !that.isEditing){
-            that.isEditing = true;
-            that.redraw();
-        }
-        return that;
-    };
-
-    classProto.disableEditing = function(){
-        var that = this;
-        if(!cm.isBoolean(that.isEditing) || that.isEditing){
-            that.isEditing = false;
-            that.redraw();
-        }
-        return that;
-    };
-});
-window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.30.14","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmVersion":"3.30.14","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-ItemColor":"#666666","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","PtOverlay-Spinner-BorderSize":"3px","PtOverlay-Spinner-DefaultBackground":"#e8e8e8","PtOverlay-Spinner-ActiveBackground":"#2985e0","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.19.0","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-CircleNote":"\\e707","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","fileuploader","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-fileuploader":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppVersion":"3.19.0","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppTopMenu-Dropdown-Duration":"50ms","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModCart-LabelIndent":"8px","ModCart-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","ModCalendar-BorderWidth":"1px","ModCalendar-BorderColor":"#cccccc","ModCalendar-Border":["1px","solid","#cccccc"],"ModCalendar-Background":"#ffffff","ModCalendarEvent-TooltipWidth":"320px","ModCalendarEvent-Padding":"4px","ModCalendarEvent-LineHeight":"18px","ModCalendarEvent-Short-Indent":"1px","ModCalendarEvent-Short-Height":"20px","ModCalendarEvent-Long-Indent":"12px","ModCalendarTable-Border":["1px","solid","#cccccc"],"ModCalendarTable-Default-Background":"#ffffff","ModCalendarTable-Default-BackgroundHover":"#f2f2f2","ModCalendarTable-Inactive-Background":"#ffffff","ModCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ModCalendarTable-Weekend-Background":"#e8e8e8","ModCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ModCalendarTable-Today-Background":"#f6fafd","ModCalendarTable-Today-BackgroundHover":"#e9f2fb","ModCalendarTable-Active-Background":"#d8e8f8","ModCalendarTable-Active-BackgroundHover":"#c2dbf4","ModCalendarAgenda-Day-Indent":"24px","ModCalendarAgenda-Day-Padding":"12px","ModCalendarAgenda-Day-Width":"72px","ModCalendarWeek-Day-Indent":"4px","ModCalendarWeek-Item-Height":"20px","ModCalendarMonth-Item-Count":3,"ModCalendarMonth-Item-LineHeight":"18px","ModCalendarMonth-Item-Height":"20px","ModCalendarMonth-Item-Indent":"1px","ModCalendarMonth-Day-Indent":"4px","ModCalendarMonth-Day-Items":5,"ModCalendarMonth-Day-Height":"104px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
+window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.33.0","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmIconIA-Spinner-BorderSize":"3px","CmIconIA-Spinner-DefaultBackground":"#e8e8e8","CmIconIA-Spinner-ActiveBackground":"#2985e0","CmVersion":"3.33.0","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXXSmall":"2px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXXSmall":"2px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationMedium":"150ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-Placeholder-Size":"inherit","CmFont-Placeholder-Style":"inherit","CmFont-Placeholder-Color":"#b7b7b7","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBox-Padding":"4px","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-Item-Color":"#666666","PtMenu-Item-HoverColor":"#1d73c9","PtMenu-Item-ActiveColor":"#16599c","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-AdaptiveFrom":"768px","PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-Indent":"24px","ComDialog-Radius":"3px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.21.1","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-CircleNote":"\\e707","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","fileuploader","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-fileuploader":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppVersion":"3.21.1","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-QuickSilkRed":"#ff6662","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppTopMenu-Dropdown-Duration":"50ms","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModCart-LabelIndent":"8px","ModCart-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","ModCalendar-BorderWidth":"1px","ModCalendar-BorderColor":"#cccccc","ModCalendar-Border":["1px","solid","#cccccc"],"ModCalendar-Background":"#ffffff","ModCalendarEvent-TooltipWidth":"320px","ModCalendarEvent-Padding":"4px","ModCalendarEvent-LineHeight":"18px","ModCalendarEvent-Short-Indent":"1px","ModCalendarEvent-Short-Height":"20px","ModCalendarEvent-Long-Indent":"12px","ModCalendarTable-Border":["1px","solid","#cccccc"],"ModCalendarTable-Default-Background":"#ffffff","ModCalendarTable-Default-BackgroundHover":"#f2f2f2","ModCalendarTable-Inactive-Background":"#ffffff","ModCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ModCalendarTable-Weekend-Background":"#e8e8e8","ModCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ModCalendarTable-Today-Background":"#f6fafd","ModCalendarTable-Today-BackgroundHover":"#e9f2fb","ModCalendarTable-Active-Background":"#d8e8f8","ModCalendarTable-Active-BackgroundHover":"#c2dbf4","ModCalendarAgenda-Day-Indent":"24px","ModCalendarAgenda-Day-Padding":"12px","ModCalendarAgenda-Day-Width":"72px","ModCalendarWeek-Day-Indent":"4px","ModCalendarWeek-Item-Height":"20px","ModCalendarMonth-Item-Count":3,"ModCalendarMonth-Item-LineHeight":"18px","ModCalendarMonth-Item-Height":"20px","ModCalendarMonth-Item-Indent":"1px","ModCalendarMonth-Day-Indent":"4px","ModCalendarMonth-Day-Items":5,"ModCalendarMonth-Day-Height":"104px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
 
 window.Collector = new Com.Collector({
         'autoInit' : true
@@ -38779,8 +41162,8 @@ window.Collector = new Com.Collector({
         new App.Sidebar({
             'node' : node,
             'events' : {
-                'onTabShow' : function(that, data){
-                    window.Collector.construct(data['item']['tab']['container']);
+                'onTabShow' : function(that, item){
+                    window.Collector.construct(item['tab']['container']);
                 }
             }
         });
@@ -38806,6 +41189,12 @@ window.Collector = new Com.Collector({
 
     .add('app-helptour', function(node){
         new App.HelpTour({
+            'node' : node
+        });
+    })
+
+    .add('app-flow', function(node){
+        new App.FlowContainer({
             'node' : node
         });
     })

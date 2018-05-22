@@ -429,10 +429,7 @@ $secondary_active = get_include_contents('ajax.panel.item.view.phtml', $variable
                         </span>
                     </dt>
                     <dd>
-                        <div class="app__stylizer__item" data-element="App.Stylizer" data-node="AppStylizer:{}:container" data-config='{"name" : "params[mobile][font]", "showResetButtons" : false}'>
-                            <input data-node="input" type="hidden" name="params[mobile][font]" value='{"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}'>
-                            <div class="item-preview" data-node="preview">The quick brown fox jumps over the lazy dog</div>
-                        </div>
+                        <input type="text" placeholder="The quick brown fox jumps over the lazy dog" data-element="App.FontInput" data-config='{"name" : "params[mobile][font]", "showResetButtons" : false, "defaultValue" : {"font-family":"Open Sans, sans-serif","line-height":"20px","font-size":"14px","font-weight":"400","color":"#666666","text-decoration":"none","font-style":"normal"}}'>
                     </dd>
                 </dl>
                 <hr>

@@ -25,6 +25,35 @@
             <div class="inner" data-node="items:{}">
                 <div class="menu__right">
                     <ul class="menu">
+                        <li class="has-icon is-no-label item--flow" data-node="flow:{}:container">
+                            <a title="Help" data-element="app-flow">
+                                <i class="menu__icon icon app-i__circle-help"></i>Flow
+                            </a>
+                        </li>
+                        <li class="has-icon is-no-label item--help" data-node="help:{}:container">
+                            <a title="Help" data-element="app-helptour">
+                                <i class="menu__icon icon app-i__circle-help"></i>Help
+                            </a>
+                        </li>
+                        <li class="pt__menu has-dropdown has-icon is-no-label item--note" data-node="note:{}:container">
+                            <a title="Notifications">
+                                <i class="menu__icon icon app-i__circle-note">
+                                    <span class="mark"></span>
+                                </i>Notifications
+                            </a>
+                            <ul class="pt__menu-dropdown" data-node="dropdown">
+                                <li>
+                                    <a>
+                                        <span class="mark success"></span>Release Updates
+                                    </a>
+                                </li>
+                                <li>
+                                    <a>
+                                        <span class="mark default"></span>Important Messages
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <li class="pt__menu has-dropdown has-icon item--user" data-node="user:{}:container">
                             <a title="User Userberg">
                                 <i class="menu__icon icon app-i__circle-user"></i>User Userberg
@@ -37,34 +66,6 @@
                                     <a>Logout</a>
                                 </li>
                             </ul>
-                        </li>
-                        <li class="pt__menu has-dropdown has-icon is-no-label item--note" data-node="note:{}:container">
-                            <a title="Notifications">
-                                <i class="menu__icon icon app-i__circle-note">
-                                    <span class="mark"></span>
-                                </i>Notifications
-                            </a>
-                            <ul class="pt__menu-dropdown" data-node="dropdown">
-                                <li>
-                                    <div class="menu__notifications">
-                                        <div class="label">Release Updates</div>
-                                        <ul>
-                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
-                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
-                                        </ul>
-                                        <div class="label">Important Messages</div>
-                                        <ul>
-                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
-                                            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempor ipsum sapien, non scelerisque metus porta eget.</li>
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="has-icon is-no-label item--help" data-node="help:{}:container">
-                            <a title="Help" data-element="app-helptour">
-                                <i class="menu__icon icon app-i__circle-help"></i>Help
-                            </a>
                         </li>
                     </ul>
                 </div>
@@ -978,7 +979,17 @@
 
 <!-- [* ******* TRIAL START ******* *] -->
 
-<div class="app__notification pull-top is-quicksilk is-show" data-node="AppNotification:{}:container" data-element="App.Notification" data-config='{"remember" : false, "name" : "app-notification"}'>
+<div class="app__notification pull-top is-quicksilk is-show" data-node="AppNotification:{}:container" data-element="App.Notification" data-config='{"name" : "trial", "remember" : true, "rememberTime" : 3600000}'>
+    <div class="inner" data-node="inner">
+        <div class="icon default linked" title="Close" data-node="close"></div>
+        <div class="text" data-node="text">
+            <span class="text-line">Hi! Your site is looking great! Just because your trial expires in 14 days doesn't mean you'll have to stop creating.</span><!--
+            --><span class="text-line"><a target="_blank">Go live</a> to continue building the site of your dreams.</span>
+        </div>
+    </div>
+</div>
+
+<div class="app__notification pull-bottom is-warning is-show" data-node="AppNotification:{}:container" data-element="App.Notification" data-config='{"name" : "cookiesNotice", "remember" : true, "rememberTime" : 3600000}'>
     <div class="inner" data-node="inner">
         <div class="icon default linked" title="Close" data-node="close"></div>
         <div class="text" data-node="text">

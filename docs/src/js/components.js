@@ -87,8 +87,8 @@ window.Collector = new Com.Collector({
         new App.Sidebar({
             'node' : node,
             'events' : {
-                'onTabShow' : function(that, data){
-                    window.Collector.construct(data['item']['tab']['container']);
+                'onTabShow' : function(that, item){
+                    window.Collector.construct(item['tab']['container']);
                 }
             }
         });
@@ -114,6 +114,12 @@ window.Collector = new Com.Collector({
 
     .add('app-helptour', function(node){
         new App.HelpTour({
+            'node' : node
+        });
+    })
+
+    .add('app-flow', function(node){
+        new App.FlowContainer({
             'node' : node
         });
     })

@@ -50,6 +50,14 @@ switch($_GET['tab']){
                                 </div>
                             </div>
                         </div>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_multifield\", \"type\" : \"form-manager\"}'>
+                            <div class=\"app__block-dummy\" data-node=\"dummy\">
+                                <div class=\"inner\">
+                                    <div class=\"icon module-default\"></div>
+                                    <div class=\"caption\">MultiFeild</div>
+                                </div>
+                            </div>
+                        </div>
                     </dd>
                 </dl>
                 <dl class=\"com__togglebox app__blocks-category is-show\" data-element=\"Com.ToggleBox\" data-config='{\"remember\" : true, \"name\" : \"app__sidebar-form-element\"}' data-node=\"ComToggleBox.container\">
@@ -190,6 +198,6 @@ $response = json_encode(array(
 	'data' => $data
 ));
 
-sleep(1);
+sleep(0.1);
 
 echo $response;

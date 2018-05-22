@@ -29,11 +29,17 @@
 @CmIcon-ChevronLeft: '\e902';
 @CmIcon-ChevronRight: '\e903';
 
+// /* ******* ANIMATED ******* */
+
+@CmIconIA-Spinner-BorderSize: 3px;
+@CmIconIA-Spinner-DefaultBackground: @CmColor-Secondary-LightActive;
+@CmIconIA-Spinner-ActiveBackground: @CmColor-Primary-DarkDefault;
+
 // /* ************************************************ */
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.30.14';
+@CmVersion: '3.33.0';
 
 // /* ******* PATH ******* */
 
@@ -50,6 +56,7 @@
 // /* ******* SIZES ******* */
 
 @CmSize-None: 0px;
+@CmSize-XXXXSmall: 2px;
 @CmSize-XXXSmall: 4px;
 @CmSize-XXSmall: 8px;
 @CmSize-XSmall: 12px;
@@ -61,6 +68,7 @@
 @CmSize-XXXLarge: 96px;
 
 @CmIndent-None: @CmSize-None;
+@CmIndent-XXXXSmall: @CmSize-XXXXSmall;
 @CmIndent-XXXSmall: @CmSize-XXXSmall;
 @CmIndent-XXSmall: @CmSize-XXSmall;
 @CmIndent-XSmall: @CmSize-XSmall;
@@ -71,11 +79,12 @@
 @CmIndent-XXLarge: @CmSize-XXLarge;
 @CmIndent-XXXLarge: @CmSize-XXXLarge;
 
-@CmIndents: @CmIndent-None @CmIndent-XXXSmall @CmIndent-XXSmall @CmIndent-XSmall @CmIndent-Small @CmIndent-Medium @CmIndent-Large @CmIndent-XLarge @CmIndent-XXLarge @CmIndent-XXXLarge;
+@CmIndents: @CmIndent-None @CmSize-XXXXSmall @CmIndent-XXXSmall @CmIndent-XXSmall @CmIndent-XSmall @CmIndent-Small @CmIndent-Medium @CmIndent-Large @CmIndent-XLarge @CmIndent-XXLarge @CmIndent-XXXLarge;
 
 // /* ******* UI ******* */
 
 @CmUI-Transition-Duration: 250ms;
+@CmUI-Transition-DurationMedium: 150ms;
 @CmUI-Transition-DurationShort: 100ms;
 @CmUI-Transition-DurationLong: 500ms;
 @CmUI-Transition-DurationXLong: 750ms;
@@ -397,6 +406,10 @@
 @CmFont-Base-Hint-Size: 11px;
 @CmFont-Base-Hint-Color: @CmColor-Font-Hint;
 
+@CmFont-Placeholder-Size: inherit;
+@CmFont-Placeholder-Style: inherit;
+@CmFont-Placeholder-Color: @CmColor-Font-Placeholder;
+
 // /* *** UI *** */
 
 @CmFont-UI-LightWeight: 300;
@@ -498,6 +511,7 @@
 
 @PtBox-BorderWidth: @CmBorder-Width;
 @PtBox-BorderColor: @CmColor-Border;
+@PtBox-Padding: @CmIndent-XXXSmall;
 @PtBoxItem-Sizes: 50 80 150;
 @PtBoxItem-DescrLines: 1;
 @PtBoxContent-Indent: @CmIndent-XLarge;
@@ -514,7 +528,9 @@
 
 @PtMenu-ItemIndentY: 2px;
 @PtMenu-ItemIndentX: @CmIndent-XSmall;
-@PtMenu-ItemColor: @CmFont-Base-Color;
+@PtMenu-Item-Color: @CmFont-Base-Color;
+@PtMenu-Item-HoverColor: @CmColor-Font-LinkHover;
+@PtMenu-Item-ActiveColor: @CmColor-Font-LinkActive;
 @PtMenu-SeparatorIndentX: @PtMenu-ItemIndentX;
 @PtMenu-SeparatorSize: @PtBox-BorderWidth;
 @PtMenu-SeparatorColor: @PtBox-BorderColor;
@@ -567,6 +583,7 @@
 
 @PtGrid-Indent: @CmUI-ColumnIndent;
 @PtGrid-Indents: @CmIndents;
+@PtGrid-AdaptiveFrom: @CmUI-AdaptiveFrom;
 
 // /* ******* SELECTABLE*** */
 
@@ -694,9 +711,6 @@
 @PtOverlay-Dark: @CmUI-Overlay-Dark;
 @PtOverlay-Duration: @CmUI-Overlay-Duration;
 @PtOverlay-Spinner-Size: @CmSize-Large;
-@PtOverlay-Spinner-BorderSize: 3px;
-@PtOverlay-Spinner-DefaultBackground: @CmColor-Secondary-LightActive;
-@PtOverlay-Spinner-ActiveBackground: @CmColor-Primary-DarkDefault;
 
 // /* ************************************************ */
 // /* ******* LAYOUTS ******* */
@@ -850,6 +864,7 @@
 
 @ComDialog-Duration: @CmUI-Transition-Duration;
 @ComDialog-Indent: @CmIndent-Medium;
+@ComDialog-Radius: @CmBorder-Radius;
 @ComDialog-TitleIndent: @CmIndent-XSmall;
 @ComDialog-Overlay: @CmUI-Overlay-Dark;
 
@@ -1002,11 +1017,17 @@
 @CmIcon-ChevronLeft: '\e902';
 @CmIcon-ChevronRight: '\e903';
 
+// /* ******* ANIMATED ******* */
+
+@CmIconIA-Spinner-BorderSize: 3px;
+@CmIconIA-Spinner-DefaultBackground: @CmColor-Secondary-LightActive;
+@CmIconIA-Spinner-ActiveBackground: @CmColor-Primary-DarkDefault;
+
 // /* ************************************************ */
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.30.14';
+@CmVersion: '3.33.0';
 
 // /* ******* PATH ******* */
 
@@ -1023,6 +1044,7 @@
 // /* ******* SIZES ******* */
 
 @CmSize-None: 0px;
+@CmSize-XXXXSmall: 2px;
 @CmSize-XXXSmall: 4px;
 @CmSize-XXSmall: 8px;
 @CmSize-XSmall: 12px;
@@ -1034,6 +1056,7 @@
 @CmSize-XXXLarge: 96px;
 
 @CmIndent-None: @CmSize-None;
+@CmIndent-XXXXSmall: @CmSize-XXXXSmall;
 @CmIndent-XXXSmall: @CmSize-XXXSmall;
 @CmIndent-XXSmall: @CmSize-XXSmall;
 @CmIndent-XSmall: @CmSize-XSmall;
@@ -1044,11 +1067,12 @@
 @CmIndent-XXLarge: @CmSize-XXLarge;
 @CmIndent-XXXLarge: @CmSize-XXXLarge;
 
-@CmIndents: @CmIndent-None @CmIndent-XXXSmall @CmIndent-XXSmall @CmIndent-XSmall @CmIndent-Small @CmIndent-Medium @CmIndent-Large @CmIndent-XLarge @CmIndent-XXLarge @CmIndent-XXXLarge;
+@CmIndents: @CmIndent-None @CmSize-XXXXSmall @CmIndent-XXXSmall @CmIndent-XXSmall @CmIndent-XSmall @CmIndent-Small @CmIndent-Medium @CmIndent-Large @CmIndent-XLarge @CmIndent-XXLarge @CmIndent-XXXLarge;
 
 // /* ******* UI ******* */
 
 @CmUI-Transition-Duration: 250ms;
+@CmUI-Transition-DurationMedium: 150ms;
 @CmUI-Transition-DurationShort: 100ms;
 @CmUI-Transition-DurationLong: 500ms;
 @CmUI-Transition-DurationXLong: 750ms;
@@ -1370,6 +1394,10 @@
 @CmFont-Base-Hint-Size: 11px;
 @CmFont-Base-Hint-Color: @CmColor-Font-Hint;
 
+@CmFont-Placeholder-Size: inherit;
+@CmFont-Placeholder-Style: inherit;
+@CmFont-Placeholder-Color: @CmColor-Font-Placeholder;
+
 // /* *** UI *** */
 
 @CmFont-UI-LightWeight: 300;
@@ -1471,6 +1499,7 @@
 
 @PtBox-BorderWidth: @CmBorder-Width;
 @PtBox-BorderColor: @CmColor-Border;
+@PtBox-Padding: @CmIndent-XXXSmall;
 @PtBoxItem-Sizes: 50 80 150;
 @PtBoxItem-DescrLines: 1;
 @PtBoxContent-Indent: @CmIndent-XLarge;
@@ -1487,7 +1516,9 @@
 
 @PtMenu-ItemIndentY: 2px;
 @PtMenu-ItemIndentX: @CmIndent-XSmall;
-@PtMenu-ItemColor: @CmFont-Base-Color;
+@PtMenu-Item-Color: @CmFont-Base-Color;
+@PtMenu-Item-HoverColor: @CmColor-Font-LinkHover;
+@PtMenu-Item-ActiveColor: @CmColor-Font-LinkActive;
 @PtMenu-SeparatorIndentX: @PtMenu-ItemIndentX;
 @PtMenu-SeparatorSize: @PtBox-BorderWidth;
 @PtMenu-SeparatorColor: @PtBox-BorderColor;
@@ -1540,6 +1571,7 @@
 
 @PtGrid-Indent: @CmUI-ColumnIndent;
 @PtGrid-Indents: @CmIndents;
+@PtGrid-AdaptiveFrom: @CmUI-AdaptiveFrom;
 
 // /* ******* SELECTABLE*** */
 
@@ -1667,9 +1699,6 @@
 @PtOverlay-Dark: @CmUI-Overlay-Dark;
 @PtOverlay-Duration: @CmUI-Overlay-Duration;
 @PtOverlay-Spinner-Size: @CmSize-Large;
-@PtOverlay-Spinner-BorderSize: 3px;
-@PtOverlay-Spinner-DefaultBackground: @CmColor-Secondary-LightActive;
-@PtOverlay-Spinner-ActiveBackground: @CmColor-Primary-DarkDefault;
 
 // /* ************************************************ */
 // /* ******* LAYOUTS ******* */
@@ -1823,6 +1852,7 @@
 
 @ComDialog-Duration: @CmUI-Transition-Duration;
 @ComDialog-Indent: @CmIndent-Medium;
+@ComDialog-Radius: @CmBorder-Radius;
 @ComDialog-TitleIndent: @CmIndent-XSmall;
 @ComDialog-Overlay: @CmUI-Overlay-Dark;
 
@@ -2062,7 +2092,7 @@
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.19.0';
+@AppVersion: '3.21.1';
 
 // /* ******* PATH ******* */
 
@@ -2171,6 +2201,7 @@
 // /* ******* COLORS ******* */
 
 @AppColor-QuickSilk: #21b573;
+@AppColor-QuickSilkRed: #ff6662;
 @AppColor-UI-Panel: #1f2630;
 @AppColor-UI-PanelBlock: @CmColor-Primary-DarkActiveHover;
 

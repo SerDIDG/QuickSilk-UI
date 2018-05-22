@@ -1,0 +1,38 @@
+<?php
+
+global $config;
+
+?>
+
+<div class="app__module mod__multifiled__element" data-element="Mod.ElementMultiField" data-node="ModElementMultiField:{}:container" data-config='{"name" : "element_multifield"}'>
+    <dl data-node="field">
+        <dt><label for="element_text">Input Text:</label></dt>
+        <dd>
+            <div class="mod__multifiled" data-node="content:{}:container">
+                <div class="mod__multifiled__template" data-node="templateContainer">
+                    <div class="inner" data-node="templateInner" data-element="App.Zone" data-config='{"zone" : 0, "type" : "<?= $config['type'] ?>", "parentPositionId" : "<?= $config['parentPositionId'] ?>", "positionId" : "<?= $config['positionId'] ?>"}'></div>
+                </div>
+                <div class="mod__multifiled__view" data-node="viewContainer">
+                    <div class="com__multifield" data-element="Com.MultiField" data-node="ComMultiField:{}:container" data-config='{"name" : "element_multifield", "theme" : "theme-cards"}'>
+                        <div class="com__multifield__content" data-node="content">
+                            <!--
+                            <div class="com__multifield__item" data-node="items:[]:container">
+                                <div class="icon drag linked" data-node="drag"></div>
+                                <div class="field" data-node="field">
+
+                                </div>
+                                <div class="icon remove linked" data-node="remove" title="Remove"></div>
+                            </div>
+                            -->
+                        </div>
+                        <div class="com__multifield__toolbar" data-node="toolbar:{}:container">
+                            <div class="com__multifield__item">
+                                <div class="icon add linked" data-node="add" title="Add"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </dd>
+    </dl>
+</div>
