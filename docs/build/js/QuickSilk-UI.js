@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.8.2 ************ */
-/*! ************ MagpieUI v3.34.9 (2018-09-27 19:06) ************ */
+/*! ************ MagpieUI v3.34.9 (2018-09-27 19:11) ************ */
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -31726,7 +31726,7 @@ cm.getConstructor('Com.TwoSideMultiSelect', function(classConstructor, className
         });
     };
 });
-/*! ************ QuickSilk-Application v3.21.8 (2018-09-27 19:07) ************ */
+/*! ************ QuickSilk-Application v3.21.8 (2018-09-27 19:11) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
@@ -42479,7 +42479,7 @@ cm.onReady(function(){
     window.Collector.construct(document.body);
 });
 if(cm._baseUrl.indexOf('serdidg.github.io') > -1){
-    cm._baseUrl = [cm._baseUrl, '/QuickSilk-UI/docs/build'].join('/');
+    cm._baseUrl = [cm._baseUrl, 'QuickSilk-UI/docs/build'].join('/');
 }else if(cm._baseUrl.indexOf('projectstagingserver.com') > -1){
     cm._baseUrl = [cm._baseUrl, 'dev-1/quicksilk__ui/docs/build'].join('/');
 }else{
