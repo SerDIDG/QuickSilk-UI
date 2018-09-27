@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.8.2 ************ */
-/*! ************ MagpieUI v3.34.9 (2018-09-27 19:11) ************ */
+/*! ************ MagpieUI v3.34.9 (2018-09-27 19:18) ************ */
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -31726,7 +31726,7 @@ cm.getConstructor('Com.TwoSideMultiSelect', function(classConstructor, className
         });
     };
 });
-/*! ************ QuickSilk-Application v3.21.8 (2018-09-27 19:11) ************ */
+/*! ************ QuickSilk-Application v3.21.8 (2018-09-27 19:18) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
@@ -32625,7 +32625,7 @@ cm.getConstructor('App.Chart', function(classConstructor, className, classProto,
         // Load script
         cm.loadScript({
             'path' : 'Chart',
-            'src' : '%AppAssetsUrl%/libs/chartjs/Chart.min.js?%version%',
+            'src' : '%AppAssetsUrl%/libs/chartjs/Chart.min.js?%AppVersion%',
             'callback' : function(path){
                 if(path){
                     that.components['chart'] = new path(that.nodes['canvas'], {
