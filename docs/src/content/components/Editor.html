@@ -25,16 +25,29 @@
             <div class="inner" data-node="items:{}">
                 <div class="menu__right">
                     <ul class="menu">
-                        <li class="has-icon is-no-label item--flow" data-node="flow:{}:container">
-                            <a title="Help" data-element="app-flow">
-                                <i class="menu__icon icon app-i__circle-help"></i>Flow
+                        <li class="pt__menu has-dropdown has-icon item--user" data-node="user:{}:container">
+                            <a title="User Userberg">
+                                <i class="menu__icon icon app-i__circle-user"></i>User Userberg
                             </a>
+                            <ul class="pt__menu-dropdown" data-node="dropdown">
+                                <li>
+                                    <a>View / Edit Profile</a>
+                                </li>
+                                <li>
+                                    <a>Logout</a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="has-icon is-no-label item--help" data-node="help:{}:container">
-                            <a title="Help" data-element="app-helptour">
-                                <i class="menu__icon icon app-i__circle-help"></i>Help
+                            <a title="Help Tour" data-element="app-helptour">
+                                <i class="menu__icon icon app-i__circle-help"></i>Help Tour
                             </a>
                         </li>
+                        <!-- <li class="has-icon is-no-label item--help" data-node="flow:{}:container">
+                            <a title="Flow" data-element="app-flow">
+                                <i class="menu__icon icon app-i__circle-help"></i>Flow
+                            </a>
+                        </li> -->
                         <li class="pt__menu has-dropdown has-icon is-no-label item--note" data-node="note:{}:container">
                             <a title="Notifications">
                                 <i class="menu__icon icon app-i__circle-note">
@@ -54,46 +67,21 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="pt__menu has-dropdown has-icon item--user" data-node="user:{}:container">
-                            <a title="User Userberg">
-                                <i class="menu__icon icon app-i__circle-user"></i>User Userberg
-                            </a>
-                            <ul class="pt__menu-dropdown" data-node="dropdown">
-                                <li>
-                                    <a>View Profile</a>
-                                </li>
-                                <li>
-                                    <a>Logout</a>
-                                </li>
-                            </ul>
-                        </li>
                     </ul>
                 </div>
 
                 <div class="menu__center">
                     <div class="inner">
                         <ul class="menu">
-                            <li class="pt__menu has-dropdown has-icon item--shortcuts" data-node="shortcuts:{}:container">
-                                <a title="Page Shortcuts">
-                                    <i class="menu__icon icon app-i__circle-actions"></i>Page Shortcuts
+                            <li class="has-icon is-no-label item--undo" data-node="undo:{}:container">
+                                <a title="Undo" data-node="link">
+                                    <i class="menu__icon icon app-i__circle-undo"></i>Undo
                                 </a>
-                                <ul class="pt__menu-dropdown" data-node="dropdown">
-                                    <li>
-                                        <a data-element="App.PanelContainer" data-config='{"params" : {"get" : {"url" : "%baseUrl%/stuff/ajax.panel.php"},"post" : {"url" : "%baseUrl%/stuff/ajax.panel.php"}}}'>Menu Constructor</a>
-                                    </li>
-                                    <li>
-                                        <a>Add New Site Page</a>
-                                    </li>
-                                    <li>
-                                        <a>Edit Page Properties</a>
-                                    </li>
-                                    <li>
-                                        <a>Duplicate Page</a>
-                                    </li>
-                                    <li>
-                                        <a>Delete Page</a>
-                                    </li>
-                                </ul>
+                            </li>
+                            <li class="has-icon is-no-label item--redo" data-node="redo:{}:container">
+                                <a title="Redo" data-node="link">
+                                    <i class="menu__icon icon app-i__circle-redo"></i>Redo
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -101,12 +89,6 @@
 
                 <div class="menu__left">
                     <ul class="menu">
-                        <li class="item--dashboard" data-node="dashboard:{}:container">
-                            <a>Dashboard</a>
-                        </li>
-                        <li class="item--user_manager" data-node="user_manager:{}:container">
-                            <a>User Manager</a>
-                        </li>
                         <li class="pt__menu has-dropdown item--modules" data-node="modules:{}:container">
                             <a href="http://google.com" target="_blank">Modules</a>
                             <ul class="pt__menu-dropdown" data-node="dropdown">
@@ -128,7 +110,7 @@
                                     <a>Manage!</a>
                                     <ul class="pt__menu-dropdown">
                                         <li>
-                                            <a>User Manager</a>
+                                            <a><b>User Manager</b></a>
                                         </li>
                                         <li>
                                             <a>Page Manager</a>
@@ -250,8 +232,33 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="item--settings" data-node="settings:{}:container">
+                        <li class="pt__menu has-dropdown item--settings" data-node="settings:{}:container">
                             <a>Settings</a>
+                            <ul class="pt__menu-dropdown" data-node="dropdown">
+                                <li>
+                                    <a>Languages</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="pt__menu has-dropdown item--shortcuts" data-node="shortcuts:{}:container">
+                            <a>Page Shortcuts</a>
+                            <ul class="pt__menu-dropdown" data-node="dropdown">
+                                <li>
+                                    <a data-element="App.PanelContainer" data-config='{"params" : {"get" : {"url" : "%baseUrl%/stuff/ajax.panel.php"},"post" : {"url" : "%baseUrl%/stuff/ajax.panel.php"}}}'>Menu Constructor</a>
+                                </li>
+                                <li>
+                                    <a>Add New Site Page</a>
+                                </li>
+                                <li>
+                                    <a>Edit Page Properties</a>
+                                </li>
+                                <li>
+                                    <a>Duplicate Page</a>
+                                </li>
+                                <li>
+                                    <a>Delete Page</a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="item--support" data-node="support:{}:container">
                             <a>Support</a>
@@ -296,7 +303,7 @@
             <ul>
                 <li class="sidebar__content__modules" data-node="tabs:[]:container" data-config='{"id" : "template-manager"}'>
                     <div class="sidebar__content__title" data-node="title">
-                        <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Modules
+                        <span class="icon cm-i cm-i__circle-arrow-left" data-node="AppSidebar.collapseButtons:[]:container"></span>Blocks
                     </div>
 
                     <div class="sidebar__content__descr" data-node="descr">
