@@ -9,7 +9,7 @@ if(cm._baseUrl.indexOf('serdidg.github.io') > -1){
 cm._assetsUrl = cm._baseUrl;
 App._assetsUrl = cm._assetsUrl;
 
-App.LoginBox.prototype.setParams({
+cm.setParams('App.LoginBox', {
     'Com.Tooltip' : {
         'adaptiveX' : true,
         'adaptiveY' : true,
@@ -17,7 +17,7 @@ App.LoginBox.prototype.setParams({
     }
 });
 
-App.Template.prototype.setParams({
+cm.setParams('App.Template', {
     'stickyFooter' : true,
     'template' : {
         'type' : 'box',
