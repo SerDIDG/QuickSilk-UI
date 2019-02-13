@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.9.0 ************ */
-/*! ************ MagpieUI v3.36.3 (2018-12-21 21:36) ************ */
+/*! ************ MagpieUI v3.36.10 (2019-02-13 21:31) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.6.0
@@ -3513,8 +3513,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.36.3');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.36.3') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.36.3') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.36.3') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.36.3#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.36.10');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.36.10') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.36.10') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.36.10') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.36.10#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -10366,15 +10366,20 @@ ul.pt__field__hint li:before {
   flex-flow: row wrap;
 }
 .pt__grid--tiles > ul > li {
-  -webkit-flex: auto;
-  -ms-flex: auto;
-  flex: auto;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
 }
 .pt__grid--tiles .pt__image {
   height: 100%;
 }
 .pt__grid--tiles .pt__image > .inner > .descr {
   height: 100%;
+}
+.pt__grid--tiles .is-stretch > ul > li {
+  -webkit-flex: auto;
+  -ms-flex: auto;
+  flex: auto;
 }
 /* ******* PARTS: GRID: MIXINS ******* */
 @media only screen and (max-width: 768px) {
@@ -10386,10 +10391,10 @@ ul.pt__field__hint li:before {
     width: 100%;
     display: block;
   }
-  html.is-adaptive .pt__grid--tiles > ul {
+  html.is-adaptive .pt__grid--tiles:not(.is-not-adaptive) > ul {
     display: block;
   }
-  html.is-adaptive .pt__grid--tiles > ul > li {
+  html.is-adaptive .pt__grid--tiles:not(.is-not-adaptive) > ul > li {
     width: auto !important;
   }
 }
@@ -16788,6 +16793,9 @@ ul.pt__field__hint li:before {
   opacity: 0;
 }
 /* ******* COMPONENTS: FILE MANAGER ******* */
+.com__file-manager > .inner {
+  position: relative;
+}
 .com__file-manager.is-fullsize {
   height: 100%;
 }
@@ -20645,14 +20653,14 @@ html.ie9 .com__palette .b-range {
   html.is-adaptive .com__tabset.is-adaptive {
     display: block !important;
   }
-  html.is-adaptive .com__tabset.is-adaptive .com__tabset__head-title {
+  html.is-adaptive .com__tabset.is-adaptive > .com__tabset__head-title {
     display: block !important;
   }
-  html.is-adaptive .com__tabset.is-adaptive .com__tabset__head-tabs {
+  html.is-adaptive .com__tabset.is-adaptive > .com__tabset__head-tabs {
     width: auto !important;
     display: none !important;
   }
-  html.is-adaptive .com__tabset.is-adaptive .com__tabset__content {
+  html.is-adaptive .com__tabset.is-adaptive > .com__tabset__content {
     width: auto !important;
     display: block !important;
     border-radius: 0 0 3px 3px;
@@ -21026,7 +21034,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.22.1 (2018-12-21 21:36) ************ */
+/*! ************ QuickSilk-Application v3.23.4 (2019-02-13 21:32) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -21035,8 +21043,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.22.1');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.22.1') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.22.1') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.22.1') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.22.1#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.23.4');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.23.4') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.23.4') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.23.4') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.23.4#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -21956,7 +21964,6 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-pt__box-sign .pt__buttons button {
   border: 1px solid #cccccc;
   text-align: left;
-  color: #666666;
 }
 /* ******* PARTS: BOX: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
@@ -24922,6 +24929,91 @@ html:not(.is-editing).is-editor .app__module__controls {
   html.is-adaptive .app__panel__preview > .inner > .title .title__toolbar {
     display: none;
   }
+}
+.app__file-uploader__stock.is-fullsize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder {
+  height: 100%;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .com__file-manager__holder > .inner {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-flex-flow: column nowrap;
+  -ms-flex-flow: column nowrap;
+  flex-flow: column nowrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .pt__image {
+  border: 2px solid #cccccc;
+  border-radius: 3px;
+  -webkit-transition: all 250ms ease-in-out 0ms;
+  transition: all 250ms ease-in-out 0ms;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .pt__image:hover,
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .pt__image.hover {
+  border: 2px solid #a6a6a6;
+  -webkit-transition: all 100ms ease-in-out 0ms;
+  transition: all 100ms ease-in-out 0ms;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .pt__image:active,
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .pt__image.active {
+  border: 2px solid #2985e0;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .cm__empty {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  -webkit-align-content: center;
+  align-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  height: 100%;
+  opacity: 0;
+  -webkit-transition: all 250ms ease-in-out 0ms;
+  transition: all 250ms ease-in-out 0ms;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .cm__empty.is-show {
+  opacity: 1;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .stock__view {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  overflow: hidden;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .stock__view .stock__tabs {
+  width: 25%;
+  position: relative;
+  flex: 0 1 auto;
+  margin: 0 24px 0 0;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .stock__view .stock__tabs > .inner {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .stock__view .stock__list {
+  position: relative;
+  flex: auto;
+}
+.app__file-uploader__stock.is-fullsize .app__file-uploader__holder .stock__view .stock__list > .inner {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
 }
 /* ******* COMPONENTS: SIDEBAR ******* */
 .app__sidebar {
@@ -28706,12 +28798,10 @@ html:not(.is-editing).is-editor .app__module__controls {
 }
 /* ******* MODULES: MENU: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
-  html.is-adaptive .app-mod__menu:not(.vertical) > ul,
-  html.is-adaptive .app-mod__menu:not(.languages) > ul {
+  html.is-adaptive .app-mod__menu:not(.vertical):not(.languages) > ul {
     display: none;
   }
-  html.is-adaptive .app-mod__menu:not(.vertical) .menu-select,
-  html.is-adaptive .app-mod__menu:not(.languages) .menu-select {
+  html.is-adaptive .app-mod__menu:not(.vertical):not(.languages) .menu-select {
     display: block;
   }
   html.is-adaptive .app-mod__menu.is-adaptive.languages > ul {
@@ -29622,7 +29712,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 /* ******* MODULES: SPACER ******* */
 /* ******* MODULES: SPACER: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
-  html.is-adaptive .app-mod__spacer {
+  html.is-adaptive .app-mod__spacer.is-adaptive {
     height: 24px !important;
   }
 }

@@ -28,6 +28,29 @@ cm.setParams('App.Template', {
     'header' : {
         'fixed' : false,
         'overlapping' : false,
-        'transformed' : true
+        'transformed' : true,
+        'mobileFixed' : true,
+        'mobileOverlapping' : true
+    }
+});
+
+cm.setParams('App.ShutterstockManager', {
+    'categoriesRequestParams' : {
+        'ajax' : {
+            'url' : '//quicksilk.magpie/shutterstock-api/images/categories'
+        }
+    },
+    'paginationParams' : {
+        'ajax' : {
+            'url' : '//quicksilk.magpie/shutterstock-api/images/search/%page%'
+        }
+    }
+});
+
+cm.setParams('App.ImageInput', {
+    'fileUploaderParams' : {
+        'params' : {
+            'stock' : true
+        }
     }
 });

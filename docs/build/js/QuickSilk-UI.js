@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.9.0 ************ */
-/*! ************ MagpieUI v3.36.3 (2018-12-21 21:36) ************ */
+/*! ************ MagpieUI v3.36.10 (2019-02-13 21:31) ************ */
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1630,7 +1630,7 @@ if(!Date.now){
  ******* */
 
 var cm = {
-        '_version' : '3.36.3',
+        '_version' : '3.36.10',
         '_loadTime' : Date.now(),
         '_isDocumentReady' : false,
         '_isDocumentLoad' : false,
@@ -2396,7 +2396,8 @@ cm.customEvent = (function(){
             var stopPropagation = false;
             params = cm.merge({
                 'target' : node,
-                'type' : 'all',            // child | parent | all
+                'type' : type,
+                'direction' : 'all',            // child | parent | all
                 'self' : true,
                 'stopPropagation' : function(){
                     stopPropagation = true;
@@ -2404,7 +2405,7 @@ cm.customEvent = (function(){
             }, params);
             if(_stack[type]){
                 _stack[type].sort(function(a, b){
-                    if(params['type'] === 'parent'){
+                    if(params['direction'] === 'parent'){
                         return cm.getNodeOffsetIndex(b['node']) > cm.getNodeOffsetIndex(a['node']);
                     }
                     return cm.getNodeOffsetIndex(a['node']) - cm.getNodeOffsetIndex(b['node']);
@@ -2414,7 +2415,7 @@ cm.customEvent = (function(){
                         if(params['self'] && node === item['node']){
                             item['handler'](params);
                         }
-                        switch(params['type']){
+                        switch(params['direction']){
                             case 'child':
                                 if(cm.isParent(node, item['node'], false)){
                                     item['handler'](params);
@@ -6731,7 +6732,7 @@ cm.init = function(){
             if(size !== cm._scrollSize){
                 size = cm._scrollSize;
                 cm.customEvent.trigger(window, 'scrollSizeChange', {
-                    'type' : 'all',
+                    'direction' : 'all',
                     'self' : true,
                     'scrollSize' : cm._scrollSize
                 });
@@ -6747,7 +6748,7 @@ cm.init = function(){
             if(size !== sizeNew){
                 size = sizeNew;
                 cm.customEvent.trigger(window, 'pageSizeChange', {
-                    'type' : 'all',
+                    'direction' : 'all',
                     'self' : true,
                     'pageSize' : cm._pageSize
                 });
@@ -6786,7 +6787,7 @@ cm.load = function(){
     // Redraw components and modules after full page loading
     if(cm._config.redrawOnLoad){
         cm.customEvent.trigger(document.body, 'redraw', {
-            'type' : 'child',
+            'direction' : 'child',
             'self' : false
         });
     }
@@ -6922,7 +6923,7 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
             that.triggerEvent('onDestruct');
             that.triggerEvent('onDestructProcess');
             cm.customEvent.trigger(that.getStackNode(), 'destruct', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             that.unsetEvents();
@@ -7832,6 +7833,7 @@ cm.define('Com.AbstractFileManager', {
     ],
     'params' : {
         'embedStructure' : 'replace',
+        'controllerEvents' : true,
         'showStats' : true,
         'max' : 0,                                                        // 0 - infinity
         'lazy' : false,
@@ -7853,17 +7855,14 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.AbstractFileManager', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.AbstractFileManager', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Bind context to methods
         that.completeHandler = that.complete.bind(that);
         // Add events
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.validateParams = function(){
@@ -7962,7 +7961,7 @@ cm.getConstructor('Com.AbstractFileManager', function(classConstructor, classNam
     classProto.setAttributes = function(){
         var that = this;
         // Call parent method
-        _inherit.prototype.setAttributes.apply(that, arguments);
+        classInherit.prototype.setAttributes.apply(that, arguments);
         // Attributes
         that.params['fullSize'] && cm.addClass(that.nodes['container'], 'is-fullsize');
         return that;
@@ -10608,7 +10607,7 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
                 that.triggerEvent('onLabelTarget', item);
                 // Set
                 if(that.params['toggleOnHashChange']){
-                    window.location.href = [window.location.href.split('#')[0], item['id']].join('#');
+                    window.location.hash = item['id'];
                 }else{
                     that.setTab(item['id']);
                 }
@@ -10700,7 +10699,7 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
             }else{
                 cm.getConstructor(item['constructor'], function(classConstructor){
                     item['controller'] = new classConstructor(
-                        cm.merge(item['controllerParams'], {
+                        cm.merge(item['constructorParams'], {
                             'container' : item['tab']['inner'],
                             'events' : {
                                 'onLoadEnd' : function(){
@@ -10776,7 +10775,8 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
         var that = this;
         if(item['id'] === that.current){
             cm.customEvent.trigger(item['tab']['container'], 'redraw', {
-                'type' : 'child', 'self' : false
+                'direction' : 'child',
+                'self' : false
             });
             that.triggerEvent('onTabShow', item, params);
             that.triggerEvent('onTabShowEnd', item, params);
@@ -10964,6 +10964,10 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
     classProto.unset = function(){
         var that = this;
         that.unsetTab(that.current);
+        // Reset
+        if(that.params['toggleOnHashChange']){
+            window.location.hash = '';
+        }
         that.current = null;
         that.previous = null;
         return that;
@@ -11031,6 +11035,672 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
             that.ajaxHandler.abort();
         }
         return that;
+    };
+});
+cm.define('Com.ScrollPagination', {
+    'extend' : 'Com.AbstractController',
+    'events' : [
+        'onRebuild',
+        'onStart',
+        'onAbort',
+        'onError',
+        'onEmpty',
+        'onPageRender',
+        'onPageRenderEnd',
+        'onPageShow',
+        'onPageHide',
+        'onEnd',
+        'onFinalize',
+        'onSetCount',
+        'onButtonShow',
+        'onButtonHide'
+    ],
+    'params' : {
+        'controllerEvents' : true,
+        'renderStructure' : false,                                  // Render wrapper nodes if not exists in html
+        'embedStructureOnRender' : false,
+        'embedStructure' : 'append',
+        'resizeEvent' : true,
+        'scrollEvent' : true,
+        'scrollNode' : window,
+        'scrollIndent' : 'Math.max(%scrollHeight% / 2, 600)',       // Variables: %blockHeight%.
+        'disabled' : false,
+        'data' : [],                                                // Static data
+        'count' : 0,
+        'perPage' : 0,                                              // 0 - render all data in one page
+        'startPage' : 1,                                            // Start page
+        'startPageToken' : '',
+        'pageCount' : 0,                                            // Render only count of pages. 0 - infinity
+        'useToken' : false,
+        'autoSend' : true,
+        'showButton' : true,                                        // true - always | once - show once after first loaded page | none - don't show and don't scroll
+        'showLoader' : true,
+        'loaderDelay' : 'cm._config.loadDelay',
+        'setDelay' : 'cm._config.loadDelay',
+        'stopOnESC' : true,
+        'pageTag' : 'div',
+        'pageAttributes' : {
+            'class' : 'com__scroll-pagination__page'
+        },
+        'responseCountKey' : 'count',                               // Take items count from response
+        'responseTokenKey' : 'token',                               // Token key name
+        'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
+        'responseErrorsKey': 'errors',
+        'responseHTML' : false,                                     // If true, html will append automatically
+        'ajax' : {
+            'type' : 'json',
+            'method' : 'get',
+            'url' : '',                                             // Request URL. Variables: %baseUrl%, %page%, %offset%, %token%, %limit%, %perPage%, %callback% for JSONP.
+            'params' : ''                                           // Params object. %baseUrl%, %page%, %offset%, %token%, %limit%, %perPage%, %callback% for JSONP.
+        }
+    },
+    'strings' : {
+        'load_more' : 'Load More',
+        'server_error' : 'An unexpected error has occurred. Please try again later.'
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    Com.AbstractController.apply(that, arguments);
+});
+
+cm.getConstructor('Com.ScrollPagination', function(classConstructor, className, classProto, classInherit){
+    classProto.construct = function(){
+        var that = this;
+        // variables
+        that.nodes = {
+            'container' : cm.node('div'),
+            'scroll' : null,
+            'bar' : cm.node('div'),
+            'barHolder' : cm.node('div'),
+            'content' : cm.node('div'),
+            'pages' : cm.node('div'),
+            'button' : cm.node('div'),
+            'loader' : cm.node('div')
+        };
+
+        that.pages = {};
+        that.ajaxHandler = null;
+        that.loaderDelay = null;
+        that.setDelay = null;
+        that.currentAction = null;
+
+        that.isAjax = false;
+        that.isProcess = false;
+        that.isFinalize = false;
+        that.isButton = false;
+        that.isDisabled = false;
+
+        that.page = null;
+        that.pageToken = null;
+        that.currentPage = null;
+        that.previousPage = null;
+        that.nextPage = null;
+        that.pageCount = 0;
+        // Binds
+        that.keyDownEventHandler = that.keyDownEvent.bind(that);
+        that.setHandler = that.set.bind(that);
+        // Call parent method - renderViewModel
+        classInherit.prototype.construct.apply(that, arguments);
+    };
+
+    classProto.onConstructEnd = function(){
+        var that = this;
+        that.params['autoSend'] && that.set();
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        that.triggerEvent('onValidateParamsStart');
+        that.triggerEvent('onValidateParams');
+        that.triggerEvent('onValidateParamsProcess');
+        that.isDisabled = that.params['disabled'];
+        // Set Scroll Node
+        if(that.nodes['scroll']){
+            that.params['scrollNode'] = that.nodes['scroll'];
+        }
+        // If URL parameter exists, use ajax data
+        if(!cm.isEmpty(that.params['ajax']['url'])){
+            that.isAjax = true;
+        }else{
+            that.params['showLoader'] = false;
+        }
+        if(that.params['pageCount'] === 0 && that.params['perPage'] && that.params['count']){
+            that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
+        }else{
+            that.pageCount = that.params['pageCount'];
+        }
+        // Set start page token
+        that.setToken(that.params['startPage'], that.params['startPageToken']);
+        // Set next page token
+        that.nextPage = that.params['startPage'];
+        that.triggerEvent('onValidateParamsEnd');
+    };
+
+    classProto.onScroll = function(){
+        var that = this;
+        if(that.checkForRequest()){
+            that.set();
+        }
+        // Show / Hide non visible pages
+        cm.forEach(that.pages, function(page){
+            that.isPageVisible(page);
+        });
+    };
+
+    classProto.onRedraw = function(){
+        var that = this;
+        cm.forEach(that.pages, function(page){
+            that.isPageVisible(page);
+        });
+    };
+
+    /******* VIEW - MODEL *******/
+
+    classProto.renderView = function(){
+        var that = this;
+        // Render Structure
+        that.nodes['container'] = cm.node('div', {'class' : 'com__scroll-pagination'},
+            that.nodes['content'] = cm.node('div', {'class' : 'com__scroll-pagination__content'},
+                that.nodes['pages'] = cm.node('div', {'class' : 'com__scroll-pagination__pages'})
+            ),
+            that.nodes['bar'] = cm.node('div', {'class' : 'com__scroll-pagination__bar'},
+                that.nodes['button'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('load_more')),
+                that.nodes['loader'] = cm.node('div', {'class' : 'button button-clear has-icon has-icon has-icon-small'},
+                    cm.node('div', {'class' : 'icon small loader'})
+                )
+            )
+        );
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        classInherit.prototype.renderViewModel.apply(that, arguments);
+        // Reset styles and variables
+        that.resetStyles();
+        // Events
+        cm.addEvent(that.nodes['button'], 'click', function(e){
+            e = cm.getEvent(e);
+            cm.preventDefault(e);
+            that.set();
+        });
+        if(that.params['stopOnESC']){
+            cm.addEvent(window, 'keydown', that.keyDownEventHandler);
+        }
+    };
+
+    /******* HELPERS *******/
+
+    classProto.resetStyles = function(){
+        var that = this;
+        // Load More Button
+        if(!that.params['showButton'] || that.params['showButton'] === 'none'){
+            that.callbacks.hideButton(that);
+        }else{
+            that.callbacks.showButton(that);
+        }
+        // Hide Loader
+        cm.addClass(that.nodes['loader'], 'is-hidden');
+    };
+
+    classProto.keyDownEvent = function(e){
+        var that = this;
+        cm.handleKey(e, 'escape', function(){
+            if(!cm.isProcess && !cm.isFinalize && that.params['showButton'] !== 'none'){
+                that.callbacks.showButton(that);
+            }
+        });
+    };
+
+    classProto.checkForRequest = function(){
+        var that = this,
+            scrollRect = cm.getRect(that.params['scrollNode']),
+            pagesRect = cm.getRect(that.nodes['pages']),
+            scrollIndent;
+        if(!that.isDisabled && !cm.isProcess && !that.isFinalize && !that.isButton && !that.checkForButton()){
+            scrollIndent = eval(
+                cm.strReplace(that.params['scrollIndent'], {
+                    '%scrollHeight%' : scrollRect['bottom'] - scrollRect['top']
+                })
+            );
+            if(pagesRect['bottom'] - scrollRect['bottom'] <= scrollIndent){
+                return true;
+            }
+        }
+        return false;
+    };
+
+    classProto.checkForButton = function(){
+        var that = this;
+        return (
+            that.params['showButton'] === true ||
+            (that.params['showButton'] === 'once' && that.params['startPage'] === that.page)
+        );
+    };
+
+    /******* CALLBACKS *******/
+
+    /*** AJAX ***/
+
+    classProto.callbacks.prepare = function(that, config){
+        config = that.callbacks.beforePrepare(that, config);
+        config['url'] = cm.strReplace(config['url'], {
+            '%perPage%' : that.params['perPage'],
+            '%limit%' : that.params['perPage'],
+            '%page%' : that.page,
+            '%offset%' : (that.page - 1) * that.params['perPage'],
+            '%token%' : that.pageToken,
+            '%baseUrl%' : cm._baseUrl
+        });
+        config['params'] = cm.objectReplace(config['params'], {
+            '%perPage%' : that.params['perPage'],
+            '%limit%' : that.params['perPage'],
+            '%page%' : that.page,
+            '%offset%' : (that.page - 1) * that.params['perPage'],
+            '%token%' : that.pageToken,
+            '%baseUrl%' : cm._baseUrl
+        });
+        config = that.callbacks.afterPrepare(that, config);
+        return config;
+    };
+
+    classProto.callbacks.beforePrepare = function(that, config){
+        return config;
+    };
+
+    classProto.callbacks.afterPrepare = function(that, config){
+        return config;
+    };
+
+    classProto.callbacks.request = function(that, config){
+        config = that.callbacks.prepare(that, config);
+        that.currentAction = config;
+        // Return ajax handler (XMLHttpRequest) to providing abort method.
+        return cm.ajax(
+            cm.merge(config, {
+                'onStart' : function(){
+                    that.callbacks.start(that);
+                },
+                'onSuccess' : function(response){
+                    that.callbacks.response(that, config, response);
+                },
+                'onError' : function(){
+                    that.callbacks.error(that, config);
+                },
+                'onAbort' : function(){
+                    that.callbacks.abort(that, config);
+                },
+                'onEnd' : function(){
+                    that.callbacks.end(that);
+                }
+            })
+        );
+    };
+
+    classProto.callbacks.filter = function(that, config, response){
+        var data = [],
+            errorsItem = cm.objectPath(that.params['responseErrorsKey'], response),
+            dataItem = cm.objectPath(that.params['responseKey'], response),
+            countItem = cm.objectPath(that.params['responseCountKey'], response),
+            tokenItem = cm.objectPath(that.params['responseTokenKey'], response);
+        if(cm.isEmpty(errorsItem)){
+            if(!cm.isEmpty(dataItem)){
+                if(!that.params['responseHTML'] && that.params['perPage']){
+                    data = dataItem.slice(0, that.params['perPage']);
+                }else{
+                    data = dataItem;
+                }
+            }
+            if(countItem){
+                that.setCount(countItem);
+            }
+            if(tokenItem){
+                that.setToken(that.nextPage, tokenItem);
+            }
+            if(that.params['useToken'] && !tokenItem){
+                that.callbacks.finalize(that);
+            }
+        }
+        return data;
+    };
+
+    classProto.callbacks.response = function(that, config, response){
+        // Set next page
+        that.setPage();
+        // Response
+        if(response){
+            response = that.callbacks.filter(that, config, response);
+        }
+        if(!cm.isEmpty(response)){
+            that.callbacks.render(that, response);
+        }else{
+            that.triggerEvent('onEmpty');
+            that.callbacks.finalize(that);
+        }
+    };
+
+    classProto.callbacks.error = function(that, config){
+        that.callbacks.finalize(that);
+        that.triggerEvent('onError');
+    };
+
+    classProto.callbacks.abort = function(that, config){
+        that.triggerEvent('onAbort');
+    };
+
+    /* *** STATIC *** */
+
+    classProto.callbacks.data = function(that, data){
+        var length, start, end, pageData;
+        that.callbacks.start(that);
+        that.setPage();
+        if(!cm.isEmpty(data)){
+            // Get page data and render
+            if(that.params['perPage'] === 0){
+                that.callbacks.render(that, data);
+                that.callbacks.finalize(that);
+            }else if(that.params['perPage'] > 0){
+                length = data.length;
+                start = (that.page - 1) * that.params['perPage'];
+                end = (that.page * that.params['perPage']);
+                if(start >= length){
+                    that.callbacks.finalize(that);
+                }else{
+                    pageData = data.slice(start , Math.min(end, length));
+                    that.callbacks.render(that, pageData);
+                }
+                if(end >= length){
+                    that.callbacks.finalize(that);
+                }
+            }
+        }else{
+            that.callbacks.render(that, data);
+        }
+        that.callbacks.end(that);
+    };
+
+    /* *** RENDER *** */
+
+    classProto.callbacks.renderContainer = function(that, page){
+        return cm.node(that.params['pageTag'], that.params['pageAttributes']);
+    };
+
+    classProto.callbacks.render = function(that, data){
+        var scrollTop = cm.getScrollTop(that.params['scrollNode']),
+            page = {
+                'page' : that.page,
+                'token' : that.pageToken,
+                'pages' : that.nodes['pages'],
+                'container' : cm.node(that.params['pageTag']),
+                'data' : data,
+                'isVisible' : false
+            };
+        // Clear container
+        if(that.page === that.params['startPage']){
+            cm.clearNode(that.nodes['pages']);
+        }
+        // Render page
+        page['container'] = that.callbacks.renderContainer(that, page);
+        that.pages[that.page] = page;
+        that.triggerEvent('onPageRender', page);
+        that.callbacks.renderPage(that, page);
+        // Embed
+        cm.appendChild(page['container'], that.nodes['pages']);
+        cm.addClass(page['container'], 'is-loaded', true);
+        // Restore scroll position
+        cm.setScrollTop(that.params['scrollNode'], scrollTop);
+        that.triggerEvent('onPageRenderEnd', page);
+        that.isPageVisible(page);
+    };
+
+    classProto.callbacks.renderPage = function(that, page){
+        var nodes;
+        if(that.params['responseHTML']){
+            nodes = cm.strToHTML(page['data']);
+            cm.appendNodes(nodes, page['container']);
+        }
+    };
+
+    /* *** HELPERS *** */
+
+    classProto.callbacks.start = function(that){
+        that.isProcess = true;
+        // Show Loader
+        if(that.params['showLoader']){
+            if(that.isButton){
+                cm.addClass(that.nodes['button'], 'is-hidden');
+                cm.removeClass(that.nodes['loader'], 'is-hidden');
+            }else{
+                that.loaderDelay = setTimeout(function(){
+                    cm.removeClass(that.nodes['loader'], 'is-hidden');
+                    cm.removeClass(that.nodes['bar'], 'is-hidden');
+                }, that.params['loaderDelay']);
+            }
+        }
+        that.triggerEvent('onStart');
+    };
+
+    classProto.callbacks.end = function(that){
+        that.isProcess = false;
+        // Hide Loader
+        that.loaderDelay && clearTimeout(that.loaderDelay);
+        cm.addClass(that.nodes['loader'], 'is-hidden');
+        // Check pages count
+        if(that.pageCount > 0 && that.pageCount === that.currentPage){
+            that.callbacks.finalize(that);
+        }
+        // Show / Hide Load More Button
+        that.callbacks.toggleButton(that);
+        that.triggerEvent('onEnd');
+        // Request more pages if has empty space below
+        if(that.checkForRequest()){
+            that.setDelay = setTimeout(that.setHandler, that.params['setDelay']);
+        }
+    };
+
+    classProto.callbacks.finalize = function(that){
+        if(!that.isFinalize){
+            that.isFinalize = true;
+            that.callbacks.hideButton(that);
+            that.triggerEvent('onFinalize');
+        }
+    };
+
+    classProto.callbacks.toggleButton = function(that){
+        if(!that.isFinalize && that.checkForButton()){
+            that.callbacks.showButton(that);
+        }else{
+            that.callbacks.hideButton(that);
+        }
+    };
+
+    classProto.callbacks.showButton = function(that){
+        that.isButton = true;
+        cm.removeClass(that.nodes['button'], 'is-hidden');
+        cm.removeClass(that.nodes['bar'], 'is-hidden');
+        cm.removeClass(that.nodes['barHolder'], 'is-hidden');
+        that.triggerEvent('onButtonShow');
+    };
+
+    classProto.callbacks.hideButton = function(that){
+        that.isButton = false;
+        cm.addClass(that.nodes['button'], 'is-hidden');
+        cm.addClass(that.nodes['bar'], 'is-hidden');
+        cm.addClass(that.nodes['barHolder'], 'is-hidden');
+        that.triggerEvent('onButtonHide');
+    };
+
+    /* ******* PUBLIC ******* */
+
+    classProto.rebuild = function(params){
+        var that = this;
+        // Cleanup
+        if(that.isProcess){
+            that.abort();
+        }
+        that.pages = {};
+        that.page = null;
+        that.pageToken = null;
+        that.currentPage = null;
+        that.previousPage = null;
+        that.nextPage = null;
+        that.pageCount = 0;
+        that.isFinalize = false;
+        // Set new parameters
+        if(!cm.isEmpty(params)){
+            that.setParams(params);
+        }
+        that.validateParams();
+        // Reset styles and variables
+        that.resetStyles();
+        that.triggerEvent('onRebuild');
+        // Render new pge
+        that.set();
+        return that;
+    };
+
+    classProto.set = function(){
+        var that = this,
+            config;
+        that.setDelay && clearTimeout(that.setDelay);
+        if(!that.isProcess && !that.isFinalize){
+            // Preset next page and page token
+            that.page = that.nextPage;
+            that.pageToken = that.pages[that.page]? that.pages[that.page]['token'] : '';
+            // Request
+            if(that.isAjax){
+                config = cm.clone(that.params['ajax']);
+                that.ajaxHandler = that.callbacks.request(that, config);
+            }else{
+                that.callbacks.data(that, that.params['data']);
+            }
+        }
+        return that;
+    };
+
+    classProto.setToken = function(page, token){
+        var that = this;
+        if(!that.pages[page]){
+            that.pages[page] = {};
+        }
+        that.pages[page]['token'] = token;
+        return that;
+    };
+
+    classProto.setCount = function(count){
+        var that = this;
+        if(!cm.isUndefined(count)){
+            count = parseInt(count.toString());
+        }
+        if(cm.isNumber(count) && count !== that.params['count']){
+            that.params['count'] = count;
+            if(that.params['pageCount'] === 0 && that.params['count'] && that.params['perPage']){
+                that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
+            }else{
+                that.pageCount = that.params['pageCount'];
+            }
+            if(that.pageCount > 0 && that.pageCount === that.currentPage){
+                that.callbacks.finalize(that);
+            }
+            that.triggerEvent('onSetCount', count);
+        }
+        return that;
+    };
+
+    classProto.setAction = function(o, mode, update){
+        var that = this;
+        mode = cm.inArray(['raw', 'update', 'current'], mode) ? mode : 'current';
+        switch(mode){
+            case 'raw':
+                that.params['ajax'] = cm.merge(that._raw.params['ajax'], o);
+                break;
+            case 'current':
+                that.params['ajax'] = cm.merge(that.params['ajax'], o);
+                break;
+            case 'update':
+                that.params['ajax'] = cm.merge(that._update.params['ajax'], o);
+                break;
+        }
+        if(update){
+            that._update.params['ajax'] = cm.clone(that.params['ajax']);
+        }
+        that.rebuild();
+        return that;
+    };
+
+    classProto.getAction = function(){
+        var that = this;
+        return that.params['ajax'];
+    };
+
+    classProto.getCurrentAction = function(){
+        var that = this;
+        return that.currentAction;
+    };
+
+    classProto.setPage = function(){
+        var that = this;
+        that.previousPage = that.currentPage;
+        that.currentPage = that.nextPage;
+        that.nextPage++;
+        return that;
+    };
+
+    classProto.isPageVisible = function(page, scrollRect){
+        var that = this;
+        if(page['container']){
+            scrollRect = cm.isUndefined(scrollRect) ? cm.getRect(that.params['scrollNode']) : scrollRect;
+            var pageRect = cm.getRect(page['container']);
+
+            if(cm.inRange(pageRect['top'], pageRect['bottom'], scrollRect['top'], scrollRect['bottom'])){
+                if(!page['isVisible']){
+                    page['isVisible'] = true;
+                    cm.removeClass(page['container'], 'is-hidden');
+                    cm.triggerEvent('onPageShow', page);
+                }
+            }else{
+                if(page['isVisible']){
+                    page['isVisible'] = false;
+                    cm.addClass(page['container'], 'is-hidden');
+                    cm.triggerEvent('onPageHide', page);
+                }
+            }
+            return page['isVisible'];
+        }
+        return false;
+    };
+
+    classProto.abort = function(){
+        var that = this;
+        if(that.ajaxHandler && that.ajaxHandler.abort){
+            that.ajaxHandler.abort();
+        }
+        return that;
+    };
+
+    classProto.disable = function(){
+        var that = this;
+        that.isDisabled = true;
+        return that;
+    };
+
+    classProto.enable = function(){
+        var that = this;
+        that.isDisabled = false;
+        return that;
+    };
+
+    classProto.embedButton = function(node){
+        var that = this;
+        that.nodes['barHolder'] = node;
+        cm.appendChild(that.nodes['bar'], node);
+    };
+
+    classProto.isParent = function(node, flag){
+        var that = this;
+        return cm.isParent(that.nodes['container'], node, flag);
     };
 });
 cm.define('Com.Calendar', {
@@ -13229,7 +13899,7 @@ function(params){
         if(!that.isDestructed){
             that.isDestructed = true;
             cm.customEvent.trigger(nodes['container'], 'destruct', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             that.removeFromStack();
@@ -15539,7 +16209,7 @@ function(params){
         }, item);
         // Check type
         if(
-            /(\.jpg|\.png|\.gif|\.jpeg|\.bmp|\.tga)$/gi.test(item['src'])
+            /\.(jpg|png|gif|jpeg|bmp|tga|svg|webp|tiff)$/gi.test(item['src'])
             || /^data:image/gi.test(item['src'])
             || /^image/gi.test(item['mime'])
             || item['type'] === 'image'
@@ -15562,7 +16232,7 @@ function(params){
             );
         }else{
             item['nodes']['inner'].appendChild(
-                item['nodes']['content'] = cm.Node('iframe', {'class' : 'descr', 'webkitallowfullscreen' : true, 'mozallowfullscreen' : true, 'allowfullscreen' : true})
+                item['nodes']['content'] = cm.Node('iframe', {'class' : 'descr', 'allowfullscreen' : true})
             );
         }
         // Caption
@@ -15879,7 +16549,7 @@ cm.define('Com.GalleryPopup', {
         'renderStructure' : true,
         'embedStructure' : 'append',
         'embedStructureOnRender' : false,
-        'removeOnDestruct' : true,
+        'removeOnDestruct' : false,
         'size' : 'fullscreen',                   // fullscreen | auto
         'aspectRatio' : 'auto',                  // auto | 1x1 | 4x3 | 3x2 | 16x10 | 16x9 | 2x1 | 21x9 | 35x10 | 3x4 | 2x3 | 10x16 | 9x16 | 1x2
         'theme' : 'theme-black',
@@ -16113,6 +16783,39 @@ cm.getConstructor('Com.GalleryPopupContainer', function(classConstructor, classN
             that.components['controller'].set(0);
         }
         return that;
+    };
+});
+cm.define('Com.GalleryScrollPagination', {
+    'extend' : 'Com.ScrollPagination',
+    'params' : {
+        'renderStructure' : true,
+        'embedStructureOnRender' : true,
+        'pageTag' : 'ul',
+        'columns' : 4,
+        'indent' : '12px',
+        'adaptive' : true
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct in current context
+    Com.ScrollPagination.apply(that, arguments);
+});
+
+cm.getConstructor('Com.GalleryScrollPagination', function(classConstructor, className, classProto, classInherit){
+    classProto.setAttributes = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        classInherit.prototype.setAttributes.apply(that, arguments);
+        // Content
+        cm.addClass(that.nodes['pages'], 'pt__grid');
+        cm.addClass(that.nodes['pages'], ['col', that.params['columns']].join('-'));
+        cm.addClass(that.nodes['pages'], ['indent', that.params['indent']].join('-'));
+        if(that.params['adaptive']){
+            cm.addClass(that.nodes['pages'], 'is-adaptive');
+        }else{
+            cm.addClass(that.nodes['pages'], 'is-not-adaptive');
+        }
     };
 });
 cm.define('Com.Geocoder', {
@@ -17932,7 +18635,8 @@ cm.define('Com.ImagePreviewContainer', {
         'params' : {
             'showCounter' : false,
             'showTitle' : true
-        }
+        },
+        'placeholder' : false
     }
 },
 function(params){
@@ -17943,17 +18647,10 @@ function(params){
 });
 
 
-cm.getConstructor('Com.ImagePreviewContainer', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.construct = function(){
+cm.getConstructor('Com.ImagePreviewContainer', function(classConstructor, className, classProto, classInherit){
+    classProto.onRenderControllerProcess = function(){
         var that = this;
-        // Bind context to methods
-        that.renderControllerProcessHandler = that.renderControllerProcess.bind(that);
-        // Add events
-        that.addEvent('onRenderControllerProcess', that.renderControllerProcessHandler);
-        // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
+        that.setController();
         return that;
     };
 
@@ -17968,12 +18665,6 @@ cm.getConstructor('Com.ImagePreviewContainer', function(classConstructor, classN
     classProto.clear = function(){
         var that = this;
         that.components['controller'] && that.components['controller'].clear();
-        return that;
-    };
-
-    classProto.renderControllerProcess = function(){
-        var that = this;
-        that.setController();
         return that;
     };
 
@@ -18096,14 +18787,14 @@ cm.define('Com.MultiField', {
         'renderStructure' : false,
         'embedStructure' : 'append',
         'embedStructureOnRender' : false,
-        'sortable' : true,                      // Use drag and drop to sort items
+        'sortable' : true,                              // Use drag and drop to sort items
         'showControls' : true,
         'showList' : true,
-        'renderItems' : 0,                      // Render count of fields by default
-        'max' : 0,                              // 0 - infinity
-        'template' : null,                      // Html node or string with items template
+        'renderItems' : 0,                              // Render count of fields by default
+        'max' : 0,                                      // 0 - infinity
+        'template' : null,                              // Html node or string with items template
         'templateAttributeReplace' : false,
-        'templateAttribute' : 'name',           // Replace specified items attribute by pattern, example: data-attribute-name="test[%index%]", available variables: %index%
+        'templateAttribute' : 'name',                   // Replace specified items attribute by pattern, example: data-attribute-name="test[%index%]", available variables: %index%
         'duration' : 'cm._config.animDurationShort',
         'theme' : '',
         'icons' : {
@@ -18126,9 +18817,7 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.MultiField', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.MultiField', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Variables
@@ -18144,11 +18833,8 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         that.components = {};
         that.items = [];
         that.isToolbarVisible = true;
-        // Bind context to methods
-        // Add events
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     /* *** SYSTEM *** */
@@ -18169,7 +18855,6 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         }
         that.triggerEvent('onRenderViewProcess');
         that.triggerEvent('onRenderViewEnd');
-        return that;
     };
 
     classProto.renderToolbarView = function(){
@@ -18194,7 +18879,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
     classProto.renderViewModel = function(){
         var that = this;
         // Call parent method - renderViewModel
-        _inherit.prototype.renderViewModel.apply(that, arguments);
+        classInherit.prototype.renderViewModel.apply(that, arguments);
         // Init Sortable
         if(that.params['sortable']){
             cm.getConstructor('Com.Sortable', function(classConstructor, className){
@@ -18218,7 +18903,6 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         cm.forEach(Math.max(that.params['renderItems'] - that.items.length, 0), function(){
             that.renderItem();
         });
-        return that;
     };
 
     classProto.processCollectedView = function(){
@@ -18233,16 +18917,14 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         cm.forEach(that.nodes['items'], function(item){
             that.processItem(item);
         });
-        return that;
     };
 
     classProto.setAttributes = function(){
         var that = this;
         // Call parent method - renderViewModel
-        _inherit.prototype.setAttributes.apply(that, arguments);
+        classInherit.prototype.setAttributes.apply(that, arguments);
         // Set theme
         cm.addClass(that.nodes['container'], that.params['theme']);
-        return that;
     };
 
     /* *** ITEMS *** */
@@ -20563,7 +21245,7 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
             cm.appendNodes(that.nodes['inner'].childNodes, that.nodes['temporary']);
             cm.appendChild(that.nodes['temporary'], that.nodes['inner']);
             cm.customEvent.trigger(that.nodes['temporary'], 'destruct', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
         }
@@ -21187,651 +21869,6 @@ Com['Scroll'] = function(o){
 
     init();
 };
-cm.define('Com.ScrollPagination', {
-    'extend' : 'Com.AbstractController',
-    'events' : [
-        'onRebuild',
-        'onStart',
-        'onAbort',
-        'onError',
-        'onPageRender',
-        'onPageRenderEnd',
-        'onPageShow',
-        'onPageHide',
-        'onEnd',
-        'onFinalize',
-        'onSetCount',
-        'onButtonShow',
-        'onButtonHide'
-    ],
-    'params' : {
-        'controllerEvents' : true,
-        'renderStructure' : false,                                  // Render wrapper nodes if not exists in html
-        'embedStructureOnRender' : false,
-        'embedStructure' : 'append',
-        'resizeEvent' : true,
-        'scrollEvent' : true,
-        'scrollNode' : window,
-        'scrollIndent' : 'Math.max(%scrollHeight% / 2, 600)',       // Variables: %blockHeight%.
-        'disabled' : false,
-        'data' : [],                                                // Static data
-        'count' : 0,
-        'perPage' : 0,                                              // 0 - render all data in one page
-        'startPage' : 1,                                            // Start page
-        'startPageToken' : '',
-        'pageCount' : 0,                                            // Render only count of pages. 0 - infinity
-        'useToken' : false,
-        'autoSend' : true,
-        'showButton' : true,                                        // true - always | once - show once after first loaded page | none - don't show and don't scroll
-        'showLoader' : true,
-        'loaderDelay' : 'cm._config.loadDelay',
-        'stopOnESC' : true,
-        'pageTag' : 'div',
-        'pageAttributes' : {
-            'class' : 'com__scroll-pagination__page'
-        },
-        'responseCountKey' : 'count',                               // Take items count from response
-        'responseTokenKey' : 'token',                               // Token key name
-        'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
-        'responseErrorsKey': 'errors',
-        'responseHTML' : false,                                     // If true, html will append automatically
-        'ajax' : {
-            'type' : 'json',
-            'method' : 'get',
-            'url' : '',                                             // Request URL. Variables: %baseUrl%, %page%, %offset%, %token%, %limit%, %perPage%, %callback% for JSONP.
-            'params' : ''                                           // Params object. %baseUrl%, %page%, %offset%, %token%, %limit%, %perPage%, %callback% for JSONP.
-        }
-    },
-    'strings' : {
-        'load_more' : 'Load More',
-        'server_error' : 'An unexpected error has occurred. Please try again later.'
-    }
-},
-function(params){
-    var that = this;
-    // Call parent class construct
-    Com.AbstractController.apply(that, arguments);
-});
-
-cm.getConstructor('Com.ScrollPagination', function(classConstructor, className, classProto, classInherit){
-    classProto.construct = function(){
-        var that = this;
-        // variables
-        that.nodes = {
-            'container' : cm.node('div'),
-            'scroll' : null,
-            'bar' : cm.node('div'),
-            'barHolder' : cm.node('div'),
-            'content' : cm.node('div'),
-            'pages' : cm.node('div'),
-            'button' : cm.node('div'),
-            'loader' : cm.node('div')
-        };
-
-        that.pages = {};
-        that.ajaxHandler = null;
-        that.loaderDelay = null;
-        that.currentAction = null;
-
-        that.isAjax = false;
-        that.isProcess = false;
-        that.isFinalize = false;
-        that.isButton = false;
-        that.isDisabled = false;
-
-        that.page = null;
-        that.pageToken = null;
-        that.currentPage = null;
-        that.previousPage = null;
-        that.nextPage = null;
-        that.pageCount = 0;
-        // Binds
-        that.keyDownEventHandler = that.keyDownEvent.bind(that);
-        // Call parent method - renderViewModel
-        classInherit.prototype.construct.apply(that, arguments);
-    };
-
-    classProto.onConstructEnd = function(){
-        var that = this;
-        that.params['autoSend'] && that.set();
-    };
-
-    classProto.validateParams = function(){
-        var that = this;
-        that.triggerEvent('onValidateParamsStart');
-        that.triggerEvent('onValidateParams');
-        that.triggerEvent('onValidateParamsProcess');
-        that.isDisabled = that.params['disabled'];
-        // Set Scroll Node
-        if(that.nodes['scroll']){
-            that.params['scrollNode'] = that.nodes['scroll'];
-        }
-        // If URL parameter exists, use ajax data
-        if(!cm.isEmpty(that.params['ajax']['url'])){
-            that.isAjax = true;
-        }else{
-            that.params['showLoader'] = false;
-        }
-        if(that.params['pageCount'] === 0 && that.params['perPage'] && that.params['count']){
-            that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
-        }else{
-            that.pageCount = that.params['pageCount'];
-        }
-        // Set start page token
-        that.setToken(that.params['startPage'], that.params['startPageToken']);
-        // Set next page token
-        that.nextPage = that.params['startPage'];
-        that.triggerEvent('onValidateParamsEnd');
-    };
-
-    classProto.onScroll = function(){
-        var that = this,
-            scrollRect = cm.getRect(that.params['scrollNode']),
-            pagesRect = cm.getRect(that.nodes['pages']),
-            scrollIndent;
-        if(
-            !that.isDisabled &&
-            (!that.params['showButton'] || that.params['showButton'] !== 'none' || (that.params['showButton'] === 'once' && that.params['startPage'] !== that.currentPage)) &&
-            !cm.isProcess && !that.isFinalize && !that.isButton
-        ){
-            scrollIndent = eval(cm.strReplace(that.params['scrollIndent'], {
-                '%scrollHeight%' : scrollRect['bottom'] - scrollRect['top']
-            }));
-            if(pagesRect['bottom'] - scrollRect['bottom'] <= scrollIndent){
-                that.set();
-            }
-        }
-        // Show / Hide non visible pages
-        cm.forEach(that.pages, function(page){
-            that.isPageVisible(page, scrollRect);
-        });
-    };
-
-    classProto.onRedraw = function(){
-        var that = this;
-        cm.forEach(that.pages, function(page){
-            that.isPageVisible(page);
-        });
-    };
-
-    /******* VIEW - MODEL *******/
-
-    classProto.renderView = function(){
-        var that = this;
-        // Render Structure
-        that.nodes['container'] = cm.node('div', {'class' : 'com__scroll-pagination'},
-            that.nodes['content'] = cm.node('div', {'class' : 'com__scroll-pagination__content'},
-                that.nodes['pages'] = cm.node('div', {'class' : 'com__scroll-pagination__pages'})
-            ),
-            that.nodes['bar'] = cm.node('div', {'class' : 'com__scroll-pagination__bar'},
-                that.nodes['button'] = cm.node('div', {'class' : 'button button-primary'}, that.lang('load_more')),
-                that.nodes['loader'] = cm.node('div', {'class' : 'button button-clear has-icon has-icon has-icon-small'},
-                    cm.node('div', {'class' : 'icon small loader'})
-                )
-            )
-        );
-    };
-
-    classProto.renderViewModel = function(){
-        var that = this;
-        // Call parent method - renderViewModel
-        classInherit.prototype.renderViewModel.apply(that, arguments);
-        // Reset styles and variables
-        that.resetStyles();
-        // Events
-        cm.addEvent(that.nodes['button'], 'click', function(e){
-            e = cm.getEvent(e);
-            cm.preventDefault(e);
-            that.set();
-        });
-        if(that.params['stopOnESC']){
-            cm.addEvent(window, 'keydown', that.keyDownEventHandler);
-        }
-    };
-
-    /******* HELPERS *******/
-
-    classProto.resetStyles = function(){
-        var that = this;
-        // Load More Button
-        if(!that.params['showButton'] || that.params['showButton'] === 'none'){
-            that.callbacks.hideButton(that);
-        }else{
-            that.callbacks.showButton(that);
-        }
-        // Hide Loader
-        cm.addClass(that.nodes['loader'], 'is-hidden');
-    };
-
-    classProto.keyDownEvent = function(e){
-        var that = this;
-        cm.handleKey(e, 'escape', function(){
-            if(!cm.isProcess && !cm.isFinalize && that.params['showButton'] !== 'none'){
-                that.callbacks.showButton(that);
-            }
-        });
-    };
-
-    /******* CALLBACKS *******/
-
-    /*** AJAX ***/
-
-    classProto.callbacks.prepare = function(that, config){
-        config = that.callbacks.beforePrepare(that, config);
-        config['url'] = cm.strReplace(config['url'], {
-            '%perPage%' : that.params['perPage'],
-            '%limit%' : that.params['perPage'],
-            '%page%' : that.page,
-            '%offset%' : (that.page - 1) * that.params['perPage'],
-            '%token%' : that.pageToken,
-            '%baseUrl%' : cm._baseUrl
-        });
-        config['params'] = cm.objectReplace(config['params'], {
-            '%perPage%' : that.params['perPage'],
-            '%limit%' : that.params['perPage'],
-            '%page%' : that.page,
-            '%offset%' : (that.page - 1) * that.params['perPage'],
-            '%token%' : that.pageToken,
-            '%baseUrl%' : cm._baseUrl
-        });
-        config = that.callbacks.afterPrepare(that, config);
-        return config;
-    };
-
-    classProto.callbacks.beforePrepare = function(that, config){
-        return config;
-    };
-
-    classProto.callbacks.afterPrepare = function(that, config){
-        return config;
-    };
-
-    classProto.callbacks.request = function(that, config){
-        config = that.callbacks.prepare(that, config);
-        that.currentAction = config;
-        // Return ajax handler (XMLHttpRequest) to providing abort method.
-        return cm.ajax(
-            cm.merge(config, {
-                'onStart' : function(){
-                    that.callbacks.start(that);
-                },
-                'onSuccess' : function(response){
-                    that.callbacks.response(that, config, response);
-                },
-                'onError' : function(){
-                    that.callbacks.error(that, config);
-                },
-                'onAbort' : function(){
-                    that.callbacks.abort(that, config);
-                },
-                'onEnd' : function(){
-                    that.callbacks.end(that);
-                }
-            })
-        );
-    };
-
-    classProto.callbacks.filter = function(that, config, response){
-        var data = [],
-            errorsItem = cm.objectPath(that.params['responseErrorsKey'], response),
-            dataItem = cm.objectPath(that.params['responseKey'], response),
-            countItem = cm.objectPath(that.params['responseCountKey'], response),
-            tokenItem = cm.objectPath(that.params['responseTokenKey'], response);
-        if(cm.isEmpty(errorsItem)){
-            if(!cm.isEmpty(dataItem)){
-                if(!that.params['responseHTML'] && that.params['perPage']){
-                    data = dataItem.slice(0, that.params['perPage']);
-                }else{
-                    data = dataItem;
-                }
-            }
-            if(countItem){
-                that.setCount(countItem);
-            }
-            if(tokenItem){
-                that.setToken(that.nextPage, tokenItem);
-            }
-            if(that.params['useToken'] && !tokenItem){
-                that.callbacks.finalize(that);
-            }
-        }
-        return data;
-    };
-
-    classProto.callbacks.response = function(that, config, response){
-        // Set next page
-        that.setPage();
-        // Response
-        if(response){
-            response = that.callbacks.filter(that, config, response);
-        }
-        if(!cm.isEmpty(response)){
-            that.callbacks.render(that, response);
-        }else{
-            that.callbacks.finalize(that);
-        }
-    };
-
-    classProto.callbacks.error = function(that, config){
-        that.callbacks.finalize(that);
-        that.triggerEvent('onError');
-    };
-
-    classProto.callbacks.abort = function(that, config){
-        that.triggerEvent('onAbort');
-    };
-
-    /* *** STATIC *** */
-
-    classProto.callbacks.data = function(that, data){
-        var length, start, end, pageData;
-        that.callbacks.start(that);
-        that.setPage();
-        if(!cm.isEmpty(data)){
-            // Get page data and render
-            if(that.params['perPage'] === 0){
-                that.callbacks.render(that, data);
-                that.callbacks.finalize(that);
-            }else if(that.params['perPage'] > 0){
-                length = data.length;
-                start = (that.page - 1) * that.params['perPage'];
-                end = (that.page * that.params['perPage']);
-                if(start >= length){
-                    that.callbacks.finalize(that);
-                }else{
-                    pageData = data.slice(start , Math.min(end, length));
-                    that.callbacks.render(that, pageData);
-                }
-                if(end >= length){
-                    that.callbacks.finalize(that);
-                }
-            }
-        }else{
-            that.callbacks.render(that, data);
-        }
-        that.callbacks.end(that);
-    };
-
-    /* *** RENDER *** */
-
-    classProto.callbacks.renderContainer = function(that, page){
-        return cm.node(that.params['pageTag'], that.params['pageAttributes']);
-    };
-
-    classProto.callbacks.render = function(that, data){
-        var scrollTop = cm.getScrollTop(that.params['scrollNode']),
-            page = {
-                'page' : that.page,
-                'token' : that.pageToken,
-                'pages' : that.nodes['pages'],
-                'container' : cm.node(that.params['pageTag']),
-                'data' : data,
-                'isVisible' : false
-            };
-        // Clear container
-        if(that.page === that.params['startPage']){
-            cm.clearNode(that.nodes['pages']);
-        }
-        // Render page
-        page['container'] = that.callbacks.renderContainer(that, page);
-        that.pages[that.page] = page;
-        that.triggerEvent('onPageRender', page);
-        that.callbacks.renderPage(that, page);
-        // Embed
-        cm.appendChild(page['container'], that.nodes['pages']);
-        cm.addClass(page['container'], 'is-loaded', true);
-        // Restore scroll position
-        cm.setScrollTop(that.params['scrollNode'], scrollTop);
-        that.triggerEvent('onPageRenderEnd', page);
-        that.isPageVisible(page);
-    };
-
-    classProto.callbacks.renderPage = function(that, page){
-        var nodes;
-        if(that.params['responseHTML']){
-            nodes = cm.strToHTML(page['data']);
-            cm.appendNodes(nodes, page['container']);
-        }
-    };
-
-    /* *** HELPERS *** */
-
-    classProto.callbacks.start = function(that){
-        that.isProcess = true;
-        // Show Loader
-        if(that.params['showLoader']){
-            if(that.isButton){
-                cm.addClass(that.nodes['button'], 'is-hidden');
-                cm.removeClass(that.nodes['loader'], 'is-hidden');
-            }else{
-                that.loaderDelay = setTimeout(function(){
-                    cm.removeClass(that.nodes['loader'], 'is-hidden');
-                    cm.removeClass(that.nodes['bar'], 'is-hidden');
-                }, that.params['loaderDelay']);
-            }
-        }
-        that.triggerEvent('onStart');
-    };
-
-    classProto.callbacks.end = function(that){
-        that.isProcess = false;
-        // Hide Loader
-        that.loaderDelay && clearTimeout(that.loaderDelay);
-        cm.addClass(that.nodes['loader'], 'is-hidden');
-        // Check pages count
-        if(that.pageCount > 0 && that.pageCount === that.currentPage){
-            that.callbacks.finalize(that);
-        }
-        // Show / Hide Load More Button
-        that.callbacks.toggleButton(that);
-        that.triggerEvent('onEnd');
-    };
-
-    classProto.callbacks.finalize = function(that){
-        if(!that.isFinalize){
-            that.isFinalize = true;
-            that.callbacks.hideButton(that);
-            that.triggerEvent('onFinalize');
-        }
-    };
-
-    classProto.callbacks.toggleButton = function(that){
-        if(
-            !that.isFinalize && 
-            (that.params['showButton'] === true || (that.params['showButton'] === 'once' && that.params['startPage'] === that.page))
-        ){
-            that.callbacks.showButton(that);
-        }else{
-            that.callbacks.hideButton(that);
-        }
-    };
-
-    classProto.callbacks.showButton = function(that){
-        that.isButton = true;
-        cm.removeClass(that.nodes['button'], 'is-hidden');
-        cm.removeClass(that.nodes['bar'], 'is-hidden');
-        cm.removeClass(that.nodes['barHolder'], 'is-hidden');
-        that.triggerEvent('onButtonShow');
-    };
-
-    classProto.callbacks.hideButton = function(that){
-        that.isButton = false;
-        cm.addClass(that.nodes['button'], 'is-hidden');
-        cm.addClass(that.nodes['bar'], 'is-hidden');
-        cm.addClass(that.nodes['barHolder'], 'is-hidden');
-        that.triggerEvent('onButtonHide');
-    };
-
-    /* ******* PUBLIC ******* */
-
-    classProto.rebuild = function(params){
-        var that = this;
-        // Cleanup
-        if(that.isProcess){
-            that.abort();
-        }
-        that.pages = {};
-        that.page = null;
-        that.pageToken = null;
-        that.currentPage = null;
-        that.previousPage = null;
-        that.nextPage = null;
-        that.pageCount = 0;
-        that.isFinalize = false;
-        // Set new parameters
-        if(!cm.isEmpty(params)){
-            that.setParams(params);
-        }
-        that.validateParams();
-        // Reset styles and variables
-        that.resetStyles();
-        that.triggerEvent('onRebuild');
-        // Render new pge
-        that.set();
-        return that;
-    };
-
-    classProto.set = function(){
-        var that = this,
-            config;
-        if(!that.isProcess && !that.isFinalize){
-            // Preset next page and page token
-            that.page = that.nextPage;
-            that.pageToken = that.pages[that.page]? that.pages[that.page]['token'] : '';
-            // Request
-            if(that.isAjax){
-                config = cm.clone(that.params['ajax']);
-                that.ajaxHandler = that.callbacks.request(that, config);
-            }else{
-                that.callbacks.data(that, that.params['data']);
-            }
-        }
-        return that;
-    };
-
-    classProto.setToken = function(page, token){
-        var that = this;
-        if(!that.pages[page]){
-            that.pages[page] = {};
-        }
-        that.pages[page]['token'] = token;
-        return that;
-    };
-
-    classProto.setCount = function(count){
-        var that = this;
-        if(!cm.isUndefined(count)){
-            count = parseInt(count.toString());
-        }
-        if(cm.isNumber(count) && count !== that.params['count']){
-            that.params['count'] = count;
-            if(that.params['pageCount'] === 0 && that.params['count'] && that.params['perPage']){
-                that.pageCount = Math.ceil(that.params['count'] / that.params['perPage']);
-            }else{
-                that.pageCount = that.params['pageCount'];
-            }
-            if(that.pageCount > 0 && that.pageCount === that.currentPage){
-                that.callbacks.finalize(that);
-            }
-            that.triggerEvent('onSetCount', count);
-        }
-        return that;
-    };
-
-    classProto.setAction = function(o, mode, update){
-        var that = this;
-        mode = cm.inArray(['raw', 'update', 'current'], mode) ? mode : 'current';
-        switch(mode){
-            case 'raw':
-                that.params['ajax'] = cm.merge(that._raw.params['ajax'], o);
-                break;
-            case 'current':
-                that.params['ajax'] = cm.merge(that.params['ajax'], o);
-                break;
-            case 'update':
-                that.params['ajax'] = cm.merge(that._update.params['ajax'], o);
-                break;
-        }
-        if(update){
-            that._update.params['ajax'] = cm.clone(that.params['ajax']);
-        }
-        that.rebuild();
-        return that;
-    };
-
-    classProto.getAction = function(){
-        var that = this;
-        return that.params['ajax'];
-    };
-
-    classProto.getCurrentAction = function(){
-        var that = this;
-        return that.currentAction;
-    };
-
-    classProto.setPage = function(){
-        var that = this;
-        that.previousPage = that.currentPage;
-        that.currentPage = that.nextPage;
-        that.nextPage++;
-        return that;
-    };
-
-    classProto.isPageVisible = function(page, scrollRect){
-        var that = this;
-        if(page['container']){
-            scrollRect = cm.isUndefined(scrollRect) ? cm.getRect(that.params['scrollNode']) : scrollRect;
-            var pageRect = cm.getRect(page['container']);
-
-            if(cm.inRange(pageRect['top'], pageRect['bottom'], scrollRect['top'], scrollRect['bottom'])){
-                if(!page['isVisible']){
-                    page['isVisible'] = true;
-                    cm.removeClass(page['container'], 'is-hidden');
-                    cm.triggerEvent('onPageShow', page);
-                }
-            }else{
-                if(page['isVisible']){
-                    page['isVisible'] = false;
-                    cm.addClass(page['container'], 'is-hidden');
-                    cm.triggerEvent('onPageHide', page);
-                }
-            }
-            return page['isVisible'];
-        }
-        return false;
-    };
-
-    classProto.abort = function(){
-        var that = this;
-        if(that.ajaxHandler && that.ajaxHandler.abort){
-            that.ajaxHandler.abort();
-        }
-        return that;
-    };
-
-    classProto.disable = function(){
-        var that = this;
-        that.isDisabled = true;
-        return that;
-    };
-
-    classProto.enable = function(){
-        var that = this;
-        that.isDisabled = false;
-        return that;
-    };
-
-    classProto.embedButton = function(node){
-        var that = this;
-        that.nodes['barHolder'] = node;
-        cm.appendChild(that.nodes['bar'], node);
-    };
-
-    classProto.isParent = function(node, flag){
-        var that = this;
-        return cm.isParent(that.nodes['container'], node, flag);
-    };
-});
 cm.define('Com.Slider', {
     'modules' : [
         'Params',
@@ -22202,7 +22239,7 @@ function(params){
                 });
                 // Trigger custom event
                 cm.customEvent.trigger(current['nodes']['container'], 'redraw', {
-                    'type' : 'child',
+                    'direction' : 'child',
                     'self' : false
                 });
             });
@@ -22985,7 +23022,7 @@ cm.define('Com.Tabset', {
         'onTabHide'
     ],
     'params' : {
-        'node' : cm.Node('div'),        // Tabs contained node
+        'node' : cm.node('div'),                // Tabs contained node
         'container' : null,
         'name' : '',
         'embedStructure' : 'replace',
@@ -22993,18 +23030,21 @@ cm.define('Com.Tabset', {
         'renderOnInit' : true,
         'removeOnDestruct' : true,
         'customEvents' : true,
+        'setInitialTab' : true,                 // Set possible initial tab even if "active" is not defined
+        'setInitialTabImmediately' : true,      // Set initial tab without animation
+        'unsetOnReClick' : false,
         'active' : null,
         'className' : '',
-        'tabsAlign' : 'left',           // left | center | right | justify
-        'tabsPosition' : 'top',         // top | right | bottom | left
+        'adaptive' : true,
+        'tabsAlign' : 'left',                   // left | center | right | justify
+        'tabsPosition' : 'top',                 // top | right | bottom | left
         'tabsFlexible' : false,
-        'tabsWidth' : 256,              // Only for tabsPosition left or right
+        'tabsWidth' : 256,                      // Only for tabsPosition left or right
         'showTabs' : true,
-        'showTabsTitle' : true,         // Show title tooltip
-        'switchManually' : false,       // Change tab manually, not implemented yet
+        'showTabsTitle' : true,                 // Show title tooltip
         'animateSwitch' : true,
-        'animateDuration' : 300,
         'calculateMaxHeight' : false,
+        'animateDuration' : 'cm._config.animDuration',
         'tabs' : [],
         'icons' : {
             'menu' : 'icon default linked'
@@ -23015,7 +23055,7 @@ function(params){
     var that = this,
         hashInterval,
         resizeInterval;
-    
+
     that.nodes = {
         'tabs' : []
     };
@@ -23024,9 +23064,10 @@ function(params){
     that.tabsListing = [];
     that.active = false;
     that.previous = false;
+    that.isInitial = null;
     that.isProcess = false;
     that.isDestructed = false;
-    
+
     var init = function(){
         getLESSVariables();
         that.setParams(params);
@@ -23059,16 +23100,14 @@ function(params){
 
     var render = function(){
         // Init hash change handler
-        if(that.params['toggleOnHashChange']){
-            initHashChange();
-        }
+        that.params['toggleOnHashChange'] && cm.addEvent(window, 'hashchange', hashHandler);
         // Set initial tab
         setInitial();
     };
 
     var renderView = function(){
         /* *** STRUCTURE *** */
-        that.nodes['container'] = cm.Node('div', {'class' : 'com__tabset is-adaptive'},
+        that.nodes['container'] = cm.Node('div', {'class' : 'com__tabset'},
             that.nodes['content'] = cm.Node('div', {'class' : 'com__tabset__content'},
                 that.nodes['contentUL'] = cm.Node('ul')
             )
@@ -23083,6 +23122,9 @@ function(params){
         that.nodes['headerTabs'] = cm.Node('div', {'class' : 'com__tabset__head-tabs'},
             that.nodes['headerUL'] = cm.Node('ul')
         );
+        if(that.params['adaptive']){
+            cm.addClass(that.nodes['container'], 'is-adaptive');
+        }
         if(that.params['animateSwitch']){
             cm.addClass(that.nodes['content'], 'is-animated');
         }
@@ -23182,7 +23224,7 @@ function(params){
         // Structure
         item['container'] = cm.Node('li',
             item['a'] = cm.Node('a',
-                cm.node('div', {'class' : 'title'}, tab['title'])
+                item['title'] = cm.node('div', {'class' : 'title'}, tab['title'])
             )
         );
         // Image
@@ -23202,21 +23244,19 @@ function(params){
             }
         }
         // Add click event
-        if(that.params['toggleOnHashChange']){
-            cm.addEvent(item['a'], 'click', function(e){
-                e = cm.getEvent(e);
-                cm.preventDefault(e);
-                if(that.active !== tab['id']){
-                    window.location.href = [window.location.href.split('#')[0], tab['id']].join('#');
+        cm.addEvent(item['a'], 'click', function(e){
+            e = cm.getEvent(e);
+            cm.preventDefault(e);
+            if(that.params['unsetOnReClick'] && that.active === tab['id']){
+                that.unset();
+            }else{
+                if(that.params['toggleOnHashChange']){
+                    window.location.hash = tab['id'];
+                }else{
+                    set(tab['id']);
                 }
-            });
-        }else{
-            cm.addEvent(item['a'], 'click', function(e){
-                e = cm.getEvent(e);
-                cm.preventDefault(e);
-                set(tab['id']);
-            });
-        }
+            }
+        });
         return item;
     };
 
@@ -23234,27 +23274,34 @@ function(params){
     };
 
     var setInitial = function(){
-        var id = getInitialID();
+        var id;
+        // Set default active tab
+        if(that.params['setInitialTab']){
+            id = getInitialID();
+        }else{
+            id = that.params['active']
+        }
         if(isValidID(id)){
             set(id);
         }
     };
 
     var set = function(id){
-        var item, previous;
-        if(!that.isProcess && id !== that.active){
+        var item = that.tabs[id];
+        if(item && id !== that.active && !that.isProcess){
             that.isProcess = true;
             // Hide Previous Tab
-            if(that.active && that.tabs[that.active]){
-                that.previous = that.active;
-                previous = that.tabs[that.previous];
-                previous['isHide'] = true;
+            unsetTab(that.active);
+            that.previous = that.active;
+            that.active = id;
+            // Initial tab
+            if(!cm.isBoolean(that.isInitial)){
+                that.isInitial = !that.previous && that.params['setInitialTabImmediately'] && that.params['setInitialTab'];
+            }else{
+                that.isInitial = false;
             }
             // Show New Tab
-            that.active = id;
-            item = that.tabs[that.active];
             item['isHide'] = false;
-            // Show Start Event
             item['onShowStart'](that, item);
             that.triggerEvent('onTabShowStart', item);
             // Controller
@@ -23264,7 +23311,7 @@ function(params){
                 }else{
                     cm.getConstructor(item['constructor'], function(classConstructor){
                         item['controller'] = new classConstructor(
-                            cm.merge(item['controllerParams'], {
+                            cm.merge(item['constructorParams'], {
                                 'container' : item['content']
                             })
                         );
@@ -23272,24 +23319,11 @@ function(params){
                 }
             }
             // Show
-            switchTabHandler(item, previous);
+            switchTabHandler(item);
         }
     };
 
-    var switchTabHandler = function(item, previous){
-        // Hide previous tab
-        if(previous){
-            // Hide Start Event
-            previous['onHideStart'](that, previous);
-            that.triggerEvent('onTabHideStart', previous);
-            // Hide
-            cm.removeClass(previous['tab']['container'], 'active');
-            cm.removeClass(previous['menu']['container'], 'active');
-            cm.removeClass(previous['content'], 'active');
-            // Hide End Event
-            previous['onHide'](that, previous);
-            that.triggerEvent('onTabHide', previous);
-        }
+    var switchTabHandler = function(item){
         // Show active tab
         item['content'].style.display = 'block';
         cm.addClass(item['tab']['container'], 'active');
@@ -23297,7 +23331,7 @@ function(params){
         cm.addClass(item['content'], 'active', true);
         that.nodes['headerTitleText'].innerHTML = item['title'];
         // Animate
-        if(that.previous && that.params['animateSwitch'] && !that.params['calculateMaxHeight']){
+        if(!that.isInitial && that.params['animateSwitch'] && !that.params['calculateMaxHeight']){
             animateSwitch();
         }else{
             if(that.params['calculateMaxHeight']){
@@ -23306,20 +23340,42 @@ function(params){
             if(that.previous){
                 that.tabs[that.previous]['content'].style.display = 'none';
             }
-            switchTab();
+            showActiveTab();
         }
     };
 
-    var switchTab = function(){
+    var unsetTab = function(id){
+        var item = that.tabs[id];
+        if(item){
+            // Hide Start Event
+            item['onHideStart'](that, item);
+            that.triggerEvent('onTabHideStart', item);
+            item['isHide'] = true;
+            // Hide
+            cm.removeClass(item['tab']['container'], 'active');
+            cm.removeClass(item['menu']['container'], 'active');
+            cm.removeClass(item['content'], 'active');
+            // Hide End Event
+            item['onHide'](that, item);
+            that.triggerEvent('onTabHide', item);
+        }
+    };
+
+    var showActiveTab = function(){
+        var item = that.tabs[that.active];
         // Show End Event
-        that.tabs[that.active]['onShow'](that, that.tabs[that.active]);
-        that.triggerEvent('onTabShow', that.tabs[that.active]);
-        that.isProcess = false;
-        // Trigger custom event
-        cm.customEvent.trigger(that.tabs[that.active]['content'], 'redraw', {
-            'type' : 'child',
-            'self' : false
-        });
+        if(item){
+            item['onShow'](that, item);
+            that.triggerEvent('onTabShow', item);
+            that.isProcess = false;
+            // Trigger custom event
+            cm.customEvent.trigger(item['content'], 'redraw', {
+                'direction' : 'child',
+                'self' : false
+            });
+        }else{
+            that.isProcess = false;
+        }
     };
 
     /* *** HELPERS *** */
@@ -23343,23 +23399,8 @@ function(params){
             }
             that.nodes['contentUL'].style.overflow = 'visible';
             that.nodes['contentUL'].style.height = 'auto';
-            switchTab();
+            showActiveTab();
         }});
-    };
-
-    var initHashChange = function(){
-        var hash;
-        if("onhashchange" in window && !cm.is('IE7')){
-            cm.addEvent(window, 'hashchange', hashHandler);
-        }else{
-            hash = window.location.hash;
-            hashInterval = setInterval(function(){
-                if(hash != window.location.hash){
-                    hash = window.location.hash;
-                    hashHandler();
-                }
-            }, 25);
-        }
     };
 
     var hashHandler = function(){
@@ -23405,7 +23446,7 @@ function(params){
         cm.forEach(that.tabs, function(item){
             height = Math.max(height, cm.getRealHeight(item['content'], 'offsetRelative'));
         });
-        if(height != that.nodes['contentUL'].offsetHeight){
+        if(height !== that.nodes['contentUL'].offsetHeight){
             that.nodes['contentUL'].style.minHeight = [height, 'px'].join('');
             cm.forEach(that.tabs, function(item){
                 item['content'].style.minHeight = [height, 'px'].join('');
@@ -23419,7 +23460,7 @@ function(params){
             calculateMaxHeight();
         }
     };
-    
+
     /* ******* MAIN ******* */
 
     that.render = function(){
@@ -23431,12 +23472,12 @@ function(params){
         setInitial();
         return that;
     };
-    
+
     that.destruct = function(){
         if(!that.isDestructed){
             that.isDestructed = true;
             cm.customEvent.trigger(that.nodes['container'], 'destruct', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             if(that.params['customEvents']){
@@ -23460,6 +23501,25 @@ function(params){
         if(item = that.tabsListing[index]){
             set(item['id']);
         }
+        return that;
+    };
+
+    that.unset = function(){
+        that.previous = that.active;
+        that.active = null;
+        unsetTab(that.previous);
+        animateSwitch();
+        // Reset
+        that.previous = null;
+        that.active = null;
+        if(that.params['toggleOnHashChange']){
+            window.location.hash = '';
+        }
+        return that;
+    };
+
+    that.reset = function(){
+        setInitial();
         return that;
     };
 
@@ -23716,7 +23776,7 @@ cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProt
         // Structure
         nodes['container'] = cm.Node('li',
             nodes['link'] = cm.Node('a',
-                cm.node('div', {'class' : 'title'}, item['title'])
+                nodes['title'] = cm.node('div', {'class' : 'title'}, item['title'])
             )
         );
         // Image
@@ -23978,7 +24038,7 @@ function(params){
         that.nodes['target'].style.overflow = 'visible';
         // Trigger events
         cm.customEvent.trigger(that.nodes['target'], 'redraw', {
-            'type' : 'child',
+            'direction' : 'child',
             'self' : false
         });
         that.triggerEvent('onShow');
@@ -24046,7 +24106,7 @@ function(params){
                 that.nodes['target'].style.display = 'block';
                 // Trigger events
                 cm.customEvent.trigger(that.nodes['target'], 'redraw', {
-                    'type' : 'child',
+                    'direction' : 'child',
                     'self' : false
                 });
                 // Prepare animation
@@ -24149,14 +24209,14 @@ function(params){
     var render = function(){
         // Structure
         that.nodes['container'] = cm.node('div', {'class' : 'com__toolbar'},
-            that.nodes['part'] = cm.node('div', {'class' : 'pt__toolbar'},
-                cm.node('div', {'class' : 'inner clear'},
+            that.nodes['toolbar'] = cm.node('div', {'class' : 'pt__toolbar'},
+                that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
                     that.nodes['left'] = cm.node('div', {'class' : 'left'}),
                     that.nodes['right'] = cm.node('div', {'class' : 'right'})
                 )
             )
         );
-        that.params['adaptive'] && cm.addClass(that.nodes['part'], 'is-adaptive');
+        that.params['adaptive'] && cm.addClass(that.nodes['toolbar'], 'is-adaptive');
         // Append
         that.embedStructure(that.nodes['container']);
     };
@@ -24176,8 +24236,9 @@ function(params){
             'container' : cm.node('ul', {'class' : 'group'}),
             'node' : null,
             'adaptive' : true,
+            'flex' : false,
             'name' : '',
-            'position' : 'left',            // left | center | right
+            'position' : 'left',            // left | center | right | justify
             'items' : {}
         }, item);
         if(!that.groups[item['name']]){
@@ -24185,8 +24246,12 @@ function(params){
                 item['node'] = item['container'];
             }
             item['adaptive'] && cm.addClass(item['container'], 'is-adaptive');
+            item['flex'] && cm.addClass(item['container'], 'is-flex');
+            // Position
             if(/left|right/.test(item['position'])){
                 cm.appendChild(item['container'], that.nodes[item['position']]);
+            }else if(item['position'] === 'justify'){
+                cm.appendChild(item['container'], that.nodes['inner']);
             }
             that.groups[item['name']] = item;
         }
@@ -24220,13 +24285,22 @@ function(params){
             'node' : null,
             'name' : '',
             'size' : null,
-            'hidden' : false
+            'hidden' : false,
+            'group' : null
         }, item);
         // Render
         if((group = that.groups[item['group']]) && !group.items[item['name']]){
             // Styles
             item['size'] && cm.addClass(item['container'], item['size']);
             item['hidden'] && cm.addClass(item['container'], 'is-hidden');
+            // Controller
+            cm.getConstructor(item['constructor'], function(classConstructor){
+                item['controller'] = new classConstructor(
+                    cm.merge(item['constructorParams'], {
+                        'container' : item['container']
+                    })
+                );
+            });
             // Embed
             if(cm.isNode(item['node'])){
                 cm.appendChild(item['node'], item['container']);
@@ -24912,7 +24986,7 @@ function(params){
         if(!that.isDestructed){
             that.isDestructed = true;
             cm.customEvent.trigger(that.getStackNode(), 'destruct', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             cm.customEvent.remove(that.getStackNode(), 'destruct', that.destructHandler);
@@ -26800,7 +26874,7 @@ cm.getConstructor('Com.Autocomplete', function(classConstructor, className, clas
 /* ****** FORM FIELD COMPONENT ******* */
 
 Com.FormFields.add('autocomplete', {
-    'node' : cm.node('input', {'type' : 'search', 'autocomplete' : 'off'}),
+    'node' : cm.node('input', {'type' : 'search', 'autocomplete' : 'none'}),
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.Autocomplete'
 });
@@ -28458,7 +28532,7 @@ function(params){
         if(!that.isDestructed){
             that.isDestructed = true;
             cm.customEvent.trigger(nodes['calendarContainer'], 'destruct', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             unsetEvents();
@@ -32145,14 +32219,14 @@ cm.getConstructor('Com.TwoSideMultiSelect', function(classConstructor, className
         });
     };
 });
-/*! ************ QuickSilk-Application v3.22.1 (2018-12-21 21:36) ************ */
+/*! ************ QuickSilk-Application v3.23.4 (2019-02-13 21:32) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.22.1',
+    '_version' : '3.23.4',
     '_assetsUrl' : [window.location.protocol, window.location.hostname].join('//'),
     'Elements': {},
     'Nodes' : {},
@@ -32190,9 +32264,7 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('App.AbstractModule', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('App.AbstractModule', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Variables
@@ -32201,7 +32273,7 @@ cm.getConstructor('App.AbstractModule', function(classConstructor, className, cl
         that.enableEditingHandler = that.enableEditing.bind(that);
         that.disableEditingHandler = that.disableEditing.bind(that);
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.onSetCustomEvents = function(){
@@ -32273,15 +32345,13 @@ function(params){
     App.AbstractModule.apply(that, arguments);
 });
 
-cm.getConstructor('App.AbstractModuleElement', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('App.AbstractModuleElement', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Bind
         that.changeEventHandler = that.changeEvent.bind(that);
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.onConstructEnd = function(){
@@ -32293,7 +32363,7 @@ cm.getConstructor('App.AbstractModuleElement', function(classConstructor, classN
     classProto.renderViewModel = function(){
         var that = this;
         // Call parent method
-        _inherit.prototype.renderViewModel.apply(that, arguments);
+        classInherit.prototype.renderViewModel.apply(that, arguments);
         // Get controller
         if(that.params['targetController']){
             that.renderController();
@@ -32880,14 +32950,14 @@ function(params){
             if(!that.params['locked']){
                 cm.addClass(that.node, 'is-editable');
                 cm.customEvent.trigger(that.node, 'enableEditable', {
-                    'type' : 'child',
+                    'direction' : 'child',
                     'self' : false
                 });
             }
             cm.removeClass(that.nodes['block']['container'], 'cm__animate');
             that.getDimensions();
             cm.customEvent.trigger(that.node, 'enableEditing', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             that.triggerEvent('enableEditing');
@@ -32905,14 +32975,14 @@ function(params){
             if(!that.params['locked']){
                 cm.removeClass(that.node, 'is-editable');
                 cm.customEvent.trigger(that.node, 'disableEditable', {
-                    'type' : 'child',
+                    'direction' : 'child',
                     'self' : false
                 });
             }
             cm.addClass(that.nodes['block']['container'], 'cm__animate');
             that.getDimensions();
             cm.customEvent.trigger(that.node, 'disableEditing', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             that.triggerEvent('disableEditing');
@@ -32929,7 +32999,7 @@ function(params){
                 that.zones[0].remove();
             }
             cm.customEvent.trigger(that.node, 'destruct', {
-                'type' : 'child',
+                'direction' : 'child',
                 'self' : false
             });
             delete App._Blocks[that.params['name']];
@@ -33292,6 +33362,7 @@ function(params){
                 break;
         }
         cm.addEvent(window, 'scroll', scroll);
+        cm.customEvent.add(window, 'pageSizeChange', scroll);
         cm.preventDefault(e);
     };
 
@@ -33347,6 +33418,7 @@ function(params){
                 break;
         }
         cm.removeEvent(window, 'scroll', scroll);
+        cm.customEvent.remove(window, 'pageSizeChange', scroll);
     };
 
     var scroll = function(e){
@@ -33899,7 +33971,7 @@ function(params){
     /* *** HELPERS *** */
 
     var getPosition = function(e){
-        if(e.type === 'scroll'){
+        if(/pageSizeChange|sctoll/.test(e.type)){
             return cm._clientPosition;
         }
         return cm.getEventClientPosition(e);
@@ -34731,6 +34803,12 @@ cm.define('App.FileUploader', {
             'showStats' : false,
             'fullSize' : true
         },
+        'stock' : false,
+        'stockConstructor' : 'App.ShutterstockManager',
+        'stockParams' : {
+            'embedStructure' : 'append',
+            'fullSize' : true
+        },
         'Com.Tabset' : {
             'embedStructure' : 'append',
             'toggleOnHashChange' : false,
@@ -34745,6 +34823,7 @@ cm.define('App.FileUploader', {
     'strings' : {
         'tab_local' : 'Select From PC',
         'tab_filemanager' : 'File Manager',
+        'tab_stock' : 'Shutterstock',
         'browse_local_single' : 'Choose file',
         'browse_local_multiple' : 'Choose files',
         'or' : 'or',
@@ -34761,17 +34840,14 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('App.FileUploader', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('App.FileUploader', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Bind context to methods
         that.completeHandler = that.complete.bind(that);
         // Add events
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.get = function(){
@@ -34803,6 +34879,9 @@ cm.getConstructor('App.FileUploader', function(classConstructor, className, clas
                 case 'fileManager':
                     that.components['fileManager'].complete();
                     break;
+                case 'stock':
+                    that.components['stock'].complete();
+                    break;
             }
         }
         return that;
@@ -34814,6 +34893,8 @@ cm.getConstructor('App.FileUploader', function(classConstructor, className, clas
         that.params['localParams']['max'] = that.params['max'];
         that.params['fileManagerParams']['max'] = that.params['max'];
         that.params['fileManagerParams']['lazy'] = that.params['fileManagerLazy'];
+        that.params['stock']['max'] = that.params['max'];
+        that.params['stock']['lazy'] = that.params['fileManagerLazy'];
         return that;
     };
 
@@ -34833,6 +34914,10 @@ cm.getConstructor('App.FileUploader', function(classConstructor, className, clas
         // File Manager
         if(that.params['fileManager']){
             that.nodes['fileManager'] = that.renderFileManager();
+        }
+        // File Manager
+        if(that.params['stock']){
+            that.nodes['stock'] = that.renderStock();
         }
         // Events
         that.triggerEvent('onRenderViewProcess');
@@ -34873,6 +34958,22 @@ cm.getConstructor('App.FileUploader', function(classConstructor, className, clas
                 });
             });
         }
+        // Init Stock
+        if(that.params['stock']){
+            cm.getConstructor(that.params['stockConstructor'], function(classObject){
+                that.components['stock'] = new classObject(
+                    cm.merge(that.params['stockParams'], {
+                        'node' : that.nodes['stock']['holder']
+                    })
+                );
+                that.components['stock'].addEvent('onGet', function(my, data){
+                    that.afterGet(data);
+                });
+                that.components['stock'].addEvent('onComplete', function(my, data){
+                    that.afterComplete(data);
+                });
+            });
+        }
         // Init Tabset
         that.renderTabset();
         // Init Stats
@@ -34898,27 +34999,55 @@ cm.getConstructor('App.FileUploader', function(classConstructor, className, clas
             );
             that.components['tabset'].addEvent('onTabShow', function(my, data){
                 that.activeTab = data;
-                if(that.activeTab['id'] === 'fileManager'){
-                    that.components['fileManager'] && that.components['fileManager'].load();
+                switch(that.activeTab['id']){
+                    case 'fileManager':
+                        that.components['fileManager'] && that.components['fileManager'].load();
+                        break;
+                    case 'stock':
+                        that.components['stock'] && that.components['stock'].load();
+                        break;
                 }
             });
-            if(that.params['local']){
-                that.components['tabset'].addTab({
-                    'id' : 'local',
-                    'title' : that.lang('tab_local'),
-                    'content' : that.nodes['local']['li']
-                });
-            }
-            if(that.params['fileManager']){
-                that.components['tabset'].addTab({
-                    'id' : 'fileManager',
-                    'title' : that.lang('tab_filemanager'),
-                    'content' : that.nodes['fileManager']['li']
-                });
-            }
-            that.components['tabset'].set(that.params['local'] ? 'local' : 'fileManager');
+            that.renderTabs();
         });
         return that;
+    };
+
+    classProto.renderTabs = function(){
+        var that = this,
+            initialTab;
+        if(that.params['local']){
+            that.components['tabset'].addTab({
+                'id' : 'local',
+                'title' : that.lang('tab_local'),
+                'content' : that.nodes['local']['li']
+            });
+            if(cm.isEmpty(initialTab)){
+                initialTab = 'local'
+            }
+        }
+        if(that.params['fileManager']){
+            that.components['tabset'].addTab({
+                'id' : 'fileManager',
+                'title' : that.lang('tab_filemanager'),
+                'content' : that.nodes['fileManager']['li']
+            });
+            if(cm.isEmpty(initialTab)){
+                initialTab = 'fileManager';
+            }
+        }
+        if(that.params['stock']){
+            that.components['tabset'].addTab({
+                'id' : 'stock',
+                'title' : that.lang('tab_stock'),
+                'content' : that.nodes['stock']['li']
+            });
+            if(cm.isEmpty(initialTab)){
+                initialTab = 'stock';
+            }
+        }
+        // Set initial tab
+        that.components['tabset'].set(initialTab);
     };
 
     classProto.renderLocal = function(){
@@ -34939,6 +35068,18 @@ cm.getConstructor('App.FileUploader', function(classConstructor, className, clas
         // Structure
         nodes['li'] = cm.node('li',
             nodes['container'] = cm.node('div', {'class' : 'app__file-uploader__file-manager is-fullsize'},
+                nodes['holder'] = cm.node('div', {'class' : 'app__file-uploader__holder'})
+            )
+        );
+        return nodes;
+    };
+
+    classProto.renderStock = function(){
+        var that = this,
+            nodes = {};
+        // Structure
+        nodes['li'] = cm.node('li',
+            nodes['container'] = cm.node('div', {'class' : 'app__file-uploader__stock is-fullsize'},
                 nodes['holder'] = cm.node('div', {'class' : 'app__file-uploader__holder'})
             )
         );
@@ -34975,7 +35116,7 @@ cm.define('App.FileUploaderContainer', {
         'placeholderParams' : {
             'renderButtons' : true,
             'params' : {
-                'width' : 900
+                'width' : '1000'
             }
         }
     },
@@ -34993,9 +35134,7 @@ function(params){
 });
 
 
-cm.getConstructor('App.FileUploaderContainer', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('App.FileUploaderContainer', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Variables
@@ -35006,14 +35145,13 @@ cm.getConstructor('App.FileUploaderContainer', function(classConstructor, classN
         that.afterCompleteHandler = that.afterComplete.bind(that);
         // Add events
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.validateParams = function(){
         var that = this;
         // Call parent method
-        _inherit.prototype.validateParams.apply(that, arguments);
+        classInherit.prototype.validateParams.apply(that, arguments);
         // Validate Request
         that.isRequest = !cm.isEmpty(that.params['action']) && window.Request && window.Request.send;
         // Validate Language Strings
@@ -35041,7 +35179,7 @@ cm.getConstructor('App.FileUploaderContainer', function(classConstructor, classN
     classProto.renderControllerEvents = function(){
         var that = this;
         // Call parent method
-        _inherit.prototype.renderControllerEvents.apply(that, arguments);
+        classInherit.prototype.renderControllerEvents.apply(that, arguments);
         // Add specific events
         that.components['controller'].addEvent('onGet', function(my, data){
             that.afterGet(data);
@@ -35141,9 +35279,7 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('App.FileUploaderLocal', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('App.FileUploaderLocal', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Variables
@@ -35158,8 +35294,7 @@ cm.getConstructor('App.FileUploaderLocal', function(classConstructor, className,
         that.processFilesHandler = that.processFiles.bind(that);
         // Add events
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.get = function(){
@@ -35214,7 +35349,6 @@ cm.getConstructor('App.FileUploaderLocal', function(classConstructor, className,
         that.triggerEvent('onRenderViewProcess');
         cm.addEvent(that.nodes['input'], 'change', that.browseActionHandler);
         that.triggerEvent('onRenderViewEnd');
-        return that;
     };
 
     classProto.renderViewModel = function(){
@@ -35264,7 +35398,6 @@ cm.getConstructor('App.FileUploaderLocal', function(classConstructor, className,
                 });
             });
         }
-        return that;
     };
 
     /* *** PROCESS FILES *** */
@@ -37509,6 +37642,7 @@ cm.define('App.LoginBox', {
             'preventClickEvent' : true,
             'adaptiveX' : true,
             'adaptiveY' : true,
+            'scroll' : false,
             'left' : '(targetWidth - selfWidth) / 2',
             'top' : 'targetHeight + 8',
             'className' : 'app-pt__box-login__tooltip'
@@ -38310,7 +38444,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
                 that.showButton(['close', 'save']);
                 that.params['showButtons'] && that.showButtons(true);
                 cm.customEvent.trigger(that.nodes['contentHolder'], 'redraw', {
-                    'type' : 'child',
+                    'direction' : 'child',
                     'self' : false
                 });
             }
@@ -38420,7 +38554,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
     classProto.setTitle = function(node){
         var that = this;
         cm.customEvent.trigger(that.nodes['label'], 'destruct', {
-            'type' : 'child',
+            'direction' : 'child',
             'self' : false
         });
         cm.clearNode(that.nodes['label']);
@@ -38435,7 +38569,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
     classProto.setContent = function(node){
         var that = this;
         cm.customEvent.trigger(that.nodes['contentHolder'], 'destruct', {
-            'type' : 'child',
+            'direction' : 'child',
             'self' : false
         });
         cm.clearNode(that.nodes['contentHolder']);
@@ -38450,7 +38584,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
     classProto.setPreview = function(node){
         var that = this;
         cm.customEvent.trigger(that.nodes['previewHolder'], 'destruct', {
-            'type' : 'child',
+            'direction' : 'child',
             'self' : false
         });
         cm.clearNode(that.nodes['previewHolder']);
@@ -38564,7 +38698,7 @@ cm.getConstructor('App.Panel', function(classConstructor, className, classProto)
                     })
                     .addEvent('onContentRenderEnd', function(){
                         cm.customEvent.trigger(that.nodes['contentHolder'], 'redraw', {
-                            'type' : 'child',
+                            'direction' : 'child',
                             'self' : false
                         });
                     });
@@ -38900,6 +39034,343 @@ function(params){
 
     init();
 });
+cm.define('App.ShutterstockManager', {
+    'extend' : 'Com.AbstractFileManager',
+    'params' : {
+        'lazy' : true,
+        'showStats' : false,
+        'toolbarConstructor' : 'Com.Toolbar',
+        'toolbarParams' : {
+            'embedStructure' : 'first'
+        },
+        'searchConstructor' : 'Com.Input',
+        'searchParams' : {
+            'embedStructure' : 'append',
+            'lazy' : true,
+            'icon' : 'icon small search linked'
+        },
+        'categoriesRequestConstructor' : 'Com.Request',
+        'categoriesRequestParams' : {
+            'autoSend' : false,
+            'responseHTML' : false,
+            'ajax' : {
+                'type' : 'json',
+                'method' : 'get',
+                'url' : '/shutterstock-api/images/categories'
+            }
+        },
+        'categoriesConstructor' : 'Com.TabsetHelper',
+        'categoriesParams' : {
+        },
+        'paginationConstructor' : 'Com.GalleryScrollPagination',
+        'paginationParams' : {
+            'embedStructure' : 'append',
+            'showButton' : 'once',
+            'perPage' : 25,
+            'columns' : 5,
+            'responseCountKey' : 'total_count',
+            'responseHTML' : false,
+            'ajax' : {
+                'type' : 'json',
+                'method' : 'get',
+                'url' : '/shutterstock-api/images/search/%page%'
+            }
+        },
+        'overlayConstructor' : 'Com.Overlay',
+        'overlayParams' : {
+            'autoOpen' : false,
+            'lazy' : true,
+            'position' : 'absolute'
+        }
+    },
+    'strings' : {
+        'all' : 'All',
+        'server_error' : 'An unexpected error has occurred. Please try again later.'
+    }
+},
+function(params){
+    var that = this;
+    that.getFilesProcessType = null;
+    that.isLoaded = false;
+    // Call parent class construct
+    Com.AbstractFileManager.apply(that, arguments);
+});
+
+cm.getConstructor('App.ShutterstockManager', function(classConstructor, className, classProto, classInherit){
+    classProto.onConstructStart = function(){
+        var that = this;
+        // Variables
+        that.categories = [{
+            'id' : 'all',
+            'name' : that.lang('all')
+        }];
+        that.currentCategory = null;
+        that.currentQuery = null;
+        that.currentItem = null;
+        // Binds
+        that.renderCategoriesResponseHandler = that.renderCategoriesResponse.bind(that);
+        that.renderCategoriesErrorHandler = that.renderCategoriesError.bind(that);
+        that.renderListPageHandler = that.renderListPage.bind(that);
+        that.renderListErrorHandler = that.renderListError.bind(that);
+        that.setListCategoryHandler = that.setListCategory.bind(that);
+        that.setListQueryHandler = that.setListQuery.bind(that);
+    };
+
+    classProto.renderController = function(){
+        var that = this;
+        that.isLoaded = true;
+        // Request categories
+        cm.getConstructor(that.params['categoriesRequestConstructor'], function(classConstructor){
+            that.components['categoriesRequest'] = new classConstructor(
+                cm.merge(that.params['categoriesRequestParams'], {
+                    'overlayContainer' : that.nodes['inner']
+                })
+            );
+            that.components['categoriesRequest'].addEvent('onSuccess', that.renderCategoriesResponseHandler);
+            that.components['categoriesRequest'].addEvent('onError', that.renderCategoriesErrorHandler);
+            that.components['categoriesRequest'].send();
+        });
+    };
+
+    /* *** CATEGORIES *** */
+
+    classProto.renderCategoriesError = function(){
+        var that = this,
+            node = cm.node('div', {'class' : 'cm__empty is-show'}, that.lang('server_error'));
+        // Embed
+        cm.clearNode(that.nodes['holder']['inner']);
+        cm.appendChild(node, that.nodes['holder']['inner']);
+        // Show
+        cm.removeClass(that.nodes['holder']['container'], 'is-hidden', true);
+    };
+
+    classProto.renderCategoriesResponse = function(request, response){
+        var that = this,
+            data = response['filtered'];
+        // Render categories
+        that.categories = cm.extend(that.categories, data);
+        that.renderCategoriesView();
+        that.renderCategoriesViewModel();
+        // Show
+        cm.removeClass(that.nodes['holder']['container'], 'is-hidden', true);
+    };
+
+    classProto.renderCategoriesView = function(){
+        var that = this,
+            nodes = {};
+        that.nodes['categories'] = nodes;
+        // Render structure
+        nodes['container'] = cm.node('div', {'class' : 'stock__view'},
+            cm.node('div', {'class' : 'stock__tabs'},
+                cm.node('div', {'class' : 'inner'},
+                    cm.node('div', {'class' : 'pt__listing-items'},
+                        nodes['tabsHolder'] = cm.node('ul')
+                    )
+                )
+            ),
+            nodes['list'] = cm.node('div', {'class' : 'stock__list'},
+                nodes['listHolder'] = cm.node('div', {'class' : 'inner'})
+            )
+        );
+        // Render tabs
+        cm.forEach(that.categories, function(item){
+            that.renderTab(item);
+        });
+        // Embed
+        cm.clearNode(that.nodes['holder']['inner']);
+        cm.appendChild(nodes['container'], that.nodes['holder']['inner']);
+    };
+
+    classProto.renderTab = function(item){
+        var that = this,
+            nodes = {};
+        // Validate
+        item['title'] = item['name'];
+        item['label'] = nodes;
+        // Structure
+        nodes['container'] = cm.node('li',
+            nodes['link'] = cm.node('a', item['title'])
+        );
+        // Embed
+        cm.appendChild(nodes['container'], that.nodes['categories']['tabsHolder']);
+    };
+
+    classProto.renderCategoriesViewModel = function(){
+        var that = this;
+        // Render toolbar
+        cm.getConstructor(that.params['toolbarConstructor'], function(classConstructor){
+            that.components['toolbar'] = new classConstructor(
+                cm.merge(that.params['toolbarParams'], {
+                    'container' : that.nodes['holder']['inner']
+                })
+            );
+            that.components['toolbar'].addGroup({
+                'name' : 'all',
+                'position' : 'justify',
+                'adaptive' : false,
+                'flex' : true
+            });
+            that.components['toolbar'].addField({
+                'name' : 'search',
+                'group' : 'all',
+                'constructor' : that.params['searchConstructor'],
+                'constructorParams' : cm.merge(that.params['searchParams'], {
+                    'events' : {
+                        'onChange' : that.setListQueryHandler
+                    }
+                })
+            });
+        });
+        // Init tabset helper
+        cm.getConstructor(that.params['categoriesConstructor'], function(classConstructor){
+            that.components['tabset'] = new classConstructor(
+                cm.merge(that.params['categoriesParams'], {
+                    'items' : that.categories
+                })
+            );
+            that.components['tabset'].addEvent('onTabShowStart', that.setListCategoryHandler);
+            that.components['tabset'].set('all');
+        });
+        // Init overlay
+        cm.getConstructor(that.params['overlayConstructor'], function(classConstructor){
+            that.components['overlay'] = new classConstructor(
+                cm.merge(that.params['overlayParams'], {
+                    'container' : that.nodes['categories']['list']
+                })
+            );
+        });
+        // Init pagination
+        cm.getConstructor(that.params['paginationConstructor'], function(classConstructor){
+            that.components['pagination'] = new classConstructor(
+                cm.merge(that.params['paginationParams'], {
+                    'container' : that.nodes['categories']['listHolder'],
+                    'scrollNode' : that.nodes['categories']['listHolder']
+                })
+            );
+            that.components['pagination'].addEvent('onStart', function(){
+                that.removeListError();
+            });
+            that.components['pagination'].addEvent('onEnd', function(){
+                that.components['overlay'].close();
+            });
+            that.components['pagination'].addEvent('onPageRenderEnd', that.renderListPageHandler);
+            that.components['pagination'].addEvent('onError', that.renderListErrorHandler);
+        });
+    };
+
+    /* *** LIST *** */
+
+    classProto.renderListError = function(){
+        var that = this;
+        if(cm.isEmpty(that.components['pagination'].currentPage)){
+            // Render structure
+            if(!that.nodes['categories']['error']){
+                that.nodes['categories']['error'] = cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'));
+            }
+            // Embed
+            cm.insertFirst(that.nodes['categories']['error'], that.nodes['categories']['listHolder']);
+            cm.addClass(that.nodes['categories']['error'], 'is-show', true);
+        }
+    };
+
+    classProto.removeListError = function(){
+        var that = this;
+        cm.removeClass(that.nodes['categories']['error'], 'is-show');
+        cm.remove(that.nodes['categories']['error']);
+    };
+
+    classProto.renderListPage = function(pagination, page){
+        var that = this;
+        // Render items
+        cm.forEach(page['data'], function(item){
+            that.renderListItem(item, page['container']);
+        });
+    };
+
+    classProto.renderListItem = function(item, container){
+        var that = this,
+            nodes = {};
+        item['nodes'] = nodes;
+        // Structure
+        nodes['container'] = cm.node('li',
+            nodes['link'] = cm.node('div', {'class' : 'pt__image is-loading is-centered is-background is-cover is-hover', 'title' : item['description']},
+                cm.node('div', {'class' : 'inner'},
+                    nodes['descr'] = cm.node('div', {'class' : 'descr'})
+                )
+            )
+        );
+        nodes['descr'].style.backgroundImage = cm.URLToCSSURL(item['assets']['huge_thumb']['url']);
+        // Load
+        cm.onImageLoad(item['assets']['huge_thumb']['url'], function(){
+            cm.addClass(nodes['link'], 'is-loaded', true);
+        });
+        // Events
+        cm.addEvent(nodes['link'], 'click', function(){
+            that.setListItem(item);
+        });
+        cm.addEvent(nodes['link'], 'dblclick', function(){
+            that.processFiles(item);
+            that.complete();
+        });
+        // Embed
+        cm.appendChild(nodes['container'], container);
+    };
+
+    classProto.setListCategory = function(tabset, tab){
+        var that = this;
+        that.currentCategory = tab['id'];
+        // Update pagination action
+        if(that.components['pagination']){
+            that.components['overlay'].open();
+            // Set category
+            that.components['pagination'].setAction({
+                'params' : {
+                    'category' : that.currentCategory === 'all' ? null : that.currentCategory
+                }
+            });
+        }
+    };
+
+    classProto.setListQuery = function(input, value){
+        var that = this;
+        that.currentQuery = value;
+        // Update pagination action
+        if(that.components['pagination']){
+            that.components['overlay'].open();
+            // Set query
+            that.components['pagination'].setAction({
+                'params' : {
+                    'query' : that.currentQuery
+                }
+            });
+        }
+    };
+
+    classProto.setListItem = function(item){
+        var that = this;
+        // Unset previous
+        if(that.currentItem){
+            cm.removeClass(that.currentItem['nodes']['link'], 'active');
+            that.currentItem = null;
+        }
+        // Set new
+        cm.addClass(item['nodes']['link'], 'active');
+        that.currentItem = item;
+        that.processFiles(item);
+    };
+
+    /* *** PROCESS FILES *** */
+
+    classProto.convertFile = function(data){
+        return {
+            'value' : data['assets']['preview']['url'],
+            'name' : data['description'],
+            'mime' : data['media_type'],
+            'size' : null,
+            'url' : data['assets']['preview']['url']
+        }
+    };
+});
 cm.define('App.Sidebar', {
     'modules' : [
         'Params',
@@ -39230,7 +39701,9 @@ cm.define('App.Template', {
             'fixed' : false,
             'overlapping' : false,
             'sticky' : false,           // Not implemented
-            'transformed' : false
+            'transformed' : false,
+            'mobileFixed' : null,
+            'mobileOverlapping' : null
         },
         'content' : {
             'editableIndent' : 0
@@ -39267,16 +39740,25 @@ function(params){
         that.convertEvents(that.params['events']);
         that.getDataNodes(that.params['node']);
         that.getDataConfig(that.params['node']);
+        validateParams();
         that.addToStack(that.params['node']);
         that.triggerEvent('onRenderStart');
         render();
-        setState();
         redraw(true);
         that.triggerEvent('onRender');
     };
 
     var getLESSVariables = function(){
         that.params['content']['editableIndent'] = cm.getLESSVariable('AppTpl-Content-EditableIndent', that.params['content']['editableIndent'], true);
+    };
+
+    var validateParams = function(){
+        if(!cm.isBoolean(that.params['header']['mobileOverlapping'])){
+            that.params['header']['mobileOverlapping'] = that.params['header']['overlapping'];
+        }
+        if(!cm.isBoolean(that.params['header']['mobileFixed'])){
+            that.params['header']['mobileFixed'] = that.params['header']['fixed'];
+        }
     };
 
     var render = function(){
@@ -39311,14 +39793,26 @@ function(params){
     };
 
     var setState = function(){
-        if(that.params['header']['overlapping']){
-            cm.addClass(that.nodes['headerContainer'], 'is-overlapping');
-        }
-        if(that.params['header']['fixed']){
-            cm.addClass(that.nodes['headerContainer'], 'is-fixed');
-        }
-        if(that.params['header']['fixed'] && !that.params['header']['overlapping']){
-            cm.addClass(that.nodes['headerSpace'], 'is-show');
+        if(cm.getPageSize('winWidth') <= cm._config.screenTabletPortrait){
+            if(that.params['header']['mobileOverlapping']){
+                cm.addClass(that.nodes['headerContainer'], 'is-overlapping');
+            }
+            if(that.params['header']['mobileFixed']){
+                cm.addClass(that.nodes['headerContainer'], 'is-fixed');
+            }
+            if(that.params['header']['mobileFixed'] && !that.params['header']['mobileOverlapping']){
+                cm.addClass(that.nodes['headerSpace'], 'is-show');
+            }
+        }else{
+            if(that.params['header']['overlapping']){
+                cm.addClass(that.nodes['headerContainer'], 'is-overlapping');
+            }
+            if(that.params['header']['fixed']){
+                cm.addClass(that.nodes['headerContainer'], 'is-fixed');
+            }
+            if(that.params['header']['fixed'] && !that.params['header']['overlapping']){
+                cm.addClass(that.nodes['headerSpace'], 'is-show');
+            }
         }
         cm.addClass(that.nodes['headerTransformed'], 'is-fixed');
         cm.removeClass(that.nodes['headerTransformed'], 'is-show');
@@ -39333,7 +39827,15 @@ function(params){
         }
     };
 
+    var stateHelper = function(){
+        unsetState();
+        if(!that.isEditing || cm.getPageSize('winWidth') <= cm._config.screenTabletPortrait){
+            setState();
+        }
+    };
+
     var redraw = function(triggerEvents){
+        stateHelper();
         getOffsets();
         resizeContent();
         setHeaderTransformed();
@@ -39413,7 +39915,6 @@ function(params){
         if(!cm.isBoolean(that.isEditing) || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.nodes['container'], 'is-editing');
-            unsetState();
             that.redraw();
             that.triggerEvent('enableEditing');
         }
@@ -39424,7 +39925,6 @@ function(params){
         if(!cm.isBoolean(that.isEditing) || that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.nodes['container'], 'is-editing');
-            setState();
             that.redraw();
             that.triggerEvent('disableEditing');
         }
@@ -39886,16 +40386,13 @@ function(params){
     Com.AbstractFileManager.apply(that, arguments);
 });
 
-cm.getConstructor('App.elFinderFileManager', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('App.elFinderFileManager', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         // Bind context to methods
         that.getFilesEventHandler = that.getFilesEvent.bind(that);
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.get = function(){
@@ -39904,7 +40401,7 @@ cm.getConstructor('App.elFinderFileManager', function(classConstructor, classNam
         if(that.components['controller']){
             that.components['controller'].exec('getfile');
         }else{
-            _inherit.prototype.get.apply(that, arguments);
+            classInherit.prototype.get.apply(that, arguments);
         }
         return that;
     };
@@ -39915,7 +40412,7 @@ cm.getConstructor('App.elFinderFileManager', function(classConstructor, classNam
         if(that.components['controller']){
             that.components['controller'].exec('getfile');
         }else{
-            _inherit.prototype.complete.apply(that, arguments);
+            classInherit.prototype.complete.apply(that, arguments);
         }
         return that;
     };
@@ -39933,7 +40430,7 @@ cm.getConstructor('App.elFinderFileManager', function(classConstructor, classNam
         var that = this;
         // Init elFinder
         if(!that.components['controller']){
-            if(!cm.isUndefined(elFinder)){
+            if(typeof elFinder !== 'undefined'){
                 that.isLoaded = true;
                 that.components['controller'] = new elFinder(that.nodes['holder']['inner'],
                     cm.merge(that.params['config'], {
@@ -39968,13 +40465,13 @@ cm.getConstructor('App.elFinderFileManager', function(classConstructor, classNam
         // Callbacks
         switch(that.getFilesProcessType){
             case 'get':
-                _inherit.prototype.get.call(that);
+                classInherit.prototype.get.call(that);
                 break;
             case 'complete':
-                _inherit.prototype.complete.call(that);
+                classInherit.prototype.complete.call(that);
                 break;
             default:
-                _inherit.prototype.complete.call(that);
+                classInherit.prototype.complete.call(that);
                 break;
 
         }
@@ -41156,7 +41653,8 @@ cm.define('Mod.ElementMultiField', {
     'extend' : 'App.AbstractModuleElement',
     'params' : {
         'targetController' : 'Com.MultiField',
-        'memorable' : false
+        'memorable' : false,
+        'demo' : false
     }
 },
 function(params){
@@ -41165,24 +41663,25 @@ function(params){
     App.AbstractModuleElement.apply(that, arguments);
 });
 
-cm.getConstructor('Mod.ElementMultiField', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Mod.ElementMultiField', function(classConstructor, className, classProto, classInherit){
     classProto.onEnableEditing = function(){
         var that = this;
-        if(that.components['controller']){
-            that.components['controller']
-                .clear();
+        if(that.params['demo']){
+            if(that.components['controller']){
+                that.components['controller']
+                    .clear();
+            }
         }
     };
 
     classProto.onDisableEditing = function(){
         var that = this;
-        cm.log(that.components['controller']);
-        if(that.components['controller']){
-            that.components['controller']
-                .clear()
-                .setTemplate(that.nodes['content']['templateInner']);
+        if(that.params['demo']){
+            if(that.components['controller']){
+                that.components['controller']
+                    .clear()
+                    .setTemplate(that.nodes['content']['templateInner']);
+            }
         }
     };
 });
@@ -42653,7 +43152,7 @@ function(params){
 
     init();
 });
-window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.36.3","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmIconIA-Spinner-BorderSize":"3px","CmIconIA-Spinner-DefaultBackground":"#e8e8e8","CmIconIA-Spinner-ActiveBackground":"#2985e0","CmVersion":"3.36.3","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXXSmall":"2px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXXSmall":"2px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationMedium":"150ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-Placeholder-Size":"inherit","CmFont-Placeholder-Style":"inherit","CmFont-Placeholder-Color":"#b7b7b7","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBox-Padding":"4px","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-Item-Color":"#666666","PtMenu-Item-HoverColor":"#1d73c9","PtMenu-Item-ActiveColor":"#16599c","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-AdaptiveFrom":"768px","PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-WindowDuration":"500ms","ComDialog-Indent":"24px","ComDialog-Radius":"3px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.22.1","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-CircleNote":"\\e707","AppIcon-CircleUndo":"\\e708","AppIcon-CircleRedo":"\\e709","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","fileuploader","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-fileuploader":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppVersion":"3.22.1","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-QuickSilkRed":"#ff6662","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppTopMenu-Dropdown-Duration":"50ms","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Languages-Indent":"12px","AppMod-Menu-Languages-ImageSize":"24px","AppMod-Menu-Languages-SelectSize":"32px","AppMod-Menu-Languages-SelectColor":"#666666","AppMod-Menu-Languages-SelectBackground":"#f2f2f2","AppMod-Menu-Languages-SeparatorWidth":"1px","AppMod-Menu-Languages-SeparatorHeight":"12px","AppMod-Menu-Languages-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModCart-LabelIndent":"8px","ModCart-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","ModCalendar-BorderWidth":"1px","ModCalendar-BorderColor":"#cccccc","ModCalendar-Border":["1px","solid","#cccccc"],"ModCalendar-Background":"#ffffff","ModCalendarEvent-TooltipWidth":"320px","ModCalendarEvent-Padding":"4px","ModCalendarEvent-LineHeight":"18px","ModCalendarEvent-Short-Indent":"1px","ModCalendarEvent-Short-Height":"20px","ModCalendarEvent-Long-Indent":"12px","ModCalendarTable-Border":["1px","solid","#cccccc"],"ModCalendarTable-Default-Background":"#ffffff","ModCalendarTable-Default-BackgroundHover":"#f2f2f2","ModCalendarTable-Inactive-Background":"#ffffff","ModCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ModCalendarTable-Weekend-Background":"#e8e8e8","ModCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ModCalendarTable-Today-Background":"#f6fafd","ModCalendarTable-Today-BackgroundHover":"#e9f2fb","ModCalendarTable-Active-Background":"#d8e8f8","ModCalendarTable-Active-BackgroundHover":"#c2dbf4","ModCalendarAgenda-Day-Indent":"24px","ModCalendarAgenda-Day-Padding":"12px","ModCalendarAgenda-Day-Width":"72px","ModCalendarWeek-Day-Indent":"4px","ModCalendarWeek-Item-Height":"20px","ModCalendarMonth-Item-Count":3,"ModCalendarMonth-Item-LineHeight":"18px","ModCalendarMonth-Item-Height":"20px","ModCalendarMonth-Item-Indent":"1px","ModCalendarMonth-Day-Indent":"4px","ModCalendarMonth-Day-Items":5,"ModCalendarMonth-Day-Height":"104px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
+window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.36.10","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmIconIA-Spinner-BorderSize":"3px","CmIconIA-Spinner-DefaultBackground":"#e8e8e8","CmIconIA-Spinner-ActiveBackground":"#2985e0","CmVersion":"3.36.10","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXXSmall":"2px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXXSmall":"2px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationMedium":"150ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-Placeholder-Size":"inherit","CmFont-Placeholder-Style":"inherit","CmFont-Placeholder-Color":"#b7b7b7","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"12px","CmScrollBar-TrackBackground":"#fafafa","CmScrollBar-TrackColor":"#dbdbdb","CmScrollBar-TrackColorHover":"#cccccc","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBox-Padding":"4px","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-Item-Color":"#666666","PtMenu-Item-HoverColor":"#1d73c9","PtMenu-Item-ActiveColor":"#16599c","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-TitlePaddingTop":"4px","PtImage-Color":"#ffffff","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-AdaptiveFrom":"768px","PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-WindowDuration":"500ms","ComDialog-Indent":"24px","ComDialog-Radius":"3px","ComDialog-TitleIndent":"12px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.23.4","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-CircleNote":"\\e707","AppIcon-CircleUndo":"\\e708","AppIcon-CircleRedo":"\\e709","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","fileuploader","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-fileuploader":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppVersion":"3.23.4","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-QuickSilkRed":"#ff6662","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppTopMenu-Dropdown-Duration":"50ms","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Theme":"Dark","AppSidebar-ThemeDark-Color":"#ffffff","AppSidebar-ThemeDark-Background":"#2985e0","AppSidebar-ThemeLight-Color":"#666666","AppSidebar-ThemeLight-Background":"#ffffff","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Theme":"Dark","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ThemeDark-ColorNormal":"#ffffff","AppBlock-Dummy-ThemeDark-ColorHover":"#ffffff","AppBlock-Dummy-ThemeDark-ColorActive":"#666666","AppBlock-Dummy-ThemeDark-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeDark-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeDark-IconBackgroundNormal":"rgba(255, 255, 255, 0.2)","AppBlock-Dummy-ThemeDark-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-ThemeDark-IconBackgroundActive":"#2985e0","AppBlock-Dummy-ThemeLight-ColorNormal":"#666666","AppBlock-Dummy-ThemeLight-ColorHover":"#666666","AppBlock-Dummy-ThemeLight-ColorActive":"#666666","AppBlock-Dummy-ThemeLight-BackgroundNormal":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundHover":"trannsparent","AppBlock-Dummy-ThemeLight-BackgroundActive":"#ffffff","AppBlock-Dummy-ThemeLight-IconBackgroundNormal":"#f2f2f2","AppBlock-Dummy-ThemeLight-IconBackgroundHover":"#d8e8f8","AppBlock-Dummy-ThemeLight-IconBackgroundActive":"#d8e8f8","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Languages-Indent":"12px","AppMod-Menu-Languages-ImageSize":"24px","AppMod-Menu-Languages-SelectSize":"32px","AppMod-Menu-Languages-SelectColor":"#666666","AppMod-Menu-Languages-SelectBackground":"#f2f2f2","AppMod-Menu-Languages-SeparatorWidth":"1px","AppMod-Menu-Languages-SeparatorHeight":"12px","AppMod-Menu-Languages-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModCart-LabelIndent":"8px","ModCart-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","ModCalendar-BorderWidth":"1px","ModCalendar-BorderColor":"#cccccc","ModCalendar-Border":["1px","solid","#cccccc"],"ModCalendar-Background":"#ffffff","ModCalendarEvent-TooltipWidth":"320px","ModCalendarEvent-Padding":"4px","ModCalendarEvent-LineHeight":"18px","ModCalendarEvent-Short-Indent":"1px","ModCalendarEvent-Short-Height":"20px","ModCalendarEvent-Long-Indent":"12px","ModCalendarTable-Border":["1px","solid","#cccccc"],"ModCalendarTable-Default-Background":"#ffffff","ModCalendarTable-Default-BackgroundHover":"#f2f2f2","ModCalendarTable-Inactive-Background":"#ffffff","ModCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ModCalendarTable-Weekend-Background":"#e8e8e8","ModCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ModCalendarTable-Today-Background":"#f6fafd","ModCalendarTable-Today-BackgroundHover":"#e9f2fb","ModCalendarTable-Active-Background":"#d8e8f8","ModCalendarTable-Active-BackgroundHover":"#c2dbf4","ModCalendarAgenda-Day-Indent":"24px","ModCalendarAgenda-Day-Padding":"12px","ModCalendarAgenda-Day-Width":"72px","ModCalendarWeek-Day-Indent":"4px","ModCalendarWeek-Item-Height":"20px","ModCalendarMonth-Item-Count":3,"ModCalendarMonth-Item-LineHeight":"18px","ModCalendarMonth-Item-Height":"20px","ModCalendarMonth-Item-Indent":"1px","ModCalendarMonth-Day-Indent":"4px","ModCalendarMonth-Day-Items":5,"ModCalendarMonth-Day-Height":"104px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts"};
 
 window.Collector = new Com.Collector({
         'autoInit' : true
@@ -42966,6 +43465,29 @@ cm.setParams('App.Template', {
     'header' : {
         'fixed' : false,
         'overlapping' : false,
-        'transformed' : true
+        'transformed' : true,
+        'mobileFixed' : true,
+        'mobileOverlapping' : true
+    }
+});
+
+cm.setParams('App.ShutterstockManager', {
+    'categoriesRequestParams' : {
+        'ajax' : {
+            'url' : '//quicksilk.magpie/shutterstock-api/images/categories'
+        }
+    },
+    'paginationParams' : {
+        'ajax' : {
+            'url' : '//quicksilk.magpie/shutterstock-api/images/search/%page%'
+        }
+    }
+});
+
+cm.setParams('App.ImageInput', {
+    'fileUploaderParams' : {
+        'params' : {
+            'stock' : true
+        }
     }
 });
