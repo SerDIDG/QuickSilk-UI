@@ -8,6 +8,7 @@ $config = array(
 	'zone' => $_POST['zone'],
 	'parentPositionId' => $_POST['parentPositionId'],
 	'type' => $_POST['type'],
+	'keyword' => $_POST['keyword'],
 	'locked' => false
 );
 if(!empty($_POST['instanceId']) && $_POST['instanceId'] != 'false'){

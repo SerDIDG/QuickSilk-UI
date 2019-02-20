@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.9.0 ************ */
-/*! ************ MagpieUI v3.36.10 (2019-02-13 21:31) ************ */
+/*! ************ MagpieUI v3.36.12 (2019-02-20 19:40) ************ */
 @charset "UTF-8";
 
 /*!
@@ -3925,7 +3925,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.36.10';
+@CmVersion: '3.36.12';
 
 // /* ******* PATH ******* */
 
@@ -4278,6 +4278,7 @@ span.CodeMirror-selectedtext { background: none; }
 
 @CmFont-Base-LightWeight: 300;
 @CmFont-Base-NormalWeight: 400;
+@CmFont-Base-MediumWeight: 500;
 @CmFont-Base-BoldWeight: 600;
 
 @CmFont-Base-LineHeight: 18px;
@@ -4525,6 +4526,7 @@ span.CodeMirror-selectedtext { background: none; }
 @PtGridlist-Title-HasBackground-Hover: @PtGridlist-Cell-HasBackground-Hover;
 @PtGridlist-Cell-HasBackground-Default: @CmColor-Secondary-LightHighlight;
 @PtGridlist-Cell-HasBackground-Hover: @CmColor-Secondary-LightHover;
+@PtGridlist-Cell-HasBackground-Active: @CmColor-Secondary-LightActive;
 
 // /* ******* DRAG AND DROP ******* */
 
@@ -6051,7 +6053,7 @@ span.CodeMirror-selectedtext { background: none; }
     }
 
     &.large {
-        .for(archive default doc exe flash image movie music pdf pps ttf txt xls); .-each(@name) {
+        .for(folder archive default doc exe flash image movie music pdf pps ttf txt xls); .-each(@name) {
             &.file-@{name} {
                 background-image: url("@{CmPath-Images}/icons/large/files/@{name}.png");
             }
@@ -8937,6 +8939,7 @@ button {
         .cm__list-clear;
         .cm__list-inline;
         margin: 0 0 -@CmIndent-XXSmall 0;
+        line-height: @CmFont-Base-LineHeight;
 
         li {
             .cm__font;
@@ -8951,6 +8954,13 @@ button {
                 &:first-child,
                 &:last-child {
                     display: none;
+                }
+            }
+
+            &.active {
+                a {
+                    color: @CmFont-Base-Color;
+                    text-decoration: none;
                 }
             }
         }
@@ -10161,6 +10171,12 @@ ul.pt__field__hint {
         }
     }
 
+    &.is-grid {
+        > ul {
+            display: grid;
+        }
+    }
+
     &.is-flex {
         > ul {
             .display-flex;
@@ -10224,6 +10240,10 @@ ul.pt__field__hint {
         .loop((@counter - 1));
 
         &.col-@{counter} {
+            .pt__grid__col(@counter);
+        }
+
+        &.size-@{counter} {
             .pt__grid__size(@counter);
         }
     }
@@ -10272,13 +10292,59 @@ ul.pt__field__hint {
     }
 }
 
+/* *** FILES *** */
+
+.pt__grid--files {
+    .pt__image {
+        border: @CmBorder-Box;
+        border-radius: @CmBorder-Radius;
+        .mx__transition(all, @CmUI-Transition-Duration);
+
+        &:hover,
+        &.hover {
+            border: @CmBorder-BoxHover;
+            .mx__transition(all, @CmUI-Transition-DurationReverse);
+        }
+
+        &:active,
+        &.active {
+            border: @CmBorder-BoxActive;
+        }
+
+        > .inner {
+            .title {
+                > .inner {
+                    line-height: @CmSize-Medium;
+                    text-align: left;
+                }
+
+                .icon {
+                    .cm__size__medium;
+                    display: inline-block;
+                    margin: 0 @CmIndent-XXXSmall 0 0;
+                    vertical-align: top;
+                    background-size: contain;
+                }
+            }
+        }
+    }
+}
+
 /* ******* PARTS: GRID: MIXINS ******* */
 
-.pt__grid__size (@count: 1) {
+.pt__grid__col (@count: 1) {
     @size: 100% / @count;
 
     > ul > li {
         width: @size;
+    }
+}
+
+.pt__grid__size (@count: 1) {
+    @size: round(1280px / @count);
+
+    > ul {
+        grid-template-columns: ~'repeat(auto-fill, minmax(@{size}, 1fr))';
     }
 }
 
@@ -10598,6 +10664,12 @@ ul.pt__field__hint {
             }
         }
 
+        &:active {
+            td {
+                background-color: @PtGridlist-Cell-ActiveBackground;
+            }
+        }
+
         &.success,
         &.valid {
             td {
@@ -10671,6 +10743,12 @@ ul.pt__field__hint {
         &:hover {
             td {
                 background-color: @PtGridlist-Cell-HasBackground-Hover;
+            }
+        }
+
+        &:active {
+            td {
+                background-color: @PtGridlist-Cell-HasBackground-Active;
             }
         }
     }
@@ -13261,7 +13339,7 @@ ul.pt__field__hint {
     }
 
     .title {
-        font-weight: @CmFont-Base-BoldWeight;
+        font-weight: @CmFont-Base-MediumWeight;
     }
 }
 
@@ -18540,7 +18618,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.23.4 (2019-02-13 21:32) ************ */
+/*! ************ QuickSilk-Application v3.24.0 (2019-02-20 19:41) ************ */
 .svg__app__logo { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E"); }
 .svg__app__menu-dropdown { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22menu-dropdown.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%227%22%20viewBox%3D%220%200%2012%207%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M12%2C0L6%2C4.787%2C0%2C0V2.212L6%2C7l6-4.79V0Z%22%2F%3E%3C%2Fsvg%3E"); }
 
@@ -18663,7 +18741,7 @@ ul.pt__field__hint {
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.23.4';
+@AppVersion: '3.24.0';
 
 // /* ******* PATH ******* */
 
@@ -22155,23 +22233,6 @@ html {
                 }
             }
 
-            .pt__image {
-                border: @CmBorder-Box;
-                border-radius: @CmBorder-Radius;
-                .mx__transition(all, @CmUI-Transition-Duration);
-
-                &:hover,
-                &.hover {
-                    border: @CmBorder-BoxHover;
-                    .mx__transition(all, @CmUI-Transition-DurationReverse);
-                }
-
-                &:active,
-                &.active {
-                    border: @CmBorder-BoxActive;
-                }
-            }
-
             .cm__empty {
                 .display-flex;
                 .cm__flex--center;
@@ -24171,6 +24232,15 @@ html {
 .app-mod__divider {
     hr {
         margin: 0;
+    }
+}
+.mod__drive {
+    .pt__toolbar {
+        .pt__breadcrumbs {
+            @padding: max(round((@CmForm-FieldHeight - @CmFont-Base-LineHeight) / 2), 0px);
+            padding-top: @padding;
+            padding-bottom: @padding;
+        }
     }
 }
 /* ******* MODULES: EVENTS WIDGET ******* */

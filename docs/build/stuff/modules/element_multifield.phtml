@@ -10,7 +10,7 @@ global $config;
         <dd>
             <div class="mod__multifiled" data-node="content:{}:container">
                 <div class="mod__multifiled__template" data-node="templateContainer">
-                    <div class="inner" data-node="templateInner" data-element="App.Zone" data-config='{"zone" : 0, "type" : "<?= $config['type'] ?>", "parentPositionId" : "<?= $config['parentPositionId'] ?>", "positionId" : "<?= $config['positionId'] ?>"}'></div>
+                    <div class="inner" data-node="templateInner" data-element="App.Zone" data-config='{"zone" : 0, "type" : "<?= $config['type'] ?>", "parentPositionId" : "<?= $config['parentPositionId'] ?>", "positionId" : "<?= $config['positionId'] ?>", "disallow" : ["element_multifield"]}'></div>
                 </div>
                 <div class="mod__multifiled__view" data-node="viewContainer">
                     <div class="com__multifield" data-element="Com.MultiField" data-node="ComMultiField:{}:container" data-config='{"name" : "element_multifield", "theme" : "theme-cards", "sortable" : false, "max" : 3}'>
