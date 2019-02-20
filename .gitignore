@@ -2,7 +2,7 @@
 .idea
 .git
 package-lock.json
-/libs
-/temp
+libs
+temp
 
 node_modules
