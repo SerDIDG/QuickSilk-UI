@@ -9,7 +9,8 @@ $config = array(
 	'parentPositionId' => $_POST['parentPositionId'],
 	'type' => $_POST['type'],
 	'keyword' => $_POST['keyword'],
-	'locked' => false
+	'locked' => false,
+	'sticky' => $_POST['keyword'] == 'sticky' ? true : false
 );
 if(!empty($_POST['instanceId']) && $_POST['instanceId'] != 'false'){
 	$config['instanceId'] = $_POST['instanceId'];
@@ -56,11 +57,6 @@ switch($_POST['keyword']){
                         </div>
                     </div>';
 		break;
-	case 'workingarea':
-		$module =   '<div href="http://google.com" target="_blank" class="app__module app-mod__area" data-element="Module.WorkingArea" data-node="ModuleWorkingArea:{}:container">
-            			<div class="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
-                    </div>';
-		break;
 	case 'spoiler':
 		$module =   '<div class="app__module module__spoiler">
 						<dl class="com__togglebox has-title-bg is-base is-show" data-element="Com.ToggleBox" data-node="ComToggleBox:{}:container">
@@ -75,109 +71,6 @@ switch($_POST['keyword']){
 							</dd>
 						</dl>
                     </div>';
-		break;
-	case 'imagegallery':
-		$module = '<div class="app__module app-mod__default">
-						<div class="pt__grid col-3 is-adaptive indent-4px" data-node="pages" data-element="image-gallery-popup" data-config="{&quot;name&quot; : &quot;122&quot;}">
-							<ul class="com__pagination__page is-visible">
-								<li>
-							        <div class="pt__image is-hover ">
-							            <a class="inner" title="Image 1" data-node="items:[]:link" href="/web/00037/files/photos/gallery-small1.jpg">
-							                <img src="../../img/examples/gallery/1-th.jpg" class="descr" alt="Image 1">
-							            </a>
-							        </div>
-							    </li>
-							    <li>
-							        <div class="pt__image is-hover ">
-							            <a class="inner" title="Image 2" data-node="items:[]:link" href="/web/00037/files/photos/gallery-small2.jpg">
-							                <img src="../../img/examples/gallery/2-th.jpg" class="descr" alt="Image 2">
-							            </a>
-							        </div>
-							    </li>
-							    <li>
-							        <div class="pt__image is-hover ">
-							            <a class="inner" title="Image 3" data-node="items:[]:link" href="/web/00037/files/photos/gallery-small3.jpg">
-							                <img src="../../img/examples/gallery/3-th.jpg" class="descr" alt="Image 3">
-							            </a>
-							        </div>
-							    </li>
-							    <li>
-							        <div class="pt__image is-hover ">
-							            <a class="inner" title="Image 4" data-node="items:[]:link" href="/web/00037/files/photos/gallery-small4.jpg">
-							                <img src="../../img/examples/gallery/4-th.jpg" class="descr" alt="Image 4">
-							            </a>
-							        </div>
-							    </li>
-							    <li>
-							        <div class="pt__image is-hover ">
-							            <a class="inner" title="Image 5" data-node="items:[]:link" href="/web/00037/files/photos/gallery-small5.jpg">
-							                <img src="../../img/examples/gallery/5-th.jpg" class="descr" alt="Image 5">
-							            </a>
-							         </div>
-							    </li>
-							    <li>
-							        <div class="pt__image is-hover ">
-							            <a class="inner" title="Image 6" data-node="items:[]:link" href="/web/00037/files/photos/gallery-small6.jpg">
-							                <img src="../../img/examples/gallery/6-th.jpg" class="descr" alt="Image 6">
-							            </a>
-							        </div>
-							    </li>
-							</ul>
-						</div>
-                    </div>';
-		break;
-	case 'rollover-tabs':
-		$module =  '<div class="app__module app-mod__rollover-tabs pull-left expand-bottom theme-default" data-element="App.ModuleRolloverTabs" data-node="AppModuleRolloverTabs:{}:container" data-config=\'{"event" : "hover", "expand" : "bottom", "attachment" : "screen", "width" : "800px"}\'>
-					 	<div class="inner" data-node="inner">
-							<div class="tabs__head" data-node="head">
-								<div class="inner" data-node="head-inner">
-									<ul data-node="head-list">
-										<li data-node="labels:[]:container" data-config=\'{"id" : "sample", "title" : "Sample"}\'>
-											<a data-node="link">Sample</a>
-										</li>
-										<li data-node="labels:[]:container" data-config=\'{"id" : "test", "title" : "Test"}\'>
-											<a data-node="link">Test</a>
-										</li>
-										<li data-node="labels:[]:container" data-config=\'{"id" : "case", "title" : "Case"}\'>
-											<a data-node="link">Case</a>
-										</li>
-									</ul>
-								</div>
-							</div>
-							<div class="tabs__menu" data-node="menu">
-								<div class="inner pt__menu menu" data-node="menu-inner">
-									<div class="icon default linked"></div>
-									<div class="label" data-node="menu-label"></div>
-									<ul class="pt__menu-dropdown" data-node="menu-list">
-										<li data-node="options:[]:container" data-config=\'{"id" : "sample"}\'>
-											<a data-node="link">Sample</a>
-										</li>
-										<li data-node="options:[]:container" data-config=\'{"id" : "test"}\'>
-											<a data-node="link">Test</a>
-										</li>
-										<li data-node="options:[]:container" data-config=\'{"id" : "case"}\'>
-											<a data-node="link">Case</a>
-										</li>
-									</ul>
-								</div>
-							</div>
-							<div class="tabs__content" data-node="content">
-								<div class="inner" data-node="content-inner">
-									<ul data-node="content-list">
-										<li data-node="tabs:[]:container" data-config=\'{"id" : "sample"}\'>
-											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 0, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
-										</li>
-										<li data-node="tabs:[]:container" data-config=\'{"id" : "test"}\'>
-											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 1, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
-										</li>
-										<li data-node="tabs:[]:container" data-config=\'{"id" : "case"}\'>
-											<div class="inner" data-node="inner" data-element="App.Zone" data-config=\'{"zone" : 2, "parentPositionId" : "'.$config['parentPositionId'].'", "positionId" : "'.$config['positionId'].'"}\'></div>
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>';
 		break;
 	default:
 		$module = get_include_contents('modules/' . $_POST['keyword'] . '.phtml', $config);
@@ -210,6 +103,9 @@ $response = json_encode(array(
 								</li>
 								<li>
 									<a data-node="duplicate">Duplicate</a>
+								</li>
+								<li>
+									<a data-node="copy">Copy to page</a>
 								</li>
 							</ul>
 						</div>

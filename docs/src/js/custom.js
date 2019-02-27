@@ -42,7 +42,8 @@ cm.setParams('App.ShutterstockManager', {
     },
     'paginationParams' : {
         'ajax' : {
-            'url' : '//quicksilk.magpie/shutterstock-api/images/search/%page%'
+            'url' : '//quicksilk.magpie/shutterstock-api/images/search/%page%',
+            'urlPurchased' : '//quicksilk.magpie/shutterstock-api/images/src'
         }
     }
 });
