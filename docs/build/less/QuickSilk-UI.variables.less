@@ -39,7 +39,8 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.36.13';
+@CmVersion: '3.36.37';
+@CmProtocol: '';
 
 // /* ******* PATH ******* */
 
@@ -408,6 +409,7 @@
 @CmFont-Base-Hint-Color: @CmColor-Font-Hint;
 
 @CmFont-Placeholder-Size: inherit;
+@CmFont-Placeholder-SizeSmall: @CmFont-Base-Hint-Size;
 @CmFont-Placeholder-Style: inherit;
 @CmFont-Placeholder-Color: @CmColor-Font-Placeholder;
 
@@ -478,10 +480,14 @@
 
 // /* ******* SCROLLBAR ******* */
 
-@CmScrollBar-Size: @CmSize-XSmall;
-@CmScrollBar-TrackBackground: @CmColor-Secondary-LightHighlight;
-@CmScrollBar-TrackColor: @CmColor-Secondary-LightActiveHover;
-@CmScrollBar-TrackColorHover: @CmColor-Secondary-MiddleDefault;
+@CmScrollBar-Size: @CmSize-XXSmall;
+@CmScrollBar-Radius: @CmBorder-Radius;
+@CmScrollBar-TrackBackground: fade(@CmColor-Secondary-LightHighlight, 50%);
+@CmScrollBar-ThumbColor: @CmColor-Secondary-LightActiveHover;
+@CmScrollBar-ThumbColorHover: @CmColor-Secondary-MiddleDefault;
+
+@CmScrollBar-Light-ThumbColor: @CmColor-Primary-LightHighlight;
+@CmScrollBar-Light-ThumbColorHover: @CmColor-Primary-LightHover;
 
 // /* ******* FORM ******* */
 
@@ -546,8 +552,10 @@
 // /* ******* IMAGE ******* */
 
 @PtImage-Background: @CmColor-Secondary-LightHighlight;
-@PtImage-TitlePaddingTop: @CmIndent-XXXSmall;
 @PtImage-Color: @CmFont-UI-ColorOpposite;
+@PtImage-Padding: @CmIndent-XXSmall;
+@PtImage-TitlePaddingTop: @CmIndent-XXXSmall;
+@PtImage-ButtonsIndent: @PtImage-Padding;
 
 // /* ******* RANGE ******* */
 
@@ -869,6 +877,7 @@
 @ComDialog-Indent: @CmIndent-Medium;
 @ComDialog-Radius: @CmBorder-Radius;
 @ComDialog-TitleIndent: @CmIndent-XSmall;
+@ComDialog-IconSize: @CmSize-Medium;
 @ComDialog-Overlay: @CmUI-Overlay-Dark;
 
 @ComDialog-Default-Background: @CmColor-Background;
@@ -880,6 +889,11 @@
 @ComDialog-Light-Background: @CmColor-Background;
 @ComDialog-Light-TitleColor: @CmFont-UI-ColorOpposite;
 @ComDialog-Light-TitleBackground: @CmColor-Primary-DarkDefault;
+
+@ComDialog-Compact-Indent: @CmIndent-XSmall;
+@ComDialog-Compact-TitleHeight: @CmForm-FieldHeight;
+@ComDialog-Compact-TitleIndent: @ComDialog-Compact-Indent;
+@ComDialog-Compact-IconSize: @CmForm-FieldHeight;
 
 @ComDialog-Box-Indent: @CmIndent-Medium;
 
@@ -895,6 +909,7 @@
 @ComTabset-Duration: @CmUI-Transition-Duration;
 @ComTabset-Column-Width: 256px;
 @ComTabset-Content-Background: @CmColor-Background;
+@ComTabset-Content-Padding: @CmIndent-Medium;
 @ComTabset-Tabs-Height: @CmForm-FieldHeight;
 @ComTabset-Tabs-Indent: @CmIndent-XXXSmall;
 @ComTabset-Tabs-IndentInner: @CmIndent-XSmall;
@@ -1030,7 +1045,8 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.36.13';
+@CmVersion: '3.36.37';
+@CmProtocol: '';
 
 // /* ******* PATH ******* */
 
@@ -1399,6 +1415,7 @@
 @CmFont-Base-Hint-Color: @CmColor-Font-Hint;
 
 @CmFont-Placeholder-Size: inherit;
+@CmFont-Placeholder-SizeSmall: @CmFont-Base-Hint-Size;
 @CmFont-Placeholder-Style: inherit;
 @CmFont-Placeholder-Color: @CmColor-Font-Placeholder;
 
@@ -1469,10 +1486,14 @@
 
 // /* ******* SCROLLBAR ******* */
 
-@CmScrollBar-Size: @CmSize-XSmall;
-@CmScrollBar-TrackBackground: @CmColor-Secondary-LightHighlight;
-@CmScrollBar-TrackColor: @CmColor-Secondary-LightActiveHover;
-@CmScrollBar-TrackColorHover: @CmColor-Secondary-MiddleDefault;
+@CmScrollBar-Size: @CmSize-XXSmall;
+@CmScrollBar-Radius: @CmBorder-Radius;
+@CmScrollBar-TrackBackground: fade(@CmColor-Secondary-LightHighlight, 50%);
+@CmScrollBar-ThumbColor: @CmColor-Secondary-LightActiveHover;
+@CmScrollBar-ThumbColorHover: @CmColor-Secondary-MiddleDefault;
+
+@CmScrollBar-Light-ThumbColor: @CmColor-Primary-LightHighlight;
+@CmScrollBar-Light-ThumbColorHover: @CmColor-Primary-LightHover;
 
 // /* ******* FORM ******* */
 
@@ -1537,8 +1558,10 @@
 // /* ******* IMAGE ******* */
 
 @PtImage-Background: @CmColor-Secondary-LightHighlight;
-@PtImage-TitlePaddingTop: @CmIndent-XXXSmall;
 @PtImage-Color: @CmFont-UI-ColorOpposite;
+@PtImage-Padding: @CmIndent-XXSmall;
+@PtImage-TitlePaddingTop: @CmIndent-XXXSmall;
+@PtImage-ButtonsIndent: @PtImage-Padding;
 
 // /* ******* RANGE ******* */
 
@@ -1860,6 +1883,7 @@
 @ComDialog-Indent: @CmIndent-Medium;
 @ComDialog-Radius: @CmBorder-Radius;
 @ComDialog-TitleIndent: @CmIndent-XSmall;
+@ComDialog-IconSize: @CmSize-Medium;
 @ComDialog-Overlay: @CmUI-Overlay-Dark;
 
 @ComDialog-Default-Background: @CmColor-Background;
@@ -1871,6 +1895,11 @@
 @ComDialog-Light-Background: @CmColor-Background;
 @ComDialog-Light-TitleColor: @CmFont-UI-ColorOpposite;
 @ComDialog-Light-TitleBackground: @CmColor-Primary-DarkDefault;
+
+@ComDialog-Compact-Indent: @CmIndent-XSmall;
+@ComDialog-Compact-TitleHeight: @CmForm-FieldHeight;
+@ComDialog-Compact-TitleIndent: @ComDialog-Compact-Indent;
+@ComDialog-Compact-IconSize: @CmForm-FieldHeight;
 
 @ComDialog-Box-Indent: @CmIndent-Medium;
 
@@ -1886,6 +1915,7 @@
 @ComTabset-Duration: @CmUI-Transition-Duration;
 @ComTabset-Column-Width: 256px;
 @ComTabset-Content-Background: @CmColor-Background;
+@ComTabset-Content-Padding: @CmIndent-Medium;
 @ComTabset-Tabs-Height: @CmForm-FieldHeight;
 @ComTabset-Tabs-Indent: @CmIndent-XXXSmall;
 @ComTabset-Tabs-IndentInner: @CmIndent-XSmall;
@@ -2100,7 +2130,7 @@
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.25.0';
+@AppVersion: '3.27.0';
 
 // /* ******* PATH ******* */
 
@@ -2275,12 +2305,8 @@
 @AppSidebar-WidthCollapsed: @AppSidebar-Menu-Width;
 @AppSidebar-Duration: @CmUI-Transition-DurationLong;
 @AppSidebar-Overlay: @CmUI-Overlay;
-
-@AppSidebar-Theme: 'Dark';
-@AppSidebar-ThemeDark-Color: @CmColor-Font-Opposite;
-@AppSidebar-ThemeDark-Background: @CmColor-Primary-DarkDefault;
-@AppSidebar-ThemeLight-Color: @CmColor-Font;
-@AppSidebar-ThemeLight-Background: #ffffff;
+@AppSidebar-Color: @CmColor-Font-Opposite;
+@AppSidebar-Background: @CmColor-Primary-DarkDefault;
 
 // /* ******* NOTIFICATION ******* */
 
@@ -2310,32 +2336,21 @@
 
 @AppBlock-Category-Background: transparent;
 
-@AppBlock-Dummy-Theme: @AppSidebar-Theme;
 @AppBlock-Dummy-Width: 94px;
 @AppBlock-Dummy-Padding: 2px;
 @AppBlock-Dummy-BorderRadius: @CmBorder-Radius;
 @AppBlock-Dummy-IconBorderRadius: 0px;
 @AppBlock-Dummy-IconSize: 90px;
 
-@AppBlock-Dummy-ThemeDark-ColorNormal: @CmColor-Font-Opposite;
-@AppBlock-Dummy-ThemeDark-ColorHover: @CmColor-Font-Opposite;
-@AppBlock-Dummy-ThemeDark-ColorActive: @CmColor-Font;
-@AppBlock-Dummy-ThemeDark-BackgroundNormal: trannsparent;
-@AppBlock-Dummy-ThemeDark-BackgroundHover: trannsparent;
-@AppBlock-Dummy-ThemeDark-BackgroundActive: @CmColor-Background;
-@AppBlock-Dummy-ThemeDark-IconBackgroundNormal: rgba(255, 255, 255, 0.2);
-@AppBlock-Dummy-ThemeDark-IconBackgroundHover: rgba(255, 255, 255, 0.5);
-@AppBlock-Dummy-ThemeDark-IconBackgroundActive: @CmColor-Primary-DarkDefault;
-
-@AppBlock-Dummy-ThemeLight-ColorNormal: @CmColor-Font;
-@AppBlock-Dummy-ThemeLight-ColorHover: @CmColor-Font;
-@AppBlock-Dummy-ThemeLight-ColorActive: @CmColor-Font;
-@AppBlock-Dummy-ThemeLight-BackgroundNormal: trannsparent;
-@AppBlock-Dummy-ThemeLight-BackgroundHover: trannsparent;
-@AppBlock-Dummy-ThemeLight-BackgroundActive: @CmColor-Background;
-@AppBlock-Dummy-ThemeLight-IconBackgroundNormal: @CmColor-Secondary-LightHover;
-@AppBlock-Dummy-ThemeLight-IconBackgroundHover: @CmColor-Primary-LightActive;
-@AppBlock-Dummy-ThemeLight-IconBackgroundActive: @CmColor-Primary-LightActive;
+@AppBlock-Dummy-ColorNormal: @CmColor-Font-Opposite;
+@AppBlock-Dummy-ColorHover: @CmColor-Font-Opposite;
+@AppBlock-Dummy-ColorActive: @CmColor-Font;
+@AppBlock-Dummy-BackgroundNormal: trannsparent;
+@AppBlock-Dummy-BackgroundHover: trannsparent;
+@AppBlock-Dummy-BackgroundActive: @CmColor-Background;
+@AppBlock-Dummy-IconBackgroundNormal: transparent;
+@AppBlock-Dummy-IconBackgroundHover: rgba(255, 255, 255, 0.5);
+@AppBlock-Dummy-IconBackgroundActive: @CmColor-Primary-DarkDefault;
 
 // /* ******* DASHBOARD ******* */
 
