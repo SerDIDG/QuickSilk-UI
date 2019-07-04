@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.9.0 ************ */
-/*! ************ MagpieUI v3.36.38 (2019-07-04 19:38) ************ */
+/*! ************ MagpieUI v3.36.38 (2019-07-04 21:57) ************ */
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -32600,7 +32600,7 @@ cm.getConstructor('Com.TwoSideMultiSelect', function(classConstructor, className
         });
     };
 });
-/*! ************ QuickSilk-Application v3.27.2 (2019-07-04 19:38) ************ */
+/*! ************ QuickSilk-Application v3.27.2 (2019-07-04 21:58) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
