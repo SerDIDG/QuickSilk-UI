@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.9.0 ************ */
-/*! ************ MagpieUI v3.36.38 (2019-07-04 21:57) ************ */
+/*! ************ MagpieUI v3.36.38 (2019-07-05 20:45) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.6.0
@@ -21596,7 +21596,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.27.2 (2019-07-04 21:58) ************ */
+/*! ************ QuickSilk-Application v3.27.3 (2019-07-05 20:45) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -21605,8 +21605,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.27.2');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.27.2') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.27.2') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.27.2') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.27.2#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.27.3');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.27.3') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.27.3') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.27.3') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.27.3#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -31123,20 +31123,20 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   }
 }
 /* ******* PAGES: GROUP PROFILE ******* */
-.page__guestbook .lt__post > .l {
+.module__guestbook-posts .lt__post > .l {
   order: 2;
 }
-.page__guestbook .lt__post .post-info {
+.module__guestbook-posts .lt__post .post-info {
   font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
-.page__guestbook .lt__post .post-columns .post-left {
+.module__guestbook-posts .lt__post .post-columns .post-left {
   max-width: 228px;
 }
-.page__guestbook .lt__post.has-image > .l {
+.module__guestbook-posts .lt__post.has-image > .l {
   max-width: 228px;
 }
-.page__guestbook-events .lt__post .post-info {
+.module__guestbook-events .lt__post .post-info {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -31144,62 +31144,62 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
 }
-.page__guestbook-events .lt__post .post-info dt,
-.page__guestbook-events .lt__post .post-info dd {
+.module__guestbook-events .lt__post .post-info dt,
+.module__guestbook-events .lt__post .post-info dd {
   padding: 0;
   margin: 0;
   overflow: hidden;
   clear: both;
 }
-.page__guestbook-events .lt__post .post-info dt {
+.module__guestbook-events .lt__post .post-info dt {
   margin: 0 0 8px;
   font-weight: 600;
 }
-.page__guestbook-events .lt__post .post-address {
+.module__guestbook-events .lt__post .post-address {
   -webkit-flex: 0 1 40%;
   -ms-flex: 0 1 40%;
   flex: 0 1 40%;
   margin: 0 16px 0 0;
 }
-.page__guestbook-events .lt__post .post-events {
+.module__guestbook-events .lt__post .post-events {
   -webkit-flex: auto;
   -ms-flex: auto;
   flex: auto;
 }
-.page__guestbook-events .lt__post .post-events dd:after {
+.module__guestbook-events .lt__post .post-events dd:after {
   height: 14px;
   display: block;
   overflow: hidden;
   border-bottom: 2px dotted #cccccc;
   content: '';
 }
-.page__guestbook-events .lt__post .post-events .date {
+.module__guestbook-events .lt__post .post-events .date {
   margin: 0 12px 0 0;
   float: left;
   color: #666666;
 }
-.page__guestbook-events .lt__post .post-events .time {
+.module__guestbook-events .lt__post .post-events .time {
   margin: 0 0 0 12px;
   float: right;
   color: #666666;
 }
-.page__guestbook-events .lt__post .post-columns .post-left {
+.module__guestbook-events .lt__post .post-columns .post-left {
   max-width: 228px;
 }
-.page__guestbook-events .lt__post.has-image > .l {
+.module__guestbook-events .lt__post.has-image > .l {
   max-width: 228px;
 }
 /* ******* ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
-  html.is-adaptive .page__guestbook-events .lt__post .post-info {
+  html.is-adaptive .module__guestbook-events .lt__post .post-info {
     display: block;
   }
-  html.is-adaptive .page__guestbook-events .lt__post .post-address,
-  html.is-adaptive .page__guestbook-events .lt__post .post-events {
+  html.is-adaptive .module__guestbook-events .lt__post .post-address,
+  html.is-adaptive .module__guestbook-events .lt__post .post-events {
     margin: 0 0 12px;
   }
-  html.is-adaptive .page__guestbook-events .lt__post .post-address:last-child,
-  html.is-adaptive .page__guestbook-events .lt__post .post-events:last-child {
+  html.is-adaptive .module__guestbook-events .lt__post .post-address:last-child,
+  html.is-adaptive .module__guestbook-events .lt__post .post-events:last-child {
     margin-bottom: 0;
   }
 }
