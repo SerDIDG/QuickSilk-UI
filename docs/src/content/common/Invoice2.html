@@ -1,0 +1,128 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-docs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Elements: Invoice</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body style="max-width:700px;">
+
+<div class="app-pt__invoice">
+    <div class="pt__gridlist">
+        <table>
+            <tbody class="app-pt__invoice__row-entry">
+                <tr>
+                    <td class="app-pt__invoice__cell-product">
+                        <h4>Payment Method</h4>
+                    </td>
+                    <td class="app-pt__invoice__cell-cost">Cheque</td>
+                </tr>
+            </tbody>
+            <tbody class="app-pt__invoice__row-space">
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+            </tbody>
+            <tbody class="app-pt__invoice__row-entry">
+                <tr>
+                    <td class="app-pt__invoice__cell-product">Membership Type - Student</td>
+                    <td class="app-pt__invoice__cell-cost">$ 25.00</td>
+                </tr>
+                <tr>
+                    <td class="app-pt__invoice__cell-product">Discount - Student Discount - 100%</td>
+                    <td class="app-pt__invoice__cell-cost">$ 25.00</td>
+                </tr>
+                <tr>
+                    <td class="app-pt__invoice__cell-product">Discount - Student Discount - 100%</td>
+                    <td class="app-pt__invoice__cell-cost">$ 25.00</td>
+                </tr>
+            </tbody>
+            <tbody class="app-pt__invoice__row-sep">
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+            </tbody>
+            <tbody class="app-pt__invoice__row-total">
+                <tr>
+                    <td class="app-pt__invoice__cell-product">Subtotal:</td>
+                    <td class="app-pt__invoice__cell-cost">$ 100.00</td>
+                </tr>
+                <tr>
+                    <td class="app-pt__invoice__cell-product">Manitoba - 25%</td>
+                    <td class="app-pt__invoice__cell-cost">$ 25.00</td>
+                </tr>
+                <tr>
+                    <td class="app-pt__invoice__cell-product">Manitoba - 25%</td>
+                    <td class="app-pt__invoice__cell-cost">$ 25.00</td>
+                </tr>
+                <tr>
+                    <td class="app-pt__invoice__cell-product">
+                        <h4>Total:</h4>
+                    </td>
+                    <td class="app-pt__invoice__cell-cost">
+                        <h4>$ 150.00</h4>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pt__buttons pull-right">
+        <div class="inner">
+            <button class="button button-transparent">Back</button>
+            <button class="button button-primary" type="submit">Go</button>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<div class="app-pt__payment-card">
+    <h1 class="pt__box-title">Moneris Payment Gateway</h1>
+    <h4>Total Price: $ 275.00</h4>
+
+    <div class="form">
+        <dl class="form-box">
+            <dt>Card Holder</dt>
+            <dd>
+                <input type="text">
+            </dd>
+        </dl>
+        <dl class="form-box">
+            <dt>Card Number</dt>
+            <dd>
+                <input type="text">
+            </dd>
+        </dl>
+        <dl class="form-box">
+            <dt>Expiration Date</dt>
+            <dd>
+                <div class="pt__toolbar is-inline is-not-adaptive">
+                    <div class="inner">
+                        <ul class="group">
+                            <li class="is-field small">
+                                <input type="text" maxlength="2" placeholder="MM">
+                            </li>
+                            <li class="is-field small">
+                                <input type="text" maxlength="2" placeholder="YY">
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <hr>
+    <div class="pt__buttons pull-right">
+        <div class="inner">
+            <button class="button button-transparent">Cancel</button>
+            <button class="button button-primary" type="submit">Proceed</button>
+        </div>
+    </div>
+</div>
+
+</body>

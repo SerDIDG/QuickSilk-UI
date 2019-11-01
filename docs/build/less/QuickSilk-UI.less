@@ -1,5 +1,5 @@
 /*! ************ QuickSilk-UI v3.9.0 ************ */
-/*! ************ MagpieUI v3.36.38 (2019-07-10 19:40) ************ */
+/*! ************ MagpieUI v3.36.44 (2019-11-01 21:17) ************ */
 @charset "UTF-8";
 
 /*!
@@ -3927,7 +3927,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.36.38';
+@CmVersion: '3.36.44';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
@@ -6561,7 +6561,7 @@ a {
     }
 }
 
-h1, h2, h3, h4, h5, h6, p, dl, ul, ol, hr, address {
+h1, h2, h3, h4, h5, h6, p, dl, ul, ol, hr, address, pre {
     &:extend(.cm__tags all);
     &:extend(.cm__inherit all);
 }
@@ -6571,7 +6571,7 @@ h1, h2, h3, h4, h5, h6 {
     &:extend(.cm__inherit all);
 }
 
-p, dl, ul, ol, hr, address {
+p, dl, ul, ol, hr, address, pre {
     &:extend(.cm__tags--base all);
     &:extend(.cm__inherit all);
 }
@@ -10214,6 +10214,12 @@ ul.pt__field__hint {
 
         &.is-hidden {
             opacity: 0;
+        }
+    }
+
+    .label-placeholder {
+        &.is-hidden {
+            display: none;
         }
     }
 
@@ -14200,6 +14206,7 @@ ul.pt__field__hint {
         position: relative;
         cursor: pointer;
         float: none;
+        clear: both;
         .mx__user-select(none);
         .mx__transition(background, @CmUI-Transition-Duration);
 
@@ -15055,6 +15062,44 @@ ul.pt__field__hint {
     }
 }
 
+.com__columns--mobile {
+    > .inner {
+        margin: 0;
+
+        > .container {
+            display: block;
+
+            > .com__column {
+                width: auto !important;
+                height: auto;
+                display: block;
+                margin: @CmIndent-Medium 0 0 0;
+
+                &:first-child {
+                    margin: 0;
+                }
+
+                > .inner {
+                    margin: 0;
+                }
+            }
+        }
+    }
+}
+
+.com__columns--mobile-reverse {
+    > .inner {
+        > .container {
+            display: flex;
+            flex-direction: column-reverse;
+
+            > .com__column {
+                margin: 0 0 @CmIndent-Medium;
+            }
+        }
+    }
+}
+
 // /* *** MIXINS *** */
 
 .com__columns__indent (@indent: @ComColumns-Indent) {
@@ -15085,26 +15130,7 @@ ul.pt__field__hint {
 
             &.is-adaptive {
                 > .inner {
-                    margin: 0;
-
-                    > .container {
-                        display: block;
-
-                        > .com__column {
-                            width: auto !important;
-                            height: auto;
-                            display: block;
-                            margin: @CmIndent-Medium 0 0 0;
-
-                            &:first-child {
-                                margin: 0;
-                            }
-
-                            > .inner {
-                                margin: 0;
-                            }
-                        }
-                    }
+                    .com__columns--mobile;
                 }
             }
         }
@@ -18460,20 +18486,6 @@ ul.pt__field__hint {
         width: calc(~'100% - @{ComTabset-Column-Width}');
         .mx__flex(1 1 auto);
     }
-
-    .ie9 & {
-        width: 100%;
-        display: table;
-        table-layout: fixed;
-
-        > .com__tabset__head-tabs {
-            display: table-cell;
-        }
-
-        > .com__tabset__content {
-            display: table-cell;
-        }
-    }
 }
 
 .com__tabset--horizontal () {
@@ -18555,16 +18567,6 @@ ul.pt__field__hint {
 
             &:last-child {
                 margin-right: 0;
-            }
-        }
-    }
-
-    .ie9 & {
-        ul {
-            .clearfix;
-
-            li {
-                float: left;
             }
         }
     }
@@ -19048,7 +19050,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.27.6 (2019-07-10 19:40) ************ */
+/*! ************ QuickSilk-Application v3.27.8 (2019-11-01 21:17) ************ */
 .svg__app__logo { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E"); }
 .svg__app__menu-dropdown { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22menu-dropdown.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%227%22%20viewBox%3D%220%200%2012%207%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M12%2C0L6%2C4.787%2C0%2C0V2.212L6%2C7l6-4.79V0Z%22%2F%3E%3C%2Fsvg%3E"); }
 
@@ -19171,7 +19173,7 @@ ul.pt__field__hint {
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.27.6';
+@AppVersion: '3.27.8';
 
 // /* ******* PATH ******* */
 
@@ -20548,10 +20550,23 @@ html {
         }
     }
 
+    .app-pt__invoice__row-space {
+        tr {
+            td {
+                background: transparent;
+            }
+
+            &:hover {
+                td {
+                    background: transparent;
+                }
+            }
+        }
+    }
+
     .app-pt__invoice__row-total {
         .app-pt__invoice__cell-product {
             text-align: right;
-            font-weight: bold;
         }
     }
 

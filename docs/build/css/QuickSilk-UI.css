@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.9.0 ************ */
-/*! ************ MagpieUI v3.36.38 (2019-07-10 19:40) ************ */
+/*! ************ MagpieUI v3.36.44 (2019-11-01 21:17) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.6.0
@@ -3519,8 +3519,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.36.38');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.36.38') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.36.38') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.36.38') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.36.38#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.36.44');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.36.44') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.36.44') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.36.44') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.36.44#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -5145,7 +5145,8 @@ dl,
 ul,
 ol,
 hr,
-address {
+address,
+pre {
   margin-bottom: 24px;
   padding: 0;
   margin: 0 0 18px;
@@ -5188,7 +5189,10 @@ hr.is-last,
 hr:last-child,
 address.bottom,
 address.is-last,
-address:last-child {
+address:last-child,
+pre.bottom,
+pre.is-last,
+pre:last-child {
   margin-bottom: 0;
 }
 h1 {
@@ -8072,7 +8076,8 @@ button.is-hidden {
 .pt__box-editable ul,
 .pt__box-editable ol,
 .pt__box-editable hr,
-.pt__box-editable address {
+.pt__box-editable address,
+.pt__box-editable pre {
   margin-bottom: 0;
 }
 .pt__box-editable > .r {
@@ -9956,6 +9961,9 @@ ul.pt__field__hint li:before {
 .pt__file-line .label.is-hidden {
   opacity: 0;
 }
+.pt__file-line .label-placeholder.is-hidden {
+  display: none;
+}
 .pt__file-line.is-hidden {
   display: none;
 }
@@ -10992,7 +11000,8 @@ ul.pt__field__hint li:before {
 .pt__image > .inner > .text ul,
 .pt__image > .inner > .text ol,
 .pt__image > .inner > .text hr,
-.pt__image > .inner > .text address {
+.pt__image > .inner > .text address,
+.pt__image > .inner > .text pre {
   color: #ffffff;
 }
 .pt__image > .inner > iframe.descr {
@@ -14967,7 +14976,8 @@ ul.pt__field__hint li:before {
 .lt__comment .comment-text ul,
 .lt__comment .comment-text ol,
 .lt__comment .comment-text hr,
-.lt__comment .comment-text address {
+.lt__comment .comment-text address,
+.lt__comment .comment-text pre {
   margin: 0;
 }
 .lt__comment .comment-text img {
@@ -15067,7 +15077,8 @@ ul.pt__field__hint li:before {
 .lt__filegridlist__cell-title ul,
 .lt__filegridlist__cell-title ol,
 .lt__filegridlist__cell-title hr,
-.lt__filegridlist__cell-title address {
+.lt__filegridlist__cell-title address,
+.lt__filegridlist__cell-title pre {
   margin: 0;
 }
 .lt__filegridlist__cell-title .cm__tags--title,
@@ -15187,7 +15198,8 @@ ul.pt__field__hint li:before {
 .lt__forum__cell-title ul,
 .lt__forum__cell-title ol,
 .lt__forum__cell-title hr,
-.lt__forum__cell-title address {
+.lt__forum__cell-title address,
+.lt__forum__cell-title pre {
   margin: 0;
 }
 .lt__forum__cell-title .title {
@@ -15373,7 +15385,8 @@ ul.pt__field__hint li:before {
 .lt__post .post-abstract ul,
 .lt__post .post-abstract ol,
 .lt__post .post-abstract hr,
-.lt__post .post-abstract address {
+.lt__post .post-abstract address,
+.lt__post .post-abstract pre {
   margin: 0;
 }
 .lt__post .pt__toolbar,
@@ -15582,6 +15595,7 @@ ul.pt__field__hint li:before {
   position: relative;
   cursor: pointer;
   float: none;
+  clear: both;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -15632,6 +15646,7 @@ ul.pt__field__hint li:before {
 .com__togglebox > dt ol,
 .com__togglebox > dt hr,
 .com__togglebox > dt address,
+.com__togglebox > dt pre,
 .com__togglebox > dt h1,
 .com__togglebox > dt h2,
 .com__togglebox > dt h3,
@@ -15644,6 +15659,7 @@ ul.pt__field__hint li:before {
 .com__togglebox > dt ol,
 .com__togglebox > dt hr,
 .com__togglebox > dt address,
+.com__togglebox > dt pre,
 .com__togglebox > dt .form .hint,
 .com__togglebox > dt .pt__box-item .title,
 .com__togglebox > dt .pt__box-item .descr,
@@ -15965,7 +15981,8 @@ ul.pt__field__hint li:before {
 .com__tooltip > .inner > .title ul,
 .com__tooltip > .inner > .title ol,
 .com__tooltip > .inner > .title hr,
-.com__tooltip > .inner > .title address {
+.com__tooltip > .inner > .title address,
+.com__tooltip > .inner > .title pre {
   margin: 0;
 }
 .com__tooltip > .inner > .scroll.is-auto {
@@ -16489,27 +16506,52 @@ ul.pt__field__hint li:before {
   display: table;
   table-layout: fixed;
 }
+.com__columns--mobile > .inner {
+  margin: 0;
+}
+.com__columns--mobile > .inner > .container {
+  display: block;
+}
+.com__columns--mobile > .inner > .container > .com__column {
+  width: auto !important;
+  height: auto;
+  display: block;
+  margin: 24px 0 0 0;
+}
+.com__columns--mobile > .inner > .container > .com__column:first-child {
+  margin: 0;
+}
+.com__columns--mobile > .inner > .container > .com__column > .inner {
+  margin: 0;
+}
+.com__columns--mobile-reverse > .inner > .container {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.com__columns--mobile-reverse > .inner > .container > .com__column {
+  margin: 0 0 24px;
+}
 /* ******* COMPONENT: COLUMNS: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .com__columns.is-editable .com__columns__chassis {
     display: none;
   }
-  html.is-adaptive .com__columns.is-adaptive > .inner {
+  html.is-adaptive .com__columns.is-adaptive > .inner > .inner {
     margin: 0;
   }
-  html.is-adaptive .com__columns.is-adaptive > .inner > .container {
+  html.is-adaptive .com__columns.is-adaptive > .inner > .inner > .container {
     display: block;
   }
-  html.is-adaptive .com__columns.is-adaptive > .inner > .container > .com__column {
+  html.is-adaptive .com__columns.is-adaptive > .inner > .inner > .container > .com__column {
     width: auto !important;
     height: auto;
     display: block;
     margin: 24px 0 0 0;
   }
-  html.is-adaptive .com__columns.is-adaptive > .inner > .container > .com__column:first-child {
+  html.is-adaptive .com__columns.is-adaptive > .inner > .inner > .container > .com__column:first-child {
     margin: 0;
   }
-  html.is-adaptive .com__columns.is-adaptive > .inner > .container > .com__column > .inner {
+  html.is-adaptive .com__columns.is-adaptive > .inner > .inner > .container > .com__column > .inner {
     margin: 0;
   }
 }
@@ -16681,6 +16723,7 @@ ul.pt__field__hint li:before {
 .com__dialog ol,
 .com__dialog hr,
 .com__dialog address,
+.com__dialog pre,
 .com__dialog h1,
 .com__dialog h2,
 .com__dialog h3,
@@ -16693,6 +16736,7 @@ ul.pt__field__hint li:before {
 .com__dialog ol,
 .com__dialog hr,
 .com__dialog address,
+.com__dialog pre,
 .com__dialog .form .hint,
 .com__dialog .pt__box-item .title,
 .com__dialog .pt__box-item .descr,
@@ -17028,6 +17072,7 @@ ul.pt__field__hint li:before {
 .com__dialog__window.theme-black ol,
 .com__dialog__window.theme-black hr,
 .com__dialog__window.theme-black address,
+.com__dialog__window.theme-black pre,
 .com__dialog__window.theme-black h1,
 .com__dialog__window.theme-black h2,
 .com__dialog__window.theme-black h3,
@@ -17040,6 +17085,7 @@ ul.pt__field__hint li:before {
 .com__dialog__window.theme-black ol,
 .com__dialog__window.theme-black hr,
 .com__dialog__window.theme-black address,
+.com__dialog__window.theme-black pre,
 .com__dialog__window.theme-black .form .hint,
 .com__dialog__window.theme-black .pt__box-item .title,
 .com__dialog__window.theme-black .pt__box-item .descr,
@@ -17215,6 +17261,7 @@ ul.pt__field__hint li:before {
 .com__dialog-font--theme-black ol,
 .com__dialog-font--theme-black hr,
 .com__dialog-font--theme-black address,
+.com__dialog-font--theme-black pre,
 .com__dialog-font--theme-black h1,
 .com__dialog-font--theme-black h2,
 .com__dialog-font--theme-black h3,
@@ -17227,6 +17274,7 @@ ul.pt__field__hint li:before {
 .com__dialog-font--theme-black ol,
 .com__dialog-font--theme-black hr,
 .com__dialog-font--theme-black address,
+.com__dialog-font--theme-black pre,
 .com__dialog-font--theme-black .form .hint,
 .com__dialog-font--theme-black .pt__box-item .title,
 .com__dialog-font--theme-black .pt__box-item .descr,
@@ -20240,7 +20288,8 @@ html.ie9 .com__palette .b-range {
 .com__slider > .inner > .slides > ul > li > .text ul,
 .com__slider > .inner > .slides > ul > li > .text ol,
 .com__slider > .inner > .slides > ul > li > .text hr,
-.com__slider > .inner > .slides > ul > li > .text address {
+.com__slider > .inner > .slides > ul > li > .text address,
+.com__slider > .inner > .slides > ul > li > .text pre {
   color: #fff;
 }
 .com__slider > .inner > .slides > ul > li > .slide-area {
@@ -20995,18 +21044,6 @@ html.ie9 .com__palette .b-range {
 .com__tabset.is-tabs-top > .com__tabset__head-tabs ul li:last-child {
   margin-right: 0;
 }
-.ie9 .com__tabset.is-tabs-top > .com__tabset__head-tabs ul:after {
-  content: ".";
-  display: block;
-  clear: both;
-  visibility: hidden;
-  line-height: 0;
-  font-size: 0;
-  height: 0;
-}
-.ie9 .com__tabset.is-tabs-top > .com__tabset__head-tabs ul li {
-  float: left;
-}
 .com__tabset.is-tabs-top > .com__tabset__head-tabs ul li {
   border-radius: 3px 3px 0 0;
 }
@@ -21082,18 +21119,6 @@ html.ie9 .com__palette .b-range {
 .com__tabset.is-tabs-bottom > .com__tabset__head-tabs ul li:last-child {
   margin-right: 0;
 }
-.ie9 .com__tabset.is-tabs-bottom > .com__tabset__head-tabs ul:after {
-  content: ".";
-  display: block;
-  clear: both;
-  visibility: hidden;
-  line-height: 0;
-  font-size: 0;
-  height: 0;
-}
-.ie9 .com__tabset.is-tabs-bottom > .com__tabset__head-tabs ul li {
-  float: left;
-}
 .com__tabset.is-tabs-bottom > .com__tabset__head-tabs ul li {
   border-radius: 0 0 3px 3px;
 }
@@ -21123,17 +21148,6 @@ html.ie9 .com__palette .b-range {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
-}
-.ie9 .com__tabset.is-tabs-right {
-  width: 100%;
-  display: table;
-  table-layout: fixed;
-}
-.ie9 .com__tabset.is-tabs-right > .com__tabset__head-tabs {
-  display: table-cell;
-}
-.ie9 .com__tabset.is-tabs-right > .com__tabset__content {
-  display: table-cell;
 }
 .com__tabset.is-tabs-right > .com__tabset__head-tabs {
   margin-left: -1px;
@@ -21176,17 +21190,6 @@ html.ie9 .com__palette .b-range {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
-}
-.ie9 .com__tabset.is-tabs-left {
-  width: 100%;
-  display: table;
-  table-layout: fixed;
-}
-.ie9 .com__tabset.is-tabs-left > .com__tabset__head-tabs {
-  display: table-cell;
-}
-.ie9 .com__tabset.is-tabs-left > .com__tabset__content {
-  display: table-cell;
 }
 .com__tabset.is-tabs-left > .com__tabset__head-tabs {
   margin-right: -1px;
@@ -21596,7 +21599,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.27.6 (2019-07-10 19:40) ************ */
+/*! ************ QuickSilk-Application v3.27.8 (2019-11-01 21:17) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -21605,8 +21608,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.27.6');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.27.6') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.27.6') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.27.6') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.27.6#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.27.8');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.27.8') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.27.8') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.27.8') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.27.8#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -21695,7 +21698,8 @@ body:before {
 .cke_dialog ul,
 .cke_dialog ol,
 .cke_dialog hr,
-.cke_dialog address {
+.cke_dialog address,
+.cke_dialog pre {
   color: #474747;
 }
 .cke_dialog .input,
@@ -21746,7 +21750,8 @@ body:before {
 .cke_panel_listItem ul,
 .cke_panel_listItem ol,
 .cke_panel_listItem hr,
-.cke_panel_listItem address {
+.cke_panel_listItem address,
+.cke_panel_listItem pre {
   color: #474747;
 }
 .cke_panel_listItem a {
@@ -21860,6 +21865,7 @@ body:before {
 .com__dialog-font ol,
 .com__dialog-font hr,
 .com__dialog-font address,
+.com__dialog-font pre,
 .com__dialog-font h1,
 .com__dialog-font h2,
 .com__dialog-font h3,
@@ -21872,6 +21878,7 @@ body:before {
 .com__dialog-font ol,
 .com__dialog-font hr,
 .com__dialog-font address,
+.com__dialog-font pre,
 .com__dialog-font .form .hint,
 .com__dialog-font .pt__box-item .title,
 .com__dialog-font .pt__box-item .descr,
@@ -21917,6 +21924,7 @@ body:before {
 .app__helptour-font ol,
 .app__helptour-font hr,
 .app__helptour-font address,
+.app__helptour-font pre,
 .app__helptour-font h1,
 .app__helptour-font h2,
 .app__helptour-font h3,
@@ -21929,6 +21937,7 @@ body:before {
 .app__helptour-font ol,
 .app__helptour-font hr,
 .app__helptour-font address,
+.app__helptour-font pre,
 .app__helptour-font .form .hint,
 .app__helptour-font .pt__box-item .title,
 .app__helptour-font .pt__box-item .descr,
@@ -22412,7 +22421,8 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-pt__admin-description .pt__editable ul,
 .app-pt__admin-description .pt__editable ol,
 .app-pt__admin-description .pt__editable hr,
-.app-pt__admin-description .pt__editable address {
+.app-pt__admin-description .pt__editable address,
+.app-pt__admin-description .pt__editable pre {
   margin: 0;
 }
 /* ******* PARTS: BOX ******* */
@@ -22560,9 +22570,14 @@ html:not(.is-editing).is-editor .app__module__controls {
   padding: 0;
   border-bottom: 2px solid #cccccc;
 }
+.app-pt__invoice .app-pt__invoice__row-space tr td {
+  background: transparent;
+}
+.app-pt__invoice .app-pt__invoice__row-space tr:hover td {
+  background: transparent;
+}
 .app-pt__invoice .app-pt__invoice__row-total .app-pt__invoice__cell-product {
   text-align: right;
-  font-weight: bold;
 }
 .app-pt__invoice .app-pt__invoice__cell-cost {
   width: 128px;
@@ -22650,7 +22665,8 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-pt__plan .plan__title ul,
 .app-pt__plan .plan__title ol,
 .app-pt__plan .plan__title hr,
-.app-pt__plan .plan__title address {
+.app-pt__plan .plan__title address,
+.app-pt__plan .plan__title pre {
   margin: 0;
   text-align: center;
 }
@@ -23042,7 +23058,8 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-lt__plan .plan-abstract ul,
 .app-lt__plan .plan-abstract ol,
 .app-lt__plan .plan-abstract hr,
-.app-lt__plan .plan-abstract address {
+.app-lt__plan .plan-abstract address,
+.app-lt__plan .plan-abstract pre {
   text-align: center;
 }
 .app-lt__plan .plan-info ul {
@@ -24331,6 +24348,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__helptour__popup ol,
 .app__helptour__popup hr,
 .app__helptour__popup address,
+.app__helptour__popup pre,
 .app__helptour__popup h1,
 .app__helptour__popup h2,
 .app__helptour__popup h3,
@@ -24343,6 +24361,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__helptour__popup ol,
 .app__helptour__popup hr,
 .app__helptour__popup address,
+.app__helptour__popup pre,
 .app__helptour__popup .form .hint,
 .app__helptour__popup .pt__box-item .title,
 .app__helptour__popup .pt__box-item .descr,
@@ -24730,7 +24749,8 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__live-preview__content .device .device__blues ul,
 .app__live-preview__content .device .device__blues ol,
 .app__live-preview__content .device .device__blues hr,
-.app__live-preview__content .device .device__blues address {
+.app__live-preview__content .device .device__blues address,
+.app__live-preview__content .device .device__blues pre {
   font: 400 13px/18px Quicksand, sans-serif;
   color: #666666;
   color: #ffffff;
@@ -24986,6 +25006,11 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__notification.is-warning > .inner > .text address,
 .app__notification.is-danger > .inner > .text address,
 .app__notification.is-quicksilk > .inner > .text address,
+.app__notification.is-secondary > .inner > .text pre,
+.app__notification.is-success > .inner > .text pre,
+.app__notification.is-warning > .inner > .text pre,
+.app__notification.is-danger > .inner > .text pre,
+.app__notification.is-quicksilk > .inner > .text pre,
 .app__notification.is-secondary > .inner > .text .com__glossary .com__glossary__title,
 .app__notification.is-success > .inner > .text .com__glossary .com__glossary__title,
 .app__notification.is-warning > .inner > .text .com__glossary .com__glossary__title,
@@ -26044,6 +26069,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__sidebar .sidebar__content__text ol,
 .app__sidebar .sidebar__content__text hr,
 .app__sidebar .sidebar__content__text address,
+.app__sidebar .sidebar__content__text pre,
 .app__sidebar .sidebar__content__text h1,
 .app__sidebar .sidebar__content__text h2,
 .app__sidebar .sidebar__content__text h3,
@@ -26056,6 +26082,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app__sidebar .sidebar__content__text ol,
 .app__sidebar .sidebar__content__text hr,
 .app__sidebar .sidebar__content__text address,
+.app__sidebar .sidebar__content__text pre,
 .app__sidebar .sidebar__content__text .form .hint,
 .app__sidebar .sidebar__content__text .pt__box-item .title,
 .app__sidebar .sidebar__content__text .pt__box-item .descr,
@@ -27975,7 +28002,8 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-mod__infoblock > .inner > .title .app-mod__richeditor ul,
 .app-mod__infoblock > .inner > .title .app-mod__richeditor ol,
 .app-mod__infoblock > .inner > .title .app-mod__richeditor hr,
-.app-mod__infoblock > .inner > .title .app-mod__richeditor address {
+.app-mod__infoblock > .inner > .title .app-mod__richeditor address,
+.app-mod__infoblock > .inner > .title .app-mod__richeditor pre {
   margin: 0;
 }
 .app-mod__infoblock > .inner > .title .app__module {
@@ -30238,7 +30266,8 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 .app-mod__sign-links ul,
 .app-mod__sign-links ol,
 .app-mod__sign-links hr,
-.app-mod__sign-links address {
+.app-mod__sign-links address,
+.app-mod__sign-links pre {
   margin: 0;
 }
 /* ******* MODULES: SIGN UP ******* */
@@ -30254,7 +30283,8 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 .mod__signup__title ul,
 .mod__signup__title ol,
 .mod__signup__title hr,
-.mod__signup__title address {
+.mod__signup__title address,
+.mod__signup__title pre {
   text-align: center;
 }
 .mod__signup__block {
