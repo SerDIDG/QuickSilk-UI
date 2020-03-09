@@ -1,10 +1,11 @@
-<div class="app__module app-mod__element" data-element="Mod.ElementText" data-node="ModElementText:{}:container" data-config='{"required" : true, "name" : "text"}'>
+<div class="app__module app-mod__element" data-element="Mod.ElementText" data-node="ModElementText:{}:container" data-config='{"required" : true, "name" : "text", "pattern" : "^[0-9]*$", "validate" : true, "match" : true}'>
     <dl data-node="field">
         <dt><label for="element_text">Input Text:</label></dt>
         <dd>
             <input name="element_text" type="text" data-node="input">
-            <ul class="hint hidden" data-node="errors">
-                <li>Value is required and can't be empty</li>
+            <ul class="hint hidden" data-node="errors:{}:container">
+                <li data-node="items:[]:message" data-type="required">Value is required and can't be empty</li>
+                <li data-node="items:[]:message" data-type="^[0-9]*$">Digits only</li>
             </ul>
         </dd>
     </dl>

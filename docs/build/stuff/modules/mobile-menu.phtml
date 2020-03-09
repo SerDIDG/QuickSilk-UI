@@ -1,0 +1,26 @@
+<?php
+
+global $config;
+
+?>
+
+<div class="app__module module__mobile-menu is-hide" data-element="Module.MobileMenu" data-node="ModuleMobileMenu:{}:container" data-config='{"view" : "sidebar-right"}'>
+    <div class="buttons pull-right">
+        <div class="button button-secondary has-icon" title="Toggle global menu" role="button" data-node="toggle">
+            <div class="icon show">
+                <img src="../../img/MagpieUI/svg/menu.svg" alt="Show" aria-hidden="true">
+            </div>
+            <div class="icon hide">
+                <img src="../../img/MagpieUI/svg/close.svg" alt="Hide" aria-hidden="true">
+            </div>
+        </div>
+    </div>
+    <div class="module__mobile-menu__container" role="navigation" aria-label="Global menu" data-node="menu">
+        <div class="inner">
+            <div class="icon close" title="Close global menu" role="button" data-node="close">
+                <img src="../../img/MagpieUI/svg/close.svg" alt="Close" aria-hidden="true">
+            </div>
+            <div class="zone" data-element="App.Zone" data-config='{"zone" : 0, "parentPositionId" : "<?php echo $config['parentPositionId'] ?>", "positionId" : "<?php echo $config['positionId'] ?>", "disallow" : ["mobile-menu"]}'></div>
+        </div>
+    </div>
+</div>
