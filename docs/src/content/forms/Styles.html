@@ -28,60 +28,111 @@
                         <li data-node="tabs:[]:container" data-config='{"id" : "methods", "title" : "Visibility"}'></li>
 
                         <li data-node="tabs:[]:container" data-config='{"id" : "examples", "title" : "Styles"}'>
-                            <div class="form__block-styles">
-                                <div class="form__styles" data-element="App.FormStyles" data-node="AppFormStyles:{}:container">
-                                    <div class="pt__box--flat">
-                                        <dl class="pt__field is-box">
-                                            <dt>Background Color</dt>
-                                            <dd>
-                                                <input type="text" data-element="Com.ColorPicker" name="background-color" data-config='{"size" : "full", "showClearButton" : true}'>
-                                            </dd>
-                                        </dl>
-                                        <div class="pt__columns is-adaptive">
-                                            <div class="inner">
-                                                <div class="column column--auto">
-                                                    <dl class="pt__field is-box field-indent">
-                                                        <dt>Background Image</dt>
+                            <div class="form__styles" data-element="App.FormStyles" data-node="AppFormStyles:{}:container">
+                                <h1 class="pt__box-title--flat">Background</h1>
+                                <div class="pt__box--flat">
+                                    <div class="com__multifield theme-cards" data-element="Com.MultiField" data-node="ComMultiField:{}:container" data-config='{"mode" : "edit", "duration" : "cm._config.animDuration"}'>
+                                        <div class="com__multifield__content" data-node="content">
+                                            <div class="com__multifield__item" data-node="items:[]:container" data-config='{"id" : "video"}'>
+                                                <div class="icon drag linked" data-node="drag"></div>
+                                                <div class="field" data-node="field">
+                                                    <input type="hidden" name="background-video-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
+                                                    <input type="hidden" name="background-video-order" autocomplete="off" data-node="field-hidden-index">
+                                                    <dl class="pt__field is-box is-first field-indent">
+                                                        <dt>
+                                                            <label>Background Video</label>
+                                                            <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                                                                <span class="icon default linked" data-node="button"></span>
+                                                                <span class="com__help-bubble__content" data-node="content">Please provide main video file in <b>.webm</b> format. For better browser compatibility you need at least add one more file in <b>.mp4</b> format.</span>
+                                                            </span>
+                                                        </dt>
                                                         <dd>
-                                                            <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="background-image">
+                                                            <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="background-video-webm">
                                                         </dd>
                                                     </dl>
-                                                    <dl class="pt__field is-box field-indent">
-                                                        <dd>
-                                                            <div class="pt__check-line">
-                                                                <label>
-                                                                    <input type="checkbox" name="background-parallax">
-                                                                    <span class="label">Use parallax effect</span>
-                                                                </label>
-                                                            </div>
-                                                        </dd>
-                                                    </dl>
-                                                </div>
-                                                <div class="column column--none">
                                                     <div class="pt__columns field-outer-indent">
                                                         <div class="inner">
+                                                            <div class="column column--none">
+                                                                <dl class="pt__field is-box">
+                                                                    <dt>
+                                                                        <label>Scaling</label>
+                                                                        <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                                                                            <span class="icon default linked" data-node="button"></span>
+                                                                            <span class="com__help-bubble__content" data-node="content">
+                                                                                <p><b>Original</b> - image is not scaled but displays as is.</p>
+                                                                                <p><b>Contain</b> - scale the image to the largest size such that both its width and its height can fit inside the content area.</p>
+                                                                                <p><b>Cover</b> - scale the background image to be as large as possible so that the background area is completely covered by the background image. Some parts of the background image may not be in view within the background positioning area.</p>
+                                                                            </span>
+                                                                        </span>
+                                                                    </dt>
+                                                                    <dd>
+                                                                        <input type="text" data-element="Com.ScaleTools" data-config='{"fieldStyle" : "block"}' name="background-video-scaling">
+                                                                    </dd>
+                                                                </dl>
+                                                            </div>
                                                             <div class="column column--none">
                                                                 <dl class="pt__field is-box field-indent">
                                                                     <dt>
                                                                         <label>Position</label>
                                                                         <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
                                                                             <span class="icon default linked" data-node="button"></span>
-                                                                            <span class="com__help-bubble__content" data-node="content">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
+                                                                            <span class="com__help-bubble__content" data-node="content">For custom position - first value is for horizontal position, second value is for vertical position.</span>
                                                                         </span>
                                                                     </dt>
                                                                     <dd>
-                                                                        <input type="text" data-element="Com.PositionTools" name="background-position">
+                                                                        <input type="text" data-element="Com.PositionTools" name="background-video-position">
                                                                     </dd>
                                                                 </dl>
                                                             </div>
+                                                            <div class="column">
+                                                                <dl class="pt__field is-box field-indent">
+                                                                    <dd class="margin-none">
+                                                                        <div class="pt__check-line is-box">
+                                                                            <label>
+                                                                                <input type="checkbox" name="background-video-position-custom" data-element="Com.CheckTrigger" data-config='{"unchecked" : {"className" : "Com.PositionTools", "name" : "background-video-position"}, "checked" : "background-video-position-value"}'>
+                                                                                <span class="label">Manual position</span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </dd>
+                                                                    <dd>
+                                                                        <input type="text" name="background-video-position-value" data-node="background-video-position-value">
+                                                                    </dd>
+                                                                </dl>
+                                                            </div>
+                                                            <div class="column">
+                                                                <dl class="pt__field is-box field-indent">
+                                                                    <dt>Additional formats</dt>
+                                                                    <dd>
+                                                                        <input type="text" data-element="App.FileInput" data-config='{"size" : "full", "showFilename" : false, "dropzone" : false, "strings" : {"browse" : "Add .mp4", "remove" : "Remove .mp4"}}' name="background-video-mp4">
+                                                                    </dd>
+                                                                    <dd>
+                                                                        <input type="text" data-element="App.FileInput" data-config='{"size" : "full", "showFilename" : false, "dropzone" : false, "strings" : {"browse" : "Add .ogv", "remove" : "Remove .ogv"}}' name="background-video-ogg">
+                                                                    </dd>
+                                                                </dl>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="icon remove linked" data-node="remove" title="Remove"></div>
+                                            </div>
+
+                                            <div class="com__multifield__item" data-node="items:[]:container" data-config='{"id" : "image"}'>
+                                                <div class="icon drag linked" data-node="drag"></div>
+                                                <div class="field" data-node="field">
+                                                    <input type="hidden" name="background-image-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
+                                                    <input type="hidden" name="background-image-order" autocomplete="off" data-node="field-hidden-index">
+                                                    <dl class="pt__field is-box is-first field-indent">
+                                                        <dt>Background Image</dt>
+                                                        <dd>
+                                                            <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="background-image">
+                                                        </dd>
+                                                    </dl>
+                                                    <div class="pt__columns field-outer-indent">
+                                                        <div class="inner">
                                                             <div class="column column--none">
                                                                 <dl class="pt__field is-box">
                                                                     <dt>
                                                                         <label>Repeat</label>
-                                                                        <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
-                                                                            <span class="icon default linked" data-node="button"></span>
-                                                                            <span class="com__help-bubble__content" data-node="content">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
-                                                                        </span>
                                                                     </dt>
                                                                     <dd>
                                                                         <input type="text" data-element="Com.RepeatTools" data-config='{"fieldStyle" : "block"}' name="background-repeat">
@@ -106,27 +157,90 @@
                                                                     </dd>
                                                                 </dl>
                                                             </div>
+                                                            <div class="column column--none">
+                                                                <dl class="pt__field is-box field-indent">
+                                                                    <dt>
+                                                                        <label>Position</label>
+                                                                        <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
+                                                                            <span class="icon default linked" data-node="button"></span>
+                                                                            <span class="com__help-bubble__content" data-node="content">For custom position - first value is for horizontal position, second value is for vertical position.</span>
+                                                                        </span>
+                                                                    </dt>
+                                                                    <dd>
+                                                                        <input type="text" data-element="Com.PositionTools" name="background-position">
+                                                                    </dd>
+                                                                </dl>
+                                                            </div>
+                                                            <div class="column column--auto">
+                                                                <dl class="pt__field is-box field-indent">
+                                                                    <dd class="margin-none">
+                                                                        <div class="pt__check-line is-box">
+                                                                            <label>
+                                                                                <input type="checkbox" name="background-position-custom" data-element="Com.CheckTrigger" data-config='{"unchecked" : {"className" : "Com.PositionTools", "name" : "background-position"}, "checked" : "background-position-value"}'>
+                                                                                <span class="label">Manual position</span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </dd>
+                                                                    <dd>
+                                                                        <input type="text" name="background-position-value" data-node="background-position-value">
+                                                                    </dd>
+                                                                </dl>
+                                                                <dl class="pt__field is-box field-indent">
+                                                                    <dd>
+                                                                        <div class="pt__check-line is-box">
+                                                                            <label>
+                                                                                <input type="checkbox" name="background-parallax">
+                                                                                <span class="label">Use parallax effect</span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </dd>
+                                                                </dl>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                </div>
+                                                <div class="icon remove linked" data-node="remove" title="Remove"></div>
+                                            </div>
 
-                                                    <dl class="pt__field is-box field-indent">
-                                                        <dd class="margin-none">
-                                                            <div class="pt__check-line has-fields">
-                                                                <input type="checkbox" name="background-position-custom" id="background-position-custom" data-element="Com.CheckTrigger" data-config='{"unchecked" : {"className" : "Com.PositionTools", "name" : "background-position"}, "checked" : "background-position-value"}'>
-                                                                <label class="label" for="background-position-custom">Manual</label>
-                                                                <div class="fields unveil">
-                                                                    <input type="text" name="background-position-value" data-node="background-position-value">
-                                                                </div>
-                                                            </div>
+                                            <div class="com__multifield__item" data-node="items:[]:container" data-config='{"id" : "color"}'>
+                                                <div class="icon drag linked" data-node="drag"></div>
+                                                <div class="field" data-node="field">
+                                                    <input type="hidden" name="background-color-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
+                                                    <input type="hidden" name="background-color-order" autocomplete="off" data-node="field-hidden-index">
+                                                    <dl class="pt__field is-box is-first">
+                                                        <dt>Background Color</dt>
+                                                        <dd>
+                                                            <input type="text" data-element="Com.ColorPicker" name="background-color" data-config='{"size" : "full"}'>
                                                         </dd>
                                                     </dl>
+                                                </div>
+                                                <div class="icon remove linked" data-node="remove" title="Remove"></div>
+                                            </div>
+                                        </div>
+                                        <div class="com__multifield__toolbar" data-node="toolbar:{}:container">
+                                            <div class="pt__buttons pull-center">
+                                                <div class="inner">
+                                                    <div class="button button-transparent has-icon has-icon-small" data-node="buttons:[]:container" data-config='{"id" : "color"}'>
+                                                        <div class="icon small add"></div>
+                                                        <div class="label">Add color</div>
+                                                    </div>
+                                                    <div class="button button-transparent has-icon has-icon-small" data-node="buttons:[]:container" data-config='{"id" : "image"}'>
+                                                        <div class="icon small add"></div>
+                                                        <div class="label">Add image</div>
+                                                    </div>
+                                                    <div class="button button-transparent has-icon has-icon-small" data-node="buttons:[]:container" data-config='{"id" : "video"}'>
+                                                        <div class="icon small add"></div>
+                                                        <div class="label">Add video</div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="pt__box--flat">
-                                        <div class="pt__columns is-adaptive is-space-between">
+                                <h1 class="pt__box-title--flat">Indent</h1>
+                                <div class="pt__box--flat">
+                                    <div class="pt__columns is-adaptive is-space-between">
                                         <div class="inner">
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent align-center">
@@ -156,10 +270,11 @@
                                             </div>
                                         </div>
                                     </div>
-                                    </div>
+                                </div>
 
-                                    <div class="pt__box--flat">
-                                        <div class="pt__columns is-adaptive">
+                                <h1 class="pt__box-title--flat">Other</h1>
+                                <div class="pt__box--flat">
+                                    <div class="pt__columns is-adaptive">
                                         <div class="inner">
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent">
@@ -181,27 +296,26 @@
                                             </div>
                                         </div>
                                     </div>
-                                    </div>
+                                </div>
 
-                                    <div class="pt__box--flat">
-                                        <div class="pt__columns is-adaptive">
-                                            <div class="inner">
-                                                <div class="column">
-                                                    <dl class="pt__field is-box field-indent">
-                                                        <dt>Custom CSS Class</dt>
-                                                        <dd>
-                                                            <input type="text" name="css-class">
-                                                        </dd>
-                                                    </dl>
-                                                </div>
-                                                <div class="column">
-                                                    <dl class="pt__field is-box field-indent">
-                                                        <dt>View Style</dt>
-                                                        <dd>
-                                                            <select data-element="Com.Select" name="style"></select>
-                                                        </dd>
-                                                    </dl>
-                                                </div>
+                                <div class="pt__box--flat">
+                                    <div class="pt__columns is-adaptive">
+                                        <div class="inner">
+                                            <div class="column">
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dt>Custom CSS Class</dt>
+                                                    <dd>
+                                                        <input type="text" name="css-class">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="column">
+                                                <dl class="pt__field is-box field-indent">
+                                                    <dt>View Style</dt>
+                                                    <dd>
+                                                        <select data-element="Com.Select" name="style"></select>
+                                                    </dd>
+                                                </dl>
                                             </div>
                                         </div>
                                     </div>

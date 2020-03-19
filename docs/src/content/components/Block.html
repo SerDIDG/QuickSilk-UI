@@ -1,41 +1,43 @@
 <div class="app__block-container app__block--123">
-    <div class="app__block"></div>
-    <style type="text/css" class="app__block__styles">
-        /* CSS goes here */
-    </style>
+    <div class="app__block" data-node="block:{}:container">
+        <div class="app__block__background app__block__background--123">
+            <div class="background__color"></div>
+            <div class="background__image"></div>
+            <video class="background__video" autoplay muted loop>
+                <source src="../../img/examples/sample.webm" type="video/webm">
+                <source src="../../img/examples/sample.mp4" type="video/mp4">
+                <source src="../../img/examples/sample.ogv" type="video/ogv">
+            </video>
+        </div>
+        <div class="inner" data-node="inner">
+            /* Block content */
+        </div>
+    </div>
 </div>
 
-
-<!-- Если будешь использовать less компилятор -->
-
-.app__block--123 {
-    // Block indent goes here
-    // margin: 0 0 24px; - for example
-
-    > .app__block {
-        // Block styles goes here (background, min-height, padding, etc)
-    }
-
-    // Mobile
-    @media only screen and (max-width : 768px) {
-        display: block / none;
-    }
-
-    // Print
-    @media print {
-        display: block / none;
-    }
-}
-
-<!-- Если будешь использовать обычный CSS -->
-
+<textarea data-element="Com.CodeHighlight">
 .app__block--123 {
     // Block indent goes here
     // margin: 0 0 24px; - for example
 }
 
 .app__block--123 > .app__block {
-    // Block styles goes here (background, min-height, padding, etc)
+    // Block styles goes here (min-height, padding, etc)
+}
+
+.app__block__background--123 .background__color {
+    // background-color
+    // z-index: 1;
+}
+
+.app__block__background--123 .background__image {
+    // background-image
+    // z-index: 2;
+}
+
+.app__block__background--123 .background__video {
+    // object-position, object-fit
+    // z-index: 3;
 }
 
 @media only screen and (max-width : 768px) {
@@ -49,3 +51,4 @@
         display: block / none;
     }
 }
+</textarea>
