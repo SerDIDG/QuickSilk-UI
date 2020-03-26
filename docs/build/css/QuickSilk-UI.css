@@ -1,6 +1,6 @@
 @charset "UTF-8";
-/*! ************ QuickSilk-UI v3.11.0 ************ */
-/*! ************ MagpieUI v3.38.0 (2020-03-19 21:11) ************ */
+/*! ************ QuickSilk-UI v3.12.0 ************ */
+/*! ************ MagpieUI v3.38.1 (2020-03-26 21:37) ************ */
 /*!
  * animate.css -http://daneden.me/animate
  * Version - 3.6.0
@@ -3522,8 +3522,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.38.0');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.38.0') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.38.0') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.38.0') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.38.0#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.38.1');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.38.1') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.38.1') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.38.1') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.38.1#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -18384,6 +18384,7 @@ ul.pt__field__hint li:before {
 }
 .com__image-input.size-default .com__image-input__content .input__holder .pt__image > .inner > .descr {
   height: 128px;
+  background-size: cover;
 }
 .com__image-input.size-default .com__image-input__content .input__holder .input__label {
   display: none;
@@ -18400,6 +18401,7 @@ ul.pt__field__hint li:before {
 }
 .com__image-input.size-full .com__image-input__content .input__holder .pt__image > .inner > .descr {
   height: 128px;
+  background-size: contain;
 }
 .com__image-input.size-custom .com__image-input__content .input__holder .input__label {
   display: none;
@@ -21664,7 +21666,7 @@ html.ie9 .com__timeselect > .inner > .sep {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.30.0 (2020-03-19 21:11) ************ */
+/*! ************ QuickSilk-Application v3.31.0 (2020-03-26 21:37) ************ */
 .svg__app__logo {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -21673,8 +21675,8 @@ html.ie9 .com__timeselect > .inner > .sep {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.30.0');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.30.0') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.30.0') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.30.0') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.30.0#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.31.0');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.31.0') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.31.0') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.31.0') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.31.0#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -28039,6 +28041,160 @@ html:not(.is-editing).is-editor .app__module__controls {
   padding-bottom: 7px;
 }
 /* ******* MODULES: EVENTS WIDGET ******* */
+.mod__flip-cards > .inner {
+  position: relative;
+}
+.mod__flip-cards > .inner > .zone {
+  height: 100%;
+  position: relative;
+}
+.mod__flip-cards.is-not-editing > .inner > .zone {
+  overflow: hidden;
+}
+.mod__flip-cards.is-not-editing > .inner > .zone--internal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.mod__flip-cards.is-editable {
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-width: 1px;
+  border-radius: 3px;
+  border-color: #cccccc;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding-box;
+  background-clip: padding-box;
+  padding: 12px;
+}
+.mod__flip-cards.is-editable > .inner > .zone {
+  margin-bottom: 24px;
+  margin-bottom: 12px;
+}
+.mod__flip-cards.is-editable > .inner > .zone.bottom,
+.mod__flip-cards.is-editable > .inner > .zone.is-last,
+.mod__flip-cards.is-editable > .inner > .zone:last-child {
+  margin-bottom: 0;
+}
+.mod__flip-cards.effect--flip {
+  perspective: 1000px;
+}
+.mod__flip-cards.effect--flip > .inner {
+  transform-style: preserve-3d;
+  -webkit-transition: -webkit-transform 500ms ease-in-out 0ms;
+  transition: -webkit-transform 500ms ease-in-out 0ms, -ms-transform 500ms ease-in-out 0ms, transform 500ms ease-in-out 0ms;
+}
+.mod__flip-cards.effect--flip > .inner > .zone {
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transition: opacity 500ms ease-in-out 0ms;
+  transition: opacity 500ms ease-in-out 0ms;
+}
+.mod__flip-cards.effect--flip > .inner > .zone--internal {
+  transform: rotateY(180deg);
+  opacity: 0;
+}
+.mod__flip-cards.effect--flip:hover > .inner,
+.mod__flip-cards.effect--flip.active > .inner {
+  transform: rotateY(180deg);
+}
+.mod__flip-cards.effect--flip:hover > .inner > .zone--external,
+.mod__flip-cards.effect--flip.active > .inner > .zone--external {
+  opacity: 0;
+}
+.mod__flip-cards.effect--flip:hover > .inner > .zone--internal,
+.mod__flip-cards.effect--flip.active > .inner > .zone--internal {
+  opacity: 1;
+}
+.mod__flip-cards.effect--flip-vertical {
+  perspective: 1000px;
+}
+.mod__flip-cards.effect--flip-vertical > .inner {
+  transform-style: preserve-3d;
+  -webkit-transition: -webkit-transform 500ms ease-in-out 0ms;
+  transition: -webkit-transform 500ms ease-in-out 0ms, -ms-transform 500ms ease-in-out 0ms, transform 500ms ease-in-out 0ms;
+}
+.mod__flip-cards.effect--flip-vertical > .inner > .zone {
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transition: opacity 500ms ease-in-out 0ms;
+  transition: opacity 500ms ease-in-out 0ms;
+}
+.mod__flip-cards.effect--flip-vertical > .inner > .zone--internal {
+  transform: rotateX(180deg);
+  opacity: 0;
+}
+.mod__flip-cards.effect--flip-vertical:hover > .inner,
+.mod__flip-cards.effect--flip-vertical.active > .inner {
+  transform: rotateX(180deg);
+}
+.mod__flip-cards.effect--flip-vertical:hover > .inner > .zone--external,
+.mod__flip-cards.effect--flip-vertical.active > .inner > .zone--external {
+  opacity: 0;
+}
+.mod__flip-cards.effect--flip-vertical:hover > .inner > .zone--internal,
+.mod__flip-cards.effect--flip-vertical.active > .inner > .zone--internal {
+  opacity: 1;
+}
+.mod__flip-cards.effect--fade > .inner > .zone {
+  -webkit-transition: opacity 500ms ease-in-out 0ms;
+  transition: opacity 500ms ease-in-out 0ms;
+}
+.mod__flip-cards.effect--fade > .inner > .zone--internal {
+  opacity: 0;
+}
+.mod__flip-cards.effect--fade:hover > .inner > .zone--external,
+.mod__flip-cards.effect--fade.active > .inner > .zone--external {
+  opacity: 0;
+}
+.mod__flip-cards.effect--fade:hover > .inner > .zone--internal,
+.mod__flip-cards.effect--fade.active > .inner > .zone--internal {
+  opacity: 1;
+}
+.mod__flip-cards.effect--fade-grow > .inner {
+  overflow: hidden;
+}
+.mod__flip-cards.effect--fade-grow > .inner > .zone {
+  -webkit-transition: all 500ms ease-in-out 0ms;
+  transition: all 500ms ease-in-out 0ms;
+}
+.mod__flip-cards.effect--fade-grow > .inner > .zone--internal {
+  opacity: 0;
+  -webkit-transform: scale(1.1);
+  -ms-transform: scale(1.1);
+  transform: scale(1.1);
+}
+.mod__flip-cards.effect--fade-grow:hover > .inner > .zone--external,
+.mod__flip-cards.effect--fade-grow.active > .inner > .zone--external {
+  opacity: 0;
+  -webkit-transform: scale(1.1);
+  -ms-transform: scale(1.1);
+  transform: scale(1.1);
+}
+.mod__flip-cards.effect--fade-grow:hover > .inner > .zone--internal,
+.mod__flip-cards.effect--fade-grow.active > .inner > .zone--internal {
+  opacity: 1;
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+}
+.mod__flip-cards.effect--none > .inner > .zone--internal {
+  opacity: 0;
+}
+.mod__flip-cards.effect--none:hover > .inner > .zone--external,
+.mod__flip-cards.effect--none.active > .inner > .zone--external {
+  opacity: 0;
+}
+.mod__flip-cards.effect--none:hover > .inner > .zone--internal,
+.mod__flip-cards.effect--none.active > .inner > .zone--internal {
+  opacity: 1;
+}
 /* ******* MODULES: FORUM ******* */
 /* ******* MODULES: FORUM WIDGET ******* */
 .app-mod__forum-widget .app-pt__latest-posts .pt__box-item .pt__image {
