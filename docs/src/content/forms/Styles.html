@@ -38,19 +38,31 @@
                                                 <div class="field" data-node="field">
                                                     <input type="hidden" name="background-video-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
                                                     <input type="hidden" name="background-video-order" autocomplete="off" data-node="field-hidden-index">
-                                                    <dl class="pt__field is-box is-first field-indent">
-                                                        <dt>
-                                                            <label>Background Video</label>
-                                                            <span class="com__help-bubble" data-element="Com.HelpBubble" data-node="ComHelpBubble:{}:container">
-                                                                <span class="icon default linked" data-node="button"></span>
-                                                                <span class="com__help-bubble__content" data-node="content">Please provide main video file in <b>.webm</b> format. For better browser compatibility you need at least add one more file in <b>.mp4</b> format.</span>
-                                                            </span>
-                                                        </dt>
-                                                        <dd>
-                                                            <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="background-video-webm">
-                                                        </dd>
-                                                    </dl>
-                                                    <div class="pt__columns field-outer-indent">
+                                                    <div class="pt__columns field-indent">
+                                                        <div class="inner">
+                                                            <div class="column">
+                                                                <dl class="pt__field is-box is-first field-indent">
+                                                                    <dt>
+                                                                        <label>Video (.webm)</label>
+                                                                    </dt>
+                                                                    <dd>
+                                                                        <input type="text" data-element="App.ImageInput" data-config='{"size" : "wide"}' name="background-video-webm">
+                                                                    </dd>
+                                                                </dl>
+                                                            </div>
+                                                            <div class="column">
+                                                                <dl class="pt__field is-box is-first field-indent">
+                                                                    <dt>
+                                                                        <label>Video (.mp4)</label>
+                                                                    </dt>
+                                                                    <dd>
+                                                                        <input type="text" data-element="App.ImageInput" data-config='{"size" : "wide"}' name="background-video-mp4">
+                                                                    </dd>
+                                                                </dl>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="pt__columns field-indent">
                                                         <div class="inner">
                                                             <div class="column column--none">
                                                                 <dl class="pt__field is-box">
@@ -84,32 +96,6 @@
                                                                     </dd>
                                                                 </dl>
                                                             </div>
-                                                            <div class="column">
-                                                                <dl class="pt__field is-box field-indent">
-                                                                    <dd class="margin-none">
-                                                                        <div class="pt__check-line is-box">
-                                                                            <label>
-                                                                                <input type="checkbox" name="background-video-position-custom" data-element="Com.CheckTrigger" data-config='{"unchecked" : {"className" : "Com.PositionTools", "name" : "background-video-position"}, "checked" : "background-video-position-value"}'>
-                                                                                <span class="label">Manual position</span>
-                                                                            </label>
-                                                                        </div>
-                                                                    </dd>
-                                                                    <dd>
-                                                                        <input type="text" name="background-video-position-value" data-node="background-video-position-value">
-                                                                    </dd>
-                                                                </dl>
-                                                            </div>
-                                                            <div class="column">
-                                                                <dl class="pt__field is-box field-indent">
-                                                                    <dt>Additional formats</dt>
-                                                                    <dd>
-                                                                        <input type="text" data-element="App.FileInput" data-config='{"size" : "full", "showFilename" : false, "dropzone" : false, "strings" : {"browse" : "Add .mp4", "remove" : "Remove .mp4"}}' name="background-video-mp4">
-                                                                    </dd>
-                                                                    <dd>
-                                                                        <input type="text" data-element="App.FileInput" data-config='{"size" : "full", "showFilename" : false, "dropzone" : false, "strings" : {"browse" : "Add .ogv", "remove" : "Remove .ogv"}}' name="background-video-ogv">
-                                                                    </dd>
-                                                                </dl>
-                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -122,12 +108,12 @@
                                                     <input type="hidden" name="background-image-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
                                                     <input type="hidden" name="background-image-order" autocomplete="off" data-node="field-hidden-index">
                                                     <dl class="pt__field is-box is-first field-indent">
-                                                        <dt>Background Image</dt>
+                                                        <dt>Image</dt>
                                                         <dd>
                                                             <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="background-image">
                                                         </dd>
                                                     </dl>
-                                                    <div class="pt__columns field-outer-indent">
+                                                    <div class="pt__columns field-indent">
                                                         <div class="inner">
                                                             <div class="column column--none">
                                                                 <dl class="pt__field is-box">
@@ -208,7 +194,7 @@
                                                     <input type="hidden" name="background-color-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
                                                     <input type="hidden" name="background-color-order" autocomplete="off" data-node="field-hidden-index">
                                                     <dl class="pt__field is-box is-first">
-                                                        <dt>Background Color</dt>
+                                                        <dt>Color</dt>
                                                         <dd>
                                                             <input type="text" data-element="Com.ColorPicker" name="background-color" data-config='{"size" : "full"}'>
                                                         </dd>
