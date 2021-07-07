@@ -1,5 +1,5 @@
-/*! ************ QuickSilk-UI v3.12.1 ************ */
-/*! ************ MagpieUI v3.38.2 (2020-03-27 22:31) ************ */
+/*! ************ QuickSilk-UI v3.13.0 ************ */
+/*! ************ MagpieUI v3.40.0 (2021-07-07 21:27) ************ */
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -1623,14 +1623,16 @@ if(!Date.now){
 
     -------
 
-    Custom Events:
+    Custom Events / Hooks:
+        ajax.beforePrepare
+        ajax.afterPrepare
         scrollSizeChange
         pageSizeChange
 
  ******* */
 
 var cm = {
-        '_version' : '3.38.2',
+        '_version' : '3.40.0',
         '_loadTime' : Date.now(),
         '_isDocumentReady' : false,
         '_isDocumentLoad' : false,
@@ -1653,9 +1655,11 @@ var cm = {
             'animDurationShort' : 150,
             'animDurationLong' : 500,
             'loadDelay' : 500,
+            'lazyDelay' : 1000,
             'hideDelay' : 250,
             'hideDelayShort' : 150,
             'hideDelayLong' : 500,
+            'autoHideDelay' : 2000,
             'requestDelay' : 300,
             'adaptiveFrom' : 768,
             'screenTablet' : 1024,
@@ -1681,8 +1685,12 @@ var cm = {
             '%version%' : 'cm._version'
         },
         '_strings' : {
+            'common' : {
+                'server_error' : 'An unexpected error has occurred. Please try again later.'
+            },
             'months' : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-            'days' : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            'days' : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            'daysAbbr' : ['S', 'M', 'T', 'W', 'T', 'F', 'S']
         }
     },
     Mod = {},
@@ -1699,6 +1707,7 @@ cm.isLocalStorage = (function(){try{return 'localStorage' in window && window.lo
 cm.isSessionStorage = (function(){try{return 'sessionStorage' in window && window.sessionStorage !== null;}catch(e){return false;}})();
 cm.isCanvas = !!document.createElement("canvas").getContext;
 cm.hasBeacon = !!(navigator.sendBeacon);
+cm.hasPointerEvent = !!(window.PointerEvent);
 
 /* ******* COMMON ******* */
 
@@ -2022,11 +2031,8 @@ cm.getLength = function(o){
         return o.length;
     }
     // Object
-    var i = 0;
-    cm.forEach(o, function(){
-        i++;
-    });
-    return i;
+    var keys = Object.keys(o);
+    return keys.length;
 };
 
 cm.getCount = function(o){
@@ -2068,13 +2074,22 @@ cm.arrayAdd = function(a, item){
     return a;
 };
 
-cm.arraySort = function(a, key, dir){
+cm.arrayFilter = function(a, items){
+    return a.filter(function(item){
+        return !items.includes(item);
+    });
+};
+
+// TODO: check is this ever needed
+cm.arraySort = function(a, key, dir, clone){
+    var newA;
     if(!cm.isArray(a)){
         return a;
     }
-    var newA = cm.clone(a);
     dir = cm.isUndefined(dir) ? 'asc' : dir.toLowerCase();
     dir = cm.inArray(['asc', 'desc'], dir) ? dir : 'asc';
+    clone = cm.isUndefined(clone) ? true : clone;
+    newA = clone ? cm.clone(a) : a;
     switch(dir){
         case 'asc':
             newA.sort(function(a, b){
@@ -2127,24 +2142,36 @@ cm.arrayToObject = function(a){
     return o;
 };
 
-cm.objectReplace = function(o, vars){
-    var newO = cm.clone(o);
-    cm.forEach(newO, function(value, key){
+cm.objectReplace = function(o, map, replaceKeys){
+    var newO = cm.isArray(o) ? [] : {},
+        newKey;
+    replaceKeys = !cm.isUndefined(replaceKeys) ? replaceKeys : true;
+    cm.forEach(o, function(value, key){
+        if(cm.isString(key)){
+            newKey = replaceKeys ? cm.strReplace(key, map) : key;
+        }else{
+            newKey = key;
+        }
         if(cm.isObject(value)){
-            newO[key] = cm.objectReplace(value, vars);
+            newO[newKey] = cm.objectReplace(value, map, replaceKeys);
         }else if(cm.isString(value)){
-            newO[key] = cm.strReplace(value, vars);
+            newO[newKey] = cm.strReplace(value, map);
+        }else{
+            newO[newKey] = value;
         }
     });
     return newO;
 };
 
+cm.getDiffCompare = function(item1, item2){
+    var newO = {};
+    cm.diffCompare(newO, item1, item2, 'key');
+    return newO['key'];
+};
+
 cm.isEmpty = function(value){
     if(cm.isUndefined(value)){
         return true;
-    }
-    if(cm.isBoolean(value)){
-        return value === false;
     }
     if(cm.isString(value) || cm.isArray(value)){
         return value.length === 0;
@@ -2159,33 +2186,21 @@ cm.isUndefined = function(value){
     return typeof value === 'undefined' || value === undefined || value === null;
 };
 
-cm.objectFormPath = function(name, apply){
+cm.objectFormPath = function(name, value, defaultValue){
     var newO = {},
         tempO = newO,
         nameO = name.toString().split('.'),
         nameL = nameO.length;
+    defaultValue = !cm.isUndefined(defaultValue) ? defaultValue : {};
+    value = !cm.isEmpty(value) ? value : defaultValue;
     nameO.map(function(item, i){
-        if(apply && (nameL === i + 1)){
-            tempO[item] = apply;
+        if(nameL === i + 1){
+            tempO[item] = value;
         }else{
             tempO = tempO[item] = {};
         }
     });
     return newO;
-};
-
-cm.objectPath = function(name, obj){
-    if(cm.isUndefined(obj) || cm.isUndefined(name)){
-        return obj;
-    }
-    name = name.toString().split('.');
-    var findObj = obj;
-    cm.forEach(name, function(item){
-        if(findObj){
-            findObj = findObj[item];
-        }
-    });
-    return findObj;
 };
 
 cm.objectSelector = function(name, obj, apply){
@@ -2207,29 +2222,59 @@ cm.objectSelector = function(name, obj, apply){
     return findObj;
 };
 
-cm.reducePath = function(name, obj){
+cm.reducePath = cm.objectPath = function(name, obj){
     if(cm.isUndefined(obj) || cm.isUndefined(name)){
         return obj;
     }
     name = name.toString().split('.');
     return name.reduce(function(object, property){
-        return object[property];
+        return cm.isUndefined(object) ? undefined : object[property];
     }, obj);
 };
 
-cm.sort = function(o){
-    var a = [];
-    cm.forEach(o, function(item, key){
-        a.push({'key' : key, 'value' : item});
+cm.fillDataMap = function(map, data){
+    var items = {},
+        value;
+    cm.forEach(map, function(id, key){
+        value = cm.reducePath(id, data);
+        if(cm.isEmpty(value) && /[{%]\w+[%}]/.test(id)){
+            value = cm.fillVariables(id, data);
+        }
+        if(!cm.isEmpty(value)){
+            items[key] = value;
+        }
     });
-    a.sort(function(a, b){
-        return (a['key'] < b['key']) ? -1 : ((a['key'] > b['key']) ? 1 : 0);
+    return items;
+};
+
+cm.objectFillVariables = function(o, map, replaceKeys){
+    var newO = cm.isArray(o) ? [] : {},
+        newKey;
+    replaceKeys = !cm.isUndefined(replaceKeys) ? replaceKeys : true;
+    cm.forEach(o, function(value, key){
+        if(cm.isString(key)){
+            newKey = replaceKeys ? cm.fillVariables(key, map) : key;
+        }else{
+            newKey = key;
+        }
+        if(cm.isObject(value)){
+            newO[newKey] = cm.objectFillVariables(value, map, replaceKeys);
+        }else if(cm.isString(value)){
+            newO[newKey] = cm.fillVariables(value, map);
+        }else{
+            newO[newKey] = value;
+        }
     });
-    o = {};
-    a.forEach(function(item){
-        o[item['key']] = item['value'];
+    return newO;
+};
+
+cm.sort = function(o, dir){
+    var keys = cm.arraySort(Object.keys(o), null, dir),
+        sorted = {};
+    cm.forEach(keys, function(key){
+        sorted[key] = o[key];
     });
-    return o;
+    return sorted;
 };
 
 cm.replaceDeep = function(o, from, to){
@@ -2278,12 +2323,25 @@ cm.errorLog = function(o){
                 'common' : 'Common'
             }
         }, o),
-        str = [
+        data = [
             config['langs'][config['type']],
             config['name'],
             config['message']
-        ];
-    cm.log(str.join(' > '));
+        ],
+        str = data.join(' > ');
+    switch(config['type']){
+        case 'error':
+            console.error(str);
+            break;
+        case 'attention':
+            console.warn(str);
+            break;
+        case 'common':
+        case 'success':
+        default:
+            console.info(str);
+            break;
+    }
 };
 
 cm.getEvent = function(e){
@@ -2448,6 +2506,52 @@ cm.customEvent = (function(){
             return node;
         }
     };
+})();
+
+cm.hook = (function(){
+    var _stack = {};
+
+    return {
+        'add' : function(type, handler){
+            if(!_stack[type]){
+                _stack[type] = [];
+            }
+            if(cm.isFunction(handler)){
+                _stack[type].push(handler);
+            }else{
+                cm.errorLog({
+                    'name' : 'cm.hook',
+                    'message' : ['Handler of event', cm.strWrap(type, '"'), 'must be a function.'].join(' ')
+                });
+            }
+        },
+        'remove' : function(type, handler){
+            if(!_stack[type]){
+                _stack[type] = [];
+            }
+            if(cm.isFunction(handler)){
+                _stack[type] = _stack[type].filter(function(item){
+                    return item !== handler;
+                });
+            }else{
+                cm.errorLog({
+                    'name' : 'cm.hook',
+                    'message' : ['Handler of event', cm.strWrap(type, '"'), 'must be a function.'].join(' ')
+                });
+            }
+        },
+        'trigger' : function(type, params){
+            var that = this,
+                data = cm.clone(arguments);
+            // Remove event name parameter from data
+            data.shift();
+            if(_stack[type]){
+                cm.forEach(_stack[type], function(handler){
+                    handler.apply(that, data);
+                });
+            }
+        }
+    }
 })();
 
 cm.onLoad = function(handler, isMessage){
@@ -2682,14 +2786,25 @@ cm.fileFromDataTransfer = function(e, callback){
 };
 
 cm.dataURItoBlob = function(dataURI){
-    var byteString = atob(dataURI.split(',')[1]);
-    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    var ab = new ArrayBuffer(byteString.length);
-    var ia = new Uint8Array(ab);
+    var byteString = atob(dataURI.split(',')[1]),
+        mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0],
+        ab = new ArrayBuffer(byteString.length),
+        ia = new Uint8Array(ab);
     for (var i = 0; i < byteString.length; i++) {
         ia[i] = byteString.charCodeAt(i);
     }
     return new Blob([ab], {'type': mimeString});
+};
+
+cm.bufferToHEX = function(arrayBuffer){
+    var byteArray = new Uint8Array(arrayBuffer),
+        hexParts = [];
+    for(var i = 0; i < byteArray.length; i++){
+        var hex = byteArray[i].toString(16),
+            paddedHex = ('00' + hex).slice(-2);
+        hexParts.push(paddedHex);
+    }
+    return hexParts.join('');
 };
 
 /* ******* NODES ******* */
@@ -3362,7 +3477,14 @@ cm.setSelect = function(o, value){
     }
     var options = o.getElementsByTagName('option');
     cm.forEach(options, function(node){
-        node.selected = cm.isArray(value) ? cm.inArray(node.value, value) : node.value == value;
+        if(cm.isArray(value)){
+            node.selected = cm.inArray(value, node.value);
+        }else{
+            if(cm.isBoolean(value)){
+                value = value.toString();
+            }
+            node.selected = node.value == value;
+        }
     });
     return o;
 };
@@ -3389,11 +3511,12 @@ cm.getValue = function(name, node){
     return value;
 };
 
-cm.getSelectedOptions = function(node){
+cm.getSelectedOptions = function(node, index){
     if(!cm.isNode(node)){
         return null;
     }
-    return node.selectedOptions ? node.selectedOptions : node.querySelectorAll('option:checked');
+    var options = node.selectedOptions ? node.selectedOptions : node.querySelectorAll('option:checked');
+    return !cm.isUndefined(index) ? options[index] : options;
 };
 
 cm.getSelectValue = function(node){
@@ -3510,15 +3633,33 @@ cm.isMobile = function(){
 };
 
 cm.decode = (function(){
-    var node = document.createElement('textarea');
-    return function(str){
-        if(str){
-            node.innerHTML = str;
+    var node = cm.node('textarea', {'class' : 'cm__textarea-clipboard'});
+    return function(text){
+        if(!cm.isEmpty(text)){
+            node.innerHTML = text;
             return node.value;
         }else{
             return '';
         }
 
+    };
+})();
+
+cm.copyToClipboard = (function(){
+    var node = cm.node('textarea', {'class' : 'cm__textarea-clipboard'}),
+        success;
+    cm.insertFirst(node, document.body);
+    return function(text, callback){
+        callback = cm.isFunction(callback) ? callback : function(){};
+        if(!cm.isEmpty(text)){
+            node.value = text;
+            node.select();
+            success = document.execCommand('copy');
+            if(!success){
+                cm.errorLog({'type' : 'error', 'name' : 'cm.copyToClipboard', 'message' : 'Unable to copy text to clipboard!'});
+            }
+            callback(success);
+        }
     };
 })();
 
@@ -3531,10 +3672,10 @@ cm.strWrap = function(str, symbol){
     return ['', str, ''].join(symbol);
 };
 
-cm.strReplace = function(str, vars){
-    if(vars && cm.isObject(vars)){
+cm.strReplace = function(str, map){
+    if(map && cm.isObject(map)){
         str = str.toString();
-        cm.forEach(vars, function(item, key){
+        cm.forEach(map, function(item, key){
             if(cm.isObject(item)){
                 item = JSON.stringify(item);
             }
@@ -3542,6 +3683,21 @@ cm.strReplace = function(str, vars){
         });
     }
     return str;
+};
+
+cm.fillVariables = function(value, data){
+    var tests;
+    return value.replace(/[{%](\w+)[%}]/g, function(math, p1){
+        tests = [
+            cm.reducePath(p1, data),
+            cm.reducePath('%' + p1 + '%', data),
+            cm.reducePath('{' + p1 + '}', data),
+            ''
+        ];
+        return tests.find(function(item){
+            return !cm.isUndefined(item);
+        });
+    });
 };
 
 cm.reduceText = function(str, length, points){
@@ -3607,10 +3763,12 @@ cm.addLeadZero = function(x){
 };
 
 cm.plural = cm.getNumberDeclension = function(number, titles /* ['найдена', 'найдено', 'найдены'] */){
-    var cases = [2, 0, 1, 1, 1, 2];
-    return titles[
-        (number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]
-    ];
+    if(!cm.isArray(titles)){
+        return titles;
+    }
+    var cases = [2, 0, 1, 1, 1, 2],
+        i = (number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5];
+    return titles[i] || titles[i - 1] || titles[0];
 };
 
 cm.toRadians = function(degrees) {
@@ -3740,9 +3898,12 @@ cm.parseDate = function(str, format){
             '%Y' : 'YYYY',
             '%m' : 'mm',
             '%d' : 'dd',
+            '%h' : 'hh',
             '%H' : 'HH',
             '%i' : 'ii',
-            '%s' : 'ss'
+            '%s' : 'ss',
+            '%v' : 'vvv',
+            '$e' : 'e'
         },
         helpers = {
             'YYYY' : function(value){
@@ -3754,6 +3915,9 @@ cm.parseDate = function(str, format){
             'dd' : function(value){
                 return (value !== '00') ? value : date.getDate();
             },
+            'hh' : function(value){
+                return value;
+            },
             'HH' : function(value){
                 return value;
             },
@@ -3762,15 +3926,24 @@ cm.parseDate = function(str, format){
             },
             'ss' : function(value){
                 return value;
+            },
+            'vv' : function(value){
+                return value;
+            },
+            'e' : function(value){
+                return value;
             }
         },
         parsed = {
             'YYYY' : '0000',
             'mm' : '00',
             'dd' : '00',
+            'hh' : '00',
             'HH' : '00',
             'ii' : '00',
-            'ss' : '00'
+            'ss' : '00',
+            'vvv' : '000',
+            'e' : 'Z'
         },
         fromIndex = 0;
     format = cm.isString(format) ? format : cm._config.dateTimeFormat;
@@ -3782,7 +3955,7 @@ cm.parseDate = function(str, format){
             fromIndex = format.indexOf(key, fromIndex + 1);
         }
     });
-    return new Date(parsed['YYYY'], parsed['mm'], parsed['dd'], parsed['HH'], parsed['ii'], parsed['ss']);
+    return new Date(parsed['YYYY'], parsed['mm'], parsed['dd'], parsed['HH'], parsed['ii'], parsed['ss'], parsed['vvv']);
 };
 
 cm.parseFormatDate = function(str, format, displayFormat, langs, formatCase){
@@ -3890,6 +4063,8 @@ cm.getPageSize = function(key){
             'winHeight' : de.clientHeight,
             'winWidth' : de.clientWidth
         };
+    o['scrollTop'] = cm.getBodyScrollTop();
+    o['scrollLeft'] = cm.getBodyScrollLeft();
     o['scrollHeight'] = o['height'] - o['winHeight'];
     o['scrollWidth'] = o['width'] - o['winWidth'];
     return o[key] || o;
@@ -3994,6 +4169,19 @@ cm.getRect = function(node){
         'width' : 0,
         'height' : 0
     };
+};
+
+cm.getOffsetRect = function(node){
+    var rect = cm.getRect(node),
+        topOffset = cm.getBodyScrollTop(),
+        leftOffset = cm.getBodyScrollLeft();
+    rect.offset = {
+        'top' : rect.top + topOffset,
+        'right' : rect.right +  leftOffset,
+        'bottom' : rect.bottom +  topOffset,
+        'left' : rect.left + leftOffset
+    }
+    return rect;
 };
 
 cm.getFullRect = function(node, styleObject){
@@ -4689,7 +4877,7 @@ cm.setCSSTransitionDuration = (function(){
 })();
 
 cm.inRange = function(a1, b1, a2, b2){
-    return a1 >= a2 && a1 <= b2 || b1 >= a2 && b1 <= b2 || a2 >= a1 && a2 <= b1
+    return a1 >= a2 && a1 <= b2 || b1 >= a2 && b1 <= b2 || a2 >= a1 && a2 <= b1;
 };
 
 cm.CSSValuesToArray = function(value){
@@ -4732,6 +4920,23 @@ cm.arrayToCSSValues = function(a, units){
 
 cm.URLToCSSURL = function(url){
     return !cm.isEmpty(url) ? 'url("' + url + '")' : 'none';
+};
+
+cm.setCSSVariable = function(key, value, node){
+    node = !cm.isUndefined(node) ? node : document.documentElement;
+    if(cm.isNode(node)){
+        node.style.setProperty(key, value);
+    }
+    return node;
+};
+
+cm.getCSSVariable = function(key, node){
+    var styleObject;
+    node = !cm.isUndefined(node) ? node : document.documentElement;
+    if(cm.isNode(node)){
+        styleObject = cm.getStyleObject(node);
+        return styleObject.getPropertyValue(key);
+    }
 };
 
 /* ******* VALIDATORS ******* */
@@ -5016,6 +5221,7 @@ cm.transition = function(node, params){
             'easing' : 'ease-in-out',
             'delayIn' : 0,
             'delayOut' : 0,
+            'immediately' : false,
             'clear' : false,
             'onStop' : function(){}
         }, params);
@@ -5035,26 +5241,33 @@ cm.transition = function(node, params){
             dimension = cm.getStyleDimension(value);
             node.style[key] = cm.getCurrentStyle(node, key, dimension) + dimension;
         });
-        // Set
-        setTimeout(function(){
-            node.style[rule] = transitions;
-            // Set new styles
+        if(params['immediately']){
+            set();
+            end();
+        }else{
+            setTimeout(set, params['delayIn']);
+            setTimeout(end, params['duration'] + params['delayIn'] + params['delayOut']);
+        }
+    };
+
+    var set = function(){
+        node.style[rule] = transitions;
+        // Set new styles
+        cm.forEach(params['properties'], function(value, key){
+            key = cm.styleStrToKey(key);
+            node.style[key] = value;
+        });
+    };
+
+    var end = function(){
+        node.style[rule]  = '';
+        if(params['clear']){
             cm.forEach(params['properties'], function(value, key){
                 key = cm.styleStrToKey(key);
-                node.style[key] = value;
+                node.style[key] = '';
             });
-        }, params['delayIn']);
-        // End
-        setTimeout(function(){
-            node.style[rule]  = '';
-            if(params['clear']){
-                cm.forEach(params['properties'], function(value, key){
-                    key = cm.styleStrToKey(key);
-                    node.style[key] = '';
-                });
-            }
-            params['onStop'](node);
-        }, params['duration'] + params['delayIn'] + params['delayOut']);
+        }
+        params['onStop'](node);
     };
 
     init();
@@ -5098,6 +5311,7 @@ cm.sessionStorageSet = function(key, value){
         try{
             window.sessionStorage.setItem(key, value);
         }catch(e){
+            cm.storageSet.apply(this, arguments);
         }
     }
 };
@@ -5105,13 +5319,16 @@ cm.sessionStorageSet = function(key, value){
 cm.sessionStorageGet = function(key){
     if(cm.isSessionStorage){
         return window.sessionStorage.getItem(key);
+    }else{
+        return cm.storageGet.apply(this, arguments);
     }
-    return null;
 };
 
 cm.sessionStorageRemove = function(key){
     if(cm.isSessionStorage){
         window.sessionStorage.removeItem(key);
+    }else{
+        cm.storageRemove.apply(this, arguments);
     }
 };
 
@@ -5156,14 +5373,17 @@ cm.cookieDate = function(days){
 cm.ajax = function(o){
     var config = cm.merge({
             'debug' : true,
-            'type' : 'json',                                         // text | xml | json | jsonp
+            'type' : 'json',                                         // text | document | json | jsonp | blob
             'method' : 'POST',                                       // POST | GET | PUT | PATCH | DELETE
-            'paramsType' : 'uri',                                    // uri | json
-            'params' : '',
+            'paramsType' : 'uri',                                    // uri | json | form-data
+            'uriConfig' : {},                                        // parameters for cm.obj2URI
+            'uriParams' : {},
+            'data' : {},
+            'params' : '',                                           // TODO: Deprecated, use uriParams and data
             'url' : '',
-            'modifier' : '',
-            'modifierParams' : {},
-            'formData'  : false,
+            'variables' : {},
+            'variablesMap' : {},
+            'formData'  : false,                                     // TODO: Deprecated, use paramsType: 'form-data'
             'headers' : {
                 'Content-Type' : 'application/x-www-form-urlencoded',
                 'X-Requested-With' : 'XMLHttpRequest'
@@ -5176,10 +5396,12 @@ cm.ajax = function(o){
             'onSuccess' : function(){},
             'onError' : function(){},
             'onAbort' : function(){},
+            'onResolve' : function(){},
+            'onReject': function(){},
             'handler' : false
         }, o),
+        successStatuses = [200, 201, 202, 204],
         vars = cm._getVariables(),
-        responseType,
         response,
         callbackName,
         callbackSuccessName,
@@ -5201,42 +5423,62 @@ cm.ajax = function(o){
     };
 
     var validate = function(){
+        cm.hook.trigger('ajax.beforePrepare', config);
         config['httpRequestObject'] = cm.createXmlHttpRequestObject();
         config['type'] = config['type'].toLowerCase();
-        responseType =  /text|json/.test(config['type']) ? 'responseText' : 'responseXML';
         config['method'] = config['method'].toUpperCase();
-        // Convert params object to URI string
-        if(config['params'] instanceof FormData) {
+        if(config['formData'] === true){
+            config['paramsType'] = 'form-data';
+        }
+        // Process variables
+        if(!cm.isEmpty(config['variablesMap'])){
+            config['_originVariables'] = config['variables'];
+            config['variables'] = cm.fillDataMap(config['variablesMap'], config['variables']);
+        }
+        // Process params object
+        if(config['data'] instanceof FormData || config['params'] instanceof FormData) {
             delete config['headers']['Content-Type'];
-        }else if(config['formData']){
-            config['params'] = cm.obj2FormData(config['params']);
-            delete config['headers']['Content-Type'];
-        }else if(cm.isObject(config['params'])){
-            config['params'] = cm.objectReplace(config['params'], vars);
+        }else{
+            if(!cm.isEmpty(config['data'])){
+                config['data'] = processParams(config['data']);
+            }else{
+                config['params'] = processParams(config['params']);
+            }
+        }
+        if(cm.isObject(config['uriParams'])){
+            config['uriParams'] = cm.obj2URI(config['uriParams'], config['uriConfig']);
+        }
+        // Process request route
+        config['url'] = cm.fillVariables(config['url'], config['variables']);
+        config['url'] = cm.strReplace(config['url'], vars);
+        if(!cm.isEmpty(config['uriParams'])){
+            config['url'] = [config['url'], config['uriParams']].join('?');
+        }else if(!cm.isEmpty(config['params']) && !cm.inArray(['POST', 'PUT', 'PATCH'], config['method'])){
+            config['url'] = [config['url'], config['params']].join('?');
+        }
+        cm.hook.trigger('ajax.afterPrepare', config);
+    };
+
+    var processParams = function(data){
+        if(cm.isObject(data)){
+            data = cm.objectFillVariables(data, config['variables']);
+            data = cm.objectReplace(data, vars);
             if(config['paramsType'] === 'json'){
                 config['headers']['Content-Type'] = 'application/json';
-                config['params'] = cm.stringifyJSON(config['params']);
+                data = cm.stringifyJSON(data);
+            }else if(config['paramsType'] === 'form-data'){
+                data = cm.obj2FormData(data);
+                delete config['headers']['Content-Type'];
             }else{
-                config['params'] = cm.obj2URI(config['params']);
+                data = cm.obj2URI(data, config['uriConfig']);
             }
         }
-        // Build request link
-        if(!cm.isEmpty(config['modifier']) && !cm.isEmpty(config['modifierParams'])){
-            config['modifier'] = cm.strReplace(config['modifier'], config['modifierParams']);
-            config['url'] += config['modifier'];
-        }else{
-            delete config['modifier'];
-        }
-        config['url'] = cm.strReplace(config['url'], vars);
-        if(!/POST|PUT|PATCH/.test(config['method'])){
-            if(!cm.isEmpty(config['params'])){
-                config['url'] = [config['url'], config['params']].join('?');
-            }
-        }
+        return data;
     };
 
     var send = function(){
         config['httpRequestObject'].open(config['method'], config['url'], config['async']);
+        config['httpRequestObject'].responseType = config['type'];
         // Set Headers
         if('withCredentials' in config['httpRequestObject']){
             config['httpRequestObject'].withCredentials = config['withCredentials'];
@@ -5251,24 +5493,33 @@ cm.ajax = function(o){
         // Send
         config['onStart']();
         if(config['beacon'] && cm.hasBeacon){
-            navigator.sendBeacon(config['url'], config['params']);
-        }else if(/POST|PUT|PATCH/.test(config['method'])){
-            config['httpRequestObject'].send(config['params']);
+            if(!cm.isEmpty(config['data'])){
+                navigator.sendBeacon(config['url'], config['data']);
+            }else if(!cm.isEmpty(config['params'])){
+                navigator.sendBeacon(config['url'], config['params']);
+            }else{
+                navigator.sendBeacon(config['url']);
+            }
         }else{
-            config['httpRequestObject'].send(null);
+            if(!cm.isEmpty(config['data'])){
+                config['httpRequestObject'].send(config['data']);
+            }else if(!cm.isEmpty(config['params']) && cm.inArray(['POST', 'PUT', 'PATCH'], config['method'])){
+                config['httpRequestObject'].send(config['params']);
+            }else{
+                config['httpRequestObject'].send(null);
+            }
         }
     };
 
     var loadHandler = function(e){
         if(config['httpRequestObject'].readyState === 4){
-            response = config['httpRequestObject'][responseType];
-            if(config['type'] === 'json'){
-                response = cm.parseJSON(response);
-            }
-            if(config['httpRequestObject'].status === 200){
+            response = config['httpRequestObject'].response;
+            if(cm.inArray(successStatuses, config['httpRequestObject'].status)){
                 config['onSuccess'](response, e);
+                config['onResolve'](response, e);
             }else{
                 config['onError'](response, e);
+                config['onReject'](response, e);
             }
             deprecatedHandler(response);
             config['onEnd'](response, e);
@@ -5277,12 +5528,14 @@ cm.ajax = function(o){
 
     var successHandler = function(){
         config['onSuccess'].apply(config['onSuccess'], arguments);
+        config['onResolve'].apply(config['onResolve'], arguments);
         deprecatedHandler.apply(deprecatedHandler, arguments);
         config['onEnd'].apply(config['onEnd'], arguments);
     };
 
     var errorHandler = function(){
         config['onError'].apply(config['onError'], arguments);
+        config['onReject'].apply(config['onReject'], arguments);
         deprecatedHandler.apply(deprecatedHandler, arguments);
         config['onEnd'].apply(config['onEnd'], arguments);
     };
@@ -5328,7 +5581,7 @@ cm.ajax = function(o){
         // Embed
         config['onStart']();
         scriptNode.setAttribute('src', config['url']);
-        document.getElementsByTagName('head')[0].appendChild(scriptNode);
+        cm.getDocumentHead().appendChild(scriptNode);
     };
 
     var removeJSONP = function(){
@@ -5348,6 +5601,17 @@ cm.ajax = function(o){
 
     init();
     return returnObject;
+};
+
+cm.ajaxPromise = function(o){
+    return new Promise(function(resolve, reject){
+        cm.ajax(
+            cm.merge(o, {
+                'onResolve' : resolve,
+                'onReject' : reject
+            })
+        );
+    });
 };
 
 cm.parseJSON = function(str){
@@ -5374,37 +5638,96 @@ cm.stringifyJSON = function(o){
     }
 };
 
-cm.obj2URI = function(obj, prefix){
-    var str = [],
-        keyPrefix;
-    cm.forEach(obj, function(item, key){
-        if(!cm.isUndefined(item)){
-            keyPrefix = !cm.isEmpty(prefix) ? prefix + "[" + key + "]" : key;
-            if(typeof item === 'object'){
-                str.push(cm.obj2URI(item, keyPrefix));
-            }else{
-                str.push([keyPrefix, encodeURIComponent(item)].join('='));
-            }
-        }
-    });
-    return !cm.isEmpty(str) ? str.join('&') : null;
-};
-
 cm.obj2Filter = function(obj, prefix, separator, skipEmpty){
     var data = {},
         keyPrefix;
     separator = !cm.isUndefined(separator) ? separator : '=';
+    skipEmpty = !cm.isUndefined(skipEmpty) ? skipEmpty : false;
     cm.forEach(obj, function(item, key){
         if(!skipEmpty || !cm.isEmpty(item)){
             keyPrefix = !cm.isEmpty(prefix) ? prefix + separator + key : key;
             if(cm.isObject(item)){
                 data = cm.merge(data, cm.obj2Filter(item, keyPrefix, separator, skipEmpty))
+            }else if(cm.isArray(item)){
+                data[keyPrefix] = item.join(',');
             }else{
                 data[keyPrefix] = item;
             }
         }
     });
     return data;
+};
+
+cm.obj2URI = function(data, params){
+    var str = [],
+        keyPrefix,
+        keyValue,
+        keyParams;
+    // TODO: Legacy: arguments[1] = prefix
+    if(cm.isString(arguments[1])){
+        params = {
+            'multipleValues' : 'brackets',
+            'prefix' : arguments[1]
+        };
+    }
+    // Validate
+    params = cm.merge({
+        'multipleValues' : 'brackets',          // brackets | keys | join
+        'multipleValuesConjunction' : ',',
+        'prefix' : null,
+        'itemConjunction' : '&',
+        'valueConjunction' : '=',
+        'skipEmpty' : false
+    }, params);
+
+    if(cm.isArray(data) && params.multipleValues === 'join'){
+        cm.forEach(data, function(item){
+            if(!cm.isUndefined(item) && (!params.skipEmpty || !cm.isEmpty(item))){
+                str.push(encodeURIComponent(item));
+            }
+        });
+        if(!cm.isEmpty(str)){
+            str = str.join(params.itemConjunction);
+            if(!cm.isEmpty(params.prefix)){
+                str = [params.prefix, str].join(params.valueConjunction);
+            }
+        }
+        return !cm.isEmpty(str) ? str : null;
+    }
+
+    cm.forEach(data, function(item, key){
+        if(!cm.isUndefined(item) && (!params.skipEmpty || !cm.isEmpty(item))){
+            keyValue = item;
+            // Handle prefix
+            if(!cm.isEmpty(params.prefix)){
+                switch(params.multipleValues){
+                    case 'brackets':
+                        keyPrefix = params.prefix + '[' + key + ']';
+                        break;
+                    case 'keys':
+                    case 'join':
+                        keyPrefix = [params.prefix, key].join(params.valueConjunction);
+                        break;
+                    case 'same':
+                        keyPrefix = params.prefix;
+                        break;
+                }
+            }else{
+                keyPrefix = key;
+            }
+            // Handle items
+            if(cm.isArray(item) && params.multipleValues === 'keys'){
+                keyValue = cm.obj2URI(keyValue, cm.merge(params, {'multipleValues' : 'same', 'prefix' : keyPrefix}));
+            }else if(typeof item === 'object'){
+                keyValue = cm.obj2URI(keyValue, cm.merge(params, {'prefix' : keyPrefix}));
+            }else{
+                keyValue = [keyPrefix, encodeURIComponent(keyValue)].join(params.valueConjunction);
+            }
+            str.push(keyValue);
+        }
+    });
+
+    return !cm.isEmpty(str) ? str.join(params.itemConjunction) : null;
 };
 
 cm.obj2FormData = function(o){
@@ -5624,7 +5947,16 @@ cm.define = (function(){
 cm.getConstructor = function(className, callback){
     var classConstructor;
     callback = cm.isFunction(callback) ? callback : function(){};
-    if(!className || className === '*'){
+    if(cm.isUndefined(className)){
+        if(cm._debug){
+            cm.errorLog({
+                'type' : 'error',
+                'name' : 'cm.getConstructor',
+                'message' : ['Parameter "className" does not specified.'].join(' ')
+            });
+        }
+        return false;
+    }else if(className === '*'){
         cm.forEach(cm._defineStack, function(classConstructor){
             callback(classConstructor, className, classConstructor.prototype, classConstructor.prototype._inherit);
         });
@@ -5645,6 +5977,17 @@ cm.getConstructor = function(className, callback){
             return classConstructor;
         }
     }
+};
+
+cm.isInstance = function(childClass, parentClass){
+    var isInstance = false;
+    if(cm.isString(parentClass)){
+        parentClass = cm.getConstructor(parentClass);
+    }
+    if(!cm.isEmpty(childClass) && !cm.isEmpty(parentClass)){
+        isInstance = childClass instanceof parentClass;
+    }
+    return isInstance;
 };
 
 cm.find = function(className, name, parentNode, callback, params){
@@ -5745,27 +6088,28 @@ cm.setParams = function(className, params){
     });
 };
 
-cm.setStrings = function(className, strings){
+cm.setMessages = cm.setStrings = function(className, strings){
     cm.getConstructor(className, function(classConstructor, className, classProto){
-        classProto.setLangs(strings);
+        classProto.setMessages(strings);
     });
 };
 
-cm.getString = function(className, str){
+cm.getMessage = cm.getString = function(className, str){
     var data;
     cm.getConstructor(className, function(classConstructor, className, classProto){
-        data = classProto.lang(str);
+        data = classProto.message(str);
     });
     return data;
 };
 
-cm.getStrings = function(className, o){
+cm.getMessages = cm.getStrings = function(className, o){
     var data;
     cm.getConstructor(className, function(classConstructor, className, classProto){
-        data = classProto.langObject(o);
+        data = classProto.messageObject(o);
     });
     return data;
 };
+
 /* ******* EXTEND ******* */
 
 Mod['Extend'] = {
@@ -6004,6 +6348,10 @@ Mod['Params'] = {
     'getParams' : function(key){
         var that = this;
         return key ? that.params[key] : that.params;
+    },
+    'getRawParams' : function(key){
+        var that = this;
+        return key ? that._raw.params[key] : that._raw.params;
     }
 };
 
@@ -6087,16 +6435,31 @@ Mod['Events'] = {
         }
         return that;
     },
+    'removeAllEvent' : function(event){
+        var that = this;
+        that.events = cm.clone(that.events);
+        if(that.events[event]){
+            that.events = [];
+        }else{
+            cm.errorLog({
+                'type' : 'attention',
+                'name' : that._name['full'],
+                'message' : [cm.strWrap(event, '"'), 'does not exists.'].join(' ')
+            });
+        }
+        return that;
+    },
     'triggerEvent' : function(event, params){
         var that = this,
-            args = cm.clone(arguments),
+            data = cm.clone(arguments),
             events;
-        args[0] = that;
+        // Replace event name parameter with context (legacy) in data
+        data[0] = that;
         if(that.events[event]){
-            events = that.events[event].slice();
-            for(var i = 0, l = events.length; i < l; i++){
-                events[i].apply(that, args);
-            }
+            events = cm.clone(that.events[event]);
+            cm.forEach(events, function(event){
+                event.apply(that, data);
+            });
         }else{
             cm.errorLog({
                 'type' : 'attention',
@@ -6146,34 +6509,75 @@ Mod['Langs'] = {
         var that = this;
         that.strings = cm.merge(that.strings, that.params['langs']);
     },
-    'lang' : function(str, vars){
+    'lang' : function(str, vars, plural){
         var that = this,
             langStr;
         if(cm.isUndefined(str) || cm.isEmpty(str)){
             return '';
         }
+        // Get string
+        langStr = that.getLang(str);
+        if(cm.isUndefined(langStr)){
+            langStr = str;
+        }
+        // Process variable
+        if(cm.isObject(langStr) || cm.isArray(langStr)){
+            langStr = cm.objectReplace(langStr, vars);
+        }else{
+            langStr = cm.strReplace(langStr, vars);
+        }
+        // Plural
+        if(!cm.isUndefined(plural) && cm.isArray(langStr)){
+            langStr = cm.plural(plural, langStr);
+        }
+        return langStr;
+    },
+    'message' : function(){
+        var that = this;
+        return that.lang.apply(that, arguments);
+    },
+    'msg' : function(){
+        var that = this;
+        return that.lang.apply(that, arguments);
+    },
+    'getLang' : function(str){
+        var that = this,
+            langStr;
+        if(cm.isUndefined(str) || cm.isEmpty(str)){
+            return;
+        }
         // Try to get string from current controller params array
-        langStr = cm.objectPath(str, that.params['langs']);
+        langStr = cm.objectPath(str, that.params.langs);
         // Try to get string from current controller strings array
         if(cm.isUndefined(langStr)){
             langStr = cm.objectPath(str, that.strings);
         }
         // Try to get string from parent controller
         if(cm.isUndefined(langStr) && that._inherit){
-            langStr = that._inherit.prototype.lang(str);
+            langStr = that._inherit.prototype.getMsg(str);
         }
-        // We tried everything we could
-        if(cm.isUndefined(langStr)){
-            langStr = str;
-        }
-        // Process variable
-        langStr = cm.strReplace(langStr, vars);
         return langStr;
+    },
+    'getMessage' : function(){
+        var that = this;
+        return that.getLang.apply(that, arguments);
+    },
+    'getMsg' : function(){
+        var that = this;
+        return that.getLang.apply(that, arguments);
     },
     'langObject' : function(str){
         var that = this,
             o = that.lang(str);
         return cm.isObject(o) || cm.isArray(o) ? o : {};
+    },
+    'messageObject' : function(){
+        var that = this;
+        return that.langObject.apply(that, arguments);
+    },
+    'msgObject' : function(){
+        var that = this;
+        return that.langObject.apply(that, arguments);
     },
     'setLangs' : function(o){
         var that = this;
@@ -6185,6 +6589,14 @@ Mod['Langs'] = {
             }
         }
         return that;
+    },
+    'setMessages' : function(){
+        var that = this;
+        return that.setLangs.apply(that, arguments);
+    },
+    'setMsgs' : function(){
+        var that = this;
+        return that.setLangs.apply(that, arguments);
     }
 };
 
@@ -6513,7 +6925,7 @@ Mod['Stack'] = {
     },
     'getStackNode' : function(){
         var that = this;
-        return that._stackItem['node'];
+        return that._stackItem ? that._stackItem['node'] : null;
     }
 };
 
@@ -6534,30 +6946,33 @@ Mod['Structure'] = {
             that.build['params']['embedStructure'] = 'append';
         }
     },
-    'embedStructure' : function(node){
+    'embedStructure' : function(node, container){
         var that = this;
         switch(that.params['embedStructure']){
             case 'replace':
                 that.replaceStructure(node);
                 break;
             case 'append':
-                that.appendStructure(node, 'insertLast');
+            case 'last':
+                that.appendStructure(node, 'insertLast', container);
                 break;
+            case 'prepend':
             case 'first':
-                that.appendStructure(node, 'insertFirst');
+                that.appendStructure(node, 'insertFirst', container);
                 break;
         }
         return that;
     },
-    'appendStructure' : function(node, type){
+    'appendStructure' : function(node, type, container){
         var that = this;
-        var container = that.params['container'] || that.params['node'];
+        container = container || that.params['container'] || that.params['node'];
         container && cm[type](node, container);
         return that;
     },
-    'replaceStructure' : function(node){
+    'replaceStructure' : function(node, container){
         var that = this;
-        if(that.params['container']){
+        container = container || that.params['container'];
+        if(container){
             if(that.params['container'] === that.params['node']){
                 cm.insertBefore(node, that.params['node']);
             }else{
@@ -6570,6 +6985,7 @@ Mod['Structure'] = {
         return that;
     }
 };
+
 Part['Menu'] = (function(){
     var processedNodes = [],
         pageSize;
@@ -6656,7 +7072,7 @@ Part['Menu'] = (function(){
             items = [],
             item;
         cm.forEach(menus, function(node){
-            if(!cm.inArray(processedNodes, node)){
+            if(!cm.inArray(processedNodes, node) && !cm.hasClass(node, 'is-manual')){
                 item = {
                     'node' : node,
                     'drop' : cm.getByClass('pt__menu-dropdown', node)[0]
@@ -6717,6 +7133,7 @@ Part['Autoresize'] = (function(){
         cm.forEach(nodes, process);
     };
 })();
+
 cm.init = function(){
     var init = function(){
         cm._isDocumentReady = true;
@@ -6802,6 +7219,9 @@ cm.init = function(){
             cm._scrollSize = cm.getScrollBarSize();
             if(size !== cm._scrollSize){
                 size = cm._scrollSize;
+                cm.hook.trigger('scrollSizeChange', {
+                    'scrollSize' : cm._scrollSize
+                });
                 cm.customEvent.trigger(window, 'scrollSizeChange', {
                     'direction' : 'all',
                     'self' : true,
@@ -6818,6 +7238,9 @@ cm.init = function(){
             sizeNew = JSON.stringify(cm._pageSize);
             if(size !== sizeNew){
                 size = sizeNew;
+                cm.hook.trigger(window, 'pageSizeChange', {
+                    'pageSize' : cm._pageSize
+                });
                 cm.customEvent.trigger(window, 'pageSizeChange', {
                     'direction' : 'all',
                     'self' : true,
@@ -6866,6 +7289,129 @@ cm.load = function(){
 
 cm.onReady(cm.init, false);
 cm.onLoad(cm.load, false);
+
+/**
+ * Find the differences between two objects and push to a new object
+ * (c) 2019 Chris Ferdinandi & Jascha Brinkmann, MIT License, https://gomakethings.com & https://twitter.com/jaschaio
+ * @param  {Object} obj1 The original object
+ * @param  {Object} obj2 The object to compare against it
+ * @return {Object}      An object of differences between the two
+ */
+cm.diff = function (obj1, obj2) {
+
+    // Make sure an object to compare is provided
+    if (!obj2 || Object.prototype.toString.call(obj2) !== '[object Object]') {
+        return obj1;
+    }
+
+    //
+    // Variables
+    //
+
+    var diffs = {};
+    var key;
+
+    //
+    // Compare our objects
+    //
+
+    // Loop through the first object
+    for (key in obj1) {
+        if (obj1.hasOwnProperty(key)) {
+            cm.diffCompare(diffs, obj1[key], obj2[key], key);
+        }
+    }
+
+    // Loop through the second object and find missing items
+    for (key in obj2) {
+        if (obj2.hasOwnProperty(key)) {
+            if (!obj1[key] && obj1[key] !== obj2[key] ) {
+                diffs[key] = obj2[key];
+            }
+        }
+    }
+
+    // Return the object of differences
+    return diffs;
+
+};
+
+/**
+ * Compare two items and push non-matches to object
+ * @param  {Object} diffs The diffs object
+ * @param  {*}      item1 The first item
+ * @param  {*}      item2 The second item
+ * @param  {String} key   The key in our object
+ */
+cm.diffCompare = function (diffs, item1, item2, key) {
+
+    // Get the object type
+    var type1 = Object.prototype.toString.call(item1);
+    var type2 = Object.prototype.toString.call(item2);
+
+    // If type2 is undefined it has been removed
+    if (type2 === '[object Undefined]') {
+        diffs[key] = null;
+        return;
+    }
+
+    // If items are different types
+    if (type1 !== type2) {
+        diffs[key] = item2;
+        return;
+    }
+
+    // If an object, compare recursively
+    if (type1 === '[object Object]') {
+        var objDiff = cm.diff(item1, item2);
+        if (Object.keys(objDiff).length > 0) {
+            diffs[key] = objDiff;
+        }
+        return;
+    }
+
+    // If an array, compare
+    if (type1 === '[object Array]') {
+        if (!cm.diffArraysMatch(item1, item2)) {
+            diffs[key] = item2;
+        }
+        return;
+    }
+
+    // Else if it's a function, convert to a string and compare
+    // Otherwise, just compare
+    if (type1 === '[object Function]') {
+        if (item1.toString() !== item2.toString()) {
+            diffs[key] = item2;
+        }
+    } else {
+        if (item1 !== item2 ) {
+            diffs[key] = item2;
+        }
+    }
+
+};
+
+/**
+ * Check if two arrays are equal
+ * @param  {Array}   arr1 The first array
+ * @param  {Array}   arr2 The second array
+ * @return {Boolean}      If true, both arrays are equal
+ */
+cm.diffArraysMatch = function (arr1, arr2) {
+
+    // Check if the arrays are the same length
+    if (arr1.length !== arr2.length) return false;
+
+    // Check if all items exist and are in the same order
+    for (var i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+    }
+
+    // Otherwise, return true
+    return true;
+
+};
 cm.define('Com.AbstractController', {
     'modules' : [
         'Params',
@@ -7153,28 +7699,30 @@ cm.getConstructor('Com.AbstractController', function(classConstructor, className
         return that;
     };
 
-    classProto.constructCollector = function(){
+    classProto.constructCollector = function(node){
         var that = this;
+        node = cm.isUndefined(node) ? that.getStackNode() : node;
         if(that.params['constructCollector']){
             if(that.params['collector']){
-                that.params['collector'].construct(that.getStackNode());
+                that.params['collector'].construct(node);
             }else{
                 cm.find('Com.Collector', null, null, function(classObject){
-                    classObject.construct(that.getStackNode());
+                    classObject.construct(node);
                 });
             }
         }
         return that;
     };
 
-    classProto.destructCollector = function(){
+    classProto.destructCollector = function(node){
         var that = this;
+        node = cm.isUndefined(node) ? that.getStackNode() : node;
         if(that.params['destructCollector']){
             if(that.params['collector']){
-                that.params['collector'].destruct(that.getStackNode());
+                that.params['collector'].destruct(node);
             }else{
                 cm.find('Com.Collector', null, null, function(classObject){
-                    classObject.destruct(that.getStackNode());
+                    classObject.destruct(node);
                 });
             }
         }
@@ -7205,6 +7753,7 @@ cm.define('Com.AbstractContainer', {
         'embedStructure' : 'none',
         'controllerEvents' : true,
         'constructor' : null,
+        'constructorParams' : {},
         'params' : {},
         'placeholder' : false,
         'placeholderConstructor' : null,
@@ -7228,6 +7777,8 @@ function(params){
 cm.getConstructor('Com.AbstractContainer', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
+        // Variables
+        that.isOpen = false;
         that.targetNode = null;
         // Bind context to methods
         that.openHandler = that.open.bind(that);
@@ -7256,6 +7807,8 @@ cm.getConstructor('Com.AbstractContainer', function(classConstructor, className,
         that.params['params']['node'] = that.params['node'];
         that.params['params']['container'] = that.params['container'];
         that.triggerEvent('onValidateParamsEnd');
+        // TODO: replace that.params['params'] to that.params['constructorParams']
+        that.params['params'] = cm.merge(that.params['constructorParams'], that.params['params']);
     };
 
     classProto.open = function(e){
@@ -7340,6 +7893,7 @@ cm.getConstructor('Com.AbstractContainer', function(classConstructor, className,
         var that = this;
         return new classObject(
             cm.merge(that.params['params'], {
+                'opener' : that,
                 'container' : that.params['placeholder'] ? that.nodes['placeholder']['content'] : that.params['container'],
                 'content' : that.params['params']['content'] || that.params['content']
             })
@@ -7381,16 +7935,19 @@ cm.getConstructor('Com.AbstractContainer', function(classConstructor, className,
 
     classProto.afterOpenController = function(){
         var that = this;
+        that.isOpen = true;
         that.triggerEvent('onOpen', that.components['controller']);
     };
 
     classProto.afterOpenControllerEnd = function(){
         var that = this;
+        that.isOpen = true;
         that.triggerEvent('onOpenEnd', that.components['controller']);
     };
 
     classProto.afterCloseController = function(){
         var that = this;
+        that.isOpen = false;
         if(that.params['destructOnClose']){
             that.destructController();
         }
@@ -7418,6 +7975,7 @@ cm.getConstructor('Com.AbstractContainer', function(classConstructor, className,
         var that = this;
         return new classObject(
             cm.merge(that.params['placeholderParams'], {
+                'opener' : that,
                 'content' : that.nodes['placeholder']
             })
         );
@@ -7502,6 +8060,7 @@ cm.getConstructor('Com.AbstractContainer', function(classConstructor, className,
         that.triggerEvent('onClosePlaceholder', that.components['placeholder']);
     };
 });
+
 cm.define('Com.AbstractInput', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -7530,8 +8089,10 @@ cm.define('Com.AbstractInput', {
         'id' : '',
         'title' : '',
         'placeholder' : '',
+        'autocomplete' : null,
         'ariaLabel' : '',
         'disabled' : false,
+        'checked' : null,
         'className' : '',
         'contentClassName' : '',
         'adaptive' : true,
@@ -7655,12 +8216,14 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
             that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
             that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
             that.params['disabled'] = that.params['node'].disabled || that.params['node'].readOnly || that.params['disabled'];
+            that.params['checked'] = that.params['node'].checked || that.params['checked'];
             that.params['required'] = that.params['node'].required || that.params['required'];
             that.params['minLength'] = that.params['node'].getAttribute('minlength') || that.params['minLength'];
             that.params['maxLength'] = that.params['node'].getAttribute('maxlength') || that.params['maxLength'];
             that.params['min'] = that.params['node'].getAttribute('min') || that.params['min'];
             that.params['max'] = that.params['node'].getAttribute('max') || that.params['max'];
             that.params['placeholder'] = that.params['node'].getAttribute('placeholder') || that.params['placeholder'];
+            that.params['autocomplete'] = that.params['node'].getAttribute('autocomplete') || that.params['autocomplete'];
             that.params['ariaLabel'] = that.params['node'].getAttribute('aria-label') || that.params['ariaLabel'];
         }
         that.triggerEvent('onValidateParams');
@@ -7916,6 +8479,7 @@ cm.getConstructor('Com.AbstractInput', function(classConstructor, className, cla
         return that;
     };
 });
+
 cm.define('Com.AbstractFileManager', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -8243,7 +8807,8 @@ cm.define('Com.AbstractFormField', {
         'renderError' : true,
         'renderErrorMessage' : true,
         'form' : false,
-        'rawValue' : false,
+        'outputValueType' : 'auto',      // 'auto' | 'raw' | 'text'
+        'inputValueType' : 'auto',       // 'auto' | 'unset'
         'value' : null,
         'defaultValue' : null,
         'dataValue' : null,
@@ -8253,18 +8818,22 @@ cm.define('Com.AbstractFormField', {
         'maxLength' : 0,
         'min' : 0,
         'max' : 0,
+        'multiple' : false,
         'type' : false,
         'label' : '',
         'help' : null,
         'helpType' : 'tooltip', // tooltip | container
         'icon' : false,
         'placeholder' : '',
+        'placeholderAsterisk' : true,
+        'autocomplete' : null,
         'showPlaceholderAbove' : false,
         'title' : '',
         'hint' : '',
         'messagePosition' : 'content', // label | content
         'visible' : true,
         'disabled' : false,
+        'checked' : null,
         'renderName' : false,
         'options' : [],
         'constraints' : [
@@ -8277,8 +8846,7 @@ cm.define('Com.AbstractFormField', {
         'validate' : false,
         'constructor' : false,
         'constructorParams' : {
-            'removeOnDestruct' : false,
-            'formData' : true
+            'removeOnDestruct' : false
         },
         'preload' : false,
         'responseKey' : 'data',
@@ -8286,7 +8854,8 @@ cm.define('Com.AbstractFormField', {
             'type' : 'json',
             'method' : 'get'
         },
-        'Com.HelpBubble' : {
+        'helpConstructor' : 'Com.HelpBubble',
+        'helpParams' : {
             'renderStructure' : true,
             'embedStructureOnRender' : true
         }
@@ -8331,7 +8900,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
     classProto.onConstructEnd = function(){
         var that = this;
         if(that.isAjax){
-            that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params['ajax']));
+            that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params.ajax));
         }
     };
 
@@ -8346,56 +8915,64 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
     classProto.onValidateParams = function(){
         var that = this;
         that.validateParamsValue();
-        that.attributeName = that.params['formName'] + '[' + that.params['name'] + ']';
+        that.attributeName = that.params.formName + '[' + that.params.name + ']';
         // Validate
-        if(that.params['required'] && that.params['requiredAsterisk'] && !cm.isEmpty(that.params['placeholder'])){
-            that.params['placeholder'] += ' *';
+        if(
+            that.params.required
+            && that.params.requiredAsterisk
+            && that.params.placeholderAsterisk
+            && !cm.isEmpty(that.params.placeholder)
+        ){
+            that.params.placeholder = [that.params.placeholder, that.lang('*')].join(' ');
         }
         // Constructor params
-        that.params['constructorParams']['id'] = that.params['id'];
-        that.params['constructorParams']['name'] = that.params['name'];
-        that.params['constructorParams']['visibleName'] = that.params['visibleName'];
-        that.params['constructorParams']['renderName'] = that.params['renderName'];
-        that.params['constructorParams']['options'] = !cm.isEmpty(that.params['options']) ? that.params['options'] : that.params['constructorParams']['options'];
-        that.params['constructorParams']['value'] = !cm.isEmpty(that.params['dataValue']) ? that.params['dataValue'] : that.params['value'];
-        that.params['constructorParams']['defaultValue'] = that.params['defaultValue'];
-        that.params['constructorParams']['required'] = that.params['required'];
-        that.params['constructorParams']['validate'] = that.params['validate'];
-        that.params['constructorParams']['disabled'] = that.params['disabled'];
-        that.params['constructorParams']['minLength'] = that.params['minLength'];
-        that.params['constructorParams']['maxLength'] = that.params['maxLength'];
-        that.params['constructorParams']['min'] = that.params['min'];
-        that.params['constructorParams']['max'] = that.params['max'];
-        that.params['constructorParams']['placeholder'] = !that.params['showPlaceholderAbove'] ? that.params['placeholder'] : '';
-        that.params['constructorParams']['title'] = that.params['title'];
-        that.params['constructorParams']['ajax'] = that.params['ajax'];
+        that.params.constructorParams.id = that.params.id;
+        that.params.constructorParams.name = that.params.name;
+        that.params.constructorParams.visibleName = that.params.visibleName;
+        that.params.constructorParams.renderName = that.params.renderName;
+        that.params.constructorParams.options = !cm.isEmpty(that.params.options) ? that.params.options : that.params.constructorParams.options;
+        that.params.constructorParams.value = !cm.isEmpty(that.params.dataValue) ? that.params.dataValue : that.params.value;
+        that.params.constructorParams.defaultValue = that.params.defaultValue;
+        that.params.constructorParams.required = that.params.required;
+        that.params.constructorParams.validate = that.params.validate;
+        that.params.constructorParams.disabled = that.params.disabled;
+        that.params.constructorParams.checked = that.params.checked;
+        that.params.constructorParams.minLength = that.params.minLength;
+        that.params.constructorParams.maxLength = that.params.maxLength;
+        that.params.constructorParams.min = that.params.min;
+        that.params.constructorParams.max = that.params.max;
+        that.params.constructorParams.multiple = that.params.multiple;
+        that.params.constructorParams.placeholder = !that.params.showPlaceholderAbove ? that.params.placeholder : '';
+        that.params.constructorParams.autocomplete = that.params.autocomplete;
+        that.params.constructorParams.title = that.params.title;
+        that.params.constructorParams.ajax = that.params.ajax;
         // Components
-        that.params['Com.HelpBubble']['title'] = that.params['label'];
-        that.params['Com.HelpBubble']['content'] = that.params['help'];
-        that.params['Com.HelpBubble']['name'] = that.params['name'];
-        that.params['Com.HelpBubble']['type'] = that.params['helpType'];
-        that.components['form'] = that.params['form'];
-        that.nodeTagName = that.params['node'].tagName.toLowerCase();
+        that.params.helpParams.title = that.params.label;
+        that.params.helpParams.content = that.params.help;
+        that.params.helpParams.name = that.params.name;
+        that.params.helpParams.type = that.params.helpType;
+        that.components.form = that.params.form;
+        that.nodeTagName = that.params.node.tagName.toLowerCase();
         // Ajax
-        if(that.params['preload'] && !cm.isEmpty(that.params['ajax']) && !cm.isEmpty(that.params['ajax']['url'])){
+        if(that.params.preload && !cm.isEmpty(that.params.ajax) && !cm.isEmpty(that.params.ajax.url)){
             that.isAjax = true;
         }
     };
 
     classProto.validateParamsValue = function(){
         var that = this;
-        that.params['value'] = that.validateParamsValueHelper(that.params['value']);
-        that.params['defaultValue'] = that.validateParamsValueHelper(that.params['defaultValue']);
-        that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
-        that.params['dataValue'] = !cm.isEmpty(that.params['dataValue']) ? that.params['dataValue'] : that.params['isOptionValue'] ? that.params['value'] : null;
+        that.params.value = that.validateParamsValueHelper(that.params.value);
+        that.params.defaultValue = that.validateParamsValueHelper(that.params.defaultValue);
+        that.params.value = !cm.isEmpty(that.params.value) ? that.params.value : that.params.defaultValue;
+        that.params.dataValue = !cm.isEmpty(that.params.dataValue) ? that.params.dataValue : that.params.isOptionValue ? that.params.value : null;
     };
 
     classProto.validateParamsValueHelper = function(value){
         var that = this;
-        if(that.params['isValueOption'] && !cm.isEmpty(value)){
+        if(that.params.isValueOption && !cm.isEmpty(value)){
             if(cm.isObject(value)){
-                value['value'] = !cm.isEmpty(value['value']) ? value['value'] : value['text'];
-                value['text'] = !cm.isEmpty(value['text']) ? value['text'] : value['value'];
+                value.value = !cm.isEmpty(value.value) ? value.value : value.text;
+                value.text = !cm.isEmpty(value.text) ? value.text : value.value;
             }else{
                 value = {
                     'value' : value,
@@ -8412,18 +8989,18 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         var that = this;
         that.triggerEvent('onRenderViewStart');
         // Render field structure
-        if(that.params['renderStructureField']){
+        if(that.params.renderStructureField){
             that.renderFiled();
         }
         // Render custom structure
-        if(that.params['renderStructureContent']){
-            that.nodes['contentContainer'] = that.renderContent();
+        if(that.params.renderStructureContent){
+            that.nodes.contentContainer = that.renderContent();
         }
         // Embed
-        if(that.params['renderStructureField']){
-            cm.insertFirst(that.nodes['contentContainer'], that.nodes['value']);
-        }else if(that.params['renderStructureContent']){
-            that.nodes['container'] = that.nodes['contentContainer'];
+        if(that.params.renderStructureField){
+            cm.insertFirst(that.nodes.contentContainer, that.nodes.value);
+        }else if(that.params.renderStructureContent){
+            that.nodes.container = that.nodes.contentContainer;
         }
         that.triggerEvent('onRenderViewProcess');
         that.triggerEvent('onRenderViewEnd');
@@ -8431,68 +9008,64 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
 
     classProto.renderFiled = function(){
         var that = this;
-        that.nodes['container'] = cm.node('dl', {'class' : 'pt__field'},
-            that.nodes['label'] = cm.node('dt'),
-            that.nodes['value'] = cm.node('dd')
+        that.nodes.container = cm.node('dl', {'class' : 'pt__field'},
+            that.nodes.label = cm.node('dt'),
+            that.nodes.value = cm.node('dd')
         );
-        if(!that.nodes['messages']){
-            switch(that.params['messagePosition']){
+        if(!that.nodes.messages){
+            switch(that.params.messagePosition){
                 case 'label':
-                    that.nodes['messages'] = that.nodes['label'];
+                    that.nodes.messages = that.nodes.label;
                     break;
                 case 'content':
                 case 'value':
-                    that.nodes['messages'] = that.nodes['value'];
+                    that.nodes.messages = that.nodes.value;
                     break;
             }
         }
         // Label
-        if(!cm.isEmpty(that.params['label'])){
-            that.nodes['labelText'] = cm.node('label', {'for' : that.attributeName, 'innerHTML' : that.params['label']});
-            cm.appendChild(that.nodes['labelText'], that.nodes['label']);
+        if(!cm.isEmpty(that.params.label)){
+            that.nodes.labelText = cm.node('label', {'for' : that.attributeName, 'innerHTML' : that.params.label});
+            cm.appendChild(that.nodes.labelText, that.nodes.label);
         }
         // Required
-        if(that.params['required'] && that.params['requiredAsterisk']){
-            that.nodes['required'] = cm.node('span', {'class' : 'required'}, that.lang('*'));
-            cm.appendChild(that.nodes['required'], that.nodes['label']);
+        that.nodes.required = cm.node('span', {'class' : 'required'}, that.lang('*'));
+        if(that.params.required && that.params.requiredAsterisk){
+            cm.appendChild(that.nodes.required, that.nodes.label);
         }
         // Hints
-        if(!cm.isEmpty(that.params['hint'])){
-            that.renderHint(that.params['hint']);
+        if(!cm.isEmpty(that.params.hint)){
+            that.renderHint(that.params.hint);
         }
     };
 
     classProto.renderContent = function(){
         var that = this,
             nodes = {};
-        that.nodes['content'] = nodes;
+        that.nodes.content = nodes;
         // Structure
-        nodes['container'] = cm.node('div', {'class' : 'pt__field__content'},
-            nodes['input'] = that.params['node']
+        nodes.container = cm.node('div', {'class' : 'pt__field__content'},
+            nodes.input = that.params.node
         );
         // Icon
-        if(that.params['icon']){
-            nodes['field'] = cm.node('div', {'class' : 'pt__input'},
-                nodes['input'],
-                nodes['icon'] = cm.node('div', {'class' : that.params['icon']})
+        if(that.params.icon){
+            nodes.field = cm.node('div', {'class' : 'pt__input'},
+                nodes.input,
+                nodes.icon = cm.node('div', {'class' : that.params.icon})
             );
-            cm.addEvent(nodes['icon'], 'click', that.focusHandler);
-            cm.appendChild(nodes['field'], nodes['container']);
+            cm.addEvent(nodes.icon, 'click', that.focusHandler);
+            cm.appendChild(nodes.field, nodes.container);
         }
         // Placeholder
-        if(that.params['showPlaceholderAbove'] && !cm.isEmpty(that.params['placeholder'])){
-            nodes['placeholder'] = cm.node('label', {'class' : 'placeholder', 'for' : that.attributeName},
-                cm.node('span', {'innerHTML' : that.params['placeholder']})
+        if(that.params.showPlaceholderAbove && !cm.isEmpty(that.params.placeholder)){
+            nodes.placeholder = cm.node('label', {'class' : 'placeholder', 'for' : that.attributeName},
+                cm.node('span', {'innerHTML' : that.params.placeholder})
             );
-            cm.appendChild(nodes['placeholder'], nodes['container']);
-            cm.addClass(nodes['container'], 'is-placeholder-above');
-        }
-        // Options
-        if(!cm.isEmpty(that.params['options'])){
-            that.renderOptions(that.params['options']);
+            cm.appendChild(nodes.placeholder, nodes.container);
+            cm.addClass(nodes.container, 'is-placeholder-above');
         }
         // Export
-        return nodes['container'];
+        return nodes.container;
     };
 
     classProto.renderOptions = function(options){
@@ -8501,10 +9074,11 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         switch(that.nodeTagName){
             case 'select' :
                 cm.forEach(options, function(item){
-                    option = cm.node('option', {'value' : item['value'], 'innerHTML' : item['text']});
-                    cm.appendChild(option, that.nodes['content']['input']);
+                    item.disabled = !cm.isUndefined(item.disabled) ? item.disabled : false;
+                    option = cm.node('option', {'value' : item.value, 'disabled' : item.disabled, 'innerHTML' : item.text});
+                    cm.appendChild(option, that.nodes.content.input);
                 });
-                cm.setSelect(that.nodes['content']['input'], that.params['value']);
+                cm.setSelect(that.nodes.content.input, that.params.value);
                 break;
         }
     };
@@ -8516,43 +9090,56 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         classInherit.prototype.setAttributes.apply(that, arguments);
         // Attributes
         if(!cm.isEmpty(that.attributeName)){
-            that.nodes['content']['input'].setAttribute('id', that.attributeName);
+            that.nodes.content.input.setAttribute('id', that.attributeName);
         }
-        if(!cm.isEmpty(that.params['name'])){
-            that.nodes['content']['input'].setAttribute('name', that.params['name']);
+        if(!cm.isEmpty(that.params.name)){
+            that.nodes.content.input.setAttribute('name', that.params.name);
         }
-        if(!cm.isEmpty(that.params['value']) && that.params['setHiddenValue']){
-            if(that.params['isOptionValue']){
-                value = that.params['value']['value'];
+        if(!cm.isEmpty(that.params.value) && that.params.inputValueType !== 'unset'){
+            if(that.params.isOptionValue){
+                value = that.params.value.value;
+            }else if(cm.isObject(that.params.value) || cm.isArray(that.params.value)){
+                value = cm.stringifyJSON(that.params.value);
             }else{
-                value = that.params['value'];
+                value = that.params.value;
             }
             switch(that.nodeTagName){
-                case 'select' :
-                    cm.setSelect(that.nodes['content']['input'], value);
+                case 'select':
+                    cm.setSelect(that.nodes.content.input, value);
                     break;
-                default :
-                    that.nodes['content']['input'].setAttribute('value', value);
+                default:
+                    that.nodes.content.input.setAttribute('value', value);
                     break;
             }
         }
-        if(!cm.isEmpty(that.params['dataValue'])){
-            that.nodes['content']['input'].setAttribute('data-value', JSON.stringify(that.params['dataValue']));
+        if(!cm.isEmpty(that.params.dataValue)){
+            if(cm.isObject(that.params.dataValue) || cm.isArray(that.params.dataValue)){
+                value = cm.stringifyJSON(that.params.dataValue);
+            }else{
+                value = that.params.dataValue;
+            }
+            that.nodes.content.input.setAttribute('data-value', value);
         }
-        if(!cm.isEmpty(that.params['placeholder']) && !that.params['showPlaceholderAbove']){
-            that.nodes['content']['input'].setAttribute('placeholder', that.params['placeholder']);
-            if(cm.isEmpty(that.params['label']) && cm.isEmpty(that.params['title'])){
-                that.nodes['content']['input'].setAttribute('aria-label', that.params['placeholder']);
+        if(!cm.isEmpty(that.params.placeholder) && !that.params.showPlaceholderAbove){
+            that.nodes.content.input.setAttribute('placeholder', that.params.placeholder);
+            if(cm.isEmpty(that.params.label) && cm.isEmpty(that.params.title)){
+                that.nodes.content.input.setAttribute('aria-label', that.params.placeholder);
             }
         }
-        if(!cm.isEmpty(that.params['title'])){
-            that.nodes['content']['input'].setAttribute('title', that.params['title']);
+        if(!cm.isEmpty(that.params.autocomplete)){
+            that.nodes.content.input.setAttribute('autocomplete', that.params.autocomplete);
         }
-        if(that.params['disabled']){
-            that.nodes['content']['input'].setAttribute('disabled', 'disabled');
+        if(!cm.isEmpty(that.params.title)){
+            that.nodes.content.input.setAttribute('title', that.params.title);
+        }
+        if(that.params.disabled){
+            that.nodes.content.input.setAttribute('disabled', 'disabled');
+        }
+        if(that.params.multiple){
+            that.nodes.content.input.setAttribute('multiple', 'multiple');
         }
         // Classes
-        if(!that.params['visible']){
+        if(!that.params.visible){
             that.hide(false);
         }else{
             that.show(false);
@@ -8563,12 +9150,16 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         var that = this;
         // Call parent method - renderViewModel
         classInherit.prototype.renderViewModel.apply(that, arguments);
+        // Options
+        if(!cm.isEmpty(that.params.options)){
+            that.renderOptions(that.params.options);
+        }
         // Help Bubble
-        if(!cm.isEmpty(that.params['help'])){
-            cm.getConstructor('Com.HelpBubble', function(classConstructor){
-                that.components['help'] = new classConstructor(
-                    cm.merge(that.params['Com.HelpBubble'], {
-                        'container' : that.nodes['label']
+        if(!cm.isEmpty(that.params.help)){
+            cm.getConstructor(that.params.helpConstructor, function(classConstructor){
+                that.components.help = new classConstructor(
+                    cm.merge(that.params.helpParams, {
+                        'container' : that.nodes.label
                     })
                 );
             });
@@ -8577,17 +9168,16 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         if(!that.isAjax || that.isPreloaded){
             that.renderController();
         }
-        return that;
     };
 
     classProto.renderController = function(){
         var that = this;
-        if(that.params['constructor']){
-            cm.getConstructor(that.params['constructor'], function(classObject){
-                that.components['controller'] = new classObject(
-                    cm.merge(that.params['constructorParams'], {
-                        'node' : that.nodes['content']['input'],
-                        'form' : that.components['form'],
+        if(that.params.constructor){
+            cm.getConstructor(that.params.constructor, function(classObject){
+                that.components.controller = new classObject(
+                    cm.merge(that.params.constructorParams, {
+                        'node' : that.nodes.content.input,
+                        'form' : that.components.form,
                         'formField' : that
                     })
                 );
@@ -8599,22 +9189,21 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
 
     classProto.renderControllerEvents = function(){
         var that = this;
-        that.components['controller'].addEvent('onFocus', that.focusEventHandler);
-        that.components['controller'].addEvent('onBlur', that.blurEventHandler);
-        that.components['controller'].addEvent('onSelect', that.selectEventHandler);
-        that.components['controller'].addEvent('onInput', that.inputEventHandler);
-        that.components['controller'].addEvent('onChange', that.changeEventHandler);
-        that.components['controller'].addEvent('onReset', that.resetEventHandler);
-        return that;
+        that.components.controller.addEvent('onFocus', that.focusEventHandler);
+        that.components.controller.addEvent('onBlur', that.blurEventHandler);
+        that.components.controller.addEvent('onSelect', that.selectEventHandler);
+        that.components.controller.addEvent('onInput', that.inputEventHandler);
+        that.components.controller.addEvent('onChange', that.changeEventHandler);
+        that.components.controller.addEvent('onReset', that.resetEventHandler);
     };
 
     classProto.togglePlaceholder = function(){
         var that = this;
-        if(that.params['showPlaceholderAbove']){
+        if(that.params.showPlaceholderAbove){
             if(that.isFocus || !cm.isEmpty(that.getText())){
-                cm.addClass(that.nodes['content']['placeholder'], 'pull-top');
+                cm.addClass(that.nodes.content.placeholder, 'pull-top');
             }else{
-                cm.removeClass(that.nodes['content']['placeholder'], 'pull-top');
+                cm.removeClass(that.nodes.content.placeholder, 'pull-top');
             }
         }
     };
@@ -8661,31 +9250,36 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
 
     classProto.set = function(value, triggerEvents){
         var that = this;
-        that.components['controller'] && cm.isFunction(that.components['controller'].set) && that.components['controller'].set(value, triggerEvents);
+        that.components.controller && cm.isFunction(that.components.controller.set) && that.components.controller.set(value, triggerEvents);
         return that;
     };
 
-    classProto.get = function(){
+    classProto.get = function(type){
         var that = this;
-        if(that.params['rawValue']){
-            return that.getRaw();
+        type = !cm.isUndefined(type) ? type : that.params.outputValueType;
+        switch(type){
+            case 'raw':
+                return that.getRaw();
+            case 'text':
+                return that.getText();
+            default:
+                return that.components.controller && cm.isFunction(that.components.controller.get) ? that.components.controller.get() : null;
         }
-        return that.components['controller'] && cm.isFunction(that.components['controller'].get) ? that.components['controller'].get() : null;
     };
 
     classProto.getRaw = function(){
         var that = this;
-        return that.components['controller'] && cm.isFunction(that.components['controller'].getRaw) ? that.components['controller'].getRaw() : that.get();
+        return that.components.controller && cm.isFunction(that.components.controller.getRaw) ? that.components.controller.getRaw() : that.get();
     };
 
     classProto.getText = function(){
         var that = this;
-        return that.components['controller'] && cm.isFunction(that.components['controller'].getText) ? that.components['controller'].getText() : that.get();
+        return that.components.controller && cm.isFunction(that.components.controller.getText) ? that.components.controller.getText() : that.get();
     };
 
     classProto.reset = function(){
         var that = this;
-        that.components['controller'] && cm.isFunction(that.components['controller'].reset) && that.components['controller'].reset();
+        that.components.controller && cm.isFunction(that.components.controller.reset) && that.components.controller.reset();
         return that;
     };
 
@@ -8695,62 +9289,72 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
             testData,
             data = {
                 'field' : that,
-                'form' : that.components['form'],
+                'form' : that.components.form,
                 'valid' : true,
                 'message' : null,
                 'value' : that.get()
             };
-        if(cm.isEmpty(data['value'])){
-            if(that.params['required']){
-                data['valid'] = false;
-                data['message'] = that.lang('required');
+        if(cm.isEmpty(data.value)){
+            if(that.params.required){
+                data.valid = false;
+                data.message = that.lang('required');
                 return data;
             }else{
-                data['valid'] = true;
+                data.valid = true;
                 return data;
             }
         }
-        if(that.params['minLength'] && data['value'].length < that.params['minLength']){
-            data['valid'] = false;
-            data['message'] = that.lang('too_short', {
-                '%count%' : that.params['minLength']
+        if(that.params.minLength && data.value.length < that.params.minLength){
+            data.valid = false;
+            data.message = that.lang('too_short', {
+                '%count%' : that.params.minLength
             });
             return data;
         }
-        if(that.params['maxLength'] && data['value'].length > that.params['maxLength']){
-            data['valid'] = false;
-            data['message'] = that.lang('too_long', {
-                '%count%' : that.params['maxLength']
+        if(that.params.maxLength && data.value.length > that.params.maxLength){
+            data.valid = false;
+            data.message = that.lang('too_long', {
+                '%count%' : that.params.maxLength
             });
             return data;
         }
-        if(!cm.isEmpty(that.params['constraints'])){
+        if(!cm.isEmpty(that.params.constraints)){
             testData = cm.clone(data);
             constraintsData = that.validateConstraints(testData);
             if(constraintsData){
                 return constraintsData;
             }
         }
-        if(that.components['controller'] && cm.isFunction(that.components['controller'].validate)){
-            return that.components['controller'].validate(data);
+        if(that.components.controller && cm.isFunction(that.components.controller.validate)){
+            return that.components.controller.validate(data);
         }
         return data;
     };
 
-    classProto.validate = function(){
+    classProto.validate = function(options){
         var that = this,
             data;
-        if(!that.params['required'] && !that.params['validate']){
+        // Validate options
+        options = cm.merge({
+            'silent' : false,
+            'triggerEvents' : true
+        }, options);
+
+        if(!that.params.required && !that.params.validate){
             return true;
         }
+
         data = that.validateValue();
-        if(data['valid']){
+        if(data.valid || options.silent){
             that.clearError();
         }else{
-            that.renderError(data['message']);
+            that.renderError(data.message);
         }
-        that.triggerEvent('onValidate', data);
-        return data['valid'];
+
+        if(options.triggerEvents && !options.silent){
+            that.triggerEvent('onValidate', data);
+        }
+        return data.valid;
     };
 
     /*** CONSTRAINTS ***/
@@ -8758,7 +9362,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
     classProto.addConstraint = function(constraint){
         var that = this;
         if(cm.isFunction(constraint)){
-            that.params['constraints'] = cm.arrayAdd(that.params['constraints'], constraint);
+            that.params.constraints = cm.arrayAdd(that.params.constraints, constraint);
         }
         return that;
     };
@@ -8766,7 +9370,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
     classProto.removeConstraint = function(constraint){
         var that = this;
         if(cm.isFunction(constraint)){
-            that.params['constraints'] = cm.arrayRemove(that.params['constraints'], constraint);
+            that.params.constraints = cm.arrayRemove(that.params.constraints, constraint);
         }
         return that;
     };
@@ -8775,10 +9379,10 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         var that = this,
             constraintsTest,
             constraintsData;
-        constraintsTest = that.params['constraints'].some(function(item){
+        constraintsTest = that.params.constraints.some(function(item){
             if(cm.isFunction(item)){
                 constraintsData = item(data);
-                return !constraintsData['valid'];
+                return !constraintsData.valid;
             }
             return false;
         });
@@ -8790,45 +9394,65 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
 
     /******* MESSAGES *******/
 
-    classProto.renderHint = function(message){
-        var that = this;
+    classProto.renderHint = function(message, params){
+        var that = this,
+            messageNode;
+        params = cm.merge({
+            'className' : null
+        },params);
+
         that.clearHint();
-        that.nodes['hints'] = cm.node('ul', {'class' : 'pt__field__hint'},
-            cm.node('li', {'innerHTML' : message})
+        that.nodes.hints = cm.node('ul', {'class' : 'pt__field__hint'},
+            messageNode = cm.node('li', {'innerHTML' : message})
         );
-        if(that.params['renderError'] && that.nodes['errors'] && cm.inDOM(that.nodes['errors'])){
-            cm.insertBefore(that.nodes['hints'], that.nodes['errors']);
-        }else{
-            cm.appendChild(that.nodes['hints'], that.nodes['messages']);
+        if(!cm.isEmpty(params.className)){
+            cm.addClass(messageNode, params.className);
         }
+        if(that.params.renderError && that.nodes.errors && cm.inDOM(that.nodes.errors)){
+            cm.insertBefore(that.nodes.hints, that.nodes.errors);
+        }else{
+            cm.appendChild(that.nodes.hints, that.nodes.messages);
+        }
+
         return that;
     };
 
     classProto.clearHint = function(){
         var that = this;
-        cm.remove(that.nodes['hints']);
+        cm.remove(that.nodes.hints);
         return that;
     };
 
-    classProto.renderError = function(message){
-        var that = this;
+    classProto.renderError = function(message, params){
+        var that = this,
+            messageNode;
+        params = cm.merge({
+            'className' : 'error'
+        },params);
+
         that.clearError();
-        if(that.params['renderError']){
-            cm.addClass(that.nodes['container'], 'error');
-            if(that.params['renderErrorMessage'] && !cm.isEmpty(message)){
-                that.nodes['errors'] = cm.node('ul', {'class' : 'pt__field__error pt__field__hint'},
-                    cm.node('li', {'class' : 'error', 'innerHTML' : message})
-                );
-                cm.insertLast(that.nodes['errors'], that.nodes['messages']);
-            }
+        if(!that.params.renderError){
+            return that;
         }
+
+        cm.addClass(that.nodes.container, 'error');
+        if(that.params.renderErrorMessage && !cm.isEmpty(message)){
+            that.nodes.errors = cm.node('ul', {'class' : 'pt__field__error pt__field__hint'},
+                messageNode = cm.node('li', {'innerHTML' : message})
+            );
+            if(!cm.isEmpty(params.className)){
+                cm.addClass(messageNode, params.className);
+            }
+            cm.insertLast(that.nodes.errors, that.nodes.messages);
+        }
+
         return that;
     };
 
     classProto.clearError = function(){
         var that = this;
-        cm.removeClass(that.nodes['container'], 'error');
-        cm.remove(that.nodes['errors']);
+        cm.removeClass(that.nodes.container, 'error');
+        cm.remove(that.nodes.errors);
         return that;
     };
 
@@ -8839,7 +9463,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         triggerEvent = cm.isUndefined(triggerEvent) ? true : triggerEvent;
         if(!cm.isBoolean(that.isVisible) || !that.isVisible){
             that.isVisible = true;
-            cm.removeClass(that.nodes['container'], 'is-hidden');
+            cm.removeClass(that.nodes.container, 'is-hidden');
             triggerEvent && that.triggerEvent('onShow', that.get());
         }
         return that;
@@ -8850,7 +9474,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         triggerEvent = cm.isUndefined(triggerEvent) ? true : triggerEvent;
         if(!cm.isBoolean(that.isVisible) || that.isVisible){
             that.isVisible = false;
-            cm.addClass(that.nodes['container'], 'is-hidden');
+            cm.addClass(that.nodes.container, 'is-hidden');
             triggerEvent && that.triggerEvent('onHide', that.get());
         }
         return that;
@@ -8858,63 +9482,67 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
 
     classProto.enable = function(){
         var that = this;
-        that.components['controller'] && cm.isFunction(that.components['controller'].enable) && that.components['controller'].enable();
+        that.components.controller && cm.isFunction(that.components.controller.enable) && that.components.controller.enable();
         return that;
     };
 
     classProto.disable = function(){
         var that = this;
-        that.components['controller'] && cm.isFunction(that.components['controller'].disable) && that.components['controller'].disable();
+        that.components.controller && cm.isFunction(that.components.controller.disable) && that.components.controller.disable();
         return that;
     };
 
     classProto.focus = function(){
         var that = this;
-        that.components['controller'] && cm.isFunction(that.components['controller'].focus) && that.components['controller'].focus();
+        that.components.controller && cm.isFunction(that.components.controller.focus) && that.components.controller.focus();
         return that;
     };
 
     classProto.blur = function(){
         var that = this;
-        that.components['controller'] && cm.isFunction(that.components['controller'].blur) && that.components['controller'].blur();
+        that.components.controller && cm.isFunction(that.components.controller.blur) && that.components.controller.blur();
         return that;
     };
 
     classProto.setRequired = function(){
         var that = this;
-        that.params['required'] = true;
+        that.params.required = true;
+        if(that.params.requiredAsterisk){
+            cm.appendChild(that.nodes.required, that.nodes.label);
+        }
         return that;
     };
 
     classProto.unsetRequired = function(){
         var that = this;
-        that.params['required'] = false;
+        that.params.required = false;
+        cm.remove(that.nodes.required);
         return that;
     };
 
     classProto.getController = function(){
         var that = this;
-        return that.components['controller'];
+        return that.components.controller;
     };
 
     classProto.getName = function(){
         var that = this;
-        return that.params['name'];
+        return that.params.name;
     };
 
     classProto.getContainer = function(){
         var that = this;
-        return that.nodes['container'];
+        return that.nodes.container;
     };
 
     /******* CALLBACKS *******/
 
     classProto.callbacks.prepare = function(that, config){
         // Prepare
-        config['url'] = cm.strReplace(config['url'], {
+        config.url = cm.strReplace(config.url, {
             '%baseUrl%' : cm._baseUrl
         });
-        config['params'] = cm.objectReplace(config['params'], {
+        config.params = cm.objectReplace(config.params, {
             '%baseUrl%' : cm._baseUrl
         });
         return config;
@@ -8971,7 +9599,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
 
     classProto.callbacks.filter = function(that, config, response){
         var data = [],
-            dataItem = cm.objectPath(that.params['responseKey'], response);
+            dataItem = cm.objectPath(that.params.responseKey, response);
         if(dataItem && !cm.isEmpty(dataItem)){
             data = dataItem;
         }
@@ -8990,8 +9618,8 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         }else if(!cm.isObject(item)){
             return {'text' : item, 'value' : item};
         }else{
-            if(cm.isUndefined(item['value'])){
-                item['value'] = item['text']
+            if(cm.isUndefined(item.value)){
+                item.value = item.text
             }
             return item;
         }
@@ -9012,6 +9640,7 @@ cm.getConstructor('Com.AbstractFormField', function(classConstructor, className,
         that.triggerEvent('onRequestAbort');
     };
 });
+
 cm.define('Com.AbstractInputContainer', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -9037,16 +9666,14 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.AbstractInputContainer', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.AbstractInputContainer', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         that.resetHandler = that.reset.bind(that);
         that.enableHandler = that.enable.bind(that);
         that.disableHandler = that.disable.bind(that);
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.onValidateParams = function(){
@@ -9586,6 +10213,7 @@ cm.define('Com.Form', {
         'onSendStart',
         'onSend',
         'onSendEnd',
+        'onSet',
         'onChange',
         'onInput',
         'onClear',
@@ -9602,12 +10230,10 @@ cm.define('Com.Form', {
         'renderButtonsSeparator' : true,
         'buttonsAlign' : 'right',
         'renderNames' : false,                                      // Render visual input name attribute
-        'showLoader' : true,
-        'loaderCoverage' : 'fields',                                // fields, all
-        'loaderDelay' : 'cm._config.loadDelay',
         'showNotifications' : true,
         'showSuccessNotification' : false,
         'showValidationNotification' : false,
+        'showValidationMessages' : true,
         'responseKey': 'data',
         'responseErrorsKey': 'errors',
         'responseMessageKey' : 'message',
@@ -9615,21 +10241,27 @@ cm.define('Com.Form', {
         'validate' : false,
         'validateOnChange' : false,
         'validateOnInput' : false,
+        'autoSend' : false,
+        'sendEmptyForm' : true,
         'sendEmptyFields' : false,
+        'sendOnlyChangedFields' : false,
         'data' : {},
         'ajax' : {
             'type' : 'json',
             'method' : 'post',
-            'formData' : true,
+            'paramsType' : 'json',
             'url' : '',                                             // Request URL. Variables: %baseUrl%, %callback% for JSONP.
             'params' : ''                                           // Params object. %baseUrl%, %callback% for JSONP.
         },
         'Com.Notifications' : {},
+        'showLoader' : true,
+        'loaderCoverage' : 'fields',                                // fields, all
         'overlayConstructor' : 'Com.Overlay',
         'overlayParams' : {
             'position' : 'absolute',
             'autoOpen' : false,
-            'removeOnClose' : true
+            'removeOnClose' : true,
+            'lazy' : true
         }
     },
     'strings' : {
@@ -9647,7 +10279,6 @@ function(params){
     that.buttons = {};
     that.constraints = [];
     that.ajaxHandler = null;
-    that.loaderDelay = null;
 
     that.isAjax = false;
     that.isProcess = false;
@@ -9655,85 +10286,87 @@ function(params){
     var init = function(){
         that.renderComponent();
         that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
+        that.convertEvents(that.params.events);
+        that.getDataNodes(that.params.node);
+        that.getDataConfig(that.params.node);
         that.callbacksProcess();
-        that.addToStack(that.params['node']);
+        that.addToStack(that.params.node);
         that.triggerEvent('onRenderStart');
         validateParams();
         render();
-        that.addToStack(that.nodes['container']);
+        that.addToStack(that.nodes.container);
         that.triggerEvent('onRender');
     };
 
     var validateParams = function(){
-        that.params['buttonsAlign'] = cm.inArray(['left', 'center', 'right', 'justify'], that.params['buttonsAlign']) ? that.params['buttonsAlign'] : 'right';
-        that.params['loaderCoverage'] = cm.inArray(['fields', 'all'], that.params['loaderCoverage']) ? that.params['loaderCoverage'] : 'all';
+        that.params.buttonsAlign = cm.inArray(['left', 'center', 'right', 'justify'], that.params.buttonsAlign) ? that.params.buttonsAlign : 'right';
+        that.params.loaderCoverage = cm.inArray(['fields', 'all'], that.params.loaderCoverage) ? that.params.loaderCoverage : 'all';
         // Ajax
-        that.isAjax = that.params['ajax'] && !cm.isEmpty(that.params['ajax']['url']);
+        that.isAjax = that.params.ajax && !cm.isEmpty(that.params.ajax.url);
     };
 
     var render = function(){
-        var overlayContainer;
         // Structure
-        if(that.params['renderStructure']){
-            that.nodes['container'] = cm.node('div', {'class' : 'com__form'},
-                that.nodes['fieldsContainer'] = cm.node('div', {'class' : 'com__form__fields'},
-                    that.nodes['fields'] = cm.node('div', {'class' : 'inner'})
+        if(that.params.renderStructure){
+            that.nodes.container = cm.node('div', {'class' : 'com__form'},
+                that.nodes.fieldsContainer = cm.node('div', {'class' : 'com__form__fields'},
+                    that.nodes.fields = cm.node('div', {'class' : 'inner'})
                 )
             );
             // Notifications
-            that.nodes['notifications'] = cm.node('div', {'class' : 'com__form__notifications'});
+            that.nodes.notifications = cm.node('div', {'class' : 'com__form__notifications'});
             // Buttons
-            that.nodes['buttonsSeparator'] = cm.node('hr');
-            that.nodes['buttonsContainer'] = cm.node('div', {'class' : 'com__form__buttons'},
-                that.nodes['buttons'] = cm.node('div', {'class' : 'pt__buttons is-adaptive'},
-                    that.nodes['buttonsHolder'] = cm.node('div', {'class' : 'inner'})
+            that.nodes.buttonsSeparator = cm.node('hr');
+            that.nodes.buttonsContainer = cm.node('div', {'class' : 'com__form__buttons'},
+                that.nodes.buttons = cm.node('div', {'class' : 'pt__buttons is-adaptive'},
+                    that.nodes.buttonsHolder = cm.node('div', {'class' : 'inner'})
                 )
             );
-            cm.addClass(that.nodes['buttons'], ['pull', that.params['buttonsAlign']].join('-'));
+            cm.addClass(that.nodes.buttons, ['pull', that.params.buttonsAlign].join('-'));
             // Embed
-            that.params['renderButtonsSeparator'] && cm.insertFirst(that.nodes['buttonsSeparator'], that.nodes['buttonsContainer']);
-            that.params['renderButtons'] && cm.appendChild(that.nodes['buttonsContainer'], that.nodes['container']);
-            cm.insertFirst(that.nodes['notifications'], that.nodes['container']);
-            that.embedStructure(that.nodes['container']);
+            that.params.renderButtonsSeparator && cm.insertFirst(that.nodes.buttonsSeparator, that.nodes.buttonsContainer);
+            that.params.renderButtons && cm.appendChild(that.nodes.buttonsContainer, that.nodes.container);
+            cm.insertFirst(that.nodes.notifications, that.nodes.container);
+            that.embedStructure(that.nodes.container);
         }
         // Notifications
         cm.getConstructor('Com.Notifications', function(classConstructor, className){
-            that.components['notifications'] = new classConstructor(
+            that.components.notifications = new classConstructor(
                 cm.merge(that.params[className], {
-                    'container' : that.nodes['notifications']
+                    'container' : that.nodes.notifications
                 })
             );
-            that.components['notifications'].addEvent('onAdd', function(){
-                cm.addClass(that.nodes['notifications'], 'is-show', true);
+            that.components.notifications.addEvent('onAdd', function(){
+                cm.addClass(that.nodes.notifications, 'is-show', true);
             });
-            that.components['notifications'].addEvent('onRemove', function(){
-                if(that.components['notifications'].getLength() === 0){
-                    cm.removeClass(that.nodes['notifications'], 'is-show', true);
+            that.components.notifications.addEvent('onRemove', function(){
+                if(that.components.notifications.getLength() === 0){
+                    cm.removeClass(that.nodes.notifications, 'is-show', true);
                 }
             });
         });
         // Overlay Loader
-        if(that.params['showLoader']){
-            cm.getConstructor(that.params['overlayConstructor'], function(classConstructor){
-                switch(that.params['loaderCoverage']){
+        var overlayContainer;
+        if(that.params.showLoader){
+            cm.getConstructor(that.params.overlayConstructor, function(classConstructor){
+                switch(that.params.loaderCoverage){
                     case 'fields':
-                        overlayContainer = that.nodes['fieldsContainer'];
+                        overlayContainer = that.nodes.fieldsContainer;
                         break;
                     case 'all':
                     default:
-                        overlayContainer = that.nodes['container'];
+                        overlayContainer = that.nodes.container;
                         break;
                 }
-                that.components['loader'] = new classConstructor(
-                    cm.merge(that.params['overlayParams'], {
+                that.components.loader = new classConstructor(
+                    cm.merge(that.params.overlayParams, {
                         'container' : overlayContainer
                     })
                 );
             });
         }
+        // Auto Send
+        that.params.autoSend && that.send();
     };
 
     var renderField = function(type, params){
@@ -9741,54 +10374,74 @@ function(params){
         // Merge params
         params = cm.merge({
             'form' : that,
-            'formName' : that.params['name'],
+            'formName' : that.params.name,
             'system' : false,
-            'send' : true,
             'name' : '',
-            'sendPath' : null,
+            'dataName' : null,
             'label' : '',
+            'originValue' : null,
             'required' : false,
             'validate' : false,
+            'send' : true,
+            'sendEmpty' : true,
+            'sendAlways' : false,
+            'sendPath' : null,
+            'sendCallback' : null,
+            'preventReset' : false,
             'options' : [],
-            'container' : that.nodes['fields'],
-            'renderName' : null
+            'container' : that.nodes.fields,
+            'render' : true,
+            'renderName' : null,
+            'renderErrorMessage' : that.params.showValidationMessages
         }, params);
         params = cm.merge(cm.clone(field, true), params);
         // Validate
-        params['fieldConstructor'] = cm.isEmpty(params['fieldConstructor']) ? 'Com.FormField' : params['fieldConstructor'];
-        params['value'] = that.params['data'][params['name']] || params['value'];
-        params['dataValue'] = that.params['data'][params['dataName']] || params['dataValue'];
-        params['renderName'] = cm.isBoolean(params['renderName']) ? params['renderName'] : that.params['renderNames'];
+        params.fieldConstructor = !cm.isEmpty(params.fieldConstructor) ? params.fieldConstructor : 'Com.FormField';
+        params.value = !cm.isEmpty(that.params.data[params.name]) ? that.params.data[params.name] : params.value;
+        params.dataValue = !cm.isEmpty(that.params.data[params.dataName]) ? that.params.data[params.dataName] : params.dataValue;
+        params.renderName = cm.isBoolean(params.renderName) ? params.renderName : that.params.renderNames;
         // Render controller
-        if(field && !that.fields[params['name']]){
+        if(params.render && field && !that.fields[params.name]){
             renderFieldController(params);
         }
     };
-    
+
     var renderFieldController = function(params){
-        cm.getConstructor(params['fieldConstructor'], function(classConstructor){
-            params['fieldController'] = params['controller'] = new classConstructor(params);
-            params['inputController'] = params['constructorController'] = cm.isFunction(params['fieldController'].getController) && params['fieldController'].getController();
+        cm.getConstructor(params.fieldConstructor, function(classConstructor){
+            params.fieldController = params.controller = new classConstructor(params);
+            params.inputController = params.constructorController = cm.isFunction(params.fieldController.getController) && params.fieldController.getController();
             // Events
-            params['fieldController'].addEvent('onBlur', function(field){
-                if(that.params['validate'] && that.params['validateOnChange'] && (field.params['required'] || field.params['validate'])){
-                    params['fieldController'].validate();
+            params.fieldController.addEvent('onBlur', function(field){
+                if(
+                    that.params.validate && that.params.validateOnChange
+                    && (field.params.required || field.params.validate)
+                ){
+                    params.fieldController.validate();
                 }
             });
-            params['fieldController'].addEvent('onChange', function(field){
-                if(that.params['validate'] && that.params['validateOnChange'] && (field.params['required'] || field.params['validate'])){
-                    params['fieldController'].validate();
+            params.fieldController.addEvent('onChange', function(field){
+                if(
+                    that.params.validate && that.params.validateOnChange
+                    && (field.params.required || field.params.validate)
+                ){
+                    params.fieldController.validate();
                 }
                 that.triggerEvent('onChange');
             });
-            params['fieldController'].addEvent('onInput', function(field){
-                if(that.params['validate'] && that.params['validateOnInput'] && (field.params['required'] || field.params['validate'])){
-                    params['fieldController'].validate();
+            params.fieldController.addEvent('onInput', function(field){
+                if(
+                    that.params.validate && that.params.validateOnInput
+                    && (field.params.required || field.params.validate)
+                ){
+                    params.fieldController.validate();
                 }
                 that.triggerEvent('onInput');
             });
+            // Save processed origin data to compare before send
+            // Use clone to prevent linking
+            params.originValue = cm.clone(params.fieldController.get());
             // Save
-            that.fields[params['name']] = params;
+            that.fields[params.name] = params;
         });
     };
 
@@ -9803,22 +10456,22 @@ function(params){
             'handler' : function(){}
         }, params);
         // Render
-        if(!that.buttons[params['name']]){
-            params['node'] = cm.node('button', {'name' : params['name'], 'class' : ['button', params['class']].join(' ')},
-                params['labelNode'] = cm.node('div', {'class' : 'label is-show'}, params['label'])
+        if(!that.buttons[params.name]){
+            params.node = cm.node('button', {'name' : params.name, 'class' : ['button', params.class].join(' ')},
+                params.labelNode = cm.node('div', {'class' : 'label is-show'}, params.label)
             );
             // Spinner
-            if(params['spinner']){
-                params['spinnerNode'] = cm.node('div', {'class' : ['icon', params['spinnerClass']].join(' ')});
-                cm.appendChild(params['spinnerNode'], params['node']);
-                cm.addClass(params['node'], 'button-spinner');
+            if(params.spinner){
+                params.spinnerNode = cm.node('div', {'class' : ['icon', params.spinnerClass].join(' ')});
+                cm.appendChild(params.spinnerNode, params.node);
+                cm.addClass(params.node, 'button-spinner');
             }
             // Actions
-            switch(params['action']){
+            switch(params.action){
                 case 'submit':
-                    params['node'].type = 'submit';
-                    cm.addClass(params['node'], 'button-primary');
-                    cm.addEvent(params['node'], 'click', function(e){
+                    params.node.type = 'submit';
+                    cm.addClass(params.node, 'button-primary');
+                    cm.addEvent(params.node, 'click', function(e){
                         cm.preventDefault(e);
                         if(that.isProcess){
                             that.abort();
@@ -9829,9 +10482,9 @@ function(params){
                     break;
 
                 case 'reset':
-                    params['node'].type = 'reset';
-                    cm.addClass(params['node'], 'button-secondary');
-                    cm.addEvent(params['node'], 'click', function(e){
+                    params.node.type = 'reset';
+                    cm.addClass(params.node, 'button-transparent');
+                    cm.addEvent(params.node, 'click', function(e){
                         cm.preventDefault(e);
                         if(!that.isProcess){
                             that.reset();
@@ -9840,8 +10493,8 @@ function(params){
                     break;
 
                 case 'clear':
-                    cm.addClass(params['node'], 'button-secondary');
-                    cm.addEvent(params['node'], 'click', function(e){
+                    cm.addClass(params.node, 'button-transparent');
+                    cm.addEvent(params.node, 'click', function(e){
                         cm.preventDefault(e);
                         if(!that.isProcess){
                             that.clear();
@@ -9851,29 +10504,29 @@ function(params){
 
                 case 'custom':
                 default:
-                    cm.addEvent(params['node'], 'click', function(e){
+                    cm.addEvent(params.node, 'click', function(e){
                         cm.preventDefault(e);
-                        cm.isFunction(params['handler']) && params['handler'](that, params, e);
+                        cm.isFunction(params.handler) && params.handler(that, params, e);
                     });
                     break;
             }
-            cm.appendChild(params['node'], that.nodes['buttonsHolder']);
+            cm.appendChild(params.node, that.nodes.buttonsHolder);
             // Export
-            that.buttons[params['name']] = params;
+            that.buttons[params.name] = params;
         }
     };
 
     var toggleButtons = function(){
         cm.forEach(that.buttons, function(item){
             if(that.isProcess){
-                if(item['spinner']){
-                    cm.replaceClass(item['labelNode'], 'is-show', 'is-hide');
-                    cm.replaceClass(item['spinnerNode'], 'is-hide', 'is-show');
+                if(item.spinner){
+                    cm.replaceClass(item.labelNode, 'is-show', 'is-hide');
+                    cm.replaceClass(item.spinnerNode, 'is-hide', 'is-show');
                 }
             }else{
-                if(item['spinner']){
-                    cm.replaceClass(item['labelNode'], 'is-hide', 'is-show');
-                    cm.replaceClass(item['spinnerNode'], 'is-show', 'is-hide');
+                if(item.spinner){
+                    cm.replaceClass(item.labelNode, 'is-hide', 'is-show');
+                    cm.replaceClass(item.spinnerNode, 'is-show', 'is-hide');
                 }
             }
         });
@@ -9882,22 +10535,22 @@ function(params){
     var renderSeparator = function(params){
         params = cm.merge({
             'node' : cm.node('hr'),
-            'container' : that.nodes['fields']
+            'container' : that.nodes.fields
         }, params);
-        cm.appendChild(params['node'], params['container']);
+        cm.appendChild(params.node, params.container);
     };
 
     var removeField = function(name){
         var item = that.getField(name);
         if(item){
-            item['fieldController'] && cm.isFunction(item['fieldController'].destruct) && item['fieldController'].destruct();
+            item.fieldController && cm.isFunction(item.fieldController.destruct) && item.fieldController.destruct();
             delete that.fields[name];
         }
     };
 
     /* *** VALIDATE *** */
 
-    var validateHelper = function(){
+    var validateHelper = function(options){
         var fieldParams,
             isFieldValidatable,
             constraintsData,
@@ -9909,11 +10562,13 @@ function(params){
             };
         // Fields
         cm.forEach(that.fields, function(field, name){
-            fieldParams = field['controller'].getParams();
-            isFieldValidatable = field['field'] && !field['system'] && (fieldParams['required'] || fieldParams['validate']) && cm.isFunction(field['controller'].validate);
-            if(isFieldValidatable && !field['controller'].validate()){
-                data['message'] = that.lang('form_error');
-                data['valid'] = false;
+            fieldParams = field.controller.getParams();
+            isFieldValidatable = field.field && !field.system
+                && (fieldParams.required || fieldParams.validate)
+                && cm.isFunction(field.controller.validate);
+            if(isFieldValidatable && !field.controller.validate(options)){
+                data.message = that.lang('form_error');
+                data.valid = false;
             }
         });
         // Constraints
@@ -9933,7 +10588,7 @@ function(params){
         constraintsTest = that.constraints.some(function(item){
             if(cm.isFunction(item)){
                 constraintsData = item(data);
-                return !constraintsData['valid'];
+                return !constraintsData.valid;
             }
             return false;
         });
@@ -9943,17 +10598,69 @@ function(params){
         return false;
     };
 
+    /* ******* HELPERS ******* */
+
+    var getHelper = function(type, o, field, name){
+        var value = field.controller.get(),
+            path;
+        // Process send callback function if specified
+        if(cm.isFunction(field.sendCallback)){
+            value = field.sendCallback(field, value);
+        }
+        // To send only changed values we need to make diff between original and current values
+        if(
+            cm.inArray(['send', 'sendPath'], type)
+            && that.params.sendOnlyChangedFields && !field.sendAlways
+        ){
+            value = cm.getDiffCompare(field.originValue, value);
+        }
+        if(
+            !cm.isUndefined(value)
+            && (that.params.sendEmptyFields || !that.params.sendEmptyFields && !cm.isEmpty(value))
+            && (field.sendEmpty || !field.sendEmpty && !cm.isEmpty(value))
+        ){
+            if(type === 'sendPath' && !cm.isEmpty(field.sendPath)){
+                path = cm.objectFormPath(field.sendPath, value, '');
+                o = cm.merge(o, path);
+            }else{
+                o[name] = value;
+            }
+        }
+        return o;
+    };
+
+    var sendPlaceholderHelper = function(){
+        var data = that.get('sendPath');
+        sendCompleteHelper(data);
+        that.clearError(that);
+        that.triggerEvent('onSendStart', data);
+        that.triggerEvent('onSend', data);
+        that.triggerEvent('onSuccess', data);
+        that.triggerEvent('onSendEnd', data);
+    };
+
+    var sendCompleteHelper = function(data){
+        data = !cm.isEmpty(data) ? data : that.get('sendPath');
+        cm.forEach(that.fields, function(field, name){
+            if(typeof data[name] !== 'undefined'){
+                that.setFieldParams(name, {
+                    'originValue' : data[name]
+                });
+            }
+        });
+    };
+
     /* ******* CALLBACKS ******* */
 
     that.callbacks.prepare = function(that, config){
         config = that.callbacks.beforePrepare(that, config);
-        config['url'] = cm.strReplace(config['url'], {
+        config.url = cm.strReplace(config.url, {
             '%baseUrl%' : cm._baseUrl
         });
-        config['params'] = cm.objectReplace(config['params'], {
+        config.params = cm.objectReplace(config.params, {
             '%baseUrl%' : cm._baseUrl
         });
-        config['params'] = cm.merge(config['params'], that.get('sendPath'));
+        config.params = cm.merge(config.params, that.get('sendPath'));
         config = that.callbacks.afterPrepare(that, config);
         return config;
     };
@@ -9969,6 +10676,12 @@ function(params){
     that.callbacks.request = function(that, config){
         config = that.callbacks.prepare(that, config);
         that.callbacks.clearError(that);
+
+        if(!that.params.sendEmptyForm && cm.isEmpty(config.params)){
+            sendPlaceholderHelper();
+            return;
+        }
+
         // Return ajax handler (XMLHttpRequest) to providing abort method.
         return cm.ajax(
             cm.merge(config, {
@@ -9993,31 +10706,24 @@ function(params){
 
     that.callbacks.start = function(that, config){
         that.isProcess = true;
-        cm.addClass(that.nodes['container'], 'is-submitting');
+        cm.addClass(that.nodes.container, 'is-submitting');
         // Toggle buttons
         toggleButtons();
         // Show Loader
-        if(that.params['showLoader']){
-            that.loaderDelay = setTimeout(function(){
-                if(that.components['loader'] && !that.components['loader'].isOpen){
-                    that.components['loader'].open();
-                }
-            }, that.params['loaderDelay']);
+        if(that.params.showLoader){
+            that.showLoader();
         }
         that.triggerEvent('onSendStart');
     };
 
     that.callbacks.end = function(that, config){
         that.isProcess = false;
-        cm.removeClass(that.nodes['container'], 'is-submitting');
+        cm.removeClass(that.nodes.container, 'is-submitting');
         // Toggle buttons
         toggleButtons();
         // Hide Loader
-        if(that.params['showLoader']){
-            that.loaderDelay && clearTimeout(that.loaderDelay);
-            if(that.components['loader'] && that.components['loader'].isOpen){
-                that.components['loader'].close();
-            }
+        if(that.params.showLoader){
+            that.hideLoader();
         }
         that.triggerEvent('onSendEnd');
     };
@@ -10026,8 +10732,8 @@ function(params){
         var errors,
             data;
         if(!cm.isEmpty(response)){
-            errors = cm.objectSelector(that.params['responseErrorsKey'], response);
-            data = cm.objectSelector(that.params['responseKey'], response);
+            errors = cm.reducePath(that.params.responseErrorsKey, response);
+            data = cm.reducePath(that.params.responseKey, response);
             if(!cm.isEmpty(errors)){
                 that.callbacks.error(that, config, response);
             }else{
@@ -10043,9 +10749,9 @@ function(params){
             message,
             code;
         if(!cm.isEmpty(response)){
-            errors = cm.objectSelector(that.params['responseErrorsKey'], response);
-            message = cm.objectSelector(that.params['responseMessageKey'], response);
-            code = cm.objectSelector(that.params['responseCodeKey'], response);
+            errors = cm.reducePath(that.params.responseErrorsKey, response);
+            message = cm.reducePath(that.params.responseMessageKey, response);
+            code = cm.reducePath(that.params.responseCodeKey, response);
         }
         that.callbacks.renderError(that, errors, message);
         that.triggerEvent('onError', {
@@ -10057,12 +10763,13 @@ function(params){
     };
 
     that.callbacks.success = function(that, data){
-        if(that.params['showNotifications'] && that.params['showSuccessNotification']){
+        if(that.params.showNotifications && that.params.showSuccessNotification){
             that.callbacks.renderNotification(that, {
                 'label' : that.lang('success_message'),
                 'type' : 'success'
             });
         }
+        sendCompleteHelper(data);
         that.triggerEvent('onSuccess', data);
     };
 
@@ -10077,7 +10784,7 @@ function(params){
         that.clearNotification();
         // Clear field errors
         cm.forEach(that.fields, function(field){
-            field['controller'].clearError();
+            field.controller.clearError();
         });
     };
 
@@ -10090,7 +10797,7 @@ function(params){
         // Render new errors messages
         if(cm.isArray(errors) || cm.isObject(errors)){
             messages = that.callbacks.renderErrorMessages(that, errors);
-            if(that.params['showNotifications']){
+            if(that.params.showNotifications){
                 that.callbacks.renderNotification(that, {
                     'label' : label,
                     'type' : 'danger',
@@ -10099,14 +10806,14 @@ function(params){
                 });
             }
         }else if(hasMessage){
-            if(that.params['showNotifications']){
+            if(that.params.showNotifications){
                 that.callbacks.renderNotification(that, {
                     'label' : label,
                     'type' : 'danger'
                 });
             }
         }else{
-            if(that.params['showNotifications']){
+            if(that.params.showNotifications){
                 that.callbacks.renderNotification(that, {
                     'label' : that.lang('server_error'),
                     'type' : 'danger'
@@ -10119,36 +10826,53 @@ function(params){
         var field,
             fieldName,
             fieldMessage,
+            fieldLabel,
             messages = [];
         cm.forEach(errors, function(item, key){
             // Get field
-            fieldName = item['field'] || key;
+            fieldName = item && item.field ? item.field : key;
             field = that.getField(fieldName);
+            fieldLabel = field && !cm.isEmpty(field.label)? field.label : fieldName;
             // Render field messages
             if(cm.isObject(item)){
-                if(cm.isArray(item['message'])){
-                    cm.forEach(item['message'], function(messageItem){
-                        fieldMessage = that.lang(messageItem);
+                if(cm.isArray(item.message)){
+                    cm.forEach(item.message, function(messageItem){
+                        fieldMessage = that.callbacks.renderErrorMessage(that, field, messageItem, fieldLabel);
                         messages.push(fieldMessage);
-                        field && field['controller'].renderError(fieldMessage);
                     })
-                }else if(!cm.isEmpty(item['message'])){
-                    fieldMessage = that.lang(item['message']);
+                }else if(!cm.isEmpty(item.message)){
+                    fieldMessage = that.callbacks.renderErrorMessage(that, field, item.message, fieldLabel);
                     messages.push(fieldMessage);
-                    field && field['controller'].renderError(fieldMessage);
                 }
+            }else if(cm.isArray(item)){
+                cm.forEach(item, function(messageItem){
+                    fieldMessage = that.callbacks.renderErrorMessage(that, field, messageItem, fieldLabel);
+                    messages.push(fieldMessage);
+                });
             }else if(!cm.isEmpty(item)){
-                fieldMessage = that.lang(item);
+                fieldMessage = that.callbacks.renderErrorMessage(that, field, item, fieldLabel);
                 messages.push(fieldMessage);
-                field && field['controller'].renderError(fieldMessage);
             }
         });
         return messages;
     };
 
+    that.callbacks.renderErrorMessage = function(that, field, message, label){
+        var messagePath = ['errors', message].join('.'),
+            messageString = that.getMsg(messagePath);
+        message = !cm.isEmpty(messageString) ? that.msg(messagePath) : message;
+        if(field){
+            field.controller.renderError(message);
+        }
+        if(!cm.isEmpty(label)){
+            message = [label, message].join(': ');
+        }
+        return message
+    };
+
     that.callbacks.renderNotification = function(that, o){
-        cm.addClass(that.nodes['notifications'], 'is-show', true);
-        that.components['notifications'].add(o);
+        cm.addClass(that.nodes.notifications, 'is-show', true);
+        that.components.notifications.add(o);
     };
 
     /* ******* PUBLIC ******* */
@@ -10157,10 +10881,10 @@ function(params){
         if(!that._isDestructed){
             that._isDestructed = true;
             cm.forEach(that.fields, function(field){
-                field['controller'].destruct();
+                field.controller.destruct();
             });
             that.removeFromStack();
-            that.params['removeOnDestruct'] && cm.remove(that.nodes['container']);
+            that.params.removeOnDestruct && cm.remove(that.nodes.container);
         }
         return that;
     };
@@ -10204,7 +10928,7 @@ function(params){
     };
 
     that.appendChild = function(node){
-        cm.appendChild(node, that.nodes['fields']);
+        cm.appendChild(node, that.nodes.fields);
         return that;
     };
 
@@ -10227,61 +10951,44 @@ function(params){
         return that;
     };
 
-    that.get = function(type){
-        var o = {},
-            handler,
-            pathHandler,
-            value,
-            path;
+    that.get = function(type, merged){
+        var data = {};
         // Validate
         type = cm.inArray(['all', 'fields', 'send', 'sendPath', 'system'], type) ? type : 'fields';
-        // Handler
-        handler = function(field, name){
-            value = field['controller'].get();
-            if(that.params['sendEmptyFields'] || !cm.isEmpty(value)){
-                o[name] = value;
-            }
-        };
-        pathHandler = function(field, name){
-            value = field['controller'].get();
-            if(that.params['sendEmptyFields'] || !cm.isEmpty(value)){
-                if(!cm.isEmpty(field['sendPath'])){
-                    path = cm.objectFormPath(field['sendPath'], value);
-                    o = cm.merge(o, path);
-                }else{
-                    o[name] = value;
-                }
-            }
-        };
+        merged = cm.isUndefined(merged) ? false : merged;
         // Get
         cm.forEach(that.fields, function(field, name){
             switch(type){
                 case 'all':
-                    handler(field, name);
+                    data = getHelper('all', data, field, name);
                     break;
                 case 'fields':
-                    if(!field['system']){
-                        handler(field, name);
+                    if(!field.system){
+                        data = getHelper('fields', data, field, name);
                     }
                     break;
                 case 'send':
-                    if(field['send'] && !field['system']){
-                        handler(field, name);
+                    if(field.send && !field.system){
+                        data = getHelper('send', data, field, name);
                     }
                     break;
                 case 'sendPath':
-                    if(field['send'] && !field['system']){
-                        pathHandler(field, name);
+                    if(field.send && !field.system){
+                        data = getHelper('sendPath', data, field, name);
                     }
                     break;
                 case 'system':
-                    if(field['system']){
-                        handler(field, name);
+                    if(field.system){
+                        data = getHelper('system', data, field, name);
                     }
                     break;
             }
         });
-        return o;
+        // TODO: check is this is ever needed
+        if(merged){
+            data = cm.merge(that.params.data, data);
+        }
+        return data;
     };
 
     that.getAll = function(){
@@ -10292,25 +10999,26 @@ function(params){
         var field, setValue;
         cm.forEach(data, function(value, name){
             field = that.fields[name];
-            if(field && !field['system']){
-                setValue = data[field['dataName']] || value;
-                that.fields[name]['controller'].set(setValue, triggerEvents);
+            if(field && !field.system){
+                setValue = data[field.dataName] || value;
+                that.fields[name].controller.set(setValue, triggerEvents);
             }
         });
+        that.triggerEvent('onSet');
         return that;
     };
 
     that.clear = function(){
         cm.forEach(that.fields, function(field){
-            field['controller'].destruct();
+            field.controller.destruct();
         });
         that.fields = {};
-        cm.clearNode(that.nodes['fields']);
+        cm.clearNode(that.nodes.fields);
         cm.forEach(that.buttons, function(button){
             cm.remove(button.node);
         });
         that.buttons = {};
-        cm.clearNode(that.nodes['buttonsHolder']);
+        cm.clearNode(that.nodes.buttonsHolder);
         that.clearError();
         that.triggerEvent('onClear');
         return that;
@@ -10318,27 +11026,36 @@ function(params){
 
     that.reset = function(){
         cm.forEach(that.fields, function(field){
-            field['controller'].reset();
+            if(!field.preventReset){
+                field.controller.reset();
+            }
         });
         that.clearError();
         that.triggerEvent('onReset');
         return that;
     };
 
-    that.validate = function(){
-        var data = validateHelper();
+    that.validate = function(options){
+        options = cm.merge({
+            'silent' : false,
+            'triggerEvents' : true
+        }, options);
         // Clear previous notifications
         that.clearNotification();
         // Show new notifications if exists
-        if(!data['valid']){
-            if(that.params['showNotifications'] && that.params['showValidationNotification']){
+        var data = validateHelper(options);
+        if(!data.valid && !options.silent){
+            if(that.params.showNotifications && that.params.showValidationNotification){
                 that.renderNotification({
-                    'label' : data['message'],
+                    'label' : data.message,
                     'type' : 'danger'
                 });
             }
         }
-        that.triggerEvent('onValidate', data);
+        // Trigger events
+        if(options.triggerEvents && !options.silent){
+            that.triggerEvent('onValidate', data);
+        }
         return data;
     };
 
@@ -10347,20 +11064,22 @@ function(params){
             'valid' : true
         };
         // Validate
-        if(that.params['validate']){
+        if(that.params.validate){
             data = that.validate();
         }
         // Send
-        if(data['valid']){
+        if(data.valid){
             if(that.isAjax){
-                that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params['ajax']));
+                that.ajaxHandler = that.callbacks.request(that, cm.clone(that.params.ajax));
             }else{
-                that.clearError(that);
-                that.triggerEvent('onSendStart', that.get());
-                that.triggerEvent('onSend', that.get());
-                that.triggerEvent('onSendEnd', that.get());
+                sendPlaceholderHelper();
             }
         }
+        return that;
+    };
+
+    that.sendPlaceholder = function(){
+        sendPlaceholderHelper();
         return that;
     };
 
@@ -10375,19 +11094,19 @@ function(params){
         mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
         switch(mode){
             case 'raw':
-                that.params['ajax'] = cm.merge(that._raw.params['ajax'], o);
+                that.params.ajax = cm.merge(that._raw.params.ajax, o);
                 break;
             case 'current':
-                that.params['ajax'] = cm.merge(that.params['ajax'], o);
+                that.params.ajax = cm.merge(that.params.ajax, o);
                 break;
             case 'update':
-                that.params['ajax'] = cm.merge(that._update.params['ajax'], o);
+                that.params.ajax = cm.merge(that._update.params.ajax, o);
                 break;
         }
         if(update){
-            that._update.params['ajax'] = cm.clone(that.params['ajax']);
+            that._update.params.ajax = cm.clone(that.params.ajax);
         }
-        that.isAjax = that.params['ajax'] && !cm.isEmpty(that.params['ajax']['url']);
+        that.isAjax = that.params.ajax && !cm.isEmpty(that.params.ajax.url);
         return that;
     };
 
@@ -10397,8 +11116,8 @@ function(params){
     };
 
     that.clearNotification = function(){
-        cm.removeClass(that.nodes['notifications'], 'is-show', true);
-        that.components['notifications'].clear();
+        cm.removeClass(that.nodes.notifications, 'is-show', true);
+        that.components.notifications.clear();
         return that;
     };
 
@@ -10412,298 +11131,32 @@ function(params){
         return that;
     };
 
+    that.showLoader = function(isImmediately){
+        that.components.loader && that.components.loader.open(isImmediately);
+        return that;
+    };
+
+    that.hideLoader = function(isImmediately){
+        that.components.loader && that.components.loader.close(isImmediately);
+        return that;
+    };
+
+
     that.getName = function(){
-        return that.params['name'];
+        return that.params.name;
     };
 
     that.getContainer = function(){
-        return that.nodes['container'];
+        return that.nodes.container;
     };
 
     that.getButtonsContainer = function(){
-        return that.nodes['buttonsContainer'];
+        return that.nodes.buttonsContainer;
     };
 
     init();
 });
 
-/* ******* COMPONENT: FORM FIELD ******* */
-
-Com.FormFields = (function(){
-    var stack = {};
-
-    return {
-        'add' : function(type, params){
-            stack[type] = cm.merge({
-                'node' : cm.node('div'),
-                'fieldConstructor' : null,
-                'constructor' : null,
-                'type' : type,
-                'field' : true,
-                'system' : false
-            }, params);
-        },
-        'get' : function(type){
-            return stack[type]? cm.clone(stack[type], true) : null;
-        }
-    };
-})();
-
-cm.define('Com.FormField', {
-    'modules' : [
-        'Params',
-        'Events',
-        'DataConfig',
-        'Stack',
-        'Callbacks'
-    ],
-    'events' : [
-        'onRender'
-    ],
-    'params' : {
-        'node' : cm.node('div'),
-        'container' : cm.node('div'),
-        'form' : false,
-        'name' : '',
-        'value' : null,
-        'dataValue' : null,
-        'type' : false,
-        'label' : '',
-        'help' : null,
-        'placeholder' : '',
-        'visible' : true,
-        'options' : [],
-        'className' : '',                   // is-box
-        'constructor' : false,
-        'constructorParams' : {
-            'formData' : true
-        },
-        'Com.HelpBubble' : {
-            'renderStructure' : true
-        }
-    }
-},
-function(params){
-    var that = this;
-
-    that.nodes = {};
-    that.components = {};
-    that.form = null;
-    that.controller = null;
-    that.value = null;
-
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['node']);
-        that.callbacksProcess();
-        validateParams();
-        render();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRender');
-    };
-
-    var validateParams = function(){
-        if(that.params['constructor']){
-            cm.getConstructor(that.params['constructor'], function(classConstructor){
-                that.params['constructor'] = classConstructor;
-            });
-        }
-        that.params['constructorParams']['node'] = that.params['node'];
-        that.params['constructorParams']['name'] = that.params['name'];
-        that.params['constructorParams']['options'] = that.params['options'];
-        that.params['constructorParams']['value'] = that.params['dataValue'] || that.params['value'];
-        that.params['Com.HelpBubble']['content'] = that.params['help'];
-        that.params['Com.HelpBubble']['name'] = that.params['name'];
-        that.form = that.params['form'];
-    };
-
-    var render = function(){
-        // Render structure
-        that.nodes = that.callbacks.render(that) || {};
-        // Append
-        that.params['container'].appendChild(that.nodes['container']);
-        // Construct
-        that.callbacks.construct(that);
-    };
-
-    /* ******* CALLBACKS ******* */
-
-    that.callbacks.construct = function(that){
-        that.controller = that.callbacks.controller(that, that.params['constructorParams']);
-    };
-
-    that.callbacks.controller = function(that, params){
-        if(that.params['constructor']){
-            return new that.params['constructor'](params);
-        }
-    };
-
-    that.callbacks.render = function(that){
-        var nodes = {};
-        // Structure
-        nodes['container'] = cm.node('dl', {'class' : 'pt__field'},
-            nodes['label'] = cm.node('dt',
-                cm.node('label', that.params['label'])
-            ),
-            nodes['value'] = cm.node('dd', that.params['node'])
-        );
-        !that.params['visible'] && cm.addClass(nodes['container'], 'is-hidden');
-        // Style
-        cm.addClass(nodes['container'], that.params['className']);
-        // Attributes
-        if(!cm.isEmpty(that.params['name'])){
-            that.params['node'].setAttribute('name', that.params['name']);
-        }
-        if(!cm.isEmpty(that.params['value'])){
-            that.params['node'].setAttribute('value', that.params['value']);
-        }
-        if(!cm.isEmpty(that.params['dataValue'])){
-            that.params['node'].setAttribute('data-value', JSON.stringify(that.params['dataValue']));
-        }
-        if(!cm.isEmpty(that.params['placeholder'])){
-            that.params['node'].setAttribute('placeholder', that.params['placeholder']);
-        }
-        if(!cm.isEmpty(that.params['help'])){
-            cm.getConstructor('Com.HelpBubble', function(classConstructor){
-                that.components['help'] = new classConstructor(
-                    cm.merge(that.params['Com.HelpBubble'], {
-                        'container' : nodes['label']
-                    })
-                );
-            });
-        }
-        return nodes;
-    };
-
-    that.callbacks.clearError = function(that){
-        cm.removeClass(that.nodes['container'], 'error');
-        cm.remove(that.nodes['errors']);
-    };
-
-    that.callbacks.renderError = function(that, message){
-        that.callbacks.clearError(that);
-        cm.addClass(that.nodes['container'], 'error');
-        that.nodes['errors'] = cm.node('ul', {'class' : 'pt__field__error pt__field__hint'},
-            cm.node('li', {'class' : 'error'}, message)
-        );
-        cm.appendChild(that.nodes['errors'], that.nodes['value']);
-    };
-
-    that.callbacks.set = function(that, value){
-        that.controller && cm.isFunction(that.controller.set) && that.controller.set(value);
-        return value;
-    };
-
-    that.callbacks.get = function(that){
-        return that.controller && cm.isFunction(that.controller.get) ? that.controller.get() : null;
-    };
-
-    that.callbacks.reset = function(that){
-        that.controller && cm.isFunction(that.controller.reset) && that.controller.reset();
-    };
-
-    that.callbacks.destruct = function(that){
-        that.controller && cm.isFunction(that.controller.destruct) && that.controller.destruct();
-    };
-
-    /* ******* PUBLIC ******* */
-
-    that.set = function(value){
-        that.value = that.callbacks.set(that, value);
-        return that;
-    };
-
-    that.get = function(){
-        that.value = that.callbacks.get(that);
-        return that.value;
-    };
-
-    that.reset = function(){
-        that.callbacks.reset(that);
-        return that;
-    };
-
-    that.destruct = function(){
-        that.callbacks.destruct(that);
-        that.removeFromStack();
-        return that;
-    };
-
-    that.renderError = function(errors, message){
-        that.callbacks.renderError(that, errors, message);
-        return that;
-    };
-
-    that.clearError = function(){
-        that.callbacks.clearError(that);
-        return that;
-    };
-
-    init();
-});
-
-/* ******* COMPONENT: FORM FIELD: DECORATORS ******* */
-
-Com.FormFields.add('empty', {
-    'field' : false,
-    'fieldConstructor' : 'Com.AbstractFormField'
-});
-
-Com.FormFields.add('buttons', {
-    'node' : cm.node('div', {'class' : 'pt__buttons pull-right'}),
-    'field' : false,
-    'system' : true,
-    'callbacks' : {
-        'render' : function(that){
-            var nodes = {};
-            nodes['container'] = that.params['node'];
-            nodes['inner'] = cm.node('div', {'class' : 'inner'});
-            cm.appendChild(nodes['inner'], nodes['container']);
-            return nodes;
-        },
-        'controller' : function(that){
-            var buttons = {},
-                node;
-            cm.forEach(that.params['options'], function(item){
-                node = cm.node('button', item['text']);
-                switch(item['value']){
-                    case 'submit':
-                        node.type = 'submit';
-                        cm.addClass(node, 'button-primary');
-                        cm.addEvent(node, 'click', function(e){
-                            cm.preventDefault(e);
-                            that.form.send();
-                        });
-                        break;
-
-                    case 'reset':
-                        node.type = 'reset';
-                        cm.addClass(node, 'button-secondary');
-                        cm.addEvent(node, 'click', function(e){
-                            cm.preventDefault(e);
-                            that.form.reset();
-                        });
-                        break;
-
-                    case 'clear':
-                        cm.addClass(node, 'button-secondary');
-                        cm.addEvent(node, 'click', function(e){
-                            cm.preventDefault(e);
-                            that.form.clear();
-                        });
-                        break;
-
-                    default:
-                        break;
-                }
-                buttons[item['value']] = node;
-                that.params['node'].appendChild(node);
-            });
-            return buttons;
-        }
-    }
-});
 cm.define('Com.TabsetHelper', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -10767,9 +11220,7 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, classProto, classInherit){
     /*** SYSTEM ***/
 
     classProto.construct = function(){
@@ -10792,7 +11243,7 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
         // Binds
         that.hashChangeHandler = that.hashChange.bind(that);
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.validateParams = function(){
@@ -10820,13 +11271,11 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
     classProto.onSetEvents = function(){
         var that = this;
         that.params['toggleOnHashChange'] && cm.addEvent(window, 'hashchange', that.hashChangeHandler);
-        return that;
     };
 
     classProto.onUnsetEvents = function(){
         var that = this;
         that.params['toggleOnHashChange'] && cm.removeEvent(window, 'hashchange', that.hashChangeHandler);
-        return that;
     };
 
     classProto.onConstructEnd = function(){
@@ -10839,7 +11288,7 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
     classProto.renderViewModel = function(){
         var that = this;
         // Call parent method
-        _inherit.prototype.renderViewModel.apply(that, arguments);
+        classInherit.prototype.renderViewModel.apply(that, arguments);
         // Process tabs
         that.processTabs(that.nodes['tabs'], that.nodes['labels']);
         // Process tabs in parameters
@@ -10854,7 +11303,7 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
         });
         return that;
     };
-    
+
     /******* TABS *******/
 
     classProto.processTab = function(tab, label){
@@ -10991,7 +11440,7 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
         }
         return that;
     };
-    
+
     /*** SET / UNSET ***/
 
     classProto.setTab = function(id){
@@ -11063,7 +11512,10 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
                     );
                 });
             }
-        }else if(item.isAjax && (!item['cache'] || (item['cache'] && !item.isCached))){
+        }else if(
+            item.isAjax
+            && (!item['cache'] || (item['cache'] && !item.isCached))
+        ){
             that.ajaxHandler = classProto.callbacks.request(that, {
                 'config' : cm.merge(that.params['ajax'], item['ajax'])
             }, item);
@@ -11390,6 +11842,7 @@ cm.getConstructor('Com.TabsetHelper', function(classConstructor, className, clas
         return that;
     };
 });
+
 cm.define('Com.ScrollPagination', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -12375,6 +12828,7 @@ function(params){
 
     init();
 });
+
 cm.define('Com.CalendarEvents', {
     'modules' : [
         'Params',
@@ -13760,6 +14214,8 @@ cm.define('Com.Dialog', {
         'theme' : 'theme-light',        // theme css class name, default: theme-default | theme-black | theme-light
         'className' : '',               // custom css class name
         'content' : cm.node('div'),
+        'contentValign' : 'top',        // top, center, bottom
+        'scroll' : true,                // content scroll
         'showTitle' : true,
         'title' : '',
         'titleOverflow' : false,
@@ -13789,7 +14245,6 @@ cm.define('Com.Dialog', {
         'appendOnRender' : false,
         'removeOnClose' : true,
         'destructOnRemove' : false,
-        'scroll' : true,
         'documentScroll' : false,
         'icons' : {
             'closeInside' : 'icon default linked',
@@ -13970,6 +14425,9 @@ function(params){
             );
             if(!that.params['scroll']){
                 cm.addClass(nodes['scroll'], 'is-no-scroll');
+            }
+            if(cm.inArray(['top', 'center', 'bottom'], that.params['contentValign'])){
+                cm.addClass(nodes['scroll'], ['is-valign', that.params['contentValign']].join('-'));
             }
             if(nodes['title']){
                 cm.insertAfter(nodes['descr'], nodes['title']);
@@ -14176,18 +14634,18 @@ function(params){
             // Remove close event on Esc press
             cm.removeEvent(window, 'keydown', windowClickEvent);
             cm.removeEvent(window, 'resize', windowResizeEvent);
-            // Show / Hide Document Scroll
-            if(!that.params['documentScroll']){
-                cm.removeClass(cm.getDocumentHtml(), 'cm__scroll--none');
-            }
             // Animate
             cm.removeClass(nodes['container'], 'is-open', true);
             cm.removeClass(nodes['window'], 'is-open', true);
             that.openInterval && clearTimeout(that.openInterval);
             that.openInterval = setTimeout(function(){
                 clearResizeInterval();
-                nodes['container'].style.display = 'none';
+                // Show / Hide Document Scroll
+                if(!that.params['documentScroll']){
+                    cm.removeClass(cm.getDocumentHtml(), 'cm__scroll--none');
+                }
                 // Remove Window
+                nodes['container'].style.display = 'none';
                 that.params['removeOnClose'] && remove();
                 params['onEnd']();
                 // Close Event
@@ -14350,6 +14808,7 @@ cm.define('Com.DialogContainer', {
         'container' : 'document.body',
         'destructOnClose' : false,
         'renderButtons' : false,
+        'renderButtonsPositions' : false,
         'renderTitle' : true,
         'renderHelp' : false,
         'justifyButtons' : 'right',
@@ -14392,6 +14851,7 @@ cm.getConstructor('Com.DialogContainer', function(classConstructor, className, c
         var that = this;
         return new classObject(
             cm.merge(that.params['params'], {
+                'opener' : that,
                 'container' : that.params['container'],
                 'title' : that.nodes['title'] || that.params['params']['title'] || that.params['title'],
                 'content' : that.nodes['content'] || that.params['params']['content'] || that.params['content'],
@@ -14412,15 +14872,20 @@ cm.getConstructor('Com.DialogContainer', function(classConstructor, className, c
         that.components['controller'].addEvent('onOpenStart', that.afterOpenControllerHandler);
         that.components['controller'].addEvent('onOpenEnd', that.afterOpenControllerEndHandler);
         that.components['controller'].addEvent('onCloseEnd', that.afterCloseControllerHandler);
-        return that;
     };
 
     classProto.renderButtonsView = function(){
         var that = this;
         // Structure
-        that.nodes['buttons'] = cm.node('div', {'class' : 'pt__buttons'},
+        that.nodes['buttons'] = cm.node('div', {'class' : 'pt__buttons is-adaptive'},
             that.nodes['buttonsHolder'] = cm.node('div', {'class' : 'inner'})
         );
+        if(that.params['renderButtonsPositions']){
+            that.nodes['buttonsHolderLeft'] = cm.node('div', {'class' : 'left'});
+            that.nodes['buttonsHolderRight'] = cm.node('div', {'class' : 'right'});
+            cm.appendChild(that.nodes['buttonsHolderLeft'], that.nodes['buttonsHolder']);
+            cm.appendChild(that.nodes['buttonsHolderRight'], that.nodes['buttonsHolder']);
+        }
         cm.addClass(that.nodes['buttons'], ['pull', that.params['justifyButtons']].join('-'));
         // Render buttons
         cm.forEach(that.buttons, function(item){
@@ -14436,19 +14901,47 @@ cm.getConstructor('Com.DialogContainer', function(classConstructor, className, c
             'name' : '',
             'label' : '',
             'style' : 'button-primary',
+            'justify' : 'auto',
             'embed' : false,
             'callback' : function(){}
         }, item);
+        // Validate
+        item['justify'] = that.params['renderButtonsPositions'] ? item['justify'] : 'auto';
         // Structure
         item['node'] = cm.node('button', {'class' : ['button', item['style']].join(' ')}, item['label']);
         cm.addEvent(item['node'], 'click', item['callback']);
         // Embed
         that.buttons[item['name']] = item;
-        if(that.nodes['buttonsHolder']){
-            item['embed'] = true;
-            cm.appendChild(item['node'], that.nodes['buttonsHolder']);
-        }
+        that.embedButton(item);
         return item;
+    };
+
+    classProto.embedButton = function(item){
+        var that = this;
+        switch(item['justify']){
+            case 'right':
+                if(that.nodes['buttonsHolderRight']){
+                    item['embed'] = true;
+                    cm.appendChild(item['node'], that.nodes['buttonsHolderRight']);
+                }
+                break;
+
+            case 'left':
+                if(that.nodes['buttonsHolderLeft']){
+                    item['embed'] = true;
+                    cm.appendChild(item['node'], that.nodes['buttonsHolderLeft']);
+                }
+                break;
+
+            case 'auto':
+            default:
+                if(that.nodes['buttonsHolder']){
+                    item['embed'] = true;
+                    cm.appendChild(item['node'], that.nodes['buttonsHolder']);
+                }
+                break;
+        }
+        return that;
     };
 
     classProto.renderButton = function(item){
@@ -14459,10 +14952,10 @@ cm.getConstructor('Com.DialogContainer', function(classConstructor, className, c
         }else{
             item = that.addButton(item);
         }
+        // TODO: Check this moment
         // Embed
-        if(!item['embed'] && that.nodes['buttonsHolder']){
-            item['embed'] = true;
-            cm.appendChild(item['node'], that.nodes['buttonsHolder']);
+        if(!item['embed']){
+            that.embedButton(item);
         }
         return that;
     };
@@ -14472,6 +14965,7 @@ cm.getConstructor('Com.DialogContainer', function(classConstructor, className, c
         return that.buttons[name];
     };
 });
+
 cm.define('Com.Draganddrop', {
     'modules' : [
         'Params',
@@ -15778,7 +16272,10 @@ cm.define('Com.FileDropzone', {
         'max' : 0,                                  // 0 - infinity
         '_height' : 128,
         '_duration' : 'cm._config.animDuration',
-        'Com.FileReader' : {}
+        'fileReaderConstructor' : 'Com.FileReader',
+        'fileReaderParams' : {
+            'readValueType' : 'base64'
+        }
     },
     'strings' : {
         'drop_single' : 'drop file here',
@@ -15916,7 +16413,7 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
         that.hide();
         that.hideDropzone();
     };
-    
+
     classProto.processFiles = function(files){
         var that = this,
             data = [],
@@ -15998,6 +16495,7 @@ cm.getConstructor('Com.FileDropzone', function(classConstructor, className, clas
         }
     };
 });
+
 cm.define('Com.FileReader', {
     'modules' : [
         'Params',
@@ -16011,6 +16509,7 @@ cm.define('Com.FileReader', {
         'onValidateParams',
         'onRenderStart',
         'onRender',
+        'onRenderEnd',
         'onReadStart',
         'onReadProcess',
         'onReadSuccess',
@@ -16018,7 +16517,9 @@ cm.define('Com.FileReader', {
         'onReadEnd'
     ],
     'params' : {
-        'file' : null
+        'file' : null,
+        'readOnRender' : true,
+        'readValueType' : 'base64'         // base64 | binary | text | hex
     }
 },
 function(params){
@@ -16040,40 +16541,147 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
         that.render();
         that.triggerEvent('onConstruct');
         that.triggerEvent('onConstructEnd');
-        return that;
     };
 
     classProto.render = function(){
         var that = this;
         that.triggerEvent('onRenderStart');
-        that.read(that.params['file']);
+        if(that.params['readOnRender']){
+            that.read(that.params['file']);
+        }
         that.triggerEvent('onRender');
+        that.triggerEvent('onRenderEnd');
+    };
+
+    classProto.readAsBase64 = function(file, callback){
+        var that = this,
+            item,
+            reader;
+        that.triggerEvent('onReadStart', file);
+        // Config
+        item = that.validate(file);
+        that.triggerEvent('onReadProcess', item);
+        // Read File
+        reader = new FileReader();
+        cm.addEvent(reader, 'load', function(e){
+            that.afterSuccess(e.target.result, item, callback);
+        });
+        cm.addEvent(reader, 'error', function(e){
+            that.afterError(e, item, callback);
+        });
+        reader.readAsDataURL(file);
         return that;
     };
+
+    classProto.readAsBinary = function(file, callback){
+        var that = this,
+            item,
+            reader;
+        that.triggerEvent('onReadStart', file);
+        // Config
+        item = that.validate(file);
+        that.triggerEvent('onReadProcess', item);
+        // Read File
+        reader = new FileReader();
+        cm.addEvent(reader, 'load', function(e){
+            that.afterSuccess(e.target.result, item, callback);
+        });
+        cm.addEvent(reader, 'error', function(e){
+            that.afterError(e, item, callback);
+        });
+        reader.readAsBinaryString(file);
+        return that;
+    };
+
+    classProto.readAsHEX = function(file, callback){
+        var that = this,
+            value,
+            item,
+            reader;
+        that.triggerEvent('onReadStart', file);
+        // Config
+        item = that.validate(file);
+        that.triggerEvent('onReadProcess', item);
+        // Read File
+        reader = new FileReader();
+        cm.addEvent(reader, 'load', function(e){
+            try{
+                value = cm.bufferToHEX(e.target.result);
+            }catch(e){
+                that.afterError(e, item, callback);
+            }finally{
+                that.afterSuccess(value, item, callback);
+            }
+        });
+        cm.addEvent(reader, 'error', function(e){
+            that.afterError(e, item, callback);
+        });
+        reader.readAsArrayBuffer(file);
+        return that;
+    };
+
+    classProto.readAsText = function(file, callback){
+        var that = this,
+            item,
+            reader;
+        that.triggerEvent('onReadStart', file);
+        // Config
+        item = that.validate(file);
+        that.triggerEvent('onReadProcess', item);
+        // Read File
+        reader = new FileReader();
+        cm.addEvent(reader, 'load', function(e){
+            that.afterSuccess(e.target.result, item, callback);
+        });
+        cm.addEvent(reader, 'error', function(e){
+            that.afterError(e, item, callback);
+        });
+        reader.readAsText(file);
+        return that;
+    };
+
+    /******* HELPERS *******/
+
+    classProto.afterSuccess = function(value, item, callback){
+        var that = this;
+        item['value'] = value;
+        callback(item);
+        that.triggerEvent('onReadSuccess', item);
+        that.triggerEvent('onReadEnd', item);
+        return item;
+    };
+
+    classProto.afterError = function(e, item, callback){
+        var that = this;
+        item['error'] = e;
+        callback && callback(item);
+        that.triggerEvent('onReadError', item);
+        that.triggerEvent('onReadEnd', item);
+        return item;
+    };
+
+    /******* PUBLIC *******/
 
     classProto.read = function(file, callback){
         var that = this;
         callback = cm.isFunction(callback) ? callback : function(){};
-        if(cm.isFileReader && cm.isFile(file)){
-            that.triggerEvent('onReadStart', file);
-            // Config
-            var item = that.validate(file);
-            that.triggerEvent('onReadProcess', item);
-            // Read File
-            var reader = new FileReader();
-            cm.addEvent(reader, 'load', function(e){
-                item['value'] = e.target.result;
-                callback(item);
-                that.triggerEvent('onReadSuccess', item);
-                that.triggerEvent('onReadEnd', item);
-            });
-            cm.addEvent(reader, 'error', function(e){
-                item['error'] = e;
-                callback(item);
-                that.triggerEvent('onReadError', item);
-                that.triggerEvent('onReadEnd', item);
-            });
-            reader.readAsDataURL(file);
+        if(cm.isFileReader && cm.isFile(file)) {
+            switch (that.params['readValueType']) {
+                case 'binary':
+                    that.readAsBinary(file, callback);
+                    break;
+                case 'hex':
+                    that.readAsHEX(file, callback);
+                    break;
+                case 'text':
+                    that.readAsText(file, callback);
+                    break;
+                case 'base64':
+                default:
+                    that.readAsBase64(file, callback);
+                    break;
+
+            }
         }
         return that;
     };
@@ -16082,6 +16690,7 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
         var that = this,
             item = {
                 '_type' : 'file',
+                '_isFile' : false,
                 'value' : null,
                 'error' : null,
                 'name' : '',
@@ -16091,6 +16700,7 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
             },
             parsed;
         if(cm.isFile(o)){
+            item['_isFile'] = true;
             item['file'] = o;
             item['type'] = o.type;
             item['name'] = o.name;
@@ -16113,6 +16723,7 @@ cm.getConstructor('Com.FileReader', function(classConstructor, className, classP
         return item;
     };
 });
+
 cm.define('Com.FileStats', {
     'extend' : 'Com.AbstractController',
     'params' : {
@@ -16166,6 +16777,283 @@ cm.getConstructor('Com.FileStats', function(classConstructor, className, classPr
         return that;
     };
 });
+/* ******* COMPONENT: FORM FIELD ******* */
+
+Com.FormFields = (function(){
+		var stack = {};
+
+		return {
+				'add' : function(type, params){
+						stack[type] = cm.merge({
+								'node' : cm.node('div'),
+								'fieldConstructor' : null,
+								'constructor' : null,
+								'type' : type,
+								'field' : true,
+								'system' : false
+						}, params);
+				},
+				'get' : function(type){
+						return stack[type]? cm.clone(stack[type], true) : null;
+				}
+		};
+})();
+
+cm.define('Com.FormField', {
+		'modules' : [
+				'Params',
+				'Events',
+				'DataConfig',
+				'Stack',
+				'Callbacks'
+		],
+		'events' : [
+				'onRender'
+		],
+		'params' : {
+				'node' : cm.node('div'),
+				'container' : cm.node('div'),
+				'form' : false,
+				'name' : '',
+				'value' : null,
+				'dataValue' : null,
+				'type' : false,
+				'label' : '',
+				'help' : null,
+				'placeholder' : '',
+				'visible' : true,
+				'options' : [],
+				'className' : '',                   // is-box
+				'constructor' : false,
+				'constructorParams' : {},
+				'helpConstructor' : 'Com.HelpBubble',
+				'helpParams' : {
+						'renderStructure' : true
+				}
+		}
+},
+function(params){
+		var that = this;
+
+		that.nodes = {};
+		that.components = {};
+		that.form = null;
+		that.controller = null;
+		that.value = null;
+
+		var init = function(){
+				that.setParams(params);
+				that.convertEvents(that.params.events);
+				that.getDataConfig(that.params.node);
+				that.callbacksProcess();
+				validateParams();
+				render();
+				that.addToStack(that.params.node);
+				that.triggerEvent('onRender');
+		};
+
+		var validateParams = function(){
+				if(that.params.constructor){
+						cm.getConstructor(that.params.constructor, function(classConstructor){
+								that.params.constructor = classConstructor;
+						});
+				}
+				that.params.constructorParams.node = that.params.node;
+				that.params.constructorParams.name = that.params.name;
+				that.params.constructorParams.options = that.params.options;
+				that.params.constructorParams.value = that.params.dataValue || that.params.value;
+				that.params.helpParams.content = that.params.help;
+				that.params.helpParams.name = that.params.name;
+				that.form = that.params.form;
+		};
+
+		var render = function(){
+				// Render structure
+				that.nodes = that.callbacks.render(that) || {};
+				// Append
+				that.params.container.appendChild(that.nodes.container);
+				// Construct
+				that.callbacks.construct(that);
+		};
+
+		/* ******* CALLBACKS ******* */
+
+		that.callbacks.construct = function(that){
+				that.controller = that.callbacks.controller(that, that.params.constructorParams);
+		};
+
+		that.callbacks.controller = function(that, params){
+				if(that.params.constructor){
+						return new that.params.constructor(params);
+				}
+		};
+
+		that.callbacks.render = function(that){
+				var nodes = {};
+				// Structure
+				nodes.container = cm.node('dl', {'class' : 'pt__field'},
+						nodes.label = cm.node('dt',
+								cm.node('label', that.params.label)
+						),
+						nodes.value = cm.node('dd', that.params.node)
+				);
+				!that.params.visible && cm.addClass(nodes.container, 'is-hidden');
+				// Style
+				cm.addClass(nodes.container, that.params.className);
+				// Attributes
+				if(!cm.isEmpty(that.params.name)){
+						that.params.node.setAttribute('name', that.params.name);
+				}
+				if(!cm.isEmpty(that.params.value)){
+						that.params.node.setAttribute('value', that.params.value);
+				}
+				if(!cm.isEmpty(that.params.dataValue)){
+						that.params.node.setAttribute('data-value', JSON.stringify(that.params.dataValue));
+				}
+				if(!cm.isEmpty(that.params.placeholder)){
+						that.params.node.setAttribute('placeholder', that.params.placeholder);
+				}
+				if(!cm.isEmpty(that.params.help)){
+						cm.getConstructor(that.params.helpConstructor, function(classConstructor){
+								that.components.help = new classConstructor(
+										cm.merge(that.params.helpParams, {
+												'container' : nodes.label
+										})
+								);
+						});
+				}
+				return nodes;
+		};
+
+		that.callbacks.clearError = function(that){
+				cm.removeClass(that.nodes.container, 'error');
+				cm.remove(that.nodes.errors);
+		};
+
+		that.callbacks.renderError = function(that, message){
+				that.callbacks.clearError(that);
+				cm.addClass(that.nodes.container, 'error');
+				that.nodes.errors = cm.node('ul', {'class' : 'pt__field__error pt__field__hint'},
+						cm.node('li', {'class' : 'error'}, message)
+				);
+				cm.appendChild(that.nodes.errors, that.nodes.value);
+		};
+
+		that.callbacks.set = function(that, value){
+				that.controller && cm.isFunction(that.controller.set) && that.controller.set(value);
+				return value;
+		};
+
+		that.callbacks.get = function(that){
+				return that.controller && cm.isFunction(that.controller.get) ? that.controller.get() : null;
+		};
+
+		that.callbacks.reset = function(that){
+				that.controller && cm.isFunction(that.controller.reset) && that.controller.reset();
+		};
+
+		that.callbacks.destruct = function(that){
+				that.controller && cm.isFunction(that.controller.destruct) && that.controller.destruct();
+		};
+
+		/* ******* PUBLIC ******* */
+
+		that.set = function(value){
+				that.value = that.callbacks.set(that, value);
+				return that;
+		};
+
+		that.get = function(){
+				that.value = that.callbacks.get(that);
+				return that.value;
+		};
+
+		that.reset = function(){
+				that.callbacks.reset(that);
+				return that;
+		};
+
+		that.destruct = function(){
+				that.callbacks.destruct(that);
+				that.removeFromStack();
+				return that;
+		};
+
+		that.renderError = function(errors, message){
+				that.callbacks.renderError(that, errors, message);
+				return that;
+		};
+
+		that.clearError = function(){
+				that.callbacks.clearError(that);
+				return that;
+		};
+
+		init();
+});
+
+/* ******* COMPONENT: FORM FIELD: DECORATORS ******* */
+
+Com.FormFields.add('empty', {
+		'field' : false,
+		'fieldConstructor' : 'Com.AbstractFormField'
+});
+
+Com.FormFields.add('buttons', {
+		'node' : cm.node('div', {'class' : 'pt__buttons pull-right'}),
+		'field' : false,
+		'system' : true,
+		'callbacks' : {
+				'render' : function(that){
+						var nodes = {};
+						nodes.container = that.params.node;
+						nodes.inner = cm.node('div', {'class' : 'inner'});
+						cm.appendChild(nodes.inner, nodes.container);
+						return nodes;
+				},
+				'controller' : function(that){
+						var buttons = {},
+								node;
+						cm.forEach(that.params.options, function(item){
+								node = cm.node('button', item.text);
+								switch(item.value){
+										case 'submit':
+												node.type = 'submit';
+												cm.addClass(node, 'button-primary');
+												cm.addEvent(node, 'click', function(e){
+														cm.preventDefault(e);
+														that.form.send();
+												});
+												break;
+
+										case 'reset':
+												node.type = 'reset';
+												cm.addClass(node, 'button-secondary');
+												cm.addEvent(node, 'click', function(e){
+														cm.preventDefault(e);
+														that.form.reset();
+												});
+												break;
+
+										case 'clear':
+												cm.addClass(node, 'button-secondary');
+												cm.addEvent(node, 'click', function(e){
+														cm.preventDefault(e);
+														that.form.clear();
+												});
+												break;
+
+										default:
+												break;
+								}
+								buttons[item.value] = node;
+								that.params.node.appendChild(node);
+						});
+						return buttons;
+				}
+		}
+});
+
 cm.define('Com.FormStepsLoader', {
     'modules' : [
         'Params',
@@ -16494,6 +17382,9 @@ cm.define('Com.Gallery', {
         'showArrowTitles' : false,
         'autoplay' : true,
         'zoom' : true,
+        'types' : {
+            'image' : 'jpg|png|gif|jpeg|bmp|tga|svg|webp|tiff'
+        },
         'icons' : {
             'prev' : 'icon default prev',
             'next' : 'icon default next',
@@ -16602,8 +17493,14 @@ function(params){
             'mime' : ''
         }, item);
         // Check type
+        try{
+            item['_url'] = new URL(item['src']);
+        }catch(e){
+        }
+        item['_regexp'] = new RegExp('\\.(' + that.params['types']['image'] + ')$', 'gi');
         if(
-            /\.(jpg|png|gif|jpeg|bmp|tga|svg|webp|tiff)$/gi.test(item['src'])
+            item['_regexp'].test(item['src'])
+            || (item['_url'] && item['_regexp'].test(item['_url'].pathname))
             || /^data:image/gi.test(item['src'])
             || /^image/gi.test(item['mime'])
             || item['type'] === 'image'
@@ -16841,6 +17738,7 @@ function(params){
 
     init();
 });
+
 cm.define('Com.GalleryLayout', {
     'modules' : [
         'Params',
@@ -17484,7 +18382,13 @@ cm.define('Com.Gridlist', {
         'onRender',
         'onRenderStart',
         'onRenderEnd',
+        'onLoadStart',
         'onLoadEnd',
+        'onLoadError',
+        'onPageRenderStart',
+        'onPageRenderEnd',
+        'onRenderTitleItem',
+        'onRenderFilterItem',
         'onColumnsChange',
         'onColumnsResize'
     ],
@@ -17518,15 +18422,22 @@ cm.define('Com.Gridlist', {
         'visibleDateFormat' : 'cm._config.dateTimeFormat',          // Render date format
 
         // Pagination and ajax data request
+        'renderEmptyMessage' : true,
+        'renderEmptyTable' : false,
+        'renderFilter' : false,
+        'divideTableHeader' : false,
         'pagination' : true,
         'perPage' : 25,
         'responseKey' : 'data',                                     // Response data response key
+        'responseErrorsKey' : 'errors',
+        'responseMessageKey' : 'message',
         'responseCountKey' : 'count',                               // Response data count response key
+        'showLoader' : true,
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
-            'url' : '',                                             // Request URL. Variables: %orderBy%, %sortBy%, %page%, %offset%, %perPage%, %limit%, %callback% for JSONP.
-            'params' : ''                                           // Params object. Variables: %orderBy%, %sortBy%, %page%, %offset%, %perPage%, %limit%, %callback% for JSONP.
+            'url' : '',                                             // Request URL. Variables: %orderBy%, %orderByLower%, %sortBy%, %page%, %offset%, %perPage%, %limit%, %callback% for JSONP.
+            'params' : ''                                           // Params object. Variables: %orderBy%, %orderByLower%, %sortBy%, %page%, %offset%, %perPage%, %limit%, %callback% for JSONP.
         },
 
         // Columns manipulation
@@ -17554,7 +18465,9 @@ cm.define('Com.Gridlist', {
         'Com.GridlistHelper' : {
             'customEvents' : false
         },
-        'Com.Pagination' : {
+        'autoSend' : true,
+        'paginationConstructor' : 'Com.Pagination',
+        'paginationParams' : {
             'renderStructure' : true,
             'embedStructureOnRender' : true,
             'animateSwitch' : true,
@@ -17604,19 +18517,25 @@ function(params){
         that.sortBy = that.params['sortBy'];
         that.orderBy = that.params['orderBy'];
         // Data
-        that.params['data'] = that.callbacks.filter(that, that.params['data']);
+        if(!cm.isEmpty(that.params['data']) && cm.isArray(that.params['data'])){
+            that.params['data'] = that.callbacks.filter(that, that.params['data']);
+        }
         // Ajax
         if(!cm.isEmpty(that.params['ajax']['url'])){
             that.isAjax = true;
             that.params['pagination'] = true;
-            that.params['Com.Pagination']['ajax'] = that.params['ajax'];
-            that.params['Com.Pagination']['responseCountKey'] = that.params['responseCountKey'];
-            that.params['Com.Pagination']['responseKey'] = that.params['responseKey'];
+            that.params['paginationParams']['autoSend'] = that.params['autoSend'];
+            that.params['paginationParams']['ajax'] = that.params['ajax'];
+            that.params['paginationParams']['showLoader'] = that.params['showLoader'];
+            that.params['paginationParams']['responseKey'] = that.params['responseKey'];
+            that.params['paginationParams']['responseCountKey'] = that.params['responseCountKey'];
+            that.params['paginationParams']['responseMessageKey'] = that.params['responseMessageKey'];
+            that.params['paginationParams']['responseErrorsKey'] = that.params['responseErrorsKey'];
         }else{
-            that.params['Com.Pagination']['count'] = that.params['data'].length;
+            that.params['paginationParams']['count'] = that.params['data'].length;
         }
         // Pagination
-        that.params['Com.Pagination']['perPage'] = that.params['perPage'];
+        that.params['paginationParams']['perPage'] = that.params['perPage'];
         // Helper
         that.params['Com.GridlistHelper']['columns'] = that.params['columns'];
     };
@@ -17645,16 +18564,19 @@ function(params){
     };
 
     var renderInitialTable = function(){
+        if(that.params['divideTableHeader']){
+            renderTableHeader(that.nodes['container']);
+        }
         if(that.isAjax){
             // Render dynamic pagination
             renderPagination();
         }else if(!cm.isEmpty(that.params['data'])){
+            // Sort data array for first time
+            that.params['sort'] && arraySort();
             // Counter
             if(that.params['showCounter']){
                 renderCounter(that.params['data'].length);
             }
-            // Sort data array for first time
-            that.params['sort'] && arraySort();
             if(that.params['pagination']){
                 // Render static pagination
                 renderPagination();
@@ -17762,30 +18684,31 @@ function(params){
     /*** PAGINATION AND TABLE ****/
 
     var renderPagination = function(){
-        cm.getConstructor('Com.Pagination', function(classConstructor, className){
+        cm.getConstructor(that.params['paginationConstructor'], function(classConstructor){
             that.components['pagination'] = new classConstructor(
-                cm.merge(that.params[className], {
+                cm.merge(that.params['paginationParams'], {
                     'container' : that.nodes['container'],
                     'callbacks' : {
                         'afterPrepare' : function(pagination, config){
-                            config['url'] = cm.strReplace(config['url'], {
-                                '%sortBy%' : that.sortBy,
-                                '%orderBy%' : that.orderBy
-                            });
-                            config['params'] = cm.objectReplace(config['params'], {
-                                '%sortBy%' : that.sortBy,
-                                '%orderBy%' : that.orderBy
-                            });
-                            return config;
+                            return that.callbacks.paginationAfterPrepare(that, pagination, config)
                         }
                     },
                     'events' : {
-                        'onPageRender' : function(pagination, data){
-                            renderPaginationPage(data);
+                        'onStart' : function(pagination){
+                            that.triggerEvent('onLoadStart');
                         },
-                        'onPageRenderEnd' : function(pagination, data){
-                            that.redraw();
+                        'onPageRenderError' : function(pagination, page){
+                            that.triggerEvent('onLoadError', {
+                                'page' : page
+                            });
                             that.triggerEvent('onLoadEnd');
+                        },
+                        'onPageRender' : function(pagination, page){
+                            that.callbacks.renderPage(that, page);
+                        },
+                        'onPageRenderEnd' : function(pagination, page){
+                            that.redraw();
+                            that.triggerEvent('onLoadEnd', {'page' : page});
                         },
                         'onSetCount' : function(pagination, count){
                             that.params['showCounter'] && renderCounter(count);
@@ -17794,25 +18717,6 @@ function(params){
                 })
             );
         });
-    };
-
-    var renderPaginationPage = function(data){
-        var startIndex, endIndex, dataArray;
-        if(that.isAjax){
-            if(!cm.isEmpty(data['data'])){
-                data['data'] = that.callbacks.filter(that, data['data']);
-            }
-            if(!cm.isEmpty(data['data'])){
-                renderTable(data['page'], data['data'], data['container']);
-            }else{
-                renderEmptiness(data['container']);
-            }
-        }else{
-            startIndex = that.params['perPage'] * (data['page'] - 1);
-            endIndex = Math.min(that.params['perPage'] * data['page'], that.params['data'].length);
-            dataArray = that.params['data'].slice(startIndex, endIndex);
-            renderTable(data['page'], dataArray, data['container']);
-        }
     };
 
     var renderCounter = function(count){
@@ -17825,30 +18729,83 @@ function(params){
         });
     };
 
-    var renderEmptiness = function(container){
-        that.nodes['empty'] = cm.node('div', {'class' : 'cm__empty'}, that.lang('empty'));
+    var renderEmptiness = function(container, errors){
+        errors = !cm.isEmpty(errors) ? errors : that.lang('empty');
+        if(that.nodes['empty'] && cm.isParent(container, that.nodes['empty'])){
+            cm.remove(that.nodes['empty']);
+        }
+        that.nodes['empty'] = cm.node('div', {'class' : 'cm__empty'}, errors);
         cm.appendChild(that.nodes['empty'], container);
+    };
+
+    var renderTableHeader = function(container){
+        var nodes = {};
+        that.nodes['header'] = nodes;
+        // Render Table
+        nodes['container'] = cm.node('div', {'class' : 'pt__gridlist pt__gridlist--header'},
+            nodes['table'] = cm.node('table',
+                nodes['head'] = cm.node('thead',
+                    nodes['title'] = cm.node('tr')
+                )
+            )
+        );
+        // Render Table Title
+        cm.forEach(that.params['cols'], function(item, i){
+            renderTitleItem(item, i, nodes['title']);
+        });
+        // Render Table Filter
+        if(that.params['renderFilter']){
+            nodes['filter'] = cm.node('tr');
+            cm.forEach(that.params['cols'], function(item, i){
+                renderFilterItem(item, i, nodes['filter']);
+            });
+            cm.appendChild(nodes['filter'], nodes['head']);
+        }
+        // Append
+        cm.appendChild(nodes['container'], container);
     };
 
     var renderTable = function(page, data, container){
         // API onRenderStart event
         that.triggerEvent('onRenderStart', {
             'container' : container,
-            'page' : page
+            'page' : page,
+            'data' : data
         });
         // Reset table
         resetTable();
+        if(that.nodes['table'] && cm.isParent(container, that.nodes['table'])){
+            cm.remove(that.nodes['table']);
+        }
         // Render Table
         that.nodes['table'] = cm.node('div', {'class' : 'pt__gridlist'},
-            cm.node('table',
-                cm.node('thead',
+            that.nodes['tableInner'] = cm.node('table',
+                that.nodes['head'] = cm.node('thead',
                     that.nodes['title'] = cm.node('tr')
                 ),
                 that.nodes['content'] = cm.node('tbody')
             )
         );
-        // Render Table Title
-        cm.forEach(that.params['cols'], renderTh);
+        if(!that.params['divideTableHeader']) {
+            // Render Table Title
+            cm.forEach(that.params['cols'], function(item, i){
+                renderTitleItem(item, i, that.nodes['title']);
+            });
+            // Render Table Filter
+            if(that.params['renderFilter']) {
+                that.nodes['filter'] = cm.node('tr');
+                cm.forEach(that.params['cols'], function(item, i){
+                    renderFilterItem(item, i, that.nodes['filter']);
+                });
+                cm.appendChild(that.nodes['filter'], that.nodes['head']);
+            }
+        }else{
+            // Render Table Title Placeholder
+            cm.forEach(that.params['cols'], function(item, i){
+                renderTitleItemPlaceholder(item, i, that.nodes['title']);
+            });
+            cm.addClass(that.nodes['head'], 'is-hidden');
+        }
         // Render Table Row
         cm.forEach(data, function(item, i){
             renderRow(that.rows, item, (i + (page -1)));
@@ -17861,6 +18818,7 @@ function(params){
         that.triggerEvent('onRenderEnd', {
             'container' : container,
             'page' : page,
+            'data' : data,
             'rows' : that.rows
         });
     };
@@ -17890,18 +18848,19 @@ function(params){
         }
     };
 
-    var renderTh = function(item, i){
+    var renderTitleItem = function(item, i, container){
         // Merge cell parameters
         item = that.params['cols'][i] = cm.merge({
             '_component' : null,            // System attribute
             'width' : 'auto',               // number | % | auto
             'access' : true,                // Render column if is accessible
-            'type' : 'text',		        // text | number | url | date | html | icon | checkbox | empty | actions | links
+            'type' : 'text',		            // text | number | url | date | html | icon | checkbox | empty | actions | links
             'key' : '',                     // Data array key
             'title' : '',                   // Table th title
             'sort' : that.params['sort'],   // Sort this column or not
             'sortKey' : '',                 // Sort key
-            'class' : '',		            // Icon css class, for type="icon"
+            'filterKey' : null,
+            'class' : '',		                // Icon css class, for type="icon"
             'target' : '_blank',            // Link target, for type="url"
             'rel' : '',                     // Link rel, for type="url"
             'textOverflow' : null,          // Overflow long text to single line
@@ -17922,10 +18881,8 @@ function(params){
         // Check access
         if(item['access']){
             // Structure
-            that.nodes['title'].appendChild(
-                item['nodes']['container'] = cm.node('th',
-                    item['nodes']['inner'] = cm.node('div', {'class' : 'inner'})
-                )
+            item['nodes']['container'] = cm.node('th',
+                item['nodes']['inner'] = cm.node('div', {'class' : 'inner'})
             );
             // Set column width
             if(/%|px|auto/.test(item['width'])){
@@ -17933,6 +18890,8 @@ function(params){
             }else{
                 item['nodes']['container'].style.width = parseFloat(item['width']) + 'px';
             }
+            // Embed
+            cm.appendChild(item['nodes']['container'], container);
             // Insert specific specified content in th
             switch(item['type']){
                 case 'checkbox' :
@@ -17959,17 +18918,15 @@ function(params){
             }
             // Render sort arrow and set function on click to th
             if(item['sort'] && !/icon|empty|actions|links|checkbox/.test(item['type'])){
-                cm.addClass(item['nodes']['container'], 'sort');
-                if(item['sortKey'] === that.sortBy || item['key'] === that.sortBy){
-                    item['nodes']['inner'].appendChild(
-                        cm.node('div', {'class' : that.params['icons']['arrow'][that.orderBy.toLowerCase()]})
-                    );
-                }
+                setTableHeaderItemSort(item, i);
                 cm.addEvent(item['nodes']['inner'], 'click', function(){
                     that.sortBy = !cm.isEmpty(item['sortKey']) ? item['sortKey'] : item['key'];
                     that.orderBy = that.orderBy === 'ASC' ? 'DESC' : 'ASC';
                     if(!that.isAjax){
                         arraySort();
+                    }
+                    if(that.params['divideTableHeader']){
+                        cm.forEach(that.params['cols'], setTableHeaderItemSort);
                     }
                     if(that.params['pagination']){
                         that.components['pagination'].rebuild();
@@ -17978,6 +18935,64 @@ function(params){
                     }
                 });
             }
+            // Trigger event
+            that.triggerEvent('onRenderTitleItem', {
+                'nodes' : item['nodes'],
+                'item' : item,
+                'i' : i
+            });
+        }
+    };
+
+    var setTableHeaderItemSort = function(item, i){
+        if(!item['access'] || /icon|empty|actions|links|checkbox/.test(item['type'])){
+            return;
+        }
+        cm.removeClass(item['nodes']['container'], 'sort');
+        if(item['sort']){
+            cm.addClass(item['nodes']['container'], 'sort');
+            cm.remove(item['nodes']['sort']);
+            if(item['sortKey'] === that.sortBy || item['key'] === that.sortBy){
+                item['nodes']['sort'] = cm.node('div', {'class' : that.params['icons']['arrow'][that.orderBy.toLowerCase()]});
+                cm.appendChild(item['nodes']['sort'], item['nodes']['inner']);
+            }
+        }
+    };
+
+    var renderTitleItemPlaceholder = function(item, i, container){
+        item['nodes']['placeholder'] = {};
+        // Check access
+        if(item['access']){
+            // Structure
+            item['nodes']['placeholder']['container'] = cm.node('th',
+                item['nodes']['placeholder']['inner'] = cm.node('div', {'class' : 'inner'})
+            )
+            // Set column width
+            if(/%|px|auto/.test(item['width'])){
+                item['nodes']['placeholder']['container'].style.width = item['width'];
+            }else{
+                item['nodes']['placeholder']['container'].style.width = parseFloat(item['width']) + 'px';
+            }
+            // Embed
+            cm.appendChild(item['nodes']['placeholder']['container'], container);
+        }
+    };
+
+    var renderFilterItem = function(item, i, container){
+        item['nodes']['filter'] = {};
+        // Check access
+        if(item['access']){
+            // Structure
+            item['nodes']['filter']['container'] = cm.node('td',
+                item['nodes']['filter']['inner'] = cm.node('div', {'class' : 'inner'})
+            )
+            cm.appendChild(item['nodes']['filter']['container'], container);
+            // Trigger event
+            that.triggerEvent('onRenderFilterItem', {
+                'nodes' : item['nodes']['filter'],
+                'item' : item,
+                'i' : i
+            });
         }
     };
 
@@ -18113,7 +19128,11 @@ function(params){
     /*** CELLS BY TYPES ***/
 
     var renderCellDefault = function(config, row, item){
-        item['nodes']['inner'].innerHTML = item['text'];
+        if(cm.isNode(item['text'])){
+            cm.appendChild(item['text'], item['nodes']['inner']);
+        }else{
+            item['nodes']['inner'].innerHTML = item['text'];
+        }
     };
 
     var renderCellNumber = function(config, row, item){
@@ -18162,125 +19181,126 @@ function(params){
     };
 
     var renderCellLinks = function(config, row, item){
-        item['nodes']['links'] = [];
-        item['nodes']['inner'].appendChild(
-            item['nodes']['node'] = cm.node('div', {'class' : ['pt__links', config['class']].join(' ')},
-                item['nodes']['linksList'] = cm.node('ul')
-            )
-        );
-        cm.forEach(config['links'], function(actionItem){
-            var actionNode;
-            actionItem = cm.merge({
-                'label' : '',
-                'attr' : {},
-                'events' : {}
-            }, actionItem);
-            cm.forEach(row['data'], function(itemValue, itemKey){
-                actionItem['attr'] = cm.replaceDeep(actionItem['attr'], new RegExp([cm.strWrap(itemKey, '%'), cm.strWrap(itemKey, '%25')].join('|'), 'g'), itemValue);
-            });
-            item['nodes']['linksList'].appendChild(
-                cm.node('li',
-                    actionNode = cm.node('a', actionItem['attr'], actionItem['label'])
-                )
-            );
-            cm.forEach(actionItem['events'], function(actionEventHandler, actionEventName){
-                cm.addEvent(actionNode, actionEventName, actionEventHandler);
-            });
-            item['nodes']['links'].push(actionNode);
-        });
+        // Structure
+        item['nodes']['items'] = item['nodes']['links'] = [];
+        item['nodes']['node'] = cm.node('div', {'class' : ['pt__links', config['class']].join(' ')},
+            item['nodes']['itemsList'] = item['nodes']['linksList'] = cm.node('ul')
+        )
+        // Items
+        item['links'] = renderCellActionItems(config, row, item, 'links');
+        // Embed
+        if(item['nodes']['links'].length){
+            cm.appendChild(item['nodes']['node'], item['nodes']['inner']);
+        }
     };
 
     var renderCellActions = function(config, row, item){
-        var isInArray, isEmpty;
         // Structure
-        item['nodes']['actions'] = [];
+        item['nodes']['items'] = item['nodes']['actions'] = [];
         item['nodes']['node'] = cm.node('div', {'class' : ['pt__links', 'pull-right', config['class']].join(' ')},
             cm.node('ul',
                 item['nodes']['componentNode'] = cm.node('li', {'class' : 'com__menu', 'data-node' : 'ComMenu:{}:button'},
                     cm.node('a', {'class' : 'label'}, that.lang('actions')),
                     cm.node('span', {'class' : 'cm-i__chevron-down xx-small inline'}),
                     cm.node('div', {'class' : 'pt__menu', 'data-node' : 'ComMenu.target'},
-                        item['nodes']['actionsList'] = cm.node('ul', {'class' : 'pt__menu-dropdown'})
+                        item['nodes']['itemsList'] = item['nodes']['actionsList'] = cm.node('ul', {'class' : 'pt__menu-dropdown'})
                     )
                 )
             )
         );
         // Items
-        cm.forEach(config['actions'], function(actionItem){
+        item['actions'] = renderCellActionItems(config, row, item, 'actions');
+        // Embed
+        if(item['nodes']['actions'].length){
+            cm.appendChild(item['nodes']['node'], item['nodes']['inner']);
+            // Render menu component
+            cm.getConstructor('Com.Menu', function(classConstructor, className){
+                item['component'] = new classConstructor(
+                    cm.merge(that.params[className], {
+                        'node' : item['nodes']['componentNode']
+                    })
+                );
+            });
+        }
+    };
+
+    var renderCellActionItems = function(config, row, item, list){
+        var isInArray,
+            isEmpty,
+            items = [];
+        cm.forEach(config[list], function(actionItem, key){
             actionItem = cm.merge({
                 'name' : '',
                 'label' : '',
                 'attr' : {},
                 'events' : {},
+                'preventDefault' : null,
                 'constructor' : false,
                 'constructorParams' : {},
                 'callback' : function(){}
             }, actionItem);
+            // Validate
+            actionItem['preventDefault'] = cm.isBoolean(actionItem['preventDefault']) ? actionItem['preventDefault'] : config['preventDefault'];
             // Check access
             isEmpty = !cm.isArray(item['data']) || cm.isEmpty(actionItem['name']);
             isInArray = cm.isArray(item['data']) && cm.inArray(item['data'], actionItem['name']);
             if(isEmpty || isInArray){
                 renderCellActionItem(config, row, item, actionItem);
             }
+            // Export
+            items.push(actionItem);
         });
-        // Embed
-        if(item['nodes']['actions'].length){
-            cm.appendChild(item['nodes']['node'], item['nodes']['inner']);
-        }
-    };
+        return items;
+    }
 
     var renderCellActionItem = function(config, row, item, actionItem){
         // WTF is that? - that is attribute bindings, for example - href
         cm.forEach(row['data'], function(itemValue, itemKey){
-            actionItem['attr'] = cm.replaceDeep(actionItem['attr'], new RegExp([cm.strWrap(itemKey, '%'), cm.strWrap(itemKey, '%25')].join('|'), 'g'), itemValue);
+            actionItem['attr'] = cm.replaceDeep(
+                actionItem['attr'],
+                new RegExp([cm.strWrap(itemKey, '%'), cm.strWrap(itemKey, '%25')].join('|'), 'g'),
+                itemValue
+            );
         });
-        item['nodes']['actionsList'].appendChild(
+        item['nodes']['itemsList'].appendChild(
             cm.node('li',
                 actionItem['node'] = cm.node('a', actionItem['attr'], actionItem['label'])
             )
         );
-        // Render menu component
-        cm.getConstructor('Com.Menu', function(classConstructor, className){
-            item['component'] = new classConstructor(
-                cm.merge(that.params[className], {
-                    'node' : item['nodes']['componentNode']
-                })
-            );
-        });
         if(actionItem['constructor']){
             cm.getConstructor(actionItem['constructor'], function(classConstructor){
-                actionItem['controller'] = new classConstructor(
-                    cm.merge(actionItem['constructorParams'], {
-                        'node' : actionItem['node'],
-                        'data' : row['data'],
-                        'rowItem' : row,
-                        'cellItem' : item,
-                        'actionItem' : actionItem
-                    })
-                );
+                actionItem['_constructorParams'] = cm.merge(actionItem['constructorParams'], {
+                    'node' : actionItem['node'],
+                    'data' : row['data'],
+                    'rowItem' : row,
+                    'cellItem' : item,
+                    'actionItem' : actionItem
+                });
+                actionItem['controller'] = new classConstructor(actionItem['_constructorParams']);
                 actionItem['controller'].addEvent('onRenderControllerEnd', function(){
-                    item['component'].hide(false);
+                    item['component'] && item['component'].hide(false);
                 });
             });
         }else{
             cm.addEvent(actionItem['node'], 'click', function(e){
-                config['preventDefault'] && cm.preventDefault(e);
+                actionItem['preventDefault'] && cm.preventDefault(e);
                 item['component'].hide(false);
                 actionItem['callback'](e, actionItem, row);
             });
         }
-        item['nodes']['actions'].push(actionItem['node']);
+        item['nodes']['items'].push(actionItem['node']);
     };
 
     /*** HELPING FUNCTIONS ***/
 
-    var resetTable = function(){
+    var resetTable = function(container){
+        cm.customEvent.trigger(that.nodes['table'], 'destruct', {
+            'direction' : 'child',
+            'self' : false
+        });
         that.unCheckAll();
         that.rows = [];
         that.checked = [];
-        if(!that.params['pagination']){
-            cm.remove(that.nodes['table']);
-        }
     };
 
     var arraySort = function(){
@@ -18400,8 +19420,49 @@ function(params){
 
     /******* CALLBACKS *******/
 
+    that.callbacks.paginationAfterPrepare = function(that, pagination, config){
+        config['url'] = cm.strReplace(config['url'], {
+            '%sortBy%' : that.sortBy,
+            '%orderBy%' : that.orderBy,
+            '%orderByLower%' : that.orderBy.toLowerCase()
+        });
+        config['params'] = cm.objectReplace(config['params'], {
+            '%sortBy%' : that.sortBy,
+            '%orderBy%' : that.orderBy,
+            '%orderByLower%' : that.orderBy.toLowerCase()
+        });
+        return config;
+    };
+
     that.callbacks.filter = function(that, data){
         return data;
+    };
+
+    that.callbacks.renderPage = function(that, page){
+        that.triggerEvent('onPageRenderStart', {'page' : page});
+        if(!that.isAjax){
+            page.data = that.getStaticPageData(page.page);
+        }
+        if(!cm.isEmpty(page.data) && cm.isArray(page.data)){
+            page.data = that.callbacks.filter(that, page.data);
+        }
+        that.renderPageTable(page);
+        that.triggerEvent('onPageRenderEnd', {'page' : page});
+    };
+
+    /******* TABLE *******/
+
+    that.renderPageTable = function(page){
+        if(!cm.isEmpty(page['data'])){
+            renderTable(page['page'], page['data'], page['container']);
+        }else{
+            if(that.params['renderEmptyTable']){
+                renderTable(page['page'], page['data'], page['container']);
+            }
+            if(that.params['renderEmptyMessage']){
+                renderEmptiness(page['container'], page['message']);
+            }
+        }
     };
 
     /******* MAIN *******/
@@ -18432,6 +19493,10 @@ function(params){
     that.abort = function(){
         that.components['pagination'] && that.components['pagination'].abort();
         return that;
+    };
+
+    that.getRows = function(){
+        return that.rows;
     };
 
     that.check = function(id){
@@ -18502,6 +19567,12 @@ function(params){
         return rows;
     };
 
+    that.getStaticPageData = function(page){
+        var startIndex = that.params.perPage * (page - 1),
+            endIndex = Math.min(that.params.perPage * page, that.params.data.length);
+        return that.params.data.slice(startIndex, endIndex);
+    };
+
     that.setRowStatus = function(id, status){
         cm.forEach(that.rows, function(row){
             if(row['index'] == id){
@@ -18536,6 +19607,7 @@ function(params){
 
     init();
 });
+
 cm.define('Com.GridlistFilter', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -19040,15 +20112,18 @@ cm.getConstructor('Com.ImageBox', function(classConstructor, className, classPro
     classProto.animSet = function(){
         var that = this;
         that.isProcessed = true;
-        cm.addClass(that.params['node'], ['animated', that.params['effect']].join(' '));
+        cm.addClass(that.params['node'], 'animate__animated');
+        cm.addClass(that.params['node'], ['animate', that.params['effect']].join('__'));
     };
 
     classProto.animRestore = function(){
         var that = this;
         that.isProcessed = false;
-        cm.removeClass(that.params['node'], ['animated', that.params['effect']].join(' '));
+        cm.removeClass(that.params['node'], 'animate__animated');
+        cm.removeClass(that.params['node'], ['animate', that.params['effect']].join('__'));
     };
 });
+
 cm.define('Com.ImagePreviewContainer', {
     'extend' : 'Com.AbstractContainer',
     'params' : {
@@ -19489,6 +20564,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
             }, item);
             params = cm.merge({
                 'triggerEvents' : true,
+                'immediately' : false,
                 'callback' : function(){}
             }, params);
             if(!cm.isBoolean(item['showControls'])){
@@ -19523,6 +20599,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
             params['triggerEvents'] && that.triggerEvent('onItemAdd', item);
             that.processItem(item, {
                 'triggerEvents' : params['triggerEvents'],
+                'immediately' : params['immediately'],
                 'callback' : function(){
                     params['triggerEvents'] && that.triggerEvent('onItemAddEnd', item);
                     params['callback'](item);
@@ -19543,6 +20620,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         }, item);
         params = cm.merge({
             'triggerEvents' : true,
+            'immediately' : false,
             'callback' : function(){}
         }, params);
         // Data config
@@ -19588,6 +20666,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         if(item.visible){
             that.showItem(item, {
                 'triggerEvents' : true,
+                'immediately' : params['immediately'],
                 'callback' : function(){
                     params['triggerEvents'] && that.triggerEvent('onItemProcessEnd', item);
                     params['callback'](item);
@@ -19596,6 +20675,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         }else{
             that.hideItem(item, {
                 'triggerEvents' : true,
+                'immediately' : params['immediately'],
                 'callback' : function(){
                     params['triggerEvents'] && that.triggerEvent('onItemProcessEnd', item);
                     params['callback'](item);
@@ -19633,6 +20713,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         var that = this;
         params = cm.merge({
             'triggerEvents' : true,
+            'immediately' : false,
             'callback' : function(){}
         }, params);
         // Process
@@ -19643,6 +20724,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         params['triggerEvents'] && that.triggerEvent('onItemHide', item);
         that.hideItemVisibility(item, {
             'triggerEvents' : params['triggerEvents'],
+            'immediately' : params['immediately'],
             'callback' : function(){
                 params['triggerEvents'] && that.triggerEvent('onItemHideEnd', item);
                 params['callback'](item);
@@ -19655,12 +20737,14 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         var that = this;
         params = cm.merge({
             'callback' : function(){},
+            'immediately' : false,
             'triggerEvents' : true
         }, params);
         // Process
         item['container'].style.overflow = 'hidden';
         item['container'].style.height = item['container'].scrollHeight + 'px';
         cm.transition(item['container'], {
+            'immediately' : params['immediately'],
             'properties' : {
                 'height' : '0px',
                 'opacity' : 0
@@ -19677,6 +20761,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         var that = this;
         params = cm.merge({
             'triggerEvents' : true,
+            'immediately' : false,
             'callback' : function(){}
         }, params);
         // Process
@@ -19687,6 +20772,7 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         params['triggerEvents'] && that.triggerEvent('onItemShow', item);
         that.showItemVisibility(item, {
             'triggerEvents' : params['triggerEvents'],
+            'immediately' : params['immediately'],
             'callback' : function(){
                 params['triggerEvents'] && that.triggerEvent('onItemShowEnd', item);
                 params['callback'](item);
@@ -19699,12 +20785,14 @@ cm.getConstructor('Com.MultiField', function(classConstructor, className, classP
         var that = this;
         params = cm.merge({
             'triggerEvents' : true,
+            'immediately' : false,
             'callback' : function(){}
         }, params);
         // Process
         item['container'].style.overflow = 'hidden';
         item['container'].style.height = '0px';
         cm.transition(item['container'], {
+            'immediately' : params['immediately'],
             'properties' : {
                 'height' : item['container'].scrollHeight + 'px',
                 'opacity' : 1
@@ -19855,7 +20943,8 @@ cm.define('Com.Notifications', {
         'icon' : 'icon small remove linked',
         'Com.ToggleBox' : {
             'toggleTitle' : false,
-            'className' : null
+            'className' : null,
+            'duration' : 'cm._config.animDuration',
         }
     },
     'strings' : {
@@ -19869,19 +20958,12 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.Notifications', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.Notifications', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(){
         var that = this;
         that.items = [];
-        // Call parent method - renderViewModel
-        _inherit.prototype.construct.apply(that, arguments);
-    };
-
-    classProto.validateParams = function(){
-        var that = this;
-        return that;
+        // Call parent method - construct
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.renderView = function(){
@@ -19889,7 +20971,6 @@ cm.getConstructor('Com.Notifications', function(classConstructor, className, cla
         that.nodes['container'] = cm.node('div', {'class' : 'com__notifications'},
             that.nodes['list'] = cm.node('ul')
         );
-        return that;
     };
 
     classProto.clear = function(){
@@ -19920,14 +21001,14 @@ cm.getConstructor('Com.Notifications', function(classConstructor, className, cla
         );
         // Label
         if(!cm.isNode(item['label']) && !cm.isTextNode(item['label'])){
-            item['label'] = cm.node('span', {'innerHTML' : item['label']});
+            item['label'] = cm.node('div', {'innerHTML' : item['label']});
         }
         cm.appendChild(item['label'], item['nodes']['descr']);
         // Messages
         if(!cm.isEmpty(item['messages'])){
             // Button
             item['nodes']['button'] = cm.node('a', {'class' : 'more'}, that.lang('more'));
-            cm.appendChild(item['nodes']['button'], item['nodes']['descr']);
+            cm.insertFirst(item['nodes']['button'], item['nodes']['descr']);
             // List
             cm.forEach(item['messages'], function(message){
                 cm.appendChild(cm.node('li', message), item['nodes']['messagesList']);
@@ -20094,16 +21175,18 @@ cm.define('Com.Overlay', {
         'name' : '',
         'container' : 'document.body',
         'appendMode' : 'appendChild',
-        'theme' : 'default',                // transparent | default | light | dark
+        'theme' : 'default',                // transparent | default | light | solid-light | dark
         'className' : '',
         'position' : 'fixed',
         'lazy' : false,
-        'delay' : 'cm._config.loadDelay',
+        'delay' : 'cm._config.lazyDelay',
         'showSpinner' : true,
         'showContent' : true,
         'autoOpen' : true,
+        'autoClose' : false,                // ToDo: implement
         'removeOnClose' : true,
         'destructOnRemove' : false,
+        'transition' : 'ease',
         'duration' : 'cm._config.animDurationLong'
     }
 },
@@ -20146,6 +21229,7 @@ function(params){
         );
         // CSS Class
         cm.addClass(that.nodes['container'], that.params['className']);
+        cm.addClass(that.nodes['container'], ['transition', that.params['transition']].join('-'));
         // Set position
         that.nodes['container'].style.position = that.params['position'];
         // Show spinner
@@ -20165,12 +21249,13 @@ function(params){
         that.triggerEvent('onClose')
             .triggerEvent('onCloseEnd');
         if(that.params['removeOnClose']){
-            cm.remove(that.nodes['container']);
+            that.remove();
         }
     };
 
-    var openProcess = function(isImmediately){
+    var openProcess = function(isImmediately, callback){
         that.isOpen = true;
+        callback = cm.isFunction(callback) ? callback : function(){};
         // Set immediately animation hack
         if(isImmediately){
             cm.addClass(that.nodes['container'], 'is-immediately');
@@ -20186,16 +21271,19 @@ function(params){
             that.openInterval = setTimeout(function(){
                 cm.removeClass(that.nodes['container'], 'is-immediately');
                 triggerOpenEvents();
+                callback();
             }, 5);
         }else{
             that.openInterval = setTimeout(function(){
                 triggerOpenEvents();
+                callback();
             }, that.params['duration'] + 5);
         }
     };
 
-    var closeProcess = function(isImmediately){
+    var closeProcess = function(isImmediately, callback){
         that.isOpen = false;
+        callback = cm.isFunction(callback) ? callback : function(){};
         // Set immediately animation hack
         if(isImmediately){
             cm.addClass(that.nodes['container'], 'is-immediately');
@@ -20208,39 +21296,41 @@ function(params){
             that.openInterval = setTimeout(function(){
                 cm.removeClass(that.nodes['container'], 'is-immediately');
                 triggerCloseEvents();
+                callback();
             }, 5);
         }else{
             that.openInterval = setTimeout(function(){
                 triggerCloseEvents();
+                callback();
             }, that.params['duration'] + 5);
         }
     };
 
     /* ******* MAIN ******* */
 
-    that.open = function(isImmediately){
+    that.open = function(isImmediately, callback){
         if(!that.isOpen){
             if(that.params['lazy'] && !isImmediately){
                 that.delayInterval && clearTimeout(that.delayInterval);
                 that.delayInterval = setTimeout(function(){
-                    openProcess(isImmediately);
+                    openProcess(isImmediately, callback);
                 }, that.params['delay']);
             }else{
-                openProcess(isImmediately);
+                openProcess(isImmediately, callback);
             }
         }
         return that;
     };
 
-    that.close = function(isImmediately){
+    that.close = function(isImmediately, callback){
         that.openInterval && clearTimeout(that.openInterval);
         that.delayInterval && clearTimeout(that.delayInterval);
         if(that.isOpen){
-            closeProcess(isImmediately);
+            closeProcess(isImmediately, callback);
         }
         return that;
     };
-    
+
     that.toggle = function(){
         if(that.isOpen){
             that.hide();
@@ -20251,13 +21341,13 @@ function(params){
 
     that.remove = function(){
         if(that.isOpen){
-            that.close();
-            if(!that.params['removeOnClose']){
-                setTimeout(function(){
-                    cm.remove(that.nodes['container']);
-                }, that.params['duration'] + 5);
-            }
+            that.close(function(){
+                if(!that.params['removeOnClose']){
+                    that.remove();
+                }
+            });
         }else{
+            that.params['destructOnRemove'] && that.destruct();
             cm.remove(that.nodes['container']);
         }
         return that;
@@ -20301,10 +21391,14 @@ function(params){
         return that;
     };
 
-    that.embed = function(node){
+    that.embed = function(node, appendMode){
+        appendMode = !cm.isUndefined(appendMode) ? appendMode : that.params['appendMode'];
         if(cm.isNode(node)){
             that.params['container'] = node;
-            //cm[that.params['appendMode']](that.nodes['container'], that.params['container']);
+            that.params['appendMode'] = appendMode;
+            if(cm.inDOM(that.nodes['container'])){
+                cm[that.params['appendMode']](that.nodes['container'], that.params['container']);
+            }
         }
         return that;
     };
@@ -20324,6 +21418,7 @@ function(params){
 
     init();
 });
+
 cm.define('Com.Pagination', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -20333,6 +21428,7 @@ cm.define('Com.Pagination', {
         'onError',
         'onPageRender',
         'onPageRenderEnd',
+        'onPageRenderError',
         'onPageSwitched',
         'onEnd',
         'onSetCount'
@@ -20344,7 +21440,7 @@ cm.define('Com.Pagination', {
         'embedStructure' : 'append',
         'scrollNode' : window,
         'data' : [],                                                // Static data
-        'count' : 0,
+        'count' : 0,                                                // Total items
         'perPage' : 0,                                              // 0 - render all data in one page
         'startPage' : 1,                                            // Start page
         'startPageToken' : '',
@@ -20367,6 +21463,7 @@ cm.define('Com.Pagination', {
         'responseCountKey' : 'count',                               // Take items count from response
         'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
         'responseErrorsKey': 'errors',
+        'responseMessageKey' : 'message',
         'responseHTML' : false,                                     // If true, html will append automatically
         'cache' : true,                                             // Cache response data
         'ajax' : {
@@ -20562,8 +21659,8 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
                 'onSuccess' : function(response){
                     that.callbacks.response(that, config, response);
                 },
-                'onError' : function(){
-                    that.callbacks.error(that, config);
+                'onError' : function(response){
+                    that.callbacks.error(that, config, response);
                 },
                 'onAbort' : function(){
                     that.callbacks.abort(that, config);
@@ -20577,9 +21674,9 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
 
     classProto.callbacks.filter = function(that, config, response){
         var data = [],
-            errorsItem = cm.objectPath(that.params['responseErrorsKey'], response),
-            dataItem = cm.objectPath(that.params['responseKey'], response),
-            countItem = cm.objectPath(that.params['responseCountKey'], response);
+            errorsItem = cm.reducePath(that.params['responseErrorsKey'], response),
+            dataItem = cm.reducePath(that.params['responseKey'], response),
+            countItem = cm.reducePath(that.params['responseCountKey'], response);
         if(cm.isEmpty(errorsItem)){
             if(!cm.isEmpty(dataItem)){
                 data = dataItem;
@@ -20591,19 +21688,29 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
         return data;
     };
 
-    classProto.callbacks.response = function(that, config, response){
+    classProto.callbacks.response = function(that, config, response, errors, message){
         // Set next page
         that.setPage();
         // Response
         if(response){
             response = that.callbacks.filter(that, config, response);
         }
-        that.callbacks.render(that, response);
+        that.callbacks.render(that, response, errors, message);
     };
 
-    classProto.callbacks.error = function(that, config){
-        that.triggerEvent('onError');
-        that.callbacks.response(that, config);
+    classProto.callbacks.error = function(that, config, response){
+        var errors,
+            message;
+        if(!cm.isEmpty(response)){
+            errors = cm.reducePath(that.params.responseErrorsKey, response);
+            message = cm.reducePath(that.params.responseMessageKey, response);
+        }
+        that.triggerEvent('onError', {
+            'response' : response,
+            'errors' : errors,
+            'message' : message
+        });
+        that.callbacks.response(that, config, null, errors, message);
     };
 
     classProto.callbacks.abort = function(that, config){
@@ -20648,7 +21755,7 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
         return cm.node(that.params['pageTag'], that.params['pageAttributes']);
     };
 
-    classProto.callbacks.render = function(that, data){
+    classProto.callbacks.render = function(that, data, errors, message){
         that.isRendering = true;
         var page = {
             'page' : that.page,
@@ -20656,10 +21763,16 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
             'pages' : that.nodes['pages'],
             'container' : cm.node(that.params['pageTag']),
             'data' : data,
+            'errors' : errors,
+            'message' : message,
+            'total' : that.getCount(),
             'isVisible' : true,
             'isRendered' : true,
             'isError' : !data
         };
+        if(cm.isEmpty(page['message'])){
+            page['message'] = page['errors'];
+        }
         // Render page
         page['container'] = that.callbacks.renderContainer(that, page);
         that.pages[that.page] = page;
@@ -20693,6 +21806,7 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
                 cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'))
             );
         }
+        that.triggerEvent('onPageRenderError', page);
     };
 
     classProto.callbacks.switchPage = function(that, page){
@@ -20997,6 +22111,11 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
         return that;
     };
 
+    classProto.getCount = function(){
+        var that = this;
+        return that.params['count'];
+    };
+
     classProto.setAction = function(o, mode, update){
         var that = this;
         mode = cm.inArray(['raw', 'update', 'current'], mode) ? mode : 'current';
@@ -21048,6 +22167,7 @@ cm.getConstructor('Com.Pagination', function(classConstructor, className, classP
         return cm.isParent(that.nodes['container'], node, flag);
     };
 });
+
 cm.define('Com.Palette', {
     'modules' : [
         'Params',
@@ -21465,6 +22585,7 @@ cm.define('Com.Request', {
         'renderContentOnSuccess' : true,
         'className' : '',
         'autoSend' : false,
+        'promise' : false,
         'responseKey' : 'data',
         'responseErrorsKey' : 'errors',
         'responseMessageKey' : 'message',
@@ -21473,15 +22594,15 @@ cm.define('Com.Request', {
         'responseHTMLKey' : 'data',
         'responseStatusKey' : 'data.success',
         'responseContainer' : null,
+        'showLoader' : true,
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
+            'variables' : {},
+            'variablesMap' : {},
             'url' : '',                                 // Request URL. Variables: %baseUrl%, %callback%.
-            'params' : '',                              // Params object. Variables: %baseUrl%, %callback%.
-            'formData' : false
+            'params' : ''                               // Params object. Variables: %baseUrl%, %callback%.
         },
-        'variables' : {},
-        'showOverlay' : true,
         'animateDuration' : 'cm._config.animDuration',
         'overlayContainer' : 'document.body',
         'overlayConstructor' : 'Com.Overlay',
@@ -21505,10 +22626,8 @@ function(params){
     that.animations = {};
     that.components = {};
     that.requestData = {};
-    that.responceData = null;
-    that.responceDataFiltered = null;
-    that.responceDataHTML = null;
-    that.responceDataStatus = null;
+    that.responseData = {};
+    that.previousResponseData = {};
     that.isProcess = false;
     that.isError = false;
     that.isRendering = false;
@@ -21520,22 +22639,32 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         var that = this;
         that.destructHandler = that.destruct.bind(that);
         that.requestHandler = that.request.bind(that);
+        that.sendHandler = that.send.bind(that);
         that.setParams(params);
-        that.convertEvents(that.params['events']);
-        //that.validateParams();
-        that.addToStack(that.params['node']);
+        that.convertEvents(that.params.events);
+        that.validateParams();
+        that.addToStack(that.params.node);
         that.triggerEvent('onRenderStart');
         that.render();
-        that.addToStack(that.nodes['container']);
+        that.addToStack(that.nodes.container);
         that.triggerEvent('onRender');
-        that.params['autoSend'] && that.send();
+        that.params.autoSend && that.send();
         return that;
+    };
+
+    classProto.validateParams = function(){
+        var that = this;
+        // Legacy parameter name
+        if(!cm.isUndefined(that.params.showOverlay)){
+            that.params.showLoader = that.params.showOverlay;
+        }
     };
 
     classProto.destruct = function(){
         var that = this;
         if(!that.isDestructed){
             that.isDestructed = true;
+            that.components.overlay && that.components.overlay.destruct();
             that.removeFromStack();
         }
         return that;
@@ -21547,55 +22676,69 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
             that.abort();
         }
         if(!that.isProcess && !that.isRendering){
+            if(that.params.promise){
+                return new Promise(that.requestHandler);
+            }
             that.request();
         }
         return that;
     };
 
+    classProto.get = function(){
+        var that = this;
+        return that.responseData;
+    };
+
     classProto.render = function(){
         var that = this;
+        // Keys
+        if(cm.isEmpty(that.params.responseHTMLKey)){
+            that.params.responseHTMLKey = that.params.responseKey;
+        }
         // Structure
         that.renderView();
-        if(that.params['wrapContent'] && cm.isNode(that.params['container'])){
-            cm.appendNodes(that.params['container'].childNodes, that.nodes['inner']);
+        if(that.params.wrapContent && cm.isNode(that.params.container)){
+            cm.appendNodes(that.params.container.childNodes, that.nodes.inner);
         }
         // Attributes
         that.setAttributes();
         // Overlay
-        if(that.params['responseHTML']){
-            that.params['overlayParams']['container'] =
-                that.params['overlayParams']['container']
-                || that.params['overlayContainer']
-                || that.nodes['container']
+        if(that.params.responseHTML){
+            that.params.overlayParams.container =
+                that.params.overlayParams.container
+                || that.params.overlayContainer
+                || that.nodes.container
                 || document.body;
         }else{
-            that.params['overlayParams']['container'] =
-                that.params['overlayParams']['container']
-                || that.params['overlayContainer']
+            that.params.overlayParams.container =
+                that.params.overlayParams.container
+                || that.params.overlayContainer
                 || document.body;
         }
-        cm.getConstructor(that.params['overlayConstructor'], function(classConstructor){
-            that.components['overlay'] = new classConstructor(that.params['overlayParams']);
-        });
+        if(that.params.showOverlay){
+            cm.getConstructor(that.params.overlayConstructor, function(classConstructor){
+                that.components.overlay = new classConstructor(that.params.overlayParams);
+            });
+        }
         // Append
-        that.embedStructure(that.nodes['container']);
+        that.embedStructure(that.nodes.container);
         return that;
     };
 
     classProto.renderView = function(){
         var that = this;
-        that.nodes['container'] = cm.node('div', {'class' : 'com__request'},
-            that.nodes['inner'] = cm.node('div', {'class' : 'inner'})
+        that.nodes.container = cm.node('div', {'class' : 'com__request'},
+            that.nodes.inner = cm.node('div', {'class' : 'inner'})
         );
         return that;
     };
-    
+
     classProto.setAttributes = function(){
         var that = this;
         // CSS Class
-        cm.addClass(that.nodes['container'], that.params['className']);
+        cm.addClass(that.nodes.container, that.params.className);
         // Animations
-        that.animations['container'] = new cm.Animation(that.nodes['container']);
+        that.animations.container = new cm.Animation(that.nodes.container);
         return that;
     };
 
@@ -21604,17 +22747,17 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
         switch(mode){
             case 'raw':
-                that.params['ajax'] = cm.merge(that._raw.params['ajax'], o);
+                that.params.ajax = cm.merge(that._raw.params.ajax, o);
                 break;
             case 'current':
-                that.params['ajax'] = cm.merge(that.params['ajax'], o);
+                that.params.ajax = cm.merge(that.params.ajax, o);
                 break;
             case 'update':
-                that.params['ajax'] = cm.merge(that._update.params['ajax'], o);
+                that.params.ajax = cm.merge(that._update.params.ajax, o);
                 break;
         }
         if(update){
-            that._update.params['ajax'] = cm.clone(that.params['ajax']);
+            that._update.params.ajax = cm.clone(that.params.ajax);
         }
         return that;
     };
@@ -21624,38 +22767,38 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
         switch(mode){
             case 'raw':
-                that.params['variables'] = cm.merge(that._raw.params['variables'], o);
+                that.params.ajax.variables = cm.merge(that._raw.params.ajax.variables, o);
                 break;
             case 'current':
-                that.params['variables'] = cm.merge(that.params['variables'], o);
+                that.params.ajax.variables = cm.merge(that.params.ajax.variables, o);
                 break;
             case 'update':
-                that.params['variables'] = cm.merge(that._update.params['variables'], o);
+                that.params.ajax.variables = cm.merge(that._update.params.ajax.variables, o);
                 break;
         }
         if(update){
-            that._update.params['variables'] = cm.clone(that.params['variables']);
+            that._update.params.ajax.variables = cm.clone(that.params.ajax.variables);
         }
         return that;
     };
 
     /* *** REQUEST *** */
 
-    classProto.request = function(){
+    classProto.request = function(resolve, reject){
         var that = this;
         that.prepare();
-        that.components['ajax'] = cm.ajax(
+        that.components.ajax = cm.ajax(
             cm.merge(that.requestData, {
                 'onStart' : function(){
                     that.start();
                 },
-                'onSuccess' : function(data){
-                    that.responceData = data;
-                    that.response();
+                'onSuccess' : function(data, event){
+                    event = data instanceof ProgressEvent ? data : event;
+                    that.response('success', data, event, resolve);
                 },
-                'onError' : function(data){
-                    that.responceData = data;
-                    that.error();
+                'onError' : function(data, event){
+                    event = data instanceof ProgressEvent ? data : event;
+                    that.response('error', data, event, reject);
                 },
                 'onAbort' : function(){
                     that.aborted();
@@ -21671,20 +22814,22 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
     classProto.prepare = function(){
         var that = this;
         that.isError = false;
-        that.responceData = null;
-        that.responceDataFiltered = null;
-        that.responceDataHTML = null;
-        that.responceDataStatus = null;
-        that.requestData = cm.clone(that.params['ajax']);
-        that.requestData['url'] = cm.strReplace(that.requestData['url'], that.params['variables']);
-        that.requestData['params'] = cm.objectReplace(that.requestData['params'], that.params['variables']);
+        // Request data
+        that.requestData = cm.clone(that.params.ajax);
+        that.requestData.url = cm.strReplace(that.requestData.url, that.params.variables);
+        that.requestData.params = cm.objectReplace(that.requestData.params, that.params.variables);
+        that.previousResponseData = cm.clone(that.responseData);
+        // Response data
+        that.responseData = {
+            'request' : that.requestData
+        };
         return that;
     };
 
     classProto.abort = function(){
         var that = this;
-        if(that.components['ajax'] && that.components['ajax'].abort){
-            that.components['ajax'].abort();
+        if(that.components.ajax && that.components.ajax.abort){
+            that.components.ajax.abort();
         }
         return that;
     };
@@ -21693,8 +22838,8 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         var that = this;
         that.isProcess = true;
         // Show Overlay
-        if(that.params['showOverlay']){
-            that.components['overlay'] && that.components['overlay'].open();
+        if(that.params.showLoader){
+            that.components.overlay && that.components.overlay.open();
         }
         that.triggerEvent('onStart');
         return that;
@@ -21704,37 +22849,45 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         var that = this;
         that.isProcess = false;
         // Hide Overlay
-        if(that.params['showOverlay']){
-            that.components['overlay'] && that.components['overlay'].close();
+        if(that.params.showLoader){
+            that.components.overlay && that.components.overlay.close();
         }
         that.triggerEvent('onEnd');
         return that;
     };
 
     classProto.filter = function(){
-        var that = this,
-            errorsItem = cm.objectPath(that.params['responseErrorsKey'], that.responceData),
-            dataFiltered = cm.objectPath(that.params['responseKey'], that.responceData),
-            dataStatus = cm.objectPath(that.params['responseStatusKey'], that.responceData),
-            dataHTML;
-        if(cm.isEmpty(errorsItem)){
-            if(cm.isEmpty(that.params['responseHTMLKey'])){
-                dataHTML = cm.objectPath(that.params['responseKey'], that.responceData);
-            }else{
-                dataHTML = cm.objectPath(that.params['responseHTMLKey'], that.responceData);
-            }
-            that.responceDataFiltered = !cm.isEmpty(dataFiltered) ? dataFiltered : [];
-            that.responceDataHTML = !cm.isEmpty(dataHTML) ? dataHTML : '';
-            that.responceDataStatus = !cm.isEmpty(dataStatus) ? dataStatus : false;
+        var that = this;
+        that.responseData.errors = cm.reducePath(that.params.responseErrorsKey, that.responseData.response);
+        that.responseData.message = cm.reducePath(that.params.responseMessageKey, that.responseData.response);
+        that.responseData.code = cm.reducePath(that.params.responseCodeKey, that.responseData.response);
+        that.responseData.status = cm.reducePath(that.params.responseStatusKey, that.responseData.response);
+        that.responseData.data = cm.reducePath(that.params.responseKey, that.responseData.response);
+        that.responseData.html = cm.reducePath(that.params.responseHTMLKey, that.responseData.response);
+        // Validate
+        if(cm.isEmpty(that.responseData.status)){
+            that.responseData.status = false;
         }
+        if(cm.isEmpty(that.responseData.data)){
+            that.responseData.data = [];
+        }
+        that.responseData.filtered = that.responseData.data;
     };
 
-    classProto.response = function(){
+    classProto.response = function(status, data, event, callback){
         var that = this;
-        if(!cm.isEmpty(that.responceData)){
+        if(event instanceof ProgressEvent){
+            that.responseData.target = event.target;
+        }
+        that.responseData.response = data;
+        that.responseData.callback = callback;
+        if(!cm.isEmpty(that.responseData.response)){
             that.filter();
         }
-        if(!cm.isEmpty(that.responceDataFiltered) || that.responceDataStatus){
+        if(
+            status === 'success'
+            && (!cm.isEmpty(that.responseData.data) || that.responseData.status)
+        ){
             that.success();
         }else{
             that.error();
@@ -21743,41 +22896,30 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
     };
 
     classProto.error = function(){
-        var that = this,
-            errors,
-            message,
-            code;
+        var that = this;
         that.isError = true;
-        if(!cm.isEmpty(that.responceData)){
-            errors = cm.objectSelector(that.params['responseErrorsKey'], that.responceData);
-            message = cm.objectSelector(that.params['responseMessageKey'], that.responceData);
-            code = cm.objectSelector(that.params['responseCodeKey'], that.responceData);
-        }
+        that.responseData.isError = true;
         that.renderError();
-        that.triggerEvent('onError', {
-            'response' : that.responceData,
-            'status' : that.responceDataStatus,
-            'filtered' : that.responceDataFiltered,
-            'html' : that.responceDataHTML,
-            'errors' : errors,
-            'message' : message,
-            'code' : code
-        });
+        that.triggerEvent('onError', that.responseData);
+        // Promise callback
+        if(cm.isFunction(that.responseData.callback)){
+            that.responseData.callback(that.responseData);
+        }
         return that;
     };
 
     classProto.success = function(){
         var that = this;
         that.isError = false;
-        if(!that.responceDataStatus || (that.responceDataStatus && that.params['renderContentOnSuccess'])){
+        that.responseData.isError = false;
+        if(!that.responseData.status || (that.responseData.status && that.params.renderContentOnSuccess)){
             that.renderResponse();
         }
-        that.triggerEvent('onSuccess', {
-            'response' : that.responceData,
-            'status' : that.responceDataStatus,
-            'filtered' : that.responceDataFiltered,
-            'html' : that.responceDataHTML
-        });
+        that.triggerEvent('onSuccess', that.responseData);
+        // Promise callback
+        if(cm.isFunction(that.responseData.callback)){
+            that.responseData.callback(that.responseData);
+        }
         return that;
     };
 
@@ -21800,8 +22942,8 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
     classProto.renderResponse = function(){
         var that = this,
             nodes;
-        if(that.params['responseHTML']){
-            nodes = cm.strToHTML(that.responceDataHTML);
+        if(that.params.responseHTML){
+            nodes = cm.strToHTML(that.responseData.html);
             that.renderContent(nodes);
         }
         return that;
@@ -21810,13 +22952,13 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
     classProto.renderContent = function(nodes){
         var that = this,
             temporary;
-        if(cm.isNode(that.params['responseContainer'])){
+        if(cm.isNode(that.params.responseContainer)){
             that.triggerEvent('onContentRenderStart', nodes);
-            cm.clearNode(that.params['responseContainer']);
-            cm.appendNodes(nodes, that.params['responseContainer']);
+            cm.clearNode(that.params.responseContainer);
+            cm.appendNodes(nodes, that.params.responseContainer);
             that.triggerEvent('onContentRender', nodes);
             that.triggerEvent('onContentRenderEnd', nodes);
-        }else if(cm.isNode(that.params['container'])){
+        }else if(cm.isNode(that.params.container)){
             temporary = that.renderTemporary(false);
             cm.appendNodes(nodes, temporary);
             that.appendResponse(temporary);
@@ -21832,25 +22974,25 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         var that = this,
             temporary,
             node;
-        if(that.params['responseHTML']){
+        if(that.params.responseHTML){
             node = cm.node('div', {'class' : 'cm__empty'}, that.lang('server_error'));
             // Append
-            if(cm.isNode(that.params['responseContainer'])){
+            if(cm.isNode(that.params.responseContainer)){
                 that.triggerEvent('onContentRenderStart', node);
-                if(that.params['swapContentOnError']){
-                    cm.clearNode(that.params['responseContainer']);
-                    cm.appendChild(node, that.params['responseContainer']);
+                if(that.params.swapContentOnError){
+                    cm.clearNode(that.params.responseContainer);
+                    cm.appendChild(node, that.params.responseContainer);
                 }else{
-                    cm.remove(that.nodes['error']);
-                    that.nodes['error'] = node;
-                    cm.insertFirst(that.nodes['error'], that.params['responseContainer']);
+                    cm.remove(that.nodes.error);
+                    that.nodes.error = node;
+                    cm.insertFirst(that.nodes.error, that.params.responseContainer);
                 }
                 that.triggerEvent('onContentRender', node);
                 that.triggerEvent('onContentRenderEnd', node);
-            }else if(cm.isNode(that.params['container'])){
+            }else if(cm.isNode(that.params.container)){
                 temporary = that.renderTemporary();
                 cm.appendChild(node, temporary);
-                if(that.params['swapContentOnError']){
+                if(that.params.swapContentOnError){
                     that.appendResponse(temporary);
                 }else{
                     that.appendError(temporary);
@@ -21868,15 +23010,15 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         var that = this;
         that.isRendering = true;
         that.triggerEvent('onContentRenderStart', temporary);
-        cm.remove(that.nodes['error']);
-        that.nodes['error'] = temporary;
-        cm.addClass(that.nodes['error'], 'is-show');
-        if(that.nodes['temporary']){
-            cm.insertFirst(that.nodes['error'], that.nodes['temporary']);
+        cm.remove(that.nodes.error);
+        that.nodes.error = temporary;
+        cm.addClass(that.nodes.error, 'is-show');
+        if(that.nodes.temporary){
+            cm.insertFirst(that.nodes.error, that.nodes.temporary);
         }else{
-            cm.insertFirst(that.nodes['error'], that.nodes['inner']);
+            cm.insertFirst(that.nodes.error, that.nodes.inner);
         }
-        cm.addClass(that.nodes['container'], 'is-show is-loaded', true);
+        cm.addClass(that.nodes.container, 'is-show is-loaded', true);
         that.isRendering = false;
         that.triggerEvent('onContentRender', temporary);
         that.triggerEvent('onContentRenderEnd', temporary);
@@ -21889,43 +23031,44 @@ cm.getConstructor('Com.Request', function(classConstructor, className, classProt
         that.isRendering = true;
         that.triggerEvent('onContentRenderStart', temporary);
         // Wrap old content
-        if(!that.nodes['temporary']){
-            that.nodes['temporary'] = that.renderTemporary(false);
-            cm.appendNodes(that.nodes['inner'].childNodes, that.nodes['temporary']);
-            cm.appendChild(that.nodes['temporary'], that.nodes['inner']);
-            cm.customEvent.trigger(that.nodes['temporary'], 'destruct', {
+        if(!that.nodes.temporary){
+            that.nodes.temporary = that.renderTemporary(false);
+            cm.appendNodes(that.nodes.inner.childNodes, that.nodes.temporary);
+            cm.appendChild(that.nodes.temporary, that.nodes.inner);
+            cm.customEvent.trigger(that.nodes.temporary, 'destruct', {
                 'direction' : 'child',
                 'self' : false
             });
         }
-        cm.removeClass(that.nodes['temporary'], 'is-show', true);
+        cm.removeClass(that.nodes.temporary, 'is-show', true);
         // Append temporary
-        cm.appendChild(temporary, that.nodes['inner']);
+        cm.appendChild(temporary, that.nodes.inner);
         cm.addClass(temporary, 'is-show', true);
         // Show container
-        cm.removeClass(that.nodes['container'], 'is-loaded', true);
-        cm.addClass(that.nodes['container'], 'is-show', true);
-        that.triggerEvent('onContentRender', that.nodes['temporary']);
+        cm.removeClass(that.nodes.container, 'is-loaded', true);
+        cm.addClass(that.nodes.container, 'is-show', true);
+        that.triggerEvent('onContentRender', that.nodes.temporary);
         // Animate
         height = temporary.offsetHeight;
-        that.animations['container'].go({
+        that.animations.container.go({
             'style' : {'height' : [height, 'px'].join('')},
-            'duration' : that.params['animateDuration'],
+            'duration' : that.params.animateDuration,
             'anim' : 'smooth',
             'onStop' : function(){
                 // Remove old temporary
-                cm.remove(that.nodes['temporary']);
+                cm.remove(that.nodes.temporary);
                 // Apply new temporary
-                that.nodes['temporary'] = temporary;
-                that.nodes['container'].style.height = '';
-                cm.addClass(that.nodes['container'], 'is-loaded', true);
+                that.nodes.temporary = temporary;
+                that.nodes.container.style.height = '';
+                cm.addClass(that.nodes.container, 'is-loaded', true);
                 that.isRendering = false;
-                that.triggerEvent('onContentRenderEnd', that.nodes['temporary']);
+                that.triggerEvent('onContentRenderEnd', that.nodes.temporary);
             }
         });
         return that;
     };
 });
+
 cm.define('Com.Router', {
     'extend' : 'Com.AbstractController',
     'events' : [
@@ -21934,6 +23077,8 @@ cm.define('Com.Router', {
     'params' : {
         'renderStructure' : false,
         'embedStructureOnRender' : false,
+        'controllerEvents' : true,
+        'customEvents' : true,
         'route' : null,
         'addLeadPoint' : true
     }
@@ -21956,16 +23101,26 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         // Bind
         that.windowClickEventHandler = that.windowClickEvent.bind(that);
         that.popstateEventHandler = that.popstateEvent.bind(that);
-        // Call parent method - construct
+        that.hashchangeEventHandler = that.hashchangeEvent.bind(that);
+        // Call parent method
         classInherit.prototype.construct.apply(that, arguments);
     };
 
-    classProto.renderViewModel = function(){
+    classProto.onSetEvents = function(){
         var that = this;
-        // Init location handlers
         cm.addEvent(window, 'click', that.windowClickEventHandler);
         cm.addEvent(window, 'popstate', that.popstateEventHandler);
+        cm.addEvent(window, 'hashchange', that.hashchangeEventHandler);
     };
+
+    classProto.onUnsetEvents = function(){
+        var that = this;
+        cm.removeEvent(window, 'click', that.windowClickEventHandler);
+        cm.removeEvent(window, 'popstate', that.popstateEventHandler);
+        cm.removeEvent(window, 'hashchange', that.hashchangeEventHandler);
+    };
+
+    /* *** PROCESS EVENTS *** */
 
     classProto.windowClickEvent = function(e){
         var that = this,
@@ -21996,10 +23151,11 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         ){
             return el;
         }
-        if(el = that.getTargetLink(el.parentNode)){
-            return el;
+        el = that.getTargetLink(el.parentNode);
+        if(!cm.isElementNode(el)){
+            return false;
         }
-        return false;
+        return el;
     };
 
     classProto.popstateEvent = function(e){
@@ -22007,10 +23163,25 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
             state = e.state;
         if(state){
             that.processRoute(state);
-        }else{
-            //that.start();
         }
     };
+
+    classProto.hashchangeEvent = function(e){
+        var that = this,
+            hash = null;
+        if(!cm.isEmpty(window.location.hash)){
+            hash = window.location.hash.slice(1);
+        }
+        // Check hash
+        that.current['hash'] = hash;
+        that.current['state']['hash'] = hash;
+        that.current['href'] = !cm.isEmpty(hash) ? [that.current['location'], that.current['hash']].join('#') : that.current['location'];
+        that.current['state']['href'] = that.current['href'];
+        // Restore route state after somebody change hash
+        window.history.replaceState(that.current['state'], '', that.current['state']['href']);
+    };
+
+    /* *** PROCESS ROUTE *** */
 
     classProto.processLink = function(el){
         var that = this,
@@ -22038,12 +23209,10 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
                 'replaceState' : false
             }, params)
         };
+        // Check hash
+        state['href'] = !cm.isEmpty(state['hash']) ? [state['location'], state['hash']].join('#') : state['location'];
         // Check data storage
         state['data'] = that.getStorageData(state['route'], state, state['params']['data']);
-        // Check hash
-        if(!cm.isEmpty(state['hash'])){
-            state['href'] = state['location'] + '#' + state['hash'];
-        }
         // Set scroll
         cm.setBodyScrollTop(0);
         // Set Window URL
@@ -22055,53 +23224,79 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         // Process route
         that.processRoute(state);
         // Process hash
-        if(!cm.isEmpty(state['href'])){
-            // TODO fix empty state object after changing hash
-            window.location.hash = '#' + state['hash'];
-            // window.history.pushState(state, '', state['href']);
+        if(!cm.isEmpty(state['hash'])){
+            window.location.hash = state['hash'];
         }
     };
 
     classProto.processRoute = function(state){
         var that = this,
-            isMatch,
-            hasAccess,
-            matchItem,
-            matchCaptures,
-            route;
+            route,
+            matchRouteRedirect,
+            matchRouteData,
+            matchRoutesData = [];
         // Destruct old route
         that.destructRoute(that.current);
         // Match route
-        cm.forEach(that.routes, function(routeItem){
-            isMatch = state['route'].match(routeItem['regexp']);
+        cm.forEach(that.routes, function(item, route){
+            var isMatch = state['route'].match(item['regexp']),
+                hasAccess = that.checkRoleAccess(item['access']),
+                routeData;
             if(isMatch){
-                hasAccess = that.checkRouteAccess(routeItem);
+                item = cm.clone(item);
+                routeData = {
+                    'hasAccess' : hasAccess,
+                    'roure': route,
+                    'item' : item,
+                    'captures' : isMatch
+                };
                 if(hasAccess){
-                    matchCaptures = isMatch;
-                    matchItem = routeItem;
+                    matchRouteData = routeData;
                 }else{
-                    state['match'].push(
-                        cm.clone(routeItem)
-                    );
+                    matchRoutesData.push(routeData);
+                    state['match'].push(item);
                 }
             }
         });
-        if(!matchItem){
-            matchItem = that.get('error');
-        }
-        route = cm.merge(matchItem, state);
-        // Get captures
-        if(matchCaptures){
-            route['captures'] = that.mapCaptures(route['map'], matchCaptures);
-        }
-        // Handle redirect
-        if(!cm.isEmpty(route.redirectTo)){
-            that.redirect(route.redirectTo, route.hash, {
-                'captures' : route['captures'],
-                'data' : route['data']
+        // Try to find route redirects if exists
+        if(!matchRouteData){
+            cm.forEach(matchRoutesData, function(routeData){
+                var redirect = that.getRouteRedirect(routeData.item);
+                if(redirect){
+                    matchRouteData = routeData;
+                    matchRouteRedirect = redirect;
+                }
             });
         }else{
-            // Construct route
+            matchRouteRedirect = that.getRouteRedirect(matchRouteData.item);
+        }
+        // If routes and redirects does not found - process error route
+        if(!matchRouteData){
+            matchRouteData = {
+                'hasAccess' : true,
+                'route' : 'error',
+                'item' : that.get('error')
+            };
+        }
+        // Process route
+        route = cm.merge(matchRouteData.item, state);
+        route.state = state;
+        // Map found captures
+        if(matchRouteData.captures){
+            route.captures = that.mapCaptures(route.map, matchRouteData.captures);
+        }
+        // Handle route redirect or route
+        if(matchRouteRedirect){
+            if(cm.isArray(matchRouteRedirect)){
+                that.redirect.apply(that, matchRouteRedirect);
+            }else{
+                that.redirect(matchRouteRedirect, route.hash, {
+                    'urlParams' : route['urlParams'],
+                    'captures' : route['captures'],
+                    'data' : route['data']
+                });
+            }
+        }else{
             that.constructRoute(route);
         }
     };
@@ -22123,14 +23318,34 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
     };
 
     classProto.constructRoute = function(route){
-        var that = this;
+        var that = this, constructor, constructorParams;
         // Export
         that.current = route;
         // Callbacks
-        if(route['constructor']){
-            cm.getConstructor(route['constructor'], function(classConstructor){
+        if(!cm.isEmpty(route['constructor'])){
+            if(cm.isObject(route['constructor'])){
+                cm.forEach(route['constructor'], function(item, key){
+                    if(that.checkRoleAccess(key)){
+                        constructor = item;
+                    }
+                });
+            }else{
+                constructor = route['constructor'];
+            }
+            if(cm.isObject(route['constructorParams'])){
+                cm.forEach(route['constructorParams'], function(item, key){
+                    if(that.checkRoleAccess(key)){
+                        constructorParams = item;
+                    }
+                });
+            }else{
+                constructorParams = route['constructorParams'];
+            }
+        }
+        if(constructor){
+            cm.getConstructor(constructor, function(classConstructor){
                 route['controller'] = new classConstructor(
-                    cm.merge(route['constructorParams'], {
+                    cm.merge(constructorParams, {
                         'container' : that.params['container'],
                         'route' : route
                     })
@@ -22143,6 +23358,26 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         }
         that.triggerEvent('onChange', route);
         return that;
+    };
+
+    classProto.getRouteRedirect = function(route){
+        var that = this,
+            routeRedirect;
+        if(!cm.isEmpty(route.redirectTo)){
+            if(cm.isObject(route.redirectTo)){
+                cm.forEach(route.redirectTo, function(item, role){
+                    if(that.checkRoleAccess(role)){
+                        routeRedirect = item;
+                    }
+                });
+            }else{
+                routeRedirect = route.redirectTo;
+            }
+        }
+        if(cm.isFunction(routeRedirect)){
+            routeRedirect = routeRedirect(route);
+        }
+        return routeRedirect;
     };
 
     /* *** HELPERS *** */
@@ -22183,7 +23418,20 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
     classProto.prepareHref = function(route){
         var that = this,
             baseUrl = that.prepareBaseUrl(true);
+        // Remove lead point
+        route = route.replace(new RegExp('^\\.'), '');
         return window.location.protocol + baseUrl + route;
+    };
+
+    classProto.prepareExternalHref = function(route, hash, urlParams){
+        var that = this;
+        // Fill url params
+        route = that.fillCaptures(route, urlParams);
+        // Add hash
+        if(!cm.isEmpty(hash)){
+            route = [route, hash].join('#');
+        }
+        return route;
     };
 
     classProto.getMap = function(route){
@@ -22209,16 +23457,16 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
     };
 
     classProto.fillCaptures = function(route, params){
-        // Set url params
-        if(cm.isObject(params)){
-            route = route.replace(/{(\w+)}/g, function(math, p1){
-                return params[p1] || '';
-            });
-        }
-        return route;
+        return cm.fillVariables(route, params);
     };
 
     classProto.checkRouteAccess = function(route){
+        var that = this,
+            item = that.get(route);
+        return item ? that.checkRoleAccess(item['access']) : false;
+    };
+
+    classProto.checkRoleAccess = function(role){
         var that = this;
         return true;
     };
@@ -22250,6 +23498,7 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
     classProto.add = function(route, params){
         var that = this,
             item = cm.merge({
+                'type' : 'internal',        // internal | external
                 'route' : route,
                 'originRoute' : route,
                 'name' : null,
@@ -22258,8 +23507,10 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
                 'regexp' : null,
                 'map' : [],
                 'captures' : {},
+                'href' : null,
                 'redirectTo' : null,
                 'data' : {},
+                'urlParams' : {},
                 //'pushState' : true,
                 //'replaceState' : false,
                 'constructor' : false,
@@ -22283,7 +23534,7 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         that.routes[route] = item;
         return that;
     };
-    
+
     classProto.get = function(route){
         var that = this;
         if(that.routesBinds[route]){
@@ -22294,12 +23545,17 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
 
     classProto.getURL = function(route, hash, urlParams, data){
         var that = this,
-            item;
-        // Get route
-        if(item = that.get(route)){
-            route = item['route'];
+            item = that.get(route);
+        // Check route type
+        if(item){
+            if(item['type'] === 'external'){
+                route = item['href'];
+                return that.prepareExternalHref(route, hash, urlParams);
+            }else{
+                route = item['route'];
+            }
         }
-        // fill url params
+        // Fill url params
         route = that.fillCaptures(route, urlParams);
         // Save into data storage
         that.dataStorage[route] = data;
@@ -22313,7 +23569,7 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         }
         // Add hash
         if(!cm.isEmpty(hash)){
-            route = route + '#' + hash;
+            route = [route, hash].join('#');
         }
         return route;
     };
@@ -22321,6 +23577,16 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
     classProto.getFullURL = function(route, hash, urlParams, data){
         var that = this;
         return that.prepareHref(that.getURL(route, hash, urlParams, data));
+    };
+
+    classProto.getRedirect = function(route){
+        var that = this,
+            item = that.get(route),
+            redirect;
+        if(item){
+            redirect = that.getRouteRedirect(item);
+        }
+        return redirect;
     };
 
     classProto.getCurrent = function(){
@@ -22361,7 +23627,9 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         if(that.routesBinds[route]){
             route = that.routesBinds[route];
         }
-        if(item = that.routes[route]){
+        // Get item
+        if(that.routes[route]){
+            item = that.routes[route];
             // Process state
             state = cm.clone(item);
             state['params'] = cm.merge(state['params'], params);
@@ -22379,7 +23647,8 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         if(that.routesBinds[route]){
             route = that.routesBinds[route];
         }
-        if(item = that.routes[route]){
+        if(that.routes[route]){
+            item = that.routes[route];
             if(cm.isString(item['name'])){
                 delete that.routesBinds[item['name']];
             }else if(cm.isArray(item['name'])){
@@ -22400,8 +23669,9 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
 
     classProto.redirect = function(route, hash, params){
         var that = this,
-            href = that.getURL(route, hash, params['captures']);
-        // Override push / replace state params
+            urlParams = !cm.isEmpty(params['urlParams']) ? params['urlParams'] : params['captures'],
+            href = that.getURL(route, hash, urlParams);
+        // Important to override push / replace state params in this case
         params = cm.merge(params, {
             'pushState' : false,
             'replaceState' : true
@@ -22410,20 +23680,22 @@ cm.getConstructor('Com.Router', function(classConstructor, className, classProto
         return that;
     };
 
-    classProto.start = function(){
-        var that = this,
-            params = {
-                'pushState' : false,
-                'replaceState' : true
-            };
-        if(!cm.isEmpty(that.params['route'])){
-            that.set(that.params['route'], null, params);
+    classProto.start = function(route, hash, params){
+        var that = this;
+        route = !cm.isUndefined(route) ? route : that.params['route'];
+        params = cm.merge({
+            'pushState' : false,
+            'replaceState' : true
+        }, params);
+        if(!cm.isEmpty(route)){
+            that.set(route, hash, params);
         }else{
-            that.setURL(window.location.href, null, params);
+            that.setURL(window.location.href, hash, params);
         }
         return that;
     };
 });
+
 Com['Scroll'] = function(o){
     var that = this,
         config = cm.merge({
@@ -22593,6 +23865,7 @@ cm.define('Com.Slider', {
         'Events',
         'DataConfig',
         'DataNodes',
+        'Structure',
         'Stack'
     ],
     'events' : [
@@ -22609,6 +23882,8 @@ cm.define('Com.Slider', {
     'params' : {
         'node' : cm.node('div'),
         'name' : '',
+        'container' : false,
+        'className' : null,
         'customEvents' : true,
         'renderStructure' : false,
         'isEditing' : false,
@@ -22639,7 +23914,7 @@ function(params){
         components = {},
         slideshowInterval,
         minHeightDimension;
-    
+
     that.nodes = {
         'container' : cm.Node('div'),
         'inner' : cm.Node('div'),
@@ -22714,8 +23989,11 @@ function(params){
         if(that.params['renderStructure']){
             renderView();
         }
+        cm.addClass(that.nodes['container'], that.params['className']);
         // Collect items
         cm.forEach(that.nodes['items'], collectItem);
+        // Collect items from config
+        cm.forEach(that.params['items'], collectItem);
         // Arrows
         if(that.params['arrows']){
             cm.addEvent(that.nodes['next'], 'click', that.next);
@@ -22762,7 +24040,29 @@ function(params){
     };
 
     var renderView = function(){
-
+        that.nodes['container'] = cm.node('div', {'class' : 'com__slider'},
+            that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
+                that.nodes['size'] = cm.node('div', {'class' : 'size'}),
+                that.nodes['slides'] = cm.node('div', {'class' : 'slides'},
+                    that.nodes['slidesInner'] = cm.node('ul')
+                ),
+                cm.node('div', {'class' : 'com__gallery-controls is-partial'},
+                    cm.node('div', {'class' : 'inner'},
+                        that.nodes['prev'] = cm.node('div', {'class' : 'bar-arrow prev'},
+                            cm.node('div', {'class' : 'icon default prev'})
+                        ),
+                        that.nodes['next'] = cm.node('div', {'class' : 'bar-arrow next'},
+                            cm.node('div', {'class' : 'icon default next'})
+                        ),
+                        cm.node('div', {'class' : 'bar-buttons'},
+                            that.nodes['buttons'] = cm.node('ul')
+                        )
+                    )
+                )
+            )
+        );
+        // Embed
+        that.embedStructure(that.nodes['container']);
     };
 
     var setEvents = function(){
@@ -22852,15 +24152,15 @@ function(params){
         }
     };
 
-    var collectItem = function(item, i){
+    var collectItem = function(item){
         // Configuration
         item = {
-            'index' : i,
+            'index' : that.items.length,
             'nodes' : item
         };
         // Bar
         if(that.params['hasBar']){
-            item['bar'] = that.nodes['bar-items'][i];
+            item['bar'] = that.nodes['bar-items'][item['index']];
             item['bar']['title'] = item['bar']['link']? item['bar']['link'].getAttribute('title') || '' : '';
             item['bar']['src'] = item['bar']['link']? item['bar']['link'].getAttribute('href') || '' : '';
         }
@@ -22877,6 +24177,10 @@ function(params){
                 'inner' : null
             }
         }, item);
+        // Embed
+        if(!cm.hasParentNode(item['nodes']['container'])){
+            cm.appendChild(item['nodes']['container'], that.nodes['slidesInner']);
+        }
         // Bar
         if(that.params['hasBar']){
             // Set image on thumb click
@@ -23399,6 +24703,7 @@ Com.SliderEffects['custom'] = function(slider, current, previous, callback){
         callback();
     }
 };
+
 cm.define('Com.Sortable', {
     'modules' : [
         'Params',
@@ -23791,6 +25096,7 @@ function(params){
     that.isInitial = null;
     that.isProcess = false;
     that.isDestructed = false;
+    that.isMenuShown = false;
 
     var init = function(){
         getLESSVariables();
@@ -23838,8 +25144,8 @@ function(params){
         );
         that.nodes['headerTitle'] = cm.Node('div', {'class' : 'com__tabset__head-title'},
             that.nodes['headerTitleText'] = cm.Node('div', {'class' : 'com__tabset__head-text'}),
-            cm.Node('div', {'class' : 'com__tabset__head-menu pt__menu'},
-                cm.Node('div', {'class' : that.params['icons']['menu']}),
+            that.nodes['headerMenu'] = cm.Node('div', {'class' : 'com__tabset__head-menu pt__menu is-manual is-hide'},
+                that.nodes['headerMenuButton'] = cm.Node('div', {'class' : that.params['icons']['menu']}),
                 that.nodes['headerMenuUL'] = cm.Node('ul', {'class' : 'pt__menu-dropdown'})
             )
         );
@@ -23852,6 +25158,7 @@ function(params){
         if(that.params['animateSwitch']){
             cm.addClass(that.nodes['content'], 'is-animated');
         }
+        cm.addEvent(that.nodes['headerMenuButton'], 'click', toggleHeaderMenu);
         // Set Tabs Width
         if(/left|right/.test(that.params['tabsPosition'])){
             that.nodes['headerTabs'].style.width = that.params['tabsWidth'];
@@ -23896,8 +25203,8 @@ function(params){
         /* *** INSERT INTO DOM *** */
         that.embedStructure(that.nodes['container']);
         /* *** EVENTS *** */
-        Part.Menu && Part.Menu();
         cm.addEvent(window, 'resize', resizeHandler);
+        cm.addEvent(window, 'click', clickHandler);
         that.addToStack(that.nodes['container']);
         if(that.params['customEvents']){
             cm.customEvent.add(that.nodes['container'], 'destruct', that.destruct);
@@ -23980,6 +25287,7 @@ function(params){
                     set(tab['id']);
                 }
             }
+            hideHeaderMenu();
         });
         return item;
     };
@@ -24102,6 +25410,24 @@ function(params){
         }
     };
 
+    var toggleHeaderMenu = function(){
+        if(that.isMenuShown){
+            hideHeaderMenu();
+        }else{
+            showHeaderMenu();
+        }
+    };
+
+    var showHeaderMenu = function(){
+        that.isMenuShown = true;
+        cm.replaceClass(that.nodes['headerMenu'], 'is-hide', 'is-show');
+    };
+
+    var hideHeaderMenu = function(){
+        that.isMenuShown = false;
+        cm.replaceClass(that.nodes['headerMenu'], 'is-show', 'is-hide');
+    };
+
     /* *** HELPERS *** */
 
     var animateSwitch = function(){
@@ -24182,6 +25508,13 @@ function(params){
         // Recalculate slider height
         if(that.params['calculateMaxHeight']){
             calculateMaxHeight();
+        }
+    };
+
+    var clickHandler = function(e){
+        var target = cm.getEventTarget(e);
+        if(!cm.isParent(that.nodes['headerMenu'], target, true)){
+            hideHeaderMenu();
         }
     };
 
@@ -24290,6 +25623,7 @@ function(params){
     that.remove = function(){
         cm.removeEvent(window, 'hashchange', hashHandler);
         cm.removeEvent(window, 'resize', resizeHandler);
+        cm.removeEvent(window, 'click', clickHandler);
         hashInterval && clearInterval(hashInterval);
         resizeInterval && clearInterval(resizeInterval);
         cm.remove(that.nodes['container']);
@@ -24302,6 +25636,7 @@ function(params){
 
     init();
 });
+
 /* ******* COMPONENTS: TABSET ******* */
 
 cm.define('Com.Tabset2', {
@@ -24316,6 +25651,7 @@ cm.define('Com.Tabset2', {
         'removeOnDestruct' : true,
         'toggleOnHashChange' : true,                                // URL hash change handler
         'targetEvent' : 'click',                                    // click | hover | none
+        'documentNode' : window,
 
         /* TABS */
 
@@ -24373,8 +25709,13 @@ function(params){
     Com.TabsetHelper.apply(that, arguments);
 });
 
-cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
+cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProto, classInherit){
+    classProto.onConstructStart = function(){
+        var that = this;
+        that.isMenuShown = false;
+        that.toggleMenuHandler = that.toggleMenu.bind(that);
+        that.windowClickHandler = that.windowClick.bind(that);
+    };
 
     classProto.onGetLESSVariablesProcess = function(){
         var that = this;
@@ -24388,7 +25729,20 @@ cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProt
         if(cm.isNode(that.params['node'])){
             that.collectTabs();
         }
-        return that;
+    };
+
+    classProto.onSetEvents = function(){
+        var that = this;
+        // Call parent method
+        classInherit.prototype.onSetEvents.apply(that, arguments);
+        cm.addEvent(that.params['documentNode'], 'click', that.windowClickHandler);
+    };
+
+    classProto.onUnsetEvents = function(){
+        var that = this;
+        // Call parent method
+        classInherit.prototype.onUnsetEvents.apply(that, arguments);
+        cm.removeEvent(that.params['documentNode'], 'click', that.windowClickHandler);
     };
 
     classProto.renderView = function(){
@@ -24401,8 +25755,8 @@ cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProt
         );
         that.nodes['headerTitle'] = cm.node('div', {'class' : 'com__tabset__head-title'},
             that.nodes['headerTitleText'] = cm.node('div', {'class' : 'com__tabset__head-text'}),
-            cm.node('div', {'class' : 'com__tabset__head-menu pt__menu'},
-                cm.node('div', {'class' : that.params['icons']['menu']}),
+            that.nodes['headerMenu'] = cm.node('div', {'class' : 'com__tabset__head-menu pt__menu is-manual is-hide'},
+                that.nodes['headerMenuButton'] = cm.node('div', {'class' : that.params['icons']['menu']}),
                 that.nodes['headerMenuUL'] = cm.node('ul', {'class' : 'pt__menu-dropdown'})
             )
         );
@@ -24454,8 +25808,9 @@ cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProt
 
     classProto.renderViewModel = function(){
         var that = this;
+        cm.addEvent(that.nodes['headerMenuButton'], 'click', that.toggleMenuHandler);
         // Call parent method - renderViewModel
-        _inherit.prototype.renderViewModel.apply(that, arguments);
+        classInherit.prototype.renderViewModel.apply(that, arguments);
     };
 
     /******* TABS *******/
@@ -24522,7 +25877,38 @@ cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProt
         return nodes;
     };
 
+    /*** MENU ***/
+
+    classProto.toggleMenu = function(){
+        var that = this;
+        if(that.isMenuShown){
+            that.hideMenu();
+        }else{
+            that.showMenu();
+        }
+    };
+
+    classProto.showMenu = function(){
+        var that = this;
+        if(!that.isMenuShown){
+            that.isMenuShown = true;
+            cm.replaceClass(that.nodes['headerMenu'], 'is-hide', 'is-show');
+        }
+    };
+
+    classProto.hideMenu = function(){
+        var that = this;
+        if(that.isMenuShown){
+            that.isMenuShown = false;
+            cm.replaceClass(that.nodes['headerMenu'], 'is-show', 'is-hide');
+        }
+    }
+
     /*** TOGGLE ***/
+
+    classProto.onLabelTarget = function(that, item){
+        that.hideMenu();
+    };
 
     classProto.onTabShowProcess = function(that, item){
         clearTimeout(item['switchInt']);
@@ -24544,6 +25930,16 @@ cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProt
         }
     };
 
+    /*** SERVICE ***/
+
+    classProto.windowClick = function(e){
+        var that = this,
+            target = cm.getEventTarget(e);
+        if(!cm.isParent(that.nodes['headerMenu'], target, true)){
+            that.hideMenu();
+        }
+    };
+
     /******* PUBLIC *******/
 
     classProto.reset = function(){
@@ -24552,6 +25948,7 @@ cm.getConstructor('Com.Tabset2', function(classConstructor, className, classProt
         return that;
     };
 });
+
 cm.define('Com.Timer', {
     'modules' : [
         'Params',
@@ -24889,6 +26286,7 @@ function(params){
 
     init();
 });
+
 cm.define('Com.Toolbar', {
     'modules' : [
         'Params',
@@ -24917,6 +26315,8 @@ function(params){
 
     that.nodes = {};
     that.groups = {};
+    that.items = [];
+    that.isHidden = true;
 
     var init = function(){
         that.setParams(params);
@@ -24932,7 +26332,7 @@ function(params){
 
     var render = function(){
         // Structure
-        that.nodes['container'] = cm.node('div', {'class' : 'com__toolbar'},
+        that.nodes['container'] = cm.node('div', {'class' : 'com__toolbar is-hidden'},
             that.nodes['toolbar'] = cm.node('div', {'class' : 'pt__toolbar'},
                 that.nodes['inner'] = cm.node('div', {'class' : 'inner'},
                     that.nodes['left'] = cm.node('div', {'class' : 'left'}),
@@ -24957,12 +26357,13 @@ function(params){
 
     that.addGroup = function(item){
         item = cm.merge({
+            'name' : '',
+            'position' : 'left',            // left | center | right | justify
+            'hidden' : false,
             'container' : cm.node('ul', {'class' : 'group'}),
             'node' : null,
             'adaptive' : true,
             'flex' : false,
-            'name' : '',
-            'position' : 'left',            // left | center | right | justify
             'items' : {}
         }, item);
         if(!that.groups[item['name']]){
@@ -24971,6 +26372,7 @@ function(params){
             }
             item['adaptive'] && cm.addClass(item['container'], 'is-adaptive');
             item['flex'] && cm.addClass(item['container'], 'is-flex');
+            item['hidden'] && cm.addClass(item['container'], 'is-hidden');
             // Position
             if(/left|right/.test(item['position'])){
                 cm.appendChild(item['container'], that.nodes[item['position']]);
@@ -24983,16 +26385,12 @@ function(params){
         return that;
     };
 
-    that.getGroup = function(name){
-        return that.groups[name];
-    };
-
     that.removeGroup = function(name){
         var item;
         if(cm.isObject(arguments[0])){
             item = name;
         }else{
-            item = that.groups[name];
+            item = that.getGroup(name);
         }
         if(item){
             cm.remove(item['container']);
@@ -25002,20 +26400,60 @@ function(params){
         return that;
     };
 
+    that.getGroup = function(name){
+        return that.groups[name];
+    };
+
+    that.showGroup = function(name){
+        var item = that.getGroup(name);
+        if(item){
+            item['hidden'] = false;
+            cm.removeClass(item['container'], 'is-hidden');
+        }
+        return that;
+    };
+
+    that.hideGroup = function(name){
+        var item = that.getGroup(name);
+        if(item){
+            item['hidden'] = true;
+            cm.addClass(item['container'], 'is-hidden');
+        }
+        return that;
+    };
+
+    that.isGroupEmpty = function(name){
+        var item = that.getGroup(name);
+        if(item){
+            return cm.getLength(item.items) === 0;
+        }
+        return true;
+    };
+
+    that.toggleGroupVisibility = function(name){
+        if(that.isGroupEmpty(name)){
+            that.hideGroup(name);
+        }else{
+            that.showGroup(name);
+        }
+        return that;
+    };
+
     that.addField = function(item){
         var group;
         item = cm.merge({
+            'name' : '',
+            'hidden' : false,
             'container' : cm.node('li'),
             'node' : null,
-            'name' : '',
             'size' : null,
-            'hidden' : false,
             'group' : null,
             'constructor' : false,
             'constructorParams' : {}
         }, item);
+        group = that.groups[item['group']];
         // Render
-        if((group = that.groups[item['group']]) && !group.items[item['name']]){
+        if(group && !group.items[item['name']]){
             // Styles
             item['size'] && cm.addClass(item['container'], item['size']);
             item['hidden'] && cm.addClass(item['container'], 'is-hidden');
@@ -25035,6 +26473,8 @@ function(params){
             }
             cm.appendChild(item['container'], group['node']);
             group.items[item['name']] = item;
+            that.items = cm.arrayAdd(that.items, item);
+            that.toggleVisibility();
         }
         that.triggerEvent('onProcessEnd');
         return that;
@@ -25046,6 +26486,7 @@ function(params){
             item['hidden'] = false;
             cm.removeClass(item['container'], 'is-hidden');
         }
+        return that;
     };
 
     that.hideField = function(name, groupName){
@@ -25054,6 +26495,7 @@ function(params){
             item['hidden'] = true;
             cm.addClass(item['container'], 'is-hidden');
         }
+        return that;
     };
 
     that.addButton = function(item){
@@ -25061,11 +26503,12 @@ function(params){
         item = cm.merge({
             'container' : cm.node('li'),
             'node' : null,
-            'type' : 'primary',                                 // primary, secondary, success, danger, warning
+            'type' : 'primary',             // primary, secondary, success, danger, warning
             'name' : '',
             'label' : '',
             'title' : '',
             'group' : '',
+            'access' : true,
             'disabled' : false,
             'hidden' : false,
             'className' : '',
@@ -25075,12 +26518,13 @@ function(params){
             'constructorParams' : {},
             'callback' : function(){}
         }, item);
+        group = that.groups[item['group']];
         // Validate
         if(cm.isEmpty(item['name'])){
             item['name'] = item['label'];
         }
         // Render
-        if((group = that.groups[item['group']]) && !group.items[item['name']]){
+        if(item['access'] && group && !group.items[item['name']]){
             // Structure
             item['node'] = cm.node('a', item['attr']);
             // Styles
@@ -25110,30 +26554,8 @@ function(params){
             cm.appendChild(item['node'], item['container']);
             cm.appendChild(item['container'], group['node']);
             group.items[item['name']] = item;
-        }
-        that.triggerEvent('onProcessEnd');
-        return that;
-    };
-
-    that.getField = that.getButton = function(name, groupName){
-        var item, group;
-        if((group = that.groups[groupName]) && (item = group.items[name])){
-            return item;
-        }
-        return null;
-    };
-
-    that.removeButton = function(name, groupName){
-        var item, group;
-        if(cm.isObject(arguments[0])){
-            item = name;
-            group = that.groups[item['group']];
-        }else if(group = that.groups[groupName]){
-            item = group.items[name];
-        }
-        if(item){
-            cm.remove(item['container']);
-            delete group.items[item['name']];
+            that.items = cm.arrayAdd(that.items, item);
+            that.toggleVisibility();
         }
         that.triggerEvent('onProcessEnd');
         return that;
@@ -25145,6 +26567,7 @@ function(params){
             item['disabled'] = false;
             cm.removeClass(item['node'], 'button-disabled');
         }
+        return that;
     };
 
     that.disableButton = function(name, groupName){
@@ -25153,6 +26576,7 @@ function(params){
             item['disabled'] = true;
             cm.addClass(item['node'], 'button-disabled');
         }
+        return that;
     };
 
     that.showButton = function(name, groupName){
@@ -25161,6 +26585,7 @@ function(params){
             item['hidden'] = false;
             cm.removeClass(item['container'], 'is-hidden');
         }
+        return that;
     };
 
     that.hideButton = function(name, groupName){
@@ -25169,10 +26594,107 @@ function(params){
             item['hidden'] = true;
             cm.addClass(item['container'], 'is-hidden');
         }
+        return that;
+    };
+
+    that.addLabel = function(item){
+        var group;
+        item = cm.merge({
+            'container' : cm.node('li', {'class' : 'label'}),
+            'node' : null,
+            'name' : '',
+            'label' : '',
+            'size' : null,
+            'hidden' : false,
+            'group' : null
+        }, item);
+        group = that.groups[item['group']];
+        // Render
+        if(group && !group.items[item['name']]){
+            // Structure
+            item['node'] = cm.node('div', {'innerHTML' : item['label']});
+            // Styles
+            item['size'] && cm.addClass(item['container'], item['size']);
+            item['hidden'] && cm.addClass(item['container'], 'is-hidden');
+            // Embed
+            if(cm.isNode(item['node'])){
+                cm.appendChild(item['node'], item['container']);
+            }
+            cm.appendChild(item['container'], group['node']);
+            group.items[item['name']] = item;
+            that.items = cm.arrayAdd(that.items, item);
+            that.toggleVisibility();
+        }
+        that.triggerEvent('onProcessEnd');
+        return that;
+    };
+
+    that.getField = that.getButton = that.getLabel = function(name, groupName){
+        var group = that.groups[groupName],
+            item;
+        if(group){
+            item = group.items[name];
+        }
+        return item;
+    };
+
+    that.removeField = that.removeButton = that.removeLabel = function(name, groupName){
+        var item, group;
+        if(cm.isObject(arguments[0])){
+            item = arguments[0];
+            group = that.groups[item['group']];
+        }else{
+            group = that.groups[groupName];
+            if(group){
+                item = group.items[name];
+            }
+        }
+        if(item){
+            cm.remove(item['container']);
+            delete group.items[item['name']];
+            that.items = cm.arrayRemove(that.items, item);
+            that.toggleVisibility();
+        }
+        that.triggerEvent('onProcessEnd');
+        return that;
+    };
+
+    that.isEmpty = function(){
+        return that.items.length === 0;
+    };
+
+    that.hide = function(){
+        if(!that.isHidden){
+            that.isHidden = true;
+            cm.addClass(that.nodes['container'], 'is-hidden');
+        }
+        return that;
+    };
+
+    that.show = function(){
+        if(that.isHidden){
+            that.isHidden = false;
+            cm.removeClass(that.nodes['container'], 'is-hidden');
+        }
+        return that;
+    };
+
+    that.toggleVisibility = function(){
+        if(that.isEmpty()){
+            that.hide();
+        }else{
+            that.show();
+        }
+        return that;
+    };
+
+    that.getNodes = function(key){
+        return that.nodes[key] || that.nodes;
     };
 
     init();
 });
+
 cm.define('Com.Tooltip', {
     'modules' : [
         'Params',
@@ -25195,8 +26717,11 @@ cm.define('Com.Tooltip', {
         'target' : cm.node('div'),
         'targetEvent' : 'hover',                        // hover | click | none
         'hideOnReClick' : false,                        // Hide tooltip when re-clicking on the target, requires setting value 'targetEvent' : 'click'
-        'hideOnOut' : true,
-        'hold' : false,
+        'hideOnSelfClick' : false,                      // Hide tooltip when clicked on own content
+        'hideOnOut' : true,                             // Hide content when clicked / mouseover outside own content
+        'autoHide' : false,
+        'autoHideDelay' : 'cm._config.autoHideDelay',
+        'hold' : false,                                 // After close hold content in specified node from 'holdTarget' parameter
         'holdTarget' : false,
         'preventClickEvent' : false,                    // Prevent default click event on the target, requires setting value 'targetEvent' : 'click'
         'positionTarget' : false,                       // Override target node for calculation position and dimensions
@@ -25236,6 +26761,7 @@ function(params){
     that.animation = null;
     that.delayInterval = null;
     that.resizeInterval = null;
+    that.autoHideInterval = null;
 
     that.isDestructed = false;
     that.isHideProcess = false;
@@ -25321,6 +26847,12 @@ function(params){
                 cm.preventDefault(e);
             });
         }
+        // Hide on self click
+        if(that.params['hideOnSelfClick']){
+            cm.addEvent(that.nodes['container'], 'click', function(){
+                that.hide();
+            });
+        }
         // Add custom events
         if(that.params['customEvents']){
             cm.customEvent.add(that.getStackNode(), 'destruct', that.destructHandler);
@@ -25372,6 +26904,7 @@ function(params){
             setWindowEvent();
             // Show Handler
             clearDelayInterval();
+            clearAutoHideInterval();
             if(immediately){
                 showHandler(immediately);
             }else if(that.params['delay'] && !that.isHideProcess){
@@ -25408,6 +26941,7 @@ function(params){
         that.isShow = true;
         that.isShowProcess = false;
         that.isHideProcess = false;
+        autoHideHandler();
         that.triggerEvent('onShow');
         that.triggerEvent('onShowEnd');
     };
@@ -25417,6 +26951,7 @@ function(params){
             that.isHideProcess = true;
             // Hide Handler
             clearDelayInterval();
+            clearAutoHideInterval();
             if(immediately){
                 hideHandler(immediately);
             }else if(that.params['delay'] && !that.isShowProcess){
@@ -25458,6 +26993,13 @@ function(params){
         that.isHideProcess = false;
         that.triggerEvent('onHide');
         that.triggerEvent('onHideEnd');
+    };
+
+    var autoHideHandler = function(){
+        if(that.params['autoHide']){
+            clearAutoHideInterval();
+            that.autoHideInterval = setTimeout(hide, that.params['autoHideDelay']);
+        }
     };
 
     var resizeHelper = function(){
@@ -25651,6 +27193,11 @@ function(params){
     var clearDelayInterval = function(){
         that.delayInterval && clearTimeout(that.delayInterval);
         that.delayInterval = null;
+    };
+
+    var clearAutoHideInterval = function(){
+        that.autoHideInterval && clearTimeout(that.autoHideInterval);
+        that.autoHideInterval = null;
     };
 
     /* ******* MAIN ******* */
@@ -26210,9 +27757,7 @@ function(params){
     Com.AbstractController.apply(that, arguments);
 });
 
-cm.getConstructor('Com.MultipleInput', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.MultipleInput', function(classConstructor, className, classProto, classInherit){
     classProto.construct = function(params){
         var that = this;
         // Variables
@@ -26229,38 +27774,35 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         that.addItemHandler = that.addItem.bind(that);
         that.removeItemHandler = that.removeItem.bind(that);
         that.constructProcessHandler = that.constructProcess.bind(that);
-        // Add events
+        // TODO: Add events
         that.addEvent('onConstructProcess', that.constructProcessHandler);
         // Call parent method
-        _inherit.prototype.construct.apply(that, arguments);
-        return that;
+        classInherit.prototype.construct.apply(that, arguments);
     };
 
     classProto.constructProcess = function(){
         var that = this;
         // Render inputs provided in DOM
         cm.forEach(that.nodes['inputs'], function(item){
-            that.addItem({'input' : item['input']}, false);
+            that.addItem({'input' : item['input']}, false, true);
         });
         // Render inputs provided in parameters
         if(cm.isArray(that.params['value'])){
             cm.forEach(that.params['value'], function(item){
-                that.addItem({'value' : item}, false);
+                that.addItem({'value' : item}, false, true);
             });
         }
-        return that;
     };
 
     classProto.validateParams = function(){
         var that = this;
         // Call parent method
-        _inherit.prototype.validateParams.apply(that, arguments);
+        classInherit.prototype.validateParams.apply(that, arguments);
         // Configure MultiField
         that.params['multiFieldParams']['max'] = that.params['max'];
         that.params['multiFieldParams']['sortable'] = that.params['sortable'];
         that.params['multiFieldParams']['showControls'] = that.params['showControls'];
         that.params['multiFieldParams']['showList'] = that.params['showList'];
-        return that;
     };
 
     /* *** SYSTEM *** */
@@ -26279,7 +27821,6 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
         }
         that.triggerEvent('onRenderViewProcess');
         that.triggerEvent('onRenderViewEnd');
-        return that;
     };
 
     classProto.renderToolbarView = function(){
@@ -26295,10 +27836,9 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
     classProto.renderViewModel = function(){
         var that = this;
         // Call parent method - renderViewModel
-        _inherit.prototype.renderViewModel.apply(that, arguments);
+        classInherit.prototype.renderViewModel.apply(that, arguments);
         // Init Multi Field
         that.renderMultiField();
-        return that;
     };
 
     classProto.renderMultiField = function(){
@@ -26340,13 +27880,14 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
 
     /* *** ITEMS *** */
 
-    classProto.addItem = function(item, triggerEvents){
+    classProto.addItem = function(item, triggerEvents, immediately){
         var that = this;
         triggerEvents = cm.isUndefined(triggerEvents) ? true : triggerEvents;
         if(!that.params['max'] || that.items.length < that.params['max']){
             // Render Fields
             that.components['multiField'].addItem({}, {
                 'triggerEvents' : false,
+                'immediately' : immediately,
                 'callback' : function(field){
                     that.addItemProcess(item, field, triggerEvents);
                 }
@@ -26519,7 +28060,7 @@ cm.getConstructor('Com.MultipleInput', function(classConstructor, className, cla
             that.triggerEvent('onSelect');
             that.triggerEvent('onSet');
             that.triggerEvent('onChange');
-        };
+        }
         return that;
     };
 
@@ -26828,6 +28369,8 @@ cm.define('Com.Autocomplete', {
         'onReset',
         'onSelect',
         'onChange',
+        'onEnable',
+        'onDisable',
         'onClickSelect',
         'onAbort',
         'onError',
@@ -26843,6 +28386,7 @@ cm.define('Com.Autocomplete', {
         'minLength' : 3,
         'direction' : 'auto',                                       // auto | start
         'className' : '',
+        'disabled' : false,
         'delay' : 'cm._config.requestDelay',
         'clearOnEmpty' : true,                                      // Clear input and value if item didn't selected from tooltip
         'showListOnEmpty' : false,                                  // Show options list, when input is empty
@@ -26857,6 +28401,7 @@ cm.define('Com.Autocomplete', {
         'suggestionParams' : {},
         'suggestionQueryName' : 'text',
         'responseKey' : 'data',                                     // Instead of using filter callback, you can provide response array key
+        'preloadData' : false,
         'ajax' : {
             'type' : 'json',
             'method' : 'get',
@@ -26884,13 +28429,15 @@ cm.define('Com.Autocomplete', {
 },
 function(params){
     var that = this;
-    
+
     that.components = {};
 
+    that.disabled = false;
     that.isDestructed = false;
     that.ajaxHandler = null;
     that.isOpen = false;
     that.isAjax = false;
+    that.ajaxParams = {};
     that.requestDelay = null;
 
     that.registeredItems = [];
@@ -26933,6 +28480,8 @@ function(params){
         that.params['data'] = that.callbacks.convert(that, that.params['data']);
         // Value
         that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
+        // Input
+        that.params['disabled'] = that.params['node'].disabled || that.params['node'].readOnly || that.params['disabled'];
         // Tooltip
         that.params['Com.Tooltip']['className'] = [
             'com__ac-tooltip',
@@ -26962,6 +28511,8 @@ function(params){
         that.setInput(that.params['node']);
         // Set
         !cm.isEmpty(that.params['value']) && that.set(that.params['value'], false);
+        // Disabled state
+        that.params['disabled'] && that.disable();
     };
 
     var setListItem = function(index){
@@ -27021,7 +28572,8 @@ function(params){
 
     var requestHandler = function(){
         var query = that.params['node'].value.trim(),
-            config = cm.clone(that.params['ajax']);
+            config = cm.clone(that.params['ajax']),
+            delay = that.params['showListOnEmpty'] && cm.isEmpty(query) ? 0 : that.params['delay'];
         // Clear tooltip ajax/static delay and filtered items list
         that.valueText = query;
         that.requestDelay && clearTimeout(that.requestDelay);
@@ -27031,7 +28583,12 @@ function(params){
         // Request
         if(that.params['showListOnEmpty'] || query.length >= that.params['minLength']){
             that.requestDelay = setTimeout(function(){
-                if(that.isAjax){
+                if(that.params['preloadData'] && !cm.isEmpty(that.ajaxParams['data'])){
+                    that.callbacks.data(that, {
+                        'data' : that.ajaxParams['data'],
+                        'query' : query
+                    });
+                }else if(that.isAjax){
                     if(that.params['showLoader']){
                         that.callbacks.renderLoader(that, {
                             'config' : config,
@@ -27049,7 +28606,7 @@ function(params){
                         'query' : query
                     });
                 }
-            }, that.params['delay']);
+            }, delay);
         }else{
             that.hide();
         }
@@ -27156,14 +28713,6 @@ function(params){
         return params['config'];
     };
 
-    that.callbacks.beforePrepare = function(that, params){
-        return params['config'];
-    };
-
-    that.callbacks.afterPrepare = function(that, params){
-        return params['config'];
-    };
-
     that.callbacks.request = function(that, params){
         params = cm.merge({
             'response' : null,
@@ -27173,6 +28722,8 @@ function(params){
         }, params);
         // Validate config
         params['config'] = that.callbacks.prepare(that, params);
+        // Export
+        that.ajaxParams = params;
         // Return ajax handler (XMLHttpRequest) to providing abort method.
         return cm.ajax(
             cm.merge(params['config'], {
@@ -27189,8 +28740,8 @@ function(params){
 
     that.callbacks.filter = function(that, params){
         var data = [],
-            dataItem = cm.objectSelector(that.params['responseKey'], params['response']);
-        if(dataItem && !cm.isEmpty(dataItem)){
+            dataItem = cm.reducePath(that.params['responseKey'], params['response']);
+        if(!cm.isEmpty(dataItem)){
             data = dataItem;
         }
         return data;
@@ -27392,6 +28943,44 @@ function(params){
         return that;
     };
 
+    that.setAction = function(o, mode, update){
+        mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
+        switch(mode){
+            case 'raw':
+                that.params.ajax = cm.merge(that._raw.params.ajax, o);
+                break;
+            case 'current':
+                that.params.ajax = cm.merge(that.params.ajax, o);
+                break;
+            case 'update':
+                that.params.ajax = cm.merge(that._update.params.ajax, o);
+                break;
+        }
+        if(update){
+            that._update.params.ajax = cm.clone(that.params.ajax);
+        }
+        return that;
+    };
+
+    that.setVariables = function(o, mode, update){
+        mode = cm.inArray(['raw', 'update', 'current'], mode)? mode : 'current';
+        switch(mode){
+            case 'raw':
+                that.params.ajax.variables = cm.merge(that._raw.params.ajax.variables, o);
+                break;
+            case 'current':
+                that.params.ajax.variables = cm.merge(that.params.ajax.variables, o);
+                break;
+            case 'update':
+                that.params.ajax.variables = cm.merge(that._update.params.ajax.variables, o);
+                break;
+        }
+        if(update){
+            that._update.params.ajax.variables = cm.clone(that.params.ajax.variables);
+        }
+        return that;
+    };
+
     that.abort = function(){
         if(that.ajaxHandler && that.ajaxHandler.abort){
             that.ajaxHandler.abort();
@@ -27404,6 +28993,26 @@ function(params){
         return that;
     };
 
+    that.enable = function(){
+        var that = this;
+        if(that.disabled){
+            that.disabled = false;
+            that.params['node'].disabled = false;
+            that.triggerEvent('onEnable');
+        }
+        return that;
+    };
+
+    that.disable = function(){
+        var that = this;
+        if(!that.disabled){
+            that.disabled = true;
+            that.params['node'].disabled = true;
+            that.triggerEvent('onDisable');
+        }
+        return that;
+    };
+
     that.isOwnNode = function(node){
         return cm.isParent(that.params['target'], node, true) || that.components['tooltip'].isOwnNode(node);
     };
@@ -27411,8 +29020,17 @@ function(params){
     init();
 });
 
-cm.getConstructor('Com.Autocomplete', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
+cm.getConstructor('Com.Autocomplete', function(classConstructor, className, classProto, classInherit){
+
+    /*** AJAX ***/
+
+    classProto.callbacks.beforePrepare = function(that, params){
+        return params['config'];
+    };
+
+    classProto.callbacks.afterPrepare = function(that, params){
+        return params['config'];
+    };
 
     /*** DATA ***/
 
@@ -27620,6 +29238,7 @@ Com.FormFields.add('autocomplete', {
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.Autocomplete'
 });
+
 cm.define('Com.AutocompleteField', {
     'extend' : 'Com.AbstractInput',
     'params' : {
@@ -27810,9 +29429,7 @@ function(params){
     Com.AbstractInput.apply(that, arguments);
 });
 
-cm.getConstructor('Com.Check', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.Check', function(classConstructor, className, classProto, classInherit){
     classProto.onConstructStart = function(){
         var that = this;
         // Variables
@@ -27824,7 +29441,26 @@ cm.getConstructor('Com.Check', function(classConstructor, className, classProto)
 
     classProto.onValidateParamsProcess = function(){
         var that = this;
-        that.params['multiple'] = !cm.isEmpty(that.params['options']) && that.params['type'] === 'checkbox';
+        if(!cm.isEmpty(that.params['options'])){
+            that.params['multiple'] = that.params['type'] === 'checkbox';
+            // Convert option values
+            cm.forEach(that.params['options'], function(item){
+                if(!cm.isEmpty(item['value']) && (item['checked'] || item['selected'])){
+                    if(cm.isEmpty(that.params['value'])){
+                        that.params['value'] = [];
+                    }else if(cm.isString(that.params['value']) || cm.isNumber(that.params['value'])){
+                        that.params['value'] = [that.params['value']];
+                    }
+                    cm.arrayAdd(that.params['value'], item['value']);
+                }
+            });
+        }
+        // Checked parameter behavior override
+        if(that.params['checked'] && cm.isEmpty(that.params['value'])){
+            if(!that.params['multiple']){
+                that.params['value'] = true;
+            }
+        }
     };
 
     /*** VIEW MODEL ***/
@@ -27862,7 +29498,7 @@ cm.getConstructor('Com.Check', function(classConstructor, className, classProto)
         item['input'] = nodes['input'];
         // Attributes
         if(!cm.isEmpty(item['value'])){
-            item['input'] .value = item['value'];
+            item['input'].value = item['value'];
         }
         if(!cm.isEmpty(that.params['name'])){
             item['input'].setAttribute('name', that.params['name']);
@@ -27893,7 +29529,10 @@ cm.getConstructor('Com.Check', function(classConstructor, className, classProto)
                 cm.appendChild(inputContainer, nodes['container']);
             });
         }else{
-            inputContainer = that.renderInput({'text' : that.params['placeholder']});
+            inputContainer = that.renderInput({
+                'text' : that.params['placeholder'],
+                'value' : that.params['value']
+            });
             cm.appendChild(inputContainer, nodes['container']);
         }
         that.triggerEvent('onRenderContentEnd');
@@ -27908,7 +29547,7 @@ cm.getConstructor('Com.Check', function(classConstructor, className, classProto)
             'nodes' : nodes,
             'text' : '',
             'value' : null
-        },item);
+        }, item);
         // Structure
         nodes['container'] = cm.node('label',
             nodes['input'] = cm.node('input', {'type' : that.params['type']}),
@@ -27954,7 +29593,11 @@ cm.getConstructor('Com.Check', function(classConstructor, className, classProto)
                 value = item['value'];
             }
         }else{
-            value = item['input'].checked;
+            if(item['input'].checked){
+                value = !cm.isEmpty(item['value']) ? item['value'] : true;
+            }else{
+                value = false;
+            }
         }
         that.set(value, triggerEvents);
         return that;
@@ -28025,6 +29668,7 @@ Com.FormFields.add('check', {
         'inline' : true
     }
 });
+
 cm.define('Com.CheckTrigger', {
     'extend' : 'Com.AbstractController',
     'params' : {
@@ -28570,6 +30214,532 @@ Com.FormFields.add('content', {
     'constructor' : 'Com.FieldContent'
 });
 
+Com.Elements['Datepicker'] = {};
+
+Com['GetDatepicker'] = function(id){
+    return Com.Elements.Datepicker[id] || null;
+};
+
+cm.define('Com.Datepicker', {
+    'modules' : [
+        'Params',
+        'Events',
+        'DataConfig',
+        'Structure',
+        'Langs',
+        'Stack'
+    ],
+    'events' : [
+        'onRender',
+        'onSelect',
+        'onChange',
+        'onClear',
+        'onFocus',
+        'onBlur'
+    ],
+    'params' : {
+        'input' : null,                                                     // Deprecated, use 'node' parameter instead.
+        'node' : cm.node('input', {'type' : 'text'}),
+        'container' : null,
+        'name' : '',
+        'embedStructure' : 'replace',
+        'customEvents' : true,
+        'renderInBody' : true,
+        'size' : 'default',                                                 // default, full, custom
+        'format' : 'cm._config.dateFormat',
+        'displayFormat' : 'cm._config.displayDateFormat',
+        'isDateTime' : false,
+        'dateTimeFormat' : 'cm._config.dateTimeFormat',
+        'displayDateTimeFormat' : 'cm._config.displayDateTimeFormat',
+        'setEmptyDateByFormat' : true,
+        'minutesInterval' : 1,
+        'startYear' : 1950,                                                 // number | current
+        'endYear' : 'current + 10',                                         // number | current
+        'startWeekDay' : 0,
+        'showTodayButton' : true,
+        'showClearButton' : false,
+        'showTitleTooltip' : true,
+        'showPlaceholder' : true,
+        'title' : '',
+        'placeholder' : '',
+        'menuMargin' : 4,
+        'value' : 0,
+        'disabled' : false,
+        'icons' : {
+            'datepicker' : 'icon default linked',
+            'clear' : 'icon default linked'
+        },
+        'Com.Tooltip' : {
+            'targetEvent' : 'click',
+            'hideOnReClick' : false,
+            'className' : 'com__datepicker__tooltip',
+            'top' : cm._config.tooltipDown
+        }
+    },
+    'strings' : {
+        'daysAbbr' : ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+        'days' : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        'months' : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'Clear date' : 'Clear date',
+        'Today' : 'Today',
+        'Now' : 'Now',
+        'Time' : 'Time:'
+    }
+},
+function(params){
+    var that = this,
+        nodes = {},
+        components = {};
+
+    that.date = null;
+    that.previousDate = null;
+    that.value = null;
+    that.previousValue = null;
+    that.format = null;
+    that.displayFormat = null;
+    that.disabled = false;
+    that.isDestructed = null;
+
+    var init = function(){
+        that.destructHandler = that.destruct.bind(that);
+        that.setParams(params);
+        preValidateParams();
+        that.convertEvents(that.params['events']);
+        that.getDataConfig(that.params['node']);
+        validateParams();
+        render();
+        setLogic();
+        setEvents();
+        // Add to stack
+        that.addToStack(nodes['container']);
+        // Set selected date
+        if(that.params['value']){
+            that.set(that.params['value'], that.format, false);
+        }else{
+            that.set(that.params['node'].value, that.format, false);
+        }
+        // Trigger events
+        that.triggerEvent('onRender', that.value);
+    };
+
+    var preValidateParams = function(){
+        if(cm.isNode(that.params['input'])){
+            that.params['node'] = that.params['input'];
+        }
+    };
+
+    var validateParams = function(){
+        if(cm.isNode(that.params['node'])){
+            that.params['placeholder'] = that.params['node'].getAttribute('placeholder') || that.params['placeholder'];
+            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
+            that.params['disabled'] = that.params['node'].disabled || that.params['disabled'];
+            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
+        }
+        if(that.params['value'] === 'now'){
+            that.params['value'] = new Date();
+        }
+        if(/current/.test(that.params['startYear'])){
+            that.params['startYear'] = eval(cm.strReplace(that.params['startYear'], {'current' : new Date().getFullYear()}));
+        }
+        if(/current/.test(that.params['endYear'])){
+            that.params['endYear'] = eval(cm.strReplace(that.params['endYear'], {'current' : new Date().getFullYear()}));
+        }
+        that.format = that.params['isDateTime']? that.params['dateTimeFormat'] : that.params['format'];
+        that.displayFormat = that.params['isDateTime']? that.params['displayDateTimeFormat'] : that.params['displayFormat'];
+        that.disabled = that.params['disabled'];
+    };
+
+    var render = function(){
+        /* *** RENDER STRUCTURE *** */
+        nodes['container'] = cm.Node('div', {'class' : 'com__datepicker-input'},
+            nodes['hidden'] = cm.Node('input', {'type' : 'hidden'}),
+            nodes['target'] = cm.Node('div', {'class' : 'pt__input has-icon-right'},
+                nodes['input'] = cm.Node('input', {'type' : 'text'}),
+                nodes['icon'] = cm.Node('div', {'class' : that.params['icons']['datepicker']})
+            ),
+            nodes['menuContainer'] = cm.Node('div', {'class' : 'form'},
+                nodes['calendarContainer'] = cm.Node('div', {'class' : 'calendar-holder'})
+            )
+        );
+        if(!cm.isEmpty(that.params['size'])){
+            cm.addClass(nodes['container'], ['size', that.params['size']].join('-'));
+        }
+        /* *** ATTRIBUTES *** */
+        // Title
+        if(that.params['showTitleTooltip'] && !cm.isEmpty(that.params['title'])){
+            nodes['container'].title = that.params['title'];
+        }
+        // ID
+        if(that.params['node'].id){
+            nodes['container'].id = that.params['node'].id;
+        }
+        // Set hidden input attributes
+        if(that.params['name']){
+            nodes['hidden'].setAttribute('name', that.params['name']);
+        }
+        // Placeholder
+        if(that.params['showPlaceholder'] && !cm.isEmpty(that.params['placeholder'])){
+            nodes['input'].setAttribute('placeholder', that.params['placeholder']);
+        }
+        // Clear Button
+        if(that.params['showClearButton']){
+            cm.addClass(nodes['container'], 'has-clear-button');
+            nodes['container'].appendChild(
+                nodes['clearButton'] = cm.Node('div', {'class' : that.params['icons']['clear'], 'title' : that.lang('Clear date')})
+            );
+        }
+        // Today / Now Button
+        if(that.params['showTodayButton']){
+            nodes['menuContainer'].appendChild(
+                nodes['todayButton'] = cm.Node('div', {'class' : 'button today is-wide'}, that.lang(that.params['isDateTime']? 'Now' : 'Today'))
+            );
+        }
+        // Time Select
+        if(that.params['isDateTime']){
+            nodes['timeHolder'] = cm.Node('div', {'class' : 'time-holder'},
+                cm.Node('dl', {'class' : 'form-box'},
+                    cm.Node('dt', that.lang('Time')),
+                    nodes['timeContainer'] = cm.Node('dd')
+                )
+            );
+            cm.insertAfter(nodes['timeHolder'], nodes['calendarContainer']);
+        }
+        /* *** INSERT INTO DOM *** */
+        that.embedStructure(nodes['container']);
+    };
+
+    var setLogic = function(){
+        cm.addEvent(nodes['input'], 'keypress', inputKeypressHandler);
+        cm.addEvent(nodes['input'], 'keyup', inputKeyHandler);
+        // Clear Button
+        if(that.params['showClearButton']){
+            cm.addEvent(nodes['clearButton'], 'click', function(){
+                that.clear();
+                components['menu'].hide(false);
+            });
+        }
+        // Today / Now Button
+        if(that.params['showTodayButton']){
+            cm.addEvent(nodes['todayButton'], 'click', function(){
+                that.set(new Date());
+                components['menu'].hide(false);
+            });
+        }
+        // Render tooltip
+        components['menu'] = new Com.Tooltip(
+            cm.merge(that.params['Com.Tooltip'], {
+                'container' : that.params['renderInBody'] ? document.body : nodes['container'],
+                'content' : nodes['menuContainer'],
+                'target' : nodes['target'],
+                'events' : {
+                    'onShowStart' : onShow,
+                    'onHideStart' : onHide
+                }
+            })
+        );
+        // Render calendar
+        components['calendar'] = new Com.Calendar({
+            'node' : nodes['calendarContainer'],
+            'renderSelectsInBody' : false,
+            'className' : 'com__datepicker-calendar',
+            'startYear' : that.params['startYear'],
+            'endYear' : that.params['endYear'],
+            'startWeekDay' : that.params['startWeekDay'],
+            'langs' : that.params['langs'],
+            'renderMonthOnInit' : false,
+            'events' : {
+                'onMonthRender' : function(){
+                    if(that.date){
+                        components['calendar'].selectDay(that.date);
+                    }
+                },
+                'onDayClick' : function(calendar, params){
+                    setDate(null, null, params['day']);
+                    components['calendar'].unSelectDay(that.previousDate);
+                    components['calendar'].selectDay(that.date);
+                    set(true);
+                    // Hide datepicker tooltip
+                    if(!that.params['isDateTime']){
+                        components['menu'].hide(false);
+                    }
+                }
+            }
+        });
+        // Render Time Select
+        if(that.params['isDateTime']){
+            components['time'] = new Com.TimeSelect({
+                'container' : nodes['timeContainer'],
+                'renderSelectsInBody' : false,
+                'minutesInterval' : that.params['minutesInterval']
+            });
+            components['time'].addEvent('onChange', function(){
+                setDate();
+                components['calendar'].set(that.date.getFullYear(), that.date.getMonth(), false);
+                components['calendar'].selectDay(that.date);
+                set(true);
+            });
+        }
+        // Enable / Disable
+        if(that.disabled){
+            that.disable();
+        }else{
+            that.enable();
+        }
+    };
+
+    var inputKeypressHandler = function(e){
+        if(cm.isKey(e, 'enter')){
+            cm.preventDefault(e);
+        }
+    };
+
+    var inputKeyHandler = function(e){
+        var value = nodes['input'].value;
+        if(cm.isKey(e, 'enter')){
+            cm.preventDefault(e);
+            validateInputValue();
+            components['menu'].hide(false);
+        }
+        if(cm.isKey(e, 'delete')){
+            if(cm.isEmpty(value)){
+                that.clear(true);
+                //components['menu'].hide(false);
+            }
+        }
+    };
+
+    var setEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.add(nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
+    var unsetEvents = function(){
+        // Add custom event
+        if(that.params['customEvents']){
+            cm.customEvent.remove(nodes['container'], 'destruct', that.destructHandler);
+        }
+    };
+
+    var onShow = function(){
+        renderCalendarMonth();
+        // Set classes
+        cm.addClass(nodes['container'], 'active');
+        that.triggerEvent('onFocus', that.value);
+    };
+
+    var onHide = function(){
+        //validateInputValue();
+        setInputValues();
+        nodes['input'].blur();
+        cm.removeClass(nodes['container'], 'active');
+        that.triggerEvent('onBlur', that.value);
+    };
+
+    var validateInputValue = function(){
+        var value = nodes['input'].value,
+            date = new Date(value);
+        if(cm.isEmpty(value) || !cm.isDateValid(date)){
+            that.clear(true);
+        }else{
+            that.set(date, null, true);
+        }
+    };
+
+    var set = function(triggerEvents){
+        that.previousValue = that.value;
+        if(that.date){
+            // Set date
+            setDate();
+            // Set value
+            that.value = cm.dateFormat(that.date, that.format, that.lang());
+        }else{
+            that.value = cm.dateFormat(false, that.format, that.lang());
+        }
+        setInputValues();
+        renderCalendarMonth();
+        // Trigger events
+        if(triggerEvents){
+            that.triggerEvent('onSelect', that.value);
+            onChange();
+        }
+    };
+
+    var setDate = function(year, month, day, hours, minutes, seconds){
+        if(!that.date){
+            that.date = new Date();
+            that.previousDate = null;
+        }else{
+            that.previousDate = cm.clone(that.date);
+        }
+        // Set date
+        year = cm.isUndefined(year) ? components['calendar'].getFullYear() : year;
+        month = cm.isUndefined(month) ? components['calendar'].getMonth() : month;
+        !cm.isEmpty(year) && that.date.setFullYear(year);
+        !cm.isEmpty(month) && that.date.setMonth(month);
+        !cm.isEmpty(day) && that.date.setDate(day);
+        // Set time
+        if(that.params['isDateTime']){
+            hours = cm.isUndefined(hours) ? components['time'].getHours() : hours;
+            minutes = cm.isUndefined(minutes) ? components['time'].getMinutes() : minutes;
+            seconds = cm.isUndefined(seconds) ? 0 : seconds;
+            !cm.isEmpty(hours) && that.date.setHours(hours);
+            !cm.isEmpty(minutes) && that.date.setMinutes(minutes);
+            !cm.isEmpty(seconds) && that.date.setSeconds(seconds);
+        }
+    };
+
+    var renderCalendarMonth = function(){
+        // Render calendar month
+        if(that.date){
+            components['calendar'].set(that.date.getFullYear(), that.date.getMonth());
+        }
+        components['calendar'].renderMonth();
+    };
+
+    var setInputValues = function(){
+        if(that.date){
+            nodes['input'].value = cm.dateFormat(that.date, that.displayFormat, that.strings);
+            nodes['hidden'].value = that.value;
+        }else{
+            nodes['input'].value = '';
+            if(that.params['setEmptyDateByFormat']){
+                nodes['hidden'].value = cm.dateFormat(false, that.format, that.strings);
+            }else{
+                nodes['hidden'].value = '';
+            }
+        }
+    };
+
+    var onChange = function(){
+        if(!that.previousValue || (!that.value && that.previousValue) || (that.value !== that.previousValue)){
+            that.triggerEvent('onChange', that.value);
+        }
+    };
+
+    /* ******* MAIN ******* */
+
+    that.destruct = function(){
+        var that = this;
+        if(!that.isDestructed){
+            that.isDestructed = true;
+            cm.customEvent.trigger(nodes['calendarContainer'], 'destruct', {
+                'direction' : 'child',
+                'self' : false
+            });
+            unsetEvents();
+            that.removeFromStack();
+        }
+        return that;
+    };
+
+    that.get = function(format){
+        format = !cm.isUndefined(format) ? format : that.format;
+        if(that.date || that.params['setEmptyDateByFormat']){
+            return cm.dateFormat(that.date, format, that.strings);
+        }else{
+            return '';
+        }
+    };
+
+    that.getDate = function(){
+        return that.date;
+    };
+
+    that.getFullYear = function(){
+        return that.date? that.date.getFullYear() : null;
+    };
+
+    that.getMonth = function(){
+        return that.date? that.date.getMonth() : null;
+    };
+
+    that.getDay = function(){
+        return that.date? that.date.getDate() : null;
+    };
+
+    that.getHours = function(){
+        return that.date? that.date.getHours() : null;
+    };
+
+    that.getMinutes = function(){
+        return that.date? that.date.getMinutes() : null;
+    };
+
+    that.set = function(str, format, triggerEvents){
+        format = !cm.isUndefined(format) ? format : that.format;
+        triggerEvents = !cm.isUndefined(triggerEvents) ? triggerEvents : true;
+        // Get date
+        var pattern = cm.dateFormat(false, format, that.lang());
+        if(cm.isEmpty(str) || str === pattern){
+            that.clear();
+            return that;
+        }else if(cm.isDate(str)){
+            that.date = str;
+        }else{
+            that.date = cm.parseDate(str, format);
+        }
+        // Set parameters into components
+        components['calendar'].set(that.date.getFullYear(), that.date.getMonth(), false);
+        if(that.params['isDateTime']){
+            components['time'].set(that.date, null, false);
+        }
+        // Set date
+        set(triggerEvents);
+        return that;
+    };
+
+    that.clear = function(triggerEvents){
+        triggerEvents = !cm.isUndefined(triggerEvents) ? triggerEvents : true;
+        // Clear date
+        that.date = null;
+        // Clear components
+        components['calendar'].clear(false);
+        if(that.params['isDateTime']){
+            components['time'].clear(false);
+        }
+        // Set date
+        set(false);
+        // Trigger events
+        if(triggerEvents){
+            that.triggerEvent('onClear', that.value);
+            onChange();
+        }
+        return that;
+    };
+
+    that.disable = function(){
+        that.disabled = true;
+        cm.addClass(nodes['container'], 'disabled');
+        nodes['input'].disabled = true;
+        components['menu'].disable();
+        return that;
+    };
+
+    that.enable = function(){
+        that.disabled = false;
+        cm.removeClass(nodes['container'], 'disabled');
+        nodes['input'].disabled = false;
+        components['menu'].enable();
+        return that;
+    };
+
+    that.getNodes = function(key){
+        return nodes[key] || nodes;
+    };
+
+    init();
+});
+
+/* ****** FORM FIELD COMPONENT ******* */
+
+Com.FormFields.add('date-picker', {
+    'node' : cm.node('input', {'type' : 'text'}),
+    'fieldConstructor' : 'Com.AbstractFormField',
+    'constructor' : 'Com.Datepicker'
+});
+
 cm.define('Com.DateSelect', {
     'modules' : [
         'Params',
@@ -28886,541 +31056,22 @@ Com.FormFields.add('date-select', {
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.DateSelect'
 });
-Com.Elements['Datepicker'] = {};
-
-Com['GetDatepicker'] = function(id){
-    return Com.Elements.Datepicker[id] || null;
-};
-
-cm.define('Com.Datepicker', {
-    'modules' : [
-        'Params',
-        'Events',
-        'DataConfig',
-        'Structure',
-        'Langs',
-        'Stack'
-    ],
-    'events' : [
-        'onRender',
-        'onSelect',
-        'onChange',
-        'onClear',
-        'onFocus',
-        'onBlur'
-    ],
-    'params' : {
-        'input' : null,                                                     // Deprecated, use 'node' parameter instead.
-        'node' : cm.node('input', {'type' : 'text'}),
-        'container' : null,
-        'name' : '',
-        'embedStructure' : 'replace',
-        'customEvents' : true,
-        'renderInBody' : true,
-        'format' : 'cm._config.dateFormat',
-        'displayFormat' : 'cm._config.displayDateFormat',
-        'isDateTime' : false,
-        'dateTimeFormat' : 'cm._config.dateTimeFormat',
-        'displayDateTimeFormat' : 'cm._config.displayDateTimeFormat',
-        'setEmptyDateByFormat' : true,
-        'minutesInterval' : 1,
-        'startYear' : 1950,                                                 // number | current
-        'endYear' : 'current + 10',                                         // number | current
-        'startWeekDay' : 0,
-        'showTodayButton' : true,
-        'showClearButton' : false,
-        'showTitleTooltip' : true,
-        'showPlaceholder' : true,
-        'title' : '',
-        'placeholder' : '',
-        'menuMargin' : 4,
-        'value' : 0,
-        'disabled' : false,
-        'icons' : {
-            'datepicker' : 'icon default linked',
-            'clear' : 'icon default linked'
-        },
-        'Com.Tooltip' : {
-            'targetEvent' : 'click',
-            'hideOnReClick' : false,
-            'className' : 'com__datepicker__tooltip',
-            'top' : cm._config.tooltipDown
-        }
-    },
-    'strings' : {
-        'daysAbbr' : ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-        'days' : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-        'months' : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        'Clear date' : 'Clear date',
-        'Today' : 'Today',
-        'Now' : 'Now',
-        'Time' : 'Time:'
-    }
-},
-function(params){
-    var that = this,
-        nodes = {},
-        components = {};
-
-    that.date = null;
-    that.previousDate = null;
-    that.value = null;
-    that.previousValue = null;
-    that.format = null;
-    that.displayFormat = null;
-    that.disabled = false;
-    that.isDestructed = null;
-
-    var init = function(){
-        that.destructHandler = that.destruct.bind(that);
-        that.setParams(params);
-        preValidateParams();
-        that.convertEvents(that.params['events']);
-        that.getDataConfig(that.params['node']);
-        validateParams();
-        render();
-        setLogic();
-        setEvents();
-        // Add to stack
-        that.addToStack(nodes['container']);
-        // Set selected date
-        if(that.params['value']){
-            that.set(that.params['value'], that.format, false);
-        }else{
-            that.set(that.params['node'].value, that.format, false);
-        }
-        // Trigger events
-        that.triggerEvent('onRender', that.value);
-    };
-
-    var preValidateParams = function(){
-        if(cm.isNode(that.params['input'])){
-            that.params['node'] = that.params['input'];
-        }
-    };
-
-    var validateParams = function(){
-        if(cm.isNode(that.params['node'])){
-            that.params['placeholder'] = that.params['node'].getAttribute('placeholder') || that.params['placeholder'];
-            that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
-            that.params['disabled'] = that.params['node'].disabled || that.params['disabled'];
-            that.params['name'] = that.params['node'].getAttribute('name') || that.params['name'];
-        }
-        if(that.params['value'] === 'now'){
-            that.params['value'] = new Date();
-        }
-        if(/current/.test(that.params['startYear'])){
-            that.params['startYear'] = eval(cm.strReplace(that.params['startYear'], {'current' : new Date().getFullYear()}));
-        }
-        if(/current/.test(that.params['endYear'])){
-            that.params['endYear'] = eval(cm.strReplace(that.params['endYear'], {'current' : new Date().getFullYear()}));
-        }
-        that.format = that.params['isDateTime']? that.params['dateTimeFormat'] : that.params['format'];
-        that.displayFormat = that.params['isDateTime']? that.params['displayDateTimeFormat'] : that.params['displayFormat'];
-        that.disabled = that.params['disabled'];
-    };
-
-    var render = function(){
-        /* *** RENDER STRUCTURE *** */
-        nodes['container'] = cm.Node('div', {'class' : 'com__datepicker-input'},
-            nodes['hidden'] = cm.Node('input', {'type' : 'hidden'}),
-            nodes['target'] = cm.Node('div', {'class' : 'pt__input has-icon-right'},
-                nodes['input'] = cm.Node('input', {'type' : 'text'}),
-                nodes['icon'] = cm.Node('div', {'class' : that.params['icons']['datepicker']})
-            ),
-            nodes['menuContainer'] = cm.Node('div', {'class' : 'form'},
-                nodes['calendarContainer'] = cm.Node('div', {'class' : 'calendar-holder'})
-            )
-        );
-        /* *** ATTRIBUTES *** */
-        // Title
-        if(that.params['showTitleTooltip'] && !cm.isEmpty(that.params['title'])){
-            nodes['container'].title = that.params['title'];
-        }
-        // ID
-        if(that.params['node'].id){
-            nodes['container'].id = that.params['node'].id;
-        }
-        // Set hidden input attributes
-        if(that.params['name']){
-            nodes['hidden'].setAttribute('name', that.params['name']);
-        }
-        // Placeholder
-        if(that.params['showPlaceholder'] && !cm.isEmpty(that.params['placeholder'])){
-            nodes['input'].setAttribute('placeholder', that.params['placeholder']);
-        }
-        // Clear Button
-        if(that.params['showClearButton']){
-            cm.addClass(nodes['container'], 'has-clear-button');
-            nodes['container'].appendChild(
-                nodes['clearButton'] = cm.Node('div', {'class' : that.params['icons']['clear'], 'title' : that.lang('Clear date')})
-            );
-        }
-        // Today / Now Button
-        if(that.params['showTodayButton']){
-            nodes['menuContainer'].appendChild(
-                nodes['todayButton'] = cm.Node('div', {'class' : 'button today is-wide'}, that.lang(that.params['isDateTime']? 'Now' : 'Today'))
-            );
-        }
-        // Time Select
-        if(that.params['isDateTime']){
-            nodes['timeHolder'] = cm.Node('div', {'class' : 'time-holder'},
-                cm.Node('dl', {'class' : 'form-box'},
-                    cm.Node('dt', that.lang('Time')),
-                    nodes['timeContainer'] = cm.Node('dd')
-                )
-            );
-            cm.insertAfter(nodes['timeHolder'], nodes['calendarContainer']);
-        }
-        /* *** INSERT INTO DOM *** */
-        that.embedStructure(nodes['container']);
-    };
-
-    var setLogic = function(){
-        cm.addEvent(nodes['input'], 'keypress', inputKeypressHandler);
-        cm.addEvent(nodes['input'], 'keyup', inputKeyHandler);
-        // Clear Button
-        if(that.params['showClearButton']){
-            cm.addEvent(nodes['clearButton'], 'click', function(){
-                that.clear();
-                components['menu'].hide(false);
-            });
-        }
-        // Today / Now Button
-        if(that.params['showTodayButton']){
-            cm.addEvent(nodes['todayButton'], 'click', function(){
-                that.set(new Date());
-                components['menu'].hide(false);
-            });
-        }
-        // Render tooltip
-        components['menu'] = new Com.Tooltip(
-            cm.merge(that.params['Com.Tooltip'], {
-                'container' : that.params['renderInBody'] ? document.body : nodes['container'],
-                'content' : nodes['menuContainer'],
-                'target' : nodes['target'],
-                'events' : {
-                    'onShowStart' : onShow,
-                    'onHideStart' : onHide
-                }
-            })
-        );
-        // Render calendar
-        components['calendar'] = new Com.Calendar({
-            'node' : nodes['calendarContainer'],
-            'renderSelectsInBody' : false,
-            'className' : 'com__datepicker-calendar',
-            'startYear' : that.params['startYear'],
-            'endYear' : that.params['endYear'],
-            'startWeekDay' : that.params['startWeekDay'],
-            'langs' : that.params['langs'],
-            'renderMonthOnInit' : false,
-            'events' : {
-                'onMonthRender' : function(){
-                    if(that.date){
-                        components['calendar'].selectDay(that.date);
-                    }
-                },
-                'onDayClick' : function(calendar, params){
-                    setDate(null, null, params['day']);
-                    components['calendar'].unSelectDay(that.previousDate);
-                    components['calendar'].selectDay(that.date);
-                    set(true);
-                    // Hide datepicker tooltip
-                    if(!that.params['isDateTime']){
-                        components['menu'].hide(false);
-                    }
-                }
-            }
-        });
-        // Render Time Select
-        if(that.params['isDateTime']){
-            components['time'] = new Com.TimeSelect({
-                'container' : nodes['timeContainer'],
-                'renderSelectsInBody' : false,
-                'minutesInterval' : that.params['minutesInterval']
-            });
-            components['time'].addEvent('onChange', function(){
-                setDate();
-                components['calendar'].set(that.date.getFullYear(), that.date.getMonth(), false);
-                components['calendar'].selectDay(that.date);
-                set(true);
-            });
-        }
-        // Enable / Disable
-        if(that.disabled){
-            that.disable();
-        }else{
-            that.enable();
-        }
-    };
-
-    var inputKeypressHandler = function(e){
-        if(cm.isKey(e, 'enter')){
-            cm.preventDefault(e);
-        }
-    };
-
-    var inputKeyHandler = function(e){
-        var value = nodes['input'].value;
-        if(cm.isKey(e, 'enter')){
-            cm.preventDefault(e);
-            validateInputValue();
-            components['menu'].hide(false);
-        }
-        if(cm.isKey(e, 'delete')){
-            if(cm.isEmpty(value)){
-                that.clear(true);
-                //components['menu'].hide(false);
-            }
-        }
-    };
-
-    var setEvents = function(){
-        // Add custom event
-        if(that.params['customEvents']){
-            cm.customEvent.add(nodes['container'], 'destruct', that.destructHandler);
-        }
-    };
-
-    var unsetEvents = function(){
-        // Add custom event
-        if(that.params['customEvents']){
-            cm.customEvent.remove(nodes['container'], 'destruct', that.destructHandler);
-        }
-    };
-
-    var onShow = function(){
-        renderCalendarMonth();
-        // Set classes
-        cm.addClass(nodes['container'], 'active');
-        that.triggerEvent('onFocus', that.value);
-    };
-
-    var onHide = function(){
-        //validateInputValue();
-        setInputValues();
-        nodes['input'].blur();
-        cm.removeClass(nodes['container'], 'active');
-        that.triggerEvent('onBlur', that.value);
-    };
-
-    var validateInputValue = function(){
-        var value = nodes['input'].value,
-            date = new Date(value);
-        if(cm.isEmpty(value) || !cm.isDateValid(date)){
-            that.clear(true);
-        }else{
-            that.set(date, null, true);
-        }
-    };
-
-    var set = function(triggerEvents){
-        that.previousValue = that.value;
-        if(that.date){
-            // Set date
-            setDate();
-            // Set value
-            that.value = cm.dateFormat(that.date, that.format, that.lang());
-        }else{
-            that.value = cm.dateFormat(false, that.format, that.lang());
-        }
-        setInputValues();
-        renderCalendarMonth();
-        // Trigger events
-        if(triggerEvents){
-            that.triggerEvent('onSelect', that.value);
-            onChange();
-        }
-    };
-
-    var setDate = function(year, month, day, hours, minutes, seconds){
-        if(!that.date){
-            that.date = new Date();
-            that.previousDate = null;
-        }else{
-            that.previousDate = cm.clone(that.date);
-        }
-        // Set date
-        year = cm.isUndefined(year) ? components['calendar'].getFullYear() : year;
-        month = cm.isUndefined(month) ? components['calendar'].getMonth() : month;
-        !cm.isEmpty(year) && that.date.setFullYear(year);
-        !cm.isEmpty(month) && that.date.setMonth(month);
-        !cm.isEmpty(day) && that.date.setDate(day);
-        // Set time
-        if(that.params['isDateTime']){
-            hours = cm.isUndefined(hours) ? components['time'].getHours() : hours;
-            minutes = cm.isUndefined(minutes) ? components['time'].getMinutes() : minutes;
-            seconds = cm.isUndefined(seconds) ? 0 : seconds;
-            !cm.isEmpty(hours) && that.date.setHours(hours);
-            !cm.isEmpty(minutes) && that.date.setMinutes(minutes);
-            !cm.isEmpty(seconds) && that.date.setSeconds(seconds);
-        }
-    };
-
-    var renderCalendarMonth = function(){
-        // Render calendar month
-        if(that.date){
-            components['calendar'].set(that.date.getFullYear(), that.date.getMonth());
-        }
-        components['calendar'].renderMonth();
-    };
-
-    var setInputValues = function(){
-        if(that.date){
-            nodes['input'].value = cm.dateFormat(that.date, that.displayFormat, that.strings);
-            nodes['hidden'].value = that.value;
-        }else{
-            nodes['input'].value = '';
-            if(that.params['setEmptyDateByFormat']){
-                nodes['hidden'].value = cm.dateFormat(false, that.format, that.strings);
-            }else{
-                nodes['hidden'].value = '';
-            }
-        }
-    };
-    
-    var onChange = function(){
-        if(!that.previousValue || (!that.value && that.previousValue) || (that.value !== that.previousValue)){
-            that.triggerEvent('onChange', that.value);
-        }
-    };
-
-    /* ******* MAIN ******* */
-
-    that.destruct = function(){
-        var that = this;
-        if(!that.isDestructed){
-            that.isDestructed = true;
-            cm.customEvent.trigger(nodes['calendarContainer'], 'destruct', {
-                'direction' : 'child',
-                'self' : false
-            });
-            unsetEvents();
-            that.removeFromStack();
-        }
-        return that;
-    };
-
-    that.get = function(format){
-        format = !cm.isUndefined(format) ? format : that.format;
-        if(that.date || that.params['setEmptyDateByFormat']){
-            return cm.dateFormat(that.date, format, that.strings);
-        }else{
-            return '';
-        }
-    };
-
-    that.getDate = function(){
-        return that.date;
-    };
-
-    that.getFullYear = function(){
-        return that.date? that.date.getFullYear() : null;
-    };
-
-    that.getMonth = function(){
-        return that.date? that.date.getMonth() : null;
-    };
-
-    that.getDay = function(){
-        return that.date? that.date.getDate() : null;
-    };
-
-    that.getHours = function(){
-        return that.date? that.date.getHours() : null;
-    };
-
-    that.getMinutes = function(){
-        return that.date? that.date.getMinutes() : null;
-    };
-
-    that.set = function(str, format, triggerEvents){
-        format = !cm.isUndefined(format) ? format : that.format;
-        triggerEvents = !cm.isUndefined(triggerEvents) ? triggerEvents : true;
-        // Get date
-        var pattern = cm.dateFormat(false, format, that.lang());
-        if(cm.isEmpty(str) || str === pattern){
-            that.clear();
-            return that;
-        }else if(cm.isDate(str)){
-            that.date = str;
-        }else{
-            that.date = cm.parseDate(str, format);
-        }
-        // Set parameters into components
-        components['calendar'].set(that.date.getFullYear(), that.date.getMonth(), false);
-        if(that.params['isDateTime']){
-            components['time'].set(that.date, null, false);
-        }
-        // Set date
-        set(triggerEvents);
-        return that;
-    };
-
-    that.clear = function(triggerEvents){
-        triggerEvents = !cm.isUndefined(triggerEvents) ? triggerEvents : true;
-        // Clear date
-        that.date = null;
-        // Clear components
-        components['calendar'].clear(false);
-        if(that.params['isDateTime']){
-            components['time'].clear(false);
-        }
-        // Set date
-        set(false);
-        // Trigger events
-        if(triggerEvents){
-            that.triggerEvent('onClear', that.value);
-            onChange();
-        }
-        return that;
-    };
-
-    that.disable = function(){
-        that.disabled = true;
-        cm.addClass(nodes['container'], 'disabled');
-        nodes['input'].disabled = true;
-        components['menu'].disable();
-        return that;
-    };
-
-    that.enable = function(){
-        that.disabled = false;
-        cm.removeClass(nodes['container'], 'disabled');
-        nodes['input'].disabled = false;
-        components['menu'].enable();
-        return that;
-    };
-
-    that.getNodes = function(key){
-        return nodes[key] || nodes;
-    };
-
-    init();
-});
-
-/* ****** FORM FIELD COMPONENT ******* */
-
-Com.FormFields.add('date-picker', {
-    'node' : cm.node('input', {'type' : 'text'}),
-    'fieldConstructor' : 'Com.AbstractFormField',
-    'constructor' : 'Com.Datepicker'
-});
 cm.define('Com.FileInput', {
     'extend' : 'Com.AbstractInput',
     'params' : {
         'controllerEvents' : true,
         'embedStructure' : 'replace',
         'className' : 'com__file-input',
-        'size' : 'default',                     // default, full, custom
+        'size' : 'full',                     // default, full, custom
         'hiddenType' : 'textarea',
         'file' : null,
         'showLink' : true,
         'showFilename' : true,
+        'showClearButton' : true,
         'autoOpen' : false,
         'placeholder' : null,
-        'formData' : false,
+        'readValueType' : 'base64',         // base64 | binary
+        'outputValueType' : 'object',         // file | object
         'local' : true,
         'fileManager' : false,
         'fileManagerConstructor' : 'Com.AbstractFileManagerContainer',
@@ -29443,7 +31094,8 @@ cm.define('Com.FileInput', {
             'max' : 1,
             'rollover' : true
         },
-        'Com.FileReader' : {}
+        'fileReaderConstructor' : 'Com.FileReader',
+        'fileReaderParams' : {}
     },
     'strings' : {
         'browse' : 'Browse',
@@ -29471,8 +31123,8 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
 
     classProto.onInitComponentsStart = function(){
         var that = this;
-        cm.getConstructor('Com.FileReader', function(classObject){
-            that.components['validator'] = new classObject();
+        cm.getConstructor(that.params['fileReaderConstructor'], function(classObject){
+            that.components['validator'] = new classObject(that.params['fileReaderParams']);
         });
     };
 
@@ -29490,6 +31142,7 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
         that.params['fileUploaderParams']['params']['local'] = that.params['local'];
         that.params['fileUploaderParams']['params']['fileManager'] = that.params['fileManager'];
         // Other
+        that.params['fileReaderParams']['readValueType'] = that.params['readValueType'];
         that.params['local'] = that.params['fileUploader'] ? false : that.params['local'];
         that.params['fileManagerParams']['openOnConstruct'] = that.params['autoOpen'];
         that.params['fileManager'] = that.params['fileUploader'] ? false : that.params['fileManager'];
@@ -29514,8 +31167,8 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
         // Call parent method - renderViewModel
         classInherit.prototype.renderViewModel.apply(that, arguments);
         // Init FilerReader
-        cm.getConstructor('Com.FileReader', function(classObject, className){
-            that.components['reader'] = new classObject(that.params[className]);
+        cm.getConstructor(that.params['fileReaderConstructor'], function(classObject){
+            that.components['reader'] = new classObject(that.params['fileReaderParams']);
             that.components['reader'].addEvent('onReadSuccess', function(my, item){
                 that.set(item, true);
             });
@@ -29582,6 +31235,10 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
                 )
             )
         );
+        // Clear button
+        if(!that.params['showClearButton']){
+            cm.addClass(nodes['clear'], 'is-hidden');
+        }
         // Render Browse Buttons
         if(that.params['local']){
             nodes['browseLocal'] = cm.node('div', {'class' : 'browse-button'},
@@ -29646,7 +31303,7 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
     classProto.get = function(){
         var that = this,
             value;
-        if(that.params['formData']){
+        if(that.params['outputValueType'] === 'file'){
             value = that.value['file'] || that.value['value'] || that.value['value']   || '';
         }else{
             value = that.value  || '';
@@ -29670,13 +31327,16 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
             }
             cm.clearNode(that.nodes['content']['label']);
             cm.addClass(that.nodes['content']['label'], 'is-hidden');
-            cm.removeClass(that.nodes['content']['browseLocal'], 'is-hidden');
-            cm.removeClass(that.nodes['content']['browseFileManager'], 'is-hidden');
-            cm.removeClass(that.nodes['content']['browseFileUploader'], 'is-hidden');
-            cm.addClass(that.nodes['content']['clear'], 'is-hidden');
+            if(that.params['showClearButton']){
+                cm.removeClass(that.nodes['content']['browseLocal'], 'is-hidden');
+                cm.removeClass(that.nodes['content']['browseFileManager'], 'is-hidden');
+                cm.removeClass(that.nodes['content']['browseFileUploader'], 'is-hidden');
+                cm.addClass(that.nodes['content']['clear'], 'is-hidden');
+            }
         }else{
             cm.addClass(that.nodes['content']['placeholder'], 'is-hidden');
             cm.clearNode(that.nodes['content']['label']);
+            cm.removeClass(that.nodes['content']['label'], 'is-hidden');
             if(that.params['showFilename']){
                 if(that.params['showLink']){
                     that.nodes['content']['link'] = cm.node('a', {'target' : '_blank', 'href' : that.value['url'], 'title' : that.lang('open')}, that.value['name']);
@@ -29685,11 +31345,12 @@ cm.getConstructor('Com.FileInput', function(classConstructor, className, classPr
                 }
                 cm.appendChild(that.nodes['content']['link'], that.nodes['content']['label']);
             }
-            cm.addClass(that.nodes['content']['browseLocal'], 'is-hidden');
-            cm.addClass(that.nodes['content']['browseFileManager'], 'is-hidden');
-            cm.addClass(that.nodes['content']['browseFileUploader'], 'is-hidden');
-            cm.removeClass(that.nodes['content']['clear'], 'is-hidden');
-            cm.removeClass(that.nodes['content']['label'], 'is-hidden');
+            if(that.params['showClearButton']){
+                cm.addClass(that.nodes['content']['browseLocal'], 'is-hidden');
+                cm.addClass(that.nodes['content']['browseFileManager'], 'is-hidden');
+                cm.addClass(that.nodes['content']['browseFileUploader'], 'is-hidden');
+                cm.removeClass(that.nodes['content']['clear'], 'is-hidden');
+            }
         }
         return that;
     };
@@ -29712,6 +31373,7 @@ Com.FormFields.add('file', {
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.FileInput'
 });
+
 cm.define('Com.HiddenStoreField', {
     'extend' : 'Com.AbstractInputContainer',
     'params' : {
@@ -29726,9 +31388,7 @@ function(params){
     Com.AbstractInputContainer.apply(that, arguments);
 });
 
-cm.getConstructor('Com.HiddenStoreField', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Com.HiddenStoreField', function(classConstructor, className, classProto, classInherit){
     classProto.onConstructStart = function(){
         var that = this;
         // Binds
@@ -29928,7 +31588,7 @@ cm.getConstructor('Com.ImageInput', function(classConstructor, className, classP
                     cm.node('source', {'src' : that.value['url']})
                 );
                 that.nodes['content']['video'].muted = true;
-                that.nodes['content']['video'].autoplay = true;
+                that.nodes['content']['video'].autoplay = false;
                 that.nodes['content']['video'].loop = true;
                 cm.appendChild(that.nodes['content']['video'], that.nodes['content']['image']);
             }else{
@@ -30155,6 +31815,9 @@ cm.getConstructor('Com.Input', function(classConstructor, className, classProto,
             if(that.nodes['content']['icon']){
                 that.nodes['content']['icon'].title = that.params['placeholder'];
             }
+        }
+        if(!cm.isEmpty(that.params['autocomplete'])){
+            that.nodes['content']['input'].setAttribute('autocomplete', that.params['autocomplete']);
         }
         if(!cm.isEmpty(that.params['title'])){
             that.nodes['content']['input'].title = that.params['title'];
@@ -30535,6 +32198,10 @@ cm.getConstructor('Com.IntegerInput', function(classConstructor, className, clas
         );
         // Attributes
         cm.setInputMaxLength(nodes['input'], that.params['maxLength'], that.params['max']);
+        // Placeholder
+        if(!cm.isEmpty(that.params['placeholder'])){
+            nodes['input'].placeholder = that.params['placeholder'];
+        }
         // Events
         that.triggerEvent('onRenderContentProcess');
         cm.addEvent(nodes['input'], 'blur', that.setValueHandler);
@@ -30584,6 +32251,7 @@ Com.FormFields.add('integer', {
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.IntegerInput'
 });
+
 cm.define('Com.MultipleAutocomplete', {
     'extend' : 'Com.MultipleInput',
     'params' : {
@@ -31329,6 +32997,10 @@ cm.define('Com.Select', {
         'Stack'
     ],
     'events' : [
+        'onValidateParams',
+        'onValidateParamsStart',
+        'onValidateParamsProcess',
+        'onValidateParamsEnd',
         'onRender',
         'onRenderStart',
         'onSelect',
@@ -31351,6 +33023,7 @@ cm.define('Com.Select', {
         'title' : false,                        // Title text. Will be shown on hover.
         'options' : [],                         // Listing of options, for rendering through java-script. Example: [{'value' : 'foo', 'text' : 'Bar'}].
         'selected' : 0,                         // Deprecated, use 'value' parameter instead.
+        'setInitialValue' : true,
         'value' : null,                         // Option value / array of option values.
         'defaultValue' : null,
         'disabled' : false,
@@ -31404,7 +33077,7 @@ function(params){
         // Set selected option
         if(that.params['multiple']){
             active = [];
-            if(that.params['value'] && cm.isArray(that.params['value'])){
+            if(!cm.isEmpty(that.params['value']) && cm.isArray(that.params['value'])){
                 cm.forEach(that.params['value'], function(item){
                     if(options[item]){
                         set(options[item], true);
@@ -31412,9 +33085,9 @@ function(params){
                 });
             }
         }else{
-            if(that.params['value'] && options[that.params['value']]){
+            if(!cm.isEmpty(that.params['value']) && options[that.params['value']]){
                 set(options[that.params['value']]);
-            }else if(optionsLength){
+            }else if(that.params['setInitialValue'] && optionsLength){
                 set(optionsList[0]);
             }
         }
@@ -31430,11 +33103,8 @@ function(params){
     };
 
     var validateParams = function(){
-        var value;
+        that.triggerEvent('onValidateParamsStart');
         if(cm.isNode(that.params['node'])){
-            value = cm.getSelectValue(that.params['node']);
-            that.params['value'] = !cm.isEmpty(that.params['selected']) ? that.params['selected'] : that.params['value'];
-            that.params['value'] = !cm.isEmpty(value) ? value : that.params['value'];
             that.params['placeholder'] = that.params['node'].getAttribute('placeholder') || that.params['placeholder'];
             that.params['multiple'] = that.params['node'].multiple;
             that.params['title'] = that.params['node'].getAttribute('title') || that.params['title'];
@@ -31444,8 +33114,27 @@ function(params){
             that.params['tabindex'] = that.params['node'].getAttribute('tabindex') || that.params['tabindex'];
             that.params['id'] = that.params['node'].id || that.params['id'];
         }
-        that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
+        that.triggerEvent('onValidateParams');
+        that.triggerEvent('onValidateParamsProcess');
+        validateParamsValue();
         that.disabled = that.params['disabled'];
+        that.triggerEvent('onValidateParamsEnd');
+    };
+
+    var validateParamsValue = function(){
+        var dataValue,
+            value;
+        if(cm.isNode(that.params['node'])){
+            dataValue = that.params['node'].getAttribute('data-value');
+            // First try to take original value, than real time js value
+            value = cm.getSelectValue(that.params['node']);
+            // Parse JSON
+            if(!cm.isEmpty(dataValue)){
+                value = cm.parseJSON(dataValue);
+            }
+            that.params['value'] = !cm.isEmpty(value) ?  value : that.params['value'];
+        }
+        that.params['value'] = !cm.isEmpty(that.params['value']) ? that.params['value'] : that.params['defaultValue'];
     };
 
     var render = function(){
@@ -31675,7 +33364,9 @@ function(params){
         // Config
         item = cm.merge({
             'hidden' : false,
+            'select' : false,       // select option on add
             'selected' : false,
+            'disabled' : false,
             'value' : '',
             'text' : '',
             'className' : '',
@@ -31690,11 +33381,14 @@ function(params){
         item['option'] = cm.node('option', {'value' : item['value'], 'innerHTML' : item['text']});
         // Label onlick event
         cm.addEvent(item['node'], 'click', function(){
-            if(!that.disabled){
+            if(!item['disabled'] && !that.disabled){
                 set(item, true);
             }
             !that.params['multiple'] && components['menu'].hide(false);
         });
+        // Hidden / Disabled
+        item['hidden'] && cm.addClass(item['node'], 'hidden');
+        item['disabled'] && cm.addClass(item['node'], 'disabled');
         // Append
         if(group){
             group['items'].appendChild(item['node']);
@@ -31706,6 +33400,10 @@ function(params){
         // Push
         optionsList.push(options[item['value']] = item);
         optionsLength = optionsList.length;
+        // Select
+        if(item['select']){
+            set(item, false);
+        }
         return true;
     };
 
@@ -31732,9 +33430,11 @@ function(params){
         delete options[option['value']];
         // Set new active option, if current active is nominated for remove
         if(that.params['multiple']){
-            active = active.filter(function(item){
-                return value != item;
-            });
+            if(cm.isArray(active)){
+                active = active.filter(function(item){
+                    return value != item;
+                });
+            }
         }else{
             if(value === active){
                 if(optionsLength){
@@ -31765,7 +33465,6 @@ function(params){
 
     var setMultiple = function(option){
         var value = !cm.isUndefined(option['value'])? option['value'] : option['text'];
-
         if(option['selected']){
             deselectMultiple(option);
         }else{
@@ -31986,6 +33685,10 @@ function(params){
         return null;
     };
 
+    that.getSelectedOption = function(){
+        return that.getOption(active);
+    };
+
     that.getOptions = that.getOptionsAll = that.getAllOptions = function(){
         var result = [];
         cm.forEach(optionsList, function(item){
@@ -32055,6 +33758,7 @@ Com.FormFields.add('select', {
     'fieldConstructor' : 'Com.AbstractFormField',
     'constructor' : 'Com.Select'
 });
+
 cm.define('Com.SelectFieldTrigger', {
     'extend' : 'Com.AbstractController',
     'params' : {
@@ -32321,7 +34025,7 @@ function(params){
         // Structure
         nodes['container'] = cm.node('div', {'class' : 'com__tags-input'},
             nodes['hidden'] = cm.node('input', {'type' : 'hidden'}),
-            nodes['inner'] = cm.node('div', {'class' : 'inner'},
+            nodes['inner'] = cm.node('div', {'class' : 'inner input'},
                 nodes['tags'] = cm.node('div', {'class' : 'tags'})
             )
         );
@@ -32378,10 +34082,12 @@ function(params){
         });
         cm.addEvent(nodes['input'], 'focus', function(){
             cm.addClass(nodes['container'], 'active');
+            cm.addClass(nodes['inner'], 'input-focus');
         });
         cm.addEvent(nodes['input'], 'blur', function(){
             addAdderTags(true);
             cm.removeClass(nodes['container'], 'active');
+            cm.removeClass(nodes['inner'], 'input-focus');
         });
     };
 
@@ -33100,14 +34806,14 @@ cm.getConstructor('Com.TwoSideMultiSelect', function(classConstructor, className
         });
     };
 });
-/*! ************ QuickSilk-Application v3.31.2 (2020-03-27 22:31) ************ */
+/*! ************ QuickSilk-Application v3.34.0 (2021-07-07 21:27) ************ */
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: COMMON ******* */
 // /* ************************************************ */
 
 var App = {
-    '_version' : '3.31.2',
+    '_version' : '3.34.0',
     '_assetsUrl' : [window.location.protocol, window.location.hostname].join('//'),
     'Elements': {},
     'Nodes' : {},
@@ -33753,23 +35459,20 @@ App.FlowScenario = [{
 App._Blocks = {};
 
 cm.define('App.Block', {
-    'modules' : [
-        'Params',
-        'Events',
-        'DataNodes',
-        'DataConfig',
-        'Stack'
-    ],
+    'extend' : 'Com.AbstractController',
     'events' : [
-        'onRenderStart',
-        'onRender',
-        'onRedraw',
         'onRemove',
         'enableEditing',
         'disableEditing'
     ],
     'params' : {
-        'node' : cm.node('div'),
+        'renderStructure' : false,
+        'embedStructureOnRender' : false,
+        'removeOnDestruct' : true,
+        'controllerEvents' : true,
+        'customEvents' : false,
+        'resizeEvent' : true,
+        'scrollEvent' : true,
         'type' : 'template-manager',            // template-manager | form-manager | mail
         'instanceId' : false,
         'positionId' : 0,
@@ -33781,6 +35484,8 @@ cm.define('App.Block', {
         'visible' : true,
         'removable' : true,
         'sticky' : false,
+        'animated' : false,
+        'effect' : 'none',                      // https://daneden.github.io/animate.css/
         'editorName' : 'app-editor',
         'templateName' : 'app-template',
         'templateController' : 'Template'
@@ -33788,47 +35493,48 @@ cm.define('App.Block', {
 },
 function(params){
     var that = this;
+    // Call parent class construct in current context
+    Com.AbstractController.apply(that, arguments);
+});
 
-    that.isTemplateRequired = false;
-    that.isDummy = false;
-    that.isRemoved = false;
-    that.isEditing = null;
-    that.styleObject = null;
-    that.dimensions = null;
 
-    that.components = {};
-    that.nodes = {
-        'container' : cm.node('div'),
-        'block' : {
+cm.getConstructor('App.Block', function(classConstructor, className, classProto, classInherit){
+    classProto.onConstructStart = function(){
+        var that = this;
+        // Variables
+        that.nodes = {
             'container' : cm.node('div'),
-            'inner' : cm.node('div'),
-            'drag' : [],
-            'menu' : {
-                'edit' : cm.node('div'),
-                'duplicate' : cm.node('div'),
-                'delete' : cm.node('div')
+            'block' : {
+                'container' : cm.node('div'),
+                'inner' : cm.node('div'),
+                'drag' : [],
+                'menu' : {
+                    'edit' : cm.node('div'),
+                    'duplicate' : cm.node('div'),
+                    'delete' : cm.node('div')
+                }
             }
-        }
+        };
+        that.isTemplateRequired = false;
+        that.isDummy = false;
+        that.isRemoved = false;
+        that.isEditing = null;
+        that.isProcessed = false;
+        that.styleObject = null;
+        that.dimensions = null;
+        that.pageDimensions = {};
+        that.index = null;
+        that.node = null;
+        that.zone = null;
+        that.zones = [];
+        // Binds
+        that.constructZoneHandler = that.constructZone.bind(that);
+        that.animProcessHandler = that.animProcess.bind(that);
     };
-    that.index = null;
-    that.node = null;
-    that.zone = null;
-    that.zones = [];
 
-    var init = function(){
-        that.setParams(params);
-        that.convertEvents(that.params['events']);
-        that.getDataNodes(that.params['node']);
-        that.getDataConfig(that.params['node']);
-        validateParams();
-        that.triggerEvent('onRenderStart');
-        render();
-        that.addToStack(that.params['node']);
-        that.triggerEvent('onRender');
-    };
-
-    var validateParams = function(){
-        var index;
+    classProto.onValidateParamsEnd = function(){
+        var that = this;
+        that.node = that.params['node'];
         // Find parent zone
         if(cm.isNumber(that.params['instanceId']) || cm.isString(that.params['instanceId'])){
             that.params['name'] = [that.params['type'], that.params['instanceId'], that.params['positionId']].join('_');
@@ -33837,76 +35543,89 @@ function(params){
             that.params['name'] = [that.params['type'], that.params['positionId']].join('_');
             that.params['zoneName'] = [that.params['type'], that.params['parentPositionId'], that.params['zone']].join('_');
         }
-        if(index = that.params['node'].getAttribute('data-index')){
+        // Index
+        var index = that.node.getAttribute('data-index');
+        if(!cm.isEmpty(index)){
             that.params['index'] = parseInt(index);
             that.params['node'].removeAttribute('data-index');
         }
         that.index = that.params['index'];
-        // Export
+        // Animation
+        if(that.params['animated']){
+            that.params['animated'] = !(cm.isEmpty(that.params['effect']) || that.params['effect'] === 'none');
+        }
+        // Export to global array
         App._Blocks[that.params['name']] = that;
     };
 
-    var render = function(){
-        that.node = that.params['node'];
+    classProto.onDestructStart = function(){
+        var that = this;
+        // Unset block from zone and editor
+        that.destructZone(that.zone);
+        that.destructEditor(that.components['editor']);
+        while(that.zones.length){
+            that.zones[0].remove();
+        }
+        // Delete from global array
+        delete App._Blocks[that.params['name']];
+    };
+
+    classProto.onSetEvents = function(){
+        var that = this;
+        cm.customEvent.add(that.node, 'redraw', that.redrawHandler);
+    };
+
+    classProto.onUnsetEvents = function(){
+        var that = this;
+        cm.customEvent.remove(that.node, 'redraw', that.redrawHandler);
+    };
+
+    classProto.onRedraw = function(){
+        var that = this;
+        // Update dimensions
+        that.getDimensions();
+        // Editing states
+        if(that.isEditing){
+            that.redrawOnEditing();
+        }else{
+            that.redrawOnNormal();
+        }
+    };
+
+    classProto.onScroll = function(){
+        var that = this;
+        if(!that.isEditing){
+            that.animProcess();
+        }
+    };
+
+    /*** VIEW MODEL ***/
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method - renderViewModel
+        classInherit.prototype.renderViewModel.apply(that, arguments);
         // Process Template
-        getTemplate();
+        that.getTemplate();
         // Process Editor and parent zone
         cm.find('App.Editor', that.params['editorName'], null, function(classObject){
-            new cm.Finder('App.Zone', that.params['zoneName'], null, constructZone);
-            constructEditor(classObject);
+            new cm.Finder('App.Zone', that.params['zoneName'], null, that.constructZoneHandler);
+            that.constructEditor(classObject);
         });
-        // Set events
-        cm.addEvent(window, 'resize', that.redraw);
-        cm.customEvent.add(that.node, 'redraw', that.redraw);
     };
 
-    var constructZone = function(classObject){
-        if(classObject){
-            that.zone = classObject;
-            that.zone.addBlock(that, that.index);
-        }
-    };
+    /*** REDRAW ***/
 
-    var destructZone = function(classObject){
-        if(classObject){
-            that.zone = classObject;
-            that.zone.removeBlock(that);
-            that.zone = null;
-        }
-    };
-
-    var constructEditor = function(classObject){
-        if(classObject){
-            that.components['editor'] = classObject;
-            that.components['editor'].addBlock(that, that.index);
-        }
-    };
-
-    var destructEditor = function(classObject){
-        if(classObject){
-            that.components['editor'] = classObject;
-            that.components['editor'].removeBlock(that);
-        }
-    };
-
-    var getTemplate = function(){
-        if(!that.components['template']){
-            that.components['template']= cm.reducePath(that.params['templateController'], window);
-            if(!that.components['template']){
-                cm.find('App.Template', that.params['templateName'], null, function(classObject){
-                    that.components['template'] = classObject;
-                });
-            }
-        }
-    };
-
-    var redrawOnNormal = function(){
-        var heightIndent, topIndent, bottomIndent;
+    classProto.redrawOnNormal = function(){
+        var that = this,
+            heightIndent,
+            topIndent,
+            bottomIndent;
         // Sticky block
         if(that.params['sticky']){
             cm.addClass(that.node, 'is-sticky');
             // Get template controller
-            getTemplate();
+            that.getTemplate();
             // Calculate
             if(that.components['template']){
                 heightIndent =
@@ -33926,9 +35645,14 @@ function(params){
                 that.nodes['block']['container'].style.maxHeight = heightIndent + 'px';
             }
         }
+        // Animations
+        if(that.params['animated']){
+            that.animEnable();
+        }
     };
 
-    var redrawOnEditing = function(){
+    classProto.redrawOnEditing = function(){
+        var that = this;
         // Sticky block
         if(that.params['sticky']){
             cm.removeClass(that.node, 'is-sticky');
@@ -33937,29 +35661,153 @@ function(params){
             that.node.style.bottom = '';
             that.nodes['block']['container'].style.maxHeight = '';
         }
-    };
-
-    /* ******* PUBLIC ******* */
-
-    that.redraw = function(){
-        // Update dimensions
-        that.getDimensions();
-        // Editing states
-        if(that.isEditing){
-            redrawOnEditing();
-        }else{
-            redrawOnNormal();
+        // Animations
+        if(that.params['animated']){
+            that.animDisable();
         }
     };
 
-    that.register = function(classObject){
-        var zone = App._Zones[that.params['zoneName']];
-        constructZone(zone);
-        constructEditor(classObject);
+    /* ******* ANIMATIONS ******* */
+
+    classProto.animEnable = function(){
+        var that = this;
+        cm.addClass(that.nodes['block']['container'], 'cm-animate');
+        cm.addClass(that.nodes['block']['container'], ['pre', that.params['effect']].join('-'));
+        that.animRestore();
+        that.animProcess();
+        return that;
+    }
+
+    classProto.animDisable = function(){
+        var that = this;
+        cm.removeClass(that.nodes['block']['container'], 'cm-animate');
+        cm.removeClass(that.nodes['block']['container'], ['pre', that.params['effect']].join('-'));
+        cm.removeClass(that.nodes['block']['container'], 'animate__animated');
+        cm.removeClass(that.nodes['block']['container'], ['animate', that.params['effect']].join('__'));
         return that;
     };
 
-    that.enableEditing = function(){
+    classProto.animProcess = function(){
+        var that = this;
+        if(!that.isProcessed){
+            that.getDimensions();
+            that.getPageDimensions();
+            // Rules for different block sizes.
+            if(that.dimensions['offset']['height'] < that.pageDimensions['winHeight']){
+                // Rules for block, which size is smaller than page's.
+                if(
+                    that.dimensions['offset']['top'] >= 0 &&
+                    that.dimensions['offset']['bottom'] <= that.pageDimensions['winHeight']
+                ){
+                    that.animSet();
+                }
+            }else{
+                // Rules for block, which size is larger than page's.
+                if(
+                    (that.dimensions['offset']['top'] < 0 && that.dimensions['bottom'] >= that.pageDimensions['winHeight'] / 2) ||
+                    (that.dimensions['offset']['bottom'] > that.pageDimensions['winHeight'] && that.dimensions['offset']['top'] <= that.pageDimensions['winHeight'] / 2)
+                ){
+                    that.animSet();
+                }
+            }
+        }
+    };
+
+    classProto.animRestore = function(){
+        var that = this;
+        that.isProcessed = false;
+        cm.removeClass(that.nodes['block']['container'], 'animate__animated');
+        cm.removeClass(that.nodes['block']['container'], ['animate', that.params['effect']].join('__'));
+    };
+
+    classProto.animSet = function(){
+        var that = this;
+        that.isProcessed = true;
+        cm.addClass(that.nodes['block']['container'], 'animate__animated');
+        cm.addClass(that.nodes['block']['container'], ['animate', that.params['effect']].join('__'));
+    };
+
+    /*** ZONES ***/
+
+    classProto.addZone = function(item){
+        var that = this;
+        that.zones.push(item);
+        return that;
+    };
+
+    classProto.removeZone = function(zone){
+        var that = this;
+        cm.arrayRemove(that.zones, zone);
+        return that;
+    };
+
+    classProto.setZone = function(zone, index){
+        var that = this;
+        that.index = index;
+        that.destructZone(that.zone);
+        that.constructZone(zone);
+        return that;
+    };
+
+    classProto.unsetZone = function(){
+        var that = this;
+        that.destructZone(that.zone);
+        return that;
+    };
+
+    classProto.constructZone = function(classObject){
+        var that = this;
+        if(classObject){
+            that.zone = classObject;
+            that.zone.addBlock(that, that.index);
+        }
+    };
+
+    classProto.destructZone = function(classObject){
+        var that = this;
+        if(classObject){
+            that.zone = classObject;
+            that.zone.removeBlock(that);
+            that.zone = null;
+        }
+    };
+
+    /*** EDITOR ***/
+
+    classProto.constructEditor = function(classObject){
+        var that = this;
+        if(classObject){
+            that.components['editor'] = classObject;
+            that.components['editor'].addBlock(that, that.index);
+        }
+    };
+
+    classProto.destructEditor = function(classObject){
+        var that = this;
+        if(classObject){
+            that.components['editor'] = classObject;
+            that.components['editor'].removeBlock(that);
+        }
+    };
+
+    /*** TEMPLATE ***/
+
+    classProto.getTemplate = function(){
+        var that = this;
+        if(!that.components['template']){
+            that.components['template']= cm.reducePath(that.params['templateController'], window);
+            if(!that.components['template']){
+                cm.find('App.Template', that.params['templateName'], null, function(classObject){
+                    that.components['template'] = classObject;
+                });
+            }
+        }
+    };
+
+    /*** EDITING ***/
+
+    classProto.enableEditing = function(){
+        var that = this;
         if(!cm.isBoolean(that.isEditing) || !that.isEditing){
             that.isEditing = true;
             cm.addClass(that.node, 'is-editing');
@@ -33983,7 +35831,8 @@ function(params){
         return that;
     };
 
-    that.disableEditing = function(){
+    classProto.disableEditing = function(){
+        var that = this;
         if(!cm.isBoolean(that.isEditing) || that.isEditing){
             that.isEditing = false;
             cm.removeClass(that.node, 'is-editing');
@@ -34009,54 +35858,28 @@ function(params){
         return that;
     };
 
-    that.remove = function(){
+    /******* PUBLIC *******/
+
+    classProto.register = function(classObject){
+        var that = this,
+            zone = App._Zones[that.params['zoneName']];
+        that.constructZone(zone);
+        that.constructEditor(classObject);
+        return that;
+    };
+
+    classProto.remove = function(){
+        var that = this;
         if(!that.isRemoved){
             that.isRemoved = true;
-            // Unset events
-            cm.removeEvent(window, 'resize', that.redraw);
-            cm.customEvent.remove(that.node, 'redraw', that.redraw);
-            // Unset block from zone and editor
-            destructZone(that.zone);
-            destructEditor(that.components['editor']);
-            while(that.zones.length){
-                that.zones[0].remove();
-            }
-            cm.customEvent.trigger(that.node, 'destruct', {
-                'direction' : 'child',
-                'self' : false
-            });
-            // Delete
-            delete App._Blocks[that.params['name']];
-            that.removeFromStack();
-            cm.remove(that.node);
+            that.destruct();
             that.triggerEvent('onRemove');
         }
         return that;
     };
 
-    that.addZone = function(item){
-        that.zones.push(item);
-        return that;
-    };
-
-    that.removeZone = function(zone){
-        cm.arrayRemove(that.zones, zone);
-        return that;
-    };
-
-    that.setZone = function(zone, index){
-        that.index = index;
-        destructZone(that.zone);
-        constructZone(zone);
-        return that;
-    };
-
-    that.unsetZone = function(){
-        destructZone(that.zone);
-        return that;
-    };
-
-    that.getIndex = function(){
+    classProto.getIndex = function(){
+        var that = this;
         if(that.zone){
             that.index = that.zone.getBlockIndex(that);
             return that.index;
@@ -34064,33 +35887,39 @@ function(params){
         return null;
     };
 
-    that.getLower = function(){
-        var index = that.getIndex();
+    classProto.getLower = function(){
+        var that = this,
+            index = that.getIndex();
         return that.zone.getBlock(index + 1) || null;
     };
 
-    that.getUpper = function(){
-        var index = that.getIndex();
+    classProto.getUpper = function(){
+        var that = this,
+            index = that.getIndex();
         return that.zone.getBlock(index - 1) || null;
     };
 
-    that.getDragNodes = function(){
-        var nodes = [];
+    classProto.getDragNodes = function(){
+        var that = this,
+            nodes = [];
         cm.forEach(that.nodes['block']['drag'], function(item){
             nodes.push(item['container']);
         });
         return nodes;
     };
 
-    that.getMenuNodes = function(){
+    classProto.getMenuNodes = function(){
+        var that = this;
         return that.nodes['block']['menu'];
     };
 
-    that.getInnerNode = function(){
+    classProto.getInnerNode = function(){
+        var that = this;
         return that.nodes['block']['inner'];
     };
 
-    that.getDimensions = function(){
+    classProto.getDimensions = function(){
+        var that = this;
         if(!that.styleObject){
             that.styleObject = cm.getStyleObject(that.node);
         }
@@ -34098,13 +35927,19 @@ function(params){
         return that.dimensions;
     };
 
-    that.updateDimensions = function(){
+    classProto.updateDimensions = function(){
+        var that = this;
         that.dimensions = cm.getNodeOffset(that.node, that.styleObject, that.dimensions);
         return that.dimensions;
     };
 
-    init();
+    classProto.getPageDimensions = function(){
+        var that = this;
+        that.pageDimensions = cm.getPageSize();
+        return that.pageDimensions;
+    };
 });
+
 cm.define('App.Chart', {
     'extend' : 'Com.AbstractController',
     'params' : {
@@ -43225,14 +45060,7 @@ function(params){
     App.AbstractModuleElement.apply(that, arguments);
 });
 
-cm.getConstructor('Mod.ElementCheckbox', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
-    classProto.validateValue = function(){
-        var that = this;
-        return that.get();
-    };
-
+cm.getConstructor('Mod.ElementCheckbox', function(classConstructor, className, classProto, classInherit){
     classProto.get = function(){
         var that = this;
         return that.nodes['input'].checked;
@@ -43280,9 +45108,7 @@ function(params){
     App.AbstractModuleElement.apply(that, arguments);
 });
 
-cm.getConstructor('Mod.ElementMultiCheckbox', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Mod.ElementMultiCheckbox', function(classConstructor, className, classProto, classInherit){
     classProto.getMultiple = function(){
         var that = this,
             values = [];
@@ -43363,9 +45189,7 @@ function(params){
     App.AbstractModuleElement.apply(that, arguments);
 });
 
-cm.getConstructor('Mod.ElementRadioButton', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Mod.ElementRadioButton', function(classConstructor, className, classProto, classInherit){
     classProto.getMultiple = function(){
         var that = this,
             value = '';
@@ -43384,6 +45208,80 @@ cm.getConstructor('Mod.ElementRadioButton', function(classConstructor, className
         });
     };
 });
+cm.define('Mod.ElementReCaptcha', {
+    'extend' : 'App.AbstractModuleElement',
+    'params' : {
+        'memorable' : false,
+        'validate' : false,
+        'sitekey' : null
+    }
+},
+function(params){
+    var that = this;
+    // Call parent class construct
+    App.AbstractModuleElement.apply(that, arguments);
+});
+
+cm.getConstructor('Mod.ElementReCaptcha', function(classConstructor, className, classProto, classInherit){
+    classProto.construct = function(){
+        var that = this;
+        // Variables
+        that.value = '';
+        // Call parent method
+        classInherit.prototype.construct.apply(that, arguments);
+    };
+
+    classProto.renderViewModel = function(){
+        var that = this;
+        // Call parent method
+        classInherit.prototype.renderViewModel.apply(that, arguments);
+        // Init recaptcha
+        that.nodes['input'] = that.nodes['field'].querySelector('.g-recaptcha');
+        that.params['sitekey'] = that.nodes['input'].getAttribute('data-sitekey');
+        /*
+        if('grecaptcha' in window){
+            that.setCaptchaComponent(window.grecaptcha);
+        }
+        */
+    };
+
+    classProto.set = function(value){
+        var that = this;
+        that.value = value;
+        return that;
+    };
+
+    classProto.get = function(){
+        var that = this,
+            value;
+        if(that.components['captcha']){
+            value = that.components['captcha'].getResponse(that._widgetId);
+        }else{
+            value = that.value;
+        }
+        return value;
+    };
+
+    classProto.setCaptchaComponent = function(recaptcha){
+        var that = this;
+        if(typeof recaptcha !== 'undefined'){
+            that.components['captcha'] = recaptcha;
+            that.components['captcha'].ready(function(){
+                try{
+                    that._widgetId = that.components['captcha'].render(that.nodes['input'], {'sitekey': that.params['sitekey']});
+                }catch(e){
+                    cm.errorLog({
+                        'name' : that._name['full'],
+                        'type' : 'attention',
+                        'message' : e
+                    });
+                }
+            });
+        }
+        return that;
+    };
+});
+
 cm.define('Mod.ElementSelect', {
     'extend' : 'App.AbstractModuleElement',
     'params' : {
@@ -43436,6 +45334,10 @@ cm.define('Mod.ElementWizard', {
         'onValidate'
     ],
     'params' : {
+        'scrollNode' : 'document.body',
+        'scrollDuration' : 'cm._config.animDurationLong',
+        'topMenuName' : 'app-topmenu',
+        'templateName' : 'app-template',
         'duration' : 'cm._config.animDuration',
         'delay' : 'cm._config.hideDelay',
         'active' : null,
@@ -43453,9 +45355,7 @@ function(params){
     App.AbstractModule.apply(that, arguments);
 });
 
-cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, classProto){
-    var _inherit = classProto._inherit;
-
+cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, classProto, classInherit){
     classProto.onConstructStart = function(){
         var that = this;
         // Variables
@@ -43492,6 +45392,18 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
 
     classProto.renderViewModel = function(){
         var that = this;
+        // Init scroll
+        that.components['scroll'] = new cm.Animation(that.params['scrollNode']);
+        // Get TopMenu
+        new cm.Finder('App.TopMenu', that.params['topMenuName'], null, function(classObject){
+            that.components['topMenu'] = classObject;
+            that.topMenuParams = that.components['topMenu'].getParams();
+        });
+        // Get Template
+        new cm.Finder('App.Template', that.params['templateName'], null, function(classObject){
+            that.components['template'] = classObject;
+            that.templateParams = that.components['template'].getParams();
+        });
         // Process Tabset
         that.processTabset();
         that.processTabs();
@@ -43633,6 +45545,7 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         if(that.validateTab() && that.currentTab['index'] > 0){
             var index = that.currentTab['index'] - 1;
             that.setTabByIndex(index);
+            that.scrollToTop();
         }
     };
 
@@ -43642,6 +45555,7 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         if(that.validateTab() && that.currentTab['index'] < that.tabsCount - 1){
             var index = that.currentTab['index'] + 1;
             that.setTabByIndex(index);
+            that.scrollToTop();
         }
     };
 
@@ -43692,6 +45606,7 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         cm.forEach(that.tabs, function(item){
             if(isValid && !that.validateTab(item)){
                 that.setTabByIndex(item['index']);
+                that.scrollToTop();
                 isValid = false;
             }
         });
@@ -43700,7 +45615,33 @@ cm.getConstructor('Mod.ElementWizard', function(classConstructor, className, cla
         });
         return isValid;
     };
+
+    classProto.scrollToTop = function(){
+        var that = this,
+            rect = cm.getOffsetRect(that.nodes['container']),
+            page = cm.getRect(window),
+            expectedTop = rect.offset.top - 16,
+            inRange;
+        // Add top menu gape
+        if(that.components['topMenu']){
+            page.top += that.components['topMenu'].getDimensions('height');
+            expectedTop -= that.components['topMenu'].getDimensions('height');
+        }
+        // Add template's fixed header gape
+        if(that.components['template'] && that.templateParams['header']['fixed']){
+            page.top += that.components['template'].getHeaderDimensions('height');
+            expectedTop -= that.components['template'].getHeaderDimensions('height');
+        }
+        // Check range
+        inRange = rect.top > page.top && rect.top < page.bottom;
+        expectedTop = Math.max(expectedTop, 0);
+        if(!inRange){
+            that.components['scroll'].go({'style' : {'docScrollTop' : expectedTop}, 'duration' : that.params['scrollDuration'], 'anim' : 'smooth'});
+        }
+        return that;
+    };
 });
+
 cm.define('Mod.ElementWysiwyg', {
     'extend' : 'App.AbstractModuleElement',
     'params' : {
@@ -43747,34 +45688,45 @@ cm.getConstructor('Module.FlipCards', function(classConstructor, className, clas
     classProto.onEnableEditing = function(){
         var that = this;
         cm.removeClass(that.nodes.container, ['effect', that.params.effect].join('--'));
+        if(cm.hasPointerEvent){
+            cm.removeEvent(that.nodes.container, 'pointerover', that.onPointerOverHandler);
+            cm.removeEvent(that.nodes.container, 'pointerout', that.onPointerOutHandler);
+            cm.removeEvent(document.body, 'pointerdown', that.onBodyClickHandler);
+        }else{
+            cm.removeEvent(that.nodes.container, 'mouseover', that.onPointerOverHandler);
+            cm.removeEvent(that.nodes.container, 'mouseout', that.onPointerOutHandler);
+        }
     };
 
     classProto.onDisableEditing = function(){
         var that = this;
         cm.addClass(that.nodes.container, ['effect', that.params.effect].join('--'));
+        if(cm.hasPointerEvent){
+            cm.addEvent(that.nodes.container, 'pointerover', that.onPointerOverHandler);
+            cm.addEvent(that.nodes.container, 'pointerout', that.onPointerOutHandler);
+            cm.addEvent(document.body, 'pointerdown', that.onBodyClickHandler);
+        }else{
+            cm.addEvent(that.nodes.container, 'mouseover', that.onPointerOverHandler);
+            cm.addEvent(that.nodes.container, 'mouseout', that.onPointerOutHandler);
+        }
     };
 
     classProto.renderViewModel = function(){
         var that = this;
-        // Call parent method - renderViewModel
-        classInherit.prototype.renderViewModel.apply(that, arguments);
-        // View
-        cm.addEvent(that.nodes.container, 'pointerover', that.onPointerOverHandler);
-        cm.addEvent(that.nodes.container, 'pointerout', that.onPointerOutHandler);
-        cm.addEvent(that.nodes.container, 'mouseover', that.onPointerOverHandler);
-        cm.addEvent(that.nodes.container, 'mouseout', that.onPointerOutHandler);
-        cm.addEvent(document.body, 'pointerdown', that.onBodyClickHandler);
+        if(that.params['isEditing']){
+            that.enableEditing();
+        }else{
+            that.disableEditing();
+        }
+        that.triggerEvent('onRenderViewModel');
     };
 
     classProto.onPointerOver = function(e){
         var that = this;
         cm.preventDefault(e);
-        if(e.type === 'pointerover'){
-            cm.removeEvent(that.nodes.container, 'mouseover', that.onPointerOverHandler);
-        }
         var target = cm.getEventTarget(e);
         if(cm.isParent(that.nodes.container, target, true)){
-            if(e.pointerType === 'mouse'){
+            if(cm.isUndefined(e.pointerType) || e.pointerType === 'mouse'){
                 that.show();
             }else{
                 that.toggle();
@@ -43785,10 +45737,7 @@ cm.getConstructor('Module.FlipCards', function(classConstructor, className, clas
     classProto.onPointerOut = function(e){
         var that = this;
         cm.preventDefault(e);
-        if(e.type === 'pointerout'){
-            cm.removeEvent(that.nodes.container, 'mouseout', that.onPointerOutHandler);
-        }
-        if(e.pointerType === 'mouse'){
+        if(cm.isUndefined(e.pointerType) || e.pointerType === 'mouse'){
             var target = cm.getRelatedTarget(e);
             if(!cm.isParent(that.nodes.container, target, true)){
                 that.hide();
@@ -43798,11 +45747,9 @@ cm.getConstructor('Module.FlipCards', function(classConstructor, className, clas
 
     classProto.onBodyClick = function(e){
         var that = this;
-        if(e.pointerType !== 'mouse'){
-            var target = cm.getEventTarget(e);
-            if(!cm.isParent(that.nodes.container, target, true)){
-                that.hide();
-            }
+        var target = cm.getEventTarget(e);
+        if(!cm.isParent(that.nodes.container, target, true)){
+            that.hide();
         }
     };
 
@@ -45183,7 +47130,7 @@ function(params){
 
     init();
 });
-window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.38.2","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmIconIA-Spinner-BorderSize":"3px","CmIconIA-Spinner-DefaultBackground":"#e8e8e8","CmIconIA-Spinner-ActiveBackground":"#2985e0","CmVersion":"3.38.2","CmProtocol":"","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXXSmall":"2px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXXSmall":"2px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationMedium":"150ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-MediumWeight":500,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"11px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"11px","CmFont-Base-Hint-Color":"#999999","CmFont-Placeholder-Size":"inherit","CmFont-Placeholder-SizeSmall":"11px","CmFont-Placeholder-Style":"inherit","CmFont-Placeholder-Color":"#b7b7b7","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"13px","CmFont-UI-SizeSmall":"11px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"8px","CmScrollBar-Radius":"3px","CmScrollBar-TrackBackground":"rgba(250, 250, 250, 0.5)","CmScrollBar-ThumbColor":"#dbdbdb","CmScrollBar-ThumbColorHover":"#cccccc","CmScrollBar-Light-ThumbColor":"#f6fafd","CmScrollBar-Light-ThumbColorHover":"#e9f2fb","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBox-Padding":"4px","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-Item-Color":"#666666","PtMenu-Item-HoverColor":"#1d73c9","PtMenu-Item-ActiveColor":"#16599c","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-Color":"#ffffff","PtImage-Padding":"8px","PtImage-TitlePaddingTop":"4px","PtImage-ButtonsIndent":"8px","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-AdaptiveFrom":"768px","PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":"24px","PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Active":"#e8e8e8","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-WindowDuration":"500ms","ComDialog-Indent":"24px","ComDialog-Radius":"3px","ComDialog-TitleIndent":"12px","ComDialog-IconSize":"24px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Compact-Indent":"12px","ComDialog-Compact-TitleHeight":"32px","ComDialog-Compact-TitleIndent":"12px","ComDialog-Compact-IconSize":"32px","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Content-Padding":"24px","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.31.2","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-CircleNote":"\\e707","AppIcon-CircleUndo":"\\e708","AppIcon-CircleRedo":"\\e709","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Names":["default","anchor","button","column","menu","divider","spacer","zone","workingarea","content","logo","googlemap","tabs","search","blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","image","imagegallery","slider","videogallery","forum","forum_build","comment","twitter","socialmedia","socialmedia_rating","socialmedia_share","login","registration","memberdirectory","memberwidget","filegridlist","filegridlistwidget","webexmeetings","events","eventscalendar","latestevents","flickr","languageswitcher","d3","rss","breadcrumb","breadcrumbs","form_builder","rollover-tabs","mobile-menu"],"AppIcon-Block-default":0,"AppIcon-Block-anchor":1,"AppIcon-Block-column":2,"AppIcon-Block-menu":3,"AppIcon-Block-divider":4,"AppIcon-Block-spacer":5,"AppIcon-Block-zone":6,"AppIcon-Block-workingarea":6,"AppIcon-Block-content":7,"AppIcon-Block-logo":8,"AppIcon-Block-googlemap":9,"AppIcon-Block-tabs":10,"AppIcon-Block-search":11,"AppIcon-Block-blogcontent":12,"AppIcon-Block-blogcategories":13,"AppIcon-Block-blogroll":14,"AppIcon-Block-blogblock":15,"AppIcon-Block-blogarchive":16,"AppIcon-Block-blogcalendar":17,"AppIcon-Block-image":18,"AppIcon-Block-imagegallery":19,"AppIcon-Block-slider":20,"AppIcon-Block-videogallery":21,"AppIcon-Block-forum":22,"AppIcon-Block-forum_build":23,"AppIcon-Block-comment":24,"AppIcon-Block-twitter":25,"AppIcon-Block-socialmedia":26,"AppIcon-Block-socialmedia_rating":26,"AppIcon-Block-socialmedia_share":26,"AppIcon-Block-login":27,"AppIcon-Block-registration":28,"AppIcon-Block-memberdirectory":29,"AppIcon-Block-memberwidget":30,"AppIcon-Block-filegridlist":31,"AppIcon-Block-filegridlistwidget":32,"AppIcon-Block-webexmeetings":33,"AppIcon-Block-events":34,"AppIcon-Block-eventscalendar":35,"AppIcon-Block-latestevents":36,"AppIcon-Block-flickr":37,"AppIcon-Block-languageswitcher":38,"AppIcon-Block-d3":39,"AppIcon-Block-rss":40,"AppIcon-Block-breadcrumb":41,"AppIcon-Block-breadcrumbs":41,"AppIcon-Block-button":42,"AppIcon-Block-form_builder":56,"AppIcon-Block-rollover-tabs":57,"AppIcon-Block-mobile-menu":3,"AppIcon-Block-Element-Names":["button","column","content","divider","spacer","input","text","password","hidden","select","checkbox","radiobutton","textarea","wysiwyg","multicheckbox","captcha","imagebrowser","fileuploader","datepicker","timepicker"],"AppIcon-Block-Element-button":42,"AppIcon-Block-Element-column":2,"AppIcon-Block-Element-content":7,"AppIcon-Block-Element-divider":4,"AppIcon-Block-Element-spacer":5,"AppIcon-Block-Element-input":43,"AppIcon-Block-Element-text":43,"AppIcon-Block-Element-password":44,"AppIcon-Block-Element-hidden":45,"AppIcon-Block-Element-select":46,"AppIcon-Block-Element-checkbox":47,"AppIcon-Block-Element-radiobutton":48,"AppIcon-Block-Element-multicheckbox":49,"AppIcon-Block-Element-textarea":50,"AppIcon-Block-Element-wysiwyg":51,"AppIcon-Block-Element-captcha":52,"AppIcon-Block-Element-imagebrowser":53,"AppIcon-Block-Element-fileuploader":53,"AppIcon-Block-Element-timepicker":54,"AppIcon-Block-Element-datepicker":55,"AppVersion":"3.31.2","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-QuickSilkRed":"#ff6662","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppTopMenu-Dropdown-Duration":"50ms","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Color":"#ffffff","AppSidebar-Background":"#2985e0","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ColorNormal":"#ffffff","AppBlock-Dummy-ColorHover":"#ffffff","AppBlock-Dummy-ColorActive":"#666666","AppBlock-Dummy-BackgroundNormal":"trannsparent","AppBlock-Dummy-BackgroundHover":"trannsparent","AppBlock-Dummy-BackgroundActive":"#ffffff","AppBlock-Dummy-IconBackgroundNormal":"transparent","AppBlock-Dummy-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-IconBackgroundActive":"#2985e0","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"11px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Languages-Indent":"12px","AppMod-Menu-Languages-ImageSize":"24px","AppMod-Menu-Languages-SelectSize":"32px","AppMod-Menu-Languages-SelectColor":"#666666","AppMod-Menu-Languages-SelectBackground":"#f2f2f2","AppMod-Menu-Languages-SeparatorWidth":"1px","AppMod-Menu-Languages-SeparatorHeight":"12px","AppMod-Menu-Languages-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-MobileMenu-AdaptiveFrom":"768px","AppMod-MobileMenu-Overlay":"rgba(255, 255, 255, 0.7)","AppMod-MobileMenu-Duration":"500ms","AppMod-MobileMenu-Background":"#ffffff","AppMod-MobileMenu-Sidebar-Width":"480px","AppMod-MobileMenu-Sidebar-IconIndent":"12px","AppMod-MobileMenu-Dropdown-Indent":"4px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModCart-LabelIndent":"8px","ModCart-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","ModCalendar-BorderWidth":"1px","ModCalendar-BorderColor":"#cccccc","ModCalendar-Border":["1px","solid","#cccccc"],"ModCalendar-Background":"#ffffff","ModCalendarEvent-TooltipWidth":"320px","ModCalendarEvent-Padding":"4px","ModCalendarEvent-LineHeight":"18px","ModCalendarEvent-Short-Indent":"1px","ModCalendarEvent-Short-Height":"20px","ModCalendarEvent-Long-Indent":"12px","ModCalendarTable-Border":["1px","solid","#cccccc"],"ModCalendarTable-Default-Background":"#ffffff","ModCalendarTable-Default-BackgroundHover":"#f2f2f2","ModCalendarTable-Inactive-Background":"#ffffff","ModCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ModCalendarTable-Weekend-Background":"#e8e8e8","ModCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ModCalendarTable-Today-Background":"#f6fafd","ModCalendarTable-Today-BackgroundHover":"#e9f2fb","ModCalendarTable-Active-Background":"#d8e8f8","ModCalendarTable-Active-BackgroundHover":"#c2dbf4","ModCalendarAgenda-Day-Indent":"24px","ModCalendarAgenda-Day-Padding":"12px","ModCalendarAgenda-Day-Width":"72px","ModCalendarWeek-Day-Indent":"4px","ModCalendarWeek-Item-Height":"20px","ModCalendarMonth-Item-Count":3,"ModCalendarMonth-Item-LineHeight":"18px","ModCalendarMonth-Item-Height":"20px","ModCalendarMonth-Item-Indent":"1px","ModCalendarMonth-Day-Indent":"4px","ModCalendarMonth-Day-Items":5,"ModCalendarMonth-Day-Height":"104px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts","AppSidebar-Theme":"Dark"};
+window.LESS = {"CmIconVars-Family":"Magpie-UI-Glyphs","CmIconVars-Color":"#666666","CmIconVars-Version":"3.40.0","CmIcon-Magnify":"\\e600","CmIcon-Reduce":"\\e601","CmIcon-CircleArrowLeft":"\\e700","CmIcon-CircleArrowRight":"\\e701","CmIcon-CircleArrowUp":"\\e702","CmIcon-CircleArrowDown":"\\e703","CmIcon-CircleClose":"\\e704","CmIcon-CircleTwitter":"\\e800","CmIcon-CircleInstagram":"\\e801","CmIcon-CircleYoutube":"\\e802","CmIcon-CircleVK":"\\e803","CmIcon-CircleFacebook":"\\e804","CmIcon-ChevronDown":"\\e900","CmIcon-ChevronUp":"\\e901","CmIcon-ChevronLeft":"\\e902","CmIcon-ChevronRight":"\\e903","CmIconIA-Spinner-BorderSize":"3px","CmIconIA-Spinner-DefaultBackground":"#e8e8e8","CmIconIA-Spinner-ActiveBackground":"#2985e0","CmVersion":"3.40.0","CmProtocol":"","CmPath-Images":"../img/MagpieUI","CmPath-Fonts":"../fonts/MagpieUI","CmScreen-Mobile":"640px","CmScreen-MobilePortrait":"480px","CmScreen-Tablet":"1024px","CmScreen-TabletPortrait":"768px","CmSize-None":"0px","CmSize-XXXXSmall":"2px","CmSize-XXXSmall":"4px","CmSize-XXSmall":"8px","CmSize-XSmall":"12px","CmSize-Small":"16px","CmSize-Medium":"24px","CmSize-Large":"32px","CmSize-XLarge":"48px","CmSize-XXLarge":"64px","CmSize-XXXLarge":"96px","CmIndent-None":"0px","CmIndent-XXXXSmall":"2px","CmIndent-XXXSmall":"4px","CmIndent-XXSmall":"8px","CmIndent-XSmall":"12px","CmIndent-Small":"16px","CmIndent-Medium":"24px","CmIndent-Large":"32px","CmIndent-XLarge":"48px","CmIndent-XXLarge":"64px","CmIndent-XXXLarge":"96px","CmIndents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"CmUI-Transition-Duration":"250ms","CmUI-Transition-DurationMedium":"150ms","CmUI-Transition-DurationShort":"100ms","CmUI-Transition-DurationLong":"500ms","CmUI-Transition-DurationXLong":"750ms","CmUI-Transition-DurationXXLong":"1000ms","CmUI-Transition-DurationReverse":"100ms","CmUI-Transition-DurationNone":"0ms","CmUI-Transition-Delay-Hide":"300ms","CmUI-MotionAsymmetric":"cubic-bezier(0.5, 0, 0.15, 1)","CmUI-Opacity-Hover":0.7,"CmUI-Shadow":[0,0,"8px","rgba(0, 0, 0, 0.15)"],"CmUI-ShadowLight":[0,0,"2px","rgba(0, 0, 0, 0.2)"],"CmUI-ShadowInner":[0,"2px","2px","rgba(0, 0, 0, 0.4)","inset"],"CmUI-Shadow-Bottom":[0,"2px","5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-BottomLarge":[0,"2px","12px","rgba(0, 0, 0, 0.2)"],"CmUI-Shadow-BottomSmall":[0,"1px","2px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Right":["2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Left":["-2px",0,"5px","rgba(0, 0, 0, 0.15)"],"CmUI-Shadow-Card":[0,"1px","2px","rgba(0, 0, 0, 0.25)"],"CmUI-Overlay":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Fade":0.7,"CmUI-Overlay-FadeMedium":0.3,"CmUI-Overlay-FadeP":"70%","CmUI-Overlay-FadeMediumP":"30%","CmUI-Overlay-Dark":"rgba(0, 0, 0, 0.7)","CmUI-Overlay-Light":"rgba(255, 255, 255, 0.7)","CmUI-Overlay-Duration":"500ms","CmUI-AdaptiveFrom":"768px","CmUI-TooltipWidth":"320px","CmUI-ColumnIndent":"24px","CmUI-BoxIndent":"24px","CmUI-GoogleFont":"Quicksand","CmUI-GoogleFont-Weight":"300, 400, 500, 700","CmVar-Color-LightDefault-Lightness":"100%","CmVar-Color-LightHighlight-Lightness":"98%","CmVar-Color-LightHover-Lightness":"95%","CmVar-Color-LightActive-Lightness":"91%","CmVar-Color-LightActiveHover-Lightness":"86%","CmVar-Color-MiddleDefault-Lightness":"80%","CmVar-Color-MiddleHover-Lightness":"75%","CmVar-Color-MiddleActive-Lightness":"70%","CmVar-Color-MiddleActiveHover-Lightness":"65%","CmVar-Color-DarkDefault-Lightness":"52%","CmVar-Color-DarkHover-Lightness":"45%","CmVar-Color-DarkActive-Lightness":"35%","CmVar-Color-DarkActiveHover-Lightness":"25%","CmColor-Primary":210,"CmColor-Primary-DarkSaturation":"75%","CmColor-Primary-DarkLighten":"0%","CmColor-Primary-DarkDefault-Lightness":"52%","CmColor-Primary-DarkHover-Lightness":"45%","CmColor-Primary-DarkActive-Lightness":"35%","CmColor-Primary-DarkActiveHover-Lightness":"25%","CmColor-Primary-DarkDefault":"#2985e0","CmColor-Primary-DarkHover":"#1d73c9","CmColor-Primary-DarkActive":"#16599c","CmColor-Primary-DarkActiveHover":"#104070","CmColor-Primary-MiddleSaturation":"75%","CmColor-Primary-MiddleLighten":"0%","CmColor-Primary-MiddleDefault-Lightness":"80%","CmColor-Primary-MiddleHover-Lightness":"75%","CmColor-Primary-MiddleActive-Lightness":"70%","CmColor-Primary-MiddleActiveHover-Lightness":"65%","CmColor-Primary-MiddleDefault":"#a6ccf2","CmColor-Primary-MiddleHover":"#8fbfef","CmColor-Primary-MiddleActive":"#79b2ec","CmColor-Primary-MiddleActiveHover":"#63a6e9","CmColor-Primary-LightSaturation":"70%","CmColor-Primary-LightLighten":"0%","CmColor-Primary-LightHighlight-Lightness":"98%","CmColor-Primary-LightHover-Lightness":"95%","CmColor-Primary-LightActive-Lightness":"91%","CmColor-Primary-LightActiveHover-Lightness":"86%","CmColor-Primary-LightDefault":"transparent","CmColor-Primary-LightHighlight":"#f6fafd","CmColor-Primary-LightHover":"#e9f2fb","CmColor-Primary-LightActive":"#d8e8f8","CmColor-Primary-LightActiveHover":"#c2dbf4","CmColor-Secondary":0,"CmColor-Secondary-DarkSaturation":"0%","CmColor-Secondary-DarkLighten":"0%","CmColor-Secondary-DarkDefault-Lightness":"52%","CmColor-Secondary-DarkHover-Lightness":"45%","CmColor-Secondary-DarkActive-Lightness":"35%","CmColor-Secondary-DarkActiveHover-Lightness":"25%","CmColor-Secondary-DarkDefault":"#858585","CmColor-Secondary-DarkHover":"#737373","CmColor-Secondary-DarkActive":"#595959","CmColor-Secondary-DarkActiveHover":"#404040","CmColor-Secondary-MiddleSaturation":"0%","CmColor-Secondary-MiddleLighten":"0%","CmColor-Secondary-MiddleDefault-Lightness":"80%","CmColor-Secondary-MiddleHover-Lightness":"75%","CmColor-Secondary-MiddleActive-Lightness":"70%","CmColor-Secondary-MiddleActiveHover-Lightness":"65%","CmColor-Secondary-MiddleDefault":"#cccccc","CmColor-Secondary-MiddleHover":"#bfbfbf","CmColor-Secondary-MiddleActive":"#b3b3b3","CmColor-Secondary-MiddleActiveHover":"#a6a6a6","CmColor-Secondary-LightSaturation":"0%","CmColor-Secondary-LightLighten":"0%","CmColor-Secondary-LightHighlight-Lightness":"98%","CmColor-Secondary-LightHover-Lightness":"95%","CmColor-Secondary-LightActive-Lightness":"91%","CmColor-Secondary-LightActiveHover-Lightness":"86%","CmColor-Secondary-LightDefault":"transparent","CmColor-Secondary-LightHighlight":"#fafafa","CmColor-Secondary-LightHover":"#f2f2f2","CmColor-Secondary-LightActive":"#e8e8e8","CmColor-Secondary-LightActiveHover":"#dbdbdb","CmColor-Success":120,"CmColor-Success-DarkSaturation":"65%","CmColor-Success-DarkLighten":"-10%","CmColor-Success-DarkDefault-Lightness":"52%","CmColor-Success-DarkHover-Lightness":"45%","CmColor-Success-DarkActive-Lightness":"35%","CmColor-Success-DarkActiveHover-Lightness":"25%","CmColor-Success-DarkDefault":"#25b125","CmColor-Success-DarkHover":"#1f931f","CmColor-Success-DarkActive":"#166916","CmColor-Success-DarkActiveHover":"#0d3f0d","CmColor-Success-MiddleSaturation":"65%","CmColor-Success-MiddleLighten":"0%","CmColor-Success-MiddleDefault-Lightness":"80%","CmColor-Success-MiddleHover-Lightness":"75%","CmColor-Success-MiddleActive-Lightness":"70%","CmColor-Success-MiddleActiveHover-Lightness":"65%","CmColor-Success-MiddleDefault":"#abedab","CmColor-Success-MiddleHover":"#96e996","CmColor-Success-MiddleActive":"#81e481","CmColor-Success-MiddleActiveHover":"#6ce06c","CmColor-Success-LightSaturation":"60%","CmColor-Success-LightLighten":"0%","CmColor-Success-LightHighlight-Lightness":"98%","CmColor-Success-LightHover-Lightness":"95%","CmColor-Success-LightActive-Lightness":"91%","CmColor-Success-LightActiveHover-Lightness":"86%","CmColor-Success-LightDefault":"transparent","CmColor-Success-LightHighlight":"#f7fdf7","CmColor-Success-LightHover":"#ebfaeb","CmColor-Success-LightActive":"#daf6da","CmColor-Success-LightActiveHover":"#c6f1c6","CmColor-Danger":0,"CmColor-Danger-DarkSaturation":"65%","CmColor-Danger-DarkLighten":"0%","CmColor-Danger-DarkDefault-Lightness":"52%","CmColor-Danger-DarkHover-Lightness":"45%","CmColor-Danger-DarkActive-Lightness":"35%","CmColor-Danger-DarkActiveHover-Lightness":"25%","CmColor-Danger-DarkDefault":"#d43535","CmColor-Danger-DarkHover":"#bd2828","CmColor-Danger-DarkActive":"#931f1f","CmColor-Danger-DarkActiveHover":"#691616","CmColor-Danger-MiddleSaturation":"65%","CmColor-Danger-MiddleLighten":"0%","CmColor-Danger-MiddleDefault-Lightness":"80%","CmColor-Danger-MiddleHover-Lightness":"75%","CmColor-Danger-MiddleActive-Lightness":"70%","CmColor-Danger-MiddleActiveHover-Lightness":"65%","CmColor-Danger-MiddleDefault":"#edabab","CmColor-Danger-MiddleHover":"#e99696","CmColor-Danger-MiddleActive":"#e48181","CmColor-Danger-MiddleActiveHover":"#e06c6c","CmColor-Danger-LightSaturation":"65%","CmColor-Danger-LightLighten":"0%","CmColor-Danger-LightHighlight-Lightness":"98%","CmColor-Danger-LightHover-Lightness":"95%","CmColor-Danger-LightActive-Lightness":"91%","CmColor-Danger-LightActiveHover-Lightness":"86%","CmColor-Danger-LightDefault":"transparent","CmColor-Danger-LightHighlight":"#fdf7f7","CmColor-Danger-LightHover":"#fbeaea","CmColor-Danger-LightActive":"#f7d9d9","CmColor-Danger-LightActiveHover":"#f3c4c4","CmColor-Warning":38,"CmColor-Warning-DarkSaturation":"75%","CmColor-Warning-DarkLighten":"0%","CmColor-Warning-DarkDefault-Lightness":"52%","CmColor-Warning-DarkHover-Lightness":"45%","CmColor-Warning-DarkActive-Lightness":"35%","CmColor-Warning-DarkActiveHover-Lightness":"25%","CmColor-Warning-DarkDefault":"#e09d29","CmColor-Warning-DarkHover":"#c98a1d","CmColor-Warning-DarkActive":"#9c6b16","CmColor-Warning-DarkActiveHover":"#704d10","CmColor-Warning-MiddleSaturation":"70%","CmColor-Warning-MiddleLighten":"0%","CmColor-Warning-MiddleDefault-Lightness":"80%","CmColor-Warning-MiddleHover-Lightness":"75%","CmColor-Warning-MiddleActive-Lightness":"70%","CmColor-Warning-MiddleActiveHover-Lightness":"65%","CmColor-Warning-MiddleDefault":"#f0d6a8","CmColor-Warning-MiddleHover":"#eccb93","CmColor-Warning-MiddleActive":"#e8c17d","CmColor-Warning-MiddleActiveHover":"#e4b667","CmColor-Warning-LightSaturation":"70%","CmColor-Warning-LightLighten":"0%","CmColor-Warning-LightHighlight-Lightness":"98%","CmColor-Warning-LightHover-Lightness":"95%","CmColor-Warning-LightActive-Lightness":"91%","CmColor-Warning-LightActiveHover-Lightness":"86%","CmColor-Warning-LightDefault":"transparent","CmColor-Warning-LightHighlight":"#fdfbf6","CmColor-Warning-LightHover":"#fbf5e9","CmColor-Warning-LightActive":"#f8ecd8","CmColor-Warning-LightActiveHover":"#f4e2c2","CmColor-Font":"#666666","CmColor-Font-Opposite":"#ffffff","CmColor-Font-Hint":"#999999","CmColor-Font-Disabled":"#999999","CmColor-Font-Placeholder":"#b7b7b7","CmColor-Font-Link":"#1d73c9","CmColor-Font-LinkHover":"#1d73c9","CmColor-Font-LinkActive":"#16599c","CmColor-Background":"#ffffff","CmColor-Icon":"#666666","CmColor-Mark":"#fdf6ad","CmColor-Gallery":"#111111","CmColor-Border":"#cccccc","CmColor-BorderHover":"#a6a6a6","CmColor-BorderSelected":"#a6ccf2","CmColor-BorderActive":"#2985e0","CmColor-BorderDisabled":"#e8e8e8","CmFont-Base-LightWeight":300,"CmFont-Base-NormalWeight":400,"CmFont-Base-MediumWeight":500,"CmFont-Base-BoldWeight":600,"CmFont-Base-LineHeight":"18px","CmFont-Base-LineHeightSmall":"18px","CmFont-Base-Family":"Quicksand, sans-serif","CmFont-Base-Size":"13px","CmFont-Base-SizeSmall":"12px","CmFont-Base-Weight":400,"CmFont-Base-Color":"#666666","CmFont-Base-ColorOpposite":"#ffffff","CmFont-Base-Hint-Size":"12px","CmFont-Base-Hint-Color":"#999999","CmFont-Placeholder-Size":"inherit","CmFont-Placeholder-SizeSmall":"12px","CmFont-Placeholder-Style":"inherit","CmFont-Placeholder-Color":"#b7b7b7","CmFont-UI-LightWeight":300,"CmFont-UI-NormalWeight":400,"CmFont-UI-BoldWeight":600,"CmFont-UI-LineHeight":"18px","CmFont-UI-Size":"14px","CmFont-UI-SizeSmall":"12px","CmFont-UI-Family":"Quicksand, sans-serif","CmFont-UI-Weight":400,"CmFont-UI-Color":"#666666","CmFont-UI-ColorOpposite":"#ffffff","CmFont-UI-H1-LineHeight":"32px","CmFont-UI-H1-Size":"24px","CmFont-UI-H1-Weight":300,"CmFont-UI-H1-Color":"#666666","CmFont-UI-H4-LineHeight":"24px","CmFont-UI-H4-Size":"16px","CmFont-UI-H4-Weight":300,"CmFont-UI-H4-Color":"#666666","CmBorder-Radius":"3px","CmBorder-Width":"1px","CmBorder-Style":"solid","CmBorder-BoxWidth":"2px","CmBorder-TemporaryWidth":"2px","CmBorder-Default":["1px","solid","#cccccc"],"CmBorder-Separator":["1px","dotted","#cccccc"],"CmBorder-Editable":["1px","dashed","#2985e0"],"CmBorder-Box":["2px","solid","#cccccc"],"CmBorder-BoxHover":["2px","solid","#a6a6a6"],"CmBorder-BoxActive":["2px","solid","#2985e0"],"CmBorder-BoxSelected":["2px","solid","#a6ccf2"],"CmBorder-Temporary":["2px","dashed","#cccccc"],"CmBorder-TemporaryHover":["2px","dashed","#a6a6a6"],"CmBorder-TemporaryActive":["2px","dashed","#2985e0"],"CmBorder-TemporarySelected":["2px","dashed","#a6ccf2"],"CmButton-PaddingX":"12px","CmButton-OutlineWidth":"1px","CmButton-OutlineOffset":"1px","CmInput-Padding":"6px","CmInput-BorderWidth":"1px","CmInput-BorderStyle":"solid","CmInput-DefaultBackground":"#ffffff","CmInput-DefaultBorder":"#cccccc","CmInput-HoverBackground":"#ffffff","CmInput-HoverBorder":"#a6a6a6","CmInput-ActiveBackground":"#ffffff","CmInput-ActiveBorder":"#2985e0","CmInput-DisabledBackground":"#fafafa","CmInput-DisableBorder":"#e8e8e8","CmTextarea-Height":"100px","CmSelect-Size":7,"CmScrollBar-Size":"8px","CmScrollBar-Radius":"3px","CmScrollBar-TrackBackground":"rgba(250, 250, 250, 0.5)","CmScrollBar-ThumbColor":"#dbdbdb","CmScrollBar-ThumbColorHover":"#cccccc","CmScrollBar-Light-ThumbColor":"#f6fafd","CmScrollBar-Light-ThumbColorHover":"#e9f2fb","CmForm-FieldHeight":"32px","CmForm-FieldIndent":"16px","CmForm-FieldTitleWidth":"156px","CmForm-FieldTitleWidthSpaceless":"128px","CmForm-FieldInnerIndent":"8px","CmForm-FieldSmallWidth":"210px","CmForm-ButtonsIndent":"12px","CmForm-IconsIndent":"8px","CmForm-ImageBox-ButtonWidth":"100px","CmForm-Cols-Names":["one","two","three","four","five","six","seven","eight","nine","ten"],"CmForm-Cols-Indent":"2%","CmForm-FilesList-Count":3,"CmForm-FieldPlaceholder-Scale":0.75,"CmCounter-Size":"16px","CmCounter-Border":"1px","CmCounter-Radius":"16px","PtBox-BorderWidth":"1px","PtBox-BorderColor":"#cccccc","PtBox-Padding":"4px","PtBoxItem-Sizes":[50,80,150],"PtBoxItem-DescrLines":1,"PtBoxContent-Indent":"48px","PtBoxContent-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtBoxCode-PaddingY":"8px","PtBoxCode-PaddingX":"12px","PtMenu-IndentY":"4px","PtMenu-IndentX":"0px","PtMenu-BorderWidth":"1px","PtMenu-BorderColor":"#cccccc","PtMenu-ItemIndentY":"2px","PtMenu-ItemIndentX":"12px","PtMenu-Item-Color":"#666666","PtMenu-Item-HoverColor":"#1d73c9","PtMenu-Item-ActiveColor":"#16599c","PtMenu-SeparatorIndentX":"12px","PtMenu-SeparatorSize":"1px","PtMenu-SeparatorColor":"#cccccc","PtMenu-Dropdown-IndentX":"0px","PtMenu-Dropdown-IndentY":"0px","PtLinks-Indent":"4px","PtImage-Background":"#fafafa","PtImage-Color":"#ffffff","PtImage-Padding":"8px","PtImage-TitlePaddingTop":"4px","PtImage-ButtonsIndent":"8px","PtRange-Size":"24px","PtRange-Height":"200px","PtRange-Drag-Color":"#000000","PtList-PaddingY":"2px","PtList-PaddingX":"4px","PtList-Indent":"1px","PtList-ImageIndent":"8px","PtListingItems-Count":10,"PtListingItems-PaddingY":"2px","PtListingItems-PaddingX":"4px","PtListingItems-Indent":"1px","PtListingCounters-Indent":"4px","PtListingCounters-Height":"24px","PtColumns-Indent":"24px","PtColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtColumns-AdaptiveFrom":"768px","PtGrid-Indent":"24px","PtGrid-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtGrid-AdaptiveFrom":"768px","PtSelectable-Hover-Background":"#fafafa","PtSelectable-Hover-Border":"#f2f2f2","PtSelectable-Active-Background":"#f6fafd","PtSelectable-Active-Border":"#d8e8f8","PtToolbar-GroupIndent":"16px","PtToolbar-ItemIndent":"4px","PtToolbar-ItemIndents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"PtToolbar-XXXSmall":"32px","PtToolbar-XXSmall":"56px","PtToolbar-XSmall":"76px","PtToolbar-Small":"100px","PtToolbar-Medium":"150px","PtToolbar-Large":"250px","PtToolbar-XLarge":"350px","PtLineShare-Size":"32px","PtLineShare-Indent":"8px","PtGridlist-AdaptiveFrom":"768px","PtGridlist-FontSize":"13px","PtGridlist-Title-FontSize":"13px","PtGridlist-Title-DefaultBackground":"transparent","PtGridlist-Title-HoverBackground":"#e9f2fb","PtGridlist-Title-ActiveBackground":"#d8e8f8","PtGridlist-Cell-Padding":"6px","PtGridlist-Cell-SpaceSize":"1px","PtGridlist-Cell-SpaceBorder":["1px","solid","transparent"],"PtGridlist-Cell-FontSize":"13px","PtGridlist-Cell-DefaultBackground":"transparent","PtGridlist-Cell-HoverBackground":"#e9f2fb","PtGridlist-Cell-ActiveBackground":"#d8e8f8","PtGridlist-Cell-ActiveHoverBackground":"#c2dbf4","PtGridlist-Cell-SuccessBackground":"#daf6da","PtGridlist-Cell-SuccessHoverBackground":"#c6f1c6","PtGridlist-Cell-WarningBackground":"#f8ecd8","PtGridlist-Cell-WarningHoverBackground":"#f4e2c2","PtGridlist-Cell-DangerBackground":"#f7d9d9","PtGridlist-Cell-DangerHoverBackground":"#f3c4c4","PtGridlist-Title-HasBackground-Default":"#fafafa","PtGridlist-Title-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Default":"#fafafa","PtGridlist-Cell-HasBackground-Hover":"#f2f2f2","PtGridlist-Cell-HasBackground-Active":"#e8e8e8","PtDnD-Area-Padding":"16px","PtDnD-Area-BorderRadius":"3px","PtDnD-DropDuration":"400ms","PtDnD-MoveDuration":"200ms","PtDnD-Chassis-HighlightIndent":"24px","PtDnD-Area-ActiveBackground":"rgba(54, 140, 226, 0.12)","PtDnD-Area-ActiveBorder":["1px","dashed","#2985e0"],"PtDnD-Area-HighlightBackground":"rgba(54, 140, 226, 0.05)","PtDnD-Area-HighlightBorder":["1px","dashed","rgba(41, 133, 224, 0.3)"],"ComDashboard-Area-Padding":0,"ComDashboard-Widget-Indent":"24px","ComDashboard-Placeholder-Height":"48px","PtEditable-HoverBackground":"rgba(255, 255, 255, 0.5)","PtEditable-ActiveBackground":"rgba(255, 255, 255, 0.5)","PtEditable-Drag-DefaultBackground":"#fafafa","PtEditable-Drag-HoverBackground":"#f2f2f2","PtEditable-Drag-ActiveBackground":"#d8e8f8","PtDrag-Vertical-Width":"48px","PtDrag-Vertical-Height":"16px","PtDrag-Vertical-Icon-Width":"18px","PtDrag-Vertical-Icon-Height":"6px","PtDrag-Horizontal-Width":"16px","PtDrag-Horizontal-Height":"32px","PtDrag-Horizontal-Icon-Width":"6px","PtDrag-Horizontal-Icon-Height":"14px","PtDrag-DefaultBackground":"#fafafa","PtDrag-DefaultBorder":"#cccccc","PtDrag-HoverBackground":"#f2f2f2","PtDrag-HoverBorder":"#a6a6a6","PtDrag-ActiveBackground":"#d8e8f8","PtDrag-ActiveBorder":"#79b2ec","PtDrag-Line-Size":"2px","PtDrag-Line-DefaultBackground":"#e8e8e8","PtDrag-Line-HoverBackground":"#e8e8e8","PtDrag-Line-ActiveBackground":"#2985e0","PtRuler-Line-Size":"2px","PtRuler-Line-Indent":"12px","PtRuler-Line-DefaultBackground":"#e8e8e8","PtRuler-Line-HoverBackground":"#e8e8e8","PtRuler-Line-ActiveBackground":"#2985e0","PtOverlay-Default":"rgba(255, 255, 255, 0.7)","PtOverlay-Light":"rgba(255, 255, 255, 0.7)","PtOverlay-SolidLight":"#ffffff","PtOverlay-Dark":"rgba(0, 0, 0, 0.7)","PtOverlay-Duration":"500ms","PtOverlay-Spinner-Size":"32px","PtOverlay-ZIndex":1003,"LtCollapsible-SidebarWidth":"350px","LtCollapsible-Duration":"500ms","LtComment-InnerIndent":"4px","LtForum-AdaptiveFrom":"768px","LtForum-PostBackground":"#fafafa","LtForum-PostBackgroundFeatured":"#f6fafd","LtForum-PostTitleBackground":"#e8e8e8","LtForum-PostLeftColumnSize":"174px","LtProfile-LeftColumn":"174px","LtPost-Indent":"32px","LtPost-Image-Size":"172px","LtPost-Image-Indent":"16px","ComCalendar-CellHeight":"21px","ComCalendar-CellBorderRadius":"2px","ComCalendar-Outer-Background":"transparent","ComCalendar-Outer-BackgroundHover":"transparent","ComCalendar-Outer-BorderSize":0,"ComCalendar-Outer-Border":"transparent","ComCalendar-Outer-BorderHover":"transparent","ComCalendar-Inner-Background":"#fafafa","ComCalendar-Inner-BackgroundHover":"#f2f2f2","ComCalendar-Inner-BorderSize":"1px","ComCalendar-Inner-Border":"#e8e8e8","ComCalendar-Inner-BorderHover":"#dbdbdb","ComCalendar-Weekend-Background":"#e8e8e8","ComCalendar-Weekend-BackgroundHover":"#dbdbdb","ComCalendar-Weekend-BorderSize":"1px","ComCalendar-Weekend-Border":"#e8e8e8","ComCalendar-Weekend-BorderHover":"#dbdbdb","ComCalendar-Today-Background":"transparent","ComCalendar-Today-BackgroundHover":"#c2dbf4","ComCalendar-Today-BorderSize":"2px","ComCalendar-Today-Border":"#2985e0","ComCalendar-Today-BorderHover":"#1d73c9","ComCalendar-Active-Background":"#d8e8f8","ComCalendar-Active-BackgroundHover":"#c2dbf4","ComCalendar-Active-BorderSize":"1px","ComCalendar-Active-Border":"#2985e0","ComCalendar-Active-BorderHover":"#1d73c9","ComColumns-AdaptiveFrom":"768px","ComColumns-Indent":"24px","ComColumns-Indents":["0px","2px","4px","8px","12px","16px","24px","32px","48px","64px","96px"],"ComColumns-MinHeight":"64px","ComColumns-HoverBackground":"rgba(0, 0, 0, 0.01)","ComColumns-ActiveBackground":"rgba(0, 0, 0, 0.01)","ComColumns-Ruler-DefaultBackground":"rgba(250, 250, 250, 0.8)","ComColumns-Ruler-ActiveBackground":"rgba(246, 250, 253, 0.8)","ComSpacer-HoverBackground":"rgba(0, 0, 0, 0.01)","ComSpacer-ActiveBackground":"#f6fafd","ComBoxTools-Width":"210px","ComBoxTools-LineSize":"32px","ComBoxTools-LineIndent":"4px","ComBoxTools-LinkSize":"24px","ComBoxTools-LinkIndent":"4px","ComPositionTools-Item-Size":"24px","ComPositionTools-Item-Indent":"4px","ComPositionTools-Item-Large-Size":"32px","ComPositionTools-Item-Large-Indent":"4px","ComRepeatTools-Item-Size":"38px","ComRepeatTools-Item-Indent":"4px","ComScaleTools-Item-Size":"38px","ComScaleTools-Item-Indent":"4px","ComDatepicker-Width":"210px","ComDatepicker-TooltipWidth":"210px","ComTimeSelect-Width":"210px","ComTimeSelect-Indent":"12px","ComColorPalette-Size":"200px","ComColorPalette-Drag-Size":"16px","ComColorPicker-Width":"210px","ComFileDropzone-Height":"128px","ComFileDropzone-Duration":"250ms","ComImageInput-Height":"128px","ComImageInput-CoverBackground":"rgba(0, 0, 0, 0.7)","ComImageInput-CoverDelay":"300ms","ComImageInput-ButtonsIndent":"4px","CmMultipleFileInput-Count":3,"ComDialog-Duration":"250ms","ComDialog-WindowDuration":"500ms","ComDialog-Indent":"24px","ComDialog-Radius":"3px","ComDialog-TitleIndent":"12px","ComDialog-IconSize":"24px","ComDialog-Overlay":"rgba(0, 0, 0, 0.7)","ComDialog-Default-Background":"#ffffff","ComDialog-Black-Background":"#111111","ComDialog-Black-TitleColor":"#ffffff","ComDialog-Light-Overlay":"rgba(255, 255, 255, 0.7)","ComDialog-Light-Background":"#ffffff","ComDialog-Light-TitleColor":"#ffffff","ComDialog-Light-TitleBackground":"#2985e0","ComDialog-Compact-Indent":"12px","ComDialog-Compact-TitleHeight":"32px","ComDialog-Compact-TitleIndent":"12px","ComDialog-Compact-IconSize":"32px","ComDialog-Box-Indent":"24px","ComTabset-AdaptiveFrom":"768px","ComTabset-BorderColor":"#cccccc","ComTabset-BorderRadius":"3px","ComTabset-BorderWidth":"1px","ComTabset-Border":["1px","solid","#cccccc"],"ComTabset-BorderOverlap":"#ffffff","ComTabset-BorderOverlapRadius":0,"ComTabset-Duration":"250ms","ComTabset-Column-Width":"256px","ComTabset-Content-Background":"#ffffff","ComTabset-Content-Padding":"24px","ComTabset-Tabs-Height":"32px","ComTabset-Tabs-Indent":"4px","ComTabset-Tabs-IndentInner":"12px","ComTabset-Tabs-IndentBetween":"-1px","ComTabset-Tabs-HorizontalIndent":"24px","ComTabset-Tabs-VerticalIndent":"24px","ComTabset-Tabs-FontSize":"13px","ComTabset-Tabs-DefaultBackground":"#e8e8e8","ComTabset-Tabs-HoverBackground":"#f2f2f2","ComTabset-Tabs-ActiveBackground":"#ffffff","ComTabset-TabsTitle-Background":"#fafafa","ComTabset-Tabs-ImageSize":"24px","ComTabset-Tabs-TitleIndent":"8px","ComPagination-Duration":"250ms","ComToggleBox-AdaptiveFrom":"768px","ComToggleBox-Size":"32px","ComToggleBox-SizeMedium":"24px","ComToggleBox-SizeUI":"24px","ComToggleBox-SizeBase":"24px","ComToggleBox-HasBackground-TitleIndentX":"8px","ComToggleBox-HasBackground-TitleIndentY":"0px","ComToggleBox-HasBackground-TitleIndent":["0px","8px"],"ComToggleBox-HasBackground-TitleBorderRadius":"3px","ComToggleBox-ContentBackgroundNormal":"#fafafa","ComToggleBox-ContentBackgroundHover":"#f2f2f2","ComToggleBox-ContentSpaceBorder":["1px","solid","transparent"],"ComToggleBox-Theme":"Light","ComToggleBox-HasBackground-TitleTheme":"Light","ComToggleBox-ThemeLight-TitleColorNormal":"#666666","ComToggleBox-ThemeLight-TitleColorHover":"#1d73c9","ComToggleBox-ThemeLight-TitleColorActive":"#666666","ComToggleBox-ThemeLight-TitleIcon":"../img/MagpieUI/icons/small/arrow-right.png","ComToggleBox-ThemeLight-TitleBackgroundNormal":"#e8e8e8","ComToggleBox-ThemeLight-TitleBackgroundHover":"#c2dbf4","ComToggleBox-ThemeLight-TitleBackgroundActive":"#e8e8e8","ComToggleBox-ThemeDark-TitleColorNormal":"#ffffff","ComToggleBox-ThemeDark-TitleColorHover":"#c2dbf4","ComToggleBox-ThemeDark-TitleColorActive":"#ffffff","ComToggleBox-ThemeDark-TitleIcon":"../img/MagpieUI/icons/small/arrow-white-right.png","ComToggleBox-ThemeDark-TitleBackgroundNormal":"#2985e0","ComToggleBox-ThemeDark-TitleBackgroundHover":"#1d73c9","ComToggleBox-ThemeDark-TitleBackgroundActive":"#2985e0","ComSelect-ListCount":7,"ComSelect-MultiListCount":5,"ComSelect-MaxHeight":"114px","ComAutocomplete-ListCount":7,"ComTagsInput-itemIndent":"12px","ComTagsInput-itemWidth":"250px","ComTagsInput-inputWidth":"200px","ComZoom-Background":"#111111","ComGallery-Background":"#111111","ComGalleryControls-Button-Size":"12px","ComGalleryLayout-ArrowWidth":"24px","ComGalleryLayout-SizesCount":12,"ComSlider-Duration":"500ms","AppIconVars-Family":"QuickSilk-Glyphs","AppIconVars-Color":"#666666","AppIconVars-Version":"3.34.0","AppIcon-QuickSilk":"\\e600","AppIcon-Plus":"\\e601","AppIcon-Gear":"\\e602","AppIcon-Gears":"\\e603","AppIcon-Pages":"\\e604","AppIcon-Layouts":"\\e605","AppIcon-Palette":"\\e606","AppIcon-Templates":"\\e606","AppIcon-Form":"\\e607","AppIcon-CircleHelp":"\\e701","AppIcon-CircleUser":"\\e702","AppIcon-CirclePlus":"\\e703","AppIcon-CircleGear":"\\e704","AppIcon-CircleStar":"\\e705","AppIcon-CircleFlash":"\\e706","AppIcon-CircleActions":"\\e706","AppIcon-CircleNote":"\\e707","AppIcon-CircleUndo":"\\e708","AppIcon-CircleRedo":"\\e709","AppIcon-Desktop":"\\e900","AppIcon-Tablet":"\\e901","AppIcon-Mobile":"\\e902","AppIcon-Block-Size":"90px","AppIcon-Block-Indent":"24px","AppIcon-Block-Names-Column1":["default","zone","workingarea","column","element_column","divider","element_divider","spacer","element_spacer","menu","dashboard","mobile-menu","tabs","rollover-tabs","sticky","flip-cards","structure-block","spoiler"],"AppIcon-Block-default":0,"AppIcon-Block-zone":1,"AppIcon-Block-workingarea":1,"AppIcon-Block-column":2,"AppIcon-Block-element_column":2,"AppIcon-Block-divider":3,"AppIcon-Block-element_divider":3,"AppIcon-Block-spacer":4,"AppIcon-Block-element_spacer":4,"AppIcon-Block-menu":5,"AppIcon-Block-mobile-menu":5,"AppIcon-Block-dashboard":5,"AppIcon-Block-tabs":6,"AppIcon-Block-rollover-tabs":7,"AppIcon-Block-sticky":8,"AppIcon-Block-flip-cards":9,"AppIcon-Block-structure-block":10,"AppIcon-Block-spoiler":11,"AppIcon-Block-Names-Column2":["search","login","registration","content","element_content","anchor","googlemap","languageswitcher","rss","breadcrumb","breadcrumbs","form_builder"],"AppIcon-Block-search":0,"AppIcon-Block-login":1,"AppIcon-Block-registration":2,"AppIcon-Block-content":3,"AppIcon-Block-element_content":3,"AppIcon-Block-anchor":4,"AppIcon-Block-googlemap":5,"AppIcon-Block-languageswitcher":6,"AppIcon-Block-rss":7,"AppIcon-Block-breadcrumb":8,"AppIcon-Block-breadcrumbs":8,"AppIcon-Block-form_builder":9,"AppIcon-Block-Names-Column3":["image","imagegallery","portfolio","slider","logocarousel","videogallery","logo"],"AppIcon-Block-image":0,"AppIcon-Block-imagegallery":1,"AppIcon-Block-portfolio":1,"AppIcon-Block-slider":2,"AppIcon-Block-logocarousel":2,"AppIcon-Block-videogallery":3,"AppIcon-Block-logo":4,"AppIcon-Block-Names-Column4":["blogcontent","blogcategories","blogroll","blogblock","blogarchive","blogcalendar","blognavigation"],"AppIcon-Block-blogcontent":0,"AppIcon-Block-blogcategories":1,"AppIcon-Block-blogroll":2,"AppIcon-Block-blogblock":3,"AppIcon-Block-blogarchive":4,"AppIcon-Block-blogcalendar":5,"AppIcon-Block-blognavigation":6,"AppIcon-Block-Names-Column5":["forum","forum_build","comment","testimonials","twitter","socialmedia","socialmedia_rating","socialmedia_share","social-aggregator","memberdirectory","memberwidget","workinggroups","faqmanager"],"AppIcon-Block-forum":0,"AppIcon-Block-forum_build":1,"AppIcon-Block-comment":2,"AppIcon-Block-testimonials":2,"AppIcon-Block-twitter":3,"AppIcon-Block-socialmedia":4,"AppIcon-Block-socialmedia_rating":4,"AppIcon-Block-socialmedia_share":4,"AppIcon-Block-social-aggregator":4,"AppIcon-Block-memberdirectory":5,"AppIcon-Block-memberwidget":6,"AppIcon-Block-workinggroups":7,"AppIcon-Block-faqmanager":8,"AppIcon-Block-Names-Column6":["events","latestevents","eventscalendar","bigcalendar","eventscategories","calendarfilter"],"AppIcon-Block-events":0,"AppIcon-Block-latestevents":1,"AppIcon-Block-eventscalendar":2,"AppIcon-Block-bigcalendar":3,"AppIcon-Block-eventscategories":4,"AppIcon-Block-calendarfilter":5,"AppIcon-Block-Names-Column7":["filegridlist","filegridlistwidget","listing-widget","directory","listing-pins","listing-filter","directoryfilter","viewsubmission","ecommerce-cart","shopify-cart","ecommerce-orders","ecommerce-directory","shopify-products","ecommerce-product","shopify-product"],"AppIcon-Block-filegridlist":0,"AppIcon-Block-filegridlistwidget":1,"AppIcon-Block-listing-widget":2,"AppIcon-Block-directory":2,"AppIcon-Block-listing-pins":3,"AppIcon-Block-listing-filter":4,"AppIcon-Block-directoryfilter":4,"AppIcon-Block-viewsubmission":5,"AppIcon-Block-ecommerce-cart":6,"AppIcon-Block-shopify-cart":6,"AppIcon-Block-ecommerce-orders":7,"AppIcon-Block-ecommerce-directory":8,"AppIcon-Block-shopify-products":8,"AppIcon-Block-ecommerce-product":9,"AppIcon-Block-shopify-product":9,"AppIcon-Block-Names-Column8":["button","element_button","element_input","element_text","element_password","element_hidden","element_select","element_checkbox","element_radiobutton","element_multicheckbox","element_timepicker","element_datepicker"],"AppIcon-Block-button":0,"AppIcon-Block-element_button":0,"AppIcon-Block-element_input":1,"AppIcon-Block-element_text":1,"AppIcon-Block-element_password":2,"AppIcon-Block-element_hidden":3,"AppIcon-Block-element_select":4,"AppIcon-Block-element_checkbox":5,"AppIcon-Block-element_radiobutton":6,"AppIcon-Block-element_multicheckbox":7,"AppIcon-Block-element_timepicker":8,"AppIcon-Block-element_datepicker":9,"AppIcon-Block-Names-Column9":["element_textarea","element_wysiwyg","element_captcha","element_recaptcha","element_imagebrowser","element_fileuploader","element_multifield","element_wizard"],"AppIcon-Block-element_textarea":0,"AppIcon-Block-element_wysiwyg":1,"AppIcon-Block-element_captcha":2,"AppIcon-Block-element_recaptcha":2,"AppIcon-Block-element_imagebrowser":3,"AppIcon-Block-element_fileuploader":3,"AppIcon-Block-element_multifield":4,"AppIcon-Block-element_wizard":5,"AppIcon-Block-Names-Column10":["d3","webexmeetings","hubspot","hubspot-blog","hubspot-form","klipfolio","instagram","flickr","quicksilksignup-link","quicksilksignup-product","templatelist"],"AppIcon-Block-d3":0,"AppIcon-Block-webexmeetings":1,"AppIcon-Block-hubspot":2,"AppIcon-Block-hubspot-blog":2,"AppIcon-Block-hubspot-form":2,"AppIcon-Block-klipfolio":3,"AppIcon-Block-instagram":4,"AppIcon-Block-flickr":5,"AppIcon-Block-quicksilksignup-link":6,"AppIcon-Block-quicksilksignup-product":6,"AppIcon-Block-templatelist":6,"AppVersion":"3.34.0","AppPath-Images":"../img/QuickSilk-Application","AppPath-Fonts":"../fonts/QuickSilk-Application","AppUI-SidebarWidth":"360px","AppUI-TitleHeight":"48px","AppFont-Admin-Family":"Quicksand, sans-serif","AppFont-Default-Family":"Quicksand, sans-serif","AppFont-Default-LineHeight":"18px","AppFont-Default-Size":"13px","AppFont-Default-Weight":400,"AppFont-Default-Color":"#666666","AppFont-H1-Family":"Quicksand, sans-serif","AppFont-H1-LineHeight":"64px","AppFont-H1-Size":"48px","AppFont-H1-Weight":100,"AppFont-H1-Color":"#666666","AppFont-H1-Decoration":"none","AppFont-H1-Style":"normal","AppFont-H2-Family":"Quicksand, sans-serif","AppFont-H2-LineHeight":"42px","AppFont-H2-Size":"32px","AppFont-H2-Weight":400,"AppFont-H2-Color":"#666666","AppFont-H2-Decoration":"none","AppFont-H2-Style":"normal","AppFont-H3-Family":"Quicksand, sans-serif","AppFont-H3-LineHeight":"32px","AppFont-H3-Size":"24px","AppFont-H3-Weight":400,"AppFont-H3-Color":"#666666","AppFont-H3-Decoration":"none","AppFont-H3-Style":"normal","AppFont-H4-Family":"Quicksand, sans-serif","AppFont-H4-LineHeight":"24px","AppFont-H4-Size":"18px","AppFont-H4-Weight":400,"AppFont-H4-Color":"#666666","AppFont-H4-Decoration":"none","AppFont-H4-Style":"normal","AppFont-H5-Family":"Quicksand, sans-serif","AppFont-H5-LineHeight":"24px","AppFont-H5-Size":"16px","AppFont-H5-Weight":400,"AppFont-H5-Color":"#666666","AppFont-H5-Decoration":"none","AppFont-H5-Style":"normal","AppFont-H6-Family":"Quicksand, sans-serif","AppFont-H6-LineHeight":"18px","AppFont-H6-Size":"12px","AppFont-H6-Weight":600,"AppFont-H6-Color":"#666666","AppFont-H6-Decoration":"none","AppFont-H6-Style":"normal","AppFont-P-Family":"Quicksand, sans-serif","AppFont-P-LineHeight":"18px","AppFont-P-Size":"13px","AppFont-P-Weight":400,"AppFont-P-Color":"#666666","AppFont-P-Decoration":"none","AppFont-P-Style":"normal","AppFont-A-Weight":400,"AppFont-A-Color":"#1d73c9","AppFont-A-Decoration":"underline","AppFont-A-Style":"normal","AppFont-AHover-Weight":400,"AppFont-AHover-Color":"#1d73c9","AppFont-AHover-Decoration":"underline","AppFont-AHover-Style":"normal","AppFont-AActive-Weight":400,"AppFont-AActive-Color":"#1d73c9","AppFont-AActive-Decoration":"underline","AppFont-AActive-Style":"normal","AppFont-Button-Family":"Open Sans, sans-serif","AppFont-Button-Size":"13px","AppFont-Button-Weight":400,"AppFont-Button-Color":"#ffffff","AppFont-Button-Decoration":"none","AppFont-Button-Style":"normal","AppColor-QuickSilk":"#21b573","AppColor-QuickSilkRed":"#ff6662","AppColor-UI-Panel":"#1f2630","AppColor-UI-PanelBlock":"#104070","AppUI-Zone-Width":"48px","AppUI-Zone-Height":"48px","AppUI-Zone-ContentHeight":"256px","AppPT-BoxLogin-Width":"350px","AppPT-LatestPosts-ImageSize":70,"AppPT-LatestPosts-DescrLines":1,"AppPT-Plan-Indent":"24px","AppLT-Templates-Item-Padding":"12px","AppTopMenu-Height":"48px","AppTopMenu-Duration":"300ms","AppTopMenu-Background":"#1f2630","AppTopMenu-Color":"#ffffff","AppTopMenu-ColorHover":"#ffffff","AppTopMenu-ColorActive":"#1f2630","AppTopMenu-HoverBackground":"#2985e0","AppTopMenu-ItemIndent":"1px","AppTopMenu-ItemBorder":["1px","solid","rgba(255, 255, 255, 0.4)"],"AppTopMenu-ItemBackground":"rgba(255, 255, 255, 0.2)","AppTopMenu-Dropdown-FirstLevel":"true","AppTopMenu-Dropdown-Duration":"50ms","AppSidebar-Width":"360px","AppSidebar-Menu-Width":"48px","AppSidebar-Menu-Background":"#1f2630","AppSidebar-Content-Width":"312px","AppSidebar-Content-Indent":"12px","AppSidebar-Title-Height":"48px","AppSidebar-WidthExpanded":"360px","AppSidebar-WidthCollapsed":"48px","AppSidebar-Duration":"500ms","AppSidebar-Overlay":"rgba(255, 255, 255, 0.7)","AppSidebar-Color":"#ffffff","AppSidebar-Background":"#2985e0","AppNotification-Height":"48px","AppNotification-Fade":"95%","AppZone-MinHeight":"24px","AppZone-Padding":"16px","AppZone-BorderRadius":"3px","AppZone-Active-Background":"rgba(54, 140, 226, 0.12)","AppZone-Active-BorderColor":"#2985e0","AppZone-Active-Border":["1px","dashed","#2985e0"],"AppZone-Highlight-Background":"rgba(54, 140, 226, 0.05)","AppZone-Highlight-BorderColor":"rgba(41, 133, 224, 0.3)","AppZone-Highlight-Border":["1px","dashed","rgba(41, 133, 224, 0.3)"],"AppBlock-Indent":"24px","AppBlock-Loader-Background":"#f2f2f2","AppBlock-Loader-Border":["1px","solid","#cccccc"],"AppBlock-Loader-BorderRadius":"3px","AppBlock-Category-Background":"transparent","AppBlock-Dummy-Width":"94px","AppBlock-Dummy-Padding":"2px","AppBlock-Dummy-BorderRadius":"3px","AppBlock-Dummy-IconBorderRadius":"0px","AppBlock-Dummy-IconSize":"90px","AppBlock-Dummy-ColorNormal":"#ffffff","AppBlock-Dummy-ColorHover":"#ffffff","AppBlock-Dummy-ColorActive":"#666666","AppBlock-Dummy-BackgroundNormal":"trannsparent","AppBlock-Dummy-BackgroundHover":"trannsparent","AppBlock-Dummy-BackgroundActive":"#ffffff","AppBlock-Dummy-IconBackgroundNormal":"transparent","AppBlock-Dummy-IconBackgroundHover":"rgba(255, 255, 255, 0.5)","AppBlock-Dummy-IconBackgroundActive":"#2985e0","AppDashboard-DropDuration":"400ms","AppDashboard-MoveDuration":"200ms","AppDashboard-Placeholder-Indent":"24px","AppHelpTour-Duration":"500ms","AppHelpTour-AdaptiveFrom":"768px","AppHelpTour-Popup-Width":"360px","AppHelpTour-Popup-Background":"#ffffff","AppHelpTour-Popup-ArrowSize":"24px","AppPanel-Duration":"500ms","AppPanel-Dialog-Width":"360px","AppPanel-Dialog-Background":"#2985e0","AppPanel-Dialog-Indent":"12px","AppPanel-Dialog-TitleHeight":"48px","AppPanel-Dialog-TitleBackground":"#2985e0","AppPanel-Dialog-ContentBackground":"#ffffff","AppPanel-Dialog-ButtonHeight":"32px","AppPanel-Dialog-ButtonsHeight":"56px","AppPanel-Dialog-ButtonsBackground":"#e8e8e8","AppPanel-Preview-Indent":"12px","AppPanel-Preview-Border":["1px","solid","#cccccc"],"AppPanel-Preview-TitleHeight":"48px","AppPanel-Preview-TitleBackground":"#e8e8e8","AppPanel-Preview-ContentBackground":"#ffffff","AppPanel-Preview-ContentIndent":"48px","AppPanel-Box-Indent":["24px","12px"],"AppLivePreview-Device-Duration":"500ms","AppLivePreview-Tablet-Width":"1024px","AppLivePreview-Tablet-Height":"640px","AppLivePreview-Tablet-Indent":"24px","AppLivePreview-Tablet-BorderY":"48px","AppLivePreview-Tablet-BorderX":"48px","AppLivePreview-Tablet-Border":["48px","48px"],"AppLivePreview-Tablet-BorderRadius":"16px","AppLivePreview-Tablet-BorderColor":"#262626","AppLivePreview-Tablet-ScreenRadius":"3px","AppLivePreview-Mobile-Width":"320px","AppLivePreview-Mobile-Height":"568px","AppLivePreview-Mobile-Indent":"24px","AppLivePreview-Mobile-BorderY":"48px","AppLivePreview-Mobile-BorderX":"12px","AppLivePreview-Mobile-Border":["48px","12px"],"AppLivePreview-Mobile-BorderRadius":"16px","AppLivePreview-Mobile-BorderColor":"#262626","AppLivePreview-Mobile-ScreenRadius":"3px","AppMod-KnowledgeCentre-Title-MinWidth":"170px","AppMod-Sitemap-FontSize":"12px","AppMod-Sitemap-Color":"#666666","AppMod-Sitemap-Title-Color":"#666666","AppMod-Sitemap-IndentY":"24px","AppMod-BlogWidget-ImageSize":70,"AppMod-BlogWidget-DescrLines":1,"AppMod-ForumWidget-ImageSize":70,"AppMod-ForumWidget-DescrLines":1,"AppMod-Menu-Default-Indent":"12px","AppMod-Menu-Default-SelectSize":"32px","AppMod-Menu-Default-SelectColor":"#666666","AppMod-Menu-Default-SelectBackground":"#f2f2f2","AppMod-Menu-Default-SeparatorWidth":"1px","AppMod-Menu-Default-SeparatorHeight":"12px","AppMod-Menu-Default-SeparatorBackground":"#cccccc","AppMod-Menu-Primary-Indent":"12px","AppMod-Menu-Primary-SelectSize":"32px","AppMod-Menu-Primary-SelectColor":"#666666","AppMod-Menu-Primary-SelectBackground":"#f2f2f2","AppMod-Menu-Primary-SeparatorWidth":"1px","AppMod-Menu-Primary-SeparatorHeight":"12px","AppMod-Menu-Primary-SeparatorBackground":"#cccccc","AppMod-Menu-Secondary-Indent":"12px","AppMod-Menu-Secondary-SelectSize":"32px","AppMod-Menu-Secondary-SelectColor":"#666666","AppMod-Menu-Secondary-SelectBackground":"#f2f2f2","AppMod-Menu-Secondary-SeparatorWidth":"1px","AppMod-Menu-Secondary-SeparatorHeight":"12px","AppMod-Menu-Secondary-SeparatorBackground":"#cccccc","AppMod-Menu-Languages-Indent":"12px","AppMod-Menu-Languages-ImageSize":"24px","AppMod-Menu-Languages-SelectSize":"32px","AppMod-Menu-Languages-SelectColor":"#666666","AppMod-Menu-Languages-SelectBackground":"#f2f2f2","AppMod-Menu-Languages-SeparatorWidth":"1px","AppMod-Menu-Languages-SeparatorHeight":"12px","AppMod-Menu-Languages-SeparatorBackground":"#cccccc","AppMod-Menu-Vertical-Indent":"12px","AppMod-Menu-Vertical-ChildIndent":"24px","AppMod-MobileMenu-AdaptiveFrom":"768px","AppMod-MobileMenu-Overlay":"rgba(255, 255, 255, 0.7)","AppMod-MobileMenu-Duration":"500ms","AppMod-MobileMenu-Background":"#ffffff","AppMod-MobileMenu-Sidebar-Width":"480px","AppMod-MobileMenu-Sidebar-IconIndent":"12px","AppMod-MobileMenu-Dropdown-Indent":"4px","AppMod-RolloverTabs-AdaptiveFrom":"768px","AppMod-RolloverTabs-BorderRadius":"3px","AppMod-RolloverTabs-BorderWidth":"1px","AppMod-RolloverTabs-Border":["1px","solid","transparent"],"AppMod-RolloverTabs-Duration":"250ms","AppMod-RolloverTabs-Theme":"Light","AppMod-RolloverTabs-Label-Height":"32px","AppMod-RolloverTabs-Label-Indent":"4px","AppMod-RolloverTabs-Label-InnerIndent":"12px","AppMod-RolloverTabs-Label-TitleIndent":"8px","AppMod-RolloverTabs-Image-Size":"24px","AppMod-RolloverTabs-Menu-Height":"32px","AppMod-RolloverTabs-Menu-Indent":"12px","AppMod-RolloverTabs-Content-Indent":"4px","AppMod-RolloverTabs-ThemeLight-BorderColor":"#cccccc","AppMod-RolloverTabs-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-RolloverTabs-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-RolloverTabs-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-RolloverTabs-ThemeLight-Menu-Background":"#ffffff","AppMod-RolloverTabs-ThemeLight-Content-Background":"#ffffff","AppMod-Wizard-AdaptiveFrom":"768px","AppMod-Wizard-BorderRadius":"3px","AppMod-Wizard-BorderWidth":"1px","AppMod-Wizard-Border":["1px","solid","transparent"],"AppMod-Wizard-Duration":"250ms","AppMod-Wizard-Theme":"Light","AppMod-Wizard-Label-Height":"32px","AppMod-Wizard-Label-Indent":"4px","AppMod-Wizard-Label-InnerIndent":"12px","AppMod-Wizard-Label-TitleIndent":"8px","AppMod-Wizard-Image-Size":"24px","AppMod-Wizard-Menu-Height":"32px","AppMod-Wizard-Menu-Indent":"12px","AppMod-Wizard-Content-Indent":"4px","AppMod-Wizard-Content-Padding":"24px","AppMod-Wizard-ThemeLight-BorderColor":"#cccccc","AppMod-Wizard-ThemeLight-Label-DefaultBackground":"#e8e8e8","AppMod-Wizard-ThemeLight-Label-HoverBackground":"#f2f2f2","AppMod-Wizard-ThemeLight-Label-ActiveBackground":"#ffffff","AppMod-Wizard-ThemeLight-Menu-Background":"#ffffff","AppMod-Wizard-ThemeLight-Content-Background":"#ffffff","ModButton-LabelIndent":"8px","ModButton-ImageSize":"24px","ModCart-LabelIndent":"8px","ModCart-ImageSize":"24px","ModSignup-Separator-Size":"32px","ModSignup-Separator-Border":["1px","solid","#cccccc"],"ModSignup-Separator-Indent":"24px","ModSignupLight-MenuHeight":"50px","ModSignupLight-Background":"#ffffff","ModSignupLight-Accent":"#e36a0d","ModSignupLight-BorderDefault":"#e2e2e2","ModSignupLight-BorderActive":"#888888","ModSignupLight-TemplateIndent":"60px","ModCalendar-BorderWidth":"1px","ModCalendar-BorderColor":"#cccccc","ModCalendar-Border":["1px","solid","#cccccc"],"ModCalendar-Background":"#ffffff","ModCalendarEvent-TooltipWidth":"320px","ModCalendarEvent-Padding":"4px","ModCalendarEvent-LineHeight":"18px","ModCalendarEvent-Short-Indent":"1px","ModCalendarEvent-Short-Height":"20px","ModCalendarEvent-Long-Indent":"12px","ModCalendarTable-Border":["1px","solid","#cccccc"],"ModCalendarTable-Default-Background":"#ffffff","ModCalendarTable-Default-BackgroundHover":"#f2f2f2","ModCalendarTable-Inactive-Background":"#ffffff","ModCalendarTable-Inactive-BackgroundHover":"#f2f2f2","ModCalendarTable-Weekend-Background":"#e8e8e8","ModCalendarTable-Weekend-BackgroundHover":"#dbdbdb","ModCalendarTable-Today-Background":"#f6fafd","ModCalendarTable-Today-BackgroundHover":"#e9f2fb","ModCalendarTable-Active-Background":"#d8e8f8","ModCalendarTable-Active-BackgroundHover":"#c2dbf4","ModCalendarAgenda-Day-Indent":"24px","ModCalendarAgenda-Day-Padding":"12px","ModCalendarAgenda-Day-Width":"72px","ModCalendarWeek-Day-Indent":"4px","ModCalendarWeek-Item-Height":"20px","ModCalendarMonth-Item-Count":3,"ModCalendarMonth-Item-LineHeight":"18px","ModCalendarMonth-Item-Height":"20px","ModCalendarMonth-Item-Indent":"1px","ModCalendarMonth-Day-Indent":"4px","ModCalendarMonth-Day-Items":5,"ModCalendarMonth-Day-Height":"104px","AppTpl-Container-Size":"box","AppTpl-Container-Width":"1000px","AppTpl-Container-Align":"center","AppTpl-Container-Indent":"24px","AppTpl-Container-BackgroundColor":"#ffffff","AppTpl-Container-BackgroundImage":"none","AppTpl-Container-BackgroundPosition":["center","center"],"AppTpl-Container-BackgroundRepeat":"repeat","AppTpl-Container-BackgroundSize":"auto","AppTpl-Container-BackgroundParallax":"scroll","AppTpl-Container-Background":["#ffffff","none","repeat",["center","center"],"scroll"],"AppTpl-Content-EditableIndent":"24px","Stuff-CKE-Color":"#474747","TplPath-Images":"../img","TplPath-Fonts":"../fonts","AppSidebar-Theme":"Dark"};
 
 window.Collector = new Com.Collector({
         'autoInit' : true

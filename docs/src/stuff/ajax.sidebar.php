@@ -45,7 +45,7 @@ switch($_GET['tab']){
                         <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_wizard\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
-                                    <div class=\"icon module-default\"></div>
+                                    <div class=\"icon module-element_wizard\"></div>
                                     <div class=\"caption\">Wizard</div>
                                 </div>
                             </div>
@@ -53,7 +53,7 @@ switch($_GET['tab']){
                         <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_multifield\", \"type\" : \"form-manager\"}'>
                             <div class=\"app__block-dummy\" data-node=\"dummy\">
                                 <div class=\"inner\">
-                                    <div class=\"icon module-default\"></div>
+                                    <div class=\"icon module-element_multifield\"></div>
                                     <div class=\"caption\">MultiFeild</div>
                                 </div>
                             </div>
@@ -167,6 +167,14 @@ switch($_GET['tab']){
                                 <div class=\"inner\">
                                     <div class=\"icon module-element_captcha\"></div>
                                     <div class=\"caption\">Captcha</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_recaptcha\", \"type\" : \"form-manager\"}'>
+                            <div class=\"app__block-dummy\" data-node=\"dummy\">
+                                <div class=\"inner\">
+                                    <div class=\"icon module-element_captcha\"></div>
+                                    <div class=\"caption\">ReCaptcha</div>
                                 </div>
                             </div>
                         </div>

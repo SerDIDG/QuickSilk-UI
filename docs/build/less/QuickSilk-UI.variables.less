@@ -1,3 +1,7 @@
+:root {
+		--pt-buttons--indent: @CmForm-ButtonsIndent;
+}
+
 
 // /* ************************************************ */
 // /* ******* MAGPIE UI: VARIABLES: ICONS ******* */
@@ -39,7 +43,7 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.38.2';
+@CmVersion: '3.40.0';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
@@ -100,6 +104,7 @@
 @CmUI-ShadowInner: 0 2px 2px rgba(0,0,0,0.4) inset;
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
+@CmUI-Shadow-BottomSmall: 0 1px 2px rgba(0,0,0,0.15);
 @CmUI-Shadow-Right: 2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Left: -2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Card: 0 1px 2px rgba(0,0,0,0.25);
@@ -399,13 +404,13 @@
 @CmFont-Base-LineHeight: 18px;
 @CmFont-Base-LineHeightSmall: 18px;
 @CmFont-Base-Family: @CmUI-GoogleFont, arial, helvetica, sans-serif;
-@CmFont-Base-Size: 13px;
-@CmFont-Base-SizeSmall: 11px;
+@CmFont-Base-Size: 14px;
+@CmFont-Base-SizeSmall: 12px;
 @CmFont-Base-Weight: @CmFont-Base-NormalWeight;
 @CmFont-Base-Color: @CmColor-Font;
 @CmFont-Base-ColorOpposite: @CmColor-Font-Opposite;
 
-@CmFont-Base-Hint-Size: 11px;
+@CmFont-Base-Hint-Size: 12px;
 @CmFont-Base-Hint-Color: @CmColor-Font-Hint;
 
 @CmFont-Placeholder-Size: inherit;
@@ -420,8 +425,8 @@
 @CmFont-UI-BoldWeight: 600;
 
 @CmFont-UI-LineHeight: 18px;
-@CmFont-UI-Size: 13px;
-@CmFont-UI-SizeSmall: 11px;
+@CmFont-UI-Size: 14px;
+@CmFont-UI-SizeSmall: 12px;
 @CmFont-UI-Family: @CmUI-GoogleFont, arial, helvetica, sans-serif;
 @CmFont-UI-Weight: @CmFont-UI-NormalWeight;
 @CmFont-UI-Color: @CmColor-Font;
@@ -495,7 +500,7 @@
 @CmForm-FieldIndent: @CmIndent-Small;
 @CmForm-FieldTitleWidth: 156px;
 @CmForm-FieldTitleWidthSpaceless: 128px;
-@CmForm-FieldInnerIndent: @CmForm-FieldIndent / 2;
+@CmForm-FieldInnerIndent: (@CmForm-FieldIndent / 2);
 @CmForm-FieldSmallWidth: 210px;
 @CmForm-ButtonsIndent: @CmIndent-XSmall;
 @CmForm-IconsIndent: @CmIndent-XXSmall;
@@ -503,6 +508,7 @@
 @CmForm-Cols-Names: one two three four five six seven eight nine ten;
 @CmForm-Cols-Indent: 2%;
 @CmForm-FilesList-Count: 3;
+@CmForm-FieldPlaceholder-Scale: 0.75;
 
 // /* ******* COUNTER ******* */
 
@@ -606,7 +612,7 @@
 
 @PtToolbar-GroupIndent: @CmIndent-Small;
 @PtToolbar-ItemIndent: @CmIndent-XXXSmall;
-@PtToolbar-ItemIndents: @CmUI-ColumnIndent;
+@PtToolbar-ItemIndents: @CmIndents;
 @PtToolbar-XXXSmall: 32px;
 @PtToolbar-XXSmall: 56px;
 @PtToolbar-XSmall: 76px;
@@ -718,9 +724,11 @@
 
 @PtOverlay-Default: @CmUI-Overlay;
 @PtOverlay-Light: @CmUI-Overlay-Light;
+@PtOverlay-SolidLight: #ffffff;
 @PtOverlay-Dark: @CmUI-Overlay-Dark;
 @PtOverlay-Duration: @CmUI-Overlay-Duration;
 @PtOverlay-Spinner-Size: @CmSize-Large;
+@PtOverlay-ZIndex: 1003;
 
 // /* ************************************************ */
 // /* ******* LAYOUTS ******* */
@@ -780,7 +788,7 @@
 @ComCalendar-Weekend-Border: @CmColor-Secondary-LightActive;
 @ComCalendar-Weekend-BorderHover: @CmColor-Secondary-LightActiveHover;
 
-@ComCalendar-Today-Background: '';
+@ComCalendar-Today-Background: transparent;
 @ComCalendar-Today-BackgroundHover: @CmColor-Primary-LightActiveHover;
 @ComCalendar-Today-BorderSize: 2px;
 @ComCalendar-Today-Border: @CmColor-Primary-DarkDefault;
@@ -1005,6 +1013,11 @@
 // /* ******* VENDORS ******* */
 // /* ************************************************ */
 
+:root {
+		--pt-buttons--indent: @CmForm-ButtonsIndent;
+}
+
+
 // /* ************************************************ */
 // /* ******* MAGPIE UI: VARIABLES: ICONS ******* */
 // /* ************************************************ */
@@ -1045,7 +1058,7 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.38.2';
+@CmVersion: '3.40.0';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
@@ -1106,6 +1119,7 @@
 @CmUI-ShadowInner: 0 2px 2px rgba(0,0,0,0.4) inset;
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
+@CmUI-Shadow-BottomSmall: 0 1px 2px rgba(0,0,0,0.15);
 @CmUI-Shadow-Right: 2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Left: -2px 0 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Card: 0 1px 2px rgba(0,0,0,0.25);
@@ -1405,13 +1419,13 @@
 @CmFont-Base-LineHeight: 18px;
 @CmFont-Base-LineHeightSmall: 18px;
 @CmFont-Base-Family: @CmUI-GoogleFont, arial, helvetica, sans-serif;
-@CmFont-Base-Size: 13px;
-@CmFont-Base-SizeSmall: 11px;
+@CmFont-Base-Size: 14px;
+@CmFont-Base-SizeSmall: 12px;
 @CmFont-Base-Weight: @CmFont-Base-NormalWeight;
 @CmFont-Base-Color: @CmColor-Font;
 @CmFont-Base-ColorOpposite: @CmColor-Font-Opposite;
 
-@CmFont-Base-Hint-Size: 11px;
+@CmFont-Base-Hint-Size: 12px;
 @CmFont-Base-Hint-Color: @CmColor-Font-Hint;
 
 @CmFont-Placeholder-Size: inherit;
@@ -1426,8 +1440,8 @@
 @CmFont-UI-BoldWeight: 600;
 
 @CmFont-UI-LineHeight: 18px;
-@CmFont-UI-Size: 13px;
-@CmFont-UI-SizeSmall: 11px;
+@CmFont-UI-Size: 14px;
+@CmFont-UI-SizeSmall: 12px;
 @CmFont-UI-Family: @CmUI-GoogleFont, arial, helvetica, sans-serif;
 @CmFont-UI-Weight: @CmFont-UI-NormalWeight;
 @CmFont-UI-Color: @CmColor-Font;
@@ -1501,7 +1515,7 @@
 @CmForm-FieldIndent: @CmIndent-Small;
 @CmForm-FieldTitleWidth: 156px;
 @CmForm-FieldTitleWidthSpaceless: 128px;
-@CmForm-FieldInnerIndent: @CmForm-FieldIndent / 2;
+@CmForm-FieldInnerIndent: (@CmForm-FieldIndent / 2);
 @CmForm-FieldSmallWidth: 210px;
 @CmForm-ButtonsIndent: @CmIndent-XSmall;
 @CmForm-IconsIndent: @CmIndent-XXSmall;
@@ -1509,6 +1523,7 @@
 @CmForm-Cols-Names: one two three four five six seven eight nine ten;
 @CmForm-Cols-Indent: 2%;
 @CmForm-FilesList-Count: 3;
+@CmForm-FieldPlaceholder-Scale: 0.75;
 
 // /* ******* COUNTER ******* */
 
@@ -1612,7 +1627,7 @@
 
 @PtToolbar-GroupIndent: @CmIndent-Small;
 @PtToolbar-ItemIndent: @CmIndent-XXXSmall;
-@PtToolbar-ItemIndents: @CmUI-ColumnIndent;
+@PtToolbar-ItemIndents: @CmIndents;
 @PtToolbar-XXXSmall: 32px;
 @PtToolbar-XXSmall: 56px;
 @PtToolbar-XSmall: 76px;
@@ -1724,9 +1739,11 @@
 
 @PtOverlay-Default: @CmUI-Overlay;
 @PtOverlay-Light: @CmUI-Overlay-Light;
+@PtOverlay-SolidLight: #ffffff;
 @PtOverlay-Dark: @CmUI-Overlay-Dark;
 @PtOverlay-Duration: @CmUI-Overlay-Duration;
 @PtOverlay-Spinner-Size: @CmSize-Large;
+@PtOverlay-ZIndex: 1003;
 
 // /* ************************************************ */
 // /* ******* LAYOUTS ******* */
@@ -1786,7 +1803,7 @@
 @ComCalendar-Weekend-Border: @CmColor-Secondary-LightActive;
 @ComCalendar-Weekend-BorderHover: @CmColor-Secondary-LightActiveHover;
 
-@ComCalendar-Today-Background: '';
+@ComCalendar-Today-Background: transparent;
 @ComCalendar-Today-BackgroundHover: @CmColor-Primary-LightActiveHover;
 @ComCalendar-Today-BorderSize: 2px;
 @ComCalendar-Today-Border: @CmColor-Primary-DarkDefault;
@@ -2010,6 +2027,7 @@
 // /* ************************************************ */
 // /* ******* VENDORS ******* */
 // /* ************************************************ */
+
 
 // /* ************************************************ */
 // /* ******* QUICKSILK: VARIABLES: ICONS ******* */
@@ -2051,87 +2069,163 @@
 // /* *** BLOCK *** */
 
 @AppIcon-Block-Size: 90px;
-@AppIcon-Block-Names: default anchor button column menu divider spacer zone workingarea content logo googlemap tabs search blogcontent blogcategories blogroll blogblock blogarchive blogcalendar image imagegallery slider videogallery forum forum_build comment twitter socialmedia socialmedia_rating socialmedia_share login registration memberdirectory memberwidget filegridlist filegridlistwidget webexmeetings events eventscalendar latestevents flickr languageswitcher d3 rss breadcrumb breadcrumbs form_builder rollover-tabs mobile-menu;
+@AppIcon-Block-Indent: 24px;
+
+// /* Column 1 */
+@AppIcon-Block-Names-Column1: default zone workingarea column element_column divider element_divider spacer element_spacer menu dashboard mobile-menu tabs rollover-tabs sticky flip-cards structure-block spoiler;
 
 @AppIcon-Block-default: 0;
-@AppIcon-Block-anchor: 1;
+@AppIcon-Block-zone: 1;
+@AppIcon-Block-workingarea: 1;
 @AppIcon-Block-column: 2;
-@AppIcon-Block-menu: 3;
-@AppIcon-Block-divider: 4;
-@AppIcon-Block-spacer: 5;
-@AppIcon-Block-zone: 6;
-@AppIcon-Block-workingarea: 6;
-@AppIcon-Block-content: 7;
-@AppIcon-Block-logo: 8;
-@AppIcon-Block-googlemap: 9;
-@AppIcon-Block-tabs: 10;
-@AppIcon-Block-search: 11;
-@AppIcon-Block-blogcontent: 12;
-@AppIcon-Block-blogcategories: 13;
-@AppIcon-Block-blogroll: 14;
-@AppIcon-Block-blogblock: 15;
-@AppIcon-Block-blogarchive: 16;
-@AppIcon-Block-blogcalendar: 17;
-@AppIcon-Block-image: 18;
-@AppIcon-Block-imagegallery: 19;
-@AppIcon-Block-slider: 20;
-@AppIcon-Block-videogallery: 21;
-@AppIcon-Block-forum: 22;
-@AppIcon-Block-forum_build: 23;
-@AppIcon-Block-comment: 24;
-@AppIcon-Block-twitter: 25;
-@AppIcon-Block-socialmedia: 26;
-@AppIcon-Block-socialmedia_rating: 26;
-@AppIcon-Block-socialmedia_share: 26;
-@AppIcon-Block-login: 27;
-@AppIcon-Block-registration: 28;
-@AppIcon-Block-memberdirectory: 29;
-@AppIcon-Block-memberwidget: 30;
-@AppIcon-Block-filegridlist: 31;
-@AppIcon-Block-filegridlistwidget: 32;
-@AppIcon-Block-webexmeetings: 33;
-@AppIcon-Block-events: 34;
-@AppIcon-Block-eventscalendar: 35;
-@AppIcon-Block-latestevents: 36;
-@AppIcon-Block-flickr: 37;
-@AppIcon-Block-languageswitcher: 38;
-@AppIcon-Block-d3: 39;
-@AppIcon-Block-rss: 40;
-@AppIcon-Block-breadcrumb: 41;
-@AppIcon-Block-breadcrumbs: 41;
-@AppIcon-Block-button: 42;
-@AppIcon-Block-form_builder: 56;
-@AppIcon-Block-rollover-tabs: 57;
-@AppIcon-Block-mobile-menu: 3;
+@AppIcon-Block-element_column: 2;
+@AppIcon-Block-divider: 3;
+@AppIcon-Block-element_divider: 3;
+@AppIcon-Block-spacer: 4;
+@AppIcon-Block-element_spacer: 4;
+@AppIcon-Block-menu: 5;
+@AppIcon-Block-mobile-menu: 5;
+@AppIcon-Block-dashboard: 5;
+@AppIcon-Block-tabs: 6;
+@AppIcon-Block-rollover-tabs: 7;
+@AppIcon-Block-sticky: 8;
+@AppIcon-Block-flip-cards: 9;
+@AppIcon-Block-structure-block: 10;
+@AppIcon-Block-spoiler: 11;
 
-@AppIcon-Block-Element-Names: button column content divider spacer input text password hidden select checkbox radiobutton textarea wysiwyg multicheckbox captcha imagebrowser fileuploader datepicker timepicker;
+// /* Column 2 */
+@AppIcon-Block-Names-Column2: search login registration content element_content anchor googlemap languageswitcher rss breadcrumb breadcrumbs form_builder;
 
-@AppIcon-Block-Element-button: 42;
-@AppIcon-Block-Element-column: 2;
-@AppIcon-Block-Element-content: 7;
-@AppIcon-Block-Element-divider: 4;
-@AppIcon-Block-Element-spacer: 5;
-@AppIcon-Block-Element-input: 43;
-@AppIcon-Block-Element-text: 43;
-@AppIcon-Block-Element-password: 44;
-@AppIcon-Block-Element-hidden: 45;
-@AppIcon-Block-Element-select: 46;
-@AppIcon-Block-Element-checkbox: 47;
-@AppIcon-Block-Element-radiobutton: 48;
-@AppIcon-Block-Element-multicheckbox: 49;
-@AppIcon-Block-Element-textarea: 50;
-@AppIcon-Block-Element-wysiwyg: 51;
-@AppIcon-Block-Element-captcha: 52;
-@AppIcon-Block-Element-imagebrowser: 53;
-@AppIcon-Block-Element-fileuploader: 53;
-@AppIcon-Block-Element-timepicker: 54;
-@AppIcon-Block-Element-datepicker: 55;
+@AppIcon-Block-search: 0;
+@AppIcon-Block-login: 1;
+@AppIcon-Block-registration: 2;
+@AppIcon-Block-content: 3;
+@AppIcon-Block-element_content: 3;
+@AppIcon-Block-anchor: 4;
+@AppIcon-Block-googlemap: 5;
+@AppIcon-Block-languageswitcher: 6;
+@AppIcon-Block-rss: 7;
+@AppIcon-Block-breadcrumb: 8;
+@AppIcon-Block-breadcrumbs: 8;
+@AppIcon-Block-form_builder: 9;
+
+// /* Column 3 */
+@AppIcon-Block-Names-Column3: image imagegallery portfolio slider logocarousel videogallery logo;
+
+@AppIcon-Block-image: 0;
+@AppIcon-Block-imagegallery: 1;
+@AppIcon-Block-portfolio: 1;
+@AppIcon-Block-slider: 2;
+@AppIcon-Block-logocarousel: 2;
+@AppIcon-Block-videogallery: 3;
+@AppIcon-Block-logo: 4;
+
+// /* Column 4 */
+@AppIcon-Block-Names-Column4: blogcontent blogcategories blogroll blogblock blogarchive blogcalendar blognavigation;
+
+@AppIcon-Block-blogcontent: 0;
+@AppIcon-Block-blogcategories: 1;
+@AppIcon-Block-blogroll: 2;
+@AppIcon-Block-blogblock: 3;
+@AppIcon-Block-blogarchive: 4;
+@AppIcon-Block-blogcalendar: 5;
+@AppIcon-Block-blognavigation: 6;
+
+// /* Column 5 */
+@AppIcon-Block-Names-Column5: forum forum_build comment testimonials twitter socialmedia socialmedia_rating socialmedia_share social-aggregator memberdirectory memberwidget workinggroups faqmanager;
+
+@AppIcon-Block-forum: 0;
+@AppIcon-Block-forum_build: 1;
+@AppIcon-Block-comment: 2;
+@AppIcon-Block-testimonials: 2;
+@AppIcon-Block-twitter: 3;
+@AppIcon-Block-socialmedia: 4;
+@AppIcon-Block-socialmedia_rating: 4;
+@AppIcon-Block-socialmedia_share: 4;
+@AppIcon-Block-social-aggregator: 4;
+@AppIcon-Block-memberdirectory: 5;
+@AppIcon-Block-memberwidget: 6;
+@AppIcon-Block-workinggroups: 7;
+@AppIcon-Block-faqmanager: 8;
+
+// /* Column 6 */
+@AppIcon-Block-Names-Column6: events latestevents eventscalendar bigcalendar eventscategories calendarfilter;
+
+@AppIcon-Block-events: 0;
+@AppIcon-Block-latestevents: 1;
+@AppIcon-Block-eventscalendar: 2;
+@AppIcon-Block-bigcalendar: 3;
+@AppIcon-Block-eventscategories: 4;
+@AppIcon-Block-calendarfilter: 5;
+
+// /* Column 7 */
+@AppIcon-Block-Names-Column7: filegridlist filegridlistwidget listing-widget directory listing-pins listing-filter directoryfilter viewsubmission ecommerce-cart shopify-cart ecommerce-orders ecommerce-directory shopify-products ecommerce-product shopify-product;
+
+@AppIcon-Block-filegridlist: 0;
+@AppIcon-Block-filegridlistwidget: 1;
+@AppIcon-Block-listing-widget: 2;
+@AppIcon-Block-directory: 2;
+@AppIcon-Block-listing-pins: 3;
+@AppIcon-Block-listing-filter: 4;
+@AppIcon-Block-directoryfilter: 4;
+@AppIcon-Block-viewsubmission: 5;
+@AppIcon-Block-ecommerce-cart: 6;
+@AppIcon-Block-shopify-cart: 6;
+@AppIcon-Block-ecommerce-orders: 7;
+@AppIcon-Block-ecommerce-directory: 8;
+@AppIcon-Block-shopify-products: 8;
+@AppIcon-Block-ecommerce-product: 9;
+@AppIcon-Block-shopify-product: 9;
+
+// /* Column 8 */
+@AppIcon-Block-Names-Column8: button element_button element_input element_text element_password element_hidden element_select element_checkbox element_radiobutton element_multicheckbox element_timepicker element_datepicker;
+
+@AppIcon-Block-button: 0;
+@AppIcon-Block-element_button: 0;
+@AppIcon-Block-element_input: 1;
+@AppIcon-Block-element_text: 1;
+@AppIcon-Block-element_password: 2;
+@AppIcon-Block-element_hidden: 3;
+@AppIcon-Block-element_select: 4;
+@AppIcon-Block-element_checkbox: 5;
+@AppIcon-Block-element_radiobutton: 6;
+@AppIcon-Block-element_multicheckbox: 7;
+@AppIcon-Block-element_timepicker: 8;
+@AppIcon-Block-element_datepicker: 9;
+
+// /* Column 9 */
+@AppIcon-Block-Names-Column9: element_textarea element_wysiwyg element_captcha element_recaptcha element_imagebrowser element_fileuploader element_multifield element_wizard;
+
+@AppIcon-Block-element_textarea: 0;
+@AppIcon-Block-element_wysiwyg: 1;
+@AppIcon-Block-element_captcha: 2;
+@AppIcon-Block-element_recaptcha: 2;
+@AppIcon-Block-element_imagebrowser: 3;
+@AppIcon-Block-element_fileuploader: 3;
+@AppIcon-Block-element_multifield: 4;
+@AppIcon-Block-element_wizard: 5;
+
+// /* Column 10 */
+@AppIcon-Block-Names-Column10: d3 webexmeetings hubspot hubspot-blog hubspot-form klipfolio instagram flickr quicksilksignup-link quicksilksignup-product templatelist;
+
+@AppIcon-Block-d3: 0;
+@AppIcon-Block-webexmeetings: 1;
+@AppIcon-Block-hubspot: 2;
+@AppIcon-Block-hubspot-blog: 2;
+@AppIcon-Block-hubspot-form: 2;
+@AppIcon-Block-klipfolio: 3;
+@AppIcon-Block-instagram: 4;
+@AppIcon-Block-flickr: 5;
+@AppIcon-Block-quicksilksignup-link: 6;
+@AppIcon-Block-quicksilksignup-product: 6;
+@AppIcon-Block-templatelist: 6;
+
 
 // /* ************************************************ */
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.31.2';
+@AppVersion: '3.34.0';
 
 // /* ******* PATH ******* */
 
@@ -2556,6 +2650,13 @@
 @ModSignup-Separator-Border: @CmBorder-Default;
 @ModSignup-Separator-Indent: @CmIndent-Medium;
 
+@ModSignupLight-MenuHeight: 50px;
+@ModSignupLight-Background: #ffffff;
+@ModSignupLight-Accent: #e36a0d;
+@ModSignupLight-BorderDefault: #e2e2e2;
+@ModSignupLight-BorderActive: #888888;
+@ModSignupLight-TemplateIndent: 60px;
+
 // /* ******* CALENDAR ******* */
 
 @ModCalendar-BorderWidth: @CmBorder-Width;
@@ -2652,6 +2753,7 @@
 // /* ******* COMPONENTS ******* */
 
 @ComImageInput-CoverDelay: @CmUI-Transition-Delay-Hide;
+
 
 // /* ************************************************ */
 // /* ******* PATH ******* */

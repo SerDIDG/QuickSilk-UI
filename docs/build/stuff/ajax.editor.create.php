@@ -10,7 +10,9 @@ $config = array(
 	'type' => $_POST['type'],
 	'keyword' => $_POST['keyword'],
 	'locked' => false,
-	'sticky' => $_POST['keyword'] == 'sticky' ? true : false
+	'sticky' => $_POST['keyword'] == 'sticky' ? true : false,
+    'animated' => true,
+    'effect' => 'fadeIn'
 );
 if(!empty($_POST['instanceId']) && $_POST['instanceId'] != 'false'){
 	$config['instanceId'] = $_POST['instanceId'];
