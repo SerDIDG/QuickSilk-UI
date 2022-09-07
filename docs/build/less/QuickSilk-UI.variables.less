@@ -1,5 +1,7 @@
 :root {
-		--pt-buttons--indent: @CmForm-ButtonsIndent;
+    --pt-buttons--indent: @CmForm-ButtonsIndent;
+
+    --pt-field--title-width: @CmForm-FieldTitleWidth;
 }
 
 
@@ -43,7 +45,7 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.40.0';
+@CmVersion: '3.40.39';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
@@ -102,6 +104,7 @@
 @CmUI-Shadow: 0 0 8px rgba(0, 0, 0, 0.15);
 @CmUI-ShadowLight: 0 0 2px rgba(0,0,0,0.2);
 @CmUI-ShadowInner: 0 2px 2px rgba(0,0,0,0.4) inset;
+@CmUI-Shadow-Top: 0 -2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-BottomSmall: 0 1px 2px rgba(0,0,0,0.15);
@@ -110,8 +113,10 @@
 @CmUI-Shadow-Card: 0 1px 2px rgba(0,0,0,0.25);
 @CmUI-Overlay: @CmUI-Overlay-Light;
 @CmUI-Overlay-Fade: 0.7;
+@CmUI-Overlay-FadeHeight: 0.9;
 @CmUI-Overlay-FadeMedium: 0.3;
 @CmUI-Overlay-FadeP: 70%;
+@CmUI-Overlay-FadeHeightP: 90%;
 @CmUI-Overlay-FadeMediumP: 30%;
 @CmUI-Overlay-Dark: rgba(0, 0, 0, @CmUI-Overlay-Fade);
 @CmUI-Overlay-Light: rgba(255, 255, 255, @CmUI-Overlay-Fade);
@@ -554,6 +559,8 @@
 // /* ******* LINKS ******* */
 
 @PtLinks-Indent: @CmIndent-XXXSmall;
+@PtLinks-Separator: '|';
+@PtLinks-Separator-Color: @CmFont-Base-Color;
 
 // /* ******* IMAGE ******* */
 
@@ -639,6 +646,7 @@
 @PtGridlist-Cell-SpaceSize: 1px;
 @PtGridlist-Cell-SpaceBorder: @PtGridlist-Cell-SpaceSize solid transparent;
 @PtGridlist-Cell-FontSize: @PtGridlist-FontSize;
+@PtGridlist-Cell-LineHeight: @CmFont-UI-LineHeight;
 @PtGridlist-Cell-DefaultBackground: @CmColor-Primary-LightDefault;
 @PtGridlist-Cell-HoverBackground: @CmColor-Primary-LightHover;
 @PtGridlist-Cell-ActiveBackground: @CmColor-Primary-LightActive;
@@ -1014,7 +1022,9 @@
 // /* ************************************************ */
 
 :root {
-		--pt-buttons--indent: @CmForm-ButtonsIndent;
+    --pt-buttons--indent: @CmForm-ButtonsIndent;
+
+    --pt-field--title-width: @CmForm-FieldTitleWidth;
 }
 
 
@@ -1058,7 +1068,7 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.40.0';
+@CmVersion: '3.40.39';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
@@ -1117,6 +1127,7 @@
 @CmUI-Shadow: 0 0 8px rgba(0, 0, 0, 0.15);
 @CmUI-ShadowLight: 0 0 2px rgba(0,0,0,0.2);
 @CmUI-ShadowInner: 0 2px 2px rgba(0,0,0,0.4) inset;
+@CmUI-Shadow-Top: 0 -2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-BottomSmall: 0 1px 2px rgba(0,0,0,0.15);
@@ -1125,8 +1136,10 @@
 @CmUI-Shadow-Card: 0 1px 2px rgba(0,0,0,0.25);
 @CmUI-Overlay: @CmUI-Overlay-Light;
 @CmUI-Overlay-Fade: 0.7;
+@CmUI-Overlay-FadeHeight: 0.9;
 @CmUI-Overlay-FadeMedium: 0.3;
 @CmUI-Overlay-FadeP: 70%;
+@CmUI-Overlay-FadeHeightP: 90%;
 @CmUI-Overlay-FadeMediumP: 30%;
 @CmUI-Overlay-Dark: rgba(0, 0, 0, @CmUI-Overlay-Fade);
 @CmUI-Overlay-Light: rgba(255, 255, 255, @CmUI-Overlay-Fade);
@@ -1569,6 +1582,8 @@
 // /* ******* LINKS ******* */
 
 @PtLinks-Indent: @CmIndent-XXXSmall;
+@PtLinks-Separator: '|';
+@PtLinks-Separator-Color: @CmFont-Base-Color;
 
 // /* ******* IMAGE ******* */
 
@@ -1654,6 +1669,7 @@
 @PtGridlist-Cell-SpaceSize: 1px;
 @PtGridlist-Cell-SpaceBorder: @PtGridlist-Cell-SpaceSize solid transparent;
 @PtGridlist-Cell-FontSize: @PtGridlist-FontSize;
+@PtGridlist-Cell-LineHeight: @CmFont-UI-LineHeight;
 @PtGridlist-Cell-DefaultBackground: @CmColor-Primary-LightDefault;
 @PtGridlist-Cell-HoverBackground: @CmColor-Primary-LightHover;
 @PtGridlist-Cell-ActiveBackground: @CmColor-Primary-LightActive;
@@ -2072,7 +2088,7 @@
 @AppIcon-Block-Indent: 24px;
 
 // /* Column 1 */
-@AppIcon-Block-Names-Column1: default zone workingarea column element_column divider element_divider spacer element_spacer menu dashboard mobile-menu tabs rollover-tabs sticky flip-cards structure-block spoiler;
+@AppIcon-Block-Names-Column1: default zone workingarea column element_column divider element_divider spacer element_spacer menu dashboard mobile-menu mobile_menu tabs rollover-tabs sticky flip-cards structure-block spoiler;
 
 @AppIcon-Block-default: 0;
 @AppIcon-Block-zone: 1;
@@ -2085,6 +2101,7 @@
 @AppIcon-Block-element_spacer: 4;
 @AppIcon-Block-menu: 5;
 @AppIcon-Block-mobile-menu: 5;
+@AppIcon-Block-mobile_menu: 5;
 @AppIcon-Block-dashboard: 5;
 @AppIcon-Block-tabs: 6;
 @AppIcon-Block-rollover-tabs: 7;

@@ -133,7 +133,8 @@ module.exports = function(grunt) {
                     '<%= components.application.styles %>',
                     '<%= paths.src %>/less/variables/*.less',
                     '<%= paths.src %>/less/main.less',
-                    '<%= paths.src %>/less/docs.less'
+                    '<%= paths.src %>/less/docs.less',
+                    '<%= paths.src %>/less/**/*.less'
                 ],
                 dest : '<%= paths.build %>/less/<%= pkg.name %>.less'
             },

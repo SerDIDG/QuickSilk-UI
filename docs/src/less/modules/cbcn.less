@@ -1,0 +1,64 @@
+.mod__cbcn-patient-path {
+    .app-pt__box-title {
+        text-align: center;
+    }
+
+    .app-mod__menu.patient-path__menu {
+        .pt__box-content;
+        position: sticky;
+        top: 0;
+
+        > ul {
+            flex-flow: row nowrap;
+            border: @CmBorder-Default;
+
+            > li {
+                flex: 1;
+                background: @CmColor-Primary-DarkDefault;
+
+                & + li {
+                    border-left: @CmBorder-Default;
+                }
+
+                > a {
+                    height: 100%;
+                    padding: 6px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    white-space: normal;
+                    line-height: @AppFont-Default-LineHeight;
+                    font-size: (@AppFont-Default-Size + 4px);
+                    color: @CmColor-Font-Opposite;
+                }
+
+                &:hover, &:focus {
+                    background: @CmColor-Primary-DarkHover;
+                }
+
+                &.active {
+                    background: @ComTabset-Tabs-ActiveBackground;
+
+                    > a {
+                        .mx__only__color(@ComTabset-Tabs-ActiveBackground, @CmFont-Base-Color, @CmFont-Base-ColorOpposite);
+                    }
+                }
+            }
+        }
+    }
+
+    .patient-path__section {
+        .pt__box-content;
+    }
+
+    .patient-path__section__anchor {
+        position: relative;
+        top: -100px;
+    }
+
+    .patient-path__section__content {
+        .cm__tags {
+            margin: 0;
+        }
+    }
+}
