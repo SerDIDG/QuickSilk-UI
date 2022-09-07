@@ -7,6 +7,10 @@
         .pt__box-content;
         position: sticky;
         top: 0;
+        .app-mod__menu__indent(0px);
+        .app-mod__menu__select-size(@CmForm-FieldHeight);
+        .app-mod__menu__select-color(@CmFont-Base-ColorOpposite);
+        .app-mod__menu__select-background(@CmColor-Primary-DarkDefault);
 
         > ul {
             flex-flow: row nowrap;
@@ -45,6 +49,10 @@
                 }
             }
         }
+
+        .menu-button {
+            .icon.medium.menu-white;
+        }
     }
 
     .patient-path__section {
@@ -59,6 +67,16 @@
     .patient-path__section__content {
         .cm__tags {
             margin: 0;
+        }
+    }
+}
+
+/* ******* ADAPTIVE ******* */
+
+@media only screen and (max-width : @CmUI-AdaptiveFrom) {
+    .mod__cbcn-patient-path {
+        .patient-path__section__anchor {
+            top: -@CmForm-FieldHeight;
         }
     }
 }
