@@ -7,6 +7,7 @@
         .pt__box-content;
         position: sticky;
         top: 0;
+        z-index: 10;
         .app-mod__menu__indent(0px);
         .app-mod__menu__select-size(@CmForm-FieldHeight);
         .app-mod__menu__select-color(@CmFont-Base-ColorOpposite);
@@ -55,13 +56,34 @@
         }
     }
 
+    .patient-path__selection {
+        .pt__box-content;
+
+        dl {
+            margin: 0;
+
+            dt {
+                display: inline;
+                margin: 0 @CmIndent-XXSmall 0 0;
+                padding: 0;
+                font-weight: bold;
+            }
+
+            dd {
+                display: inline;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    }
+
     .patient-path__section {
         .pt__box-content;
     }
 
     .patient-path__section__anchor {
         position: relative;
-        top: -100px;
+        top: -(@AppFont-Default-LineHeight * 3 + (@CmBorder-Width + 6px) * 2 + @CmIndent-Medium);
     }
 
     .patient-path__section__content {
@@ -76,7 +98,7 @@
 @media only screen and (max-width : @CmUI-AdaptiveFrom) {
     .mod__cbcn-patient-path {
         .patient-path__section__anchor {
-            top: -@CmForm-FieldHeight;
+            top: -(@CmForm-FieldHeight + @CmIndent-Medium);
         }
     }
 }
