@@ -120,6 +120,7 @@ module.exports = function(grunt) {
                     '<%= components.common.scripts %>',
                     '<%= components.application.scripts %>',
                     '<%= paths.build %>/js/<%= pkg.name %>.variables.js',
+                    '<%= paths.src %>/js/modules/**/*.js',
                     '<%= paths.src %>/js/**/*.js'
                 ],
                 dest : '<%= paths.build %>/js/<%= pkg.name %>.js'

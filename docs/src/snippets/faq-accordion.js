@@ -4,7 +4,7 @@ $(function(){
     function init(){
         var nodes = document.querySelectorAll('.lt__faq');
         cm.forEach(nodes, collect);
-    };
+    }
 
     function collect(node){
         var items = [];
@@ -17,8 +17,8 @@ $(function(){
                     }
                 });
             });
-        }, {'multiple' : true});
-    };
+        }, {'multiple': true});
+    }
 
     init();
 });

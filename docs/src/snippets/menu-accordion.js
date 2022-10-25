@@ -6,7 +6,7 @@ $(function(){
     function init(){
         var nodes = document.querySelectorAll('.app-mod__menu.vertical.theme__menu-icon');
         cm.forEach(nodes, collect);
-    };
+    }
 
     function collect(node){
         var dropdowns = node.querySelectorAll('li.has-dropdown');
@@ -57,7 +57,7 @@ $(function(){
                 });
             });
         }
-    };
+    }
 
     function hide(item){
         if(!item.isProcessing && item.isVisible){
@@ -74,7 +74,7 @@ $(function(){
                 });
             });
         }
-    };
+    }
 
     init();
 });

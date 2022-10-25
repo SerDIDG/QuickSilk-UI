@@ -1,13 +1,101 @@
-.mod__cbcn-patient-path {
+:root {
+    @top: -(@AppFont-Default-LineHeight * 3 + (@CmBorder-Width + 6px) * 2 + @CmIndent-Medium);
+    --module-pathways--anchor-top: @top;
+}
+
+.module__pathways {
     .app-pt__box-title {
         text-align: center;
     }
 
-    .app-mod__menu.patient-path__menu {
-        .pt__box-content;
+    .form {
+        .pt__box-title {
+            .required-icon {
+                color: @CmColor-Primary-DarkDefault;
+            }
+        }
+
+        .com__select-multi {
+            .inner {
+                padding: 0;
+                background: transparent;
+                border: none;
+            }
+
+            .pt__listing-items {
+                ul {
+                    max-height: none;
+                    margin-top: 8px;
+
+                    li {
+                        margin: 0 8px 8px 0;
+                        display: inline-block;
+                        position: relative;
+                        background: #ffffff;
+                        border: @CmBorder-Separator;
+
+                        > a {
+                            padding: 12px 24px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .table-respons {
+        .com__tabset {
+            &.is-tabs-top {
+                > .com__tabset__head-tabs {
+                    ul {
+                        padding: 0;
+
+                        li {
+                            margin: 0 -1px 0 0;
+                        }
+                    }
+                }
+            }
+
+            > .com__tabset__head-tabs {
+                ul {
+                    li {
+                        background: @CmColor-Primary-DarkDefault;
+
+                        a {
+                            height: 100%;
+                            padding: 6px 6px;
+                            line-height: @AppFont-Default-LineHeight;
+                            font-size: @AppFont-Default-Size + 4;
+                            color: @CmColor-Font-Opposite;
+
+                            .title {
+                                white-space: normal;
+                            }
+                        }
+
+                        &:hover {
+                            background: darken(@CmColor-Primary-DarkDefault, 10%);
+                        }
+
+                        &.active {
+                            background: @ComTabset-Tabs-ActiveBackground;
+
+                            a {
+                                .mx__only__color(@ComTabset-Tabs-ActiveBackground, @CmFont-Base-Color, @CmFont-Base-ColorOpposite);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .pathways__menu.app-mod__menu {
+        margin-bottom: @PtBoxContent-Indent;
         position: sticky;
         top: 0;
-        z-index: 10;
+        z-index: 20;
         .app-mod__menu__indent(0px);
         .app-mod__menu__select-size(@CmForm-FieldHeight);
         .app-mod__menu__select-color(@CmFont-Base-ColorOpposite);
@@ -56,8 +144,8 @@
         }
     }
 
-    .patient-path__selection {
-        .pt__box-content;
+    .pathways__selection {
+        margin-bottom: @PtBoxContent-Indent;
 
         h4 {
             margin: 0;
@@ -85,16 +173,18 @@
         }
     }
 
-    .patient-path__section {
-        .pt__box-content;
+    .pathways__section {
+        &:not(:last-child) {
+            padding-bottom: @PtBoxContent-Indent;
+        }
     }
 
-    .patient-path__section__anchor {
+    .pathways__section__anchor {
         position: relative;
-        top: -(@AppFont-Default-LineHeight * 3 + (@CmBorder-Width + 6px) * 2 + @CmIndent-Medium);
+        top: var(--module-pathways--anchor-top);
     }
 
-    .patient-path__section__content {
+    .pathways__section__content {
         .cm__tags {
             margin: 0;
         }
@@ -104,9 +194,8 @@
 /* ******* ADAPTIVE ******* */
 
 @media only screen and (max-width : @CmUI-AdaptiveFrom) {
-    .mod__cbcn-patient-path {
-        .patient-path__section__anchor {
-            top: -(@CmForm-FieldHeight + @CmIndent-Medium);
-        }
+    :root {
+        @top: -(@CmForm-FieldHeight + @CmIndent-Medium);
+        --module-pathways--anchor-top: @top;
     }
 }

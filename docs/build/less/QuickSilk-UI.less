@@ -1,5 +1,5 @@
-/*! ************ QuickSilk-UI v3.13.4 ************ */
-/*! ************ MagpieUI v3.40.39 (2022-09-10 00:02) ************ */
+/*! ************ QuickSilk-UI v3.14.0 ************ */
+/*! ************ MagpieUI v3.42.0 (2022-10-25 12:49) ************ */
 @charset "UTF-8";/*!
  * animate.css - https://animate.style/
  * Version - 4.1.1
@@ -4585,7 +4585,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.40.39';
+@CmVersion: '3.42.0';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
@@ -5165,6 +5165,7 @@ span.CodeMirror-selectedtext { background: none; }
 @PtToolbar-XSmall: 76px;
 @PtToolbar-Small: 100px;
 @PtToolbar-Medium: 150px;
+@PtToolbar-Default: 200px;
 @PtToolbar-Large: 250px;
 @PtToolbar-XLarge: 350px;
 
@@ -10149,6 +10150,12 @@ button {
                 display: flex;
                 .mx__flex-direction(column);
                 .mx__justify-content(center);
+
+                &.column--flex-column {
+                    > .inner {
+                        .mx__justify-content(center);
+                    }
+                }
             }
         }
     }
@@ -13361,7 +13368,8 @@ ul.pt__field__hint {
             }
 
             > a,
-            > .inner {
+            > .inner,
+            > .text {
                 //&:extend(.cm__link all);
                 display: block;
                 padding: @PtListingItems-PaddingY @PtListingItems-PaddingX;
@@ -13384,6 +13392,10 @@ ul.pt__field__hint {
                 &:hover {
                     text-decoration: none;
                     .mx__transition(all, @CmUI-Transition-DurationReverse);
+                }
+
+                &.disabled {
+                    color: @CmColor-Font-Disabled;
                 }
             }
 
@@ -13412,7 +13424,7 @@ ul.pt__field__hint {
                 > a,
                 > .inner {
                     background-color: @CmColor-Secondary-LightHighlight;
-                    color: @CmColor-Font-Placeholder;
+                    color: @CmColor-Font-Disabled;
                 }
             }
 
@@ -13454,6 +13466,16 @@ ul.pt__field__hint {
                 > a,
                 > .inner {
                     cursor: default;
+                }
+            }
+        }
+    }
+
+    &.is-nowrap {
+        ul {
+            li {
+                > a {
+                    .cm__text-nowrap;
                 }
             }
         }
@@ -14188,6 +14210,11 @@ ul.pt__field__hint {
             &.size-medium,
             &.medium {
                 width: @PtToolbar-Medium;
+            }
+
+            &.size-default,
+            &.default {
+                width: @PtToolbar-Default;
             }
 
             &.size-large,
@@ -20232,7 +20259,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.34.0 (2022-09-10 00:03) ************ */
+/*! ************ QuickSilk-Application v3.35.0 (2022-10-25 12:49) ************ */
 .svg__app__arrow-right { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2217px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(0%2C%200%2C%200)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M7.209%2C1.86%20C6.871%2C1.420%206.878%2C1.964%207.223%2C2.291%20L11.459%2C6.327%20L1.355%2C6.327%20C0.888%2C6.327%200.512%2C6.704%200.512%2C7.171%20L0.512%2C8.296%20C0.512%2C8.764%200.888%2C9.140%201.355%2C9.140%20L11.459%2C9.140%20L7.223%2C13.176%20C6.882%2C13.503%206.875%2C14.48%207.209%2C14.382%20L7.989%2C15.162%20C8.316%2C15.493%208.851%2C15.493%209.181%2C15.162%20L16.15%2C8.328%20C16.346%2C8.1%2016.346%2C7.466%2016.15%2C7.136%20L9.181%2C0.305%20C8.854%2C0.24%208.320%2C0.24%207.989%2C0.305%20L7.209%2C1.86%20Z%22%2F%3E%3C%2Fsvg%3E"); }
 .svg__app__check-orange { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2221px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(226%2C%20106%2C%2013)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M20.399%2C3.378%20L11.207%2C12.571%20L11.207%2C12.571%20L8.378%2C15.399%20L5.550%2C12.571%20L5.550%2C12.571%20L0.600%2C7.621%20L3.428%2C4.792%20L8.378%2C9.742%20L17.571%2C0.550%20L20.399%2C3.378%20Z%22%2F%3E%3C%2Fsvg%3E"); }
 .svg__app__logo { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E"); }
@@ -20435,7 +20462,7 @@ ul.pt__field__hint {
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.34.0';
+@AppVersion: '3.35.0';
 
 // /* ******* PATH ******* */
 
@@ -30402,8 +30429,8 @@ html {
 // /* ******* FONT ******* */
 
 @AppFont-Default-Family: Quicksand, sans-serif;
-@AppFont-Default-LineHeight: 18px;
-@AppFont-Default-Size: 13px;
+@AppFont-Default-LineHeight: 24px;
+@AppFont-Default-Size: 14px;
 @AppFont-Default-Weight: 400;
 @AppFont-Default-Color: #666666;
 
@@ -30448,16 +30475,16 @@ html {
 @AppFont-H5-Style: normal;
 
 @AppFont-H6-Family: Quicksand, sans-serif;
-@AppFont-H6-LineHeight: 18px;
-@AppFont-H6-Size: 12px;
+@AppFont-H6-LineHeight: 24px;
+@AppFont-H6-Size: 14px;
 @AppFont-H6-Weight: 600;
 @AppFont-H6-Color: #666666;
 @AppFont-H6-Decoration: none;
 @AppFont-H6-Style: normal;
 
 @AppFont-P-Family: Quicksand, sans-serif;
-@AppFont-P-LineHeight: 18px;
-@AppFont-P-Size: 13px;
+@AppFont-P-LineHeight: 24px;
+@AppFont-P-Size: 14px;
 @AppFont-P-Weight: 400;
 @AppFont-P-Color: #666666;
 @AppFont-P-Decoration: none;
@@ -30577,16 +30604,104 @@ html {
         overflow: auto;
     }
 }
-.mod__cbcn-patient-path {
+:root {
+    @top: -(@AppFont-Default-LineHeight * 3 + (@CmBorder-Width + 6px) * 2 + @CmIndent-Medium);
+    --module-pathways--anchor-top: @top;
+}
+
+.module__pathways {
     .app-pt__box-title {
         text-align: center;
     }
 
-    .app-mod__menu.patient-path__menu {
-        .pt__box-content;
+    .form {
+        .pt__box-title {
+            .required-icon {
+                color: @CmColor-Primary-DarkDefault;
+            }
+        }
+
+        .com__select-multi {
+            .inner {
+                padding: 0;
+                background: transparent;
+                border: none;
+            }
+
+            .pt__listing-items {
+                ul {
+                    max-height: none;
+                    margin-top: 8px;
+
+                    li {
+                        margin: 0 8px 8px 0;
+                        display: inline-block;
+                        position: relative;
+                        background: #ffffff;
+                        border: @CmBorder-Separator;
+
+                        > a {
+                            padding: 12px 24px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .table-respons {
+        .com__tabset {
+            &.is-tabs-top {
+                > .com__tabset__head-tabs {
+                    ul {
+                        padding: 0;
+
+                        li {
+                            margin: 0 -1px 0 0;
+                        }
+                    }
+                }
+            }
+
+            > .com__tabset__head-tabs {
+                ul {
+                    li {
+                        background: @CmColor-Primary-DarkDefault;
+
+                        a {
+                            height: 100%;
+                            padding: 6px 6px;
+                            line-height: @AppFont-Default-LineHeight;
+                            font-size: @AppFont-Default-Size + 4;
+                            color: @CmColor-Font-Opposite;
+
+                            .title {
+                                white-space: normal;
+                            }
+                        }
+
+                        &:hover {
+                            background: darken(@CmColor-Primary-DarkDefault, 10%);
+                        }
+
+                        &.active {
+                            background: @ComTabset-Tabs-ActiveBackground;
+
+                            a {
+                                .mx__only__color(@ComTabset-Tabs-ActiveBackground, @CmFont-Base-Color, @CmFont-Base-ColorOpposite);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .pathways__menu.app-mod__menu {
+        margin-bottom: @PtBoxContent-Indent;
         position: sticky;
         top: 0;
-        z-index: 10;
+        z-index: 20;
         .app-mod__menu__indent(0px);
         .app-mod__menu__select-size(@CmForm-FieldHeight);
         .app-mod__menu__select-color(@CmFont-Base-ColorOpposite);
@@ -30635,8 +30750,8 @@ html {
         }
     }
 
-    .patient-path__selection {
-        .pt__box-content;
+    .pathways__selection {
+        margin-bottom: @PtBoxContent-Indent;
 
         h4 {
             margin: 0;
@@ -30664,16 +30779,18 @@ html {
         }
     }
 
-    .patient-path__section {
-        .pt__box-content;
+    .pathways__section {
+        &:not(:last-child) {
+            padding-bottom: @PtBoxContent-Indent;
+        }
     }
 
-    .patient-path__section__anchor {
+    .pathways__section__anchor {
         position: relative;
-        top: -(@AppFont-Default-LineHeight * 3 + (@CmBorder-Width + 6px) * 2 + @CmIndent-Medium);
+        top: var(--module-pathways--anchor-top);
     }
 
-    .patient-path__section__content {
+    .pathways__section__content {
         .cm__tags {
             margin: 0;
         }
@@ -30683,9 +30800,8 @@ html {
 /* ******* ADAPTIVE ******* */
 
 @media only screen and (max-width : @CmUI-AdaptiveFrom) {
-    .mod__cbcn-patient-path {
-        .patient-path__section__anchor {
-            top: -(@CmForm-FieldHeight + @CmIndent-Medium);
-        }
+    :root {
+        @top: -(@CmForm-FieldHeight + @CmIndent-Medium);
+        --module-pathways--anchor-top: @top;
     }
 }
