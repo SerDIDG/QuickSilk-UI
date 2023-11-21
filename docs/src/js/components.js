@@ -75,6 +75,26 @@ window.Collector = new Com.Collector({
         });
     })
 
+    .add('dynamical-scroll-pagination', function (node) {
+        new Com.ScrollPagination({
+            'node': node,
+            'showButton': 'once',
+            'responseHTML': true,
+            'events': {
+                'onPageRenderEnd': function (that, page) {
+                    // Construct components
+                    window.Collector.construct(page['container']);
+                }
+            },
+            'ajax': {
+                'type': 'json',
+                'params': {
+                    'page': '%page%'
+                }
+            }
+        });
+    })
+
     /* *** APPLICATION *** */
 
     .add('app-topmenu', function(node){
@@ -155,6 +175,16 @@ window.Collector = new Com.Collector({
             'node' : node
         });
     }, null, 990)
+
+    .add('image-gallery-popup', function(node) {
+        new Com.GalleryPopup({'node' : node});
+    })
+
+    .add('module_image-gallery', function (node) {
+        new App.ModuleImageGallery({
+            'node' : node
+        });
+    })
 
     /* *** DOCS *** */
 

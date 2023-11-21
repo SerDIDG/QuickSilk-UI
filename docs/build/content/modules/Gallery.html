@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html class="is-adaptive is-docs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Modules: Gallery</title>
+
+    <link type="text/css" rel="stylesheet" href="../../css/QuickSilk-UI.css">
+    <script type="text/javascript" src="../../js/QuickSilk-UI.js"></script>
+</head>
+
+<body>
+
+<h1 class="pt__box-title">Modules: Gallery</h1>
+<hr>
+
+<div class="app__module app-mod__default is-not-adaptive " data-element="module_image-gallery" data-config='{"name" : "test-gallery"}'>
+    <div class="com__scroll-pagination" data-element="dynamical-scroll-pagination" data-config='{"name":"test-gallery","pageTag":"ul","perPage":5,"count":"30","ajax":{"url":"%baseUrl%/stuff/ajax.gallery.php"}}' data-node="ComScrollPagination:{}:container">
+        <div class="com__scroll-pagination__content" data-node="content">
+            <div class="pt__grid col-5 is-not-adaptive indent-4px" data-node="pages" data-element="image-gallery-popup" data-config='{"name" : "test-gallery", "navigation": {"count":"30", "request": true}}'></div>
+        </div>
+        <div class="com__scroll-pagination__bar" data-node="bar">
+            <div class="button button-primary" data-node="button">Load More</div>
+            <div class="button button-clear has-icon has-icon has-icon-small" data-node="loader">
+                <div class="icon small loader"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>
