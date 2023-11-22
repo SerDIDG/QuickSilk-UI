@@ -1,6 +1,6 @@
 @charset "UTF-8";
-/*! ************ QuickSilk-UI v3.15.0 ************ */
-/*! ************ MagpieUI v3.58.0 (2023-11-21 21:38) ************ */
+/*! ************ QuickSilk-UI v3.15.1 ************ */
+/*! ************ MagpieUI v3.58.0 (2023-11-22 15:50) ************ */
 /*!
  * animate.css - https://animate.style/
  * Version - 4.1.1
@@ -18899,6 +18899,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 }
 .com__gallery .pt__image.is-centered {
   padding-bottom: 0;
+  background-color: #111111;
 }
 .com__gallery > .loader {
   display: none;
@@ -22813,7 +22814,7 @@ html.ie9 .com__palette .b-range {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.36.0 (2023-11-21 21:39) ************ */
+/*! ************ QuickSilk-Application v3.36.0 (2023-11-22 15:51) ************ */
 .svg__app__arrow-right {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2217px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(0%2C%200%2C%200)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M7.209%2C1.86%20C6.871%2C1.420%206.878%2C1.964%207.223%2C2.291%20L11.459%2C6.327%20L1.355%2C6.327%20C0.888%2C6.327%200.512%2C6.704%200.512%2C7.171%20L0.512%2C8.296%20C0.512%2C8.764%200.888%2C9.140%201.355%2C9.140%20L11.459%2C9.140%20L7.223%2C13.176%20C6.882%2C13.503%206.875%2C14.48%207.209%2C14.382%20L7.989%2C15.162%20C8.316%2C15.493%208.851%2C15.493%209.181%2C15.162%20L16.15%2C8.328%20C16.346%2C8.1%2016.346%2C7.466%2016.15%2C7.136%20L9.181%2C0.305%20C8.854%2C0.24%208.320%2C0.24%207.989%2C0.305%20L7.209%2C1.86%20Z%22%2F%3E%3C%2Fsvg%3E");
 }

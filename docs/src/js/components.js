@@ -75,6 +75,25 @@ window.Collector = new Com.Collector({
         });
     })
 
+    .add('dynamical-default-pagination', function (node) {
+        new Com.Pagination({
+            'node': node,
+            'responseHTML': true,
+            'events': {
+                'onPageRenderEnd': function (that, page) {
+                    // Construct components
+                    window.Collector.construct(page['container']);
+                }
+            },
+            'ajax': {
+                'type': 'json',
+                'params': {
+                    'page': '%page%'
+                }
+            }
+        });
+    })
+
     .add('dynamical-scroll-pagination', function (node) {
         new Com.ScrollPagination({
             'node': node,
