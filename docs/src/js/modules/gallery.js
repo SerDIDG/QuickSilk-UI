@@ -4,8 +4,11 @@ cm.define('App.ModuleImageGallery', {
         renderStructure: false,
         embedStructureOnRender: false,
         type: 'default',                  // default | tiles
-        popup: true
-    }
+        popup: true,
+        navigation: false,
+        count: 0,
+        perPage: 0,
+    },
 },
 function() {
     App.AbstractModule.apply(this, arguments);
@@ -16,12 +19,14 @@ cm.getConstructor('App.ModuleImageGallery', function(classConstructor, className
         var that = this;
 
         // Variables
-        that.popupRequestData = null;
+        that.popupRequestCallback = null;
+        that.pages = [];
+    };
 
-        // Binds
-        that.processPageHandler = that.processPage.bind(that);
-        that.processItemHandler = that.processItem.bind(that);
-        that.processPopupRequestHandler = that.processPopupRequest.bind(that);
+    classProto.onValidateParams = function() {
+        var that = this;
+        that.params.count = parseInt(that.params.count);
+        that.params.perPage = parseInt(that.params.perPage);
     };
 
     classProto.renderViewModel = function() {
@@ -31,31 +36,48 @@ cm.getConstructor('App.ModuleImageGallery', function(classConstructor, className
         classInherit.prototype.renderViewModel.apply(that, arguments);
 
         // Init pagination
-        new cm.Finder('Com.ScrollPagination', that.params['name'], that.params.node, function(classObject) {
+        new cm.Finder('Com.ScrollPagination', that.params.name, that.params.node, function(classObject) {
             that.components.pagination = classObject;
-            that.components.pagination.addEvent('onPageRenderEnd', that.processPageHandler);
+            that.components.pagination.addEvent('onPageRenderEnd', that.processPage.bind(that));
         });
-        new cm.Finder('Com.Pagination', that.params['name'], that.params.node, function(classObject) {
+        new cm.Finder('Com.Pagination', that.params.name, that.params.node, function(classObject) {
             that.components.pagination = classObject;
-            that.components.pagination.addEvent('onPageRenderEnd', that.processPageHandler);
+            that.components.pagination.addEvent('onPageRenderEnd', that.processPage.bind(that));
         });
-        new cm.Finder('Com.GalleryPopup', that.params['name'], that.params.node, function(classObject) {
+        new cm.Finder('Com.GalleryPopup', that.params.name, that.params.node, function(classObject) {
             that.components.popup = classObject;
-            that.components.popup.addEvent('onRequest', that.processPopupRequestHandler);
+            if (that.params.navigation) {
+                that.components.gallery = that.components.popup.getGallery();
+                that.components.gallery.setParams({
+                    navigation: {
+                        enable: false,
+                        cycle: false,
+                        count: that.params.count,
+                    },
+                });
+                that.components.popup.addEvent('onPrev', that.requestPrevItem.bind(that));
+                that.components.popup.addEvent('onNext', that.requestNextItem.bind(that));
+            }
         });
     };
 
-    classProto.processPage = function(pagination, page) {
+    classProto.processPage = function(pagination, data) {
         var that = this,
-            nodes = that.getDataNodesObject(page.container, that.params.nodesDataMarker, false),
+            nodes = that.getDataNodesObject(data.container, that.params.nodesDataMarker, false),
             itemsLength = nodes.items ? nodes.items.length : 0;
+
+        // Add to array
+        that.pages[data.page] = data;
 
         // Add to gallery
         if (that.params.popup && that.components.popup) {
-            that.components.popup.collect(page.container);
-            if (that.popupRequestData) {
-                cm.isFunction(that.popupRequestData.callback) && that.popupRequestData.callback();
-                that.popupRequestData = null;
+            that.components.popup.collect(data.container, {
+                fromIndex: (data.page - 1) * that.params.perPage,
+                fromPage: data.page,
+            });
+            if (that.popupRequestCallback) {
+                cm.isFunction(that.popupRequestCallback) && that.popupRequestCallback();
+                that.popupRequestCallback = null;
             }
         }
 
@@ -67,18 +89,6 @@ cm.getConstructor('App.ModuleImageGallery', function(classConstructor, className
         // Finalize scroll pagination
         if (!itemsLength) {
             cm.isFunction(that.components.pagination.finalize) && that.components.pagination.finalize();
-        }
-    };
-
-    classProto.processPopupRequest = function(gallery, data) {
-        var that = this;
-        that.popupRequestData = data;
-        if (cm.isInstance(that.components.pagination, 'Com.Pagination')) {
-            that.components.pagination.next();
-        } else if (cm.isInstance(that.components.pagination, 'Com.ScrollPagination')) {
-            that.components.pagination.set();
-        } else {
-            that.components.popup.close();
         }
     };
 
@@ -147,5 +157,67 @@ cm.getConstructor('App.ModuleImageGallery', function(classConstructor, className
         var that = this,
             newWidth = 100 / rowWidth * item._config.normalizedWidth;
         item.container.style.width = newWidth + '%';
+    };
+
+    classProto.requestPrevItem = function(popup, data) {
+        var that = this;
+        var index = data.index - 1;
+        var page = Math.floor(index / that.params.perPage) + 1;
+
+        if (index < 0) {
+            return;
+        }
+
+        if (cm.isInstance(that.components.pagination, 'Com.Pagination')) {
+            if (!that.pages[page] || !that.pages[page].isRendered) {
+                that.popupRequestCallback = function() {
+                    that.requestPrevItem(popup, data);
+                };
+                popup.toggleLoader(true);
+                that.components.pagination.set(page);
+            } else {
+                that.components.pagination.set(page);
+                popup.set(index);
+            }
+        } else if (cm.isInstance(that.components.pagination, 'Com.ScrollPagination')) {
+            popup.set(index);
+        } else {
+            popup.close();
+        }
+    };
+
+    classProto.requestNextItem = function(popup, data) {
+        var that = this;
+        var index = data.index + 1;
+        var page = Math.floor(index / that.params.perPage) + 1;
+
+        if (index >= popup.getCount()) {
+            return;
+        }
+
+        if (cm.isInstance(that.components.pagination, 'Com.Pagination')) {
+            if (!that.pages[page] || !that.pages[page].isRendered) {
+                that.popupRequestCallback = function() {
+                    that.requestNextItem(popup, data);
+                };
+                popup.toggleLoader(true);
+                that.components.pagination.set(page);
+            } else {
+                that.components.pagination.set(page);
+                popup.set(index);
+            }
+        } else if (cm.isInstance(that.components.pagination, 'Com.ScrollPagination')) {
+            if (index < popup.getLength()) {
+                popup.set(index);
+            } else if (index < popup.getCount()) {
+                that.popupRequestCallback = function() {
+                    that.requestNextItem(popup, data);
+                };
+                popup.toggleLoader(true);
+                that.components.pagination.set();
+            }
+        } else {
+            popup.close();
+        }
     };
 });

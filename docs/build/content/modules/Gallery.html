@@ -15,10 +15,10 @@
 <hr>
 
 <h2>Default Paginator</h2>
-<div class="app__module app-mod__default is-not-adaptive " data-element="module_image-gallery" data-config='{"name" : "test-gallery"}'>
+<div class="app__module app-mod__default is-not-adaptive " data-element="module_image-gallery" data-config='{"name" : "test-gallery", "perPage":5, "count":30, "navigation": true}'>
     <div class="com__pagination" data-element="dynamical-default-pagination" data-config='{"name":"test-gallery","pageTag":"ul","perPage":5,"count":"30","ajax":{"url":"%baseUrl%/stuff/ajax.gallery.php"}}' data-node="ComPagination:{}:container">
         <div class="com__pagination__content" data-node="content">
-            <div class="pt__grid col-5 is-not-adaptive indent-4px" data-node="pages" data-element="image-gallery-popup" data-config='{"name" : "test-gallery", "navigation": {"count":"30", "request": true}}'></div>
+            <div class="pt__grid col-5 is-not-adaptive indent-4px" data-node="pages" data-element="image-gallery-popup" data-config='{"name" : "test-gallery"}'></div>
         </div>
         <div class="com__pagination__bar pull-center" data-node="bar:[]:container">
             <ul data-node="items"></ul>
@@ -29,10 +29,10 @@
 <hr>
 
 <h2>Scroll Paginator</h2>
-<div class="app__module app-mod__default is-not-adaptive " data-element="module_image-gallery" data-config='{"name" : "test-gallery-scroll"}'>
+<div class="app__module app-mod__default is-not-adaptive " data-element="module_image-gallery" data-config='{"name" : "test-gallery-scroll", "perPage":5, "count":30, "navigation": true}'>
     <div class="com__scroll-pagination" data-element="dynamical-scroll-pagination" data-config='{"name":"test-gallery-scroll","pageTag":"ul","perPage":5,"count":"30","ajax":{"url":"%baseUrl%/stuff/ajax.gallery.php"}}' data-node="ComScrollPagination:{}:container">
         <div class="com__scroll-pagination__content" data-node="content">
-            <div class="pt__grid col-5 is-not-adaptive indent-4px" data-node="pages" data-element="image-gallery-popup" data-config='{"name" : "test-gallery-scroll", "navigation": {"count":"30", "request": true}}'></div>
+            <div class="pt__grid col-5 is-not-adaptive indent-4px" data-node="pages" data-element="image-gallery-popup" data-config='{"name" : "test-gallery-scroll"}'></div>
         </div>
         <div class="com__scroll-pagination__bar" data-node="bar">
             <div class="button button-primary" data-node="button">Load More</div>
