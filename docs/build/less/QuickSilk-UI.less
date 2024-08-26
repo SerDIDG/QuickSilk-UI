@@ -1,5 +1,5 @@
-/*! ************ QuickSilk-UI v3.16.0 ************ */
-/*! ************ MagpieUI v3.60.0 (2023-11-25 01:53) ************ */
+/*! ************ QuickSilk-UI v3.17.0 ************ */
+/*! ************ MagpieUI v3.75.0 (2024-08-27 02:43) ************ */
 @charset "UTF-8";/*!
  * animate.css - https://animate.style/
  * Version - 4.1.1
@@ -4588,7 +4588,7 @@ span.CodeMirror-selectedtext { background: none; }
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.60.0';
+@CmVersion: '3.75.0';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
@@ -4643,6 +4643,8 @@ span.CodeMirror-selectedtext { background: none; }
 @CmUI-Transition-DurationNone: 0ms;
 @CmUI-Transition-Delay-Hide: 300ms;
 @CmUI-MotionAsymmetric: cubic-bezier(.5,0,.15,1);
+@CmUI-MotionBounce: cubic-bezier(.5,.1,.4,1.3);
+@CmUI-Opacity-Transparent: 0.01;
 @CmUI-Opacity-Hover: 0.7;
 @CmUI-Shadow: 0 0 8px rgba(0, 0, 0, 0.15);
 @CmUI-ShadowLight: 0 0 2px rgba(0,0,0,0.2);
@@ -5030,6 +5032,7 @@ span.CodeMirror-selectedtext { background: none; }
 @CmInput-ActiveBorder: @CmColor-BorderActive;
 @CmInput-DisabledBackground: @CmColor-Secondary-LightHighlight;
 @CmInput-DisableBorder: @CmColor-BorderDisabled;
+@CmInput-AccentColor: hsl(@CmColor-Primary, @CmColor-Primary-DarkSaturation, 40%);
 @CmTextarea-Height: 100px;
 @CmSelect-Size: 7;
 
@@ -5107,6 +5110,11 @@ span.CodeMirror-selectedtext { background: none; }
 @PtLinks-Separator: '|';
 @PtLinks-Separator-Color: @CmFont-Base-Color;
 
+// /* ******* CHECK LINE ******* */
+
+@PtCheckLine-Gap: 0px;
+@PtCheckLine-HasHover-Gap: @CmBorder-Width;
+
 // /* ******* IMAGE ******* */
 
 @PtImage-Background: @CmColor-Secondary-LightHighlight;
@@ -5136,6 +5144,7 @@ span.CodeMirror-selectedtext { background: none; }
 @PtListingItems-PaddingY: @PtList-PaddingY;
 @PtListingItems-PaddingX: @PtList-PaddingX;
 @PtListingItems-Indent: @PtList-Indent;
+@PtListingItems-GroupIndent: @CmIndent-XSmall;
 
 // /* ******* LISTING COUNTERS ******* */
 
@@ -5608,6 +5617,13 @@ span.CodeMirror-selectedtext { background: none; }
     }
 }
 
+.mx__backdrop-filter (@properties) {
+    .for(@properties); .-each(@property) {
+        -webkit-backdrop-filter+_: @property;
+                backdrop-filter+_: @property;
+    }
+}
+
 .mx__transform (@properties) {
     .for(@properties); .-each(@property) {
         transform+_: @property;
@@ -5688,6 +5704,10 @@ span.CodeMirror-selectedtext { background: none; }
 
 .mx__backface-visibility (@value: visible) {
     backface-visibility: @value;
+}
+
+.mx__letter-spacing (@value, @fontSize) {
+    letter-spacing: ((@value * @fontSize) / 1000px);
 }
 
 // /* ******* COMMON ******* */
@@ -5825,6 +5845,10 @@ span.CodeMirror-selectedtext { background: none; }
 
 .display-none {
     display: none !important;
+}
+
+.display-block {
+    display: block;
 }
 
 .display-inline,
@@ -6325,14 +6349,19 @@ span.CodeMirror-selectedtext { background: none; }
     color: @CmFont-Base-Hint-Color;
 }
 
+.cm__font--hint-cursive {
+    .cm__font--hint;
+    font-style: italic;
+}
+
 .cm__font--placeholder {
     font-size: @CmFont-Placeholder-Size;
     font-style: @CmFont-Placeholder-Style;
     color: @CmFont-Placeholder-Color;
 }
 
-.cm__font--hint-cursive {
-    .cm__font--hint;
+.cm__font--placeholder-cursive {
+    .cm__font--placeholder;
     font-style: italic;
 }
 
@@ -7404,7 +7433,11 @@ tbody, thead, td, th, tr {
 
 /* ******* COMMON: INPUTS ******* */
 
+.input-alike {
+}
+
 .input {
+    &:extend(.input-alike all);
     width: 100%;
     margin: 0;
     vertical-align: top;
@@ -7510,13 +7543,11 @@ tbody, thead, td, th, tr {
     }
 }
 
-.textarea--size-helper (@height, @padding, @border, @lineHeight) {
-    @padding_calc: (@height - @lineHeight - @border * 2) / 2;
-
+.textarea--size-helper (@height: @CmForm-FieldHeight, @padding: @CmInput-Padding, @border: @CmBorder-Width, @lineHeight: @CmFont-Base-LineHeight) {
     min-height: @height;
     height: @CmTextarea-Height;
-    padding: max(ceil((@padding_calc)), @padding);
     border-width: @border;
+    .textarea--padding(@height, @padding, @border, @lineHeight);
 
     &.cm-autoresize {
         height: 0;
@@ -7527,6 +7558,11 @@ tbody, thead, td, th, tr {
     }
 }
 
+.textarea--padding (@height: @CmForm-FieldHeight, @padding: @CmInput-Padding, @border: @CmBorder-Width, @lineHeight: @CmFont-Base-LineHeight) {
+    @padding_calc: (@height - @lineHeight - @border * 2) / 2;
+    padding: max(ceil((@padding_calc)), @padding);
+}
+
 .input--size (@height: @CmForm-FieldHeight, @padding: @CmInput-Padding, @border: @CmBorder-Width, @lineHeight: @CmFont-Base-LineHeight) {
     .input--size-helper(@height, @padding, @border, @lineHeight);
 
@@ -7535,14 +7571,17 @@ tbody, thead, td, th, tr {
     }
 }
 
-.input--size-helper (@height, @padding, @border, @lineHeight) {
+.input--size-helper (@height: @CmForm-FieldHeight, @padding: @CmInput-Padding, @border: @CmBorder-Width, @lineHeight: @CmFont-Base-LineHeight) {
+    height: @height;
+    border-width: @border;
+    .input--padding(@height, @padding, @border, @lineHeight);
+}
+
+.input--padding (@height: @CmForm-FieldHeight, @padding: @CmInput-Padding, @border: @CmBorder-Width, @lineHeight: @CmFont-Base-LineHeight) {
     @padding_calc: (@height - @lineHeight - @border * 2) / 2;
     @padding_y: max(ceil((@padding_calc)), 0px);
     @padding_x: max(ceil((@padding_calc)), @padding);
-
-    height: @height;
     padding: @padding_y @padding_x;
-    border-width: @border;
 }
 
 /* *** APPLY *** */
@@ -7564,14 +7603,13 @@ input[type="file"] {
 input[type="radio"],
 input[type="checkbox"] {
     cursor: pointer;
-}
-input[type="checkbox"] {
-    accent-color: @CmColor-Primary-DarkDefault;
+    accent-color: @CmInput-AccentColor;
 }
 
 input[type="text"],
 input[type="search"],
 input[type="email"],
+input[type="url"],
 input[type="tel"],
 input[type="number"],
 input[type="time"],
@@ -10024,6 +10062,22 @@ button {
     }
 }
 
+.pt__buttons--flex {
+    > .inner {
+        gap: var(--pt-buttons--indent);
+        margin: 0;
+
+        > .left,
+        > .right {
+            gap: var(--pt-buttons--indent);
+        }
+    }
+
+    .button-alike {
+        margin: 0;
+    }
+}
+
 .pt__buttons--box {
     > .inner {
         display: block;
@@ -10095,11 +10149,12 @@ button {
 .pt__check-line {
     @padding_calc: (@CmForm-FieldHeight - @CmFont-Base-LineHeight) / 2;
     @padding: max(floor((@padding_calc)), 0px);
-    @margin_calc: (@CmFont-Base-LineHeight - 13px) / 2;
+    @margin_calc: (@CmFont-Base-LineHeight - 14px) / 2;
     @margin: max(floor((@margin_calc)), 0px);
 
     min-height: @CmForm-FieldHeight;
     line-height: @CmForm-FieldHeight;
+    .mx__transition(color, @CmUI-Transition-Duration);
 
     label {
         margin-right: @CmIndent-Medium;
@@ -10141,10 +10196,6 @@ button {
         }
     }
 
-    &.pull-center {
-        text-align: center;
-    }
-
     &.disabled {
         label {
             color: @CmColor-Font-Disabled;
@@ -10154,7 +10205,7 @@ button {
 
     &.has-hover {
         label {
-            margin-right: @CmBorder-Width;
+            margin: 0;
             padding: @padding @CmForm-FieldInnerIndent;
             border-radius: @CmBorder-Radius;
         }
@@ -10200,6 +10251,12 @@ button {
                 }
             }
         }
+
+        &.is-line {
+            label {
+                margin-right: @PtCheckLine-HasHover-Gap;
+            }
+        }
     }
 
     &.has-fields {
@@ -10227,15 +10284,27 @@ button {
     &.has-fields-box {
         input[type="radio"],
         input[type="checkbox"] {
-            @margin_calc: (@CmForm-FieldHeight - 13px) / 2;
+            @margin_calc: (@CmForm-FieldHeight - 14px) / 2;
             @margin: max(floor((@margin_calc)), 0px);
             margin-top: @margin;
             margin-bottom: @margin;
         }
     }
 
+    &.is-line {
+        &.pull-center {
+            text-align: center;
+        }
+    }
+
     &.is-box {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: @PtCheckLine-Gap;
+
         label {
+            margin: 0;
             display: block;
         }
 
@@ -10247,6 +10316,68 @@ button {
         .label {
             overflow: hidden;
             display: block;
+        }
+
+        .text {
+            display: block;
+        }
+
+        &.has-hover {
+            gap: @PtCheckLine-HasHover-Gap;
+        }
+    }
+
+    &.is-flex,
+    &.is-flex-reverse {
+        label {
+            display: flex;
+            gap: @CmForm-FieldInnerIndent;
+            align-items: flex-start;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 0;
+            margin-left: 0;
+            flex: none;
+        }
+
+        .icon {
+            min-height: @CmFont-Base-LineHeight;
+            flex: none;
+        }
+
+        .label {
+            flex: auto;
+        }
+    }
+
+    &.is-flex-reverse {
+        label {
+            flex-direction: row-reverse;
+        }
+    }
+
+    &.is-flex-inline {
+        display: flex;
+        flex-wrap: wrap;
+
+        &.pull-center {
+            justify-content: center;
+        }
+
+        &.has-hover {
+            gap: @PtCheckLine-HasHover-Gap;
+        }
+    }
+}
+
+@media only screen and (max-width : @CmUI-AdaptiveFrom) {
+    html.is-adaptive {
+        .pt__check-line {
+            &.is-adaptive {
+                .pt__check-line.is-box;
+            }
         }
     }
 }
@@ -10314,12 +10445,14 @@ button {
     }
 
     &.field-indent,
-    &.field-inner-indent {
+    &.field-inner-indent,
+    &.indent--field-inner {
         .cm__box;
         margin-bottom: @CmForm-FieldInnerIndent;
     }
 
-    &.field-outer-indent {
+    &.field-outer-indent,
+    &.indent--field {
         .cm__box;
         margin-bottom: @CmForm-FieldIndent;
     }
@@ -10386,15 +10519,18 @@ button {
 
     .pt__columns__indent(@PtColumns-Indent);
 
-    &.indent-field {
+    &.indent-field,
+    &.gap--field {
         .pt__columns__indent(@CmForm-FieldIndent);
     }
 
-    &.indent-field-inner {
+    &.indent-field-inner,
+    &.gap--field-inner {
         .pt__columns__indent(@CmForm-FieldInnerIndent);
     }
 
-    &.indent-buttons {
+    &.indent-buttons,
+    &.gap--buttons {
         .pt__columns__indent(@CmForm-ButtonsIndent);
     }
 
@@ -10408,15 +10544,18 @@ button {
 .pt__columns--grid {
     .pt__columns__indent-grid(@PtColumns-Indent);
 
-    &.indent-field {
+    &.indent-field,
+    &.gap--field {
         .pt__columns__indent-grid(@CmForm-FieldIndent);
     }
 
-    &.indent-field-inner {
+    &.indent-field-inner,
+    &.gap--field-inner {
         .pt__columns__indent-grid(@CmForm-FieldInnerIndent);
     }
 
-    &.indent-buttons {
+    &.indent-buttons,
+    &.gap--buttons {
         .pt__columns__indent-grid(@CmForm-ButtonsIndent);
     }
 
@@ -10502,10 +10641,17 @@ button {
         }
     }
 
-    &.indent-field,
     &.indent-buttons,
-    &.indent-field-inner {
+    &.indent-field,
+    &.indent-field-inner,
+    &.gap--buttons,
+    &.gap--field,
+    &.gap--field-inner {
         .pt__columns__indent-mobile(@CmForm-FieldIndent);
+    }
+
+    &.gap-adaptive--field-inner {
+        .pt__columns__indent-mobile(@CmForm-FieldInnerIndent);
     }
 }
 
@@ -11016,18 +11162,18 @@ button {
         }
     }
 
-    &.error,
-    &.danger {
+    &:is(.error, .danger) {
         > dt,
         > .field__title {
             color: @CmColor-Danger-DarkDefault;
         }
 
+        .pt__check-line,
         .pt__field__error {
             color: @CmColor-Danger-DarkDefault;
         }
 
-        .input {
+        .input-alike {
             border: 1px solid @CmColor-Danger-DarkDefault;
             background-color: @CmColor-Danger-LightHighlight;
         }
@@ -11039,28 +11185,29 @@ button {
             color: @CmColor-Warning-DarkDefault;
         }
 
+        .pt__check-line,
         .pt__field__error {
             color: @CmColor-Warning-DarkDefault;
         }
 
-        .input {
+        .input-alike {
             border: 1px solid @CmColor-Warning-DarkDefault;
             background-color: @CmColor-Warning-LightHighlight;
         }
     }
 
-    &.ok,
-    &.success {
+    &:is(.ok, .success) {
         > dt,
         > .field__title {
             color: @CmColor-Success-DarkDefault;
         }
 
+        .pt__check-line,
         .pt__field__error {
             color: @CmColor-Success-DarkDefault;
         }
 
-        .input {
+        .input-alike {
             border: 1px solid @CmColor-Success-DarkDefault;
             background-color: @CmColor-Success-LightHighlight;
         }
@@ -11559,34 +11706,21 @@ ul.pt__field__hint {
 
 }
 
-/* ******* PARTS: FILE LINE ******* */
-
 .pt__file-line {
     > .inner {
-        .clearfix;
+        display: flex;
+        align-items: center;
+        gap: @CmForm-ButtonsIndent;
     }
 
     .button-alike {
-        float: left;
-        margin-right: @CmForm-ButtonsIndent;
-
-        &:last-child {
-            margin-right: 0;
-        }
+        flex: none;
     }
 
     .label {
         .cm__text-nowrap;
-        opacity: 1;
-        line-height: @CmForm-FieldHeight;
-        .mx__transition(all, @CmUI-Transition-DurationShort);
+        flex: auto;
 
-        &.is-hidden {
-            opacity: 0;
-        }
-    }
-
-    .label-placeholder {
         &.is-hidden {
             display: none;
         }
@@ -11594,6 +11728,19 @@ ul.pt__field__hint {
 
     &.is-hidden {
         display: none;
+    }
+
+    @media (max-width: @CmUI-AdaptiveFrom) {
+        &.is-adaptive {
+            > .inner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .label {
+                .cm__text-wrap;
+            }
+        }
     }
 }
 /* ******* PARTS: GRID ******* */
@@ -11910,6 +12057,18 @@ ul.pt__field__hint {
 .pt__grid__indent (@indent: @PtGrid-Indent) when (@indent > 0) {
     @half__indent: (@indent / 2);
 
+    > ul {
+        margin: @half__indent -@half__indent -@half__indent;
+
+        &:first-child {
+            margin: -@half__indent;
+        }
+
+        > li {
+            padding: @half__indent;
+        }
+    }
+
     &.has-outer-page-indent {
         > ul {
             margin: 0 @half__indent;
@@ -11930,15 +12089,23 @@ ul.pt__field__hint {
         }
     }
 
-    > ul {
-        margin: @half__indent -@half__indent -@half__indent;
+    &.has-page-indent-first {
+        > ul {
+            margin-top: -@half__indent;
 
-        &:first-child {
-            margin: -@half__indent;
+            &:first-child {
+                margin-top: -@half__indent;
+            }
         }
+    }
 
-        > li {
-            padding: @half__indent;
+    &.has-page-indent-last {
+        > ul {
+            margin-bottom: -@half__indent;
+
+            &:first-child {
+                margin-bottom: -@half__indent;
+            }
         }
     }
 }
@@ -12128,6 +12295,16 @@ ul.pt__field__hint {
         .pt__gridlist__has-background;
     }
 
+    &.is-scrollable {
+        .cm__scroll--auto;
+
+        table {
+            width: auto;
+            min-width: 100%;
+            max-width: none;
+        }
+    }
+
     &.is-editable {
         > .com__columns__chassis {
             display: block;
@@ -12165,6 +12342,14 @@ ul.pt__field__hint {
 
 .pt__gridlist__counter {
     .cm__box;
+}
+
+.pt__gridlist__row-filter {
+    td, th {
+        > .inner {
+            min-height: @CmForm-FieldHeight;
+        }
+    }
 }
 
 .pt__gridlist__indent {
@@ -12222,17 +12407,23 @@ ul.pt__field__hint {
 
     tbody {
         tr {
+            background-color: @PtGridlist-Cell-DefaultBackground;
+
             th, td {
                 background-color: @PtGridlist-Cell-DefaultBackground;
             }
 
             &:hover {
+                background-color: @PtGridlist-Cell-HoverBackground;
+
                 th, td {
                     background-color: @PtGridlist-Cell-HoverBackground;
                 }
             }
 
             &:active {
+                background-color: @PtGridlist-Cell-ActiveBackground;
+
                 th, td {
                     background-color: @PtGridlist-Cell-ActiveBackground;
                 }
@@ -12240,11 +12431,15 @@ ul.pt__field__hint {
 
             &.success,
             &.valid {
+                background-color: @PtGridlist-Cell-SuccessBackground;
+
                 th, td {
                     background-color: @PtGridlist-Cell-SuccessBackground;
                 }
 
                 &:hover {
+                    background-color: @PtGridlist-Cell-SuccessHoverBackground;
+
                     th, td {
                         background-color: @PtGridlist-Cell-SuccessHoverBackground;
                     }
@@ -12253,11 +12448,15 @@ ul.pt__field__hint {
 
             &.danger,
             &.invalid {
+                background-color: @PtGridlist-Cell-DangerBackground;
+
                 th, td {
                     background-color: @PtGridlist-Cell-DangerBackground;
                 }
 
                 &:hover {
+                    background-color: @PtGridlist-Cell-DangerHoverBackground;
+
                     th, td {
                         background-color: @PtGridlist-Cell-DangerHoverBackground;
                     }
@@ -12265,11 +12464,15 @@ ul.pt__field__hint {
             }
 
             &.warning {
+                background-color: @PtGridlist-Cell-WarningBackground;
+
                 th, td {
                     background-color: @PtGridlist-Cell-WarningBackground;
                 }
 
                 &:hover {
+                    background-color: @PtGridlist-Cell-WarningHoverBackground;
+
                     th, td {
                         background-color: @PtGridlist-Cell-WarningHoverBackground;
                     }
@@ -12277,11 +12480,15 @@ ul.pt__field__hint {
             }
 
             &.active {
+                background-color: @PtGridlist-Cell-ActiveBackground;
+
                 th, td {
                     background-color: @PtGridlist-Cell-ActiveBackground;
                 }
 
                 &:hover {
+                    background-color: @PtGridlist-Cell-ActiveHoverBackground;
+
                     th, td {
                         background-color: @PtGridlist-Cell-ActiveHoverBackground;
                     }
@@ -12308,17 +12515,23 @@ ul.pt__field__hint {
 
     tbody {
         tr {
+            background-color: @PtGridlist-Cell-HasBackground-Default;
+
             td {
                 background-color: @PtGridlist-Cell-HasBackground-Default;
             }
 
             &:hover {
+                background-color: @PtGridlist-Cell-HasBackground-Hover;
+
                 th, td {
                     background-color: @PtGridlist-Cell-HasBackground-Hover;
                 }
             }
 
             &:active {
+                background-color: @PtGridlist-Cell-HasBackground-Active;
+
                 th, td {
                     background-color: @PtGridlist-Cell-HasBackground-Active;
                 }
@@ -12333,13 +12546,7 @@ ul.pt__field__hint {
 
     html.is-adaptive {
         .pt__gridlist {
-            .cm__scroll--auto;
-
-            table {
-                width: auto;
-                min-width: 100%;
-                max-width: none;
-            }
+            .pt__gridlist.is-scrollable;
         }
 
         .pt__gridlist.is-adaptive {
@@ -12405,6 +12612,7 @@ ul.pt__field__hint {
         > .descr {
             .icon.initial;
             .cm__image-resizable;
+            min-height: 1px;
             position: relative;
             z-index: 1;
             will-change: opacity;
@@ -12653,6 +12861,14 @@ ul.pt__field__hint {
         }
     }
 
+    &.is-hover-cursor {
+        cursor: pointer;
+
+        > a.inner {
+            cursor: pointer;
+        }
+    }
+
     &.is-hover,
     &.is-zoom {
         cursor: pointer;
@@ -12839,7 +13055,7 @@ ul.pt__field__hint {
     &.is-loading {
         > .inner {
             > .descr {
-                opacity: 0.01;
+                opacity: @CmUI-Opacity-Transparent;
                 .mx__transition(opacity, @CmUI-Transition-Duration);
             }
         }
@@ -12939,7 +13155,7 @@ ul.pt__field__hint {
         padding: 0;
         position: absolute;
         border-radius: max(@CmBorder-Radius - 2px, 0px);
-        color: @CmColor-Border;
+        color: @CmColor-Icon;
     }
 
     &.no-label {
@@ -12971,6 +13187,23 @@ ul.pt__field__hint {
 
     &.size-xxlarge {
         .pt__input--size(@CmSize-XXLarge, @CmInput-Padding, @CmBorder-Width, @CmFont-Base-LineHeight);
+    }
+
+    &.is-icon-compact {
+        .icon {
+            width: @CmSize-Small;
+            background-size: @CmSize-XSmall;
+        }
+
+        .input {
+            &:not(:first-child) {
+                padding-left: @CmSize-Small;
+            }
+
+            &:not(:last-child) {
+                padding-right: @CmSize-Small;
+            }
+        }
     }
 }
 
@@ -13454,21 +13687,15 @@ ul.pt__field__hint {
     }
 
     &.pull-left {
-        > ul {
-            text-align: left;
-        }
+        text-align: left;
     }
 
     &.pull-center {
-        > ul {
-            text-align: center;
-        }
+        text-align: center;
     }
 
     &.pull-right {
-        > ul {
-            text-align: right;
-        }
+        text-align: right;
     }
 }
 
@@ -13839,7 +14066,7 @@ ul.pt__field__hint {
             }
 
             .pt__listing-items {
-                margin: @PtListingItems-Indent 0 0 @CmIndent-XSmall;
+                margin: @PtListingItems-Indent 0 0 @PtListingItems-GroupIndent;
 
                 &:first-child {
                     margin-top: 0;
@@ -13865,6 +14092,27 @@ ul.pt__field__hint {
                 > .inner {
                     background-color: @CmColor-Secondary-LightHighlight;
                     color: @CmColor-Font-Disabled;
+                }
+            }
+
+            &.sticky {
+                position: sticky;
+                top: 0;
+                z-index: 2;
+
+                > a,
+                > .inner,
+                > .text {
+                    background-color: @CmColor-Background;
+                }
+            }
+
+            &.group-sticky {
+                .title {
+                    position: sticky;
+                    top: 0;
+                    z-index: 2;
+                    background-color: @CmColor-Background;
                 }
             }
 
@@ -14671,6 +14919,14 @@ ul.pt__field__hint {
             &.x-large {
                 width: @PtToolbar-XLarge;
             }
+
+            &.flex-auto {
+                flex: auto;
+            }
+
+            &.flex-none {
+                flex: none;
+            }
         }
 
         &.is-flex {
@@ -14815,6 +15071,12 @@ ul.pt__field__hint {
 
     html.is-adaptive {
         .pt__toolbar {
+            .group {
+                &.is-adaptive-flex {
+                    display: flex;
+                }
+            }
+
             &:not(.is-not-adaptive){
                 > .inner {
                     display: block;
@@ -15184,6 +15446,14 @@ ul.pt__field__hint {
 
     .input__content {
         position: relative;
+    }
+
+    &--input {
+        .input;
+        height: auto;
+        min-height: @CmForm-FieldHeight;
+        padding: @CmIndent-XXXSmall;
+        cursor: default;
     }
 }
 /* ******* COMPONENT: TOGGLE BOX ******* */
@@ -16394,6 +16664,14 @@ ul.pt__field__hint {
         > .title {
             position: relative;
             z-index: 2;
+
+            &.is-align-center {
+                text-align: center;
+            }
+
+            &.is-align-right {
+                text-align: right;
+            }
         }
 
         > .descr {
@@ -16814,7 +17092,7 @@ ul.pt__field__hint {
         }
 
         &.help {
-            right: @icon_size + (@icon_indent * 2);
+            right: (@icon_size + @icon_indent * 2);
         }
     }
 
@@ -16827,7 +17105,12 @@ ul.pt__field__hint {
     &.has-close-inside {
         > .inner {
             > .title {
-                padding-right: @indent + @icon_indent + @icon_size;
+                @padding: (@icon_size + @icon_indent * 2);
+                padding-right: @padding;
+
+                &.is-align-center {
+                    padding-left: @padding;
+                }
             }
         }
     }
@@ -16839,7 +17122,7 @@ ul.pt__field__hint {
             }
 
             &.help {
-                right: -(@icon_indent + @icon_size) * 2;
+                right: -((@icon_indent + @icon_size) * 2);
             }
         }
     }
@@ -17337,7 +17620,7 @@ ul.pt__field__hint {
                     margin: 0;
                 }
 
-                &:hover {
+                &:is(:hover, :focus-visible) {
                     border-color: @CmColor-Primary-DarkDefault;
                     .mx__transition(all, @CmUI-Transition-DurationReverse);
                 }
@@ -17347,6 +17630,12 @@ ul.pt__field__hint {
                     background-color: @CmColor-Primary-DarkDefault;
                 }
             }
+        }
+
+        &.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
     }
 
@@ -17503,6 +17792,10 @@ ul.pt__field__hint {
         .bar-zoom {
             display: none;
         }
+    }
+
+    &.is-visible {
+        opacity: 1;
     }
 }
 
@@ -17992,24 +18285,28 @@ ul.pt__field__hint {
 /* ******* COMPONENTS: MENU ******* */
 
 .com__menu {
+    display: inline-flex;
+    align-items: center;
+    gap: @CmIndent-XXXSmall;
+
     .button {
         margin: 0 !important;
     }
 
-    > .label {
-        margin: 0 @CmIndent-XXXSmall;
-
-        &:first-child {
-            margin-left: 0;
-        }
-
-        &:last-child {
-            margin-right: 0;
-        }
-    }
-
     .pt__menu {
         display: none;
+    }
+
+    &--link {
+        text-decoration: none;
+
+        &:is(:hover, :active, :focus-visible) {
+            text-decoration: none;
+
+            .label {
+                text-decoration: underline;
+            }
+        }
     }
 }
 
@@ -18251,6 +18548,10 @@ ul.pt__field__hint {
                 }
             }
         }
+    }
+
+    &__entry {
+        color: inherit;
     }
 }
 
@@ -18968,6 +19269,10 @@ ul.pt__field__hint {
         }
     }
 
+    &.is-icon-compact {
+        .pt__input.is-icon-compact;
+    }
+
     &.is-hidden {
         display: none;
     }
@@ -18998,8 +19303,10 @@ ul.pt__field__hint {
         cursor: default;
     }
 
-    .pt__listing-items > ul {
-        max-height: @ComSelect-MaxHeight;
+    .pt__listing-items {
+        > ul {
+            max-height: @ComSelect-MaxHeight;
+        }
     }
 
     &.is-max {
@@ -19181,6 +19488,12 @@ ul.pt__field__hint {
     }
 }
 
+.com__slider__holder {
+    > li {
+        display: none;
+    }
+}
+
 // /* *** MIXINS *** */
 
 .com__slider__effects () {
@@ -19279,7 +19592,7 @@ ul.pt__field__hint {
 
                 &:first-child {
                     display: block;
-                    left: 0%;
+                    left: 0;
                 }
             }
         }
@@ -19294,7 +19607,7 @@ ul.pt__field__hint {
 
                 &:first-child {
                     display: block;
-                    left: 0%;
+                    left: 0;
                 }
             }
         }
@@ -19309,7 +19622,7 @@ ul.pt__field__hint {
 
                 &:first-child {
                     display: block;
-                    left: 0%;
+                    left: 0;
                 }
             }
         }
@@ -19630,6 +19943,7 @@ ul.pt__field__hint {
     }
 }
 
+.com__tabset__holder,
 .com__tabset__content-ul {
     > li {
         display: none;
@@ -20259,7 +20573,7 @@ ul.pt__field__hint {
         }
     }
 }
-/*! ************ QuickSilk-Application v3.36.0 (2023-11-25 01:54) ************ */
+/*! ************ QuickSilk-Application v3.37.0 (2024-08-27 02:43) ************ */
 .svg__app__arrow-right { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2217px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(0%2C%200%2C%200)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M7.209%2C1.86%20C6.871%2C1.420%206.878%2C1.964%207.223%2C2.291%20L11.459%2C6.327%20L1.355%2C6.327%20C0.888%2C6.327%200.512%2C6.704%200.512%2C7.171%20L0.512%2C8.296%20C0.512%2C8.764%200.888%2C9.140%201.355%2C9.140%20L11.459%2C9.140%20L7.223%2C13.176%20C6.882%2C13.503%206.875%2C14.48%207.209%2C14.382%20L7.989%2C15.162%20C8.316%2C15.493%208.851%2C15.493%209.181%2C15.162%20L16.15%2C8.328%20C16.346%2C8.1%2016.346%2C7.466%2016.15%2C7.136%20L9.181%2C0.305%20C8.854%2C0.24%208.320%2C0.24%207.989%2C0.305%20L7.209%2C1.86%20Z%22%2F%3E%3C%2Fsvg%3E"); }
 .svg__app__check-orange { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2221px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(226%2C%20106%2C%2013)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M20.399%2C3.378%20L11.207%2C12.571%20L11.207%2C12.571%20L8.378%2C15.399%20L5.550%2C12.571%20L5.550%2C12.571%20L0.600%2C7.621%20L3.428%2C4.792%20L8.378%2C9.742%20L17.571%2C0.550%20L20.399%2C3.378%20Z%22%2F%3E%3C%2Fsvg%3E"); }
 .svg__app__logo { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20id%3D%22logo.svg%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2250%22%20height%3D%2224%22%20viewBox%3D%220%200%2050%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23F27C21%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-1%2C%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%20%20.cls-2%20%7B%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20id%3D%22_3%22%20data-name%3D%223%22%20class%3D%22cls-1%22%20d%3D%22M35%2C24l8.58-12L35%2C0h6.429L50%2C12l-8.58%2C12H35Z%22%2F%3E%20%20%3Cpath%20id%3D%22_2%22%20data-name%3D%222%22%20class%3D%22cls-2%22%20d%3D%22M28%2C24L19.425%2C12%2C28%2C0H21.575L13%2C12l8.58%2C12H28Z%22%2F%3E%20%20%3Cpath%20id%3D%22_1%22%20data-name%3D%221%22%20class%3D%22cls-2%22%20d%3D%22M15%2C24L6.425%2C12%2C15%2C0H8.575L0%2C12l8.58%2C12H15Z%22%2F%3E%3C%2Fsvg%3E"); }
@@ -20462,7 +20776,7 @@ ul.pt__field__hint {
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.36.0';
+@AppVersion: '3.37.0';
 
 // /* ******* PATH ******* */
 

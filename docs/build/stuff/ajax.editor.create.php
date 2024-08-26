@@ -11,6 +11,7 @@ $config = array(
 	'keyword' => $_POST['keyword'],
 	'locked' => false,
 	'sticky' => $_POST['keyword'] == 'sticky' ? true : false,
+    'visible' => isset($_POST['visible']) ? filter_var($_POST['visible'], FILTER_VALIDATE_BOOLEAN) : true,
     'animated' => true,
     'effect' => 'fadeIn'
 );

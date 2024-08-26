@@ -195,6 +195,22 @@ switch($_GET['tab']){
                             </div>
                         </div>
                     </dd>
+                </dl>
+                <dl class=\"com__togglebox app__blocks-category is-show\" data-element=\"Com.ToggleBox\" data-config='{\"remember\" : true, \"name\" : \"app__sidebar-form-element\"}' data-node=\"ComToggleBox.container\">
+                    <dt data-node=\"ComToggleBox.button\">
+                        <span class=\"icon default\"></span>
+                        <span class=\"title\">Tests</span>
+                    </dt>
+                    <dd data-node=\"ComToggleBox.target\">
+                        <div class=\"app__block-container\" data-element=\"app-dummy-block\" data-node=\"AppDummyBlock:{}:container\" data-config='{\"keyword\" : \"element_text--hidden\", \"type\" : \"form-manager\", \"visible\": false}'>
+                            <div class=\"app__block-dummy\" data-node=\"dummy\">
+                                <div class=\"inner\">
+                                    <div class=\"icon module-element_input\"></div>
+                                    <div class=\"caption\">Input (Hidden)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </dd>
                 </dl>";
 		break;
 	default:
@@ -206,6 +222,6 @@ $response = json_encode(array(
 	'data' => $data
 ));
 
-sleep(0.1);
+usleep(1000 * 100);
 
 echo $response;

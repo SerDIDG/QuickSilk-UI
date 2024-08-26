@@ -267,11 +267,12 @@ window.Collector = new Com.Collector({
                         'method' : 'POST',
                         'url' : cm._baseUrl + '/stuff/ajax.editor.create.php',
                         'params' : {
+                            'visible' : block.params['visible'],
                             'instanceId' : block.zone.params['instanceId'],
                             'keyword' : block.params['keyword'],
                             'parentPositionId' : block.zone.params['positionId'],
                             'type' : block.params['type'],
-                            'zone' : block.zone.params['zone']
+                            'zone' : block.zone.params['zone'],
                         },
                         'onSuccess' : function(response){
                             editor.create(response['data'], block);
