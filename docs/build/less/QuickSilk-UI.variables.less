@@ -1,5 +1,8 @@
 :root {
+    --cm-button--gap: @CmButton-Gap;
+
     --pt-buttons--indent: @CmForm-ButtonsIndent;
+    --pt-buttons--box-indent: @CmForm-FieldIndent;
 
     --pt-field--title-width: @CmForm-FieldTitleWidth;
     --pt-field--title-indent: @CmForm-FieldIndent;
@@ -47,20 +50,13 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.75.0';
+@CmVersion: '3.83.7';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
 
 @CmPath-Images: '../img';
 @CmPath-Fonts: '../fonts';
-
-// /* ******* SCREEN TYPES ******* */
-
-@CmScreen-Mobile: 640px;
-@CmScreen-MobilePortrait: 480px;
-@CmScreen-Tablet: 1024px;
-@CmScreen-TabletPortrait: 768px;
 
 // /* ******* SIZES ******* */
 
@@ -109,6 +105,7 @@
 @CmUI-ShadowLight: 0 0 2px rgba(0,0,0,0.2);
 @CmUI-ShadowInner: 0 2px 2px rgba(0,0,0,0.4) inset;
 @CmUI-Shadow-Top: 0 -2px 5px rgba(0,0,0,0.15);
+@CmUI-Shadow-TopSmall: 0 -1px 2px rgba(0,0,0,0.15);
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-BottomSmall: 0 1px 2px rgba(0,0,0,0.15);
@@ -477,6 +474,7 @@
 @CmButton-PaddingX: @CmIndent-XSmall;
 @CmButton-OutlineWidth: 1px;
 @CmButton-OutlineOffset: 1px;
+@CmButton-Gap: @CmIndent-XXSmall;
 
 // /* ******* INPUTS ******* */
 
@@ -514,6 +512,7 @@
 @CmForm-FieldTitleWidthSpaceless: 128px;
 @CmForm-FieldInnerIndent: (@CmForm-FieldIndent / 2);
 @CmForm-FieldSmallWidth: 210px;
+@CmForm-HintGap: @CmSize-XXXSmall;
 @CmForm-ButtonsIndent: @CmIndent-XSmall;
 @CmForm-IconsIndent: @CmIndent-XXSmall;
 @CmForm-ImageBox-ButtonWidth: 100px;
@@ -752,6 +751,7 @@
 @PtOverlay-Dark: @CmUI-Overlay-Dark;
 @PtOverlay-Duration: @CmUI-Overlay-Duration;
 @PtOverlay-Spinner-Size: @CmSize-Large;
+@PtOverlay-Progress-Size: @CmSize-XXXSmall;
 @PtOverlay-ZIndex: 1003;
 
 // /* ************************************************ */
@@ -1030,9 +1030,35 @@
 // /* ************************************************ */
 // /* ******* VENDORS ******* */
 // /* ************************************************ */
+
+// /* ******* SCREEN TYPES ******* */
+
+@CmScreen-Tablet: 1024px;
+@CmScreen-TabletPortrait: 768px;
+@CmScreen-Mobile: 640px;
+@CmScreen-MobilePortrait: 480px;
+@CmScreen-XSmall: 375px;
+
+// /* ******* BREAKPOINTS ******* */
+
+@CmMedia-Laptop-Up: 1400px;
+@CmMedia-Laptop-Down: (1400px - 1px);
+@CmMedia-Desktop-Up: @CmScreen-Tablet;
+@CmMedia-Desktop-Down: (@CmScreen-Tablet - 1px);
+@CmMedia-Tablet-Up: (@CmScreen-TabletPortrait + 1px);
+@CmMedia-Tablet-Down: @CmScreen-TabletPortrait;
+@CmMedia-Mobile-Up: (@CmScreen-Mobile + 1px);
+@CmMedia-Mobile-Down: @CmScreen-Mobile;
+@CmMedia-Small-Up: (@CmScreen-MobilePortrait + 1px);
+@CmMedia-Small-Down: @CmScreen-MobilePortrait;
+@CmMedia-XSmall-Up: (@CmScreen-XSmall + 1px);
+@CmMedia-XSmall-Down: @CmScreen-XSmall;
 
 :root {
+    --cm-button--gap: @CmButton-Gap;
+
     --pt-buttons--indent: @CmForm-ButtonsIndent;
+    --pt-buttons--box-indent: @CmForm-FieldIndent;
 
     --pt-field--title-width: @CmForm-FieldTitleWidth;
     --pt-field--title-indent: @CmForm-FieldIndent;
@@ -1080,20 +1106,13 @@
 // /* ******* MAGPIE UI: VARIABLES ******* */
 // /* ************************************************ */
 
-@CmVersion: '3.75.0';
+@CmVersion: '3.83.7';
 @CmProtocol: '';
 
 // /* ******* PATH ******* */
 
 @CmPath-Images: '../img';
 @CmPath-Fonts: '../fonts';
-
-// /* ******* SCREEN TYPES ******* */
-
-@CmScreen-Mobile: 640px;
-@CmScreen-MobilePortrait: 480px;
-@CmScreen-Tablet: 1024px;
-@CmScreen-TabletPortrait: 768px;
 
 // /* ******* SIZES ******* */
 
@@ -1142,6 +1161,7 @@
 @CmUI-ShadowLight: 0 0 2px rgba(0,0,0,0.2);
 @CmUI-ShadowInner: 0 2px 2px rgba(0,0,0,0.4) inset;
 @CmUI-Shadow-Top: 0 -2px 5px rgba(0,0,0,0.15);
+@CmUI-Shadow-TopSmall: 0 -1px 2px rgba(0,0,0,0.15);
 @CmUI-Shadow-Bottom: 0 2px 5px rgba(0,0,0,0.15);
 @CmUI-Shadow-BottomLarge: 0 2px 12px rgba(0, 0, 0, 0.2);
 @CmUI-Shadow-BottomSmall: 0 1px 2px rgba(0,0,0,0.15);
@@ -1510,6 +1530,7 @@
 @CmButton-PaddingX: @CmIndent-XSmall;
 @CmButton-OutlineWidth: 1px;
 @CmButton-OutlineOffset: 1px;
+@CmButton-Gap: @CmIndent-XXSmall;
 
 // /* ******* INPUTS ******* */
 
@@ -1547,6 +1568,7 @@
 @CmForm-FieldTitleWidthSpaceless: 128px;
 @CmForm-FieldInnerIndent: (@CmForm-FieldIndent / 2);
 @CmForm-FieldSmallWidth: 210px;
+@CmForm-HintGap: @CmSize-XXXSmall;
 @CmForm-ButtonsIndent: @CmIndent-XSmall;
 @CmForm-IconsIndent: @CmIndent-XXSmall;
 @CmForm-ImageBox-ButtonWidth: 100px;
@@ -1785,6 +1807,7 @@
 @PtOverlay-Dark: @CmUI-Overlay-Dark;
 @PtOverlay-Duration: @CmUI-Overlay-Duration;
 @PtOverlay-Spinner-Size: @CmSize-Large;
+@PtOverlay-Progress-Size: @CmSize-XXXSmall;
 @PtOverlay-ZIndex: 1003;
 
 // /* ************************************************ */
@@ -2063,6 +2086,29 @@
 // /* ************************************************ */
 // /* ******* VENDORS ******* */
 // /* ************************************************ */
+
+// /* ******* SCREEN TYPES ******* */
+
+@CmScreen-Tablet: 1024px;
+@CmScreen-TabletPortrait: 768px;
+@CmScreen-Mobile: 640px;
+@CmScreen-MobilePortrait: 480px;
+@CmScreen-XSmall: 375px;
+
+// /* ******* BREAKPOINTS ******* */
+
+@CmMedia-Laptop-Up: 1400px;
+@CmMedia-Laptop-Down: (1400px - 1px);
+@CmMedia-Desktop-Up: @CmScreen-Tablet;
+@CmMedia-Desktop-Down: (@CmScreen-Tablet - 1px);
+@CmMedia-Tablet-Up: (@CmScreen-TabletPortrait + 1px);
+@CmMedia-Tablet-Down: @CmScreen-TabletPortrait;
+@CmMedia-Mobile-Up: (@CmScreen-Mobile + 1px);
+@CmMedia-Mobile-Down: @CmScreen-Mobile;
+@CmMedia-Small-Up: (@CmScreen-MobilePortrait + 1px);
+@CmMedia-Small-Down: @CmScreen-MobilePortrait;
+@CmMedia-XSmall-Up: (@CmScreen-XSmall + 1px);
+@CmMedia-XSmall-Down: @CmScreen-XSmall;
 
 
 // /* ************************************************ */
@@ -2262,7 +2308,7 @@
 // /* ******* VARIABLES ******* */
 // /* ************************************************ */
 
-@AppVersion: '3.37.0';
+@AppVersion: '3.37.4';
 
 // /* ******* PATH ******* */
 
