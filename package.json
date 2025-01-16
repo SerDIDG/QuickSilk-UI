@@ -1,6 +1,6 @@
 {
   "name": "QuickSilk-UI",
-  "version": "3.17.1",
+  "version": "3.18.0",
   "license": "UNLICENSED",
   "scripts": {
     "build": "grunt",
