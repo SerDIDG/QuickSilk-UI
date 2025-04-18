@@ -2,6 +2,8 @@ if(cm._baseUrl.indexOf('serdidg.github.io') > -1){
     cm._baseUrl = [cm._baseUrl, 'QuickSilk-UI/docs/build'].join('/');
 }else if(cm._baseUrl.indexOf('projectstagingserver.com') > -1){
     cm._baseUrl = [cm._baseUrl, 'dev-1/quicksilk__ui/docs/build'].join('/');
+}else if(cm._baseUrl.indexOf('ui.qs.magpie') > -1){
+    cm._baseUrl = [cm._baseUrl, cm._port].join(':');
 }
 
 cm._assetsUrl = cm._baseUrl;

@@ -38,12 +38,12 @@
                                                 <div class="field" data-node="field">
                                                     <input type="hidden" name="background-video-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
                                                     <input type="hidden" name="background-video-order" autocomplete="off" data-node="field-hidden-index">
-                                                    <div class="pt__columns field-indent">
+                                                    <div class="pt__columns field-indent is-adaptive">
                                                         <div class="inner">
                                                             <div class="column">
                                                                 <dl class="pt__field is-box is-first field-indent">
                                                                     <dt>
-                                                                        <label>Video (.webm)</label>
+                                                                        <label>Video (.webm):</label>
                                                                     </dt>
                                                                     <dd>
                                                                         <input type="text" data-element="App.ImageInput" data-config='{"size" : "wide"}' name="background-video-webm">
@@ -53,7 +53,7 @@
                                                             <div class="column">
                                                                 <dl class="pt__field is-box is-first field-indent">
                                                                     <dt>
-                                                                        <label>Video (.mp4)</label>
+                                                                        <label>Video (.mp4):</label>
                                                                     </dt>
                                                                     <dd>
                                                                         <input type="text" data-element="App.ImageInput" data-config='{"size" : "wide"}' name="background-video-mp4">
@@ -108,12 +108,12 @@
                                                     <input type="hidden" name="background-image-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
                                                     <input type="hidden" name="background-image-order" autocomplete="off" data-node="field-hidden-index">
                                                     <dl class="pt__field is-box is-first field-indent">
-                                                        <dt>Image</dt>
+                                                        <dt>Background Image:</dt>
                                                         <dd>
                                                             <input type="text" data-element="App.ImageInput" data-config='{"size" : "full"}' name="background-image">
                                                         </dd>
                                                     </dl>
-                                                    <div class="pt__columns field-indent">
+                                                    <div class="pt__columns field-indent is-adaptive">
                                                         <div class="inner">
                                                             <div class="column column--none">
                                                                 <dl class="pt__field is-box">
@@ -194,7 +194,7 @@
                                                     <input type="hidden" name="background-color-enable" autocomplete="off" value="1" data-node="field-hidden-visible">
                                                     <input type="hidden" name="background-color-order" autocomplete="off" data-node="field-hidden-index">
                                                     <dl class="pt__field is-box is-first">
-                                                        <dt>Color</dt>
+                                                        <dt>Background Color:</dt>
                                                         <dd>
                                                             <input type="text" data-element="Com.ColorPicker" name="background-color" data-config='{"size" : "full"}'>
                                                         </dd>
@@ -224,20 +224,73 @@
                                     </div>
                                 </div>
 
+                                <h1 class="pt__box-title--flat">Border</h1>
+                                <div class="pt__box--flat">
+                                    <div class="pt__columns is-adaptive">
+                                        <div class="inner">
+                                            <div class="column">
+                                                <dl class="pt__field is-box align-center">
+                                                    <dt>Border Size:</dt>
+                                                    <dd>
+                                                        <input type="text" value="0" data-element="Com.BoxTools" data-config='{"justify" : "center"}' name="border-size">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="column">
+                                                <dl class="pt__field is-box align-center">
+                                                    <dt>Border Radius:</dt>
+                                                    <dd>
+                                                        <input type="text" value="0" data-element="Com.BoxRadiusTools" data-config='{"justify" : "center"}' name="border-radius">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="pt__columns is-adaptive">
+                                        <div class="inner">
+                                            <div class="column">
+                                                <dl class="pt__field is-box">
+                                                    <dt>Border Style:</dt>
+                                                    <dd>
+                                                        <select data-element="Com.Select" name="order-style">
+                                                            <option value="solid">Solid</option>
+                                                            <option value="dotted">Dotted</option>
+                                                            <option value="dashed">Dashed</option>
+                                                            <option value="double">Double</option>
+                                                            <option value="groove">Groove</option>
+                                                            <option value="ridge">Ridge</option>
+                                                            <option value="inset">Inset</option>
+                                                            <option value="outset">Outset</option>
+                                                        </select>
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="column">
+                                                <dl class="pt__field is-box">
+                                                    <dt>Border Color:</dt>
+                                                    <dd>
+                                                        <input type="text" data-element="Com.ColorPicker" data-config='{"size" : "full"}' name="border-color">
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <h1 class="pt__box-title--flat">Indent</h1>
                                 <div class="pt__box--flat">
                                     <div class="pt__columns is-adaptive is-space-between">
                                         <div class="inner">
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent align-center">
-                                                    <dt>Outer Indent</dt>
+                                                    <dt>Outer Indent:</dt>
                                                     <dd>
                                                         <input type="text" value="0 0 24px 0" data-element="Com.BoxTools" data-config='{"justify" : "center", "allowNegative" : true}' name="outer-indent">
                                                     </dd>
                                                 </dl>
                                                 <dl class="pt__field is-box field-indent">
                                                     <dd>
-                                                        <div class="pt__check-line pull-center">
+                                                        <div class="pt__check-line is-line pull-center">
                                                             <label>
                                                                 <input type="checkbox" name="outer-indent-auto" checked="checked" data-element="Com.CheckTrigger" data-config='{"unchecked" : {"className" : "Com.BoxTools", "name" : "outer-indent"}}'>
                                                                 <span class="label">Auto</span>
@@ -248,7 +301,7 @@
                                             </div>
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent align-center">
-                                                    <dt>Inner Indent</dt>
+                                                    <dt>Inner Indent:</dt>
                                                     <dd>
                                                         <input type="text" value="0" data-element="Com.BoxTools" data-config='{"justify" : "center"}' name="inner-indent">
                                                     </dd>
@@ -265,7 +318,7 @@
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent">
                                                     <dt>
-                                                        <label>Minimum height</label>
+                                                        <label>Minimum height:</label>
                                                     </dt>
                                                     <dd>
                                                         <input type="text" name="min-height" placeholder="0px" maxlength="24" data-element="Com.IndentInput" data-config='{"allowCustom" : true}'>
@@ -274,7 +327,7 @@
                                             </div>
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent">
-                                                    <dt>Z-index</dt>
+                                                    <dt>Z-index:</dt>
                                                     <dd>
                                                         <input type="text" name="z-index" value="1" maxlength="4" data-element="Com.IntegerInput">
                                                     </dd>
@@ -289,7 +342,7 @@
                                         <div class="inner">
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent">
-                                                    <dt>Custom CSS Class</dt>
+                                                    <dt>Custom CSS Class:</dt>
                                                     <dd>
                                                         <input type="text" name="css-class">
                                                     </dd>
@@ -297,7 +350,7 @@
                                             </div>
                                             <div class="column">
                                                 <dl class="pt__field is-box field-indent">
-                                                    <dt>View Style</dt>
+                                                    <dt>View Style:</dt>
                                                     <dd>
                                                         <select data-element="Com.Select" name="style"></select>
                                                     </dd>

@@ -163,12 +163,6 @@ window.Collector = new Com.Collector({
         });
     })
 
-    .add('app-stylizer', function(node){
-        new App.Stylizer({
-            'node' : node
-        });
-    })
-
     .add('templates-list', function(node){
         new App.TemplatesList({
             'node' : node

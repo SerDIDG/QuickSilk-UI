@@ -1,6 +1,6 @@
 @charset "UTF-8";
-/*! ************ QuickSilk-UI v3.18.0 ************ */
-/*! ************ MagpieUI v3.88.0 (2025-01-16 21:09) ************ */
+/*! ************ QuickSilk-UI v3.19.0 ************ */
+/*! ************ MagpieUI v3.105.0 (2025-04-18 08:24) ************ */
 /*!
  * animate.css - https://animate.style/
  * Version - 4.1.1
@@ -4380,16 +4380,36 @@ span.CodeMirror-selectedtext {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%235e5e5e%3B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M18.6%2C20.425L16.475%2C18.3A1.5%2C1.5%2C0%2C1%2C1%2C18.6%2C16.182L20.718%2C18.3A1.5%2C1.5%2C0%2C0%2C1%2C18.6%2C20.425Zm-11.667-4.6a7%2C7%2C0%2C1%2C1%2C9.9%2C0A7%2C7%2C0%2C0%2C1%2C6.929%2C15.828Zm8.485-8.485a5%2C5%2C0%2C1%2C0%2C0%2C7.071A5%2C5%2C0%2C0%2C0%2C15.414%2C7.343Z%22%20%2F%3E%3C%2Fsvg%3E");
 }
 :root {
+  --cm-color--primary: hsl(210, 75%, 52%);
+  --cm-color--secondary: hsl(0, 0%, 52%);
+  --cm-color--placeholder: #b7b7b7;
+  --cm-color--hint: #999999;
+  --cm-color--success: hsl(120, 65%, 42%);
+  --cm-color--warning: hsl(38, 75%, 52%);
+  --cm-color--danger: hsl(0, 65%, 52%);
   --cm-button--gap: 8px;
+  --cm-input--icon-gap: 6px;
   --pt-buttons--indent: 12px;
   --pt-buttons--box-indent: 16px;
   --pt-field--title-width: 156px;
   --pt-field--title-indent: 16px;
+  --dvh-100: 100vh;
+  --svh-100: 100vh;
+}
+@supports (height: 100dvh) {
+  :root {
+    --dvh-100: 100dvh;
+  }
+}
+@supports (height: 100svh) {
+  :root {
+    --svh-100: 100svh;
+  }
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.88.0');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.88.0') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.88.0') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.88.0') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.88.0#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.105.0');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.105.0') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.105.0') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.105.0') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.105.0#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -4495,15 +4515,25 @@ span.CodeMirror-selectedtext {
   font-weight: 600;
 }
 /* ******* COMMON ******* */
-.cm__hidden {
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  border: 0;
-  padding: 0;
-  position: absolute;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
+.cm__hidden,
+.pt__field.is-no-label > dt,
+.pt__field.is-no-label > .field__title,
+.pt__field.is-box.is-no-label > dt,
+.pt__field.is-form-box.is-no-label > dt,
+.pt__field.is-box.is-no-label > .field__title,
+.pt__field.is-form-box.is-no-label > .field__title {
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  position: absolute !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
 }
 .cm__box {
   margin-bottom: 24px;
@@ -4551,42 +4581,46 @@ span.CodeMirror-selectedtext {
 html.is-scrollbar-visible .cm__scrollbar {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .cm__scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 html.is-scrollbar-visible .cm__scrollbar--light {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-thumb {
-  background-color: hsl(210, 70%, 98%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(210, 70%, 95%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-thumb {
+    background-color: hsl(210, 70%, 98%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(210, 70%, 95%);
+  }
 }
 /* *** COUNTER *** */
 .cm__counter {
@@ -4724,6 +4758,12 @@ html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-thumb:hover {
   overflow: visible;
   white-space: normal;
   text-overflow: clip;
+}
+.cm__scroll-anchor--none {
+  overflow-anchor: none;
+}
+.cm__scroll-anchor--none body {
+  overflow-anchor: none;
 }
 .cm__scroll {
   -webkit-overflow-scrolling: touch;
@@ -4971,25 +5011,25 @@ html.is-scrollbar-visible .cm__scrollbar--light::-webkit-scrollbar-thumb:hover {
 /* ******* COMMON: COLORS ******* */
 /* *** FONT COLORS *** */
 .cm__color__primary {
-  color: hsl(210, 75%, 52%);
+  color: var(--cm-color--primary);
 }
 .cm__color__secondary {
-  color: hsl(0, 0%, 52%);
+  color: var(--cm-color--secondary);
 }
 .cm__color__placeholder {
-  color: #b7b7b7;
+  color: var(--cm-color--placeholder);
 }
 .cm__color__hint {
-  color: #999999;
+  color: var(--cm-color--hint);
 }
 .cm__color__success {
-  color: hsl(120, 65%, 42%);
+  color: var(--cm-color--success);
 }
 .cm__color__warning {
-  color: hsl(38, 75%, 52%);
+  color: var(--cm-color--warning);
 }
 .cm__color__danger {
-  color: hsl(0, 65%, 52%);
+  color: var(--cm-color--danger);
 }
 /* *** BACKGROUND COLORS *** */
 .cm__background__primary {
@@ -6635,7 +6675,14 @@ input[type="submit"]:hover,
 input[type="reset"]:hover,
 button:hover {
   text-decoration: none;
-  transition: background 100ms ease-in-out 0ms, color 100ms ease-in-out 0ms, box-shadow 100ms ease-in-out 0ms, border-color 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
+}
+.button:active,
+input[type="button"]:active,
+input[type="submit"]:active,
+input[type="reset"]:active,
+button:active {
+  transition-duration: 100ms;
 }
 .button:is(:hover, .hover),
 input[type="button"]:is(:hover, .hover),
@@ -7133,6 +7180,14 @@ button.button-clear {
   border: none;
   color: hsl(210, 75%, 52%);
   cursor: default;
+}
+.button.button--medium,
+input[type="button"].button--medium,
+input[type="submit"].button--medium,
+input[type="reset"].button--medium,
+button.button--medium {
+  min-height: 24px;
+  padding: 0px 16px;
 }
 .button.button--large,
 input[type="button"].button--large,
@@ -8040,13 +8095,13 @@ button.is-hidden {
   display: none;
 }
 .form .hint.success {
-  color: hsl(120, 65%, 42%);
+  color: var(--cm-color--success);
 }
 .form .hint.warning {
-  color: hsl(38, 75%, 52%);
+  color: var(--cm-color--warning);
 }
 .form .hint.danger {
-  color: hsl(0, 65%, 52%);
+  color: var(--cm-color--danger);
 }
 .form ul.hint {
   margin: 0;
@@ -9355,22 +9410,24 @@ button.is-hidden {
 html.is-scrollbar-visible .pt__box-code {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 .pt__box-code.is-borderless {
   min-height: 24px;
@@ -9556,18 +9613,18 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
   align-items: flex-end;
 }
 .pt__buttons.is-box > .inner {
-  display: block;
+  display: flex;
+  flex-direction: column;
   margin: 0;
+  gap: var(--pt-buttons--box-indent);
 }
 .pt__buttons.is-box > .inner > .left,
 .pt__buttons.is-box > .inner > .right {
-  display: block;
   width: 100%;
-  margin: var(--pt-buttons--box-indent) 0 0 0;
-}
-.pt__buttons.is-box > .inner > .left:first-child,
-.pt__buttons.is-box > .inner > .right:first-child {
+  display: flex;
+  flex-direction: column;
   margin: 0;
+  gap: var(--pt-buttons--box-indent);
 }
 .pt__buttons.is-box .button-alike,
 .pt__buttons.is-box .button,
@@ -9580,18 +9637,6 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
 .pt__buttons.is-box input[type="reset"],
 .pt__buttons.is-box button {
   width: 100%;
-  margin: var(--pt-buttons--box-indent) 0 0 0;
-}
-.pt__buttons.is-box .button-alike:first-child,
-.pt__buttons.is-box .button:first-child,
-.pt__buttons.is-box .browse-button:first-child,
-.pt__buttons.is-box .cm__button-wrapper:first-child,
-.pt__buttons.is-box .com__menu:first-child,
-.pt__buttons.is-box .com__pagination__bar ul li a:first-child,
-.pt__buttons.is-box input[type="button"]:first-child,
-.pt__buttons.is-box input[type="submit"]:first-child,
-.pt__buttons.is-box input[type="reset"]:first-child,
-.pt__buttons.is-box button:first-child {
   margin: 0;
 }
 .pt__buttons.is-box-reverse > .inner {
@@ -9642,18 +9687,18 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
   margin: 0;
 }
 .pt__buttons--box > .inner {
-  display: block;
+  display: flex;
+  flex-direction: column;
   margin: 0;
+  gap: var(--pt-buttons--box-indent);
 }
 .pt__buttons--box > .inner > .left,
 .pt__buttons--box > .inner > .right {
-  display: block;
   width: 100%;
-  margin: var(--pt-buttons--box-indent) 0 0 0;
-}
-.pt__buttons--box > .inner > .left:first-child,
-.pt__buttons--box > .inner > .right:first-child {
+  display: flex;
+  flex-direction: column;
   margin: 0;
+  gap: var(--pt-buttons--box-indent);
 }
 .pt__buttons--box .button-alike,
 .pt__buttons--box .button,
@@ -9666,18 +9711,6 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
 .pt__buttons--box input[type="reset"],
 .pt__buttons--box button {
   width: 100%;
-  margin: var(--pt-buttons--box-indent) 0 0 0;
-}
-.pt__buttons--box .button-alike:first-child,
-.pt__buttons--box .button:first-child,
-.pt__buttons--box .browse-button:first-child,
-.pt__buttons--box .cm__button-wrapper:first-child,
-.pt__buttons--box .com__menu:first-child,
-.pt__buttons--box .com__pagination__bar ul li a:first-child,
-.pt__buttons--box input[type="button"]:first-child,
-.pt__buttons--box input[type="submit"]:first-child,
-.pt__buttons--box input[type="reset"]:first-child,
-.pt__buttons--box button:first-child {
   margin: 0;
 }
 .pt__buttons--box-reverse > .inner {
@@ -9710,18 +9743,18 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
 /* ******* PARTS: BUTTONS: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .pt__buttons.is-adaptive > .inner {
-    display: block;
+    display: flex;
+    flex-direction: column;
     margin: 0;
+    gap: var(--pt-buttons--box-indent);
   }
   html.is-adaptive .pt__buttons.is-adaptive > .inner > .left,
   html.is-adaptive .pt__buttons.is-adaptive > .inner > .right {
-    display: block;
     width: 100%;
-    margin: var(--pt-buttons--box-indent) 0 0 0;
-  }
-  html.is-adaptive .pt__buttons.is-adaptive > .inner > .left:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive > .inner > .right:first-child {
+    display: flex;
+    flex-direction: column;
     margin: 0;
+    gap: var(--pt-buttons--box-indent);
   }
   html.is-adaptive .pt__buttons.is-adaptive .button-alike,
   html.is-adaptive .pt__buttons.is-adaptive .button,
@@ -9734,18 +9767,6 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
   html.is-adaptive .pt__buttons.is-adaptive input[type="reset"],
   html.is-adaptive .pt__buttons.is-adaptive button {
     width: 100%;
-    margin: var(--pt-buttons--box-indent) 0 0 0;
-  }
-  html.is-adaptive .pt__buttons.is-adaptive .button-alike:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive .button:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive .browse-button:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive .cm__button-wrapper:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive .com__menu:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive .com__pagination__bar ul li a:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive input[type="button"]:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive input[type="submit"]:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive input[type="reset"]:first-child,
-  html.is-adaptive .pt__buttons.is-adaptive button:first-child {
     margin: 0;
   }
   html.is-adaptive .pt__buttons.is-adaptive-reverse > .inner {
@@ -10907,6 +10928,7 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -10919,7 +10941,7 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown > li > a:hover {
@@ -10941,19 +10963,49 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
   font-style: normal;
   text-decoration: underline;
 }
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li > a:hover {
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li > a:active {
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li:first-child {
+  margin-top: 0;
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li:first-child:before {
+  display: none;
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li:hover {
+  z-index: 2;
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -10977,43 +11029,35 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
   bottom: 0;
   left: 0;
 }
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li:first-child {
-  margin-top: 0;
-}
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li:first-child:before {
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.is-hidden {
   display: none;
 }
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li:hover {
-  z-index: 2;
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.pt__editable.is-editable > .menu .pt__menu-dropdown > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.pt__editable.is-editable > .menu .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .pt__editable.is-editable > .menu .pt__menu-dropdown > li > ul {
   top: -5px;
@@ -11280,10 +11324,6 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
 .pt__field.is-label-flex .com__help-bubble .com__help-bubble__title .icon {
   display: block;
 }
-.pt__field.is-no-label > dt,
-.pt__field.is-no-label > .field__title {
-  display: none;
-}
 .pt__field.is-no-label > dd,
 .pt__field.is-no-label > .field__descr {
   margin-left: 0;
@@ -11354,12 +11394,6 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
 .pt__field.is-box > .field__descr:last-child,
 .pt__field.is-form-box > .field__descr:last-child {
   margin: 0;
-}
-.pt__field.is-box.is-no-label > dt,
-.pt__field.is-form-box.is-no-label > dt,
-.pt__field.is-box.is-no-label > .field__title,
-.pt__field.is-form-box.is-no-label > .field__title {
-  display: none;
 }
 .pt__field.is-box.is-first > dt,
 .pt__field.is-form-box.is-first > dt,
@@ -11495,28 +11529,34 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
 /* *** FIELD HINT *** */
 .pt__field-status {
   transition: all 500ms ease-in-out;
+  color: var(--color);
 }
 .pt__field-status.primary,
 .pt__field-status.accent {
-  color: hsl(210, 75%, 52%);
+  --color: var(--cm-color--primary);
 }
 .pt__field-status.secondary {
-  color: hsl(0, 0%, 52%);
+  --color: var(--cm-color--secondary);
 }
 .pt__field-status.placeholder {
-  color: #b7b7b7;
+  --color: var(--cm-color--placeholder);
 }
 .pt__field-status.hint {
-  color: #999999;
+  --color: var(--cm-color--hint);
 }
 .pt__field-status.success {
-  color: hsl(120, 65%, 42%);
+  --color: var(--cm-color--success);
 }
 .pt__field-status.warning {
-  color: hsl(38, 75%, 52%);
+  --color: var(--cm-color--warning);
 }
 .pt__field-status.danger {
-  color: hsl(0, 65%, 52%);
+  --color: var(--cm-color--danger);
+}
+.pt__field-status.has-icon {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 .pt__field-status.is-hidden {
   display: none;
@@ -11531,13 +11571,13 @@ html.is-scrollbar-visible .pt__box-code::-webkit-scrollbar-thumb:hover {
   text-transform: none;
 }
 .pt__field__hint.success {
-  color: hsl(120, 65%, 42%);
+  color: var(--cm-color--success);
 }
 .pt__field__hint.warning {
-  color: hsl(38, 75%, 52%);
+  color: var(--cm-color--warning);
 }
 .pt__field__hint.danger {
-  color: hsl(0, 65%, 52%);
+  color: var(--cm-color--danger);
 }
 ul.pt__field__hint {
   margin: 0;
@@ -12427,11 +12467,14 @@ ul.pt__field__hint li:before {
 .pt__gridlist tbody tr td {
   background-color: transparent;
 }
-.pt__gridlist tbody tr:hover {
+.pt__gridlist tbody tr:hover,
+.pt__gridlist tbody tr.highlight {
   background-color: hsl(210, 70%, 95%);
 }
 .pt__gridlist tbody tr:hover th,
-.pt__gridlist tbody tr:hover td {
+.pt__gridlist tbody tr.highlight th,
+.pt__gridlist tbody tr:hover td,
+.pt__gridlist tbody tr.highlight td {
   background-color: hsl(210, 70%, 95%);
 }
 .pt__gridlist tbody tr:active {
@@ -12452,13 +12495,19 @@ ul.pt__field__hint li:before {
   background-color: hsl(120, 60%, 91%);
 }
 .pt__gridlist tbody tr.success:hover,
-.pt__gridlist tbody tr.valid:hover {
+.pt__gridlist tbody tr.valid:hover,
+.pt__gridlist tbody tr.success.highlight,
+.pt__gridlist tbody tr.valid.highlight {
   background-color: hsl(120, 60%, 86%);
 }
 .pt__gridlist tbody tr.success:hover th,
 .pt__gridlist tbody tr.valid:hover th,
+.pt__gridlist tbody tr.success.highlight th,
+.pt__gridlist tbody tr.valid.highlight th,
 .pt__gridlist tbody tr.success:hover td,
-.pt__gridlist tbody tr.valid:hover td {
+.pt__gridlist tbody tr.valid:hover td,
+.pt__gridlist tbody tr.success.highlight td,
+.pt__gridlist tbody tr.valid.highlight td {
   background-color: hsl(120, 60%, 86%);
 }
 .pt__gridlist tbody tr.danger,
@@ -12472,13 +12521,19 @@ ul.pt__field__hint li:before {
   background-color: hsl(0, 65%, 91%);
 }
 .pt__gridlist tbody tr.danger:hover,
-.pt__gridlist tbody tr.invalid:hover {
+.pt__gridlist tbody tr.invalid:hover,
+.pt__gridlist tbody tr.danger.highlight,
+.pt__gridlist tbody tr.invalid.highlight {
   background-color: hsl(0, 65%, 86%);
 }
 .pt__gridlist tbody tr.danger:hover th,
 .pt__gridlist tbody tr.invalid:hover th,
+.pt__gridlist tbody tr.danger.highlight th,
+.pt__gridlist tbody tr.invalid.highlight th,
 .pt__gridlist tbody tr.danger:hover td,
-.pt__gridlist tbody tr.invalid:hover td {
+.pt__gridlist tbody tr.invalid:hover td,
+.pt__gridlist tbody tr.danger.highlight td,
+.pt__gridlist tbody tr.invalid.highlight td {
   background-color: hsl(0, 65%, 86%);
 }
 .pt__gridlist tbody tr.warning {
@@ -12488,11 +12543,14 @@ ul.pt__field__hint li:before {
 .pt__gridlist tbody tr.warning td {
   background-color: hsl(38, 70%, 91%);
 }
-.pt__gridlist tbody tr.warning:hover {
+.pt__gridlist tbody tr.warning:hover,
+.pt__gridlist tbody tr.warning.highlight {
   background-color: hsl(38, 70%, 86%);
 }
 .pt__gridlist tbody tr.warning:hover th,
-.pt__gridlist tbody tr.warning:hover td {
+.pt__gridlist tbody tr.warning.highlight th,
+.pt__gridlist tbody tr.warning:hover td,
+.pt__gridlist tbody tr.warning.highlight td {
   background-color: hsl(38, 70%, 86%);
 }
 .pt__gridlist tbody tr.active {
@@ -12502,11 +12560,14 @@ ul.pt__field__hint li:before {
 .pt__gridlist tbody tr.active td {
   background-color: hsl(210, 70%, 91%);
 }
-.pt__gridlist tbody tr.active:hover {
+.pt__gridlist tbody tr.active:hover,
+.pt__gridlist tbody tr.active.highlight {
   background-color: hsl(210, 70%, 86%);
 }
 .pt__gridlist tbody tr.active:hover th,
-.pt__gridlist tbody tr.active:hover td {
+.pt__gridlist tbody tr.active.highlight th,
+.pt__gridlist tbody tr.active:hover td,
+.pt__gridlist tbody tr.active.highlight td {
   background-color: hsl(210, 70%, 86%);
 }
 .pt__gridlist table {
@@ -12526,13 +12587,16 @@ ul.pt__field__hint li:before {
 }
 .pt__gridlist td > .inner,
 .pt__gridlist th > .inner {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   display: block;
   position: relative;
   word-wrap: normal;
   text-decoration: none;
+}
+.pt__gridlist td > .inner.is-nowrap,
+.pt__gridlist th > .inner.is-nowrap {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .pt__gridlist td.pull-left,
 .pt__gridlist th.pull-left {
@@ -12667,11 +12731,14 @@ ul.pt__field__hint li:before {
 .pt__gridlist.has-background tbody tr td {
   background-color: transparent;
 }
-.pt__gridlist.has-background tbody tr:hover {
+.pt__gridlist.has-background tbody tr:hover,
+.pt__gridlist.has-background tbody tr.highlight {
   background-color: hsl(210, 70%, 95%);
 }
 .pt__gridlist.has-background tbody tr:hover th,
-.pt__gridlist.has-background tbody tr:hover td {
+.pt__gridlist.has-background tbody tr.highlight th,
+.pt__gridlist.has-background tbody tr:hover td,
+.pt__gridlist.has-background tbody tr.highlight td {
   background-color: hsl(210, 70%, 95%);
 }
 .pt__gridlist.has-background tbody tr:active {
@@ -12692,13 +12759,19 @@ ul.pt__field__hint li:before {
   background-color: hsl(120, 60%, 91%);
 }
 .pt__gridlist.has-background tbody tr.success:hover,
-.pt__gridlist.has-background tbody tr.valid:hover {
+.pt__gridlist.has-background tbody tr.valid:hover,
+.pt__gridlist.has-background tbody tr.success.highlight,
+.pt__gridlist.has-background tbody tr.valid.highlight {
   background-color: hsl(120, 60%, 86%);
 }
 .pt__gridlist.has-background tbody tr.success:hover th,
 .pt__gridlist.has-background tbody tr.valid:hover th,
+.pt__gridlist.has-background tbody tr.success.highlight th,
+.pt__gridlist.has-background tbody tr.valid.highlight th,
 .pt__gridlist.has-background tbody tr.success:hover td,
-.pt__gridlist.has-background tbody tr.valid:hover td {
+.pt__gridlist.has-background tbody tr.valid:hover td,
+.pt__gridlist.has-background tbody tr.success.highlight td,
+.pt__gridlist.has-background tbody tr.valid.highlight td {
   background-color: hsl(120, 60%, 86%);
 }
 .pt__gridlist.has-background tbody tr.danger,
@@ -12712,13 +12785,19 @@ ul.pt__field__hint li:before {
   background-color: hsl(0, 65%, 91%);
 }
 .pt__gridlist.has-background tbody tr.danger:hover,
-.pt__gridlist.has-background tbody tr.invalid:hover {
+.pt__gridlist.has-background tbody tr.invalid:hover,
+.pt__gridlist.has-background tbody tr.danger.highlight,
+.pt__gridlist.has-background tbody tr.invalid.highlight {
   background-color: hsl(0, 65%, 86%);
 }
 .pt__gridlist.has-background tbody tr.danger:hover th,
 .pt__gridlist.has-background tbody tr.invalid:hover th,
+.pt__gridlist.has-background tbody tr.danger.highlight th,
+.pt__gridlist.has-background tbody tr.invalid.highlight th,
 .pt__gridlist.has-background tbody tr.danger:hover td,
-.pt__gridlist.has-background tbody tr.invalid:hover td {
+.pt__gridlist.has-background tbody tr.invalid:hover td,
+.pt__gridlist.has-background tbody tr.danger.highlight td,
+.pt__gridlist.has-background tbody tr.invalid.highlight td {
   background-color: hsl(0, 65%, 86%);
 }
 .pt__gridlist.has-background tbody tr.warning {
@@ -12728,11 +12807,14 @@ ul.pt__field__hint li:before {
 .pt__gridlist.has-background tbody tr.warning td {
   background-color: hsl(38, 70%, 91%);
 }
-.pt__gridlist.has-background tbody tr.warning:hover {
+.pt__gridlist.has-background tbody tr.warning:hover,
+.pt__gridlist.has-background tbody tr.warning.highlight {
   background-color: hsl(38, 70%, 86%);
 }
 .pt__gridlist.has-background tbody tr.warning:hover th,
-.pt__gridlist.has-background tbody tr.warning:hover td {
+.pt__gridlist.has-background tbody tr.warning.highlight th,
+.pt__gridlist.has-background tbody tr.warning:hover td,
+.pt__gridlist.has-background tbody tr.warning.highlight td {
   background-color: hsl(38, 70%, 86%);
 }
 .pt__gridlist.has-background tbody tr.active {
@@ -12742,11 +12824,14 @@ ul.pt__field__hint li:before {
 .pt__gridlist.has-background tbody tr.active td {
   background-color: hsl(210, 70%, 91%);
 }
-.pt__gridlist.has-background tbody tr.active:hover {
+.pt__gridlist.has-background tbody tr.active:hover,
+.pt__gridlist.has-background tbody tr.active.highlight {
   background-color: hsl(210, 70%, 86%);
 }
 .pt__gridlist.has-background tbody tr.active:hover th,
-.pt__gridlist.has-background tbody tr.active:hover td {
+.pt__gridlist.has-background tbody tr.active.highlight th,
+.pt__gridlist.has-background tbody tr.active:hover td,
+.pt__gridlist.has-background tbody tr.active.highlight td {
   background-color: hsl(210, 70%, 86%);
 }
 .pt__gridlist.has-background thead th,
@@ -13456,7 +13541,7 @@ ul.pt__field__hint li:before {
 .pt__input input[type="password"]:not(:first-child),
 .pt__input textarea:not(:first-child),
 .pt__input select:not(:first-child) {
-  padding-left: 36px;
+  padding-left: calc(30px + var(--cm-input--icon-gap));
 }
 .pt__input .input:not(:last-child),
 .pt__input input[type="text"]:not(:last-child),
@@ -13469,7 +13554,7 @@ ul.pt__field__hint li:before {
 .pt__input input[type="password"]:not(:last-child),
 .pt__input textarea:not(:last-child),
 .pt__input select:not(:last-child) {
-  padding-right: 36px;
+  padding-right: calc(30px + var(--cm-input--icon-gap));
 }
 .pt__input .textarea,
 .pt__input textarea {
@@ -13519,31 +13604,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.is-less-indent .input:not(:first-child),
-.pt__input.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.is-less-indent textarea:not(:first-child),
-.pt__input.is-less-indent select:not(:first-child) {
-  padding-left: 30px;
+.pt__input.has-icon-before .input,
+.pt__input.has-icon-before input[type="text"],
+.pt__input.has-icon-before input[type="search"],
+.pt__input.has-icon-before input[type="email"],
+.pt__input.has-icon-before input[type="url"],
+.pt__input.has-icon-before input[type="tel"],
+.pt__input.has-icon-before input[type="number"],
+.pt__input.has-icon-before input[type="time"],
+.pt__input.has-icon-before input[type="password"],
+.pt__input.has-icon-before textarea,
+.pt__input.has-icon-before select {
+  padding-left: calc(30px + var(--cm-input--icon-gap));
 }
-.pt__input.is-less-indent .input:not(:last-child),
-.pt__input.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.is-less-indent textarea:not(:last-child),
-.pt__input.is-less-indent select:not(:last-child) {
-  padding-right: 30px;
+.pt__input.has-icon-after .input,
+.pt__input.has-icon-after input[type="text"],
+.pt__input.has-icon-after input[type="search"],
+.pt__input.has-icon-after input[type="email"],
+.pt__input.has-icon-after input[type="url"],
+.pt__input.has-icon-after input[type="tel"],
+.pt__input.has-icon-after input[type="number"],
+.pt__input.has-icon-after input[type="time"],
+.pt__input.has-icon-after input[type="password"],
+.pt__input.has-icon-after textarea,
+.pt__input.has-icon-after select {
+  padding-right: calc(30px + var(--cm-input--icon-gap));
+}
+.pt__input.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.is-icon-outside .input:not(:first-child),
 .pt__input.is-icon-outside input[type="text"]:not(:first-child),
@@ -13696,7 +13784,7 @@ ul.pt__field__hint li:before {
 .pt__input.is-borderless input[type="password"]:not(:first-child),
 .pt__input.is-borderless textarea:not(:first-child),
 .pt__input.is-borderless select:not(:first-child) {
-  padding-left: 38px;
+  padding-left: calc(32px + var(--cm-input--icon-gap));
 }
 .pt__input.is-borderless .input:not(:last-child),
 .pt__input.is-borderless input[type="text"]:not(:last-child),
@@ -13709,7 +13797,7 @@ ul.pt__field__hint li:before {
 .pt__input.is-borderless input[type="password"]:not(:last-child),
 .pt__input.is-borderless textarea:not(:last-child),
 .pt__input.is-borderless select:not(:last-child) {
-  padding-right: 38px;
+  padding-right: calc(32px + var(--cm-input--icon-gap));
 }
 .pt__input.is-borderless .textarea,
 .pt__input.is-borderless textarea {
@@ -13759,31 +13847,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.is-borderless.is-less-indent .input:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.is-borderless.is-less-indent textarea:not(:first-child),
-.pt__input.is-borderless.is-less-indent select:not(:first-child) {
-  padding-left: 32px;
+.pt__input.is-borderless.has-icon-before .input,
+.pt__input.is-borderless.has-icon-before input[type="text"],
+.pt__input.is-borderless.has-icon-before input[type="search"],
+.pt__input.is-borderless.has-icon-before input[type="email"],
+.pt__input.is-borderless.has-icon-before input[type="url"],
+.pt__input.is-borderless.has-icon-before input[type="tel"],
+.pt__input.is-borderless.has-icon-before input[type="number"],
+.pt__input.is-borderless.has-icon-before input[type="time"],
+.pt__input.is-borderless.has-icon-before input[type="password"],
+.pt__input.is-borderless.has-icon-before textarea,
+.pt__input.is-borderless.has-icon-before select {
+  padding-left: calc(32px + var(--cm-input--icon-gap));
 }
-.pt__input.is-borderless.is-less-indent .input:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.is-borderless.is-less-indent textarea:not(:last-child),
-.pt__input.is-borderless.is-less-indent select:not(:last-child) {
-  padding-right: 32px;
+.pt__input.is-borderless.has-icon-after .input,
+.pt__input.is-borderless.has-icon-after input[type="text"],
+.pt__input.is-borderless.has-icon-after input[type="search"],
+.pt__input.is-borderless.has-icon-after input[type="email"],
+.pt__input.is-borderless.has-icon-after input[type="url"],
+.pt__input.is-borderless.has-icon-after input[type="tel"],
+.pt__input.is-borderless.has-icon-after input[type="number"],
+.pt__input.is-borderless.has-icon-after input[type="time"],
+.pt__input.is-borderless.has-icon-after input[type="password"],
+.pt__input.is-borderless.has-icon-after textarea,
+.pt__input.is-borderless.has-icon-after select {
+  padding-right: calc(32px + var(--cm-input--icon-gap));
+}
+.pt__input.is-borderless.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.is-borderless.is-icon-outside .input:not(:first-child),
 .pt__input.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
@@ -13936,7 +14027,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-large input[type="password"]:not(:first-child),
 .pt__input.size-large textarea:not(:first-child),
 .pt__input.size-large select:not(:first-child) {
-  padding-left: 36px;
+  padding-left: calc(30px + var(--cm-input--icon-gap));
 }
 .pt__input.size-large .input:not(:last-child),
 .pt__input.size-large input[type="text"]:not(:last-child),
@@ -13949,7 +14040,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-large input[type="password"]:not(:last-child),
 .pt__input.size-large textarea:not(:last-child),
 .pt__input.size-large select:not(:last-child) {
-  padding-right: 36px;
+  padding-right: calc(30px + var(--cm-input--icon-gap));
 }
 .pt__input.size-large .textarea,
 .pt__input.size-large textarea {
@@ -13999,31 +14090,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.size-large.is-less-indent .input:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.size-large.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.size-large.is-less-indent textarea:not(:first-child),
-.pt__input.size-large.is-less-indent select:not(:first-child) {
-  padding-left: 30px;
+.pt__input.size-large.has-icon-before .input,
+.pt__input.size-large.has-icon-before input[type="text"],
+.pt__input.size-large.has-icon-before input[type="search"],
+.pt__input.size-large.has-icon-before input[type="email"],
+.pt__input.size-large.has-icon-before input[type="url"],
+.pt__input.size-large.has-icon-before input[type="tel"],
+.pt__input.size-large.has-icon-before input[type="number"],
+.pt__input.size-large.has-icon-before input[type="time"],
+.pt__input.size-large.has-icon-before input[type="password"],
+.pt__input.size-large.has-icon-before textarea,
+.pt__input.size-large.has-icon-before select {
+  padding-left: calc(30px + var(--cm-input--icon-gap));
 }
-.pt__input.size-large.is-less-indent .input:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.size-large.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.size-large.is-less-indent textarea:not(:last-child),
-.pt__input.size-large.is-less-indent select:not(:last-child) {
-  padding-right: 30px;
+.pt__input.size-large.has-icon-after .input,
+.pt__input.size-large.has-icon-after input[type="text"],
+.pt__input.size-large.has-icon-after input[type="search"],
+.pt__input.size-large.has-icon-after input[type="email"],
+.pt__input.size-large.has-icon-after input[type="url"],
+.pt__input.size-large.has-icon-after input[type="tel"],
+.pt__input.size-large.has-icon-after input[type="number"],
+.pt__input.size-large.has-icon-after input[type="time"],
+.pt__input.size-large.has-icon-after input[type="password"],
+.pt__input.size-large.has-icon-after textarea,
+.pt__input.size-large.has-icon-after select {
+  padding-right: calc(30px + var(--cm-input--icon-gap));
+}
+.pt__input.size-large.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.size-large.is-icon-outside .input:not(:first-child),
 .pt__input.size-large.is-icon-outside input[type="text"]:not(:first-child),
@@ -14176,7 +14270,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-large.is-borderless input[type="password"]:not(:first-child),
 .pt__input.size-large.is-borderless textarea:not(:first-child),
 .pt__input.size-large.is-borderless select:not(:first-child) {
-  padding-left: 38px;
+  padding-left: calc(32px + var(--cm-input--icon-gap));
 }
 .pt__input.size-large.is-borderless .input:not(:last-child),
 .pt__input.size-large.is-borderless input[type="text"]:not(:last-child),
@@ -14189,7 +14283,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-large.is-borderless input[type="password"]:not(:last-child),
 .pt__input.size-large.is-borderless textarea:not(:last-child),
 .pt__input.size-large.is-borderless select:not(:last-child) {
-  padding-right: 38px;
+  padding-right: calc(32px + var(--cm-input--icon-gap));
 }
 .pt__input.size-large.is-borderless .textarea,
 .pt__input.size-large.is-borderless textarea {
@@ -14239,31 +14333,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.size-large.is-borderless.is-less-indent .input:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent textarea:not(:first-child),
-.pt__input.size-large.is-borderless.is-less-indent select:not(:first-child) {
-  padding-left: 32px;
+.pt__input.size-large.is-borderless.has-icon-before .input,
+.pt__input.size-large.is-borderless.has-icon-before input[type="text"],
+.pt__input.size-large.is-borderless.has-icon-before input[type="search"],
+.pt__input.size-large.is-borderless.has-icon-before input[type="email"],
+.pt__input.size-large.is-borderless.has-icon-before input[type="url"],
+.pt__input.size-large.is-borderless.has-icon-before input[type="tel"],
+.pt__input.size-large.is-borderless.has-icon-before input[type="number"],
+.pt__input.size-large.is-borderless.has-icon-before input[type="time"],
+.pt__input.size-large.is-borderless.has-icon-before input[type="password"],
+.pt__input.size-large.is-borderless.has-icon-before textarea,
+.pt__input.size-large.is-borderless.has-icon-before select {
+  padding-left: calc(32px + var(--cm-input--icon-gap));
 }
-.pt__input.size-large.is-borderless.is-less-indent .input:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent textarea:not(:last-child),
-.pt__input.size-large.is-borderless.is-less-indent select:not(:last-child) {
-  padding-right: 32px;
+.pt__input.size-large.is-borderless.has-icon-after .input,
+.pt__input.size-large.is-borderless.has-icon-after input[type="text"],
+.pt__input.size-large.is-borderless.has-icon-after input[type="search"],
+.pt__input.size-large.is-borderless.has-icon-after input[type="email"],
+.pt__input.size-large.is-borderless.has-icon-after input[type="url"],
+.pt__input.size-large.is-borderless.has-icon-after input[type="tel"],
+.pt__input.size-large.is-borderless.has-icon-after input[type="number"],
+.pt__input.size-large.is-borderless.has-icon-after input[type="time"],
+.pt__input.size-large.is-borderless.has-icon-after input[type="password"],
+.pt__input.size-large.is-borderless.has-icon-after textarea,
+.pt__input.size-large.is-borderless.has-icon-after select {
+  padding-right: calc(32px + var(--cm-input--icon-gap));
+}
+.pt__input.size-large.is-borderless.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.size-large.is-borderless.is-icon-outside .input:not(:first-child),
 .pt__input.size-large.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
@@ -14416,7 +14513,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xlarge input[type="password"]:not(:first-child),
 .pt__input.size-xlarge textarea:not(:first-child),
 .pt__input.size-xlarge select:not(:first-child) {
-  padding-left: 52px;
+  padding-left: calc(46px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xlarge .input:not(:last-child),
 .pt__input.size-xlarge input[type="text"]:not(:last-child),
@@ -14429,7 +14526,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xlarge input[type="password"]:not(:last-child),
 .pt__input.size-xlarge textarea:not(:last-child),
 .pt__input.size-xlarge select:not(:last-child) {
-  padding-right: 52px;
+  padding-right: calc(46px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xlarge .textarea,
 .pt__input.size-xlarge textarea {
@@ -14479,31 +14576,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.size-xlarge.is-less-indent .input:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.size-xlarge.is-less-indent textarea:not(:first-child),
-.pt__input.size-xlarge.is-less-indent select:not(:first-child) {
-  padding-left: 46px;
+.pt__input.size-xlarge.has-icon-before .input,
+.pt__input.size-xlarge.has-icon-before input[type="text"],
+.pt__input.size-xlarge.has-icon-before input[type="search"],
+.pt__input.size-xlarge.has-icon-before input[type="email"],
+.pt__input.size-xlarge.has-icon-before input[type="url"],
+.pt__input.size-xlarge.has-icon-before input[type="tel"],
+.pt__input.size-xlarge.has-icon-before input[type="number"],
+.pt__input.size-xlarge.has-icon-before input[type="time"],
+.pt__input.size-xlarge.has-icon-before input[type="password"],
+.pt__input.size-xlarge.has-icon-before textarea,
+.pt__input.size-xlarge.has-icon-before select {
+  padding-left: calc(46px + var(--cm-input--icon-gap));
 }
-.pt__input.size-xlarge.is-less-indent .input:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.size-xlarge.is-less-indent textarea:not(:last-child),
-.pt__input.size-xlarge.is-less-indent select:not(:last-child) {
-  padding-right: 46px;
+.pt__input.size-xlarge.has-icon-after .input,
+.pt__input.size-xlarge.has-icon-after input[type="text"],
+.pt__input.size-xlarge.has-icon-after input[type="search"],
+.pt__input.size-xlarge.has-icon-after input[type="email"],
+.pt__input.size-xlarge.has-icon-after input[type="url"],
+.pt__input.size-xlarge.has-icon-after input[type="tel"],
+.pt__input.size-xlarge.has-icon-after input[type="number"],
+.pt__input.size-xlarge.has-icon-after input[type="time"],
+.pt__input.size-xlarge.has-icon-after input[type="password"],
+.pt__input.size-xlarge.has-icon-after textarea,
+.pt__input.size-xlarge.has-icon-after select {
+  padding-right: calc(46px + var(--cm-input--icon-gap));
+}
+.pt__input.size-xlarge.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.size-xlarge.is-icon-outside .input:not(:first-child),
 .pt__input.size-xlarge.is-icon-outside input[type="text"]:not(:first-child),
@@ -14656,7 +14756,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xlarge.is-borderless input[type="password"]:not(:first-child),
 .pt__input.size-xlarge.is-borderless textarea:not(:first-child),
 .pt__input.size-xlarge.is-borderless select:not(:first-child) {
-  padding-left: 54px;
+  padding-left: calc(48px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xlarge.is-borderless .input:not(:last-child),
 .pt__input.size-xlarge.is-borderless input[type="text"]:not(:last-child),
@@ -14669,7 +14769,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xlarge.is-borderless input[type="password"]:not(:last-child),
 .pt__input.size-xlarge.is-borderless textarea:not(:last-child),
 .pt__input.size-xlarge.is-borderless select:not(:last-child) {
-  padding-right: 54px;
+  padding-right: calc(48px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xlarge.is-borderless .textarea,
 .pt__input.size-xlarge.is-borderless textarea {
@@ -14719,31 +14819,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.size-xlarge.is-borderless.is-less-indent .input:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent textarea:not(:first-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent select:not(:first-child) {
-  padding-left: 48px;
+.pt__input.size-xlarge.is-borderless.has-icon-before .input,
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="text"],
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="search"],
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="email"],
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="url"],
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="tel"],
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="number"],
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="time"],
+.pt__input.size-xlarge.is-borderless.has-icon-before input[type="password"],
+.pt__input.size-xlarge.is-borderless.has-icon-before textarea,
+.pt__input.size-xlarge.is-borderless.has-icon-before select {
+  padding-left: calc(48px + var(--cm-input--icon-gap));
 }
-.pt__input.size-xlarge.is-borderless.is-less-indent .input:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent textarea:not(:last-child),
-.pt__input.size-xlarge.is-borderless.is-less-indent select:not(:last-child) {
-  padding-right: 48px;
+.pt__input.size-xlarge.is-borderless.has-icon-after .input,
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="text"],
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="search"],
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="email"],
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="url"],
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="tel"],
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="number"],
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="time"],
+.pt__input.size-xlarge.is-borderless.has-icon-after input[type="password"],
+.pt__input.size-xlarge.is-borderless.has-icon-after textarea,
+.pt__input.size-xlarge.is-borderless.has-icon-after select {
+  padding-right: calc(48px + var(--cm-input--icon-gap));
+}
+.pt__input.size-xlarge.is-borderless.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.size-xlarge.is-borderless.is-icon-outside .input:not(:first-child),
 .pt__input.size-xlarge.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
@@ -14896,7 +14999,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xxlarge input[type="password"]:not(:first-child),
 .pt__input.size-xxlarge textarea:not(:first-child),
 .pt__input.size-xxlarge select:not(:first-child) {
-  padding-left: 68px;
+  padding-left: calc(62px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xxlarge .input:not(:last-child),
 .pt__input.size-xxlarge input[type="text"]:not(:last-child),
@@ -14909,7 +15012,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xxlarge input[type="password"]:not(:last-child),
 .pt__input.size-xxlarge textarea:not(:last-child),
 .pt__input.size-xxlarge select:not(:last-child) {
-  padding-right: 68px;
+  padding-right: calc(62px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xxlarge .textarea,
 .pt__input.size-xxlarge textarea {
@@ -14959,31 +15062,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.size-xxlarge.is-less-indent .input:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent textarea:not(:first-child),
-.pt__input.size-xxlarge.is-less-indent select:not(:first-child) {
-  padding-left: 62px;
+.pt__input.size-xxlarge.has-icon-before .input,
+.pt__input.size-xxlarge.has-icon-before input[type="text"],
+.pt__input.size-xxlarge.has-icon-before input[type="search"],
+.pt__input.size-xxlarge.has-icon-before input[type="email"],
+.pt__input.size-xxlarge.has-icon-before input[type="url"],
+.pt__input.size-xxlarge.has-icon-before input[type="tel"],
+.pt__input.size-xxlarge.has-icon-before input[type="number"],
+.pt__input.size-xxlarge.has-icon-before input[type="time"],
+.pt__input.size-xxlarge.has-icon-before input[type="password"],
+.pt__input.size-xxlarge.has-icon-before textarea,
+.pt__input.size-xxlarge.has-icon-before select {
+  padding-left: calc(62px + var(--cm-input--icon-gap));
 }
-.pt__input.size-xxlarge.is-less-indent .input:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent textarea:not(:last-child),
-.pt__input.size-xxlarge.is-less-indent select:not(:last-child) {
-  padding-right: 62px;
+.pt__input.size-xxlarge.has-icon-after .input,
+.pt__input.size-xxlarge.has-icon-after input[type="text"],
+.pt__input.size-xxlarge.has-icon-after input[type="search"],
+.pt__input.size-xxlarge.has-icon-after input[type="email"],
+.pt__input.size-xxlarge.has-icon-after input[type="url"],
+.pt__input.size-xxlarge.has-icon-after input[type="tel"],
+.pt__input.size-xxlarge.has-icon-after input[type="number"],
+.pt__input.size-xxlarge.has-icon-after input[type="time"],
+.pt__input.size-xxlarge.has-icon-after input[type="password"],
+.pt__input.size-xxlarge.has-icon-after textarea,
+.pt__input.size-xxlarge.has-icon-after select {
+  padding-right: calc(62px + var(--cm-input--icon-gap));
+}
+.pt__input.size-xxlarge.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.size-xxlarge.is-icon-outside .input:not(:first-child),
 .pt__input.size-xxlarge.is-icon-outside input[type="text"]:not(:first-child),
@@ -15136,7 +15242,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xxlarge.is-borderless input[type="password"]:not(:first-child),
 .pt__input.size-xxlarge.is-borderless textarea:not(:first-child),
 .pt__input.size-xxlarge.is-borderless select:not(:first-child) {
-  padding-left: 70px;
+  padding-left: calc(64px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xxlarge.is-borderless .input:not(:last-child),
 .pt__input.size-xxlarge.is-borderless input[type="text"]:not(:last-child),
@@ -15149,7 +15255,7 @@ ul.pt__field__hint li:before {
 .pt__input.size-xxlarge.is-borderless input[type="password"]:not(:last-child),
 .pt__input.size-xxlarge.is-borderless textarea:not(:last-child),
 .pt__input.size-xxlarge.is-borderless select:not(:last-child) {
-  padding-right: 70px;
+  padding-right: calc(64px + var(--cm-input--icon-gap));
 }
 .pt__input.size-xxlarge.is-borderless .textarea,
 .pt__input.size-xxlarge.is-borderless textarea {
@@ -15199,31 +15305,34 @@ ul.pt__field__hint li:before {
   bottom: auto;
   left: auto;
 }
-.pt__input.size-xxlarge.is-borderless.is-less-indent .input:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="text"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="search"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="email"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="url"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="tel"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="number"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="time"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="password"]:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent textarea:not(:first-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent select:not(:first-child) {
-  padding-left: 64px;
+.pt__input.size-xxlarge.is-borderless.has-icon-before .input,
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="text"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="search"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="email"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="url"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="tel"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="number"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="time"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before input[type="password"],
+.pt__input.size-xxlarge.is-borderless.has-icon-before textarea,
+.pt__input.size-xxlarge.is-borderless.has-icon-before select {
+  padding-left: calc(64px + var(--cm-input--icon-gap));
 }
-.pt__input.size-xxlarge.is-borderless.is-less-indent .input:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="text"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="search"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="email"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="url"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="tel"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="number"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="time"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent input[type="password"]:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent textarea:not(:last-child),
-.pt__input.size-xxlarge.is-borderless.is-less-indent select:not(:last-child) {
-  padding-right: 64px;
+.pt__input.size-xxlarge.is-borderless.has-icon-after .input,
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="text"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="search"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="email"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="url"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="tel"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="number"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="time"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after input[type="password"],
+.pt__input.size-xxlarge.is-borderless.has-icon-after textarea,
+.pt__input.size-xxlarge.is-borderless.has-icon-after select {
+  padding-right: calc(64px + var(--cm-input--icon-gap));
+}
+.pt__input.size-xxlarge.is-borderless.is-less-indent {
+  --cm-input--icon-gap: 0px;
 }
 .pt__input.size-xxlarge.is-borderless.is-icon-outside .input:not(:first-child),
 .pt__input.size-xxlarge.is-borderless.is-icon-outside input[type="text"]:not(:first-child),
@@ -16088,9 +16197,9 @@ ul.pt__field__hint li:before {
 .pt__listing-items ul li > .text .icon.small {
   margin-top: 4px;
 }
-.pt__listing-items ul li > a:hover,
-.pt__listing-items ul li > .inner:hover,
-.pt__listing-items ul li > .text:hover {
+.pt__listing-items ul li > a:is(:hover, :focus-visible, .highlight),
+.pt__listing-items ul li > .inner:is(:hover, :focus-visible, .highlight),
+.pt__listing-items ul li > .text:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   transition: all 100ms ease-in-out 0ms;
 }
@@ -16150,12 +16259,16 @@ ul.pt__field__hint li:before {
 .pt__listing-items ul li.sep {
   border-bottom: 1px solid hsl(0, 0%, 80%);
 }
-.pt__listing-items:not(.disabled) ul li > a:hover,
-.pt__listing-items:not(.disabled) ul li > .inner:hover {
+.pt__listing-items:not(.disabled) ul li > a:is(:hover, :focus-visible, .highlight),
+.pt__listing-items:not(.disabled) ul li > .inner:is(:hover, :focus-visible, .highlight) {
   background-color: hsl(0, 0%, 95%);
 }
-.pt__listing-items:not(.disabled) ul li.active > a:hover,
-.pt__listing-items:not(.disabled) ul li.active > .inner:hover {
+.pt__listing-items:not(.disabled) ul li > a:is(:active, .active),
+.pt__listing-items:not(.disabled) ul li > .inner:is(:active, .active) {
+  background-color: hsl(210, 70%, 91%);
+}
+.pt__listing-items:not(.disabled) ul li.active > a:is(:hover, :focus-visible, .highlight),
+.pt__listing-items:not(.disabled) ul li.active > .inner:is(:hover, :focus-visible, .highlight) {
   background-color: hsl(210, 70%, 86%);
 }
 .pt__listing-items.disabled ul li > a,
@@ -16192,6 +16305,7 @@ ul.pt__field__hint li:before {
 }
 .pt__menu-dropdown--base > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -16204,7 +16318,7 @@ ul.pt__field__hint li:before {
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .pt__menu-dropdown--base > li > a:hover {
@@ -16226,19 +16340,49 @@ ul.pt__field__hint li:before {
   font-style: normal;
   text-decoration: underline;
 }
-.pt__menu-dropdown--base > li > a:hover {
+.pt__menu-dropdown--base > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.pt__menu-dropdown--base > li > a:active {
+.pt__menu-dropdown--base > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.pt__menu-dropdown--base > li:first-child {
+  margin-top: 0;
+}
+.pt__menu-dropdown--base > li:first-child:before {
+  display: none;
+}
+.pt__menu-dropdown--base > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.pt__menu-dropdown--base > li:hover {
+  z-index: 2;
+}
+.pt__menu-dropdown--base > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .pt__menu-dropdown--base > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -16262,43 +16406,35 @@ ul.pt__field__hint li:before {
   bottom: 0;
   left: 0;
 }
-.pt__menu-dropdown--base > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.pt__menu-dropdown--base > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.pt__menu-dropdown--base > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.pt__menu-dropdown--base > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.pt__menu-dropdown--base > li:first-child {
-  margin-top: 0;
-}
-.pt__menu-dropdown--base > li:first-child:before {
+.pt__menu-dropdown--base > li.is-hidden {
   display: none;
 }
-.pt__menu-dropdown--base > li:hover {
-  z-index: 2;
+.pt__menu-dropdown--base > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.pt__menu-dropdown--base > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.pt__menu-dropdown--base > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.pt__menu-dropdown--base > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.pt__menu-dropdown--base > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.pt__menu-dropdown--base > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.pt__menu-dropdown--base > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.pt__menu-dropdown--base > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.pt__menu-dropdown--base > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.pt__menu-dropdown--base > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .pt__menu-dropdown--position {
   visibility: hidden;
@@ -16402,6 +16538,7 @@ ul.pt__field__hint li:before {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -16424,15 +16561,6 @@ ul.pt__field__hint li:before {
   right: 0;
   bottom: 0;
   left: 0;
-}
-.pt__menu__item--icon > a .title {
-  margin: 0 8px;
-}
-.pt__menu__item--icon > a .title:first-child {
-  margin-left: 0;
-}
-.pt__menu__item--icon > a .title:last-child {
-  margin-right: 0;
 }
 /* ******* PARTS: OVERLAY ******* */
 .pt__overlay {
@@ -17795,11 +17923,14 @@ ul.pt__field__hint li:before {
 .com__togglebox.has-content-bg .pt__gridlist tbody tr td {
   background-color: transparent;
 }
-.com__togglebox.has-content-bg .pt__gridlist tbody tr:hover {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr:hover,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.highlight {
   background-color: hsl(210, 70%, 95%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr:hover th,
-.com__togglebox.has-content-bg .pt__gridlist tbody tr:hover td {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.highlight th,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr:hover td,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.highlight td {
   background-color: hsl(210, 70%, 95%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr:active {
@@ -17820,13 +17951,19 @@ ul.pt__field__hint li:before {
   background-color: hsl(120, 60%, 91%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.success:hover,
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.valid:hover {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.valid:hover,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.success.highlight,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.valid.highlight {
   background-color: hsl(120, 60%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.success:hover th,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.valid:hover th,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.success.highlight th,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.valid.highlight th,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.success:hover td,
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.valid:hover td {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.valid:hover td,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.success.highlight td,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.valid.highlight td {
   background-color: hsl(120, 60%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.danger,
@@ -17840,13 +17977,19 @@ ul.pt__field__hint li:before {
   background-color: hsl(0, 65%, 91%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.danger:hover,
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid:hover {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid:hover,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.danger.highlight,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid.highlight {
   background-color: hsl(0, 65%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.danger:hover th,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid:hover th,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.danger.highlight th,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid.highlight th,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.danger:hover td,
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid:hover td {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid:hover td,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.danger.highlight td,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.invalid.highlight td {
   background-color: hsl(0, 65%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning {
@@ -17856,11 +17999,14 @@ ul.pt__field__hint li:before {
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning td {
   background-color: hsl(38, 70%, 91%);
 }
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.warning.highlight {
   background-color: hsl(38, 70%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover th,
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover td {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.warning.highlight th,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover td,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.warning.highlight td {
   background-color: hsl(38, 70%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.active {
@@ -17870,11 +18016,14 @@ ul.pt__field__hint li:before {
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.active td {
   background-color: hsl(210, 70%, 91%);
 }
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.active:hover {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.active:hover,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.active.highlight {
   background-color: hsl(210, 70%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.active:hover th,
-.com__togglebox.has-content-bg .pt__gridlist tbody tr.active:hover td {
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.active.highlight th,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.active:hover td,
+.com__togglebox.has-content-bg .pt__gridlist tbody tr.active.highlight td {
   background-color: hsl(210, 70%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist thead th,
@@ -18241,6 +18390,7 @@ ul.pt__field__hint li:before {
 .com__box-tools__content.disabled .b-link {
   background-color: hsl(0, 0%, 95%);
   cursor: default;
+  pointer-events: none;
 }
 .com__box-tools__content.disabled .b-link.active {
   background-color: hsl(0, 0%, 86%);
@@ -18849,7 +18999,7 @@ ul.pt__field__hint li:before {
 .com__dialog .com__glossary .com__glossary__title {
   color: #666666;
 }
-.com__dialog:before {
+.com__dialog::before {
   height: 100%;
   display: inline-block;
   vertical-align: middle;
@@ -18867,6 +19017,12 @@ ul.pt__field__hint li:before {
   position: fixed;
   z-index: 2;
   font-size: 0;
+}
+.com__dialog.is-valign-top::before {
+  vertical-align: top;
+}
+.com__dialog.is-valign-bottom::before {
+  vertical-align: bottom;
 }
 .com__dialog.is-open {
   visibility: visible;
@@ -18914,22 +19070,24 @@ ul.pt__field__hint li:before {
 html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 .com__dialog__window > .inner > .descr > .scroll.is-no-scroll > .inner {
   height: 100%;
@@ -18959,6 +19117,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   margin-top: 0;
 }
 .com__dialog__window.is-animate {
+  will-change: opacity, transform;
   opacity: 0;
   transform: scale(0.9);
   transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
@@ -18967,6 +19126,11 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   opacity: 1;
   transform: scale(1);
   transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
+}
+@media (prefers-reduced-motion) {
+  .com__dialog__window.is-animate {
+    transform: none !important;
+  }
 }
 .com__dialog__window.is-fullscreen > .inner > .descr > .scroll.is-animate {
   -webkit-transition: none !important;
@@ -20382,11 +20546,14 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__gridlist.has-background .pt__gridlist tbody tr td {
   background-color: transparent;
 }
-.com__gridlist.has-background .pt__gridlist tbody tr:hover {
+.com__gridlist.has-background .pt__gridlist tbody tr:hover,
+.com__gridlist.has-background .pt__gridlist tbody tr.highlight {
   background-color: hsl(210, 70%, 95%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr:hover th,
-.com__gridlist.has-background .pt__gridlist tbody tr:hover td {
+.com__gridlist.has-background .pt__gridlist tbody tr.highlight th,
+.com__gridlist.has-background .pt__gridlist tbody tr:hover td,
+.com__gridlist.has-background .pt__gridlist tbody tr.highlight td {
   background-color: hsl(210, 70%, 95%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr:active {
@@ -20407,13 +20574,19 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   background-color: hsl(120, 60%, 91%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.success:hover,
-.com__gridlist.has-background .pt__gridlist tbody tr.valid:hover {
+.com__gridlist.has-background .pt__gridlist tbody tr.valid:hover,
+.com__gridlist.has-background .pt__gridlist tbody tr.success.highlight,
+.com__gridlist.has-background .pt__gridlist tbody tr.valid.highlight {
   background-color: hsl(120, 60%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.success:hover th,
 .com__gridlist.has-background .pt__gridlist tbody tr.valid:hover th,
+.com__gridlist.has-background .pt__gridlist tbody tr.success.highlight th,
+.com__gridlist.has-background .pt__gridlist tbody tr.valid.highlight th,
 .com__gridlist.has-background .pt__gridlist tbody tr.success:hover td,
-.com__gridlist.has-background .pt__gridlist tbody tr.valid:hover td {
+.com__gridlist.has-background .pt__gridlist tbody tr.valid:hover td,
+.com__gridlist.has-background .pt__gridlist tbody tr.success.highlight td,
+.com__gridlist.has-background .pt__gridlist tbody tr.valid.highlight td {
   background-color: hsl(120, 60%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.danger,
@@ -20427,13 +20600,19 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   background-color: hsl(0, 65%, 91%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.danger:hover,
-.com__gridlist.has-background .pt__gridlist tbody tr.invalid:hover {
+.com__gridlist.has-background .pt__gridlist tbody tr.invalid:hover,
+.com__gridlist.has-background .pt__gridlist tbody tr.danger.highlight,
+.com__gridlist.has-background .pt__gridlist tbody tr.invalid.highlight {
   background-color: hsl(0, 65%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.danger:hover th,
 .com__gridlist.has-background .pt__gridlist tbody tr.invalid:hover th,
+.com__gridlist.has-background .pt__gridlist tbody tr.danger.highlight th,
+.com__gridlist.has-background .pt__gridlist tbody tr.invalid.highlight th,
 .com__gridlist.has-background .pt__gridlist tbody tr.danger:hover td,
-.com__gridlist.has-background .pt__gridlist tbody tr.invalid:hover td {
+.com__gridlist.has-background .pt__gridlist tbody tr.invalid:hover td,
+.com__gridlist.has-background .pt__gridlist tbody tr.danger.highlight td,
+.com__gridlist.has-background .pt__gridlist tbody tr.invalid.highlight td {
   background-color: hsl(0, 65%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.warning {
@@ -20443,11 +20622,14 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__gridlist.has-background .pt__gridlist tbody tr.warning td {
   background-color: hsl(38, 70%, 91%);
 }
-.com__gridlist.has-background .pt__gridlist tbody tr.warning:hover {
+.com__gridlist.has-background .pt__gridlist tbody tr.warning:hover,
+.com__gridlist.has-background .pt__gridlist tbody tr.warning.highlight {
   background-color: hsl(38, 70%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.warning:hover th,
-.com__gridlist.has-background .pt__gridlist tbody tr.warning:hover td {
+.com__gridlist.has-background .pt__gridlist tbody tr.warning.highlight th,
+.com__gridlist.has-background .pt__gridlist tbody tr.warning:hover td,
+.com__gridlist.has-background .pt__gridlist tbody tr.warning.highlight td {
   background-color: hsl(38, 70%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.active {
@@ -20457,11 +20639,14 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__gridlist.has-background .pt__gridlist tbody tr.active td {
   background-color: hsl(210, 70%, 91%);
 }
-.com__gridlist.has-background .pt__gridlist tbody tr.active:hover {
+.com__gridlist.has-background .pt__gridlist tbody tr.active:hover,
+.com__gridlist.has-background .pt__gridlist tbody tr.active.highlight {
   background-color: hsl(210, 70%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.active:hover th,
-.com__gridlist.has-background .pt__gridlist tbody tr.active:hover td {
+.com__gridlist.has-background .pt__gridlist tbody tr.active.highlight th,
+.com__gridlist.has-background .pt__gridlist tbody tr.active:hover td,
+.com__gridlist.has-background .pt__gridlist tbody tr.active.highlight td {
   background-color: hsl(210, 70%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist thead th,
@@ -20755,36 +20940,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 /* *** MIXINS *** */
-/* ******* COMPONENTS: MENU ******* */
-.com__menu {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.com__menu .button,
-.com__menu input[type="button"],
-.com__menu input[type="submit"],
-.com__menu input[type="reset"],
-.com__menu button {
-  margin: 0 !important;
-}
-.com__menu .pt__menu {
-  display: none;
-}
-.com__menu--link {
-  text-decoration: none;
-}
-.com__menu--link:is(:hover, :active, :focus-visible) {
-  text-decoration: none;
-}
-.com__menu--link:is(:hover, :active, :focus-visible) .label {
-  text-decoration: underline;
-}
-/* *** TOOLTIP *** */
-.com__tooltip.com__menu-tooltip > .inner > .scroll {
-  overflow: visible;
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown {
+.pt__menu--tooltip .pt__menu-dropdown {
   padding: 4px;
   background: #ffffff;
   border: 1px solid hsl(0, 0%, 80%);
@@ -20811,13 +20967,14 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   opacity: 1;
   position: static;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li {
+.pt__menu--tooltip .pt__menu-dropdown > li {
   position: relative;
   margin-top: 1px;
   color: #666666;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > a {
+.pt__menu--tooltip .pt__menu-dropdown > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -20830,74 +20987,43 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > a:hover {
+.pt__menu--tooltip .pt__menu-dropdown > li > a:hover {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > a:active {
+.pt__menu--tooltip .pt__menu-dropdown > li > a:active {
   color: hsl(210, 75%, 35%);
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > a:hover {
+.pt__menu--tooltip .pt__menu-dropdown > li > a:hover {
   font-weight: 400;
   color: #1d73c9;
   font-style: normal;
   text-decoration: underline;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > a:active {
+.pt__menu--tooltip .pt__menu-dropdown > li > a:active {
   font-weight: 400;
   color: #1d73c9;
   font-style: normal;
   text-decoration: underline;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > a:hover {
+.pt__menu--tooltip .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > a:active {
+.pt__menu--tooltip .pt__menu-dropdown > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li.has-icon > a {
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-pack: center;
-  white-space: nowrap;
-  transition: all 250ms ease-in-out 0ms;
-  align-items: center;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
+.pt__menu--tooltip .pt__menu-dropdown > li:first-child {
+  margin-top: 0;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li.has-icon > a .image {
-  width: 24px;
-  height: 24px;
-  position: relative;
+.pt__menu--tooltip .pt__menu-dropdown > li:first-child:before {
+  display: none;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li.has-icon > a .image img {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  margin: auto;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li:before {
+.pt__menu--tooltip .pt__menu-dropdown > li:before {
   display: block;
   height: 0;
   margin: 0 12px;
@@ -20912,62 +21038,142 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   bottom: auto;
   left: 0;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li:first-child {
-  margin-top: 0;
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li:first-child:before {
-  display: none;
-}
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li:hover {
+.pt__menu--tooltip .pt__menu-dropdown > li:hover {
   z-index: 2;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li:hover > ul {
+.pt__menu--tooltip .pt__menu-dropdown > li:hover > ul {
   visibility: visible;
   opacity: 1;
   transition: all 100ms ease-in-out 0ms;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > ul {
+.pt__menu--tooltip .pt__menu-dropdown > li.has-icon > a {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 250ms ease-in-out 0ms;
+  align-items: center;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.has-icon > a .image {
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.has-icon > a .image img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.is-hidden {
+  display: none;
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.success {
+  color: hsl(120, 65%, 42%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
+}
+.pt__menu--tooltip .pt__menu-dropdown > li > ul {
   top: -5px;
   right: auto;
   bottom: auto;
   left: calc(100% - 0px);
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > ul.pull-left {
+.pt__menu--tooltip .pt__menu-dropdown > li > ul.pull-left {
   top: -5px;
   right: auto;
   bottom: auto;
   left: calc(100% - 0px);
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown > li > ul.pull-right {
+.pt__menu--tooltip .pt__menu-dropdown > li > ul.pull-right {
   top: -5px;
   right: calc(100% - 0px);
   bottom: auto;
   left: auto;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown.pull-left {
+.pt__menu--tooltip .pt__menu-dropdown.pull-left {
   top: 100%;
   right: auto;
   bottom: auto;
   left: 0;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown.pull-center {
+.pt__menu--tooltip .pt__menu-dropdown.pull-center {
   top: 100%;
   right: auto;
   bottom: auto;
   left: 50%;
   transform: translateX(-50%);
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown.pull-right {
+.pt__menu--tooltip .pt__menu-dropdown.pull-right {
   top: 100%;
   right: 0;
   bottom: auto;
   left: auto;
 }
-.com__tooltip.com__menu-tooltip .pt__menu .pt__menu-dropdown.pull-justify {
+.pt__menu--tooltip .pt__menu-dropdown.pull-justify {
   top: 100%;
   right: 0;
   bottom: auto;
   left: 0;
+}
+.com__menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.com__menu .button,
+.com__menu input[type="button"],
+.com__menu input[type="submit"],
+.com__menu input[type="reset"],
+.com__menu button {
+  margin: 0 !important;
+}
+.com__menu .pt__menu {
+  display: none;
+}
+.com__menu--link {
+  text-decoration: none;
+}
+.com__menu--link:is(:hover, :active, :focus-visible) {
+  text-decoration: none;
+}
+.com__menu--link:is(:hover, :active, :focus-visible) .label {
+  text-decoration: underline;
+}
+.com__tooltip.com__menu-tooltip > .inner > .scroll {
+  overflow: visible;
 }
 /* ******* COMPONENTS: MULTI FIELD  ******* */
 .com__multifield__content {
@@ -21114,6 +21320,9 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 }
 .com__notifications > ul > li > .icon.small {
   margin-top: 4px;
+}
+.com__notifications > ul > li > .icon.small[class*="svg__close"] {
+  background-size: 18px;
 }
 .com__notifications > ul > li > .close {
   float: right;
@@ -21293,6 +21502,9 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__pagination__bar {
   margin: 24px 0;
   line-height: 32px;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -21378,7 +21590,10 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 }
 .com__pagination__bar ul li a:hover {
   text-decoration: none;
-  transition: background 100ms ease-in-out 0ms, color 100ms ease-in-out 0ms, box-shadow 100ms ease-in-out 0ms, border-color 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
+}
+.com__pagination__bar ul li a:active {
+  transition-duration: 100ms;
 }
 .com__pagination__bar ul li a:is(:hover, .hover) {
   background-color: hsl(210, 75%, 45%);
@@ -21637,6 +21852,10 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   color: hsl(210, 75%, 52%);
   cursor: default;
 }
+.com__pagination__bar ul li a.button--medium {
+  min-height: 24px;
+  padding: 0px 16px;
+}
 .com__pagination__bar ul li a.button--large {
   min-height: 32px;
   padding: 4px 24px;
@@ -21804,6 +22023,11 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   background-color: hsl(0, 0%, 91%);
   color: hsl(210, 75%, 52%);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4) inset;
+}
+.com__pagination__bar ul li.prev a.has-icon,
+.com__pagination__bar ul li.next a.has-icon {
+  font-size: 12px;
+  font-weight: 400;
 }
 .com__pagination__bar ul li.points {
   width: 32px;
@@ -22251,6 +22475,10 @@ html.ie9 .com__palette .b-range {
 .com__scroll-pagination__page.is-loaded {
   opacity: 1;
 }
+.com__scroll-pagination__page.is-placeholder {
+  height: var(--svh-100);
+  opacity: 1;
+}
 .com__scroll-pagination__bar {
   height: 32px;
   margin: 24px 0;
@@ -22274,31 +22502,8 @@ html.ie9 .com__palette .b-range {
   z-index: 1;
   outline: none;
 }
-.com__select .pt__input .input:not(:first-child),
-.com__select .pt__input input[type="text"]:not(:first-child),
-.com__select .pt__input input[type="search"]:not(:first-child),
-.com__select .pt__input input[type="email"]:not(:first-child),
-.com__select .pt__input input[type="url"]:not(:first-child),
-.com__select .pt__input input[type="tel"]:not(:first-child),
-.com__select .pt__input input[type="number"]:not(:first-child),
-.com__select .pt__input input[type="time"]:not(:first-child),
-.com__select .pt__input input[type="password"]:not(:first-child),
-.com__select .pt__input textarea:not(:first-child),
-.com__select .pt__input select:not(:first-child) {
-  padding-left: 30px;
-}
-.com__select .pt__input .input:not(:last-child),
-.com__select .pt__input input[type="text"]:not(:last-child),
-.com__select .pt__input input[type="search"]:not(:last-child),
-.com__select .pt__input input[type="email"]:not(:last-child),
-.com__select .pt__input input[type="url"]:not(:last-child),
-.com__select .pt__input input[type="tel"]:not(:last-child),
-.com__select .pt__input input[type="number"]:not(:last-child),
-.com__select .pt__input input[type="time"]:not(:last-child),
-.com__select .pt__input input[type="password"]:not(:last-child),
-.com__select .pt__input textarea:not(:last-child),
-.com__select .pt__input select:not(:last-child) {
-  padding-right: 30px;
+.com__select .pt__input {
+  --cm-input--icon-gap: 0px;
 }
 .com__select .pt__input .icon.default {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%20%20%3Cdefs%3E%20%20%20%20%3Cstyle%3E%20%20%20%20%20%20.cls-1%20%7B%20%20%20%20%20%20%20%20fill%3A%20%235e5e5e%3B%20%20%20%20%20%20%20%20fill-rule%3A%20evenodd%3B%20%20%20%20%20%20%7D%20%20%20%20%3C%2Fstyle%3E%20%20%3C%2Fdefs%3E%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M10.939%2C16.425L4.575%2C10.061A1.5%2C1.5%2C0%2C1%2C1%2C6.7%2C7.939l5.3%2C5.3%2C5.3-5.3a1.5%2C1.5%2C0%2C1%2C1%2C2.121%2C2.121l-6.364%2C6.364A1.5%2C1.5%2C0%2C0%2C1%2C10.939%2C16.425Z%22%20%2F%3E%3C%2Fsvg%3E");
@@ -22346,8 +22551,33 @@ html.ie9 .com__palette .b-range {
   -webkit-user-select: none;
   user-select: none;
 }
-.com__tooltip.com__select__tooltip > .inner > .scroll {
-  max-height: 144px;
+.com__tooltip.com__select__tooltip .pt__listing-items > ul {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 202px;
+}
+html.is-scrollbar-visible .com__tooltip.com__select__tooltip .pt__listing-items > ul {
+  scrollbar-width: thin;
+}
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .com__tooltip.com__select__tooltip .pt__listing-items > ul::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .com__tooltip.com__select__tooltip .pt__listing-items > ul::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .com__tooltip.com__select__tooltip .pt__listing-items > ul::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .com__tooltip.com__select__tooltip .pt__listing-items > ul::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 /* Select Multiple */
 .com__select-multi {
@@ -22461,30 +22691,32 @@ html.ie9 .com__palette .b-range {
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 144px;
+  max-height: 202px;
 }
 html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 .com__select-multi.is-max .pt__listing-items > ul {
-  height: 144px;
+  height: 202px;
 }
 .com__select-multi.disabled .inner {
   background-color: hsl(0, 0%, 98%);
@@ -22542,7 +22774,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: 0;
   left: 0;
 }
-.com__slider > .inner > .slides > ul > li:first-child {
+.com__slider > .inner > .slides > ul > li:not(.is-ready):first-child {
   display: block;
   z-index: 2;
 }
@@ -22629,7 +22861,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   display: none;
   position: relative;
 }
-.com__slider > .inner > .slides.effect-none > ul > li:first-child {
+.com__slider > .inner > .slides.effect-none > ul > li:not(.is-ready):first-child {
   display: block;
 }
 .com__slider > .inner > .slides.effect-none > ul > li > .slide-area {
@@ -22645,7 +22877,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   display: none;
   position: relative;
 }
-.com__slider > .inner > .slides.effect-edit > ul > li:first-child {
+.com__slider > .inner > .slides.effect-edit > ul > li:not(.is-ready):first-child {
   display: block;
 }
 .com__slider > .inner > .slides.effect-edit > ul > li > .slide-area {
@@ -22660,7 +22892,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: auto;
   left: 0;
 }
-.com__slider > .inner > .slides.effect-fade > ul > li:first-child {
+.com__slider > .inner > .slides.effect-fade > ul > li:not(.is-ready):first-child {
   display: block;
   opacity: 1;
 }
@@ -22673,7 +22905,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: auto;
   left: 0;
 }
-.com__slider > .inner > .slides.effect-fade-out > ul > li:first-child {
+.com__slider > .inner > .slides.effect-fade-out > ul > li:not(.is-ready):first-child {
   display: block;
   opacity: 1;
 }
@@ -22707,7 +22939,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: auto;
   left: 100%;
 }
-.com__slider > .inner > .slides.effect-pull > ul > li:first-child {
+.com__slider > .inner > .slides.effect-pull > ul > li:not(.is-ready):first-child {
   display: block;
   left: 0;
 }
@@ -22719,7 +22951,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: auto;
   left: 100%;
 }
-.com__slider > .inner > .slides.effect-pull-overlap > ul > li:first-child {
+.com__slider > .inner > .slides.effect-pull-overlap > ul > li:not(.is-ready):first-child {
   display: block;
   left: 0;
 }
@@ -22731,7 +22963,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: auto;
   left: 100%;
 }
-.com__slider > .inner > .slides.effect-pull-parallax > ul > li:first-child {
+.com__slider > .inner > .slides.effect-pull-parallax > ul > li:not(.is-ready):first-child {
   display: block;
   left: 0;
 }
@@ -22743,7 +22975,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: auto;
   left: 0;
 }
-.com__slider > .inner > .slides.effect-pull-parallax-css > ul > li:first-child {
+.com__slider > .inner > .slides.effect-pull-parallax-css > ul > li:not(.is-ready):first-child {
   display: block;
 }
 .com__slider > .inner > .slides.effect-custom > ul > li {
@@ -22754,7 +22986,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: auto;
   left: 0;
 }
-.com__slider > .inner > .slides.effect-custom > ul > li:first-child {
+.com__slider > .inner > .slides.effect-custom > ul > li:not(.is-ready):first-child {
   display: block;
 }
 .com__slider.is-adaptive-content > .inner {
@@ -22953,6 +23185,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
 }
 .com__tabset__head-menu .pt__menu-dropdown > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -22965,7 +23198,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .com__tabset__head-menu .pt__menu-dropdown > li > a:hover {
@@ -22987,19 +23220,49 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   font-style: normal;
   text-decoration: underline;
 }
-.com__tabset__head-menu .pt__menu-dropdown > li > a:hover {
+.com__tabset__head-menu .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.com__tabset__head-menu .pt__menu-dropdown > li > a:active {
+.com__tabset__head-menu .pt__menu-dropdown > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li:first-child {
+  margin-top: 0;
+}
+.com__tabset__head-menu .pt__menu-dropdown > li:first-child:before {
+  display: none;
+}
+.com__tabset__head-menu .pt__menu-dropdown > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.com__tabset__head-menu .pt__menu-dropdown > li:hover {
+  z-index: 2;
+}
+.com__tabset__head-menu .pt__menu-dropdown > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .com__tabset__head-menu .pt__menu-dropdown > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -23023,43 +23286,35 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   bottom: 0;
   left: 0;
 }
-.com__tabset__head-menu .pt__menu-dropdown > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.com__tabset__head-menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.com__tabset__head-menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.com__tabset__head-menu .pt__menu-dropdown > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.com__tabset__head-menu .pt__menu-dropdown > li:first-child {
-  margin-top: 0;
-}
-.com__tabset__head-menu .pt__menu-dropdown > li:first-child:before {
+.com__tabset__head-menu .pt__menu-dropdown > li.is-hidden {
   display: none;
 }
-.com__tabset__head-menu .pt__menu-dropdown > li:hover {
-  z-index: 2;
+.com__tabset__head-menu .pt__menu-dropdown > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.com__tabset__head-menu .pt__menu-dropdown > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.com__tabset__head-menu .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.com__tabset__head-menu .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .com__tabset__head-menu .pt__menu-dropdown > li > ul {
   top: -5px;
@@ -23767,7 +24022,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.37.4 (2025-01-16 21:09) ************ */
+/*! ************ QuickSilk-Application v3.37.5 (2025-04-18 08:24) ************ */
 .svg__app__arrow-right {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2217px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(0%2C%200%2C%200)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M7.209%2C1.86%20C6.871%2C1.420%206.878%2C1.964%207.223%2C2.291%20L11.459%2C6.327%20L1.355%2C6.327%20C0.888%2C6.327%200.512%2C6.704%200.512%2C7.171%20L0.512%2C8.296%20C0.512%2C8.764%200.888%2C9.140%201.355%2C9.140%20L11.459%2C9.140%20L7.223%2C13.176%20C6.882%2C13.503%206.875%2C14.48%207.209%2C14.382%20L7.989%2C15.162%20C8.316%2C15.493%208.851%2C15.493%209.181%2C15.162%20L16.15%2C8.328%20C16.346%2C8.1%2016.346%2C7.466%2016.15%2C7.136%20L9.181%2C0.305%20C8.854%2C0.24%208.320%2C0.24%207.989%2C0.305%20L7.209%2C1.86%20Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -23782,8 +24037,8 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul::-webkit-sc
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.37.4');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.37.4') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.37.4') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.37.4') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.37.4#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.37.5');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.37.5') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.37.5') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.37.5') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.37.5#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -25948,22 +26203,24 @@ html:not(.is-editing).is-editor .app__module__controls {
 html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 .app__block-container.is-editing {
   margin: 0 0 24px;
@@ -26098,6 +26355,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -26110,7 +26368,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li > a:hover {
@@ -26132,19 +26390,49 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit
   font-style: normal;
   text-decoration: underline;
 }
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li > a:hover {
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li > a:active {
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:first-child {
+  margin-top: 0;
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:first-child:before {
+  display: none;
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:hover {
+  z-index: 2;
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -26168,43 +26456,35 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit
   bottom: 0;
   left: 0;
 }
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:first-child {
-  margin-top: 0;
-}
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:first-child:before {
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.is-hidden {
   display: none;
 }
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:hover {
-  z-index: 2;
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .app__block-container.is-editable > .app__block > .menu .pt__menu-dropdown > li > ul {
   top: -5px;
@@ -28351,22 +28631,24 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block::-webkit
 html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs > .inner::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 .app__file-uploader__stock .stock__view .stock__list {
   position: relative;
@@ -28381,22 +28663,24 @@ html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__tabs >
 html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list > .inner::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 .app__file-uploader__stock .stock__tour {
   display: -webkit-flex;
@@ -28699,22 +28983,24 @@ html.is-scrollbar-visible .app__file-uploader__stock .stock__view .stock__list >
 html.is-scrollbar-visible .app__sidebar .sidebar__content__descr {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar-thumb {
-  background-color: hsl(210, 70%, 98%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(210, 70%, 95%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar-thumb {
+    background-color: hsl(210, 70%, 98%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(210, 70%, 95%);
+  }
 }
 .app__sidebar .sidebar__content__descr > .inner {
   padding: 12px;
@@ -29471,6 +29757,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li > a {
     font: 400 14px/24px Quicksand, sans-serif;
+    color: #666666;
     outline: none;
     cursor: pointer;
     font-weight: 400;
@@ -29483,7 +29770,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
     white-space: nowrap;
     text-overflow: ellipsis;
     text-decoration: none;
-    color: #666666;
+    color: inherit;
     transition: all 250ms ease-in-out 0ms;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li > a:hover {
@@ -29505,19 +29792,49 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
     font-style: normal;
     text-decoration: underline;
   }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li > a:hover {
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
     text-decoration: none;
     color: hsl(210, 75%, 45%);
-    transition: all 100ms ease-in-out 0ms;
+    transition-duration: 100ms;
   }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li > a:active {
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li > a:is(:active, .active) {
     color: hsl(210, 75%, 35%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:first-child {
+    margin-top: 0;
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:first-child:before {
+    display: none;
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:before {
+    display: block;
+    height: 0;
+    margin: 0 12px;
+    position: absolute;
+    overflow: hidden;
+    border-top: 1px solid hsl(0, 0%, 80%);
+    border-width: 1px;
+    border-color: hsl(0, 0%, 80%);
+    content: '';
+    top: -1px;
+    right: 0;
+    bottom: auto;
+    left: 0;
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:hover {
+    z-index: 2;
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:hover > ul {
+    visibility: visible;
+    opacity: 1;
+    transition: all 100ms ease-in-out 0ms;
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.has-icon > a {
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
     -ms-flex-pack: center;
+    gap: 8px;
     white-space: nowrap;
     transition: all 250ms ease-in-out 0ms;
     align-items: center;
@@ -29541,43 +29858,35 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
     bottom: 0;
     left: 0;
   }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.has-icon > a .title {
-    margin: 0 8px;
-  }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-    margin-left: 0;
-  }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-    margin-right: 0;
-  }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:before {
-    display: block;
-    height: 0;
-    margin: 0 12px;
-    position: absolute;
-    overflow: hidden;
-    border-top: 1px solid hsl(0, 0%, 80%);
-    border-width: 1px;
-    border-color: hsl(0, 0%, 80%);
-    content: '';
-    top: -1px;
-    right: 0;
-    bottom: auto;
-    left: 0;
-  }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:first-child {
-    margin-top: 0;
-  }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:first-child:before {
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.is-hidden {
     display: none;
   }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:hover {
-    z-index: 2;
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.success {
+    color: hsl(120, 65%, 42%);
   }
-  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li:hover > ul {
-    visibility: visible;
-    opacity: 1;
-    transition: all 100ms ease-in-out 0ms;
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+    color: hsl(120, 65%, 35%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.success > a:is(:active, .active) {
+    color: hsl(120, 65%, 25%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.warning {
+    color: hsl(38, 75%, 52%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+    color: hsl(38, 75%, 45%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+    color: hsl(38, 75%, 35%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.danger {
+    color: hsl(0, 65%, 52%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+    color: hsl(0, 65%, 45%);
+  }
+  html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+    color: hsl(0, 65%, 35%);
   }
   html.is-adaptive .app__topmenu .menu .pt__menu-dropdown > li > ul {
     top: -5px;
@@ -30853,6 +31162,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -30875,15 +31185,6 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   right: 0;
   bottom: 0;
   left: 0;
-}
-.app-mod__lang-switch ul li.has-icon > a .title {
-  margin: 0 8px;
-}
-.app-mod__lang-switch ul li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.app-mod__lang-switch ul li.has-icon > a .title:last-child {
-  margin-right: 0;
 }
 .app-mod__lang-switch ul li.active a {
   color: #666666;
@@ -31253,6 +31554,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
 }
 .mod__menu--custom.is-dropdown .menu__sub > ul > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -31265,7 +31567,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .mod__menu--custom.is-dropdown .menu__sub > ul > li > a:hover {
@@ -31287,19 +31589,49 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   font-style: normal;
   text-decoration: underline;
 }
-.mod__menu--custom.is-dropdown .menu__sub > ul > li > a:hover {
+.mod__menu--custom.is-dropdown .menu__sub > ul > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.mod__menu--custom.is-dropdown .menu__sub > ul > li > a:active {
+.mod__menu--custom.is-dropdown .menu__sub > ul > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li:first-child {
+  margin-top: 0;
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li:first-child:before {
+  display: none;
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li:hover {
+  z-index: 2;
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .mod__menu--custom.is-dropdown .menu__sub > ul > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -31323,43 +31655,35 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   bottom: 0;
   left: 0;
 }
-.mod__menu--custom.is-dropdown .menu__sub > ul > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.mod__menu--custom.is-dropdown .menu__sub > ul > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.mod__menu--custom.is-dropdown .menu__sub > ul > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.mod__menu--custom.is-dropdown .menu__sub > ul > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.mod__menu--custom.is-dropdown .menu__sub > ul > li:first-child {
-  margin-top: 0;
-}
-.mod__menu--custom.is-dropdown .menu__sub > ul > li:first-child:before {
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.is-hidden {
   display: none;
 }
-.mod__menu--custom.is-dropdown .menu__sub > ul > li:hover {
-  z-index: 2;
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.mod__menu--custom.is-dropdown .menu__sub > ul > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.mod__menu--custom.is-dropdown .menu__sub > ul > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .mod__menu--custom.is-dropdown.is-horizontal .menu__sub {
   top: 100%;
@@ -31541,6 +31865,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -31563,15 +31888,6 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   right: 0;
   bottom: 0;
   left: 0;
-}
-.app-mod__menu > ul > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.app-mod__menu > ul > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.app-mod__menu > ul > li.has-icon > a .title:last-child {
-  margin-right: 0;
 }
 .app-mod__menu > ul > li:hover {
   z-index: 2;
@@ -31608,6 +31924,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
 }
 .app-mod__menu .pt__menu-dropdown > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -31620,7 +31937,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .app-mod__menu .pt__menu-dropdown > li > a:hover {
@@ -31642,19 +31959,49 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   font-style: normal;
   text-decoration: underline;
 }
-.app-mod__menu .pt__menu-dropdown > li > a:hover {
+.app-mod__menu .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.app-mod__menu .pt__menu-dropdown > li > a:active {
+.app-mod__menu .pt__menu-dropdown > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.app-mod__menu .pt__menu-dropdown > li:first-child {
+  margin-top: 0;
+}
+.app-mod__menu .pt__menu-dropdown > li:first-child:before {
+  display: none;
+}
+.app-mod__menu .pt__menu-dropdown > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.app-mod__menu .pt__menu-dropdown > li:hover {
+  z-index: 2;
+}
+.app-mod__menu .pt__menu-dropdown > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .app-mod__menu .pt__menu-dropdown > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -31678,43 +32025,35 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr::-webkit-scroll
   bottom: 0;
   left: 0;
 }
-.app-mod__menu .pt__menu-dropdown > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.app-mod__menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.app-mod__menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.app-mod__menu .pt__menu-dropdown > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.app-mod__menu .pt__menu-dropdown > li:first-child {
-  margin-top: 0;
-}
-.app-mod__menu .pt__menu-dropdown > li:first-child:before {
+.app-mod__menu .pt__menu-dropdown > li.is-hidden {
   display: none;
 }
-.app-mod__menu .pt__menu-dropdown > li:hover {
-  z-index: 2;
+.app-mod__menu .pt__menu-dropdown > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.app-mod__menu .pt__menu-dropdown > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.app-mod__menu .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.app-mod__menu .pt__menu-dropdown > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.app-mod__menu .pt__menu-dropdown > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.app-mod__menu .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.app-mod__menu .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.app-mod__menu .pt__menu-dropdown > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.app-mod__menu .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.app-mod__menu .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .app-mod__menu .pt__menu-dropdown > li > ul {
   top: -5px;
@@ -32384,30 +32723,32 @@ html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .
 html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone {
   scrollbar-width: thin;
 }
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar-track,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar-track,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar-track {
-  background-color: hsla(0, 0%, 98%, 0.5);
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar-thumb,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar-thumb,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar-thumb {
-  background-color: hsl(0, 0%, 86%);
-  background-clip: padding-box;
-  border: 1px solid transparent;
-  border-radius: 3px;
-}
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar-thumb:hover,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar-thumb:hover,
-html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(0, 0%, 80%);
+@supports selector(::-webkit-scrollbar) {
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar-track,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar-track,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar-track {
+    background-color: hsla(0, 0%, 98%, 0.5);
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar-thumb,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar-thumb,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 86%);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+  }
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar > .inner > .zone::-webkit-scrollbar-thumb:hover,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-left > .inner > .zone::-webkit-scrollbar-thumb:hover,
+  html.is-scrollbar-visible .module__mobile-menu__container.view--sidebar-right > .inner > .zone::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 80%);
+  }
 }
 .module__mobile-menu__container.view--sidebar.is-show,
 .module__mobile-menu__container.view--sidebar-left.is-show,
@@ -32769,6 +33110,7 @@ html.is-editor--collapsed .module__mobile-menu__container.view--sidebar-right {
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -32781,7 +33123,7 @@ html.is-editor--collapsed .module__mobile-menu__container.view--sidebar-right {
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li > a:hover {
@@ -32803,19 +33145,49 @@ html.is-editor--collapsed .module__mobile-menu__container.view--sidebar-right {
   font-style: normal;
   text-decoration: underline;
 }
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li > a:hover {
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li > a:active {
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:first-child {
+  margin-top: 0;
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:first-child:before {
+  display: none;
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:hover {
+  z-index: 2;
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -32839,43 +33211,35 @@ html.is-editor--collapsed .module__mobile-menu__container.view--sidebar-right {
   bottom: 0;
   left: 0;
 }
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:first-child {
-  margin-top: 0;
-}
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:first-child:before {
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.is-hidden {
   display: none;
 }
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:hover {
-  z-index: 2;
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .app-mod__rollover-tabs > .inner > .tabs__menu .pt__menu-dropdown > li > ul {
   top: -5px;
@@ -33862,6 +34226,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 }
 .mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li > a {
   font: 400 14px/24px Quicksand, sans-serif;
+  color: #666666;
   outline: none;
   cursor: pointer;
   font-weight: 400;
@@ -33874,7 +34239,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
-  color: #666666;
+  color: inherit;
   transition: all 250ms ease-in-out 0ms;
 }
 .mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li > a:hover {
@@ -33896,19 +34261,49 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   font-style: normal;
   text-decoration: underline;
 }
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li > a:hover {
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li > a:is(:hover, :focus-visible, .highlight) {
   text-decoration: none;
   color: hsl(210, 75%, 45%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li > a:active {
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li > a:is(:active, .active) {
   color: hsl(210, 75%, 35%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:first-child {
+  margin-top: 0;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:first-child:before {
+  display: none;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:before {
+  display: block;
+  height: 0;
+  margin: 0 12px;
+  position: absolute;
+  overflow: hidden;
+  border-top: 1px solid hsl(0, 0%, 80%);
+  border-width: 1px;
+  border-color: hsl(0, 0%, 80%);
+  content: '';
+  top: -1px;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:hover {
+  z-index: 2;
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:hover > ul {
+  visibility: visible;
+  opacity: 1;
+  transition: all 100ms ease-in-out 0ms;
 }
 .mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
+  gap: 8px;
   white-space: nowrap;
   transition: all 250ms ease-in-out 0ms;
   align-items: center;
@@ -33932,43 +34327,35 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
   bottom: 0;
   left: 0;
 }
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a .title {
-  margin: 0 8px;
-}
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a .title:first-child {
-  margin-left: 0;
-}
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.has-icon > a .title:last-child {
-  margin-right: 0;
-}
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:before {
-  display: block;
-  height: 0;
-  margin: 0 12px;
-  position: absolute;
-  overflow: hidden;
-  border-top: 1px solid hsl(0, 0%, 80%);
-  border-width: 1px;
-  border-color: hsl(0, 0%, 80%);
-  content: '';
-  top: -1px;
-  right: 0;
-  bottom: auto;
-  left: 0;
-}
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:first-child {
-  margin-top: 0;
-}
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:first-child:before {
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.is-hidden {
   display: none;
 }
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:hover {
-  z-index: 2;
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.success {
+  color: hsl(120, 65%, 42%);
 }
-.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li:hover > ul {
-  visibility: visible;
-  opacity: 1;
-  transition: all 100ms ease-in-out 0ms;
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.success > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(120, 65%, 35%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.success > a:is(:active, .active) {
+  color: hsl(120, 65%, 25%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.warning {
+  color: hsl(38, 75%, 52%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.warning > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(38, 75%, 45%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.warning > a:is(:active, .active) {
+  color: hsl(38, 75%, 35%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.danger {
+  color: hsl(0, 65%, 52%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.danger > a:is(:hover, :focus-visible, .highlight) {
+  color: hsl(0, 65%, 45%);
+}
+.mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li.danger > a:is(:active, .active) {
+  color: hsl(0, 65%, 35%);
 }
 .mod__wizard > .inner > .tabs__menu .pt__menu-dropdown > li > ul {
   top: -5px;
