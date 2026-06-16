@@ -1,6 +1,6 @@
 [submodule "libs/common"]
 	path = libs/common
-	url = https://github.com/SerDIDG/FioraUI.git
+	url = https://github.com/SerDIDG/MagpieUI.git
 [submodule "libs/application"]
 	path = libs/application
-	url = https://github.com/SerDIDG/QuicksilkCMSv3Application.git
+	url = https://github.com/SerDIDG/QuickSilk-Application.git

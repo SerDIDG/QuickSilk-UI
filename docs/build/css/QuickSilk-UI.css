@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! ************ QuickSilk-UI v3.19.0 ************ */
-/*! ************ MagpieUI v3.105.0 (2025-04-18 08:24) ************ */
+/*! ************ MagpieUI v3.148.0 (2026-06-16 17:12) ************ */
 /*!
  * animate.css - https://animate.style/
  * Version - 4.1.1
@@ -4395,6 +4395,9 @@ span.CodeMirror-selectedtext {
   --pt-field--title-indent: 16px;
   --dvh-100: 100vh;
   --svh-100: 100vh;
+  --com-tooltip--arrow-size: 6px;
+  --com-tooltip--arrow-indent: 12px;
+  --com-tooltip--arrow-background: transparent;
 }
 @supports (height: 100dvh) {
   :root {
@@ -4408,8 +4411,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.105.0');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.105.0') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.105.0') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.105.0') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.105.0#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.148.0');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.148.0') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.148.0') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.148.0') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.148.0#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -4771,6 +4774,10 @@ html.is-scrollbar-visible .cm__scrollbar--light {
 }
 .cm__scroll--none {
   overflow: hidden !important;
+}
+.cm__scroll--clip {
+  overflow: hidden !important;
+  overflow: clip !important;
 }
 .cm__scroll--auto {
   -webkit-overflow-scrolling: touch;
@@ -5740,7 +5747,7 @@ html.is-scrollbar-visible .cm__scrollbar--light {
 .app-i,
 [class^="app-i__"],
 [class*=" app-i__"] {
-  font-family: 'Magpie-UI-Glyphs';
+  font-family: 'Magpie-UI-Glyphs' !important;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -5751,31 +5758,13 @@ html.is-scrollbar-visible .cm__scrollbar--light {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.cm-i:link,
-[class^="cm-i__"]:link,
-[class*=" cm-i__"]:link,
-.cm-i:visited,
-[class^="cm-i__"]:visited,
-[class*=" cm-i__"]:visited,
-.cm-i:hover,
-[class^="cm-i__"]:hover,
-[class*=" cm-i__"]:hover,
-.cm-i:active,
-[class^="cm-i__"]:active,
-[class*=" cm-i__"]:active,
-.app-i:link,
-.app-i:visited,
-.app-i:hover,
-.app-i:active,
-[class^="app-i__"]:link,
-[class^="app-i__"]:visited,
-[class^="app-i__"]:hover,
-[class^="app-i__"]:active,
-[class*=" app-i__"]:link,
-[class*=" app-i__"]:visited,
-[class*=" app-i__"]:hover,
-[class*=" app-i__"]:active {
-  font-family: 'Magpie-UI-Glyphs';
+.cm-i:is(:link, :visited, :hover, :active),
+[class^="cm-i__"]:is(:link, :visited, :hover, :active),
+[class*=" cm-i__"]:is(:link, :visited, :hover, :active),
+.app-i:is(:link, :visited, :hover, :active),
+[class^="app-i__"]:is(:link, :visited, :hover, :active),
+[class*=" app-i__"]:is(:link, :visited, :hover, :active) {
+  font-family: 'Magpie-UI-Glyphs' !important;
 }
 .cm-i:hover,
 [class^="cm-i__"]:hover,
@@ -5872,7 +5861,7 @@ html.is-scrollbar-visible .cm__scrollbar--light {
 .app-i:before,
 [class^="app-i__"]:before,
 [class*=" app-i__"]:before {
-  speak: none;
+  speak: never;
   display: block;
 }
 /* *** COMMON *** */
@@ -6131,6 +6120,7 @@ ul,
 ol,
 hr,
 address,
+blockquote,
 pre {
   margin-bottom: 24px;
   padding: 0;
@@ -6175,6 +6165,9 @@ hr:last-child,
 address.bottom,
 address.is-last,
 address:last-child,
+blockquote.bottom,
+blockquote.is-last,
+blockquote:last-child,
 pre.bottom,
 pre.is-last,
 pre:last-child {
@@ -6610,6 +6603,15 @@ input::placeholder,
 select::placeholder,
 textarea::placeholder,
 button::placeholder {
+  opacity: 1;
+  color: #b7b7b7;
+  font-size: inherit;
+  font-style: inherit;
+}
+input.is-placeholder,
+select.is-placeholder,
+textarea.is-placeholder,
+button.is-placeholder {
   opacity: 1;
   color: #b7b7b7;
   font-size: inherit;
@@ -7138,6 +7140,13 @@ button.button-white--active {
   color: hsl(210, 75%, 52%);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4) inset;
 }
+.button[disabled],
+input[type="button"][disabled],
+input[type="submit"][disabled],
+input[type="reset"][disabled],
+button[disabled] {
+  pointer-events: none;
+}
 .button.button-disabled,
 input[type="button"].button-disabled,
 input[type="submit"].button-disabled,
@@ -7305,6 +7314,13 @@ input[type="reset"].has-icon-large .icon,
 button.has-icon-large .icon {
   margin-top: 0px;
   margin-bottom: 0px;
+}
+.button.is-no-label .label,
+input[type="button"].is-no-label .label,
+input[type="submit"].is-no-label .label,
+input[type="reset"].is-no-label .label,
+button.is-no-label .label {
+  display: none;
 }
 .button.button-spinner .label,
 .button.button-spinner .icon,
@@ -8886,6 +8902,10 @@ button.is-hidden {
 .cm-animate.animated.spin {
   animation: spin 2s linear infinite;
 }
+.cm-animate.animate__animated.spin-reverse,
+.cm-animate.animated.spin-reverse {
+  animation: spin-reverse 2s linear infinite;
+}
 /* *** ANIMATION ON HOVER *** */
 .cm__animate.hover--fadeIn {
   opacity: 0;
@@ -8902,6 +8922,14 @@ button.is-hidden {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+@keyframes spin-reverse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
   }
 }
 /* ******* PART: BOX ******* */
@@ -9192,6 +9220,7 @@ button.is-hidden {
 .pt__box-editable ol,
 .pt__box-editable hr,
 .pt__box-editable address,
+.pt__box-editable blockquote,
 .pt__box-editable pre {
   margin-bottom: 0;
 }
@@ -9713,6 +9742,32 @@ html.is-scrollbar-visible .pt__box-code {
   width: 100%;
   margin: 0;
 }
+.pt__buttons--box-column > .inner {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  gap: var(--pt-buttons--box-indent);
+}
+.pt__buttons--box-column > .inner > .left,
+.pt__buttons--box-column > .inner > .right {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  gap: var(--pt-buttons--box-indent);
+}
+.pt__buttons--box-column .button-alike,
+.pt__buttons--box-column .button,
+.pt__buttons--box-column .browse-button,
+.pt__buttons--box-column .cm__button-wrapper,
+.pt__buttons--box-column .com__menu,
+.pt__buttons--box-column .com__pagination__bar ul li a,
+.pt__buttons--box-column input[type="button"],
+.pt__buttons--box-column input[type="submit"],
+.pt__buttons--box-column input[type="reset"],
+.pt__buttons--box-column button {
+  margin: 0;
+}
 .pt__buttons--box-reverse > .inner {
   display: flex;
   flex-direction: column-reverse;
@@ -9809,6 +9864,9 @@ html.is-scrollbar-visible .pt__box-code {
   display: inline-block;
   vertical-align: baseline;
   line-height: 24px;
+}
+.pt__check-line label.hidden {
+  display: none;
 }
 .pt__check-line label:first-child {
   margin-left: 0;
@@ -9927,6 +9985,9 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__check-line.is-box.has-hover {
   gap: 1px;
 }
+.pt__check-line.is-box.is-compact label {
+  padding: 0;
+}
 .pt__check-line.is-flex label,
 .pt__check-line.is-flex-reverse label {
   display: flex;
@@ -9987,6 +10048,9 @@ html.is-scrollbar-visible .pt__box-code {
   }
   html.is-adaptive .pt__check-line.is-adaptive.has-hover {
     gap: 1px;
+  }
+  html.is-adaptive .pt__check-line.is-adaptive.is-compact label {
+    padding: 0;
   }
 }
 /* ******* PARTS: COLUMNS ******* */
@@ -11272,7 +11336,7 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__field.warning textarea,
 .pt__field.warning select {
   border: 1px solid hsl(38, 75%, 52%);
-  background-color: hsl(38, 70%, 98%);
+  background-color: hsl(38, 75%, 98%);
 }
 .pt__field:is(.ok, .success) > dt,
 .pt__field:is(.ok, .success) > .field__title {
@@ -11306,6 +11370,10 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__field.is-label-strong > dt,
 .pt__field.is-label-strong > .field__title {
   font-weight: 600;
+}
+.pt__field.is-label-medium > dt,
+.pt__field.is-label-medium > .field__title {
+  font-weight: 500;
 }
 .pt__field.is-label-flex > dt,
 .pt__field.is-label-flex > .field__title {
@@ -11400,6 +11468,13 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__field.is-box.is-first > .field__title,
 .pt__field.is-form-box.is-first > .field__title {
   padding-top: 0;
+}
+.pt__field.is-box.is-label-indent > dt,
+.pt__field.is-form-box.is-label-indent > dt,
+.pt__field.is-box.is-label-indent > .field__title,
+.pt__field.is-form-box.is-label-indent > .field__title {
+  margin-bottom: 8px;
+  padding-block: 0;
 }
 .pt__field.is-box.is-border-box,
 .pt__field.is-form-box.is-border-box {
@@ -11579,6 +11654,12 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__field__hint.danger {
   color: var(--cm-color--danger);
 }
+.pt__field__hint.pull-right {
+  text-align: right;
+}
+.pt__field__hint.is-hidden {
+  display: none;
+}
 ul.pt__field__hint {
   margin: 0;
   padding: 0px 0;
@@ -11650,7 +11731,7 @@ ul.pt__field__hint li:before {
   background-color: hsl(0, 65%, 98%);
 }
 .pt__field__content.is-placeholder-above:is(.warning) .pt__input--textarea::before {
-  background-color: hsl(38, 70%, 98%);
+  background-color: hsl(38, 75%, 98%);
 }
 .pt__field__content.is-placeholder-above:is(.ok, .success) .pt__input--textarea::before {
   background-color: hsl(120, 60%, 98%);
@@ -12537,21 +12618,21 @@ ul.pt__field__hint li:before {
   background-color: hsl(0, 65%, 86%);
 }
 .pt__gridlist tbody tr.warning {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .pt__gridlist tbody tr.warning th,
 .pt__gridlist tbody tr.warning td {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .pt__gridlist tbody tr.warning:hover,
 .pt__gridlist tbody tr.warning.highlight {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .pt__gridlist tbody tr.warning:hover th,
 .pt__gridlist tbody tr.warning.highlight th,
 .pt__gridlist tbody tr.warning:hover td,
 .pt__gridlist tbody tr.warning.highlight td {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .pt__gridlist tbody tr.active {
   background-color: hsl(210, 70%, 91%);
@@ -12801,21 +12882,21 @@ ul.pt__field__hint li:before {
   background-color: hsl(0, 65%, 86%);
 }
 .pt__gridlist.has-background tbody tr.warning {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .pt__gridlist.has-background tbody tr.warning th,
 .pt__gridlist.has-background tbody tr.warning td {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .pt__gridlist.has-background tbody tr.warning:hover,
 .pt__gridlist.has-background tbody tr.warning.highlight {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .pt__gridlist.has-background tbody tr.warning:hover th,
 .pt__gridlist.has-background tbody tr.warning.highlight th,
 .pt__gridlist.has-background tbody tr.warning:hover td,
 .pt__gridlist.has-background tbody tr.warning.highlight td {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .pt__gridlist.has-background tbody tr.active {
   background-color: hsl(210, 70%, 91%);
@@ -13006,7 +13087,6 @@ ul.pt__field__hint li:before {
   min-height: 1px;
   position: relative;
   z-index: 1;
-  will-change: opacity;
   transition: opacity 250ms ease-in-out 0ms;
 }
 .pt__image > .inner > .descr:is(iframe) {
@@ -13044,6 +13124,7 @@ ul.pt__field__hint li:before {
 .pt__image > .inner > .text ol,
 .pt__image > .inner > .text hr,
 .pt__image > .inner > .text address,
+.pt__image > .inner > .text blockquote,
 .pt__image > .inner > .text pre {
   color: #ffffff;
 }
@@ -13141,7 +13222,6 @@ ul.pt__field__hint li:before {
   z-index: 5;
   position: absolute;
   transform: translateY(100%);
-  will-change: transform;
   top: auto;
   right: 0;
   bottom: 0;
@@ -16759,7 +16839,7 @@ ul.pt__field__hint li:before {
 .pt__range.theme--default .drag .counter {
   font: 400 12px/18px Quicksand, sans-serif;
   color: #999999;
-  padding: 0 4px;
+  padding: 2px 4px;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 3px;
   color: #ffffff;
@@ -16776,7 +16856,7 @@ ul.pt__field__hint li:before {
   margin: auto;
   position: absolute;
   border-style: solid;
-  border-width: 6px 4px 0 4px;
+  border-width: 6px;
   border-color: rgba(0, 0, 0, 0.7) transparent transparent;
   content: '';
   top: 100%;
@@ -17599,6 +17679,7 @@ ul.pt__field__hint li:before {
 .lt__comment .comment-text ol,
 .lt__comment .comment-text hr,
 .lt__comment .comment-text address,
+.lt__comment .comment-text blockquote,
 .lt__comment .comment-text pre {
   margin: 0;
 }
@@ -17618,7 +17699,7 @@ ul.pt__field__hint li:before {
   display: block;
   z-index: -1;
   content: '';
-  background-color: hsl(38, 70%, 98%);
+  background-color: hsl(38, 75%, 98%);
   border-radius: 3px;
   top: -8px;
   right: -8px;
@@ -17795,6 +17876,9 @@ ul.pt__field__hint li:before {
   width: 16px;
   transition: transform 250ms ease-in-out 0ms;
 }
+.com__togglebox > dt .icon.animated {
+  transition: transform 250ms ease-in-out 0ms;
+}
 .com__togglebox > dt .title {
   font: 300 24px/32px Quicksand, sans-serif;
   color: #666666;
@@ -17823,6 +17907,7 @@ ul.pt__field__hint li:before {
 .com__togglebox > dt ol,
 .com__togglebox > dt hr,
 .com__togglebox > dt address,
+.com__togglebox > dt blockquote,
 .com__togglebox > dt pre,
 .com__togglebox > dt h1,
 .com__togglebox > dt h2,
@@ -17836,6 +17921,7 @@ ul.pt__field__hint li:before {
 .com__togglebox > dt ol,
 .com__togglebox > dt hr,
 .com__togglebox > dt address,
+.com__togglebox > dt blockquote,
 .com__togglebox > dt pre,
 .com__togglebox > dt .form .hint,
 .com__togglebox > dt .pt__box-item .title,
@@ -17993,21 +18079,21 @@ ul.pt__field__hint li:before {
   background-color: hsl(0, 65%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning th,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning td {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning.highlight {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover th,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning.highlight th,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning:hover td,
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.warning.highlight td {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .com__togglebox.has-content-bg .pt__gridlist tbody tr.active {
   background-color: hsl(210, 70%, 91%);
@@ -18108,7 +18194,8 @@ ul.pt__field__hint li:before {
   overflow: hidden;
   opacity: 0;
 }
-.com__togglebox.is-show > dt .icon.default {
+.com__togglebox.is-show > dt .icon.default,
+.com__togglebox.is-show > dt .icon.animated {
   transform: rotate(90deg);
 }
 .com__togglebox.is-wrap > dt .title {
@@ -18243,6 +18330,7 @@ ul.pt__field__hint li:before {
 .com__tooltip > .inner > .title ol,
 .com__tooltip > .inner > .title hr,
 .com__tooltip > .inner > .title address,
+.com__tooltip > .inner > .title blockquote,
 .com__tooltip > .inner > .title pre {
   margin: 0;
 }
@@ -18257,13 +18345,45 @@ ul.pt__field__hint li:before {
   overflow-y: auto;
   max-height: calc(100vh - 10px);
 }
+.com__tooltip.has-arrow > .inner::before {
+  width: 0;
+  height: 0;
+  margin: auto;
+  display: block;
+  position: absolute;
+  content: '';
+  border-style: solid;
+  border-width: var(--com-tooltip--arrow-size);
+  border-color: transparent;
+}
+.com__tooltip.has-arrow[class*="arrow--top"] > .inner::before {
+  top: calc(-2 * var(--com-tooltip--arrow-size));
+  border-bottom-color: var(--com-tooltip--arrow-background);
+}
+.com__tooltip.has-arrow[class*="arrow--bottom"] > .inner::before {
+  bottom: calc(-2 * var(--com-tooltip--arrow-size));
+  border-top-color: var(--com-tooltip--arrow-background);
+}
+.com__tooltip.has-arrow.arrow--top-left > .inner::before,
+.com__tooltip.has-arrow.arrow--bottom-left > .inner::before {
+  left: var(--com-tooltip--arrow-indent);
+}
+.com__tooltip.has-arrow.arrow--top-center > .inner::before,
+.com__tooltip.has-arrow.arrow--bottom-center > .inner::before {
+  left: 0;
+  right: 0;
+}
+.com__tooltip.has-arrow.arrow--top-right > .inner::before,
+.com__tooltip.has-arrow.arrow--bottom-right > .inner::before {
+  right: var(--com-tooltip--arrow-indent);
+}
 .com__tooltip.animate--drop-bottom-left {
   transition: transform 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
   transform-origin: right top;
-  transform: scale(0);
+  transform: scale(0.7);
 }
 .com__tooltip.animate--drop-bottom-left.is-hide {
-  transform: scale(0);
+  transform: scale(0.7);
 }
 .com__tooltip.animate--drop-bottom-left.is-show {
   transform: scale(1);
@@ -18271,10 +18391,10 @@ ul.pt__field__hint li:before {
 .com__tooltip.animate--drop-bottom-center {
   transition: transform 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
   transform-origin: center top;
-  transform: scale(0);
+  transform: scale(0.7);
 }
 .com__tooltip.animate--drop-bottom-center.is-hide {
-  transform: scale(0);
+  transform: scale(0.7);
 }
 .com__tooltip.animate--drop-bottom-center.is-show {
   transform: scale(1);
@@ -18282,15 +18402,51 @@ ul.pt__field__hint li:before {
 .com__tooltip.animate--drop-bottom-right {
   transition: transform 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
   transform-origin: left top;
-  transform: scale(0);
+  transform: scale(0.7);
 }
 .com__tooltip.animate--drop-bottom-right.is-hide {
-  transform: scale(0);
+  transform: scale(0.7);
 }
 .com__tooltip.animate--drop-bottom-right.is-show {
   transform: scale(1);
 }
+.com__tooltip.animate--drop-top-left {
+  transition: transform 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
+  transform-origin: right bottom;
+  transform: scale(0.7);
+}
+.com__tooltip.animate--drop-top-left.is-hide {
+  transform: scale(0.7);
+}
+.com__tooltip.animate--drop-top-left.is-show {
+  transform: scale(1);
+}
+.com__tooltip.animate--drop-top-center {
+  transition: transform 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
+  transform-origin: center bottom;
+  transform: scale(0.7);
+}
+.com__tooltip.animate--drop-top-center.is-hide {
+  transform: scale(0.7);
+}
+.com__tooltip.animate--drop-top-center.is-show {
+  transform: scale(1);
+}
+.com__tooltip.animate--drop-top-right {
+  transition: transform 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
+  transform-origin: left bottom;
+  transform: scale(0.7);
+}
+.com__tooltip.animate--drop-top-right.is-hide {
+  transform: scale(0.7);
+}
+.com__tooltip.animate--drop-top-right.is-show {
+  transform: scale(1);
+}
 /* ******* COMPONENT: TOOLTIP: THEMES ******* */
+.com__tooltip.theme-default {
+  --com-tooltip--arrow-background: #ffffff;
+}
 .com__tooltip.theme-default > .inner {
   padding: 4px;
   background: #ffffff;
@@ -18301,6 +18457,10 @@ ul.pt__field__hint li:before {
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
+}
+.com__tooltip.theme-dark,
+.com__tooltip.theme-black {
+  --com-tooltip--arrow-background: #111111;
 }
 .com__tooltip.theme-dark > .inner,
 .com__tooltip.theme-black > .inner {
@@ -18315,6 +18475,18 @@ ul.pt__field__hint li:before {
   background-clip: padding-box;
   background: #111111;
   border-color: #111111;
+}
+.com__tooltip.theme-shadow-top > .inner {
+  box-shadow: none;
+  border-color: #ffffff;
+  -webkit-filter: drop-shadow(0 -2px 12px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 -2px 12px rgba(0, 0, 0, 0.2));
+}
+.com__tooltip.theme-shadow-bottom > .inner {
+  box-shadow: none;
+  border-color: #ffffff;
+  -webkit-filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.2));
 }
 /* ******* COMPONENT: TOOLTIP: INNER COMPONENTS ******* */
 /* *** ITEMS LIST *** */
@@ -18881,19 +19053,11 @@ ul.pt__field__hint li:before {
 /* ******* COMPONENT: DATEPICKER ******* */
 .com__datepicker-input {
   width: 100%;
-  max-width: 210px;
   display: inline-block;
   vertical-align: top;
   position: relative;
   z-index: 1;
   outline: none;
-}
-.com__datepicker-input.size-full {
-  max-width: none;
-}
-.com__datepicker-input.has-clear-button {
-  max-width: 250px;
-  padding: 0 40px 0 0;
 }
 .com__datepicker-input .pt__input .icon.default {
   background-image: url("../img/MagpieUI/icons/medium/datepicker.png");
@@ -18909,6 +19073,15 @@ ul.pt__field__hint li:before {
 }
 .com__datepicker-input > .icon.default {
   background-image: url("../img/MagpieUI/icons/small/remove.png");
+}
+.com__datepicker-input.size-default {
+  max-width: 210px;
+}
+.com__datepicker-input.has-clear-button {
+  padding: 0 40px 0 0;
+}
+.com__datepicker-input.has-clear-button.size-default {
+  max-width: 250px;
 }
 /* Tooltip */
 .com__tooltip.com__datepicker__tooltip {
@@ -18951,7 +19124,8 @@ ul.pt__field__hint li:before {
   position: fixed;
   z-index: 1000;
   opacity: 0;
-  text-align: center;
+  align-items: center;
+  justify-content: center;
   top: 0;
   right: 0;
   bottom: 0;
@@ -18976,6 +19150,7 @@ ul.pt__field__hint li:before {
 .com__dialog ol,
 .com__dialog hr,
 .com__dialog address,
+.com__dialog blockquote,
 .com__dialog pre,
 .com__dialog h1,
 .com__dialog h2,
@@ -18989,6 +19164,7 @@ ul.pt__field__hint li:before {
 .com__dialog ol,
 .com__dialog hr,
 .com__dialog address,
+.com__dialog blockquote,
 .com__dialog pre,
 .com__dialog .form .hint,
 .com__dialog .pt__box-item .title,
@@ -18998,12 +19174,6 @@ ul.pt__field__hint li:before {
 .com__dialog .com__glossary .com__glossary__title,
 .com__dialog .com__glossary .com__glossary__title {
   color: #666666;
-}
-.com__dialog::before {
-  height: 100%;
-  display: inline-block;
-  vertical-align: middle;
-  content: '';
 }
 .com__dialog > .bg {
   width: 100%;
@@ -19018,11 +19188,11 @@ ul.pt__field__hint li:before {
   z-index: 2;
   font-size: 0;
 }
-.com__dialog.is-valign-top::before {
-  vertical-align: top;
+.com__dialog.is-valign-top {
+  align-items: flex-start;
 }
-.com__dialog.is-valign-bottom::before {
-  vertical-align: bottom;
+.com__dialog.is-valign-bottom {
+  align-items: flex-end;
 }
 .com__dialog.is-open {
   visibility: visible;
@@ -19032,9 +19202,6 @@ ul.pt__field__hint li:before {
   max-width: 100%;
   position: relative;
   z-index: 2;
-  display: inline-block;
-  text-align: left;
-  vertical-align: middle;
 }
 .com__dialog__window > .icon {
   position: absolute;
@@ -19117,7 +19284,6 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   margin-top: 0;
 }
 .com__dialog__window.is-animate {
-  will-change: opacity, transform;
   opacity: 0;
   transform: scale(0.9);
   transition: all 250ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
@@ -19127,10 +19293,13 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   transform: scale(1);
   transition: all 500ms cubic-bezier(0.5, 0, 0.15, 1) 0ms;
 }
-@media (prefers-reduced-motion) {
+@media (prefers-reduced-motion: reduce) {
   .com__dialog__window.is-animate {
     transform: none !important;
   }
+}
+.com__dialog__window.is-animate-process {
+  will-change: opacity, transform;
 }
 .com__dialog__window.is-fullscreen > .inner > .descr > .scroll.is-animate {
   -webkit-transition: none !important;
@@ -19142,29 +19311,14 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 }
 /* *** TOOLTIP *** */
 .com__tooltip.com__dialog__tooltip {
+  --com-tooltip--arrow-size: 12px;
+  --com-tooltip--arrow-indent: 40px;
+  --com-tooltip--arrow-background: #ffffff;
   text-align: left;
   transform-origin: calc(100% - 52px) -8px;
 }
 .com__tooltip.com__dialog__tooltip > .inner {
   padding: 24px;
-  border-color: #ffffff;
-  box-shadow: none;
-  -webkit-filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.2));
-  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.2));
-}
-.com__tooltip.com__dialog__tooltip > .inner::before {
-  width: 0;
-  height: 0;
-  display: block;
-  position: absolute;
-  border-style: solid;
-  border-width: 0 12px 14px 12px;
-  border-color: transparent transparent #ffffff transparent;
-  content: '';
-  top: -14px;
-  right: 40px;
-  bottom: auto;
-  left: auto;
 }
 /* *** FONT *** */
 /* ******* COMPONENT: DIALOG: STUFF ******* */
@@ -19286,7 +19440,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__dialog__window.theme-black > .icon.help,
 .com__dialog__window.theme-light > .icon.help,
 .com__dialog__window.theme-compact > .icon.help {
-  right: 48px;
+  right: 36px;
 }
 .com__dialog__window.theme-default > .inner > .title,
 .com__dialog__window.theme-black > .inner > .title,
@@ -19316,7 +19470,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__dialog__window.theme-black.has-no-title > .icon.help,
 .com__dialog__window.theme-light.has-no-title > .icon.help,
 .com__dialog__window.theme-compact.has-no-title > .icon.help {
-  right: -72px;
+  right: -60px;
 }
 .com__dialog__window.theme-default > .inner > .descr .com__dialog__inner,
 .com__dialog__window.theme-black > .inner > .descr .com__dialog__inner,
@@ -19363,6 +19517,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__dialog__window.theme-black ol,
 .com__dialog__window.theme-black hr,
 .com__dialog__window.theme-black address,
+.com__dialog__window.theme-black blockquote,
 .com__dialog__window.theme-black pre,
 .com__dialog__window.theme-black h1,
 .com__dialog__window.theme-black h2,
@@ -19376,6 +19531,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__dialog__window.theme-black ol,
 .com__dialog__window.theme-black hr,
 .com__dialog__window.theme-black address,
+.com__dialog__window.theme-black blockquote,
 .com__dialog__window.theme-black pre,
 .com__dialog__window.theme-black .form .hint,
 .com__dialog__window.theme-black .pt__box-item .title,
@@ -19442,7 +19598,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 }
 .com__dialog__window.theme-light > .icon.help,
 .com__dialog__window.theme-compact > .icon.help {
-  right: 48px;
+  right: 36px;
 }
 .com__dialog__window.theme-light > .inner > .title,
 .com__dialog__window.theme-compact > .inner > .title {
@@ -19462,7 +19618,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 }
 .com__dialog__window.theme-light.has-no-title > .icon.help,
 .com__dialog__window.theme-compact.has-no-title > .icon.help {
-  right: -72px;
+  right: -60px;
 }
 .com__dialog__window.theme-light > .inner > .descr .com__dialog__inner,
 .com__dialog__window.theme-compact > .inner > .descr .com__dialog__inner {
@@ -19571,6 +19727,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__dialog-font--theme-black ol,
 .com__dialog-font--theme-black hr,
 .com__dialog-font--theme-black address,
+.com__dialog-font--theme-black blockquote,
 .com__dialog-font--theme-black pre,
 .com__dialog-font--theme-black h1,
 .com__dialog-font--theme-black h2,
@@ -19584,6 +19741,7 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__dialog-font--theme-black ol,
 .com__dialog-font--theme-black hr,
 .com__dialog-font--theme-black address,
+.com__dialog-font--theme-black blockquote,
 .com__dialog-font--theme-black pre,
 .com__dialog-font--theme-black .form .hint,
 .com__dialog-font--theme-black .pt__box-item .title,
@@ -20282,6 +20440,9 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__gallery-controls.is-visible {
   opacity: 1;
 }
+.com__gallery-controls.is-hidden {
+  display: none;
+}
 /* *** MIXINS *** */
 /* ******* COMPONENT: GALLERY: LAYOUT ******* */
 .com__gallery-layout {
@@ -20616,21 +20777,21 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   background-color: hsl(0, 65%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.warning {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.warning th,
 .com__gridlist.has-background .pt__gridlist tbody tr.warning td {
-  background-color: hsl(38, 70%, 91%);
+  background-color: hsl(38, 75%, 91%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.warning:hover,
 .com__gridlist.has-background .pt__gridlist tbody tr.warning.highlight {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.warning:hover th,
 .com__gridlist.has-background .pt__gridlist tbody tr.warning.highlight th,
 .com__gridlist.has-background .pt__gridlist tbody tr.warning:hover td,
 .com__gridlist.has-background .pt__gridlist tbody tr.warning.highlight td {
-  background-color: hsl(38, 70%, 86%);
+  background-color: hsl(38, 75%, 86%);
 }
 .com__gridlist.has-background .pt__gridlist tbody tr.active {
   background-color: hsl(210, 70%, 91%);
@@ -21829,6 +21990,9 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
   color: hsl(210, 75%, 52%);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4) inset;
 }
+.com__pagination__bar ul li a[disabled] {
+  pointer-events: none;
+}
 .com__pagination__bar ul li a.button-disabled {
   background-color: hsl(0, 0%, 91%);
   color: #999999;
@@ -21912,6 +22076,9 @@ html.is-scrollbar-visible .com__dialog__window > .inner > .descr > .scroll.is-sc
 .com__pagination__bar ul li a.has-icon-large .icon {
   margin-top: 0px;
   margin-bottom: 0px;
+}
+.com__pagination__bar ul li a.is-no-label .label {
+  display: none;
 }
 .com__pagination__bar ul li a.button-spinner .label,
 .com__pagination__bar ul li a.button-spinner .icon {
@@ -22830,6 +22997,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul {
 .com__slider > .inner > .slides > ul > li > .text ol,
 .com__slider > .inner > .slides > ul > li > .text hr,
 .com__slider > .inner > .slides > ul > li > .text address,
+.com__slider > .inner > .slides > ul > li > .text blockquote,
 .com__slider > .inner > .slides > ul > li > .text pre {
   color: #fff;
 }
@@ -24022,7 +24190,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.37.5 (2025-04-18 08:24) ************ */
+/*! ************ QuickSilk-Application v3.37.6 (2026-06-16 17:13) ************ */
 .svg__app__arrow-right {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2217px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(0%2C%200%2C%200)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M7.209%2C1.86%20C6.871%2C1.420%206.878%2C1.964%207.223%2C2.291%20L11.459%2C6.327%20L1.355%2C6.327%20C0.888%2C6.327%200.512%2C6.704%200.512%2C7.171%20L0.512%2C8.296%20C0.512%2C8.764%200.888%2C9.140%201.355%2C9.140%20L11.459%2C9.140%20L7.223%2C13.176%20C6.882%2C13.503%206.875%2C14.48%207.209%2C14.382%20L7.989%2C15.162%20C8.316%2C15.493%208.851%2C15.493%209.181%2C15.162%20L16.15%2C8.328%20C16.346%2C8.1%2016.346%2C7.466%2016.15%2C7.136%20L9.181%2C0.305%20C8.854%2C0.24%208.320%2C0.24%207.989%2C0.305%20L7.209%2C1.86%20Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -24037,8 +24205,8 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.37.5');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.37.5') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.37.5') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.37.5') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.37.5#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.37.6');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.37.6') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.37.6') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.37.6') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.37.6#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -24128,6 +24296,7 @@ body:before {
 .cke_dialog ol,
 .cke_dialog hr,
 .cke_dialog address,
+.cke_dialog blockquote,
 .cke_dialog pre {
   color: #474747;
 }
@@ -24186,6 +24355,7 @@ body:before {
 .cke_panel_listItem ol,
 .cke_panel_listItem hr,
 .cke_panel_listItem address,
+.cke_panel_listItem blockquote,
 .cke_panel_listItem pre {
   color: #474747;
 }
@@ -24300,6 +24470,7 @@ body:before {
 .com__dialog-font ol,
 .com__dialog-font hr,
 .com__dialog-font address,
+.com__dialog-font blockquote,
 .com__dialog-font pre,
 .com__dialog-font h1,
 .com__dialog-font h2,
@@ -24313,6 +24484,7 @@ body:before {
 .com__dialog-font ol,
 .com__dialog-font hr,
 .com__dialog-font address,
+.com__dialog-font blockquote,
 .com__dialog-font pre,
 .com__dialog-font .form .hint,
 .com__dialog-font .pt__box-item .title,
@@ -24359,6 +24531,7 @@ body:before {
 .app__helptour-font ol,
 .app__helptour-font hr,
 .app__helptour-font address,
+.app__helptour-font blockquote,
 .app__helptour-font pre,
 .app__helptour-font h1,
 .app__helptour-font h2,
@@ -24372,6 +24545,7 @@ body:before {
 .app__helptour-font ol,
 .app__helptour-font hr,
 .app__helptour-font address,
+.app__helptour-font blockquote,
 .app__helptour-font pre,
 .app__helptour-font .form .hint,
 .app__helptour-font .pt__box-item .title,
@@ -24474,7 +24648,7 @@ body:before {
 .app-i,
 [class^="app-i__"],
 [class*=" app-i__"] {
-  font-family: 'QuickSilk-Glyphs';
+  font-family: 'QuickSilk-Glyphs' !important;
 }
 .app-i:link,
 [class^="app-i__"]:link,
@@ -24488,7 +24662,7 @@ body:before {
 .app-i:active,
 [class^="app-i__"]:active,
 [class*=" app-i__"]:active {
-  font-family: 'QuickSilk-Glyphs';
+  font-family: 'QuickSilk-Glyphs' !important;
 }
 .app-i__quicksilk:before {
   content: '\e600';
@@ -24857,6 +25031,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-pt__admin-description .pt__editable ol,
 .app-pt__admin-description .pt__editable hr,
 .app-pt__admin-description .pt__editable address,
+.app-pt__admin-description .pt__editable blockquote,
 .app-pt__admin-description .pt__editable pre {
   margin: 0;
 }
@@ -25089,6 +25264,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-pt__plan .plan__title ol,
 .app-pt__plan .plan__title hr,
 .app-pt__plan .plan__title address,
+.app-pt__plan .plan__title blockquote,
 .app-pt__plan .plan__title pre {
   margin: 0;
   text-align: center;
@@ -25307,6 +25483,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .lt__filegridlist__cell-title ol,
 .lt__filegridlist__cell-title hr,
 .lt__filegridlist__cell-title address,
+.lt__filegridlist__cell-title blockquote,
 .lt__filegridlist__cell-title pre {
   margin: 0;
 }
@@ -25428,6 +25605,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .lt__forum__cell-title ol,
 .lt__forum__cell-title hr,
 .lt__forum__cell-title address,
+.lt__forum__cell-title blockquote,
 .lt__forum__cell-title pre {
   margin: 0;
 }
@@ -25777,6 +25955,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-lt__plan .plan-abstract ol,
 .app-lt__plan .plan-abstract hr,
 .app-lt__plan .plan-abstract address,
+.app-lt__plan .plan-abstract blockquote,
 .app-lt__plan .plan-abstract pre {
   text-align: center;
 }
@@ -25870,6 +26049,7 @@ html:not(.is-editing).is-editor .app__module__controls {
 .lt__post .post-abstract ol,
 .lt__post .post-abstract hr,
 .lt__post .post-abstract address,
+.lt__post .post-abstract blockquote,
 .lt__post .post-abstract pre {
   margin: 0;
 }
@@ -25909,7 +26089,7 @@ html:not(.is-editing).is-editor .app__module__controls {
   background-color: hsl(210, 70%, 98%);
 }
 .lt__post.is-pending:before {
-  background-color: hsl(38, 70%, 98%);
+  background-color: hsl(38, 75%, 98%);
 }
 .lt__post.is-entry .post-info.is-bottom,
 .lt__post.is-entry .pt__toolbar,
@@ -27411,6 +27591,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
 .app__helptour__popup ol,
 .app__helptour__popup hr,
 .app__helptour__popup address,
+.app__helptour__popup blockquote,
 .app__helptour__popup pre,
 .app__helptour__popup h1,
 .app__helptour__popup h2,
@@ -27424,6 +27605,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
 .app__helptour__popup ol,
 .app__helptour__popup hr,
 .app__helptour__popup address,
+.app__helptour__popup blockquote,
 .app__helptour__popup pre,
 .app__helptour__popup .form .hint,
 .app__helptour__popup .pt__box-item .title,
@@ -27437,7 +27619,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
 .app__helptour__popup .popup__close {
   cursor: pointer;
   transition: all 250ms ease-in-out 0ms;
-  font-family: 'Magpie-UI-Glyphs';
+  font-family: 'Magpie-UI-Glyphs' !important;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -27460,11 +27642,8 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
   opacity: 0.7;
   transition: all 100ms ease-in-out 0ms;
 }
-.app__helptour__popup .popup__close:link,
-.app__helptour__popup .popup__close:visited,
-.app__helptour__popup .popup__close:hover,
-.app__helptour__popup .popup__close:active {
-  font-family: 'Magpie-UI-Glyphs';
+.app__helptour__popup .popup__close:is(:link, :visited, :hover, :active) {
+  font-family: 'Magpie-UI-Glyphs' !important;
 }
 .app__helptour__popup .popup__close:hover {
   text-decoration: none;
@@ -27506,7 +27685,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
   font-size: 96px;
 }
 .app__helptour__popup .popup__close:before {
-  speak: none;
+  speak: never;
   display: block;
 }
 .app__helptour__popup .popup__close:before {
@@ -27782,6 +27961,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
 .app__live-preview__content .device .device__blues ol,
 .app__live-preview__content .device .device__blues hr,
 .app__live-preview__content .device .device__blues address,
+.app__live-preview__content .device .device__blues blockquote,
 .app__live-preview__content .device .device__blues pre {
   font: 400 14px/18px Quicksand, sans-serif;
   color: #666666;
@@ -28035,6 +28215,11 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
 .app__notification.is-warning > .inner > .text address,
 .app__notification.is-danger > .inner > .text address,
 .app__notification.is-quicksilk > .inner > .text address,
+.app__notification.is-secondary > .inner > .text blockquote,
+.app__notification.is-success > .inner > .text blockquote,
+.app__notification.is-warning > .inner > .text blockquote,
+.app__notification.is-danger > .inner > .text blockquote,
+.app__notification.is-quicksilk > .inner > .text blockquote,
 .app__notification.is-secondary > .inner > .text pre,
 .app__notification.is-success > .inner > .text pre,
 .app__notification.is-warning > .inner > .text pre,
@@ -28130,7 +28315,7 @@ html.is-scrollbar-visible .app__block-container.is-sticky > .app__block {
   background: hsla(120, 60%, 91%, 0.95);
 }
 .app__notification.is-warning--light > .inner {
-  background: hsla(38, 70%, 91%, 0.95);
+  background: hsla(38, 75%, 91%, 0.95);
 }
 .app__notification.is-danger--light > .inner {
   background: hsla(0, 65%, 91%, 0.95);
@@ -29034,6 +29219,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr {
 .app__sidebar .sidebar__content__text ol,
 .app__sidebar .sidebar__content__text hr,
 .app__sidebar .sidebar__content__text address,
+.app__sidebar .sidebar__content__text blockquote,
 .app__sidebar .sidebar__content__text pre,
 .app__sidebar .sidebar__content__text h1,
 .app__sidebar .sidebar__content__text h2,
@@ -29047,6 +29233,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr {
 .app__sidebar .sidebar__content__text ol,
 .app__sidebar .sidebar__content__text hr,
 .app__sidebar .sidebar__content__text address,
+.app__sidebar .sidebar__content__text blockquote,
 .app__sidebar .sidebar__content__text pre,
 .app__sidebar .sidebar__content__text .form .hint,
 .app__sidebar .sidebar__content__text .pt__box-item .title,
@@ -29409,7 +29596,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr {
   background: hsl(0, 65%, 70%);
 }
 .app__topmenu .mark.warning {
-  background: hsl(38, 70%, 70%);
+  background: hsl(38, 75%, 70%);
 }
 .app__topmenu .menu__logo {
   position: relative;
@@ -31053,6 +31240,7 @@ html.is-scrollbar-visible .app__sidebar .sidebar__content__descr {
 .app-mod__infoblock > .inner > .title .app-mod__richeditor ol,
 .app-mod__infoblock > .inner > .title .app-mod__richeditor hr,
 .app-mod__infoblock > .inner > .title .app-mod__richeditor address,
+.app-mod__infoblock > .inner > .title .app-mod__richeditor blockquote,
 .app-mod__infoblock > .inner > .title .app-mod__richeditor pre {
   margin: 0;
 }
@@ -33575,6 +33763,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 .app-mod__sign-links ol,
 .app-mod__sign-links hr,
 .app-mod__sign-links address,
+.app-mod__sign-links blockquote,
 .app-mod__sign-links pre {
   margin: 0;
 }
@@ -33592,6 +33781,7 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 .mod__signup__title ol,
 .mod__signup__title hr,
 .mod__signup__title address,
+.mod__signup__title blockquote,
 .mod__signup__title pre {
   text-align: center;
 }
@@ -35386,6 +35576,7 @@ html.is-docs-main {
 .module__pathways .pathways__section__content ol,
 .module__pathways .pathways__section__content hr,
 .module__pathways .pathways__section__content address,
+.module__pathways .pathways__section__content blockquote,
 .module__pathways .pathways__section__content pre {
   margin: 0;
 }
