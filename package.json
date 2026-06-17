@@ -5,7 +5,8 @@
   "scripts": {
     "build": "grunt",
     "optimize": "grunt optimize",
-    "watch": "grunt && grunt watcher"
+    "watch": "grunt && grunt watcher",
+    "postinstall": "git submodule update --init --recursive && git submodule foreach \"npm install\" && npm run build"
   },
   "dependencies": {
     "grunt-cli": "^1.4.3"
@@ -19,7 +20,7 @@
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-less": "^3.0.0",
     "grunt-contrib-watch": "~1.1.0",
-    "grunt-grunt": "github:SerDIDG/grunt-grunt",
+    "grunt-grunt": "git+https://github.com/SerDIDG/grunt-grunt.git#patch-1",
     "grunt-lessvars": "^0.3.1",
     "load-grunt-tasks": "^5.1.0"
   }
