@@ -6,7 +6,7 @@
     "build": "grunt",
     "optimize": "grunt optimize",
     "watch": "grunt && grunt watcher",
-    "postinstall": "git submodule update --init --recursive && git submodule foreach \"npm install\" && npm run build"
+    "postinstall": "git submodule update --init --recursive && git submodule foreach \"npm install\" && npm run optimize"
   },
   "dependencies": {
     "grunt-cli": "^1.4.3"
