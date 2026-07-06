@@ -1,5 +1,5 @@
 /**
- * Less - Leaner CSS v4.6.6
+ * Less - Leaner CSS v4.6.7
  * http://lesscss.org
  *
  * Copyright (c) 2009-2026, Alexis Sellier <self@cloudhead.net>
@@ -14090,7 +14090,7 @@ var imageSize = environment => {
 };
 
 createRequire();
-const version = "4.6.6";
+const version = "4.6.7";
 
 const less = createFromEnvironment(environment, [new FileManager(), new UrlFileManager()], version);
 

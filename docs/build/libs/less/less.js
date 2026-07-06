@@ -1,5 +1,5 @@
 /**
- * Less - Leaner CSS v4.6.6
+ * Less - Leaner CSS v4.6.7
  * http://lesscss.org
  *
  * Copyright (c) 2009-2026, Alexis Sellier <self@cloudhead.net>
@@ -14175,7 +14175,7 @@
     };
 
     var name = "less";
-    var version = "4.6.6";
+    var version = "4.6.7";
     var description = "Leaner CSS";
     var homepage = "http://lesscss.org";
     var author = {
