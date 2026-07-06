@@ -1,6 +1,8 @@
 [submodule "libs/common"]
 	path = libs/common
 	url = https://github.com/SerDIDG/MagpieUI.git
+	branch = master
 [submodule "libs/application"]
 	path = libs/application
 	url = https://github.com/SerDIDG/QuickSilk-Application.git
+	branch = master
