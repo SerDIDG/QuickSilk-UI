@@ -1,6 +1,6 @@
 @charset "UTF-8";
-/*! ************ QuickSilk-UI v3.19.6 ************ */
-/*! ************ MagpieUI v3.148.2 (2026-07-17 18:58) ************ */
+/*! ************ QuickSilk-UI v3.19.8 ************ */
+/*! ************ MagpieUI v3.149.0 (2026-07-17 20:51) ************ */
 /*!
  * animate.css - https://animate.style/
  * Version - 4.1.1
@@ -4411,8 +4411,8 @@ span.CodeMirror-selectedtext {
 }
 @font-face {
   font-family: 'Magpie-UI-Glyphs';
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.148.2');
-  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.148.2') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.148.2') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.148.2') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.148.2#Magpie-UI-Glyphs') format('svg');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?3.149.0');
+  src: url('../fonts/MagpieUI/Magpie-UI-Glyphs.eot?#iefix3.149.0') format('embedded-opentype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.woff?3.149.0') format('woff'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.ttf?3.149.0') format('truetype'), url('../fonts/MagpieUI/Magpie-UI-Glyphs.svg?3.149.0#Magpie-UI-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -7783,11 +7783,6 @@ button.is-hidden {
 .form.is-box dl.is-no-label > dt {
   display: none;
 }
-.form.is-box dl.inline-input > dd {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
 .form--values dt {
   padding: 0;
   font-weight: 600;
@@ -7806,11 +7801,6 @@ button.is-hidden {
 }
 .form-box.is-no-label > dt {
   display: none;
-}
-.form-box.inline-input > dd {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 /* *** BUTTONS CONTAINER *** */
 .btn-wrap {
@@ -8170,9 +8160,9 @@ button.is-hidden {
   display: block;
 }
 .check-line label {
-  display: block;
   padding: 4px 24px 4px 8px;
   cursor: pointer;
+  vertical-align: baseline;
   line-height: 24px;
 }
 .check-line label:first-child {
@@ -8275,71 +8265,6 @@ button.is-hidden {
 }
 .form dd > input[type="checkbox"]:checked + .unveil {
   display: block;
-}
-.form .checkbox-row {
-  min-height: 48px;
-  padding: 12px 12px;
-  margin: 0 0 24px;
-  border: 1px solid hsl(0, 0%, 80%);
-  border-radius: 3px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-decoration: none;
-  line-height: 24px;
-  background: #ffffff;
-}
-.form .checkbox-row:last-child {
-  margin: 0;
-}
-.form .checkbox-row input {
-  width: 16px;
-  height: 16px;
-  accent-color: hsl(210, 75%, 52%);
-}
-/* *** RADIO style BUTTON *** */
-.check-btn {
-  position: relative;
-}
-.check-btn input[type="radio"] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-.check-btn input[type="radio"]:checked + label {
-  background-color: hsl(210, 75%, 52%);
-  color: #ffffff;
-  border-color: hsl(210, 75%, 52%);
-}
-.check-btn input[type="radio"]:focus-visible + label {
-  outline: 2px solid hsl(210, 75%, 52%);
-  outline-offset: 3px;
-}
-.check-btn label {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  min-height: 32px;
-  margin: 0;
-  padding: 4px 12px;
-  display: inline-block;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid hsl(0, 0%, 80%);
-  border-radius: 999px;
-  background: #ffffff;
-  color: #000;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-.check-btn label:hover {
-  border-color: #999;
 }
 /* *** COLUMNS *** */
 .form .cols {
@@ -9681,6 +9606,9 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__buttons.pull-center > .inner {
   justify-content: center;
 }
+.pt__buttons.pull-apart > .inner {
+  justify-content: space-between;
+}
 .pt__buttons.pull-justify .button-alike,
 .pt__buttons.pull-justify .button,
 .pt__buttons.pull-justify .browse-button,
@@ -9984,14 +9912,14 @@ html.is-scrollbar-visible .pt__box-code {
 }
 .pt__check-line.has-hover:not(.disabled) label:has(:focus-visible) {
   background: hsl(210, 70%, 95%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
 .pt__check-line.has-hover:not(.disabled) label:has(:focus-visible).active {
   background: hsl(210, 70%, 86%);
 }
 .pt__check-line.has-hover:not(.disabled) label:is(:hover, :focus-visible) {
   background: hsl(210, 70%, 95%);
-  transition: all 100ms ease-in-out 0ms;
+  transition-duration: 100ms;
 }
 .pt__check-line.has-hover:not(.disabled) label:is(:hover, :focus-visible).active {
   background: hsl(210, 70%, 86%);
@@ -10007,6 +9935,25 @@ html.is-scrollbar-visible .pt__box-code {
 }
 .pt__check-line.has-hover.is-line label {
   margin-right: 1px;
+}
+.pt__check-line.has-border label {
+  margin: 0;
+  padding: 4px 8px;
+  border: 1px solid hsl(0, 0%, 80%);
+  border-radius: 3px;
+}
+.pt__check-line.has-border:not(.disabled) label {
+  transition: all 250ms ease-in-out 0ms;
+  /* Emulate :focus-visible-within. */
+  /* Separate rules because Firefox doesn't support this syntax yet. */
+}
+.pt__check-line.has-border:not(.disabled) label:has(:focus-visible) {
+  border-color: hsl(0, 0%, 65%);
+  transition-duration: 100ms;
+}
+.pt__check-line.has-border:not(.disabled) label:is(:hover, :focus-visible) {
+  border-color: hsl(0, 0%, 65%);
+  transition-duration: 100ms;
 }
 .pt__check-line.has-fields {
   display: -webkit-flex;
@@ -10060,6 +10007,9 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__check-line.is-box.has-hover {
   gap: 1px;
 }
+.pt__check-line.is-box.has-border {
+  gap: 16px;
+}
 .pt__check-line.is-box.is-compact label {
   padding: 0;
 }
@@ -10099,6 +10049,54 @@ html.is-scrollbar-visible .pt__box-code {
 .pt__check-line.is-flex-inline.has-hover {
   gap: 1px;
 }
+.pt__check-line--buttons label {
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+.pt__check-line--buttons input[type="radio"],
+.pt__check-line--buttons input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.pt__check-line--buttons input[type="radio"]:checked + .label,
+.pt__check-line--buttons input[type="checkbox"]:checked + .label {
+  background-color: hsl(210, 75%, 52%);
+  color: #ffffff;
+  border-color: hsl(210, 75%, 52%);
+}
+.pt__check-line--buttons input[type="radio"]:focus-visible + .label,
+.pt__check-line--buttons input[type="checkbox"]:focus-visible + .label {
+  outline: 2px solid hsl(210, 75%, 52%);
+  outline-offset: 2px;
+}
+.pt__check-line--buttons .label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-height: 32px;
+  margin: 0;
+  padding: 4px 12px;
+  display: inline-block;
+  vertical-align: top;
+  border: 1px solid hsl(0, 0%, 80%);
+  border-radius: 32px;
+  background: #ffffff;
+  transition: all 100ms ease-in-out 0ms;
+}
+.pt__check-line--buttons .label:is(:hover, :active) {
+  border-color: hsl(0, 0%, 65%);
+}
+.pt__check-line--buttons.is-flex-inline {
+  gap: 12px;
+}
 @media only screen and (max-width: 768px) {
   html.is-adaptive .pt__check-line.is-adaptive {
     display: flex;
@@ -10123,6 +10121,9 @@ html.is-scrollbar-visible .pt__box-code {
   }
   html.is-adaptive .pt__check-line.is-adaptive.has-hover {
     gap: 1px;
+  }
+  html.is-adaptive .pt__check-line.is-adaptive.has-border {
+    gap: 16px;
   }
   html.is-adaptive .pt__check-line.is-adaptive.is-compact label {
     padding: 0;
@@ -24265,7 +24266,7 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul {
   display: block;
   padding: 24px;
 }
-/*! ************ QuickSilk-Application v3.38.1 (2026-07-17 18:58) ************ */
+/*! ************ QuickSilk-Application v3.39.0 (2026-07-17 20:51) ************ */
 .svg__app__arrow-right {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20%20%20%20%20%20%20%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%20%20%20%20%20%20%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20%20%20%20%20width%3D%2217px%22%20height%3D%2216px%22%3E%20%20%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20%20fill%3D%22rgb(0%2C%200%2C%200)%22%20%20%20%20%20%20%20%20%20%20d%3D%22M7.209%2C1.86%20C6.871%2C1.420%206.878%2C1.964%207.223%2C2.291%20L11.459%2C6.327%20L1.355%2C6.327%20C0.888%2C6.327%200.512%2C6.704%200.512%2C7.171%20L0.512%2C8.296%20C0.512%2C8.764%200.888%2C9.140%201.355%2C9.140%20L11.459%2C9.140%20L7.223%2C13.176%20C6.882%2C13.503%206.875%2C14.48%207.209%2C14.382%20L7.989%2C15.162%20C8.316%2C15.493%208.851%2C15.493%209.181%2C15.162%20L16.15%2C8.328%20C16.346%2C8.1%2016.346%2C7.466%2016.15%2C7.136%20L9.181%2C0.305%20C8.854%2C0.24%208.320%2C0.24%207.989%2C0.305%20L7.209%2C1.86%20Z%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -24280,8 +24281,8 @@ html.is-scrollbar-visible .com__select-multi .pt__listing-items > ul {
 }
 @font-face {
   font-family: 'QuickSilk-Glyphs';
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.38.1');
-  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.38.1') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.38.1') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.38.1') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.38.1#QuickSilk-Glyphs') format('svg');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?3.39.0');
+  src: url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.eot?#iefix3.39.0') format('embedded-opentype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.woff?3.39.0') format('woff'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.ttf?3.39.0') format('truetype'), url('../fonts/QuickSilk-Application/QuickSilk-Glyphs.svg?3.39.0#QuickSilk-Glyphs') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -26482,89 +26483,6 @@ html:not(.is-editing).is-editor .app__module__controls {
 .app-lt__templates__item.item-slim:hover {
   transform: translateY(-3px);
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
-}
-.mod__signup__progressbar {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin: 0 auto 44px;
-  width: 100%;
-  max-width: 840px;
-}
-.mod__signup__progressbar span {
-  height: 5px;
-  background: hsl(0, 0%, 80%);
-  border-radius: 99px;
-}
-.mod__signup__progressbar span.active {
-  background: hsl(210, 75%, 52%);
-}
-.mod__step {
-  display: none;
-}
-.mod__step.active {
-  display: block;
-}
-.mod__review-list {
-  border: 1px solid hsl(0, 0%, 80%);
-  padding: 32px;
-  background: #fff;
-  border-radius: 3px;
-}
-.mod__review-list .review-row {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid hsl(0, 0%, 80%);
-  padding: 16px 0;
-  gap: 24px;
-}
-.mod__review-list .review-row:last-child {
-  border-bottom: 0;
-}
-.mod__review-list .review-row span:first-child {
-  color: #999999;
-}
-.mod__review-list .review-row span:last-child {
-  font-weight: 700;
-  text-align: right;
-}
-.mod__loading {
-  text-align: center;
-  border: 1px solid hsl(0, 0%, 80%);
-  padding: 48px;
-  border-radius: 3px;
-}
-.mod__loader {
-  width: 54px;
-  height: 54px;
-  border: 4px solid #eee;
-  border-top-color: #000;
-  border-radius: 50%;
-  margin: 0 auto 24px;
-  animation: spin-loader 1s linear infinite;
-}
-@keyframes spin-loader {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.mod__loading-list {
-  margin-top: 24px;
-  text-align: left;
-}
-.mod__loading-list .loading-row {
-  min-height: 48px;
-  padding: 12px 12px;
-  margin: 0 0 16px;
-  border: 1px solid hsl(0, 0%, 80%);
-  border-radius: 3px;
-}
-.mod__loading-list .loading-row:last-child {
-  margin: 0;
-}
-.success-icon {
-  color: hsl(120, 65%, 42%);
-  font-weight: 700;
 }
 /* ******* COMPONENTS: BLOCK ******* */
 .app__block-container {
@@ -34101,10 +34019,101 @@ html.is-editor--collapsed .app-mod__rollover-tabs:not(.is-editing).attachment-sc
 .mod__signup__nav {
   margin: 48px 0 0 0;
 }
-.mod__signup__nav .pt__buttons:not(.pull-left):not(.pull-center):not(.pull-right) > .inner {
-  justify-content: space-between;
+.mod__signup__progressbar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 0 auto 44px;
+  width: 100%;
+  max-width: 840px;
 }
-/* ******* MODULES: SIGN UP: Adaptive ******* */
+.mod__signup__progressbar span {
+  height: 5px;
+  background: hsl(0, 0%, 80%);
+  border-radius: 99px;
+}
+.mod__signup__progressbar span.active {
+  background: hsl(210, 75%, 52%);
+}
+.mod__signup__step {
+  display: none;
+}
+.mod__signup__step.active {
+  display: block;
+}
+.mod__signup__step-form {
+  max-width: 720px;
+  margin-inline: auto;
+}
+.mod__signup__step-form .pt__check-line.has-border label {
+  padding: 12px 12px;
+  background: #ffffff;
+}
+.mod__signup__step-form .pt__check-line.has-border input {
+  width: 16px;
+  height: 16px;
+  accent-color: hsl(210, 75%, 52%);
+}
+.mod__signup__step-form .pt__check-line.has-border.is-box {
+  gap: 24px;
+}
+.mod__signup__review-list {
+  border: 1px solid hsl(0, 0%, 80%);
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 3px;
+}
+.mod__signup__review-list .review-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid hsl(0, 0%, 80%);
+  padding: 16px 0;
+  gap: 24px;
+}
+.mod__signup__review-list .review-row:last-child {
+  border-bottom: 0;
+}
+.mod__signup__review-list .review-row span:first-child {
+  color: #999999;
+}
+.mod__signup__review-list .review-row span:last-child {
+  font-weight: 700;
+  text-align: right;
+}
+.mod__signup__loading {
+  text-align: center;
+  border: 1px solid hsl(0, 0%, 80%);
+  padding: 48px;
+  border-radius: 3px;
+}
+.mod__signup__loading-list {
+  margin-top: 24px;
+  text-align: left;
+}
+.mod__signup__loading-list .loading-row {
+  min-height: 48px;
+  padding: 12px 12px;
+  margin: 0 0 16px;
+  border: 1px solid hsl(0, 0%, 80%);
+  border-radius: 3px;
+}
+.mod__signup__loading-list .loading-row:last-child {
+  margin: 0;
+}
+.mod__signup__loading-list .success-icon {
+  color: hsl(120, 65%, 42%);
+  font-weight: 700;
+}
+.mod__signup__loader {
+  width: 54px;
+  height: 54px;
+  border: 4px solid #eee;
+  border-top-color: #000;
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  animation: spin 1s linear infinite;
+}
+/* ******* MODULES: SIGN UP: ADAPTIVE ******* */
 @media only screen and (max-width: 768px) {
   html.is-adaptive .mod__signup__columns {
     display: block;

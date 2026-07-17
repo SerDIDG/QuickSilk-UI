@@ -20,20 +20,16 @@
     </div>
 
     <div class="mod__signup__block mod__signup__templates">
-        <div class="pt__toolbar">
-            <div class="inner clear">
-                <div class="mod__signup__progressbar">
-                    <span class="active"></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
+        <div class="mod__signup__progressbar">
+            <span class="active"></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
 
         <!-- STEP 1 -->
-        <section class="mod__step active" data-title="Choose Theme" data-subtitle="Select a starter template to build your website">        
+        <section class="mod__signup__step active" data-title="Choose Theme" data-subtitle="Select a starter template to build your website">
             <div class="app-lt__templates__scroll grid-visible">
                 <div class="pt__grid indent-24px col-2">
                     <ul class="clear">
@@ -115,7 +111,7 @@
         </section>
 
         <!-- STEP 2 -->
-        <section class="mod__step" data-title="What are you building?" data-subtitle="This helps Pixxell prepare the right website structure">        
+        <section class="mod__signup__step" data-title="What are you building?" data-subtitle="This helps Pixxell prepare the right website structure">
             <div class="app-lt__templates__scroll grid-visible">
                 <div class="pt__grid indent-24px col-2">
                     <ul class="clear">
@@ -132,7 +128,7 @@
                                 </div>
                             </div>
                         </li>
-                        
+
                         <li>
                             <div class="app-lt__templates__item item-slim">
                                 <div class="inner">
@@ -176,7 +172,7 @@
             </div>
 
             <div class="mod__signup__nav">
-                <div class="pt__buttons">
+                <div class="pt__buttons pull-apart">
                     <div class="inner">
                         <a class="button button-transparent button--xlarge prev">Back</a>
                         <a class="button button-primary button--xlarge next">Continue</a>
@@ -184,9 +180,9 @@
                 </div>
             </div>
         </section>
-    
+
         <!-- STEP 3 -->
-        <section class="mod__step" data-title="How would you like to start?" data-subtitle="Choose how much Pixxell should prepare for you">        
+        <section class="mod__signup__step" data-title="How would you like to start?" data-subtitle="Choose how much Pixxell should prepare for you">
             <div class="app-lt__templates__scroll grid-visible">
                 <div class="pt__grid indent-24px col-3">
                     <ul class="clear">
@@ -234,7 +230,7 @@
             </div>
 
             <div class="mod__signup__nav">
-                <div class="pt__buttons">
+                <div class="pt__buttons pull-apart">
                     <div class="inner">
                         <a class="button button-transparent button--xlarge prev">Back</a>
                         <a class="button button-primary button--xlarge next">Continue</a>
@@ -244,59 +240,57 @@
         </section>
 
         <!-- STEP 4 -->
-        <section class="mod__step" data-title="Tell us about your website" data-subtitle="A few details help Pixxell create a better first version">        
-            <div class="app-lt__templates__scroll grid-visible">
-                <div style="max-width: 720px; margin: 0 auto;">
-                    <div class="pt__box-content indent-24px">
-                        <div class="form">
-                            <dl class="form-box">
-                                <dt>Website Name <span class="required">*</span></dt>
-                                <dd>
-                                    <input type="text">
-                                </dd>
-                            </dl>
-                            <dl class="form-box">
-                                <dt>Short Description</dt>
-                                <dd>
-                                    <textarea name="comments"></textarea>
-                                </dd>
-                            </dl>
-                            <dl class="form-box inline-input">
-                                <dt>Tone <span class="required">*</span></dt>
-                                <dd>
-                                    <div class="check-btn">
-                                        <input type="radio" name="type" value="professional" id="tone-professional" checked>
-                                        <label for="tone-professional">Professional</label>
-                                    </div>
-                                    <div class="check-btn">
-                                        <input type="radio" name="type" value="friendly" id="tone-friendly">
-                                        <label for="tone-friendly">Friendly</label>
-                                    </div>
-                                    <div class="check-btn">
-                                        <input type="radio" name="type" value="join" id="tone-bold">
-                                        <label for="tone-bold">Bold</label>
-                                    </div>
-                                </dd>
-                            </dl>
-                            <dl class="form-box">
-                                <dt>Language</dt>
-                                <dd>
-                                    <select data-element="select">
-                                        <option>- Please Select -</option>
-                                        <option>English</option>
-                                        <option>English + French</option>
-                                        <option>Ukrainian</option>
-                                        <option>German</option>
-                                    </select>
-                                </dd>
-                            </dl>
-                        </div>
-                    </div>
+        <section class="mod__signup__step" data-title="Tell us about your website" data-subtitle="A few details help Pixxell create a better first version">
+            <div class="mod__signup__step-form">
+                <div class="form">
+                    <dl class="form-box">
+                        <dt>Website Name <span class="required">*</span></dt>
+                        <dd>
+                            <input type="text">
+                        </dd>
+                    </dl>
+                    <dl class="form-box">
+                        <dt>Short Description</dt>
+                        <dd>
+                            <textarea name="comments"></textarea>
+                        </dd>
+                    </dl>
+                    <dl class="form-box">
+                        <dt>Tone <span class="required">*</span></dt>
+                        <dd>
+                            <div class="pt__check-line pt__check-line--buttons is-flex-inline">
+                                <label>
+                                    <input type="radio" name="type" value="professional" id="tone-professional" checked>
+                                    <span class="label">Professional</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="type" value="friendly" id="tone-friendly">
+                                    <span class="label">Friendly</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="type" value="join" id="tone-bold">
+                                    <span class="label">Bold</span>
+                                </label>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl class="form-box">
+                        <dt>Language</dt>
+                        <dd>
+                            <select data-element="select">
+                                <option>- Please Select -</option>
+                                <option>English</option>
+                                <option>English + French</option>
+                                <option>Ukrainian</option>
+                                <option>German</option>
+                            </select>
+                        </dd>
+                    </dl>
                 </div>
             </div>
 
             <div class="mod__signup__nav">
-                <div class="pt__buttons">
+                <div class="pt__buttons pull-apart">
                     <div class="inner">
                         <a class="button button-transparent button--xlarge prev">Back</a>
                         <a class="button button-primary button--xlarge next">Continue</a>
@@ -306,26 +300,40 @@
         </section>
 
         <!-- STEP 5 -->
-        <section class="mod__step" data-title="Choose Sections" data-subtitle="Select the blocks you want to include in the first version">        
-            <div class="app-lt__templates__scroll grid-visible">
-                <div style="max-width: 720px; margin: 0 auto;">
-                    <div class="pt__box-content indent-24px">
-                        <div class="form">
-                            <div class="checkbox-list">
-                                <label class="checkbox-row">Hero <input type="checkbox" checked="" value="Hero"></label>
-                                <label class="checkbox-row">About <input type="checkbox" checked="" value="About"></label>
-                                <label class="checkbox-row">Services <input type="checkbox" checked="" value="Services"></label>
-                                <label class="checkbox-row">Testimonials <input type="checkbox" checked="" value="Testimonials"></label>
-                                <label class="checkbox-row">Contact <input type="checkbox" checked="" value="Contact"></label>
-                                <label class="checkbox-row">Blog <input type="checkbox" value="Blog"></label>
-                            </div>
-                        </div>
+        <section class="mod__signup__step" data-title="Choose Sections" data-subtitle="Select the blocks you want to include in the first version">
+            <div class="mod__signup__step-form">
+                <div class="form">
+                    <div class="pt__check-line is-box is-flex-reverse has-border">
+                        <label>
+                            <input type="checkbox" checked="" value="Hero">
+                            <span class="label">Hero</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" checked="" value="About">
+                            <span class="label">About</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" checked="" value="Services">
+                            <span class="label">Services</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" checked="" value="Testimonials">
+                            <span class="label">Testimonials</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" checked="" value="Contact">
+                            <span class="label">Contact</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" value="Blog">
+                            <span class="label">Blog</span>
+                        </label>
                     </div>
                 </div>
             </div>
 
             <div class="mod__signup__nav">
-                <div class="pt__buttons">
+                <div class="pt__buttons pull-apart">
                     <div class="inner">
                         <a class="button button-transparent button--xlarge prev">Back</a>
                         <a class="button button-primary button--xlarge next">Continue</a>
@@ -335,25 +343,21 @@
         </section>
 
         <!-- STEP 6 -->
-        <section class="mod__step" data-title="Review your setup" data-subtitle="Confirm your selection before creating the website">        
-            <div class="app-lt__templates__scroll grid-visible">
-                <div style="max-width: 720px; margin: 0 auto;">
-                    <div class="pt__box-content indent-24px">
-                        <div class="mod__review-list">
-                            <div class="review-row"><span>Theme</span><span id="rTheme">One-Page Light</span></div>
-                            <div class="review-row"><span>Website Type</span><span id="rType">Landing Page / Campaign</span></div>
-                            <div class="review-row"><span>Start Mode</span><span id="rStart">AI-Generated Website</span></div>
-                            <div class="review-row"><span>Website Name</span><span id="rName">Sample Company</span></div>
-                            <div class="review-row"><span>Tone</span><span id="rTone">Professional</span></div>
-                            <div class="review-row"><span>Language</span><span id="rLang">English</span></div>
-                            <div class="review-row"><span>Sections</span><span id="rSections">Hero, About, Services, Testimonials, Contact</span></div>
-                        </div>
-                    </div>
+        <section class="mod__signup__step" data-title="Review your setup" data-subtitle="Confirm your selection before creating the website">
+            <div class="mod__signup__step-form">
+                <div class="mod__signup__review-list">
+                    <div class="review-row"><span>Theme</span><span id="rTheme">One-Page Light</span></div>
+                    <div class="review-row"><span>Website Type</span><span id="rType">Landing Page / Campaign</span></div>
+                    <div class="review-row"><span>Start Mode</span><span id="rStart">AI-Generated Website</span></div>
+                    <div class="review-row"><span>Website Name</span><span id="rName">Sample Company</span></div>
+                    <div class="review-row"><span>Tone</span><span id="rTone">Professional</span></div>
+                    <div class="review-row"><span>Language</span><span id="rLang">English</span></div>
+                    <div class="review-row"><span>Sections</span><span id="rSections">Hero, About, Services, Testimonials, Contact</span></div>
                 </div>
             </div>
 
             <div class="mod__signup__nav">
-                <div class="pt__buttons">
+                <div class="pt__buttons pull-apart">
                     <div class="inner">
                         <a class="button button-transparent button--xlarge prev">Back</a>
                         <a class="button button-primary button--xlarge next">Create Website</a>
@@ -361,22 +365,20 @@
                 </div>
             </div>
         </section>
-        
-        <!-- STEP 7 -->
-        <section class="mod__step" data-title="Creating your website..." data-subtitle="Pixxell is preparing your first version">        
-            <div class="app-lt__templates__scroll grid-visible">
-                <div style="max-width: 720px; margin: 0 auto;">
-                    <div class="mod__loading">
-                        <div class="mod__loader"></div>
-                        <h2>Please wait a moment</h2>
-                        <p>We are creating structure, content and design based on your selection.</p>
 
-                        <div class="mod__loading-list">
-                            <div class="loading-row"><span class="success-icon">✓</span> Generating website structure</div>
-                            <div class="loading-row"><span class="success-icon">✓</span> Preparing content blocks</div>
-                            <div class="loading-row"><span class="success-icon">✓</span> Applying theme design</div>
-                            <div class="loading-row"><span class="success-icon">✓</span> Optimizing basic SEO setup</div>
-                        </div>
+        <!-- STEP 7 -->
+        <section class="mod__signup__step" data-title="Creating your website..." data-subtitle="Pixxell is preparing your first version">
+            <div class="mod__signup__step-form">
+                <div class="mod__signup__loading">
+                    <div class="mod__signup__loader"></div>
+                    <h2>Please wait a moment</h2>
+                    <p>We are creating structure, content and design based on your selection.</p>
+
+                    <div class="mod__signup__loading-list">
+                        <div class="loading-row"><span class="success-icon">✓</span> Generating website structure</div>
+                        <div class="loading-row"><span class="success-icon">✓</span> Preparing content blocks</div>
+                        <div class="loading-row"><span class="success-icon">✓</span> Applying theme design</div>
+                        <div class="loading-row"><span class="success-icon">✓</span> Optimizing basic SEO setup</div>
                     </div>
                 </div>
             </div>
@@ -390,13 +392,13 @@
             </div>
         </section>
     </div>
-   
+
 </div>
 
 <script>
   let currentStep = 0;
 
-  const steps = Array.from(document.querySelectorAll('.mod__step'));
+  const steps = Array.from(document.querySelectorAll('.mod__signup__step'));
   const progress = Array.from(document.querySelectorAll('.mod__signup__progressbar span'));
   const title = document.getElementById('stepTitle');
   const subtitle = document.getElementById('stepSubtitle');
