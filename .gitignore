@@ -3,5 +3,6 @@
 .git
 package-lock.json
 /temp
+/garage
 
 node_modules
